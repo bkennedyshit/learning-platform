@@ -1,0 +1,51 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="rel-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .lightcone { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 6,3; fill: none; }
+    .worldline { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .particle { fill: var(--interactive-accent, #58a6ff); }
+  </style>
+
+  <!-- Light cone -->
+  <line x1="300" y1="200" x2="450" y2="50" class="lightcone"/>
+  <line x1="300" y1="200" x2="150" y2="50" class="lightcone"/>
+  <line x1="300" y1="200" x2="450" y2="350" class="lightcone"/>
+  <line x1="300" y1="200" x2="150" y2="350" class="lightcone"/>
+  <text x="460" y="55" class="label" fill="var(--text-accent, #79c0ff)">ct = x</text>
+
+  <!-- Axes -->
+  <line x1="300" y1="380" x2="300" y2="30" class="axis" marker-end="url(#rel-arr)"/>
+  <line x1="80" y1="200" x2="520" y2="200" class="axis" marker-end="url(#rel-arr)"/>
+  <text x="310" y="25" class="label">ct</text>
+  <text x="530" y="205" class="label">x</text>
+
+  <!-- Worldline of charged particle -->
+  <path d="M 280 370 C 290 300, 310 250, 320 200 C 330 150, 340 100, 350 50" class="worldline"/>
+  <text x="360" y="100" class="math">xᵘ(τ)</text>
+
+  <!-- Animated particle -->
+  <circle r="5" class="particle" cx="0" cy="0">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 280 370 C 290 300, 310 250, 320 200 C 330 150, 340 100, 350 50" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" />
+  </circle>
+
+  <!-- Four-potential box -->
+  <rect x="30" y="30" width="200" height="120" class="box"/>
+  <text x="130" y="55" class="label" font-weight="bold" text-anchor="middle">Four-Potential</text>
+  <text x="130" y="80" class="math" text-anchor="middle">Aᵘ = (φ/c, A)</text>
+  <text x="130" y="105" class="math" text-anchor="middle">Jᵘ = (cρ, J)</text>
+  <text x="130" y="130" class="math" text-anchor="middle">∂ᵤAᵘ = 0 (Lorenz)</text>
+
+  <!-- Invariants box -->
+  <rect x="380" y="250" width="200" height="80" class="box"/>
+  <text x="480" y="275" class="label" font-weight="bold" text-anchor="middle">Lorentz Invariants</text>
+  <text x="480" y="300" class="math" text-anchor="middle">E² − c²B²</text>
+  <text x="480" y="320" class="math" text-anchor="middle">E · B</text>
+</svg>

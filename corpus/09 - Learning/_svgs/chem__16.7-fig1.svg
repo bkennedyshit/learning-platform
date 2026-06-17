@@ -1,0 +1,68 @@
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 8px; fill: var(--text-muted, #8b949e); }
+    .decision { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .outcome { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .yes { font-family: Inter, system-ui, sans-serif; font-size: 8px; fill: #51cf66; font-weight: bold; }
+    .no { font-family: Inter, system-ui, sans-serif; font-size: 8px; fill: #ff6b6b; font-weight: bold; }
+    .conn { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+  </style>
+  <text x="300" y="20" class="title" text-anchor="middle">SN1/SN2/E1/E2 Decision Tree</text>
+  <!-- Root: Substrate type -->
+  <polygon points="300,40 380,70 300,100 220,70" class="decision"/>
+  <text x="300" y="72" class="label" text-anchor="middle">Substrate?</text>
+  <!-- Methyl/1° branch -->
+  <line x1="220" y1="70" x2="100" y2="130" class="conn"/>
+  <text x="150" y="95" class="sublabel">methyl/1°</text>
+  <polygon points="100,130 160,155 100,180 40,155" class="decision"/>
+  <text x="100" y="157" class="label" text-anchor="middle">Strong Nu?</text>
+  <line x1="60" y1="180" x2="60" y2="220" class="conn"/>
+  <text x="50" y="200" class="yes">Yes</text>
+  <rect x="20" y="220" width="80" height="35" class="outcome"/>
+  <text x="60" y="238" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)" font-weight="bold">SN2</text>
+  <text x="60" y="250" class="sublabel" text-anchor="middle">inversion</text>
+  <line x1="140" y1="180" x2="140" y2="220" class="conn"/>
+  <text x="148" y="200" class="no">No</text>
+  <rect x="105" y="220" width="70" height="35" class="outcome"/>
+  <text x="140" y="238" class="label" text-anchor="middle">No rxn</text>
+  <text x="140" y="250" class="sublabel" text-anchor="middle">(too slow)</text>
+  <!-- 3° branch -->
+  <line x1="380" y1="70" x2="480" y2="130" class="conn"/>
+  <text x="440" y="95" class="sublabel">3°</text>
+  <polygon points="480,130 545,155 480,180 415,155" class="decision"/>
+  <text x="480" y="157" class="label" text-anchor="middle">Strong base?</text>
+  <line x1="430" y1="180" x2="410" y2="220" class="conn"/>
+  <text x="410" y="200" class="yes">Yes</text>
+  <rect x="370" y="220" width="80" height="35" class="outcome"/>
+  <text x="410" y="238" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)" font-weight="bold">E2</text>
+  <text x="410" y="250" class="sublabel" text-anchor="middle">anti-periplanar</text>
+  <line x1="530" y1="180" x2="540" y2="220" class="conn"/>
+  <text x="542" y="200" class="no">No</text>
+  <rect x="500" y="220" width="80" height="35" class="outcome"/>
+  <text x="540" y="233" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)" font-weight="bold">SN1/E1</text>
+  <text x="540" y="248" class="sublabel" text-anchor="middle">racemization</text>
+  <!-- 2° branch (middle) -->
+  <line x1="300" y1="100" x2="300" y2="130" class="conn"/>
+  <text x="310" y="118" class="sublabel">2°</text>
+  <polygon points="300,130 360,155 300,180 240,155" class="decision"/>
+  <text x="300" y="157" class="label" text-anchor="middle">Conditions?</text>
+  <line x1="255" y1="180" x2="220" y2="220" class="conn"/>
+  <text x="225" y="200" class="sublabel">strong Nu</text>
+  <text x="225" y="210" class="sublabel">aprotic</text>
+  <rect x="185" y="220" width="70" height="35" class="outcome"/>
+  <text x="220" y="238" class="label" text-anchor="middle" font-weight="bold">SN2</text>
+  <line x1="345" y1="180" x2="340" y2="220" class="conn"/>
+  <text x="350" y="200" class="sublabel">strong base</text>
+  <text x="350" y="210" class="sublabel">heat</text>
+  <rect x="305" y="220" width="70" height="35" class="outcome"/>
+  <text x="340" y="238" class="label" text-anchor="middle" font-weight="bold">E2</text>
+  <!-- Summary box -->
+  <rect x="100" y="280" width="400" height="85" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1" rx="4"/>
+  <text x="300" y="300" class="label" text-anchor="middle" font-weight="bold">Key Factors:</text>
+  <text x="300" y="315" class="sublabel" text-anchor="middle">• Substrate: methyl/1° → SN2 | 3° → SN1/E1/E2</text>
+  <text x="300" y="330" class="sublabel" text-anchor="middle">• Nucleophile: strong → SN2 | weak → SN1</text>
+  <text x="300" y="345" class="sublabel" text-anchor="middle">• Base: strong/bulky → E2 | weak → E1</text>
+  <text x="300" y="360" class="sublabel" text-anchor="middle">• Solvent: polar aprotic → SN2 | polar protic → SN1</text>
+</svg>

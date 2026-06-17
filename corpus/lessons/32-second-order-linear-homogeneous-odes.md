@@ -1,0 +1,835 @@
+---
+title: "Second Order Linear Homogeneous Odes"
+subject: "Ordinary & Partial Differential Equations"
+catalog: advanced
+audience_tier: higher-education
+chapter: "3.2"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 3.2 — Second-Order Linear Homogeneous ODEs
+
+> *"The vibrating string, the swinging pendulum, the oscillating circuit — all obey the same second-order equation. Nature speaks in eigenfrequencies."* — Lord Rayleigh
+
+The second-order linear homogeneous ODE $y'' + p(x)y' + q(x)y = 0$ is the workhorse of mathematical physics. Its constant-coefficient special case $ay'' + by' + cy = 0$ governs mechanical vibrations, electrical circuits, and wave propagation. This chapter develops the complete theory: the structure of the solution space as a 2-dimensional vector space, the characteristic equation method, the Wronskian determinant for independence testing, and the physical interpretation of underdamped, critically damped, and overdamped oscillations.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Recognize the general form $y'' + p(x)y' + q(x)y = 0$ and its constant-coefficient specialization.
+2. Prove that the solution set forms a 2-dimensional vector space (superposition principle).
+3. Derive the characteristic equation $ar^2 + br + c = 0$ from the exponential ansatz $y = e^{rx}$.
+4. Handle all three cases: distinct real roots, repeated roots, and complex conjugate roots.
+5. Compute the Wronskian $W[y_1, y_2]$ and use Abel's theorem.
+6. Classify oscillatory behavior: underdamped ($\Delta < 0$), critically damped ($\Delta = 0$), overdamped ($\Delta > 0$).
+7. Solve initial value problems by determining constants from $y(x_0)$ and $y'(x_0)$.
+8. Connect eigenvalues of the companion matrix to characteristic roots (link to [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)).
+
+---
+
+
+## 🖼️ Visual Anchor — Damped Oscillation Regimes
+
+![math-03__3.2-fig1](math-03__3.2-fig1.svg)
+
+---
+
+
+## 📚 1. Definitions
+
+### Definition 3.2.1 — Second-Order Linear ODE
+
+A **second-order linear ODE** has the form:
+
+$$
+a(x)\,y'' + b(x)\,y' + c(x)\,y = g(x),
+$$
+
+where $a(x) \neq 0$ on the interval of interest. When $g(x) = 0$, the equation is **homogeneous**. The standard form (dividing by $a(x)$) is:
+
+$$
+y'' + p(x)\,y' + q(x)\,y = 0.
+$$
+
+### Definition 3.2.2 — Constant-Coefficient Case
+
+When $a$, $b$, $c$ are constants, the equation becomes:
+
+$$
+ay'' + by' + cy = 0.
+$$
+
+This is the equation governing spring-mass-damper systems, RLC circuits, and countless physical oscillators.
+
+### Definition 3.2.3 — Characteristic Equation
+
+For the constant-coefficient ODE $ay'' + by' + cy = 0$, substituting the ansatz $y = e^{rx}$ yields the **characteristic equation** (also called the auxiliary equation):
+
+$$
+ar^2 + br + c = 0.
+$$
+
+The roots $r_1, r_2$ determine the form of the general solution.
+
+### Definition 3.2.4 — Wronskian
+
+Given two solutions $y_1(x)$ and $y_2(x)$ of a second-order linear ODE, their **Wronskian** is:
+
+$$
+W[y_1, y_2](x) = \begin{vmatrix} y_1 & y_2 \\ y_1' & y_2' \end{vmatrix} = y_1 y_2' - y_2 y_1'.
+$$
+
+The solutions form a **fundamental set** (basis for the solution space) if and only if $W \neq 0$ at some (equivalently, every) point in the interval.
+
+### Definition 3.2.5 — Fundamental Set of Solutions
+
+A pair $\{y_1, y_2\}$ is a **fundamental set** for $y'' + p(x)y' + q(x)y = 0$ on interval $I$ if:
+1. Both $y_1$ and $y_2$ are solutions on $I$.
+2. $W[y_1, y_2](x) \neq 0$ for all $x \in I$.
+
+The general solution is then $y = c_1 y_1 + c_2 y_2$.
+
+### Definition 3.2.6 — Discriminant and Damping Classification
+
+For $ay'' + by' + cy = 0$ with $a > 0$, $c > 0$, define the discriminant $\Delta = b^2 - 4ac$:
+- **Overdamped** ($\Delta > 0$): two distinct real roots, exponential decay without oscillation.
+- **Critically damped** ($\Delta = 0$): repeated real root, fastest non-oscillatory decay.
+- **Underdamped** ($\Delta < 0$): complex conjugate roots, oscillatory decay.
+
+---
+
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 3.2.P1 (Superposition Principle):** If $y_1$ and $y_2$ are solutions of the homogeneous equation $L[y] = y'' + p(x)y' + q(x)y = 0$, then any linear combination $c_1 y_1 + c_2 y_2$ is also a solution. The operator $L$ is linear.
+
+**Postulate 3.2.P2 (Existence-Uniqueness for 2nd Order):** If $p(x)$ and $q(x)$ are continuous on an open interval $I$ containing $x_0$, then the IVP $y'' + p(x)y' + q(x)y = 0$, $y(x_0) = y_0$, $y'(x_0) = y_0'$ has a unique solution on all of $I$.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 3.2.1 — Abel's Theorem (Wronskian Formula)
+
+If $y_1, y_2$ are solutions of $y'' + p(x)y' + q(x)y = 0$ on interval $I$, then:
+
+$$
+W[y_1, y_2](x) = W[y_1, y_2](x_0)\,\exp\!\left(-\int_{x_0}^{x} p(t)\,dt\right).
+$$
+
+**Proof.** Compute $W' = y_1 y_2'' - y_2 y_1''$. Since $y_i'' = -p y_i' - q y_i$:
+
+$$
+W' = y_1(-p y_2' - q y_2) - y_2(-p y_1' - q y_1) = -p(y_1 y_2' - y_2 y_1') = -p\,W.
+$$
+
+This is a first-order linear ODE $W' + pW = 0$. By the integrating factor method ([3.1 - First-Order ODEs - Separable & Exact](3.1---First-Order-ODEs---Separable-&-Exact)):
+
+$$
+W(x) = W(x_0)\,e^{-\int_{x_0}^x p(t)\,dt}. \quad \blacksquare
+$$
+
+**Corollary:** $W$ is either identically zero or never zero on $I$. The Wronskian cannot "switch" between zero and nonzero.
+
+### Lemma 3.2.2 — Reduction of Order
+
+If one solution $y_1$ of $y'' + p(x)y' + q(x)y = 0$ is known, a second linearly independent solution is:
+
+$$
+y_2(x) = y_1(x)\int \frac{e^{-\int p(x)\,dx}}{[y_1(x)]^2}\,dx.
+$$
+
+**Proof.** Set $y_2 = v(x)\,y_1(x)$. Substitute into the ODE:
+
+$$
+(v'' y_1 + 2v' y_1' + v y_1'') + p(v' y_1 + v y_1') + q(v y_1) = 0.
+$$
+
+Since $y_1'' + p y_1' + q y_1 = 0$, the terms with $v$ cancel:
+
+$$
+v'' y_1 + 2v' y_1' + p v' y_1 = 0 \implies v'' + \left(\frac{2y_1'}{y_1} + p\right)v' = 0.
+$$
+
+Let $w = v'$. Then $w' + \left(\frac{2y_1'}{y_1} + p\right)w = 0$, which is first-order linear:
+
+$$
+w = \frac{e^{-\int p\,dx}}{y_1^2}.
+$$
+
+Integrate: $v = \int \frac{e^{-\int p\,dx}}{y_1^2}\,dx$, giving $y_2 = y_1 v$. $\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 3.2.1 — Solution Space is 2-Dimensional
+
+The set of all solutions of $y'' + p(x)y' + q(x)y = 0$ on interval $I$ forms a **2-dimensional vector space**. Every solution can be written as $y = c_1 y_1 + c_2 y_2$ for some fundamental set $\{y_1, y_2\}$.
+
+### Theorem 3.2.2 — Characteristic Equation Solutions (Constant Coefficients)
+
+For $ay'' + by' + cy = 0$ with characteristic equation $ar^2 + br + c = 0$ having roots $r_1, r_2$:
+
+**Case 1 (Distinct real roots, $\Delta > 0$):**
+
+$$
+y(x) = c_1 e^{r_1 x} + c_2 e^{r_2 x}.
+$$
+
+**Case 2 (Repeated root $r_1 = r_2 = r$, $\Delta = 0$):**
+
+$$
+y(x) = (c_1 + c_2 x)\,e^{rx}.
+$$
+
+**Case 3 (Complex conjugate roots $r = \alpha \pm i\beta$, $\Delta < 0$):**
+
+$$
+y(x) = e^{\alpha x}(c_1 \cos\beta x + c_2 \sin\beta x).
+$$
+
+### Theorem 3.2.3 — Linear Independence via Wronskian
+
+Two solutions $y_1, y_2$ of $y'' + p(x)y' + q(x)y = 0$ are linearly independent on $I$ if and only if $W[y_1, y_2](x_0) \neq 0$ for some (hence all) $x_0 \in I$.
+
+---
+
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Characteristic Equation (Theorem 3.2.2)
+
+Starting from $ay'' + by' + cy = 0$.
+
+**Step 1.** Assume a solution of the form $y = e^{rx}$ where $r$ is a constant to be determined.
+
+**Step 2.** Compute derivatives: $y' = re^{rx}$, $y'' = r^2 e^{rx}$.
+
+**Step 3.** Substitute into the ODE:
+
+$$
+a(r^2 e^{rx}) + b(r e^{rx}) + c(e^{rx}) = 0.
+$$
+
+**Step 4.** Factor out $e^{rx}$ (which is never zero):
+
+$$
+e^{rx}(ar^2 + br + c) = 0 \implies ar^2 + br + c = 0.
+$$
+
+**Step 5.** Solve using the quadratic formula:
+
+$$
+r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
+$$
+
+The discriminant $\Delta = b^2 - 4ac$ determines the nature of the roots.
+
+### 5.2 Proof: Repeated Root Requires $xe^{rx}$ (Case 2)
+
+When $\Delta = 0$, we have $r_1 = r_2 = r = -b/(2a)$. The first solution is $y_1 = e^{rx}$. We need a second, linearly independent solution.
+
+**Step 1.** Apply reduction of order (Lemma 3.2.2). For constant coefficients, $p = b/a$:
+
+$$
+y_2 = y_1 \int \frac{e^{-\int (b/a)\,dx}}{(e^{rx})^2}\,dx = e^{rx}\int \frac{e^{-(b/a)x}}{e^{2rx}}\,dx.
+$$
+
+**Step 2.** Since $r = -b/(2a)$, we have $2r = -b/a$, so $e^{-(b/a)x} = e^{2rx}$:
+
+$$
+y_2 = e^{rx}\int \frac{e^{2rx}}{e^{2rx}}\,dx = e^{rx}\int 1\,dx = xe^{rx}.
+$$
+
+**Step 3.** Verify: $y_2 = xe^{rx}$, $y_2' = e^{rx} + rxe^{rx} = (1+rx)e^{rx}$, $y_2'' = (2r + r^2 x)e^{rx}$.
+
+$$
+ay_2'' + by_2' + cy_2 = a(2r+r^2x)e^{rx} + b(1+rx)e^{rx} + cxe^{rx}.
+$$
+
+$$
+= e^{rx}[2ar + ar^2 x + b + brx + cx] = e^{rx}[(2ar+b) + x(ar^2+br+c)].
+$$
+
+Since $ar^2+br+c = 0$ (characteristic equation) and $r = -b/(2a)$ gives $2ar + b = 2a(-b/(2a)) + b = 0$:
+
+$$
+ay_2'' + by_2' + cy_2 = 0. \quad \blacksquare
+$$
+
+### 5.3 Proof: Complex Roots Give Real Solutions (Case 3)
+
+When $\Delta < 0$, roots are $r = \alpha \pm i\beta$ where $\alpha = -b/(2a)$ and $\beta = \sqrt{4ac-b^2}/(2a)$.
+
+**Step 1.** The complex solutions are $e^{(\alpha+i\beta)x}$ and $e^{(\alpha-i\beta)x}$.
+
+**Step 2.** By Euler's formula: $e^{i\beta x} = \cos(\beta x) + i\sin(\beta x)$.
+
+**Step 3.** Take real and imaginary parts (which are individually solutions by linearity):
+
+$$
+y_1 = \text{Re}[e^{(\alpha+i\beta)x}] = e^{\alpha x}\cos(\beta x),
+$$
+
+$$
+y_2 = \text{Im}[e^{(\alpha+i\beta)x}] = e^{\alpha x}\sin(\beta x).
+$$
+
+**Step 4.** Verify linear independence via Wronskian:
+
+$$
+W[y_1, y_2] = e^{2\alpha x}\bigl[\cos(\beta x)\cdot\beta\cos(\beta x) + \cos(\beta x)\cdot\alpha\sin(\beta x)
+$$
+
+$$
+\quad - \sin(\beta x)\cdot(-\beta\sin(\beta x)) - \sin(\beta x)\cdot\alpha\cos(\beta x)\bigr]
+$$
+
+$$
+= e^{2\alpha x}\bigl[\beta\cos^2(\beta x) + \beta\sin^2(\beta x)\bigr] = \beta e^{2\alpha x} \neq 0.
+$$
+
+Since $\beta > 0$ and $e^{2\alpha x} > 0$, the Wronskian is always positive. $\blacksquare$
+
+### 5.4 Proof of Theorem 3.2.1 (Solution Space is 2-Dimensional)
+
+**Step 1.** The solution set is a subspace of $C^2(I)$: if $y_1, y_2$ solve $L[y]=0$, then $L[c_1y_1+c_2y_2] = c_1 L[y_1] + c_2 L[y_2] = 0$ (linearity).
+
+**Step 2.** Dimension is at most 2: by existence-uniqueness (Postulate 3.2.P2), a solution is completely determined by the two initial conditions $(y(x_0), y'(x_0))$. The map $\phi \mapsto (\phi(x_0), \phi'(x_0))$ is a linear injection from the solution space into $\mathbb{R}^2$.
+
+**Step 3.** Dimension is at least 2: construct $y_1$ with $y_1(x_0)=1, y_1'(x_0)=0$ and $y_2$ with $y_2(x_0)=0, y_2'(x_0)=1$. These exist by Postulate 3.2.P2 and are linearly independent (their Wronskian at $x_0$ is $1\cdot1 - 0\cdot0 = 1 \neq 0$). $\blacksquare$
+
+---
+
+
+## 🧮 6. Worked Examples
+
+### Example 3.2.E1 — Distinct Real Roots (Overdamped)
+
+**Solve:** $y'' + 5y' + 6y = 0$.
+
+**Step 1.** Characteristic equation: $r^2 + 5r + 6 = 0$.
+
+**Step 2.** Factor: $(r+2)(r+3) = 0$, so $r_1 = -2$, $r_2 = -3$.
+
+**Step 3.** Discriminant: $\Delta = 25 - 24 = 1 > 0$ (distinct real roots).
+
+**Step 4.** General solution:
+
+$$
+y(x) = c_1 e^{-2x} + c_2 e^{-3x}.
+$$
+
+**Verification:** $y_1 = e^{-2x}$: $y_1'' + 5y_1' + 6y_1 = 4e^{-2x} - 10e^{-2x} + 6e^{-2x} = 0$. ✓
+
+---
+
+### Example 3.2.E2 — Repeated Root (Critically Damped)
+
+**Solve:** $y'' + 4y' + 4y = 0$, $y(0) = 3$, $y'(0) = 1$.
+
+**Step 1.** Characteristic equation: $r^2 + 4r + 4 = 0$.
+
+**Step 2.** Factor: $(r+2)^2 = 0$, so $r = -2$ (repeated).
+
+**Step 3.** General solution: $y = (c_1 + c_2 x)e^{-2x}$.
+
+**Step 4.** Apply $y(0) = 3$: $c_1 e^0 = c_1 = 3$.
+
+**Step 5.** Compute $y' = c_2 e^{-2x} - 2(c_1 + c_2 x)e^{-2x} = (c_2 - 2c_1 - 2c_2 x)e^{-2x}$.
+
+**Step 6.** Apply $y'(0) = 1$: $c_2 - 2c_1 = c_2 - 6 = 1$, so $c_2 = 7$.
+
+**Solution:**
+
+$$
+y(x) = (3 + 7x)e^{-2x}.
+$$
+
+---
+
+### Example 3.2.E3 — Complex Roots (Underdamped Oscillation)
+
+**Solve:** $y'' + 2y' + 5y = 0$, $y(0) = 1$, $y'(0) = 0$.
+
+**Step 1.** Characteristic equation: $r^2 + 2r + 5 = 0$.
+
+**Step 2.** Quadratic formula: $r = \frac{-2 \pm \sqrt{4-20}}{2} = \frac{-2 \pm \sqrt{-16}}{2} = -1 \pm 2i$.
+
+**Step 3.** Identify $\alpha = -1$, $\beta = 2$. General solution:
+
+$$
+y = e^{-x}(c_1\cos 2x + c_2\sin 2x).
+$$
+
+**Step 4.** Apply $y(0) = 1$: $e^0(c_1\cos 0 + c_2\sin 0) = c_1 = 1$.
+
+**Step 5.** Compute $y'$:
+
+$$
+y' = -e^{-x}(c_1\cos 2x + c_2\sin 2x) + e^{-x}(-2c_1\sin 2x + 2c_2\cos 2x).
+$$
+
+**Step 6.** Apply $y'(0) = 0$: $-(c_1) + 2c_2 = -1 + 2c_2 = 0$, so $c_2 = 1/2$.
+
+**Solution:**
+
+$$
+y(x) = e^{-x}\left(\cos 2x + \frac{1}{2}\sin 2x\right).
+$$
+
+**Physical interpretation:** The system oscillates with angular frequency $\omega = 2$ while the amplitude decays exponentially with rate $|\alpha| = 1$.
+
+---
+
+### Example 3.2.E4 — Wronskian Computation
+
+**Verify** that $y_1 = e^{-2x}$ and $y_2 = e^{-3x}$ (from E1) are linearly independent.
+
+$$
+W[y_1, y_2] = \begin{vmatrix} e^{-2x} & e^{-3x} \\ -2e^{-2x} & -3e^{-3x} \end{vmatrix} = e^{-2x}(-3e^{-3x}) - e^{-3x}(-2e^{-2x})
+$$
+
+$$
+= -3e^{-5x} + 2e^{-5x} = -e^{-5x} \neq 0 \quad \forall x.
+$$
+
+Since $W \neq 0$, the solutions are linearly independent. ✓
+
+**Check via Abel's theorem:** $p(x) = 5$ (coefficient of $y'$), so $W(x) = W(0)e^{-\int_0^x 5\,dt} = W(0)e^{-5x}$. At $x=0$: $W(0) = -3+2 = -1$. Hence $W(x) = -e^{-5x}$. ✓
+
+---
+
+### Example 3.2.E5 — Connection to Eigenvalues (Companion Matrix)
+
+The ODE $y'' + 5y' + 6y = 0$ can be written as a first-order system. Let $\mathbf{x} = \begin{pmatrix}y\\y'\end{pmatrix}$. Then:
+
+$$
+\mathbf{x}' = \begin{pmatrix}0 & 1\\-6 & -5\end{pmatrix}\mathbf{x} = A\mathbf{x}.
+$$
+
+The eigenvalues of $A$ satisfy $\det(A - \lambda I) = 0$:
+
+$$
+\det\begin{pmatrix}-\lambda & 1\\-6 & -5-\lambda\end{pmatrix} = -\lambda(-5-\lambda) + 6 = \lambda^2 + 5\lambda + 6 = 0.
+$$
+
+This is exactly the characteristic equation from E1. The eigenvalues $\lambda = -2, -3$ are the characteristic roots $r_1, r_2$. This connection is developed fully in [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space).
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [3.1 - First-Order ODEs - Separable & Exact](3.1---First-Order-ODEs---Separable-&-Exact) — prerequisite; Abel's theorem uses first-order methods
+- [3.3 - Nonhomogeneous ODEs & Undetermined Coefficients](3.3---Nonhomogeneous-ODEs-&-Undetermined-Coefficients) — extends to $g(x) \neq 0$
+- [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space) — matrix formulation of higher-order ODEs
+- [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) — eigenvalues of companion matrix = characteristic roots
+- [2.5 - Determinants & Cramer's Rule](2.5---Determinants-&-Cramer's-Rule) — Wronskian is a determinant
+
+### External References
+- **MIT OCW 18.03SC**, Unit II: Second-Order Constant-Coefficient Equations
+- **Professor Leonard**, Differential Equations Lectures 5–12 (detailed classroom treatment)
+- **Jiří Lebl**, *Notes on Diffy Qs*, Ch. 2.1–2.4
+- **3Blue1Brown**, "But what is a differential equation?" (visual intuition for phase space)
+
+---
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Damped Harmonic Oscillator (Underdamped Mass-Spring System)
+
+A 2 kg mass is attached to a spring with stiffness $k = 50$ N/m and a dashpot with damping coefficient $b = 4$ N·s/m. The mass is displaced 0.1 m from equilibrium and released from rest. Find the position $x(t)$.
+
+The governing equation is $mx'' + bx' + kx = 0$, i.e.:
+
+$$
+2x'' + 4x' + 50x = 0.
+$$
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Write the characteristic equation
+
+Divide by 2:
+
+$$
+x'' + 2x' + 25x = 0.
+$$
+
+Characteristic equation:
+
+$$
+r^2 + 2r + 25 = 0.
+$$
+
+#### Step 2: Solve via the quadratic formula
+
+$$
+r = \frac{-2 \pm \sqrt{4 - 100}}{2} = \frac{-2 \pm \sqrt{-96}}{2} = \frac{-2 \pm 4i\sqrt{6}}{2} = -1 \pm 2i\sqrt{6}.
+$$
+
+So $\alpha = -1$ and $\beta = 2\sqrt{6} \approx 4.899$ rad/s.
+
+#### Step 3: Write the general solution (complex roots case)
+
+$$
+x(t) = e^{-t}\left[C_1 \cos(2\sqrt{6}\,t) + C_2 \sin(2\sqrt{6}\,t)\right].
+$$
+
+#### Step 4: Apply initial conditions
+
+$x(0) = 0.1$:
+
+$$
+0.1 = e^{0}[C_1 \cos 0 + C_2 \sin 0] = C_1.
+$$
+
+So $C_1 = 0.1$.
+
+$x'(0) = 0$: First compute $x'(t)$:
+
+$$
+x'(t) = -e^{-t}[C_1 \cos(2\sqrt{6}\,t) + C_2 \sin(2\sqrt{6}\,t)] + e^{-t}[-2\sqrt{6}\,C_1 \sin(2\sqrt{6}\,t) + 2\sqrt{6}\,C_2 \cos(2\sqrt{6}\,t)].
+$$
+
+At $t = 0$:
+
+$$
+x'(0) = -C_1 + 2\sqrt{6}\,C_2 = 0 \implies C_2 = \frac{C_1}{2\sqrt{6}} = \frac{0.1}{2\sqrt{6}} = \frac{1}{20\sqrt{6}} = \frac{\sqrt{6}}{120}.
+$$
+
+#### Step 5: Write the particular solution
+
+$$
+x(t) = e^{-t}\left[0.1\cos(2\sqrt{6}\,t) + \frac{\sqrt{6}}{120}\sin(2\sqrt{6}\,t)\right].
+$$
+
+Alternatively, in amplitude-phase form: $x(t) = Ae^{-t}\cos(2\sqrt{6}\,t - \phi)$ where:
+
+$$
+A = \sqrt{C_1^2 + C_2^2} = \sqrt{0.01 + \frac{6}{14400}} = \sqrt{0.01 + 0.000417} = \sqrt{0.010417} \approx 0.1021 \text{ m}.
+$$
+
+$$
+\phi = \arctan\frac{C_2}{C_1} = \arctan\frac{1}{2\sqrt{6}} \approx 0.2014 \text{ rad}.
+$$
+
+**Final Answer:**
+
+$$
+x(t) = 0.1021\,e^{-t}\cos(2\sqrt{6}\,t - 0.2014) \text{ m}.
+$$
+
+The system oscillates at the damped frequency $\omega_d = 2\sqrt{6} \approx 4.90$ rad/s with exponentially decaying amplitude (time constant $\tau = 1$ s). The natural frequency is $\omega_n = \sqrt{25} = 5$ rad/s, and the damping ratio is $\zeta = 1/5 = 0.2$ (underdamped).
+
+</details>
+
+### Example 8.2 — Critically Damped System (Door Closer Mechanism)
+
+A door closer is modeled by $x'' + 10x' + 25x = 0$ with $x(0) = 1$ (door fully open, normalized) and $x'(0) = 0$ (released from rest). Find $x(t)$ and determine when the door is 95% closed.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Characteristic equation
+
+$$
+r^2 + 10r + 25 = 0 \implies (r + 5)^2 = 0 \implies r = -5 \text{ (repeated root)}.
+$$
+
+#### Step 2: General solution for repeated roots
+
+$$
+x(t) = (C_1 + C_2 t)e^{-5t}.
+$$
+
+#### Step 3: Apply initial conditions
+
+$x(0) = 1$: $C_1 = 1$.
+
+$x'(t) = C_2 e^{-5t} - 5(C_1 + C_2 t)e^{-5t} = (C_2 - 5C_1 - 5C_2 t)e^{-5t}$.
+
+$x'(0) = C_2 - 5C_1 = C_2 - 5 = 0 \implies C_2 = 5$.
+
+#### Step 4: Particular solution
+
+$$
+x(t) = (1 + 5t)e^{-5t}.
+$$
+
+#### Step 5: Find when door is 95% closed ($x = 0.05$)
+
+Solve $(1 + 5t)e^{-5t} = 0.05$.
+
+This is transcendental — use numerical methods or iteration. Try $t = 1$: $(1+5)e^{-5} = 6 \times 0.00674 = 0.0404$. Too small. Try $t = 0.8$: $(1+4)e^{-4} = 5 \times 0.0183 = 0.0916$. Try $t = 0.9$: $(1+4.5)e^{-4.5} = 5.5 \times 0.0111 = 0.0611$. Try $t = 0.95$: $(1+4.75)e^{-4.75} = 5.75 \times 0.00867 = 0.0499 \approx 0.05$. ✓
+
+**Final Answer:**
+
+$$
+x(t) = (1 + 5t)e^{-5t}, \qquad \text{95\% closed at } t \approx 0.95 \text{ s}.
+$$
+
+Critical damping returns to equilibrium fastest without oscillation — this is why door closers are designed at or near critical damping.
+
+</details>
+
+### Example 8.3 — Euler–Cauchy Equation (Beam Deflection Near a Singularity)
+
+Solve the Euler–Cauchy equation:
+
+$$
+x^2 y'' - 3xy' + 4y = 0, \quad x > 0.
+$$
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Assume the trial solution $y = x^m$
+
+Compute derivatives: $y' = mx^{m-1}$, $y'' = m(m-1)x^{m-2}$.
+
+#### Step 2: Substitute into the ODE
+
+$$
+x^2 \cdot m(m-1)x^{m-2} - 3x \cdot mx^{m-1} + 4x^m = 0.
+$$
+
+$$
+m(m-1)x^m - 3mx^m + 4x^m = 0.
+$$
+
+Factor out $x^m \neq 0$:
+
+$$
+m(m-1) - 3m + 4 = 0.
+$$
+
+#### Step 3: Solve the indicial equation
+
+$$
+m^2 - m - 3m + 4 = 0 \implies m^2 - 4m + 4 = 0 \implies (m-2)^2 = 0.
+$$
+
+Repeated root: $m = 2$.
+
+#### Step 4: General solution for repeated Euler–Cauchy roots
+
+When the indicial equation has a repeated root $m$, the two linearly independent solutions are:
+
+$$
+y_1 = x^m, \qquad y_2 = x^m \ln x.
+$$
+
+(This is analogous to the $(C_1 + C_2 t)e^{rt}$ form for constant-coefficient equations with repeated roots, via the substitution $t = \ln x$.)
+
+#### Step 5: Write the general solution
+
+**Final Answer:**
+
+$$
+y(x) = C_1 x^2 + C_2 x^2 \ln x = x^2(C_1 + C_2 \ln x).
+$$
+
+**Verification:** For $y_2 = x^2 \ln x$: $y_2' = 2x\ln x + x$, $y_2'' = 2\ln x + 3$. Then:
+
+$$
+x^2(2\ln x + 3) - 3x(2x\ln x + x) + 4x^2\ln x = 2x^2\ln x + 3x^2 - 6x^2\ln x - 3x^2 + 4x^2\ln x = 0. \checkmark
+$$
+
+</details>
+
+### Example 8.4 — Fourth-Order ODE (Euler–Bernoulli Beam)
+
+The static deflection of a uniform beam under its own weight satisfies:
+
+$$
+y^{(4)} = \frac{w}{EI},
+$$
+
+where $w/(EI)$ is a constant. For the homogeneous part $y^{(4)} = 0$, find the general solution and apply clamped-free boundary conditions: $y(0) = 0$, $y'(0) = 0$, $y''(L) = 0$, $y'''(L) = 0$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Solve the homogeneous equation
+
+The characteristic equation for $y^{(4)} = 0$ is $r^4 = 0$, giving $r = 0$ with multiplicity 4. The general solution is:
+
+$$
+y_h(x) = C_1 + C_2 x + C_3 x^2 + C_4 x^3.
+$$
+
+#### Step 2: Find a particular solution of $y^{(4)} = w/(EI) = q$ (constant)
+
+By inspection (or integrating four times):
+
+$$
+y_p(x) = \frac{q x^4}{24}.
+$$
+
+General solution: $y(x) = C_1 + C_2 x + C_3 x^2 + C_4 x^3 + \frac{qx^4}{24}$.
+
+#### Step 3: Apply boundary conditions
+
+**BC 1:** $y(0) = 0 \implies C_1 = 0$.
+
+**BC 2:** $y'(0) = 0$. $y'(x) = C_2 + 2C_3 x + 3C_4 x^2 + \frac{qx^3}{6}$. At $x = 0$: $C_2 = 0$.
+
+**BC 3:** $y''(L) = 0$. $y''(x) = 2C_3 + 6C_4 x + \frac{qx^2}{2}$. At $x = L$:
+
+$$
+2C_3 + 6C_4 L + \frac{qL^2}{2} = 0. \tag{i}
+$$
+
+**BC 4:** $y'''(L) = 0$. $y'''(x) = 6C_4 + qx$. At $x = L$:
+
+$$
+6C_4 + qL = 0 \implies C_4 = -\frac{qL}{6}. \tag{ii}
+$$
+
+Substitute (ii) into (i):
+
+$$
+2C_3 + 6\left(-\frac{qL}{6}\right)L + \frac{qL^2}{2} = 0 \implies 2C_3 - qL^2 + \frac{qL^2}{2} = 0 \implies 2C_3 = \frac{qL^2}{2} \implies C_3 = \frac{qL^2}{4}.
+$$
+
+#### Step 4: Assemble the solution
+
+$$
+y(x) = \frac{qL^2}{4}x^2 - \frac{qL}{6}x^3 + \frac{q}{24}x^4 = \frac{q}{24}\left(6L^2 x^2 - 4Lx^3 + x^4\right).
+$$
+
+**Final Answer:**
+
+$$
+y(x) = \frac{w}{24EI}\left(6L^2 x^2 - 4Lx^3 + x^4\right).
+$$
+
+Maximum deflection at the free end ($x = L$):
+
+$$
+y(L) = \frac{w}{24EI}(6L^4 - 4L^4 + L^4) = \frac{3wL^4}{24EI} = \frac{wL^4}{8EI}.
+$$
+
+This is the classic cantilever beam deflection formula from structural engineering.
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 The Reduction of Order Method — Complete Derivation
+
+Given one known solution $y_1(x)$ of $y'' + p(x)y' + q(x)y = 0$, we can find a second linearly independent solution $y_2$ by the substitution $y_2 = v(x)\,y_1(x)$.
+
+**Derivation.** Compute derivatives of $y_2 = vy_1$:
+
+$$
+y_2' = v'y_1 + vy_1', \qquad y_2'' = v''y_1 + 2v'y_1' + vy_1''.
+$$
+
+Substitute into the ODE:
+
+$$
+(v''y_1 + 2v'y_1' + vy_1'') + p(v'y_1 + vy_1') + q(vy_1) = 0.
+$$
+
+Group terms:
+
+$$
+v''y_1 + v'(2y_1' + py_1) + v\underbrace{(y_1'' + py_1' + qy_1)}_{= 0 \text{ since } y_1 \text{ is a solution}} = 0.
+$$
+
+This reduces to:
+
+$$
+v''y_1 + v'(2y_1' + py_1) = 0.
+$$
+
+Let $w = v'$ (reducing order by one):
+
+$$
+w'y_1 + w(2y_1' + py_1) = 0 \implies \frac{w'}{w} = -\frac{2y_1' + py_1}{y_1} = -2\frac{y_1'}{y_1} - p.
+$$
+
+Integrate:
+
+$$
+\ln|w| = -2\ln|y_1| - \int p\,dx \implies w = \frac{1}{y_1^2}\,e^{-\int p\,dx}.
+$$
+
+Then $v = \int w\,dx$ and $y_2 = y_1 \int \frac{e^{-\int p\,dx}}{y_1^2}\,dx$.
+
+**The Abel–Liouville formula.** This derivation also yields the Wronskian formula: since $W(y_1, y_2) = y_1 y_2' - y_2 y_1' = y_1(v'y_1 + vy_1') - vy_1 y_1' = y_1^2 v' = y_1^2 w = e^{-\int p\,dx}$, we recover Abel's identity:
+
+$$
+W(y_1, y_2)(x) = W(y_1, y_2)(x_0)\,e^{-\int_{x_0}^x p(s)\,ds}.
+$$
+
+This proves the Wronskian is either identically zero (dependent solutions) or never zero (independent solutions) — it cannot vanish at isolated points.
+
+**Application to constant-coefficient repeated roots.** For $y'' + 2\alpha y' + \alpha^2 y = 0$ with $y_1 = e^{-\alpha x}$: $p = 2\alpha$, so $e^{-\int p\,dx} = e^{-2\alpha x}$, and:
+
+$$
+y_2 = e^{-\alpha x}\int \frac{e^{-2\alpha x}}{e^{-2\alpha x}}\,dx = e^{-\alpha x}\int 1\,dx = xe^{-\alpha x}.
+$$
+
+This confirms the $xe^{rx}$ formula for repeated roots without needing to "guess" it.
+
+*Reference: Jiří Lebl, Notes on Diffy Qs, §2.1; Strang, Differential Equations and Linear Algebra, §2.4.*
+
+### 9.2 The Wronskian and Linear Independence — Why It Works
+
+The Wronskian $W(y_1, y_2) = y_1 y_2' - y_2 y_1'$ is the determinant of the fundamental matrix. Its role in proving linear independence deserves careful treatment.
+
+**Claim.** If $y_1, y_2$ are solutions of $y'' + p(x)y' + q(x)y = 0$ on an interval $I$ with $p, q$ continuous, then $y_1, y_2$ are linearly independent on $I$ if and only if $W(y_1, y_2)(x_0) \neq 0$ for some (equivalently, every) $x_0 \in I$.
+
+**Proof of necessity.** Suppose $y_1, y_2$ are linearly dependent: $y_2 = cy_1$ for some constant $c$. Then $W = y_1(cy_1') - cy_1 y_1' = 0$ identically.
+
+**Proof of sufficiency (contrapositive).** Suppose $W(x_0) = 0$ for some $x_0$. By Abel's identity, $W(x) = W(x_0)e^{-\int_{x_0}^x p\,ds} = 0$ for all $x$. So $y_1 y_2' - y_2 y_1' = 0$ everywhere. If $y_1(x_0) \neq 0$ on some subinterval, then $(y_2/y_1)' = (y_1 y_2' - y_2 y_1')/y_1^2 = 0$, so $y_2/y_1 = c$ (constant), meaning $y_2 = cy_1$ — linearly dependent.
+
+**Key subtlety.** For arbitrary functions (not necessarily solutions of an ODE), $W = 0$ does NOT imply linear dependence. The classic counterexample: $f(x) = x^2$ and $g(x) = x|x|$ on $(-1, 1)$. These are linearly independent, yet $W(f,g)(0) = 0$. The theorem requires that the functions be solutions of a second-order linear ODE with continuous coefficients — this is what gives Abel's identity its power to propagate the zero from one point to all points.
+
+**Practical use.** To verify that two proposed solutions form a fundamental set, compute $W$ at any convenient point (often $x = 0$). If $W \neq 0$, you have a basis. If $W = 0$, your solutions are proportional and you need to find another.
+
+*Reference: MIT OCW 18.03SC, Lecture 13 notes; Boyce & DiPrima, Elementary Differential Equations, §3.2.*
+
+### 9.3 Connection to the Companion Matrix and State-Space Form
+
+Any second-order ODE $y'' + py' + qy = 0$ can be rewritten as a first-order system by setting $x_1 = y$, $x_2 = y'$:
+
+$$
+\begin{pmatrix} x_1' \\ x_2' \end{pmatrix} = \begin{pmatrix} 0 & 1 \\ -q & -p \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}.
+$$
+
+The matrix $A = \begin{pmatrix} 0 & 1 \\ -q & -p \end{pmatrix}$ is called the **companion matrix**. Its characteristic polynomial is:
+
+$$
+\det(A - \lambda I) = \det\begin{pmatrix} -\lambda & 1 \\ -q & -p - \lambda \end{pmatrix} = -\lambda(-p-\lambda) - (-q) = \lambda^2 + p\lambda + q.
+$$
+
+This is exactly the characteristic equation $r^2 + pr + q = 0$ from the direct method! The eigenvalues of the companion matrix are the characteristic roots. This explains why:
+
+- **Distinct real eigenvalues** $\lambda_1, \lambda_2$ give eigenvector solutions $\mathbf{x}(t) = e^{\lambda_i t}\mathbf{v}_i$, which project to $y = e^{\lambda_i t}$.
+- **Complex eigenvalues** $\alpha \pm i\beta$ give oscillatory solutions $e^{\alpha t}\cos(\beta t)$, $e^{\alpha t}\sin(\beta t)$.
+- **Repeated eigenvalues** with a deficient eigenspace (non-diagonalizable $A$) give generalized eigenvector solutions, projecting to $te^{\lambda t}$.
+
+The phase portrait of the system (node, spiral, saddle, center) directly encodes the qualitative behavior of the second-order ODE. This bridge between scalar ODEs and linear algebra is developed fully in [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space).
+
+*Reference: Strang, Differential Equations and Linear Algebra (Wellesley-Cambridge, 2014), Ch. 6.*
+
+---

@@ -1,0 +1,162 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);transition: fill 0.2s ease;}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;transition:all 0.3s ease;}
+    .box:hover{stroke:var(--interactive-accent,#58a6ff);fill:rgba(88,166,255,0.02);filter:drop-shadow(0 0 4px rgba(88,166,255,0.15));}
+    
+    /* Hover effects for bottom practical tolerance table rows */
+    .table-row {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .table-row:hover text {
+      fill: var(--interactive-accent,#58a6ff) !important;
+      font-weight: bold;
+    }
+    
+    /* Warn/stress pulse for gap stack-up */
+    @keyframes warn-pulse {
+      0%, 100% { fill: #ffd93d; }
+      50% { fill: #ff6b6b; filter: drop-shadow(0 0 3px #ff6b6b); }
+    }
+    .warn-glow {
+      animation: warn-pulse 2s infinite;
+    }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">34.6 — Tolerancing, Fits &amp; Assemblies: ISO System &amp; Tolerance Stacking</text>
+  
+  <!-- Hole/shaft fit diagram -->
+  <rect x="20" y="35" width="220" height="190" class="box" rx="4"/>
+  <text x="130" y="52" class="label" text-anchor="middle" font-weight="bold">ISO Hole &amp; Shaft Fit System</text>
+  
+  <!-- Clearance fit illustration (Animated sliding) -->
+  <g transform="translate(40, 65)">
+    <rect x="0" y="0" width="80" height="50" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" rx="2"/>
+    <g>
+      <rect x="15" y="7" width="50" height="36" fill="#0d1117" stroke="var(--text-muted,#8b949e)" stroke-width="1" rx="1"/>
+      <animateTransform attributeName="transform" type="translate" values="-10,0; 10,0; -10,0" dur="4s" repeatCount="indefinite"/>
+    </g>
+  </g>
+  <text x="80" y="128" class="sub" text-anchor="middle">Clearance (H7/f6)</text>
+  
+  <!-- Interference fit (Animated press + stress gradient glow) -->
+  <g transform="translate(140, 65)">
+    <rect x="0" y="0" width="80" height="50" fill="none" stroke="#ff6b6b" stroke-width="1.5" rx="2"/>
+    <rect x="0" y="0" width="80" height="50" fill="#ff6b6b" opacity="0.1">
+      <animate attributeName="opacity" values="0.05; 0.4; 0.05" dur="4s" repeatCount="indefinite" />
+    </rect>
+    <!-- Shaft pressing in and creating interference friction stress -->
+    <g>
+      <rect x="-42" y="7" width="50" height="36" fill="#0d1117" stroke="#ff6b6b" stroke-width="1" rx="1"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 57,0; 0,0" dur="4s" repeatCount="indefinite"/>
+    </g>
+  </g>
+  <text x="180" y="128" class="sub" text-anchor="middle">Interference (H7/p6)</text>
+  
+  <text x="130" y="148" class="sub" text-anchor="middle">Hole basis: H (zero dev at low)</text>
+  <text x="130" y="160" class="sub" text-anchor="middle">IT grades: IT1 (tight) → IT18 (loose)</text>
+  <text x="130" y="174" class="sub" text-anchor="middle">H7/g6 = sliding fit (shaft through bearing)</text>
+  <text x="130" y="186" class="sub" text-anchor="middle">H7/k6 = transition (light press)</text>
+  <text x="130" y="198" class="sub" text-anchor="middle">H7/p6 = interference (press, shrink)</text>
+  <text x="130" y="210" class="sub" text-anchor="middle">3D print: add 0.2–0.3mm to H, -0.1 to shaft</text>
+  
+  <!-- Tolerance stack-up -->
+  <rect x="255" y="35" width="230" height="190" class="box" rx="4"/>
+  <text x="370" y="52" class="label" text-anchor="middle" font-weight="bold">Tolerance Stack-up Analysis</text>
+  
+  <!-- Part chain diagram -->
+  <rect x="270" y="65" width="40" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2"/>
+  <text x="290" y="83" class="mono" text-anchor="middle">Part A</text>
+  <text x="290" y="100" class="mono" text-anchor="middle">±0.05</text>
+  
+  <rect x="315" y="65" width="40" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2"/>
+  <text x="335" y="83" class="mono" text-anchor="middle">Part B</text>
+  <text x="335" y="100" class="mono" text-anchor="middle">±0.1</text>
+  
+  <rect x="360" y="65" width="40" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2"/>
+  <text x="380" y="83" class="mono" text-anchor="middle">Part C</text>
+  <text x="380" y="100" class="mono" text-anchor="middle">±0.05</text>
+  
+  <rect x="405" y="65" width="55" height="30" fill="none" stroke="#ffd93d" stroke-width="1.2"/>
+  <text x="432" y="80" class="mono" text-anchor="middle">Gap G</text>
+  <text x="432" y="93" class="mono warn-glow" text-anchor="middle" font-weight="bold">= ?</text>
+  
+  <text x="370" y="118" class="sub" text-anchor="middle">Worst Case: G = Σ|tol| = 0.05+0.1+0.05 = ±0.2mm</text>
+  <text x="370" y="131" class="sub" text-anchor="middle">RSS: G = √(Σtolᵢ²) = √(0.05²+0.1²+0.05²) ≈ ±0.12mm</text>
+  <text x="370" y="146" class="sub" text-anchor="middle" font-weight="bold">WC = guaranteed fit; RSS = statistical</text>
+  <text x="270" y="162" class="sub" font-weight="bold">Rules for minimizing stack-up:</text>
+  <text x="270" y="174" class="sub">• Datums on same surface for all parts</text>
+  <text x="270" y="186" class="sub">• Self-centering features (tapers, pins)</text>
+  <text x="270" y="198" class="sub">• Short chains — avoid long dimension chains</text>
+  <text x="270" y="210" class="sub">• Adjust shims for critical assemblies</text>
+  <text x="270" y="220" class="sub">• Semi-kinematic mounts for precise location</text>
+  
+  <!-- Surface roughness + fasteners -->
+  <rect x="500" y="35" width="200" height="190" class="box" rx="4"/>
+  <text x="600" y="52" class="label" text-anchor="middle" font-weight="bold">Surface Finish &amp; Fasteners</text>
+  <text x="510" y="68" class="sub" font-weight="bold">Ra (Arithmetic mean roughness):</text>
+  <text x="510" y="80" class="mono">Ra 0.8µm — precision bearing seat</text>
+  <text x="510" y="92" class="mono">Ra 1.6µm — mating surfaces</text>
+  <text x="510" y="104" class="mono">Ra 3.2µm — standard CNC finish</text>
+  <text x="510" y="116" class="mono">Ra 6.3µm — coarse/hidden faces</text>
+  <text x="510" y="130" class="sub" font-weight="bold">Fastener torque (approximate, dry):</text>
+  <text x="510" y="142" class="mono">M3 steel: 0.5 Nm  M4: 1.2 Nm</text>
+  <text x="510" y="154" class="mono">M5: 2.5 Nm  M6: 4.5 Nm</text>
+  <text x="510" y="166" class="mono">M8: 11 Nm  M10: 22 Nm</text>
+  <text x="510" y="180" class="sub" font-weight="bold">Standard threads (ISO):</text>
+  <text x="510" y="192" class="mono">M3×0.5 · M4×0.7 · M5×0.8 · M6×1</text>
+  <text x="510" y="204" class="mono">M8×1.25 · M10×1.5 · M12×1.75</text>
+  <text x="510" y="216" class="sub">UNC/UNF for US/imperial hardware</text>
+  
+  <!-- Bottom: Assembly tolerance chart -->
+  <rect x="20" y="240" width="680" height="160" class="box" rx="4"/>
+  <text x="360" y="258" class="label" text-anchor="middle" font-weight="bold">Practical Tolerance Guide for Makers (FDM 3D Print vs CNC vs Sheet Metal)</text>
+  <text x="35" y="274" class="sub" font-weight="bold">Feature</text>
+  <text x="180" y="274" class="sub" font-weight="bold">FDM 3D Print</text>
+  <text x="340" y="274" class="sub" font-weight="bold">CNC Machined</text>
+  <text x="500" y="274" class="sub" font-weight="bold">Sheet Metal Bend</text>
+  <text x="640" y="274" class="sub" font-weight="bold">Notes</text>
+  <line x1="20" y1="278" x2="700" y2="278" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  
+  <g class="table-row">
+    <text x="35" y="292" class="mono">General dims</text>
+    <text x="180" y="292" class="mono">±0.2–0.5mm</text>
+    <text x="340" y="292" class="mono">±0.025–0.1mm</text>
+    <text x="500" y="292" class="mono">±0.1–0.3mm</text>
+    <text x="640" y="292" class="mono">Vary by size</text>
+  </g>
+  <g class="table-row">
+    <text x="35" y="308" class="mono">Hole diameters</text>
+    <text x="180" y="308" class="mono">−0.1 to −0.3mm</text>
+    <text x="340" y="308" class="mono">+0.01/−0.00mm</text>
+    <text x="500" y="308" class="mono">±0.1mm punch</text>
+    <text x="640" y="308" class="mono">FDM holes shrink</text>
+  </g>
+  <g class="table-row">
+    <text x="35" y="324" class="mono">Bearing bores</text>
+    <text x="180" y="324" class="mono">Post-drill/ream</text>
+    <text x="340" y="324" class="mono">H7 = +0.021/0</text>
+    <text x="500" y="324" class="mono">CNC bore after</text>
+    <text x="640" y="324" class="mono">Don't 3D print bearings!</text>
+  </g>
+  <g class="table-row">
+    <text x="35" y="340" class="mono">Angular</text>
+    <text x="180" y="340" class="mono">±0.5–1°</text>
+    <text x="340" y="340" class="mono">±0.1°</text>
+    <text x="500" y="340" class="mono">±0.5–1° per bend</text>
+    <text x="640" y="340" class="mono">Spring-back correction</text>
+  </g>
+  <g class="table-row">
+    <text x="35" y="356" class="mono">Thread fit</text>
+    <text x="180" y="356" class="mono">Heat-set insert only</text>
+    <text x="340" y="356" class="mono">6H/6g standard</text>
+    <text x="500" y="356" class="mono">Rivet nut / PEM</text>
+    <text x="640" y="356" class="mono">Never 3D print threads</text>
+  </g>
+  
+  <text x="360" y="378" class="sub" text-anchor="middle">Free tolerance calculator: engineersedge.com/tolerance/ISO_tolerance_calculator.htm · Fits calculator: amesweb.info/tolerances/iso-tolerances</text>
+  <text x="360" y="393" class="sub" text-anchor="middle">Rule of thumb: design for the loosest tolerance that functions. Every order of magnitude tighter tolerance ≈ 2–5× cost increase (machining). Use GD&amp;T, not limit tolerances, for complex surfaces.</text>
+</svg>

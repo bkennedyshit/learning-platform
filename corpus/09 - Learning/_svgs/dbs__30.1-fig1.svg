@@ -1,0 +1,113 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.2; }
+    .accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .acc-arr{ stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; }
+    .disk   { fill: #2a3a4a; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .mem    { fill: #1a3a1a; stroke: #51cf66; stroke-width: 1.5; }
+    .row    { fill: #3a2a1a; stroke: #ffd93d; stroke-width: 1.2; }
+    .page   { fill: #2a1a3a; stroke: #a855f7; stroke-width: 1.2; }
+  </style>
+  <defs>
+    <marker id="dbs1-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="dbs1-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Storage Engine Foundations — The Database Stack</text>
+
+  <!-- LEFT column: Storage hierarchy -->
+  <rect x="18" y="38" width="200" height="268" class="box" rx="6"/>
+  <text x="118" y="58" class="label" text-anchor="middle" font-weight="bold">Storage Hierarchy</text>
+  <rect x="34"  y="68"  width="168" height="36" class="mem" rx="4"/>
+  <text x="118" y="82"  class="label" text-anchor="middle" fill="#51cf66">CPU Registers / Cache</text>
+  <text x="118" y="96"  class="small" text-anchor="middle">&lt; 1 ns — volatile</text>
+  <rect x="34"  y="112" width="168" height="36" class="mem" rx="4"/>
+  <text x="118" y="126" class="label" text-anchor="middle" fill="#51cf66">RAM / Buffer Pool</text>
+  <text x="118" y="140" class="small" text-anchor="middle">~100 ns — volatile</text>
+  <rect x="34"  y="156" width="168" height="36" class="page" rx="4"/>
+  <text x="118" y="170" class="label" text-anchor="middle" fill="#a855f7">Page Cache (OS)</text>
+  <text x="118" y="184" class="small" text-anchor="middle">managed by kernel</text>
+  <rect x="34"  y="200" width="168" height="36" class="disk" rx="4"/>
+  <text x="118" y="214" class="label" text-anchor="middle" fill="#58a6ff">SSD / NVMe</text>
+  <text x="118" y="228" class="small" text-anchor="middle">~150 µs — durable</text>
+  <rect x="34"  y="244" width="168" height="36" class="disk" rx="4"/>
+  <text x="118" y="258" class="label" text-anchor="middle" fill="#58a6ff">HDD / Spinning Disk</text>
+  <text x="118" y="272" class="small" text-anchor="middle">~10 ms — sequential wins</text>
+  <text x="118" y="298" class="small" text-anchor="middle">Rule: minimise I/O boundary</text>
+
+  <!-- MIDDLE column: Engine layers -->
+  <rect x="236" y="38" width="220" height="268" class="box" rx="6"/>
+  <text x="346" y="58" class="label" text-anchor="middle" font-weight="bold">Database Engine Layers</text>
+  <rect x="252" y="68"  width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="88"  class="label" text-anchor="middle">SQL / Query Interface</text>
+  <rect x="252" y="108" width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="128" class="label" text-anchor="middle">Query Planner &amp; Optimizer</text>
+  <rect x="252" y="148" width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="168" class="label" text-anchor="middle">Execution Engine</text>
+  <rect x="252" y="188" width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="208" class="label" text-anchor="middle">Transaction Manager (ACID)</text>
+  <rect x="252" y="228" width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="248" class="label" text-anchor="middle">WAL / Recovery Manager</text>
+  <rect x="252" y="268" width="188" height="32" class="accent" rx="4"/>
+  <text x="346" y="288" class="label" text-anchor="middle">Buffer Pool Manager</text>
+
+  <!-- arrows between engine layers -->
+  <line x1="346" y1="100" x2="346" y2="108" class="arr" marker-end="url(#dbs1-a)"/>
+  <line x1="346" y1="140" x2="346" y2="148" class="arr" marker-end="url(#dbs1-a)"/>
+  <line x1="346" y1="180" x2="346" y2="188" class="arr" marker-end="url(#dbs1-a)"/>
+  <line x1="346" y1="220" x2="346" y2="228" class="arr" marker-end="url(#dbs1-a)"/>
+  <line x1="346" y1="260" x2="346" y2="268" class="arr" marker-end="url(#dbs1-a)"/>
+
+  <!-- RIGHT column: Two engine families -->
+  <rect x="474" y="38" width="228" height="268" class="box" rx="6"/>
+  <text x="588" y="58" class="label" text-anchor="middle" font-weight="bold">Two Engine Families</text>
+
+  <rect x="490" y="68"  width="196" height="90" rx="4" fill="#1a2a3a" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="588" y="88"  class="label" text-anchor="middle" fill="#58a6ff">B-Tree (Update-in-Place)</text>
+  <text x="490" y="108" class="small">• Reads optimised</text>
+  <text x="490" y="122" class="small">• Random writes hurt</text>
+  <text x="490" y="136" class="small">• PostgreSQL, MySQL,</text>
+  <text x="490" y="150" class="small">  SQLite, Oracle</text>
+
+  <rect x="490" y="168" width="196" height="90" rx="4" fill="#1a3a2a" stroke="#51cf66" stroke-width="1.5"/>
+  <text x="588" y="188" class="label" text-anchor="middle" fill="#51cf66">LSM-Tree (Append-Only)</text>
+  <text x="490" y="208" class="small">• Writes optimised</text>
+  <text x="490" y="222" class="small">• Reads cost compaction</text>
+  <text x="490" y="236" class="small">• RocksDB, LevelDB,</text>
+  <text x="490" y="250" class="small">  Cassandra, HBase</text>
+
+  <text x="588" y="298" class="small" text-anchor="middle">DDIA Ch. 3 · CMU 15-445</text>
+
+  <!-- BOTTOM row: Page anatomy -->
+  <rect x="18" y="318" width="684" height="88" class="box" rx="6"/>
+  <text x="360" y="338" class="label" text-anchor="middle" font-weight="bold">Fixed-Size Page Layout (4 KB / 8 KB) — the atomic I/O unit</text>
+
+  <rect x="28"  y="350" width="60"  height="44" class="page" rx="3"/>
+  <text x="58"  y="368" class="small" text-anchor="middle" fill="#a855f7">Page</text>
+  <text x="58"  y="382" class="small" text-anchor="middle" fill="#a855f7">Header</text>
+
+  <rect x="92"  y="350" width="50"  height="44" class="row" rx="3"/>
+  <text x="117" y="368" class="small" text-anchor="middle" fill="#ffd93d">Slot</text>
+  <text x="117" y="382" class="small" text-anchor="middle" fill="#ffd93d">Array</text>
+
+  <rect x="146" y="350" width="330" height="44" fill="#1e2830" stroke="#ffd93d" stroke-width="1" rx="3"/>
+  <text x="311" y="368" class="small" text-anchor="middle" fill="#ffd93d">← Tuple Data (rows grow rightward)</text>
+  <text x="311" y="382" class="mono" text-anchor="middle">FREE SPACE (middle of page)</text>
+
+  <rect x="480" y="350" width="100" height="44" class="row" rx="3"/>
+  <text x="530" y="368" class="small" text-anchor="middle" fill="#ffd93d">Tuple N</text>
+  <text x="530" y="382" class="small" text-anchor="middle" fill="#ffd93d">…Tuple 1 →</text>
+
+  <rect x="584" y="350" width="110" height="44" class="page" rx="3"/>
+  <text x="639" y="368" class="small" text-anchor="middle" fill="#a855f7">Special</text>
+  <text x="639" y="382" class="small" text-anchor="middle" fill="#a855f7">Data / LSN</text>
+</svg>

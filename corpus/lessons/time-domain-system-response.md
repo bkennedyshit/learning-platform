@@ -1,0 +1,1230 @@
+---
+title: "Time Domain System Response"
+subject: "Control Theory & Systems Engineering"
+catalog: advanced
+audience_tier: higher-education
+chapter: "11.3"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 11.3 — Time Domain System Response
+
+> *"The art of control engineering lies in shaping the transient response — making systems respond quickly without excessive oscillation, and settle precisely to the desired value."*
+> — Katsuhiko Ogata
+
+The time-domain response reveals how a system behaves after a disturbance: how fast it rises, how much it overshoots, how long it oscillates, and where it finally settles. These performance metrics — rise time, overshoot, settling time, steady-state error — are directly determined by the locations of the closed-loop poles in the $s$-plane.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Characterize first-order system response (time constant, rise time, settling time).
+2. Derive the complete step response of a second-order underdamped system.
+3. Relate damping ratio $\zeta$ and natural frequency $\omega_n$ to transient specifications.
+4. Compute percent overshoot, peak time, rise time, and settling time from pole locations.
+5. Identify overdamped, critically damped, underdamped, and undamped responses.
+6. Understand the effect of additional poles and zeros on the standard second-order response.
+7. Apply dominant pole approximation for higher-order systems.
+
+---
+
+
+## 🖼️ Visual Anchor — Second-Order Step Response
+
+![math-11__11.3-fig1](math-11__11.3-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 11.3.1 — Standard First-Order System
+
+A first-order system has the transfer function:
+
+$$
+G(s) = \frac{K}{\tau s + 1}
+$$
+
+where $K$ is the DC gain and $\tau$ is the **time constant**. The single pole is at $s = -1/\tau$.
+
+### Definition 11.3.2 — Standard Second-Order System
+
+The canonical second-order transfer function is:
+
+$$
+G(s) = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}
+$$
+
+where:
+- $\omega_n$ = **natural frequency** (rad/s) — the oscillation frequency if there were no damping
+- $\zeta$ = **damping ratio** (dimensionless) — determines the character of the response
+
+### Definition 11.3.3 — Damping Categories
+
+| Damping Ratio | Response Type | Pole Locations |
+|:---:|:---|:---|
+| $\zeta = 0$ | Undamped | Purely imaginary: $s = \pm j\omega_n$ |
+| $0 < \zeta < 1$ | Underdamped | Complex conjugate: $s = -\zeta\omega_n \pm j\omega_n\sqrt{1-\zeta^2}$ |
+| $\zeta = 1$ | Critically damped | Repeated real: $s = -\omega_n$ (double) |
+| $\zeta > 1$ | Overdamped | Distinct real: $s = -\omega_n(\zeta \pm \sqrt{\zeta^2 - 1})$ |
+
+### Definition 11.3.4 — Transient Performance Specifications
+
+For a unit step response of a second-order underdamped system:
+
+- **Rise Time** $t_r$: Time to go from 10% to 90% of final value (or 0% to 100% for underdamped).
+- **Peak Time** $t_p$: Time to reach the first (maximum) overshoot.
+- **Percent Overshoot** $M_p$: Maximum deviation above steady-state, as a percentage.
+- **Settling Time** $t_s$: Time for the response to remain within ±2% (or ±5%) of final value.
+
+### Definition 11.3.5 — Damped Natural Frequency
+
+For an underdamped system ($0 < \zeta < 1$), the actual oscillation frequency is:
+
+$$
+\omega_d = \omega_n\sqrt{1 - \zeta^2}
+$$
+
+The poles are located at $s = -\sigma \pm j\omega_d$ where $\sigma = \zeta\omega_n$.
+
+### Definition 11.3.6 — Dominant Poles
+
+In a higher-order system, the **dominant poles** are the closed-loop poles closest to the imaginary axis. They dominate the transient response because their corresponding exponential modes decay most slowly.
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 11.3.A1 — Pole-Zero Dominance
+
+The transient response of a stable LTI system is a sum of exponential/sinusoidal modes, one for each pole. Poles farther left in the $s$-plane produce faster-decaying modes. After sufficient time, only the slowest modes (dominant poles) remain significant.
+
+### Axiom 11.3.A2 — Superposition of Modes
+
+For a system with distinct poles $p_1, p_2, \ldots, p_n$, the time response has the form:
+
+$$
+y(t) = \sum_{i=1}^n c_i e^{p_i t}
+$$
+
+where complex poles contribute oscillatory terms $e^{-\sigma t}[\cos(\omega_d t), \sin(\omega_d t)]$.
+
+### Axiom 11.3.A3 — Standard Test Inputs
+
+System performance is characterized using standard test inputs:
+- **Impulse** $\delta(t)$: Tests natural modes directly
+- **Step** $u(t)$: Tests tracking and steady-state accuracy
+- **Ramp** $tu(t)$: Tests velocity tracking
+- **Parabola** $\frac{1}{2}t^2 u(t)$: Tests acceleration tracking
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 11.3.1 — First-Order Step Response
+
+For $G(s) = \dfrac{K}{\tau s + 1}$ with unit step input:
+
+$$
+Y(s) = \frac{K}{s(\tau s + 1)}
+$$
+
+Partial fractions: $\dfrac{K}{s(\tau s + 1)} = \dfrac{K}{s} - \dfrac{K}{s + 1/\tau}$
+
+$$
+y(t) = K(1 - e^{-t/\tau}), \quad t \geq 0
+$$
+
+Key metrics:
+- At $t = \tau$: $y(\tau) = K(1 - e^{-1}) = 0.632K$ (63.2% of final value)
+- Rise time (10%–90%): $t_r = 2.2\tau$
+- Settling time (2%): $t_s = 4\tau$
+- Settling time (5%): $t_s = 3\tau$
+
+### Lemma 11.3.2 — Second-Order Underdamped Step Response
+
+For $G(s) = \dfrac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$ with $0 < \zeta < 1$ and unit step input:
+
+$$
+y(t) = 1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\sin(\omega_d t + \phi), \quad t \geq 0
+$$
+
+where $\omega_d = \omega_n\sqrt{1-\zeta^2}$ and $\phi = \arctan\left(\dfrac{\sqrt{1-\zeta^2}}{\zeta}\right) = \arccos(\zeta)$.
+
+### Lemma 11.3.3 — Performance Formulas (Second-Order Underdamped)
+
+$$
+t_p = \frac{\pi}{\omega_d} = \frac{\pi}{\omega_n\sqrt{1-\zeta^2}}
+$$
+
+$$
+M_p = e^{-\pi\zeta/\sqrt{1-\zeta^2}} \times 100\%
+$$
+
+$$
+t_s \approx \frac{4}{\zeta\omega_n} \quad (2\% \text{ criterion})
+$$
+
+$$
+t_r \approx \frac{1.8}{\omega_n} \quad (\text{approximate, for } 0.3 < \zeta < 0.8)
+$$
+
+### Lemma 11.3.4 — Relationship Between $\zeta$ and Overshoot
+
+Inverting the overshoot formula:
+
+$$
+\zeta = \frac{-\ln(M_p/100)}{\sqrt{\pi^2 + \ln^2(M_p/100)}}
+$$
+
+### Lemma 11.3.5 — Effect of an Additional Zero
+
+Adding a zero at $s = -z$ to the standard second-order system:
+
+$$
+G(s) = \frac{\omega_n^2(s/z + 1)}{s^2 + 2\zeta\omega_n s + \omega_n^2}
+$$
+
+- Zero in LHP ($z > 0$): **increases** overshoot and speeds up response
+- Zero closer to origin → more pronounced effect
+- Zero in RHP ($z < 0$): **non-minimum phase** — initial response goes opposite direction
+
+### Lemma 11.3.6 — Effect of an Additional Pole
+
+Adding a pole at $s = -p$ to the standard second-order system:
+
+$$
+G(s) = \frac{\omega_n^2}{(s/p + 1)(s^2 + 2\zeta\omega_n s + \omega_n^2)}
+$$
+
+- Additional pole **slows** the response and **reduces** overshoot
+- If $p > 5\zeta\omega_n$: the additional pole has negligible effect (dominant pole approximation valid)
+
+
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 11.3.1 — Complete Second-Order Underdamped Step Response Derivation
+
+For the standard second-order system with unit step input, the output in the time domain is:
+
+$$
+y(t) = 1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\sin\left(\omega_n\sqrt{1-\zeta^2}\,t + \arccos\zeta\right)
+$$
+
+### Theorem 11.3.2 — Pole Location ↔ Time Response Mapping
+
+The location of a pole $s = -\sigma + j\omega_d$ in the complex plane directly encodes:
+- **Real part** $\sigma = \zeta\omega_n$: exponential decay rate (larger → faster settling)
+- **Imaginary part** $\omega_d$: oscillation frequency
+- **Distance from origin** $|s| = \omega_n$: natural frequency
+- **Angle from negative real axis** $\theta = \arccos\zeta$: damping ratio
+
+### Theorem 11.3.3 — Constant-$\zeta$ and Constant-$\omega_n$ Loci
+
+In the $s$-plane:
+- **Constant $\zeta$**: radial lines from origin at angle $\theta = \arccos\zeta$ from negative real axis
+- **Constant $\omega_n$**: circles of radius $\omega_n$ centered at origin
+- **Constant $\sigma$ (settling time)**: vertical lines at $\text{Re}(s) = -\sigma$
+- **Constant $\omega_d$ (oscillation frequency)**: horizontal lines at $\text{Im}(s) = \pm\omega_d$
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 — Full Derivation of Second-Order Underdamped Step Response
+
+**Given:** $G(s) = \dfrac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$, input $U(s) = 1/s$.
+
+**Step 1 — Form output:**
+
+$$
+Y(s) = \frac{\omega_n^2}{s(s^2 + 2\zeta\omega_n s + \omega_n^2)}
+$$
+
+**Step 2 — Factor denominator.** The quadratic has roots:
+
+$$
+s = -\zeta\omega_n \pm j\omega_n\sqrt{1-\zeta^2} = -\sigma \pm j\omega_d
+$$
+
+where $\sigma = \zeta\omega_n$ and $\omega_d = \omega_n\sqrt{1-\zeta^2}$.
+
+**Step 3 — Partial fraction decomposition:**
+
+$$
+Y(s) = \frac{\omega_n^2}{s[(s+\sigma)^2 + \omega_d^2]} = \frac{A}{s} + \frac{Bs + C}{(s+\sigma)^2 + \omega_d^2}
+$$
+
+Cover-up for $A$:
+
+$$
+A = \left[\frac{\omega_n^2}{(s+\sigma)^2 + \omega_d^2}\right]_{s=0} = \frac{\omega_n^2}{\sigma^2 + \omega_d^2} = \frac{\omega_n^2}{\omega_n^2} = 1
+$$
+
+(since $\sigma^2 + \omega_d^2 = \zeta^2\omega_n^2 + (1-\zeta^2)\omega_n^2 = \omega_n^2$)
+
+Multiply both sides by $s[(s+\sigma)^2 + \omega_d^2]$:
+
+$$
+\omega_n^2 = [(s+\sigma)^2 + \omega_d^2] + s(Bs + C)
+$$
+
+Expand the left side at $s = 0$: already used. Expand right side:
+
+$$
+\omega_n^2 = s^2 + 2\sigma s + \sigma^2 + \omega_d^2 + Bs^2 + Cs
+$$
+
+$$
+\omega_n^2 = (1+B)s^2 + (2\sigma + C)s + \omega_n^2
+$$
+
+Equating coefficients:
+- $s^2$: $0 = 1 + B \Rightarrow B = -1$
+- $s^1$: $0 = 2\sigma + C \Rightarrow C = -2\sigma = -2\zeta\omega_n$
+- $s^0$: $\omega_n^2 = \omega_n^2$ ✓
+
+**Step 4 — Rewrite:**
+
+$$
+Y(s) = \frac{1}{s} - \frac{s + 2\sigma}{(s+\sigma)^2 + \omega_d^2}
+$$
+
+Split the second term:
+
+$$
+= \frac{1}{s} - \frac{(s+\sigma)}{(s+\sigma)^2 + \omega_d^2} - \frac{\sigma}{(s+\sigma)^2 + \omega_d^2}
+$$
+
+$$
+= \frac{1}{s} - \frac{(s+\sigma)}{(s+\sigma)^2 + \omega_d^2} - \frac{\sigma}{\omega_d}\cdot\frac{\omega_d}{(s+\sigma)^2 + \omega_d^2}
+$$
+
+**Step 5 — Inverse Laplace transform:**
+
+$$
+y(t) = 1 - e^{-\sigma t}\cos(\omega_d t) - \frac{\sigma}{\omega_d}e^{-\sigma t}\sin(\omega_d t)
+$$
+
+$$
+= 1 - e^{-\sigma t}\left[\cos(\omega_d t) + \frac{\zeta}{\sqrt{1-\zeta^2}}\sin(\omega_d t)\right]
+$$
+
+**Step 6 — Combine sinusoids** using $A\cos\theta + B\sin\theta = R\sin(\theta + \phi)$ where $R = \sqrt{A^2+B^2}$:
+
+Let $A = 1$ and $B = \zeta/\sqrt{1-\zeta^2}$:
+
+$$
+R = \sqrt{1 + \frac{\zeta^2}{1-\zeta^2}} = \sqrt{\frac{1-\zeta^2+\zeta^2}{1-\zeta^2}} = \frac{1}{\sqrt{1-\zeta^2}}
+$$
+
+$$
+\phi = \arctan\left(\frac{A}{B}\right) = \arctan\left(\frac{\sqrt{1-\zeta^2}}{\zeta}\right) = \arccos(\zeta)
+$$
+
+**Final result:**
+
+$$
+y(t) = 1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\sin(\omega_d t + \phi), \quad \phi = \arccos(\zeta)
+$$
+
+### 5.2 — Derivation of Peak Time Formula
+
+At peak time $t_p$, $\dfrac{dy}{dt} = 0$.
+
+$$
+\frac{dy}{dt} = \frac{\omega_n}{\sqrt{1-\zeta^2}}e^{-\zeta\omega_n t}\sin(\omega_d t)
+$$
+
+(This can be verified by differentiating the step response.)
+
+Setting $\dfrac{dy}{dt} = 0$: since $e^{-\zeta\omega_n t} \neq 0$ and $\omega_n/\sqrt{1-\zeta^2} \neq 0$:
+
+$$
+\sin(\omega_d t) = 0 \implies \omega_d t = n\pi, \quad n = 1, 2, 3, \ldots
+$$
+
+The first peak (maximum overshoot) occurs at $n = 1$:
+
+$$
+t_p = \frac{\pi}{\omega_d} = \frac{\pi}{\omega_n\sqrt{1-\zeta^2}}
+$$
+
+### 5.3 — Derivation of Percent Overshoot Formula
+
+Evaluate $y(t_p)$:
+
+$$
+y(t_p) = 1 - \frac{e^{-\zeta\omega_n \cdot \pi/\omega_d}}{\sqrt{1-\zeta^2}}\sin\left(\omega_d \cdot \frac{\pi}{\omega_d} + \phi\right)
+$$
+
+$$
+= 1 - \frac{e^{-\pi\zeta/\sqrt{1-\zeta^2}}}{\sqrt{1-\zeta^2}}\sin(\pi + \phi)
+$$
+
+Since $\sin(\pi + \phi) = -\sin(\phi) = -\sin(\arccos\zeta) = -\sqrt{1-\zeta^2}$:
+
+$$
+y(t_p) = 1 - \frac{e^{-\pi\zeta/\sqrt{1-\zeta^2}}}{\sqrt{1-\zeta^2}} \cdot (-\sqrt{1-\zeta^2})
+$$
+
+$$
+= 1 + e^{-\pi\zeta/\sqrt{1-\zeta^2}}
+$$
+
+Percent overshoot:
+
+$$
+M_p = \frac{y(t_p) - y_{ss}}{y_{ss}} \times 100\% = e^{-\pi\zeta/\sqrt{1-\zeta^2}} \times 100\%
+$$
+
+### 5.4 — Derivation of Settling Time
+
+The envelope of the oscillation is $1 \pm \dfrac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}$.
+
+For 2% criterion, we need:
+
+$$
+\frac{e^{-\zeta\omega_n t_s}}{\sqrt{1-\zeta^2}} \leq 0.02
+$$
+
+For moderate $\zeta$ (where $1/\sqrt{1-\zeta^2} \approx 1$):
+
+$$
+e^{-\zeta\omega_n t_s} \approx 0.02
+$$
+
+$$
+-\zeta\omega_n t_s = \ln(0.02) \approx -3.91 \approx -4
+$$
+
+$$
+t_s \approx \frac{4}{\zeta\omega_n} = \frac{4}{\sigma}
+$$
+
+For 5% criterion: $t_s \approx \dfrac{3}{\zeta\omega_n}$.
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 11.3.1 — Design Specs to Pole Locations
+
+**Requirement:** Design a second-order system with $M_p \leq 10\%$ and $t_s \leq 1$ s (2% criterion).
+
+**Step 1 — Find $\zeta$ from overshoot:**
+
+$$
+0.10 = e^{-\pi\zeta/\sqrt{1-\zeta^2}}
+$$
+
+$$
+\ln(0.10) = \frac{-\pi\zeta}{\sqrt{1-\zeta^2}}
+$$
+
+$$
+-2.302 = \frac{-\pi\zeta}{\sqrt{1-\zeta^2}}
+$$
+
+$$
+\frac{\zeta}{\sqrt{1-\zeta^2}} = \frac{2.302}{\pi} = 0.7327
+$$
+
+Square both sides: $\dfrac{\zeta^2}{1-\zeta^2} = 0.5369$
+
+$$
+\zeta^2 = 0.5369(1-\zeta^2) = 0.5369 - 0.5369\zeta^2
+$$
+
+$$
+1.5369\zeta^2 = 0.5369 \implies \zeta^2 = 0.3493 \implies \zeta = 0.591
+$$
+
+**Step 2 — Find $\omega_n$ from settling time:**
+
+$$
+t_s = \frac{4}{\zeta\omega_n} \leq 1 \implies \omega_n \geq \frac{4}{\zeta \cdot 1} = \frac{4}{0.591} = 6.77 \text{ rad/s}
+$$
+
+**Step 3 — Pole locations:** Choose $\omega_n = 6.77$ rad/s:
+
+$$
+s = -\zeta\omega_n \pm j\omega_d = -4.0 \pm j5.46
+$$
+
+**Verification:** $\omega_d = 6.77\sqrt{1-0.591^2} = 6.77 \times 0.807 = 5.46$ rad/s ✓
+
+---
+
+### Example 11.3.2 — Third-Order System with Dominant Poles
+
+Given: $G(s) = \dfrac{100}{(s+10)(s^2 + 4s + 8)}$
+
+**Step 1 — Find all poles:**
+- Real pole: $s = -10$
+- Complex poles: $s^2 + 4s + 8 = 0 \implies s = -2 \pm 2j$
+
+**Step 2 — Identify dominant poles:** The complex pair at $s = -2 \pm 2j$ is closest to the imaginary axis (real part $-2$ vs $-10$).
+
+**Step 3 — Dominant pole parameters:**
+
+$$
+\sigma = 2, \quad \omega_d = 2, \quad \omega_n = \sqrt{\sigma^2 + \omega_d^2} = \sqrt{8} = 2\sqrt{2} \approx 2.83
+$$
+
+$$
+\zeta = \frac{\sigma}{\omega_n} = \frac{2}{2\sqrt{2}} = \frac{1}{\sqrt{2}} \approx 0.707
+$$
+
+**Step 4 — Approximate performance (dominant pole approximation):**
+
+$$
+M_p \approx e^{-\pi(0.707)/\sqrt{1-0.5}} \times 100\% = e^{-\pi/\sqrt{2}} \times 100\% \approx e^{-2.22} \times 100\% \approx 10.9\%
+$$
+
+$$
+t_p \approx \frac{\pi}{\omega_d} = \frac{\pi}{2} \approx 1.57 \text{ s}
+$$
+
+$$
+t_s \approx \frac{4}{\sigma} = \frac{4}{2} = 2 \text{ s}
+$$
+
+**Step 5 — Validity check:** The non-dominant pole at $s = -10$ is 5× farther from the imaginary axis than the dominant poles ($|-10|/|-2| = 5$). Rule of thumb: ratio > 5 → approximation is good. ✓
+
+---
+
+### Example 11.3.3 — Effect of a Zero on Overshoot
+
+Compare the step response of:
+- System A: $G_A(s) = \dfrac{10}{s^2 + 2s + 10}$ (standard second-order)
+- System B: $G_B(s) = \dfrac{10(s/5 + 1)}{s^2 + 2s + 10}$ (added zero at $s = -5$)
+
+**System A parameters:** $\omega_n = \sqrt{10} \approx 3.16$, $\zeta = 1/\sqrt{10} \approx 0.316$
+
+$$
+M_{p,A} = e^{-\pi(0.316)/\sqrt{1-0.1}} \times 100\% = e^{-1.047} \times 100\% \approx 35.1\%
+$$
+
+**System B:** The zero at $s = -5$ adds a derivative term. The step response becomes:
+
+$$
+y_B(t) = y_A(t) + \frac{1}{5}\frac{dy_A}{dt}
+$$
+
+The derivative of the step response is always positive initially, so the zero **increases** the overshoot. Numerically, $M_{p,B} \approx 50\%$.
+
+---
+
+### Example 11.3.4 — Critically Damped System Step Response
+
+For $G(s) = \dfrac{25}{(s+5)^2}$ (repeated pole at $s = -5$, $\omega_n = 5$, $\zeta = 1$):
+
+$$
+Y(s) = \frac{25}{s(s+5)^2}
+$$
+
+Partial fractions:
+
+$$
+\frac{25}{s(s+5)^2} = \frac{A}{s} + \frac{B}{s+5} + \frac{C}{(s+5)^2}
+$$
+
+$A = [25/(s+5)^2]_{s=0} = 25/25 = 1$
+
+$C = [25/s]_{s=-5} = 25/(-5) = -5$
+
+For $B$: multiply out and compare $s^2$ coefficients: $0 = A + B \implies B = -1$
+
+$$
+y(t) = 1 - e^{-5t} - 5te^{-5t} = 1 - (1 + 5t)e^{-5t}
+$$
+
+**No overshoot** (critically damped). Settling time: $t_s \approx 4/(5) = 0.8$ s.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [11.1 - Laplace Transforms & Transfer Functions](11.1---Laplace-Transforms-&-Transfer-Functions) — Partial fraction inversion techniques
+- [11.2 - Block Diagrams & Feedback](11.2---Block-Diagrams-&-Feedback) — Closed-loop pole locations
+- [11.4 - Stability & Routh-Hurwitz Criterion](11.4---Stability-&-Routh-Hurwitz-Criterion) — Formal stability analysis
+- [11.5 - Root Locus Analysis](11.5---Root-Locus-Analysis) — How poles move with gain
+- [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space) — ODE solution structure
+
+### External Resources
+- **Åström & Murray**, *Feedback Systems* — Chapter 6: Frequency Domain Design
+- **MIT OCW 16.30** — Lecture 5: Time Domain Specifications
+- **Brian Douglas** — [Second Order Systems](https://www.youtube.com/watch?v=wTRe2CRlFtQ) (YouTube)
+- **Nise**, *Control Systems Engineering* — Chapter 4: Time Response
+
+---
+
+*Next: [11.4 - Stability & Routh-Hurwitz Criterion](11.4---Stability-&-Routh-Hurwitz-Criterion) →*
+
+
+
+---
+
+## 📚 Appendix — Extended Time Response Analysis
+
+### A.1 — Complete Step Response Derivation: Overdamped System ($\zeta > 1$)
+
+For $G(s) = \dfrac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$ with $\zeta > 1$:
+
+Poles are real and distinct: $s_{1,2} = -\zeta\omega_n \pm \omega_n\sqrt{\zeta^2-1} = -\sigma_1, -\sigma_2$
+
+where $\sigma_1 = \omega_n(\zeta - \sqrt{\zeta^2-1})$ (slow pole) and $\sigma_2 = \omega_n(\zeta + \sqrt{\zeta^2-1})$ (fast pole).
+
+**Step response:**
+
+$$
+Y(s) = \frac{\omega_n^2}{s(s+\sigma_1)(s+\sigma_2)}
+$$
+
+Partial fractions:
+
+$$
+A = \frac{\omega_n^2}{\sigma_1\sigma_2} = \frac{\omega_n^2}{\omega_n^2} = 1
+$$
+
+$$
+B = \frac{\omega_n^2}{(-\sigma_1)(\sigma_2-\sigma_1)} = \frac{\omega_n^2}{\sigma_1(\sigma_1-\sigma_2)}
+$$
+
+$$
+C = \frac{\omega_n^2}{(-\sigma_2)(\sigma_1-\sigma_2)} = \frac{\omega_n^2}{\sigma_2(\sigma_2-\sigma_1)}
+$$
+
+**Time response:**
+
+$$
+y(t) = 1 + \frac{\omega_n^2}{\sigma_1(\sigma_1-\sigma_2)}e^{-\sigma_1 t} + \frac{\omega_n^2}{\sigma_2(\sigma_2-\sigma_1)}e^{-\sigma_2 t}
+$$
+
+$$
+= 1 - \frac{\sigma_2}{\sigma_2-\sigma_1}e^{-\sigma_1 t} + \frac{\sigma_1}{\sigma_2-\sigma_1}e^{-\sigma_2 t}
+$$
+
+**Key property:** No overshoot. The response monotonically approaches steady state.
+
+**Settling time:** Dominated by the slow pole: $t_s \approx 4/\sigma_1 = 4/[\omega_n(\zeta-\sqrt{\zeta^2-1})]$
+
+---
+
+### A.2 — Higher-Order System: Partial Fraction Approach
+
+**Given:** $G(s) = \dfrac{24}{(s+2)(s+3)(s+4)}$, unit step input.
+
+$$
+Y(s) = \frac{24}{s(s+2)(s+3)(s+4)}
+$$
+
+**Partial fractions:**
+
+$$
+A = \frac{24}{2\cdot3\cdot4} = 1
+$$
+
+$$
+B = \frac{24}{(-2)(1)(2)} = -6
+$$
+
+$$
+C = \frac{24}{(-3)(-1)(1)} = 8
+$$
+
+$$
+D = \frac{24}{(-4)(-2)(-1)} = -3
+$$
+
+**Time response:**
+
+$$
+y(t) = 1 - 6e^{-2t} + 8e^{-3t} - 3e^{-4t}, \quad t \geq 0
+$$
+
+**Dominant pole:** $s = -2$ (closest to imaginary axis). Approximate settling time: $t_s \approx 4/2 = 2$ s.
+
+**Verify:** At $t = 2$: dominant term $6e^{-4} = 0.11$ (within 2% would need $6e^{-2\sigma t_s} < 0.02$, so $t_s > \ln(300)/2 = 2.85$ s for exact 2% criterion).
+
+---
+
+### A.3 — Non-Minimum Phase Step Response
+
+**System:** $G(s) = \dfrac{-s + 4}{s^2 + 3s + 4}$ (RHP zero at $s = +4$)
+
+**Step response characteristics:**
+1. Initial response goes in the **wrong direction** (undershoot before rising)
+2. This is because $G(0) = 4/4 = 1 > 0$ (positive DC gain) but the zero at $s = +4$ causes initial inverse response
+
+**Initial slope:** $y'(0^+) = \lim_{s\to\infty} s^2 Y(s) - sy(0) = \lim_{s\to\infty} s \cdot G(s) = \lim_{s\to\infty} \dfrac{-s^2+4s}{s^2+3s+4} = -1$
+
+The initial slope is **negative** — the output initially moves away from the setpoint.
+
+**Implication for control:** Non-minimum phase systems have fundamental performance limitations. The controller cannot be made arbitrarily fast without destabilizing the system.
+
+---
+
+### A.4 — Time Delay Effect on Step Response
+
+**System:** $G(s) = \dfrac{e^{-\theta s}}{\tau s + 1}$ (first-order with dead time)
+
+**Step response:**
+
+$$
+y(t) = \begin{cases} 0 & t < \theta \\ 1 - e^{-(t-\theta)/\tau} & t \geq \theta \end{cases}
+$$
+
+The response is identical to the delay-free case, but shifted right by $\theta$ seconds.
+
+**Effect on performance specs:**
+- Rise time: $t_r = 2.2\tau + \theta$ (delay adds directly)
+- Settling time: $t_s = 4\tau + \theta$
+- No overshoot (first-order)
+
+**Effect on stability:** Dead time adds phase lag $-\omega\theta$ (radians) without changing magnitude. This reduces phase margin and can destabilize high-gain feedback systems.
+
+---
+
+### A.5 — Pole-Zero Cancellation: When It Works and When It Doesn't
+
+**Scenario:** Plant has a slow pole at $s = -0.1$. Controller includes a zero at $s = -0.1$ to "cancel" it.
+
+**Transfer function view:** The pole-zero pair cancels in $T(s)$, and the closed-loop appears fast.
+
+**State-space view:** The cancelled mode still exists internally! If the initial condition excites this mode, it decays at rate $e^{-0.1t}$ (very slowly) even though the output transfer function doesn't show it.
+
+**Dangerous case:** If the cancelled pole is **unstable** ($s = +a$), the internal mode grows exponentially even though the transfer function appears stable. This is why pole-zero cancellation of RHP poles is **never acceptable** in practice.
+
+**Safe case:** Cancelling stable poles is acceptable if:
+1. The pole location is known precisely (no model uncertainty)
+2. The cancelled mode is stable (will decay even if excited)
+3. Internal signals remain bounded
+
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Problem 11.3.E1 — Complete Step Response of an Underdamped 2nd-Order System
+
+> **Problem:** A second-order system has transfer function $G(s) = \dfrac{36}{s^2 + 4.8s + 36}$. For a unit step input:
+> (a) Identify $\omega_n$, $\zeta$, $\sigma$, $\omega_d$.
+> (b) Compute percent overshoot $M_p$, peak time $t_p$, settling time $t_s$ (2%), and rise time $t_r$.
+> (c) Write the complete time-domain step response $y(t)$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): System Parameters
+
+Compare with standard form $\dfrac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$:
+
+$$
+\omega_n^2 = 36 \implies \omega_n = 6 \text{ rad/s}
+$$
+
+$$
+2\zeta\omega_n = 4.8 \implies \zeta = \frac{4.8}{2(6)} = \frac{4.8}{12} = 0.4
+$$
+
+Since $0 \lt  \zeta \lt  1$: **underdamped** system.
+
+$$
+\sigma = \zeta\omega_n = 0.4 \times 6 = 2.4 \text{ (exponential decay rate)}
+$$
+
+$$
+\omega_d = \omega_n\sqrt{1-\zeta^2} = 6\sqrt{1-0.16} = 6\sqrt{0.84} = 6(0.9165) = 5.50 \text{ rad/s}
+$$
+
+Poles: $s = -\sigma \pm j\omega_d = -2.4 \pm j5.50$
+
+#### Part (b): Performance Specifications
+
+**Percent Overshoot:**
+
+$$
+M_p = e^{-\pi\zeta/\sqrt{1-\zeta^2}} \times 100\%
+$$
+
+$$
+\frac{\pi\zeta}{\sqrt{1-\zeta^2}} = \frac{\pi(0.4)}{\sqrt{0.84}} = \frac{1.2566}{0.9165} = 1.371
+$$
+
+$$
+M_p = e^{-1.371} \times 100\% = 0.2538 \times 100\% = 25.4\%
+$$
+
+**Peak Time:**
+
+$$
+t_p = \frac{\pi}{\omega_d} = \frac{\pi}{5.50} = 0.571 \text{ s}
+$$
+
+**Settling Time (2% criterion):**
+
+$$
+t_s = \frac{4}{\sigma} = \frac{4}{2.4} = 1.667 \text{ s}
+$$
+
+**Rise Time (0% to 100%):**
+
+$$
+t_r = \frac{\pi - \arccos(\zeta)}{\omega_d} = \frac{\pi - \arccos(0.4)}{5.50}
+$$
+
+$$
+\arccos(0.4) = 1.159 \text{ rad}
+$$
+
+$$
+t_r = \frac{3.1416 - 1.159}{5.50} = \frac{1.983}{5.50} = 0.360 \text{ s}
+$$
+
+#### Part (c): Complete Step Response
+
+The unit step response of a standard underdamped second-order system is:
+
+$$
+y(t) = 1 - \frac{e^{-\sigma t}}{\sqrt{1-\zeta^2}}\sin(\omega_d t + \phi), \quad t \geq 0
+$$
+
+where $\phi = \arccos(\zeta) = \arccos(0.4) = 1.159$ rad $= 66.4°$.
+
+Substituting our values:
+
+$$
+y(t) = 1 - \frac{e^{-2.4t}}{\sqrt{0.84}}\sin(5.50t + 1.159)
+$$
+
+$$
+= 1 - 1.091\,e^{-2.4t}\sin(5.50t + 1.159), \quad t \geq 0
+$$
+
+**Verification at key points:**
+
+- $y(0) = 1 - 1.091\sin(1.159) = 1 - 1.091(0.9165) = 1 - 1.0 = 0$ ✓
+- $y(t_p) = 1 - 1.091\,e^{-2.4(0.571)}\sin(5.50(0.571) + 1.159)$
+  - $= 1 - 1.091\,e^{-1.371}\sin(\pi + 1.159)$
+  - $= 1 - 1.091(0.2538)\sin(4.301)$
+  - $= 1 - 0.2769(-0.9165) = 1 + 0.2538 = 1.254$ ✓ (matches $M_p = 25.4\%$)
+
+</details>
+
+---
+
+### Problem 11.3.E2 — Ramp Response of a Type 1 System
+
+> **Problem:** A unity feedback system has open-loop transfer function $L(s) = \dfrac{20}{s(s+4)}$. Find the closed-loop ramp response $y(t)$ for input $r(t) = t \cdot u(t)$, and determine the steady-state error.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Find the Closed-Loop Transfer Function
+
+$$
+T(s) = \frac{L(s)}{1 + L(s)} = \frac{\frac{20}{s(s+4)}}{1 + \frac{20}{s(s+4)}} = \frac{20}{s^2 + 4s + 20}
+$$
+
+#### Step 2: Identify System Parameters
+
+$$
+\omega_n = \sqrt{20} = 4.47 \text{ rad/s}, \quad \zeta = \frac{4}{2\sqrt{20}} = \frac{4}{8.94} = 0.447
+$$
+
+$$
+\omega_d = 4.47\sqrt{1 - 0.2} = 4.47(0.894) = 4.0 \text{ rad/s}
+$$
+
+$$
+\sigma = \zeta\omega_n = 2.0
+$$
+
+#### Step 3: Compute $Y(s)$ for Ramp Input
+
+Ramp input: $R(s) = 1/s^2$
+
+$$
+Y(s) = T(s) \cdot R(s) = \frac{20}{s^2(s^2 + 4s + 20)}
+$$
+
+#### Step 4: Partial Fraction Decomposition
+
+$$
+\frac{20}{s^2(s^2+4s+20)} = \frac{A}{s} + \frac{B}{s^2} + \frac{Cs + D}{s^2+4s+20}
+$$
+
+Multiply both sides by $s^2(s^2+4s+20)$:
+
+$$
+20 = As(s^2+4s+20) + B(s^2+4s+20) + (Cs+D)s^2
+$$
+
+Set $s = 0$: $20 = B(20) \implies B = 1$
+
+Expand and collect:
+
+$$
+20 = As^3 + 4As^2 + 20As + Bs^2 + 4Bs + 20B + Cs^3 + Ds^2
+$$
+
+$$
+20 = (A+C)s^3 + (4A+B+D)s^2 + (20A+4B)s + 20B
+$$
+
+Equate coefficients:
+- $s^3$: $A + C = 0$
+- $s^2$: $4A + B + D = 0 \implies 4A + 1 + D = 0$
+- $s^1$: $20A + 4B = 0 \implies 20A + 4 = 0 \implies A = -1/5$
+- $s^0$: $20B = 20$ ✓
+
+From $A = -1/5$: $C = -A = 1/5$
+
+From $4(-1/5) + 1 + D = 0$: $-4/5 + 1 + D = 0 \implies D = -1/5$
+
+#### Step 5: Inverse Laplace Transform
+
+$$
+Y(s) = \frac{-1/5}{s} + \frac{1}{s^2} + \frac{(1/5)s - 1/5}{s^2+4s+20}
+$$
+
+For the complex-pole term, complete the square: $s^2+4s+20 = (s+2)^2 + 16$
+
+$$
+\frac{(1/5)s - 1/5}{(s+2)^2+16} = \frac{1}{5}\cdot\frac{s-1}{(s+2)^2+16} = \frac{1}{5}\cdot\frac{(s+2)-3}{(s+2)^2+4^2}
+$$
+
+$$
+= \frac{1}{5}\left[\frac{s+2}{(s+2)^2+16} - \frac{3}{4}\cdot\frac{4}{(s+2)^2+16}\right]
+$$
+
+Inverse transform:
+
+$$
+y(t) = -\frac{1}{5} + t + \frac{1}{5}e^{-2t}\cos(4t) - \frac{3}{20}e^{-2t}\sin(4t), \quad t \geq 0
+$$
+
+#### Step 6: Steady-State Error
+
+As $t \to \infty$, the transient terms vanish:
+
+$$
+y_{ss}(t) = t - \frac{1}{5}
+$$
+
+The desired output is $r(t) = t$, so the steady-state error is:
+
+$$
+e_{ss} = r(t) - y_{ss}(t) = t - (t - 1/5) = \frac{1}{5} = 0.2
+$$
+
+**Verify with error constant:** $K_v = \lim_{s\to 0} sL(s) = \lim_{s\to 0} \dfrac{20}{s+4} = 5$
+
+$$
+e_{ss} = \frac{1}{K_v} = \frac{1}{5} = 0.2 \quad \checkmark
+$$
+
+</details>
+
+---
+
+### Problem 11.3.E3 — Impulse Response and Its Relationship to Step Response
+
+> **Problem:** For the system $G(s) = \dfrac{10}{s^2 + 6s + 10}$:
+> (a) Find the impulse response $g(t)$.
+> (b) Verify that the step response is $y_{step}(t) = \int_0^t g(\tau)\,d\tau$.
+> (c) Find the initial slope of the step response using the impulse response.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): Impulse Response
+
+The impulse response is $g(t) = \mathcal{L}^{-1}\{G(s)\}$.
+
+System parameters: $\omega_n = \sqrt{10} \approx 3.162$, $\zeta = 3/\sqrt{10} \approx 0.949$
+
+Since $\zeta \lt  1$ (underdamped):
+
+$$
+\sigma = \zeta\omega_n = 3, \quad \omega_d = \omega_n\sqrt{1-\zeta^2} = \sqrt{10}\sqrt{1-0.9} = \sqrt{10}\sqrt{0.1} = 1
+$$
+
+Complete the square: $s^2 + 6s + 10 = (s+3)^2 + 1$
+
+$$
+G(s) = \frac{10}{(s+3)^2 + 1^2} = 10 \cdot \frac{1}{(s+3)^2 + 1}
+$$
+
+Using $\mathcal{L}^{-1}\left\{\dfrac{\beta}{(s+a)^2+\beta^2}\right\} = e^{-at}\sin(\beta t)$:
+
+$$
+g(t) = 10\,e^{-3t}\sin(t), \quad t \geq 0
+$$
+
+#### Part (b): Verify Step Response via Integration
+
+The step response is:
+
+$$
+y_{step}(t) = \int_0^t g(\tau)\,d\tau = \int_0^t 10\,e^{-3\tau}\sin(\tau)\,d\tau
+$$
+
+Use the formula $\int e^{a\tau}\sin(b\tau)\,d\tau = \dfrac{e^{a\tau}(a\sin(b\tau) - b\cos(b\tau))}{a^2+b^2}$:
+
+With $a = -3$, $b = 1$:
+
+$$
+\int_0^t 10\,e^{-3\tau}\sin(\tau)\,d\tau = 10\left[\frac{e^{-3\tau}(-3\sin\tau - \cos\tau)}{9+1}\right]_0^t
+$$
+
+$$
+= 10 \cdot \frac{1}{10}\left[e^{-3\tau}(-3\sin\tau - \cos\tau)\right]_0^t
+$$
+
+$$
+= \left[e^{-3t}(-3\sin t - \cos t)\right] - \left[e^0(-3\sin 0 - \cos 0)\right]
+$$
+
+$$
+= e^{-3t}(-3\sin t - \cos t) - (-1)
+$$
+
+$$
+= 1 - e^{-3t}(3\sin t + \cos t)
+$$
+
+**Cross-check via Laplace:** $Y_{step}(s) = G(s)/s = \dfrac{10}{s((s+3)^2+1)}$
+
+Partial fractions: $A/s + (Bs+C)/((s+3)^2+1)$
+
+$A = [10/((s+3)^2+1)]_{s=0} = 10/10 = 1$
+
+After algebra: $y_{step}(t) = 1 - e^{-3t}\cos t - 3e^{-3t}\sin t$ ✓
+
+#### Part (c): Initial Slope of Step Response
+
+The initial slope of the step response equals the initial value of the impulse response:
+
+$$
+\left.\frac{dy_{step}}{dt}\right|_{t=0} = g(0^+) = 10\,e^0\sin(0) = 0
+$$
+
+This makes physical sense: the system has relative degree 2 (denominator degree minus numerator degree = 2), so the step response starts with zero slope (and zero value). The first non-zero derivative is the second:
+
+$$
+\left.\frac{d^2 y_{step}}{dt^2}\right|_{t=0} = g'(0^+) = 10[-3e^{-3t}\sin t + e^{-3t}\cos t]_{t=0} = 10[0 + 1] = 10 = \omega_n^2
+$$
+
+**General rule:** For a system with relative degree $r$, the step response and its first $r-1$ derivatives are zero at $t = 0^+$.
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 — Complete Derivation of the Underdamped Step Response Formula
+
+Starting from the standard second-order transfer function:
+
+$$
+G(s) = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}
+$$
+
+with $0 < \zeta < 1$ (underdamped), we derive the unit step response from scratch.
+
+#### Step 1: Form $Y(s)$
+
+$$
+Y(s) = \frac{\omega_n^2}{s(s^2 + 2\zeta\omega_n s + \omega_n^2)}
+$$
+
+#### Step 2: Factor the Quadratic
+
+The poles are at $s = -\zeta\omega_n \pm j\omega_n\sqrt{1-\zeta^2} = -\sigma \pm j\omega_d$
+
+where $\sigma = \zeta\omega_n$ and $\omega_d = \omega_n\sqrt{1-\zeta^2}$.
+
+#### Step 3: Partial Fraction Decomposition
+
+$$
+\frac{\omega_n^2}{s(s^2+2\zeta\omega_n s+\omega_n^2)} = \frac{A}{s} + \frac{Bs + C}{s^2+2\zeta\omega_n s+\omega_n^2}
+$$
+
+Cover-up for $A$:
+
+$$
+A = \left[\frac{\omega_n^2}{s^2+2\zeta\omega_n s+\omega_n^2}\right]_{s=0} = \frac{\omega_n^2}{\omega_n^2} = 1
+$$
+
+Multiply through: $\omega_n^2 = (s^2+2\zeta\omega_n s+\omega_n^2) + (Bs+C)s$
+
+$$
+\omega_n^2 = (1+B)s^2 + (2\zeta\omega_n+C)s + \omega_n^2
+$$
+
+Equating coefficients:
+- $s^2$: $1+B = 0 \implies B = -1$
+- $s^1$: $2\zeta\omega_n + C = 0 \implies C = -2\zeta\omega_n$
+
+#### Step 4: Rewrite for Inverse Transform
+
+$$
+Y(s) = \frac{1}{s} - \frac{s + 2\zeta\omega_n}{s^2+2\zeta\omega_n s+\omega_n^2}
+$$
+
+Complete the square in the denominator: $s^2+2\zeta\omega_n s+\omega_n^2 = (s+\sigma)^2 + \omega_d^2$
+
+Rewrite the numerator: $s + 2\zeta\omega_n = (s+\sigma) + \sigma$
+
+$$
+Y(s) = \frac{1}{s} - \frac{(s+\sigma) + \sigma}{(s+\sigma)^2+\omega_d^2}
+$$
+
+$$
+= \frac{1}{s} - \frac{s+\sigma}{(s+\sigma)^2+\omega_d^2} - \frac{\sigma}{\omega_d}\cdot\frac{\omega_d}{(s+\sigma)^2+\omega_d^2}
+$$
+
+#### Step 5: Inverse Transform
+
+$$
+y(t) = 1 - e^{-\sigma t}\cos(\omega_d t) - \frac{\sigma}{\omega_d}e^{-\sigma t}\sin(\omega_d t)
+$$
+
+#### Step 6: Combine into Single Sinusoidal Form
+
+Using the identity $A\cos\theta + B\sin\theta = R\sin(\theta + \phi)$ where $R = \sqrt{A^2+B^2}$ and $\phi = \arctan(A/B)$:
+
+Here $A = 1$ (coefficient of $\cos$) and $B = \sigma/\omega_d = \zeta/\sqrt{1-\zeta^2}$:
+
+$$
+R = \sqrt{1 + \frac{\zeta^2}{1-\zeta^2}} = \sqrt{\frac{1-\zeta^2+\zeta^2}{1-\zeta^2}} = \frac{1}{\sqrt{1-\zeta^2}}
+$$
+
+$$
+\phi = \arctan\left(\frac{1}{\sigma/\omega_d}\right) = \arctan\left(\frac{\omega_d}{\sigma}\right) = \arctan\left(\frac{\sqrt{1-\zeta^2}}{\zeta}\right) = \arccos(\zeta)
+$$
+
+Therefore:
+
+$$
+\boxed{y(t) = 1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\sin(\omega_d t + \phi), \quad \phi = \arccos(\zeta)}
+$$
+
+This is the canonical form found in all control textbooks (Ogata, Nise, Franklin et al.).
+
+---
+
+### 9.2 — Derivation of Peak Time and Overshoot Formulas
+
+#### Peak Time
+
+The peak occurs when $\dot{y}(t_p) = 0$ (first maximum after $t = 0$).
+
+Differentiate the step response:
+
+$$
+\dot{y}(t) = \frac{d}{dt}\left[1 - e^{-\sigma t}\cos(\omega_d t) - \frac{\sigma}{\omega_d}e^{-\sigma t}\sin(\omega_d t)\right]
+$$
+
+$$
+= \sigma e^{-\sigma t}\cos(\omega_d t) + \omega_d e^{-\sigma t}\sin(\omega_d t) - \frac{\sigma}{\omega_d}\left[-\sigma e^{-\sigma t}\sin(\omega_d t) + \omega_d e^{-\sigma t}\cos(\omega_d t)\right]
+$$
+
+$$
+= e^{-\sigma t}\left[\sigma\cos(\omega_d t) + \omega_d\sin(\omega_d t) + \frac{\sigma^2}{\omega_d}\sin(\omega_d t) - \sigma\cos(\omega_d t)\right]
+$$
+
+$$
+= e^{-\sigma t}\sin(\omega_d t)\left[\omega_d + \frac{\sigma^2}{\omega_d}\right]
+$$
+
+$$
+= e^{-\sigma t}\sin(\omega_d t)\cdot\frac{\omega_d^2 + \sigma^2}{\omega_d} = \frac{\omega_n^2}{\omega_d}e^{-\sigma t}\sin(\omega_d t)
+$$
+
+Setting $\dot{y}(t_p) = 0$: since $e^{-\sigma t} > 0$ and $\omega_n^2/\omega_d > 0$, we need $\sin(\omega_d t_p) = 0$.
+
+The first positive solution (after $t = 0$) is $\omega_d t_p = \pi$:
+
+$$
+\boxed{t_p = \frac{\pi}{\omega_d} = \frac{\pi}{\omega_n\sqrt{1-\zeta^2}}}
+$$
+
+#### Percent Overshoot
+
+Evaluate $y(t_p)$:
+
+$$
+y(t_p) = 1 - e^{-\sigma\pi/\omega_d}\cos(\pi) - \frac{\sigma}{\omega_d}e^{-\sigma\pi/\omega_d}\sin(\pi)
+$$
+
+Since $\cos(\pi) = -1$ and $\sin(\pi) = 0$:
+
+$$
+y(t_p) = 1 + e^{-\sigma\pi/\omega_d} = 1 + e^{-\pi\zeta/\sqrt{1-\zeta^2}}
+$$
+
+The overshoot is:
+
+$$
+\boxed{M_p = \frac{y(t_p) - 1}{1} = e^{-\pi\zeta/\sqrt{1-\zeta^2}}}
+$$
+
+**Key insight:** The overshoot depends ONLY on $\zeta$, not on $\omega_n$. This means you can change the speed of response (via $\omega_n$) without affecting the overshoot shape.
+
+---
+
+### 9.3 — Higher-Order Systems and the Dominant Pole Approximation
+
+#### When Is the Approximation Valid?
+
+A higher-order system can be approximated by its dominant (closest to $j\omega$-axis) poles when:
+
+1. **Non-dominant poles are far away:** The ratio $|\text{Re}(p_{non-dom})|/|\text{Re}(p_{dom})| \geq 5$ ensures the non-dominant modes decay at least 5× faster.
+
+2. **Near-cancellation of poles and zeros:** If a non-dominant pole at $s = -a$ has a nearby zero at $s = -b$ with $|a - b|/|a| < 0.1$, the pole-zero pair approximately cancels and contributes negligibly to the response.
+
+3. **DC gain is preserved:** The approximation must maintain the correct steady-state value. This requires adjusting the gain of the reduced model.
+
+#### Quantifying the Approximation Error
+
+For a third-order system with dominant poles at $s = -\sigma \pm j\omega_d$ and a non-dominant real pole at $s = -p$ (where $p \gg \sigma$):
+
+The exact step response contains a term $C \cdot e^{-pt}$ from the non-dominant pole. This term:
+- Has magnitude $|C| \approx \omega_n^2/(p^2)$ (small when $p$ is large)
+- Decays with time constant $1/p$ (fast)
+- Contributes to the response primarily during $0 < t < 3/p$
+
+The approximation error in overshoot is approximately:
+
+$$
+\Delta M_p \approx \frac{\omega_n^2}{p^2 - 2\zeta\omega_n p + \omega_n^2} \cdot e^{-\pi\sigma/\omega_d}
+$$
+
+For $p/\sigma > 5$, this error is typically less than 5% of the true overshoot.
+
+**References:** Ogata, *Modern Control Engineering*, §5-7; Nise, *Control Systems Engineering*, §4.8; Franklin, Powell & Emami-Naeini, *Feedback Control*, §3.5.

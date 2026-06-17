@@ -1,0 +1,216 @@
+---
+title: "40.3 — The Muscular System"
+subject: "Anatomy"
+catalog: advanced
+audience_tier: higher-education
+chapter: "40.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 40.3 — The Muscular System
+
+*Back to [Subject_Plan](Subject_Plan) | [← 40.2](40.2---The-Skeletal-System) | [40.4 →](40.4---The-Nervous-System)*
+
+> **Chapter goal:** Understand muscle contraction at the molecular level, classify fiber types, master all major muscle groups with their origin/insertion/action, and connect muscular anatomy to clinical and performance contexts.
+
+---
+
+## 1. Muscle Tissue Types
+
+| Type | Striated? | Voluntary? | Location | Key feature |
+|------|-----------|-----------|----------|------------|
+| **Skeletal** | Yes | Yes | Attached to bone via tendons | Multinucleated; fatigable |
+| **Cardiac** | Yes | No | Heart wall only | Intercalated discs (gap junctions → synchronized contraction) |
+| **Smooth** | No | No | Hollow organs (GI, vessels, bladder, uterus) | Spindle-shaped cells; slow, sustained contraction |
+
+---
+
+## 2. Skeletal Muscle Architecture
+
+### 2.1 Connective Tissue Hierarchy
+```
+Epimysium     → surrounds entire muscle belly
+  └── Perimysium  → surrounds fascicles (bundles of fibers)
+        └── Endomysium  → surrounds individual muscle fibers (cells)
+```
+
+### 2.2 Muscle Fiber (Cell) Structure
+- **Sarcolemma** — plasma membrane of muscle fiber
+- **Sarcoplasm** — cytoplasm; contains glycogen, myoglobin (oxygen store)
+- **Sarcoplasmic reticulum (SR)** — smooth ER modified to store and release Ca²⁺
+- **T-tubules** — invaginations of sarcolemma; conduct action potentials deep into fiber
+- **Myofibrils** — contractile organelles running longitudinally; composed of sarcomeres in series
+
+### 2.3 Sarcomere — The Contractile Unit
+
+```
+Z-disc ←─────── Sarcomere ────────→ Z-disc
+
+    │ ←── I-band ──→ │←── A-band ──→│ ←── I-band ──→ │
+    │    (actin only) │  (myosin +   │  (actin only)  │
+    │                 │   actin)     │                 │
+    Z                 M               M                 Z
+                     ←── H-zone ──→
+                    (myosin only;
+                   shortens in contraction)
+```
+
+- **Thick filaments** = myosin (heads have ATPase activity)
+- **Thin filaments** = actin + tropomyosin + troponin complex
+- **Titin** — elastic protein connecting myosin to Z-disc; acts as a molecular spring
+
+---
+
+## 3. Sliding Filament Theory — Step by Step
+
+1. **Motor nerve fires** → action potential reaches neuromuscular junction (NMJ)
+2. **Acetylcholine (ACh)** released from presynaptic terminal into synaptic cleft
+3. **ACh binds nicotinic receptors** on motor end plate → Na⁺ influx → action potential in sarcolemma
+4. **Action potential travels** along sarcolemma and down T-tubules
+5. **T-tubules activate dihydropyridine (DHP) receptors** → mechanically open ryanodine receptors (RyR) on SR
+6. **Ca²⁺ floods** from SR into sarcoplasm
+7. **Ca²⁺ binds troponin C** → troponin-tropomyosin complex shifts → active sites on actin exposed
+8. **Myosin heads bind actin** (cross-bridge formation; requires ADP + Pi already bound to myosin)
+9. **Power stroke** → myosin head pivots, pulling actin toward M-line; ADP + Pi released
+10. **ATP binds myosin head** → cross-bridge detaches from actin
+11. **ATP hydrolyzed** (ATPase) → myosin head returns to cocked position
+12. **If Ca²⁺ still present**: cycle repeats → continued shortening
+13. **Nerve stops firing** → ACh removed by acetylcholinesterase → Ca²⁺ pumped back into SR (SERCA pump, uses ATP) → tropomyosin re-covers actin → relaxation
+
+> ⚠️ **Rigor mortis** occurs because ATP is absent after death. Myosin heads cannot detach from actin (step 10 requires ATP) → all cross-bridges remain locked → rigid muscles. Resolves ~48 hrs as muscle proteins degrade.
+
+---
+
+## 4. Muscle Fiber Types
+
+| Type | Fiber type | Contraction speed | Fatigue resistance | Fuel | Color | Use |
+|------|-----------|------------------|-------------------|------|-------|-----|
+| **Type I** | Slow oxidative (SO) | Slow | High | Aerobic (oxidative phosphorylation) | Red (myoglobin-rich) | Postural muscles, endurance |
+| **Type IIa** | Fast oxidative-glycolytic (FOG) | Fast | Intermediate | Aerobic + anaerobic | Red | Intermediate activities |
+| **Type IIx (IIb)** | Fast glycolytic (FG) | Very fast | Low | Anaerobic (glycolysis) | White | Explosive power, sprinting |
+
+> All fibers in a **motor unit** are the same type. A motor unit = one motor neuron + all fibers it innervates. Smaller motor units (fewer fibers) = finer control (intrinsic hand muscles: ~1–10 fibers/unit). Larger motor units = more force (quadriceps: ~1000+ fibers/unit).
+
+**Size principle (Henneman):** Motor units recruited from smallest to largest as force demand increases. Type I → Type IIa → Type IIx. This allows fine gradation of force output.
+
+---
+
+## 5. Major Muscle Groups by Region
+
+### 5.1 Head & Neck
+| Muscle | Origin | Insertion | Action |
+|--------|--------|-----------|--------|
+| Masseter | Zygomatic arch | Mandible (angle/ramus) | Jaw closure (mastication) |
+| Temporalis | Temporal fossa | Coronoid process of mandible | Jaw closure, retraction |
+| Sternocleidomastoid (SCM) | Sternum + clavicle | Mastoid process | Unilateral: lateral flexion + contralateral rotation. Bilateral: neck flexion |
+| Trapezius (upper) | Occipital bone, nuchal lig, C7 spine | Clavicle, acromion, scapular spine | Elevates scapula/shoulder |
+
+### 5.2 Trunk — Anterior
+| Muscle | Action |
+|--------|--------|
+| Rectus abdominis | Trunk flexion; "six-pack" |
+| External oblique | Contralateral rotation, lateral flexion |
+| Internal oblique | Ipsilateral rotation, lateral flexion |
+| Transversus abdominis | Abdominal compression; stabilizes lumbar spine (deep core) |
+
+### 5.3 Trunk — Posterior
+| Muscle | Action |
+|--------|--------|
+| Erector spinae (iliocostalis, longissimus, spinalis) | Trunk extension, lateral flexion, posture |
+| Multifidus | Segmental spinal stabilization (deep) |
+| Quadratus lumborum | Lateral trunk flexion, hip elevation |
+
+### 5.4 Shoulder (Rotator Cuff — "SITS")
+| Muscle | Origin | Insertion | Action |
+|--------|--------|-----------|--------|
+| **S**upraspinatus | Supraspinous fossa | Greater tubercle (superior facet) | Initiates abduction (0–15°) |
+| **I**nfraspinatus | Infraspinous fossa | Greater tubercle (middle facet) | External rotation |
+| **T**eres minor | Lateral border scapula | Greater tubercle (inferior facet) | External rotation |
+| **S**ubscapularis | Subscapular fossa | Lesser tubercle | Internal rotation |
+
+> The rotator cuff **stabilizes** the glenohumeral joint (prevents superior migration of humeral head) rather than being the primary movers of the arm.
+
+### 5.5 Upper Arm
+| Muscle | Action |
+|--------|--------|
+| Biceps brachii | Forearm flexion + **supination** (primary supinator) |
+| Brachialis | Forearm flexion (pure; does not depend on forearm position) |
+| Triceps brachii | Forearm extension; only muscle on posterior arm |
+| Coracobrachialis | Shoulder flexion + adduction |
+
+### 5.6 Forearm — Key Groups
+- **Flexors** (anterior compartment): flexor carpi radialis, flexor carpi ulnaris, palmaris longus, flexor digitorum superficialis/profundus, flexor pollicis longus
+- **Extensors** (posterior compartment): extensor carpi radialis longus/brevis, extensor carpi ulnaris, extensor digitorum, extensor pollicis longus/brevis
+
+### 5.7 Hip & Gluteal Region
+| Muscle | Action |
+|--------|--------|
+| Gluteus maximus | Powerful hip extension + lateral rotation; stair climbing, rising from chair |
+| Gluteus medius + minimus | Hip abduction; stabilize pelvis during single-leg stance (Trendelenburg gait if weak) |
+| Iliopsoas (iliacus + psoas major) | Powerful hip flexion; most important hip flexor |
+| Hip external rotators ("deep six"): piriformis, obturator internus/externus, gemelli, quadratus femoris | External rotation of femur |
+
+### 5.8 Thigh
+| Muscle | Action |
+|--------|--------|
+| Quadriceps (rectus femoris, vastus lateralis/medialis/intermedius) | Knee extension; rectus femoris also flexes hip |
+| Hamstrings (biceps femoris, semitendinosus, semimembranosus) | Knee flexion, hip extension |
+| Adductor group (adductor longus/brevis/magnus, gracilis, pectineus) | Hip adduction |
+| Sartorius | Longest muscle; "tailor's muscle"; hip flexion + abduction + external rotation + knee flexion |
+| Tensor fasciae latae (TFL) | Hip flexion + abduction + internal rotation; via IT band → stabilizes knee |
+
+### 5.9 Leg (Below Knee)
+| Compartment | Muscles | Action |
+|-------------|---------|--------|
+| Anterior | Tibialis anterior, extensor digitorum longus, extensor hallucis longus | Dorsiflexion, toe extension |
+| Posterior (superficial) | Gastrocnemius, soleus ("triceps surae"), plantaris | Plantarflexion |
+| Posterior (deep) | Tibialis posterior, flexor digitorum longus, flexor hallucis longus | Plantarflexion, toe flexion, foot inversion |
+| Lateral | Fibularis (peroneus) longus and brevis | Foot eversion, weak plantarflexion |
+
+---
+
+## 6. Common Clinical Correlates
+
+| Condition | Muscle/Structure | Notes |
+|-----------|-----------------|-------|
+| **Rotator cuff tear** | Supraspinatus (most common) | Impingement + degeneration; painful arc 60–120° abduction |
+| **Biceps tendon rupture** | Long head of biceps | "Popeye sign" — muscle belly drops distally |
+| **Compartment syndrome** | Any enclosed compartment | Increased pressure → ischemia; surgical emergency (fasciotomy) |
+| **Rhabdomyolysis** | Skeletal muscle globally | Massive myosin release → myoglobinuria → renal failure |
+| **Trendelenburg gait** | Gluteus medius/minimus | Pelvis drops to unsupported side on single-leg stance |
+| **Myasthenia gravis** | NMJ — anti-AChR antibodies | Fatigable weakness; worse with activity; ptosis, dysphagia |
+
+---
+
+## 🔗 Cross-links
+
+- Previous: [40.2 - The Skeletal System](40.2---The-Skeletal-System)
+- Next: [40.4 - The Nervous System](40.4---The-Nervous-System)
+- [40.8 - Regional & Clinical Anatomy](40.8---Regional-&-Clinical-Anatomy) — regional re-integration of all muscle groups
+- [13.1 - Kinematics of Human Movement](13.1---Kinematics-of-Human-Movement) — muscle mechanics in motion
+- [Subject_Plan](Subject_Plan) — autonomic/neuromuscular interface
+
+---
+
+## 📚 Primary Sources
+
+- OpenStax *Anatomy and Physiology 2e*, Chapters 10–11 — [free](https://openstax.org/details/books/anatomy-and-physiology-2e)
+- Armando Hasudungan — Muscle Physiology — [YouTube](https://www.youtube.com/@armandohasudungan)
+- Kenhub — Muscles of the body — [kenhub.com](https://www.kenhub.com/en/library/anatomy/muscles)
+
+<details>
+<summary>🧠 Active Recall Prompts</summary>
+
+1. Walk through the 13 steps of the sliding filament theory from nerve impulse to muscle relaxation.
+2. A patient cannot supinate their forearm. Which two muscles are most likely involved? Which nerve innervates the primary one?
+3. Name the four rotator cuff muscles (SITS), their insertions, and their actions.
+4. What is Henneman's Size Principle? Why does it matter for strength training?
+5. Compare Type I and Type IIx muscle fibers across 6 properties.
+6. A runner has lateral knee pain. The IT band is implicated. Name the muscles that feed into the IT band and their hip actions.
+7. What is Trendelenburg gait? Which muscle is weak? What nerve innervates it?
+
+</details>

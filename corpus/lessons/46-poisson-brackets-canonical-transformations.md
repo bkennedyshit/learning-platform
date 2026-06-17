@@ -1,0 +1,652 @@
+---
+title: "Poisson Brackets Canonical Transformations"
+subject: "Classical Mechanics & Dynamical Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "4.6"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 4.6 — Poisson Brackets & Canonical Transformations
+
+> *"The algebraic structure of classical mechanics is the Poisson bracket — and it maps directly to the commutator in quantum mechanics."* — Paul Dirac, 1925
+
+Poisson brackets provide an algebraic framework for Hamiltonian mechanics that reveals deep structural properties: conservation laws become vanishing brackets, canonical transformations preserve the bracket structure, and the entire formalism translates directly into quantum mechanics via $\{\ ,\ \} \to \frac{1}{i\hbar}[\ ,\ ]$.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compute Poisson brackets for arbitrary phase-space functions.
+2. Express equations of motion and conservation laws using Poisson brackets.
+3. Define and verify canonical transformations via bracket preservation.
+4. Construct generating functions for canonical transformations.
+5. Apply canonical transformations to simplify Hamiltonians.
+6. State the connection to quantum commutators.
+
+---
+
+## 🖼️ Visual Anchor — Canonical Transformation Mapping
+
+![math-04__4.6-fig1](math-04__4.6-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 4.6.1 — Poisson Bracket
+
+For two phase-space functions $f(q,p,t)$ and $g(q,p,t)$, the **Poisson bracket** is:
+
+$$
+\{f, g\} = \sum_{k=1}^n \left(\frac{\partial f}{\partial q_k}\frac{\partial g}{\partial p_k} - \frac{\partial f}{\partial p_k}\frac{\partial g}{\partial q_k}\right).
+$$
+
+### Definition 4.6.2 — Canonical Transformation
+
+A transformation $(q,p) \to (Q,P)$ is **canonical** if it preserves the fundamental Poisson bracket relations:
+
+$$
+\{Q_i, P_j\} = \delta_{ij}, \quad \{Q_i, Q_j\} = 0, \quad \{P_i, P_j\} = 0.
+$$
+
+### Definition 4.6.3 — Generating Function
+
+A **generating function** is a scalar function that implicitly defines a canonical transformation. The four standard types are:
+
+| Type | Function | Relations |
+|:---:|:---:|:---:|
+| 1 | $F_1(q, Q, t)$ | $p = \partial F_1/\partial q$, $P = -\partial F_1/\partial Q$ |
+| 2 | $F_2(q, P, t)$ | $p = \partial F_2/\partial q$, $Q = \partial F_2/\partial P$ |
+| 3 | $F_3(p, Q, t)$ | $q = -\partial F_3/\partial p$, $P = -\partial F_3/\partial Q$ |
+| 4 | $F_4(p, P, t)$ | $q = -\partial F_4/\partial p$, $Q = \partial F_4/\partial P$ |
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 4.6.A1 — Symplectic Invariance
+
+The fundamental 2-form $\omega = \sum_k dp_k \wedge dq_k$ is invariant under canonical transformations: $\sum_k dP_k \wedge dQ_k = \sum_k dp_k \wedge dq_k$.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 4.6.1 — Fundamental Brackets
+
+$$
+\{q_i, q_j\} = 0, \quad \{p_i, p_j\} = 0, \quad \{q_i, p_j\} = \delta_{ij}.
+$$
+
+**Proof.** Direct computation: $\{q_i, p_j\} = \sum_k\left(\frac{\partial q_i}{\partial q_k}\frac{\partial p_j}{\partial p_k} - \frac{\partial q_i}{\partial p_k}\frac{\partial p_j}{\partial q_k}\right) = \sum_k \delta_{ik}\delta_{jk} = \delta_{ij}$. $\blacksquare$
+
+### Lemma 4.6.2 — Poisson Bracket Properties
+
+1. **Antisymmetry:** $\{f,g\} = -\{g,f\}$.
+2. **Linearity:** $\{af+bg, h\} = a\{f,h\} + b\{g,h\}$.
+3. **Leibniz rule:** $\{fg, h\} = f\{g,h\} + g\{f,h\}$.
+4. **Jacobi identity:** $\{f,\{g,h\}\} + \{g,\{h,f\}\} + \{h,\{f,g\}\} = 0$.
+
+### Lemma 4.6.3 — Equation of Motion via Poisson Bracket
+
+For any phase-space function $f(q,p,t)$:
+
+$$
+\frac{df}{dt} = \{f, H\} + \frac{\partial f}{\partial t}.
+$$
+
+**Proof.** $\frac{df}{dt} = \sum_k\left(\frac{\partial f}{\partial q_k}\dot{q}_k + \frac{\partial f}{\partial p_k}\dot{p}_k\right) + \frac{\partial f}{\partial t} = \sum_k\left(\frac{\partial f}{\partial q_k}\frac{\partial H}{\partial p_k} - \frac{\partial f}{\partial p_k}\frac{\partial H}{\partial q_k}\right) + \frac{\partial f}{\partial t} = \{f,H\} + \frac{\partial f}{\partial t}$. $\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 4.6.1 — Conservation and Poisson Brackets
+
+A quantity $f(q,p)$ (with no explicit time dependence) is conserved if and only if $\{f, H\} = 0$.
+
+### Theorem 4.6.2 — Poisson's Theorem
+
+If $f$ and $g$ are both constants of motion, then $\{f,g\}$ is also a constant of motion.
+
+**Proof.** $\frac{d}{dt}\{f,g\} = \{\{f,g\}, H\}$. By the Jacobi identity: $\{\{f,g\},H\} = -\{\{g,H\},f\} - \{\{H,f\},g\} = -\{0,f\} - \{0,g\} = 0$. $\blacksquare$
+
+### Theorem 4.6.3 — Canonical Transformation Criterion
+
+$(q,p)\to(Q,P)$ is canonical if and only if the Jacobian matrix $M = \partial(Q,P)/\partial(q,p)$ satisfies $M^T J M = J$, where $J = \begin{pmatrix}0 & I_n \\ -I_n & 0\end{pmatrix}$ is the symplectic matrix.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Proof of the Jacobi Identity
+
+**Proof.** Direct (but tedious) computation. For functions $f,g,h$ of $(q_k, p_k)$:
+
+$$
+\{f,\{g,h\}\} = \sum_i\left(\frac{\partial f}{\partial q_i}\frac{\partial\{g,h\}}{\partial p_i} - \frac{\partial f}{\partial p_i}\frac{\partial\{g,h\}}{\partial q_i}\right).
+$$
+
+Expanding $\frac{\partial\{g,h\}}{\partial p_i} = \sum_j\left(\frac{\partial^2 g}{\partial q_j\partial p_i}\frac{\partial h}{\partial p_j} + \frac{\partial g}{\partial q_j}\frac{\partial^2 h}{\partial p_j\partial p_i} - \frac{\partial^2 g}{\partial p_j\partial p_i}\frac{\partial h}{\partial q_j} - \frac{\partial g}{\partial p_j}\frac{\partial^2 h}{\partial q_j\partial p_i}\right)$.
+
+When all three cyclic permutations are summed, second-derivative terms cancel pairwise by symmetry of mixed partials, yielding zero. $\blacksquare$
+
+### 5.2 Example: Generating Function for Harmonic Oscillator
+
+Use $F_1(q,Q) = \frac{m\omega q^2}{2}\cot Q$ to transform the oscillator $H = p^2/(2m) + m\omega^2 q^2/2$ into $K(P) = \omega P$ (action-angle variables).
+
+From $p = \partial F_1/\partial q = m\omega q\cot Q$ and $P = -\partial F_1/\partial Q = \frac{m\omega q^2}{2\sin^2 Q}$.
+
+Solving: $q = \sqrt{2P/(m\omega)}\sin Q$, $p = \sqrt{2Pm\omega}\cos Q$. Then $H = \omega P = K$, and Hamilton's equations give $\dot{Q} = \omega$, $\dot{P} = 0$ — trivially solved.
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 4.6.1 — Angular Momentum Poisson Brackets
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+For $L_x = yp_z - zp_y$, $L_y = zp_x - xp_z$, $L_z = xp_y - yp_x$:
+
+$$
+\{L_x, L_y\} = \sum_k\left(\frac{\partial L_x}{\partial q_k}\frac{\partial L_y}{\partial p_k} - \frac{\partial L_x}{\partial p_k}\frac{\partial L_y}{\partial q_k}\right).
+$$
+
+Non-zero terms: $\frac{\partial L_x}{\partial y} = p_z$, $\frac{\partial L_y}{\partial p_y} = 0$... Computing systematically:
+
+$\frac{\partial L_x}{\partial y}\frac{\partial L_y}{\partial p_y} - \frac{\partial L_x}{\partial p_y}\frac{\partial L_y}{\partial y} = p_z\cdot 0 - (-z)\cdot 0 = 0$.
+
+$\frac{\partial L_x}{\partial z}\frac{\partial L_y}{\partial p_z} - \frac{\partial L_x}{\partial p_z}\frac{\partial L_y}{\partial z} = (-p_y)(-x) - (y)(p_x) = xp_y - yp_x = L_z$.
+
+Therefore $\{L_x, L_y\} = L_z$. By cyclic permutation: $\{L_i, L_j\} = \varepsilon_{ijk}L_k$.
+
+</details>
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+- **Previous:** [4.5 - Hamiltonian Mechanics - Canonical Equations](4.5---Hamiltonian-Mechanics---Canonical-Equations)
+- **Next:** [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles)
+- **Quantum analogue:** $\{f,g\} \to \frac{1}{i\hbar}[\hat{f},\hat{g}]$ (Dirac's quantization rule)
+- **Goldstein**, Ch. 9–10 — Canonical Transformations and Hamilton-Jacobi Theory
+- **Arnold**, *Mathematical Methods of Classical Mechanics*, Ch. 8
+
+---
+
+*Next: [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles) →*
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Poisson Bracket Algebra of Angular Momentum Components
+
+**Problem:** For a particle in 3D with position $(x, y, z)$ and momenta $(p_x, p_y, p_z)$, compute all Poisson brackets $\{L_i, L_j\}$ and $\{L_i, L^2\}$ where $L_i$ are the angular momentum components and $L^2 = L_x^2 + L_y^2 + L_z^2$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Define the angular momentum components
+
+$$
+L_x = yp_z - zp_y, \quad L_y = zp_x - xp_z, \quad L_z = xp_y - yp_x.
+$$
+
+#### Step 2: Compute $\{L_x, L_y\}$
+
+Using the Poisson bracket definition $\{f,g\} = \sum_k\left(\frac{\partial f}{\partial q_k}\frac{\partial g}{\partial p_k} - \frac{\partial f}{\partial p_k}\frac{\partial g}{\partial q_k}\right)$:
+
+Partial derivatives of $L_x$:
+
+$$
+\frac{\partial L_x}{\partial x} = 0, \quad \frac{\partial L_x}{\partial y} = p_z, \quad \frac{\partial L_x}{\partial z} = -p_y.
+$$
+
+$$
+\frac{\partial L_x}{\partial p_x} = 0, \quad \frac{\partial L_x}{\partial p_y} = -z, \quad \frac{\partial L_x}{\partial p_z} = y.
+$$
+
+Partial derivatives of $L_y$:
+
+$$
+\frac{\partial L_y}{\partial x} = -p_z, \quad \frac{\partial L_y}{\partial y} = 0, \quad \frac{\partial L_y}{\partial z} = p_x.
+$$
+
+$$
+\frac{\partial L_y}{\partial p_x} = z, \quad \frac{\partial L_y}{\partial p_y} = 0, \quad \frac{\partial L_y}{\partial p_z} = -x.
+$$
+
+Now compute term by term ($k = x, y, z$):
+
+$k = x$: $\frac{\partial L_x}{\partial x}\frac{\partial L_y}{\partial p_x} - \frac{\partial L_x}{\partial p_x}\frac{\partial L_y}{\partial x} = 0\cdot z - 0\cdot(-p_z) = 0$.
+
+$k = y$: $\frac{\partial L_x}{\partial y}\frac{\partial L_y}{\partial p_y} - \frac{\partial L_x}{\partial p_y}\frac{\partial L_y}{\partial y} = p_z\cdot 0 - (-z)\cdot 0 = 0$.
+
+$k = z$: $\frac{\partial L_x}{\partial z}\frac{\partial L_y}{\partial p_z} - \frac{\partial L_x}{\partial p_z}\frac{\partial L_y}{\partial z} = (-p_y)(-x) - (y)(p_x) = xp_y - yp_x = L_z$.
+
+Therefore:
+
+$$
+\{L_x, L_y\} = L_z.
+$$
+
+#### Step 3: Complete the algebra by cyclic permutation
+
+The angular momentum components satisfy the cyclic structure $(x \to y \to z \to x)$. By the same calculation with cyclic relabeling:
+
+$$
+\{L_y, L_z\} = L_x, \quad \{L_z, L_x\} = L_y.
+$$
+
+Compactly: $\{L_i, L_j\} = \varepsilon_{ijk}L_k$ (Einstein summation on $k$).
+
+#### Step 4: Compute $\{L_x, L^2\}$
+
+Using the Leibniz rule for Poisson brackets: $\{f, gh\} = g\{f,h\} + \{f,g\}h$:
+
+$$
+\{L_x, L^2\} = \{L_x, L_x^2 + L_y^2 + L_z^2\} = \{L_x, L_x^2\} + \{L_x, L_y^2\} + \{L_x, L_z^2\}.
+$$
+
+For $\{L_x, L_x^2\}$: $\{L_x, L_x^2\} = 2L_x\{L_x, L_x\} = 0$ (any quantity has zero bracket with itself).
+
+For $\{L_x, L_y^2\}$: $\{L_x, L_y^2\} = 2L_y\{L_x, L_y\} = 2L_y L_z$.
+
+For $\{L_x, L_z^2\}$: $\{L_x, L_z^2\} = 2L_z\{L_x, L_z\} = 2L_z(-L_y) = -2L_y L_z$.
+
+Therefore:
+
+$$
+\{L_x, L^2\} = 0 + 2L_y L_z - 2L_y L_z = 0.
+$$
+
+By the same argument: $\{L_i, L^2\} = 0$ for all $i$.
+
+#### Step 5: Physical interpretation
+
+$\{L_i, L^2\} = 0$ means $L^2$ is conserved under rotations about any axis — the magnitude of angular momentum is a Casimir invariant of the rotation algebra. In quantum mechanics, this becomes $[\hat{L}_i, \hat{L}^2] = 0$, meaning we can simultaneously diagonalize $\hat{L}^2$ and any one component (conventionally $\hat{L}_z$), giving quantum numbers $\ell$ and $m$.
+
+The non-commutativity $\{L_x, L_y\} = L_z \neq 0$ means we cannot simultaneously specify all three components — the classical precursor to the uncertainty principle for angular momentum.
+
+**Final Answer:**
+
+$$
+\{L_i, L_j\} = \varepsilon_{ijk}L_k, \quad \{L_i, L^2\} = 0
+$$
+
+</details>
+
+### Example 8.2 — Canonical Transformation Generated by $F_2(q, P, t)$
+
+**Problem:** Consider the generating function $F_2(q, P) = q^2 P$. Find the canonical transformation $(q, p) \to (Q, P)$, verify it is canonical by checking the Poisson bracket $\{Q, P\}_{q,p} = 1$, and find the new Hamiltonian for $H = p^2/(2m) + \frac{1}{2}m\omega^2 q^2$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Transformation equations from $F_2$
+
+For a type-2 generating function $F_2(q, P)$, the transformation equations are:
+
+$$
+p = \frac{\partial F_2}{\partial q}, \quad Q = \frac{\partial F_2}{\partial P}.
+$$
+
+With $F_2 = q^2 P$:
+
+$$
+p = \frac{\partial(q^2 P)}{\partial q} = 2qP, \quad Q = \frac{\partial(q^2 P)}{\partial P} = q^2.
+$$
+
+#### Step 2: Express old variables in terms of new
+
+From $Q = q^2$: $q = \sqrt{Q}$ (taking positive root).
+
+From $p = 2qP$: $P = \frac{p}{2q} = \frac{p}{2\sqrt{Q}}$.
+
+#### Step 3: Verify canonicity via Poisson bracket
+
+Compute $\{Q, P\}_{q,p} = \frac{\partial Q}{\partial q}\frac{\partial P}{\partial p} - \frac{\partial Q}{\partial p}\frac{\partial P}{\partial q}$.
+
+$\frac{\partial Q}{\partial q} = 2q$, $\frac{\partial Q}{\partial p} = 0$.
+
+$\frac{\partial P}{\partial p} = \frac{1}{2q}$, $\frac{\partial P}{\partial q} = -\frac{p}{2q^2}$.
+
+$$
+\{Q, P\}_{q,p} = 2q\cdot\frac{1}{2q} - 0\cdot\left(-\frac{p}{2q^2}\right) = 1. \quad \checkmark
+$$
+
+The transformation is canonical.
+
+#### Step 4: Transform the Hamiltonian
+
+Express $H = \frac{p^2}{2m} + \frac{1}{2}m\omega^2 q^2$ in terms of $(Q, P)$:
+
+$q = \sqrt{Q}$, $p = 2\sqrt{Q}\cdot P$. Therefore:
+
+$$
+H = \frac{(2\sqrt{Q}\cdot P)^2}{2m} + \frac{1}{2}m\omega^2 Q = \frac{4QP^2}{2m} + \frac{1}{2}m\omega^2 Q = \frac{2QP^2}{m} + \frac{1}{2}m\omega^2 Q.
+$$
+
+Since $F_2$ has no explicit time dependence, the new Hamiltonian $K = H$:
+
+$$
+K(Q, P) = \frac{2QP^2}{m} + \frac{1}{2}m\omega^2 Q.
+$$
+
+#### Step 5: Hamilton's equations in new variables
+
+$$
+\dot{Q} = \frac{\partial K}{\partial P} = \frac{4QP}{m}.
+$$
+
+$$
+\dot{P} = -\frac{\partial K}{\partial Q} = -\frac{2P^2}{m} - \frac{1}{2}m\omega^2.
+$$
+
+Note: This transformation does not simplify the harmonic oscillator (unlike the action-angle transformation). It illustrates the mechanics of generating functions without claiming optimality.
+
+**Final Answer:**
+
+$$
+Q = q^2, \quad P = \frac{p}{2q}, \quad K = \frac{2QP^2}{m} + \frac{1}{2}m\omega^2 Q
+$$
+
+</details>
+
+### Example 8.3 — Symplectic Verification of a Linear Canonical Transformation
+
+**Problem:** Show that the transformation $Q = p$, $P = -q$ (a 90° rotation in phase space) is canonical by verifying the symplectic condition $M^T\mathbb{J}M = \mathbb{J}$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Write the transformation as a matrix
+
+The transformation $(q, p) \to (Q, P) = (p, -q)$ can be written:
+
+$$
+\begin{pmatrix}Q\\P\end{pmatrix} = \begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix}\begin{pmatrix}q\\p\end{pmatrix}.
+$$
+
+So the Jacobian matrix is $M = \begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix}$.
+
+#### Step 2: Recall the symplectic matrix
+
+$$
+\mathbb{J} = \begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix}.
+$$
+
+#### Step 3: Compute $M^T\mathbb{J}M$
+
+$$
+M^T = \begin{pmatrix}0 & -1\\1 & 0\end{pmatrix}.
+$$
+
+$$
+M^T\mathbb{J} = \begin{pmatrix}0 & -1\\1 & 0\end{pmatrix}\begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix} = \begin{pmatrix}0\cdot 0+(-1)(-1) & 0\cdot 1+(-1)\cdot 0\\1\cdot 0+0\cdot(-1) & 1\cdot 1+0\cdot 0\end{pmatrix} = \begin{pmatrix}1 & 0\\0 & 1\end{pmatrix}.
+$$
+
+$$
+M^T\mathbb{J}M = \begin{pmatrix}1 & 0\\0 & 1\end{pmatrix}\begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix} = \begin{pmatrix}0 & 1\\-1 & 0\end{pmatrix} = \mathbb{J}. \quad \checkmark
+$$
+
+#### Step 4: Alternative verification via Poisson bracket
+
+$$
+\{Q, P\}_{q,p} = \frac{\partial Q}{\partial q}\frac{\partial P}{\partial p} - \frac{\partial Q}{\partial p}\frac{\partial P}{\partial q} = 0\cdot 0 - 1\cdot(-1) = 1. \quad \checkmark
+$$
+
+#### Step 5: Physical interpretation
+
+This transformation exchanges coordinates and momenta (with a sign). It corresponds to a quarter-period time evolution of the harmonic oscillator: after time $t = \pi/(2\omega)$, the phase-space point $(q_0, p_0)$ maps to $(p_0/(m\omega), -m\omega q_0)$, which (up to scaling) is exactly $(p, -q)$.
+
+More generally, any $2n\times 2n$ matrix $M$ satisfying $M^T\mathbb{J}M = \mathbb{J}$ belongs to the **symplectic group** $Sp(2n, \mathbb{R})$. This group is the symmetry group of Hamiltonian mechanics.
+
+**Final Answer:**
+
+$$
+M^T\mathbb{J}M = \mathbb{J} \implies \text{transformation is canonical (symplectic)}
+$$
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Liouville's Theorem: Phase-Space Volume Conservation
+
+Liouville's theorem is one of the most profound results in Hamiltonian mechanics: the flow generated by Hamilton's equations preserves phase-space volume. This has deep consequences for statistical mechanics, ergodic theory, and the foundations of thermodynamics.
+
+**Statement:** Let $\rho(\mathbf{q}, \mathbf{p}, t)$ be the phase-space density of an ensemble of systems evolving under Hamilton's equations. Then:
+
+$$
+\frac{d\rho}{dt} = 0 \quad \text{(along trajectories)}.
+$$
+
+Equivalently, the phase-space volume $\Gamma = \int dq_1\cdots dq_n\,dp_1\cdots dp_n$ of any region is preserved under Hamiltonian time evolution.
+
+**Proof via the continuity equation:**
+
+**Step 1:** The phase-space "velocity field" is $\mathbf{v} = (\dot{q}_1, \ldots, \dot{q}_n, \dot{p}_1, \ldots, \dot{p}_n)$. The continuity equation for the density is:
+
+$$
+\frac{\partial\rho}{\partial t} + \nabla_{2n}\cdot(\rho\mathbf{v}) = 0,
+$$
+
+where $\nabla_{2n}\cdot$ is the $2n$-dimensional divergence in phase space.
+
+**Step 2:** Expand the divergence:
+
+$$
+\nabla_{2n}\cdot(\rho\mathbf{v}) = \rho(\nabla_{2n}\cdot\mathbf{v}) + \mathbf{v}\cdot\nabla_{2n}\rho.
+$$
+
+**Step 3:** Compute the phase-space divergence of the Hamiltonian flow:
+
+$$
+\nabla_{2n}\cdot\mathbf{v} = \sum_i\left(\frac{\partial\dot{q}_i}{\partial q_i} + \frac{\partial\dot{p}_i}{\partial p_i}\right) = \sum_i\left(\frac{\partial^2 H}{\partial q_i\partial p_i} - \frac{\partial^2 H}{\partial p_i\partial q_i}\right) = 0,
+$$
+
+by the equality of mixed partial derivatives (Clairaut's theorem). This is the key step — the Hamiltonian flow is **incompressible** in phase space.
+
+**Step 4:** Therefore the continuity equation becomes:
+
+$$
+\frac{\partial\rho}{\partial t} + \mathbf{v}\cdot\nabla_{2n}\rho = \frac{d\rho}{dt} = 0.
+$$
+
+The total (convective) derivative of $\rho$ vanishes — the density is constant along trajectories. $\blacksquare$
+
+**Consequences:**
+
+1. **Statistical mechanics:** Liouville's theorem justifies the microcanonical ensemble — if we start with a uniform distribution on an energy surface, it remains uniform for all time.
+
+2. **No attractors in Hamiltonian systems:** Since volume is preserved, Hamiltonian systems cannot have attracting fixed points or limit cycles (which would require volume contraction). Chaos in Hamiltonian systems is qualitatively different from dissipative chaos.
+
+3. **Beam physics:** In particle accelerators, Liouville's theorem constrains the emittance (phase-space area) of a beam — you cannot focus a beam to a smaller phase-space volume without violating Hamiltonian structure (e.g., using dissipative cooling).
+
+4. **Connection to entropy:** The Gibbs entropy $S = -k_B\int\rho\ln\rho\,d\Gamma$ is constant under Hamiltonian evolution (fine-grained entropy). The apparent increase of entropy (second law) arises from coarse-graining — see [5 - Thermodynamics & Statistical Mechanics](5---Thermodynamics-&-Statistical-Mechanics).
+
+**Poisson bracket formulation:** Liouville's theorem can be restated as:
+
+$$
+\frac{d\rho}{dt} = \frac{\partial\rho}{\partial t} + \{\rho, H\} = 0.
+$$
+
+This is the classical analogue of the quantum von Neumann equation $i\hbar\frac{\partial\hat\rho}{\partial t} = [\hat{H}, \hat\rho]$.
+
+*References: Goldstein, Classical Mechanics, §9.9; Arnold, Mathematical Methods of Classical Mechanics, §16; Landau & Lifshitz, Statistical Physics, §3.*
+
+### 9.2 The Hamilton-Jacobi Equation and Its Connection to Quantum Mechanics
+
+The Hamilton-Jacobi (HJ) equation represents the pinnacle of classical mechanics — it transforms the problem of solving Hamilton's equations into finding a single scalar function. Moreover, it provides the bridge to quantum mechanics via the WKB approximation.
+
+**The idea:** Find a canonical transformation $(q, p) \to (Q, P)$ such that the new Hamiltonian $K = 0$. Then $\dot{Q} = \dot{P} = 0$, meaning the new variables are constants — the problem is solved.
+
+**Step 1: Generating function approach.** Use a type-2 generating function $S(q, P, t)$ (called **Hamilton's principal function**). The transformation equations are:
+
+$$
+p_i = \frac{\partial S}{\partial q_i}, \quad Q_i = \frac{\partial S}{\partial P_i}.
+$$
+
+The new Hamiltonian is:
+
+$$
+K = H + \frac{\partial S}{\partial t}.
+$$
+
+Setting $K = 0$:
+
+$$
+H\left(q_i, \frac{\partial S}{\partial q_i}, t\right) + \frac{\partial S}{\partial t} = 0.
+$$
+
+This is the **Hamilton-Jacobi equation** — a first-order PDE for $S(q, t)$.
+
+**Step 2: Connection to action.** Along a classical trajectory, $S$ equals the action:
+
+$$
+S = \int_{t_0}^t L\,dt' + \text{const}.
+$$
+
+This can be verified: $\frac{dS}{dt} = L = p\dot{q} - H$, and $\frac{\partial S}{\partial q} = p$, $\frac{\partial S}{\partial t} = -H$.
+
+**Step 3: Connection to quantum mechanics.** Write the quantum wave function as $\Psi = A\,e^{iS/\hbar}$. Substituting into the Schrödinger equation $i\hbar\frac{\partial\Psi}{\partial t} = -\frac{\hbar^2}{2m}\nabla^2\Psi + V\Psi$ and taking $\hbar \to 0$:
+
+The leading order ($\hbar^0$) gives:
+
+$$
+\frac{\partial S}{\partial t} + \frac{(\nabla S)^2}{2m} + V = 0,
+$$
+
+which is exactly the Hamilton-Jacobi equation with $p = \nabla S$. Classical mechanics emerges as the $\hbar \to 0$ limit of quantum mechanics, with the phase of the wave function playing the role of Hamilton's principal function.
+
+**Step 4: Example — free particle.** $H = p^2/(2m)$. The HJ equation: $\frac{\partial S}{\partial t} + \frac{1}{2m}\left(\frac{\partial S}{\partial x}\right)^2 = 0$.
+
+Try $S = \alpha x - \frac{\alpha^2}{2m}t$ (where $\alpha = P$ is the constant new momentum). Then $p = \partial S/\partial x = \alpha$ and $Q = \partial S/\partial P = x - \frac{\alpha t}{m}$. Since $Q = \text{const}$: $x = Q + \frac{\alpha t}{m} = x_0 + \frac{p_0 t}{m}$. This is uniform motion. ✓
+
+*References: Goldstein, Classical Mechanics, Ch. 10; Landau & Lifshitz, Mechanics, §47; Susskind, The Theoretical Minimum, Lecture 10.*
+
+### 9.3 Infinitesimal Canonical Transformations and Symmetry Generators
+
+Every conserved quantity generates a one-parameter family of canonical transformations via the Poisson bracket. This is the classical version of the quantum mechanical statement that observables generate symmetries.
+
+**Setup:** Consider an infinitesimal canonical transformation:
+
+$$
+Q_i = q_i + \varepsilon\{q_i, G\}, \quad P_i = p_i + \varepsilon\{p_i, G\},
+$$
+
+where $G(q, p)$ is the **generator** and $\varepsilon$ is infinitesimal.
+
+**Verification of canonicity:** To first order in $\varepsilon$:
+
+$$
+\{Q_i, P_j\} = \{q_i + \varepsilon\{q_i,G\},\; p_j + \varepsilon\{p_j,G\}\} = \{q_i, p_j\} + \varepsilon[\{q_i,\{p_j,G\}\} + \{\{q_i,G\}, p_j\}] + O(\varepsilon^2).
+$$
+
+By the Jacobi identity: $\{q_i,\{p_j,G\}\} + \{p_j,\{G,q_i\}\} + \{G,\{q_i,p_j\}\} = 0$. Since $\{q_i,p_j\} = \delta_{ij}$ (constant), $\{G, \delta_{ij}\} = 0$. Therefore the $\varepsilon$ correction vanishes and $\{Q_i, P_j\} = \delta_{ij}$. ✓
+
+**Key examples:**
+
+| Generator $G$ | Transformation | Conserved when... |
+|---|---|---|
+| $p_x$ | $x \to x + \varepsilon$ (translation) | $\partial H/\partial x = 0$ |
+| $L_z = xp_y - yp_x$ | rotation about $z$ by $\varepsilon$ | $\partial H/\partial\phi = 0$ |
+| $H$ | time evolution by $\varepsilon$ | always (tautological) |
+
+**The deep connection:** If $\{G, H\} = 0$ (i.e., $G$ is conserved), then the transformation generated by $G$ is a symmetry of $H$. Conversely, every continuous symmetry of $H$ corresponds to a conserved generator. This is **Noether's theorem in Hamiltonian language**.
+
+In quantum mechanics: $G \to \hat{G}$, $\{,\} \to \frac{1}{i\hbar}[,]$, and the finite transformation is $e^{-i\hat{G}\varepsilon/\hbar}$. The momentum operator generates translations: $e^{-i\hat{p}a/\hbar}|x\rangle = |x+a\rangle$.
+
+*References: Goldstein, §9.3–9.4; Arnold, Mathematical Methods, §37; Sakurai, Modern Quantum Mechanics, §1.6.*
+
+---
+
+
+### 9.4 The Four Types of Generating Functions
+
+Canonical transformations can be generated by four types of generating functions, each depending on a different mix of old and new variables. Here we catalog all four and show their interrelationships.
+
+**The fundamental relation:** For a canonical transformation $(q, p) \to (Q, P)$, the condition $\sum_i p_i\,dq_i - H\,dt = \sum_i P_i\,dQ_i - K\,dt + dF$ (where $F$ is the generating function and $K$ is the new Hamiltonian) leads to different forms depending on which variables $F$ depends on.
+
+**Type 1: $F_1(q, Q, t)$**
+
+$$
+p_i = \frac{\partial F_1}{\partial q_i}, \quad P_i = -\frac{\partial F_1}{\partial Q_i}, \quad K = H + \frac{\partial F_1}{\partial t}.
+$$
+
+**Type 2: $F_2(q, P, t)$** (most commonly used)
+
+Obtained from $F_1$ by Legendre transform: $F_2 = F_1 + \sum_i Q_i P_i$.
+
+$$
+p_i = \frac{\partial F_2}{\partial q_i}, \quad Q_i = \frac{\partial F_2}{\partial P_i}, \quad K = H + \frac{\partial F_2}{\partial t}.
+$$
+
+**Type 3: $F_3(p, Q, t)$**
+
+Obtained from $F_1$ by: $F_3 = F_1 - \sum_i q_i p_i$.
+
+$$
+q_i = -\frac{\partial F_3}{\partial p_i}, \quad P_i = -\frac{\partial F_3}{\partial Q_i}, \quad K = H + \frac{\partial F_3}{\partial t}.
+$$
+
+**Type 4: $F_4(p, P, t)$**
+
+Obtained from $F_2$ by: $F_4 = F_2 - \sum_i q_i p_i$.
+
+$$
+q_i = -\frac{\partial F_4}{\partial p_i}, \quad Q_i = \frac{\partial F_4}{\partial P_i}, \quad K = H + \frac{\partial F_4}{\partial t}.
+$$
+
+**Important special cases:**
+
+- **Identity transformation:** $F_2 = \sum_i q_i P_i$ gives $Q_i = q_i$, $p_i = P_i$.
+- **Point transformation** $Q_i = Q_i(q)$: use $F_2 = \sum_i Q_i(q)P_i$.
+- **Exchange transformation** $Q = p$, $P = -q$: use $F_1 = qQ$ (gives $p = Q$, $P = -q$).
+
+**Connection to Hamilton-Jacobi:** Hamilton's principal function $S(q, P, t)$ is a type-2 generating function that transforms to trivial dynamics ($K = 0$, so $Q$ and $P$ are constants).
+
+*References: Goldstein, Classical Mechanics, §9.1–9.3; Landau & Lifshitz, Mechanics, §45; Arnold, Mathematical Methods, §9.*
+
+### 9.5 Poisson Brackets and the Transition to Quantum Mechanics
+
+The Poisson bracket is not merely a computational tool — it is the classical limit of the quantum commutator. Dirac's quantization prescription makes this precise.
+
+**Dirac's correspondence principle (1925):**
+
+$$
+\{f, g\}_{\text{classical}} \longleftrightarrow \frac{1}{i\hbar}[\hat{f}, \hat{g}]_{\text{quantum}}.
+$$
+
+**Verification for fundamental brackets:**
+
+| Classical | Quantum |
+|---|---|
+| $\{q_i, p_j\} = \delta_{ij}$ | $\frac{1}{i\hbar}[\hat{q}_i, \hat{p}_j] = \delta_{ij}$ |
+| $\{q_i, q_j\} = 0$ | $[\hat{q}_i, \hat{q}_j] = 0$ |
+| $\{L_i, L_j\} = \varepsilon_{ijk}L_k$ | $\frac{1}{i\hbar}[\hat{L}_i, \hat{L}_j] = \varepsilon_{ijk}\hat{L}_k$ |
+
+**Time evolution:** Classically, $\dot{f} = \{f, H\}$. Quantum mechanically (Heisenberg picture): $\frac{d\hat{f}}{dt} = \frac{1}{i\hbar}[\hat{f}, \hat{H}]$.
+
+**Conservation:** $\{f, H\} = 0$ (classical conservation) $\leftrightarrow$ $[\hat{f}, \hat{H}] = 0$ (quantum conservation / simultaneous eigenstates).
+
+**Limitations of the correspondence:** The map $\{,\} \to \frac{1}{i\hbar}[,]$ cannot be made exact for all observables simultaneously (Groenewold-van Hove theorem). Ordering ambiguities arise for products like $qp$ vs $pq$ (classically equal, quantum mechanically different by $i\hbar$). The Weyl ordering prescription $\widehat{qp} = \frac{1}{2}(\hat{q}\hat{p} + \hat{p}\hat{q})$ is one systematic resolution.
+
+*References: Dirac, Principles of Quantum Mechanics, §4; Sakurai, Modern Quantum Mechanics, §1.6; Goldstein, §9.7.*
+

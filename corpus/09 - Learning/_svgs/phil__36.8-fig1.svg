@@ -1,0 +1,93 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .state{fill:var(--background-secondary,#161b22);stroke:var(--interactive-accent,#58a6ff);stroke-width:1.2;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.8 — Altered States, Dreams &amp; Non-Ordinary Consciousness</text>
+  <!-- States of consciousness spectrum -->
+  <rect x="20" y="35" width="680" height="90" class="box" rx="4"/>
+  <text x="360" y="52" class="label" text-anchor="middle" font-weight="bold">Consciousness States Spectrum</text>
+  <rect x="30" y="60" width="85" height="45" class="state" rx="3"/>
+  <text x="72" y="78" class="sub" text-anchor="middle">Waking</text>
+  <text x="72" y="90" class="sub" text-anchor="middle">Normal baseline</text>
+  <text x="72" y="102" class="sub" text-anchor="middle">Beta/Alpha EEG</text>
+  <rect x="125" y="60" width="85" height="45" class="state" rx="3"/>
+  <text x="167" y="78" class="sub" text-anchor="middle">Hypnagogia</text>
+  <text x="167" y="90" class="sub" text-anchor="middle">Sleep onset</text>
+  <text x="167" y="102" class="sub" text-anchor="middle">theta, hallucinations</text>
+  <rect x="220" y="60" width="85" height="45" class="state" rx="3"/>
+  <text x="262" y="78" class="sub" text-anchor="middle">NREM Sleep</text>
+  <text x="262" y="90" class="sub" text-anchor="middle">Slow wave</text>
+  <text x="262" y="102" class="sub" text-anchor="middle">delta, repair</text>
+  <rect x="315" y="60" width="85" height="45" class="state" rx="3"/>
+  <text x="357" y="78" class="sub" text-anchor="middle">REM/Dreaming</text>
+  <text x="357" y="90" class="sub" text-anchor="middle">Active visual cx</text>
+  <text x="357" y="102" class="sub" text-anchor="middle">near-wake EEG</text>
+  <rect x="410" y="60" width="85" height="45" class="state" rx="3"/>
+  <text x="452" y="78" class="sub" text-anchor="middle">Lucid Dream</text>
+  <text x="452" y="90" class="sub" text-anchor="middle">Prefrontal active</text>
+  <text x="452" y="102" class="sub" text-anchor="middle">aware in dream</text>
+  <rect x="505" y="60" width="90" height="45" class="state" rx="3"/>
+  <text x="550" y="78" class="sub" text-anchor="middle">Meditation</text>
+  <text x="550" y="90" class="sub" text-anchor="middle">Alpha/Gamma</text>
+  <text x="550" y="102" class="sub" text-anchor="middle">default mode ↓</text>
+  <rect x="605" y="60" width="90" height="45" class="state" rx="3"/>
+  <text x="650" y="78" class="sub" text-anchor="middle">Psychedelic</text>
+  <text x="650" y="90" class="sub" text-anchor="middle">DMN disrupted</text>
+  <text x="650" y="102" class="sub" text-anchor="middle">hyperconnectivity</text>
+  <!-- Dream theories -->
+  <rect x="20" y="140" width="225" height="160" class="box" rx="4"/>
+  <text x="122" y="157" class="label" text-anchor="middle" font-weight="bold">Dream Theories</text>
+  <text x="30" y="174" class="sub" font-weight="bold">Freudian (wish-fulfilment):</text>
+  <text x="30" y="188" class="sub">Dreams = disguised unconscious wishes</text>
+  <text x="30" y="202" class="sub">Latent vs manifest content</text>
+  <text x="30" y="218" class="sub" font-weight="bold">Activation-synthesis (Hobson):</text>
+  <text x="30" y="232" class="sub">Brainstem activates randomly during REM</text>
+  <text x="30" y="246" class="sub">Cortex constructs narrative from noise</text>
+  <text x="30" y="262" class="sub" font-weight="bold">Threat simulation (Revonsuo):</text>
+  <text x="30" y="276" class="sub">Dreams rehearse threat responses</text>
+  <text x="30" y="288" class="sub">Evolutionary safety simulator</text>
+  <text x="30" y="302" class="sub" font-weight="bold">Predictive processing:</text>
+  <text x="30" y="316" class="sub">Dreams = model running offline,</text>
+  <text x="30" y="328" class="sub">updating priors without sensory input</text>
+  <!-- Meditation neuroscience -->
+  <rect x="260" y="140" width="225" height="160" class="box" rx="4"/>
+  <text x="372" y="157" class="label" text-anchor="middle" font-weight="bold">Meditation Neuroscience</text>
+  <text x="270" y="174" class="sub" font-weight="bold">Default Mode Network (DMN):</text>
+  <text x="270" y="188" class="sub">Active during mind-wandering, self-ref</text>
+  <text x="270" y="202" class="sub">Suppressed during focused attention</text>
+  <text x="270" y="218" class="sub" font-weight="bold">Focused attention meditation:</text>
+  <text x="270" y="232" class="sub">Strengthens prefrontal control over DMN</text>
+  <text x="270" y="246" class="sub">Alpha/Theta in anterior cingulate</text>
+  <text x="270" y="262" class="sub" font-weight="bold">Open monitoring (vipassana):</text>
+  <text x="270" y="276" class="sub">Gamma bursts, expanded awareness</text>
+  <text x="270" y="290" class="sub">Non-dual awareness: no self-referential</text>
+  <text x="270" y="304" class="sub" processing" fill="var(--text-muted,#8b949e)" font-size="10">interference. Mirror neurons active.</text>
+  <text x="270" y="318" class="sub" font-weight="bold">MBSR (Kabat-Zinn): clinical effects</text>
+  <text x="270" y="332" class="sub">Cortical thickness ↑ in long-term meditators</text>
+  <!-- Psychedelics neuroscience -->
+  <rect x="500" y="140" width="200" height="160" class="box" rx="4"/>
+  <text x="600" y="157" class="label" text-anchor="middle" font-weight="bold">Psychedelic Neuroscience</text>
+  <text x="510" y="174" class="sub" font-weight="bold">Serotonin 5-HT2A agonism:</text>
+  <text x="510" y="188" class="sub">Psilocybin, LSD, DMT all bind 5-HT2A</text>
+  <text x="510" y="202" class="sub">Destabilizes predictive hierarchies</text>
+  <text x="510" y="218" class="sub" font-weight="bold">Entropy increase:</text>
+  <text x="510" y="232" class="sub">Carhart-Harris: psychedelics increase</text>
+  <text x="510" y="246" class="sub">neural entropy (less stereotyped patterns)</text>
+  <text x="510" y="262" class="sub">DMN fragmentation = ego dissolution</text>
+  <text x="510" y="278" class="sub" font-weight="bold">Therapeutic applications:</text>
+  <text x="510" y="292" class="sub">PTSD, depression, addiction</text>
+  <text x="510" y="306" class="sub">Johns Hopkins, Imperial College</text>
+  <text x="510" y="320" class="sub">FDA breakthrough therapy psilocybin</text>
+  <!-- Bottom -->
+  <rect x="20" y="315" width="680" height="92" class="box" rx="4"/>
+  <text x="360" y="332" class="label" text-anchor="middle" font-weight="bold">Philosophical Implications of Non-Ordinary States</text>
+  <text x="30" y="348" class="sub">Ordinary waking consciousness is NOT the only form of consciousness — altered states reveal the constructed, modifiable nature of subjective experience.</text>
+  <text x="30" y="363" class="sub">Dream consciousness: phenomenally rich without external input → supports the idea that consciousness is internally generated, not just reactive.</text>
+  <text x="30" y="378" class="sub">Psychedelic ego dissolution: temporary loss of self-boundaries → suggests the "self" is a model, not a fixed metaphysical entity. Connects to Parfit's no-self conclusion.</text>
+  <text x="30" y="393" class="sub">Free resources: Carhart-Harris "The Entropic Brain" (free PDF) · Hobson "The Dreaming Brain" · SEP plato.stanford.edu/entries/consciousness-states/ · Waking up app (Sam Harris)</text>
+</svg>

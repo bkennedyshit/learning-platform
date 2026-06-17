@@ -1,0 +1,167 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .stage-s { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: stageS 6s infinite ease-in-out; }
+    .stage-p { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; animation: stageP 6s infinite ease-in-out 1s; }
+    .stage-i { fill: #2a1a4a; stroke: #8c3db8; stroke-width: 1; animation: stageI 6s infinite ease-in-out 2s; }
+    .stage-n { fill: #1a4a3a; stroke: #51cf66; stroke-width: 1; animation: stageN 6s infinite ease-in-out 3s; }
+    .stage-close { fill: #3a2a1a; stroke: #b8703d; stroke-width: 2; animation: stageClose 4s infinite ease-in-out; }
+    .objection { fill: #ff6b6b; opacity: 0.15; stroke: #ff6b6b; stroke-width: 1; }
+    .response { fill: #51cf66; opacity: 0.15; stroke: #51cf66; stroke-width: 1; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .arrow-down { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; }
+
+    @keyframes stageS {
+      0%, 100% { stroke-width: 1.5; opacity: 0.8; }
+      50% { stroke-width: 2.2; opacity: 1; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes stageP {
+      0%, 100% { stroke-width: 1; }
+      50% { stroke-width: 1.8; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes stageI {
+      0%, 100% { stroke-width: 1; }
+      50% { stroke-width: 1.8; filter: drop-shadow(0 0 4px #8c3db8); }
+    }
+    @keyframes stageN {
+      0%, 100% { stroke-width: 1; }
+      50% { stroke-width: 1.8; filter: drop-shadow(0 0 4px #51cf66); }
+    }
+    @keyframes stageClose {
+      0%, 100% { stroke-width: 2; }
+      50% { stroke-width: 3.2; filter: drop-shadow(0 0 6px #b8703d); }
+    }
+    @keyframes flowArrows {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz6-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="biz6-arr-d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">Sales Process Flow — Discovery to Close (SPIN + Objection Handling)</text>
+
+  <!-- Sales Cycle Flow (top) -->
+  <!-- Stage boxes in a row -->
+  <rect x="10" y="30" width="88" height="62" rx="4" class="stage-s"/>
+  <text x="54" y="50" class="bold" text-anchor="middle">Lead Gen</text>
+  <text x="14" y="64" class="sublabel">Cold email · PLG PQL</text>
+  <text x="14" y="75" class="sublabel">Inbound · referral</text>
+  <text x="14" y="86" class="sublabel">Community post</text>
+
+  <line x1="100" y1="61" x2="118" y2="61" class="arrow" marker-end="url(#biz6-arr)"/>
+
+  <rect x="120" y="30" width="88" height="62" rx="4" class="stage-p"/>
+  <text x="164" y="50" class="bold" text-anchor="middle">Qualify</text>
+  <text x="124" y="64" class="sublabel">BANT / MEDDIC</text>
+  <text x="124" y="75" class="sublabel">Budget + Authority</text>
+  <text x="124" y="86" class="sublabel">Need + Timeline</text>
+
+  <line x1="210" y1="61" x2="228" y2="61" class="arrow" marker-end="url(#biz6-arr)"/>
+
+  <rect x="230" y="30" width="100" height="62" rx="4" class="stage-i"/>
+  <text x="280" y="50" class="bold" text-anchor="middle">Discovery Call</text>
+  <text x="234" y="64" class="sublabel">SPIN questions</text>
+  <text x="234" y="75" class="sublabel">S: Situation</text>
+  <text x="234" y="86" class="sublabel">P: Problem</text>
+
+  <line x1="332" y1="61" x2="350" y2="61" class="arrow" marker-end="url(#biz6-arr)"/>
+
+  <rect x="352" y="30" width="88" height="62" rx="4" class="stage-n"/>
+  <text x="396" y="50" class="bold" text-anchor="middle">Demo</text>
+  <text x="356" y="64" class="sublabel">Problem-first</text>
+  <text x="356" y="75" class="sublabel">Map to their pain</text>
+  <text x="356" y="86" class="sublabel">Show before/after</text>
+
+  <line x1="442" y1="61" x2="460" y2="61" class="arrow" marker-end="url(#biz6-arr)"/>
+
+  <rect x="462" y="30" width="96" height="62" rx="4" class="stage-s"/>
+  <text x="510" y="50" class="bold" text-anchor="middle">Proposal</text>
+  <text x="466" y="64" class="sublabel">Price + scope</text>
+  <text x="466" y="75" class="sublabel">ROI calculation</text>
+  <text x="466" y="86" class="sublabel">Sent within 24hrs</text>
+
+  <line x1="560" y1="61" x2="578" y2="61" class="arrow" marker-end="url(#biz6-arr)"/>
+
+  <rect x="580" y="30" width="130" height="62" rx="4" class="stage-close"/>
+  <text x="645" y="50" class="bold" text-anchor="middle">Close</text>
+  <text x="584" y="64" class="sublabel">Assumptive / Summary</text>
+  <text x="584" y="75" class="sublabel">Next step always set</text>
+  <text x="584" y="86" class="sublabel">Contract in &lt;1hr of yes</text>
+
+  <!-- SPIN breakdown (middle left) -->
+  <rect x="10" y="108" width="300" height="140" class="box" rx="4"/>
+  <text x="160" y="126" class="bold" text-anchor="middle">SPIN Selling — Discovery Call Framework</text>
+
+  <rect x="18" y="132" width="280" height="22" rx="2" fill="#1a3a5c" opacity="0.5"/>
+  <text x="28" y="147" class="label">S — Situation</text>
+  <text x="200" y="147" class="sublabel">"What tools are you using today?"</text>
+
+  <rect x="18" y="157" width="280" height="22" rx="2" fill="#2a1a4a" opacity="0.5"/>
+  <text x="28" y="172" class="label">P — Problem</text>
+  <text x="200" y="172" class="sublabel">"What's most frustrating about that?"</text>
+
+  <rect x="18" y="182" width="280" height="22" rx="2" fill="#4a2a1a" opacity="0.6"/>
+  <text x="28" y="197" class="label">I — Implication 🔑</text>
+  <text x="200" y="197" class="sublabel">"How does that affect your timeline?"</text>
+
+  <rect x="18" y="207" width="280" height="22" rx="2" fill="#1a4a3a" opacity="0.6"/>
+  <text x="28" y="222" class="label">N — Need-Payoff 🔑</text>
+  <text x="200" y="222" class="sublabel">"If that was solved, what would change?"</text>
+
+  <text x="18" y="240" class="sublabel">I + N are the emotional engine of SPIN. Let them articulate their own pain severity and the value of solving it.</text>
+
+  <!-- Objection handling (middle right) -->
+  <rect x="320" y="108" width="390" height="140" class="box" rx="4"/>
+  <text x="515" y="126" class="bold" text-anchor="middle">The 5 Common Objections + Responses</text>
+
+  <text x="328" y="142" class="label" fill="#ff6b6b">❌ "Too expensive"</text>
+  <text x="328" y="154" class="sublabel" fill="#51cf66">→ "Is it the number, or is it that you're not sure the value justifies it?"</text>
+
+  <text x="328" y="166" class="label" fill="#ff6b6b">❌ "Not the right time"</text>
+  <text x="328" y="178" class="sublabel" fill="#51cf66">→ "What needs to change for timing to be right? Any version that fits now?"</text>
+
+  <text x="328" y="190" class="label" fill="#ff6b6b">❌ "We built our own solution"</text>
+  <text x="328" y="202" class="sublabel" fill="#51cf66">→ "What led you to build it? Where does it fall short today?"</text>
+
+  <text x="328" y="214" class="label" fill="#ff6b6b">❌ "Need to check with my boss"</text>
+  <text x="328" y="226" class="sublabel" fill="#51cf66">→ "Who else is involved? Can I join a call to help with the internal discussion?"</text>
+
+  <text x="328" y="238" class="label" fill="#ff6b6b">❌ "Evaluating other options"</text>
+  <text x="328" y="250" class="sublabel" fill="#51cf66">→ "What criteria matter most? Let me show you where we're different on those."</text>
+
+  <!-- BOTTOM: Negotiation + Closing -->
+  <rect x="10" y="262" width="340" height="100" class="box" rx="4"/>
+  <text x="180" y="280" class="bold" text-anchor="middle">Negotiation Principles</text>
+  <text x="18" y="296" class="sublabel">BATNA: always have 3+ deals in pipeline — power comes from alternatives</text>
+  <text x="18" y="309" class="sublabel">Anchor: name your price first. First number anchors the negotiation.</text>
+  <text x="18" y="322" class="sublabel">Concession sequencing: $500 off → $200 off → $50 off (decreasing size signals floor)</text>
+  <text x="18" y="335" class="sublabel">Every concession must buy something: "I can do $3,000 if you pay annually upfront"</text>
+  <text x="18" y="348" class="sublabel">Hold your floor: "I'm not able to go below $2,500 — that's where it breaks for me."</text>
+  <text x="18" y="358" class="sublabel">Don't fill silence — after naming price, wait. Let them respond first.</text>
+
+  <!-- Closing moves -->
+  <rect x="360" y="262" width="350" height="100" class="box" rx="4"/>
+  <text x="535" y="280" class="bold" text-anchor="middle">Closing Moves</text>
+  <text x="368" y="296" class="label">1. Assumptive close:</text>
+  <text x="368" y="308" class="sublabel">"Great — do you want the contract addressed to you or your company?"</text>
+  <text x="368" y="320" class="label">2. Summary close:</text>
+  <text x="368" y="332" class="sublabel">"We've agreed on Builder annual at $699, starting Q1 — I'll send the agreement now."</text>
+  <text x="368" y="344" class="label">3. Next-step close:</text>
+  <text x="368" y="356" class="sublabel">"Can we find 15 mins Friday to review the agreement together?" (Never: "let me know what you think")</text>
+
+  <!-- Bottom rule -->
+  <text x="360" y="382" class="bold" text-anchor="middle">The Founder Sales Rule</text>
+  <text x="360" y="396" class="sublabel" text-anchor="middle">Founders must close the first 20–30 deals personally. Only after you've documented the repeatable playbook do you hire a salesperson.</text>
+  <text x="360" y="408" class="sublabel" text-anchor="middle">You're hiring someone to execute your playbook — not to write it for you.</text>
+</svg>

@@ -1,0 +1,497 @@
+---
+title: "16.7 — Query Processing & Execution"
+subject: "Databases & Storage Engines"
+catalog: advanced
+audience_tier: higher-education
+chapter: "16.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 16.7 — Query Processing & Execution
+
+> *"Every slow query is a correctly written algorithm for the wrong plan. The optimizer chose the wrong plan. EXPLAIN ANALYZE tells you why."*
+
+> *"The Volcano model is the 'pull' protocol of database execution. Every node in the plan tree says 'give me your next tuple' to its child. It's turtles all the way down — until a SeqScan reaches the storage engine."*
+
+Query processing is the layer between the SQL string you type and the rows that appear on your screen. It's a compiler-like pipeline: parsing produces a tree, analysis resolves names and types, rewriting expands views and rules, planning generates execution alternatives and chooses the cheapest, and execution pulls tuples through the plan tree using the Volcano model.
+
+This chapter gives you the vocabulary to read `EXPLAIN ANALYZE` output and understand every number in it.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Describe each stage of the **query pipeline**: Parser → Analyzer → Rewriter → Planner/Optimizer → Executor.
+2. Explain the **Volcano/iterator model**: `init()`, `next()`, `close()` and how plan nodes form a tree.
+3. Explain **PostgreSQL's cost model**: `seq_page_cost`, `random_page_cost`, `cpu_tuple_cost`, `cpu_index_tuple_cost`, and how they combine.
+4. Describe the **three join algorithms**: Nested-Loop, Hash Join, Merge Join — conditions for each, time complexity, and memory usage.
+5. Read **`EXPLAIN (ANALYZE, BUFFERS)`** output and identify: cost estimate vs actual, rows estimate vs actual, shared buffers hit/read, and bottleneck operators.
+6. Identify common query optimization failures: missing index, bad statistics, `LIKE '%prefix'`, function on indexed column, implicit type cast.
+
+---
+
+## 🖼️ Visual Anchor
+
+![dbs__30.7-fig1](dbs__30.7-fig1.svg)
+
+*Figure 30.7.1 — Query pipeline stages, Volcano model plan tree, and the three join algorithms.*
+
+---
+
+## 📚 1. The Query Processing Pipeline
+
+### 1.1 Stage 1: Parser
+
+The parser converts a SQL text string into a **parse tree** (also called abstract syntax tree, AST). It does only syntactic analysis — no semantic checking.
+
+```sql
+-- Input
+SELECT u.name, o.amount
+FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE o.amount > 100;
+
+-- Parse tree (simplified):
+SelectStmt {
+  targetList: [ColumnRef(u, name), ColumnRef(o, amount)]
+  fromClause: JoinExpr {
+    left: RangeVar(users, alias=u)
+    jointype: INNER
+    right: RangeVar(orders, alias=o)
+    quals: OpExpr(u.id = o.user_id)
+  }
+  whereClause: OpExpr(o.amount > 100)
+}
+```
+
+### 1.2 Stage 2: Analyzer / Semantic Analysis
+
+The analyzer resolves names (looks up `users` and `orders` in `pg_catalog`), checks types, and produces a **query tree** annotated with OIDs, types, and operator resolutions.
+
+Key tasks:
+- Resolve table names to OIDs in `pg_class`
+- Resolve column names to attribute numbers in `pg_attribute`
+- Resolve operator symbols (`>`, `=`) to function OIDs in `pg_operator`
+- Check for type compatibility (`o.amount > 100` → `numeric > integer` → implicit cast)
+- Build target list with proper types
+
+### 1.3 Stage 3: Rewriter
+
+The rewriter applies transformation rules to the query tree:
+- **View expansion**: replace view references with their defining SELECT
+- **Rule expansion**: apply `DO INSTEAD` or `DO ALSO` rules
+- **Row-level security (RLS)**: inject WHERE clauses for RLS policies
+
+```sql
+-- Example: view expansion
+CREATE VIEW active_users AS SELECT * FROM users WHERE active = true;
+
+SELECT name FROM active_users WHERE id = 42;
+-- Rewriter expands to:
+SELECT name FROM users WHERE active = true AND id = 42;
+```
+
+### 1.4 Stage 4: Planner / Optimizer
+
+The planner takes the rewritten query tree and generates an **execution plan**. This is the most complex stage.
+
+**Steps:**
+1. Generate candidate plans (different join orders, different access methods)
+2. Estimate cost for each candidate using the cost model and statistics
+3. Select the cheapest plan → output a `PlannedStmt` tree
+
+**Statistics sources** (updated by `ANALYZE`):
+- `pg_class.reltuples`: estimated row count
+- `pg_class.relpages`: estimated page count
+- `pg_statistic`: per-column histograms, most-common values, null fraction, correlation
+
+### 1.5 Stage 5: Executor
+
+The executor drives the plan tree using the **Volcano/iterator model**. It materialises the result set by pulling tuples from the root node, which pulls from its children, all the way down to the leaf scan nodes that read from the storage engine.
+
+---
+
+## 📚 2. The Volcano / Iterator Model
+
+### 2.1 Three Interface Methods
+
+Every executor node implements three methods:
+
+```
+init()    — initialise state, recurse to init children
+next()    — return the next output tuple (or NULL if done)
+close()   — clean up state, recurse to close children
+```
+
+Execution proceeds via lazy evaluation: the root node calls `next()` on its child, which calls `next()` on its child, all the way to the leaf scanner. Only one tuple flows up the tree at a time (except for blocking operators like Sort and Hash).
+
+### 2.2 A Volcano Plan Tree
+
+```
+SELECT u.name, SUM(o.amount)
+FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE u.active = true
+GROUP BY u.name
+ORDER BY SUM(o.amount) DESC;
+
+Plan tree (Volcano):
+  Sort (ORDER BY sum_amount DESC)
+    └── Aggregate (GROUP BY u.name → SUM)
+          └── Hash Join (u.id = o.user_id)
+                ├── Seq Scan users (Filter: active = true)  ← build side
+                └── Seq Scan orders  ← probe side
+```
+
+Execution:
+1. `Sort.init()` → calls `Aggregate.init()` → calls `HashJoin.init()` → calls both `SeqScan.init()`
+2. `Sort.next()` → needs all input → repeatedly calls `Aggregate.next()` → collects all groups
+3. `Aggregate.next()` → calls `HashJoin.next()` for each new tuple
+4. `HashJoin.next()` → first builds hash table from left (`users`), then probes with right (`orders`)
+5. `SeqScan.next()` → reads pages from the buffer pool one tuple at a time
+
+**Blocking operators**: Sort and Hash (in Hash Join) must materialise their entire input before producing any output. They don't stream tuple-by-tuple — they block until complete. This affects memory usage (`work_mem` setting).
+
+### 2.3 The Node Zoo
+
+| Node type | What it does |
+|---|---|
+| `SeqScan` | Sequential scan of entire heap |
+| `IndexScan` | B-tree lookup → fetch heap tuple via ctid |
+| `IndexOnlyScan` | B-tree lookup, skip heap fetch (if visibility map all-visible) |
+| `BitmapIndexScan` + `BitmapHeapScan` | Build bitmap of matching TIDs, then fetch heap pages in order |
+| `NestLoop` | Nested-loop join |
+| `HashJoin` | Build hash table + probe |
+| `MergeJoin` | Merge two sorted inputs |
+| `Aggregate` | GROUP BY + aggregate functions |
+| `Sort` | ORDER BY or needed by MergeJoin |
+| `Hash` | Build a hash table (for HashJoin) |
+| `Limit` | Return first N tuples |
+| `Materialize` | Cache inner side of NestLoop |
+| `Append` | Partition pruning for partitioned tables |
+
+---
+
+## 📚 3. The Cost Model
+
+### 3.1 Cost Units
+
+PostgreSQL's cost model estimates cost in abstract units. The base units are:
+- `seq_page_cost = 1.0` (default): cost to read one page sequentially
+- `random_page_cost = 4.0` (default for HDD; set to 1.1 for NVMe SSD): cost to read one page randomly
+- `cpu_tuple_cost = 0.01`: cost to process one tuple
+- `cpu_index_tuple_cost = 0.005`: cost to process one index entry
+- `cpu_operator_cost = 0.0025`: cost to evaluate one operator
+
+**Sequential scan cost formula:**
+```
+cost = seq_page_cost × relpages + cpu_tuple_cost × reltuples
+     = 1.0 × 1000 + 0.01 × 100000
+     = 1000 + 1000 = 2000
+```
+
+**Index scan cost formula:**
+```
+cost = (random_page_cost × matching_leaf_pages) + (random_page_cost × heap_pages_fetched)
+     + cpu_index_tuple_cost × index_rows_scanned
+     + cpu_tuple_cost × rows_returned
+```
+
+**Key tuning insight**: `random_page_cost` default (4.0) was set for spinning disks. For NVMe SSDs, setting `random_page_cost = 1.1` causes the planner to favour index scans more aggressively — often the right call.
+
+### 3.2 Statistics-Based Estimation
+
+The planner estimates the number of rows returned by a condition using statistics:
+
+```sql
+-- pg_statistic for the amount column in orders:
+SELECT *
+FROM pg_stats
+WHERE tablename = 'orders' AND attname = 'amount';
+-- Shows: histogram_bounds, most_common_vals, most_common_freqs, n_distinct, correlation
+```
+
+**Selectivity estimation** for `amount > 100`:
+- If the histogram shows 80% of values are ≤ 100, selectivity = 0.20 (20% of rows match)
+- Estimated rows = 0.20 × reltuples
+
+**Bad statistics = bad plan.** If `ANALYZE` hasn't run recently, row estimates are wrong, and the planner may choose the wrong join order or wrong index. Always run `VACUUM ANALYZE` after large data loads.
+
+---
+
+## 📚 4. Join Algorithms
+
+### 4.1 Nested-Loop Join
+
+**Algorithm:**
+```
+for each row R in outer_table:
+    for each row S in inner_table:
+        if R.join_key = S.join_key:
+            emit (R, S)
+```
+
+**Time complexity:** O(N × M) — N and M are row counts of outer and inner tables.
+**Memory:** O(1) — just current rows in memory.
+**When to choose:** Small outer table with large indexed inner table. Each probe of the inner table uses an index scan (O(log M) instead of O(M)).
+
+```
+NestLoop
+  ├── SeqScan orders (outer, small: 100 rows)
+  └── Index Scan users ON users_pkey (inner, indexed, 1M rows)
+  
+Cost: 100 × O(log 1M) ≈ 100 × 20 = 2000 index probes
+vs SeqScan: 1M row scan = much more expensive
+```
+
+### 4.2 Hash Join
+
+**Algorithm:**
+```
+-- Build phase:
+for each row R in build_table (smaller):
+    insert R into hash_table[hash(R.join_key)]
+
+-- Probe phase:
+for each row S in probe_table (larger):
+    look up hash_table[hash(S.join_key)]
+    for each match: emit (match, S)
+```
+
+**Time complexity:** O(N + M) — linear in total input size.
+**Memory:** O(N) — the entire build table must fit in `work_mem`. If it doesn't, hash joins spill to disk (batched hash join).
+**When to choose:** Large tables with equality join condition, no useful index, enough memory for build table.
+
+```sql
+-- Check if hash join is spilling to disk:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT u.name, COUNT(o.id)
+FROM users u JOIN orders o ON u.id = o.user_id
+GROUP BY u.name;
+
+-- Look for: "Batches: 1" (no spill) vs "Batches: N" (N-way spill)
+-- If spilling: consider increasing work_mem
+SET work_mem = '256MB';
+```
+
+### 4.3 Merge Join
+
+**Algorithm:**
+```
+sort outer by join_key (if not already sorted)
+sort inner by join_key (if not already sorted)
+
+while both lists not exhausted:
+    if outer.key < inner.key: advance outer
+    if outer.key > inner.key: advance inner
+    if outer.key = inner.key: emit all combinations, advance both
+```
+
+**Time complexity:** O((N + M) log N + (N + M) log M) with sort, or O(N + M) if inputs are pre-sorted.
+**Memory:** Sort requires O(N) or O(M) unless merging external sorted runs.
+**When to choose:**
+- Both inputs are already sorted (e.g., from index scans on the join column)
+- The query has an `ORDER BY` on the join key (sort can be shared)
+- Very large tables where hash join would require many spill batches
+
+---
+
+## 📚 5. Reading EXPLAIN ANALYZE
+
+### 5.1 The Essential Command
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT u.name, SUM(o.amount)
+FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE u.active = true
+GROUP BY u.name
+HAVING SUM(o.amount) > 1000
+ORDER BY 2 DESC
+LIMIT 10;
+```
+
+### 5.2 Anatomy of EXPLAIN Output
+
+```
+Sort  (cost=12345.67..12345.69 rows=10 width=40)
+      (actual time=89.234..89.236 rows=10 loops=1)
+  Sort Key: (sum(o.amount)) DESC
+  Sort Method: top-N heapsort  Memory: 25kB
+  Buffers: shared hit=4821 read=203
+  ->  HashAggregate  (cost=12000.00..12100.00 rows=500 width=40)
+                     (actual time=88.100..89.100 rows=487 loops=1)
+        Group Key: u.name
+        Batches: 1  Memory Usage: 256kB
+        Buffers: shared hit=4821 read=203
+        ->  Hash Join  (cost=1000.00..10000.00 rows=50000 width=28)
+                        (actual time=1.234..65.432 rows=48923 loops=1)
+              Hash Cond: (o.user_id = u.id)
+              Buffers: shared hit=4815 read=203
+              ->  Seq Scan on orders o  (cost=0..5000 rows=100000 width=16)
+                                         (actual time=0.012..25.678 rows=100000 loops=1)
+                    Buffers: shared hit=3000 read=200
+              ->  Hash  (cost=800..800 rows=16000 width=12)
+                         (actual time=0.890..0.890 rows=15934 loops=1)
+                    Buckets: 16384  Batches: 1  Memory: 768kB
+                    Buffers: shared hit=1815 read=3
+                    ->  Seq Scan on users u  (cost=0..700 rows=16000 width=12)
+                                              (actual time=0.005..0.587 rows=15934 loops=1)
+                          Filter: active
+                          Rows Removed by Filter: 66
+                          Buffers: shared hit=1815 read=3
+```
+
+### 5.3 What Each Field Means
+
+| Field | Meaning |
+|---|---|
+| `cost=X..Y` | X = startup cost (before first row); Y = total cost (all rows) |
+| `rows=N` | **Estimated** rows this node will produce |
+| `actual time=A..B` | **Actual** milliseconds — A=first row, B=all rows |
+| `actual rows=N` | **Actual** rows produced (loops × per-loop-rows) |
+| `loops=N` | How many times this node was executed (NestLoop inner = 1 per outer row) |
+| `shared hit=N` | Pages found in buffer pool (no disk I/O) |
+| `shared read=N` | Pages fetched from disk |
+| `Rows Removed by Filter` | Rows read but discarded by a filter condition |
+
+### 5.4 Diagnosis Patterns
+
+**Rows estimate vs actual:**
+```
+rows=500 actual rows=48923 → 98× underestimate
+→ Statistics stale (run VACUUM ANALYZE) or multi-column correlation
+  (consider CREATE STATISTICS for correlated columns)
+```
+
+**High `shared read`:**
+```
+shared hit=0 read=5000 → cache miss, table/index not in buffer pool
+→ Consider: pg_prewarm, increase shared_buffers, or expect cold-start
+```
+
+**Filter removes many rows:**
+```
+Seq Scan on users (rows=100000 actual=15934 loops=1)
+  Filter: active
+  Rows Removed by Filter: 84066
+→ 84% of rows filtered AFTER reading them — index on 'active' column
+  would allow IndexScan to skip unneeded pages
+```
+
+**Wrong join algorithm:**
+```
+NestLoop (actual time=15000..15010 rows=100000 loops=1)
+→ Expected Hash Join for this table size — maybe enable_hashjoin is off,
+  or work_mem is too low, or statistics are wrong
+```
+
+---
+
+## 📚 6. Common Query Optimization Failures
+
+### 6.1 Missing Index
+
+```sql
+-- Slow: full table scan
+EXPLAIN SELECT * FROM orders WHERE customer_id = 9001;
+-- "Seq Scan on orders (cost=0..50000 rows=1 width=...)"
+
+-- Fix:
+CREATE INDEX CONCURRENTLY idx_orders_customer ON orders (customer_id);
+-- Now: "Index Scan using idx_orders_customer (cost=0..8 rows=1 width=...)"
+```
+
+### 6.2 Stale Statistics
+
+```sql
+-- Run after bulk loads, large deletes, or when estimates are clearly wrong
+VACUUM ANALYZE orders;
+-- Or just the statistics update:
+ANALYZE orders;
+```
+
+### 6.3 Function on Indexed Column
+
+```sql
+-- BROKEN: function call prevents index use
+SELECT * FROM users WHERE lower(email) = 'alice@example.com';
+-- "Seq Scan on users" ← index on email is useless here
+
+-- Fix 1: functional index
+CREATE INDEX idx_users_email_lower ON users (lower(email));
+
+-- Fix 2: generated column
+ALTER TABLE users ADD COLUMN email_lower TEXT GENERATED ALWAYS AS (lower(email)) STORED;
+CREATE INDEX idx_users_email_lower ON users (email_lower);
+```
+
+### 6.4 LIKE with Leading Wildcard
+
+```sql
+-- BROKEN: leading wildcard prevents B-tree index use
+SELECT * FROM products WHERE name LIKE '%widget%';
+-- "Seq Scan on products" ← B-tree can't do leading wildcards
+
+-- Fix: pg_trgm for trigram-based LIKE/ILIKE
+CREATE EXTENSION pg_trgm;
+CREATE INDEX idx_products_name_trgm ON products USING GIN (name gin_trgm_ops);
+-- Now: "Bitmap Index Scan using idx_products_name_trgm"
+```
+
+### 6.5 Implicit Type Cast
+
+```sql
+-- BROKEN: customer_id is INTEGER, literal '9001' is TEXT → implicit cast
+SELECT * FROM orders WHERE customer_id = '9001';
+-- PostgreSQL handles this correctly in most cases, but watch for:
+-- Integer column with character literal in Postgres = fine (implicit cast)
+-- Character column with integer literal = sequence scan!
+
+-- Always match types:
+SELECT * FROM orders WHERE customer_id = 9001;  -- correct
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [16.2 - B-Trees & Page Management](16.2---B-Trees-&-Page-Management) — IndexScan and IndexOnlyScan node implementations
+- [16.6 - Concurrency Control & MVCC](16.6---Concurrency-Control-&-MVCC) — visibility map enables IndexOnlyScan to skip heap
+- [16.1 - Storage Engine Fundamentals](16.1---Storage-Engine-Fundamentals) — SeqScan reads pages from buffer pool
+- [Subject_Plan](Subject_Plan) — the SQL queries that flow through this pipeline
+
+### External
+- [CMU 15-445 Lecture 11 — Sorting & Aggregation Algorithms](https://15445.courses.cs.cmu.edu/)
+- [CMU 15-445 Lecture 12 — Join Algorithms](https://15445.courses.cs.cmu.edu/)
+- [CMU 15-445 Lecture 14 — Query Execution I](https://15445.courses.cs.cmu.edu/)
+- [CMU 15-445 Lecture 15 — Query Execution II](https://15445.courses.cs.cmu.edu/)
+- [PostgreSQL EXPLAIN Documentation](https://www.postgresql.org/docs/current/sql-explain.html)
+- [PostgreSQL Planner Cost Parameters](https://www.postgresql.org/docs/current/runtime-config-query.html#RUNTIME-CONFIG-QUERY-CONSTANTS)
+- [EXPLAIN Depesz — online EXPLAIN ANALYZE visualizer](https://explain.depesz.com/)
+- [PEV2 — PostgreSQL Explain Visualizer 2](https://explain.dalibo.com/)
+- [Use The Index, Luke — index optimisation for developers](https://use-the-index-luke.com/)
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"EXPLAIN shows actual execution."** `EXPLAIN` without `ANALYZE` shows *estimated* costs and *estimated* row counts — no actual execution. `EXPLAIN ANALYZE` actually runs the query. For `UPDATE`/`DELETE`, wrap in a transaction and rollback to avoid side effects.
+- **"Index always wins."** For queries that return >20% of rows, a sequential scan reads fewer total pages than an index scan (index lookup + random heap fetch per row). The planner does this math — trust it unless statistics are wrong.
+- **"work_mem is per-query."** `work_mem` is per *operator*. A query with 5 hash joins uses up to 5× `work_mem`. On a server with 100 concurrent queries each with 5 joins: 100 × 5 × work_mem = potential memory usage. Set `work_mem` conservatively globally and raise it per-session when needed.
+- **"cost=0 means fast."** Cost units are relative, not milliseconds. `cost=0..1.0` means one sequential page read — but in wall time that could be 0.01ms or 50ms depending on I/O.
+- **"The planner always picks the right join."** The planner uses statistics. With wrong statistics (stale after bulk inserts), it can choose a NestLoop for a 10M-row table scan. Always `VACUUM ANALYZE` after large data changes.
+
+---
+
+*Next: [16.8 - Distributed Databases & Replication](16.8---Distributed-Databases-&-Replication) — When one machine isn't enough.*

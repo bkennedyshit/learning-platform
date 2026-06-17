@@ -1,0 +1,415 @@
+---
+title: "15.2 — Parsers & Grammars"
+subject: "Compilers & Language Design"
+catalog: advanced
+audience_tier: higher-education
+chapter: "15.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 15.2 — Parsers & Grammars
+
+> *"Parsing is the act of converting one representation into another. A grammar is the contract between the input and the structure."*
+
+The lexer gave us a **flat stream of tokens**. The parser's job is to impose **structure** — a tree. `3 + 4 * 2` isn't just five tokens; it's an *addition* of `3` and the *product* of `4` and `2`. Operator precedence is a grammatical rule. The parser enforces it.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Write a **context-free grammar (CFG)** in BNF and EBNF for an expression language.
+2. Implement a **recursive descent parser** for statements and expressions.
+3. Understand **LL(1) parsing** and compute FIRST/FOLLOW sets.
+4. Implement a **Pratt parser** (top-down operator precedence) for expressions.
+5. Understand LR parsing at a conceptual level — what shift-reduce means.
+6. Build the full **parse tree → AST** transformation.
+
+---
+
+## 🖼️ Visual Anchor
+
+![comp-15__fig2](comp-15__fig2.svg)
+
+---
+
+## 📚 1. Context-Free Grammars
+
+### Definition 15.2.1 — Context-Free Grammar
+
+A **CFG** is a 4-tuple G = (V, Σ, R, S) where:
+- **V** = set of non-terminal symbols (grammar variables, written in CAPS)
+- **Σ** = set of terminal symbols (actual tokens)
+- **R** = set of production rules: each rule is `A → α` where A ∈ V, α ∈ (V ∪ Σ)*
+- **S** ∈ V = start symbol
+
+### BNF Notation (Backus-Naur Form)
+
+```bnf
+<expr>   ::= <expr> '+' <term>
+           | <expr> '-' <term>
+           | <term>
+
+<term>   ::= <term> '*' <factor>
+           | <term> '/' <factor>
+           | <factor>
+
+<factor> ::= '(' <expr> ')'
+           | NUMBER
+           | IDENT
+```
+
+### EBNF Notation (Extended BNF)
+
+EBNF adds shorthands `{ }` (zero or more), `[ ]` (optional), and `( )` (grouping):
+
+```ebnf
+expr   = term { ('+' | '-') term } ;
+term   = factor { ('*' | '/') factor } ;
+factor = '(' expr ')' | NUMBER | IDENT ;
+```
+
+EBNF maps directly to recursive descent code with loops, making it often more natural for implementation.
+
+---
+
+## 📚 2. Why Operator Precedence Requires a Hierarchy
+
+Consider `3 + 4 * 2`. Without a grammar hierarchy, this could parse as `(3 + 4) * 2 = 14` or `3 + (4 * 2) = 11`.
+
+The grammar hierarchy *encodes precedence*: `factor` has higher precedence than `term` has higher precedence than `expr`. A parser can only reach `*` through `term`, which is a subexpression of `expr`. Therefore `*` always binds tighter than `+`.
+
+| Grammar level | Operators | Associativity |
+|---|---|---|
+| expr | + − | left |
+| term | * / | left |
+| factor | ** (if added) | right |
+| unary | − ! | right |
+| primary | literals, parenthesized | — |
+
+---
+
+## 📚 3. LL(1) Parsing
+
+An **LL(1)** parser:
+- Reads input **L**eft to right
+- Produces a **L**eftmost derivation
+- Uses **1** token of lookahead
+
+LL(1) grammars have no left recursion and no ambiguity. The grammar above is *left-recursive* (`expr → expr '+' term`), which causes infinite recursion in a naive recursive descent parser. The fix is to eliminate left recursion:
+
+### Left Recursion Elimination
+
+```
+// Left-recursive (causes infinite recursion):
+expr → expr '+' term | term
+
+// Transformed (right-recursive / iterative):
+expr  → term expr'
+expr' → '+' term expr' | ε
+```
+
+Or equivalently in EBNF using a loop:
+```ebnf
+expr = term { '+' term } ;   (* no left recursion *)
+```
+
+### FIRST and FOLLOW Sets
+
+LL(1) parsing tables are built from FIRST and FOLLOW sets:
+
+- **FIRST(α)** = set of terminals that can begin a string derived from α
+- **FOLLOW(A)** = set of terminals that can appear *after* A in any sentential form
+
+For `expr = term { '+' term }`:
+- FIRST(expr) = FIRST(term) = `{NUMBER, IDENT, '('}`
+- FOLLOW(expr) = `{EOF, ')'}`
+
+---
+
+## 📚 4. Recursive Descent Parser — Implementation
+
+A recursive descent parser is a collection of mutually recursive functions, one per non-terminal. Each function:
+1. Reads the current token
+2. Branches based on it (lookahead)
+3. Calls sub-parsers for sub-expressions
+4. Returns an AST node
+
+```python
+from dataclasses import dataclass
+from typing import Optional
+
+# --- AST nodes (simplified) ---
+@dataclass
+class Num:    value: float
+@dataclass
+class Var:    name: str
+@dataclass
+class BinOp:  op: str; left: object; right: object
+@dataclass
+class UnaryOp: op: str; operand: object
+
+class Parser:
+    def __init__(self, tokens: list):
+        self.tokens = tokens
+        self.pos = 0
+
+    def _peek(self):
+        return self.tokens[self.pos] if self.pos < len(self.tokens) else None
+
+    def _expect(self, type_):
+        tok = self._peek()
+        if tok is None or tok.type != type_:
+            raise SyntaxError(f"Expected {type_}, got {tok}")
+        self.pos += 1
+        return tok
+
+    def _match(self, *types):
+        tok = self._peek()
+        if tok and tok.type in types:
+            self.pos += 1
+            return tok
+        return None
+
+    def parse_expr(self):
+        """expr → term { ('+' | '-') term }"""
+        left = self.parse_term()
+        while tok := self._match('PLUS', 'MINUS'):
+            right = self.parse_term()
+            left = BinOp(tok.lexeme, left, right)
+        return left
+
+    def parse_term(self):
+        """term → factor { ('*' | '/') factor }"""
+        left = self.parse_factor()
+        while tok := self._match('STAR', 'SLASH'):
+            right = self.parse_factor()
+            left = BinOp(tok.lexeme, left, right)
+        return left
+
+    def parse_factor(self):
+        """factor → '-' factor | '(' expr ')' | NUMBER | IDENT"""
+        if tok := self._match('MINUS'):
+            operand = self.parse_factor()
+            return UnaryOp('-', operand)
+        if self._match('LPAREN'):
+            node = self.parse_expr()
+            self._expect('RPAREN')
+            return node
+        if tok := self._match('NUMBER'):
+            return Num(float(tok.lexeme))
+        if tok := self._match('IDENT'):
+            return Var(tok.lexeme)
+        raise SyntaxError(f"Unexpected token: {self._peek()}")
+
+    def parse(self):
+        node = self.parse_expr()
+        self._expect('EOF')
+        return node
+```
+
+### Parsing `3 + 4 * 2` Step by Step
+
+```
+parse_expr()
+  → parse_term()             ← left of '+'
+      → parse_factor() → Num(3)
+      no '*' or '/'
+      returns Num(3)
+  → sees '+', consume
+  → parse_term()             ← right of '+'
+      → parse_factor() → Num(4)
+      → sees '*', consume
+      → parse_factor() → Num(2)
+      returns BinOp('*', Num(4), Num(2))
+  → returns BinOp('+', Num(3), BinOp('*', Num(4), Num(2)))
+```
+
+Result: `BinOp('+', Num(3.0), BinOp('*', Num(4.0), Num(2.0)))`
+
+---
+
+## 📚 5. Pratt Parsing (Top-Down Operator Precedence)
+
+Recursive descent with a grammar hierarchy works, but adding a new operator requires restructuring the grammar. **Pratt parsing** (Vaughan Pratt, 1973) solves this elegantly with a **binding power table**.
+
+### Key Concepts
+
+- **nud** (null denotation): how a token behaves at the *start* of an expression (e.g., a number, a prefix `-`).
+- **led** (left denotation): how a token behaves when it follows an expression (e.g., `+` between two expressions).
+- **bp** (binding power): how tightly the operator binds. Higher = tighter.
+- **rbp** (right binding power): for right-associative operators, bp−1 is used to allow the right side to grab the operator.
+
+### Binding Power Table
+
+| Token | nud | led | bp |
+|---|---|---|---|
+| `NUMBER` | literal value | — | 0 |
+| `IDENT` | variable | — | 0 |
+| `+` | — | binary add | 10 |
+| `-` | unary negate | binary sub | 10 |
+| `*` | — | binary mul | 20 |
+| `/` | — | binary div | 20 |
+| `**` | — | binary pow (right-assoc) | 30 |
+| `(` | grouped expr | function call | 40 |
+
+### Pratt Parser Implementation
+
+```python
+class PrattParser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.pos = 0
+
+    def _peek(self): return self.tokens[self.pos]
+    def _advance(self):
+        tok = self.tokens[self.pos]
+        self.pos += 1
+        return tok
+
+    # Binding powers
+    BP = {'PLUS': 10, 'MINUS': 10, 'STAR': 20, 'SLASH': 20,
+          'STARSTAR': 30}
+
+    def parse_expr(self, min_bp: int = 0):
+        tok = self._advance()
+
+        # NUD: prefix position
+        if tok.type == 'NUMBER':
+            left = Num(float(tok.lexeme))
+        elif tok.type == 'IDENT':
+            left = Var(tok.lexeme)
+        elif tok.type == 'MINUS':                   # unary minus
+            operand = self.parse_expr(100)           # high bp = tight binding
+            left = UnaryOp('-', operand)
+        elif tok.type == 'LPAREN':
+            left = self.parse_expr(0)
+            self._advance()  # consume ')'
+        else:
+            raise SyntaxError(f"Unexpected {tok}")
+
+        # LED: infix/postfix position
+        while True:
+            op = self._peek()
+            bp = self.BP.get(op.type, -1)
+            if bp <= min_bp:
+                break
+            self._advance()
+            # Right-associative: pass bp; left-assoc: pass bp (next call uses bp as min)
+            right_bp = bp - 1 if op.type == 'STARSTAR' else bp
+            right = self.parse_expr(right_bp)
+            left = BinOp(op.lexeme, left, right)
+
+        return left
+```
+
+### Why Pratt Wins for Expressions
+
+Adding a new infix operator requires only adding one row to the BP table. No grammar restructuring. This is why many modern production parsers (TypeScript, Go, Rust) use a Pratt-style expression parser embedded in an otherwise recursive-descent parser for statements.
+
+---
+
+## 📚 6. LR Parsing — Conceptual Overview
+
+LR (Left-to-right, Rightmost derivation) parsers are **bottom-up**: they recognise smaller pieces first and assemble them up. Used by `yacc`, `bison`, and many generated parsers.
+
+### Shift-Reduce
+
+An LR parser maintains a **stack** and an input **cursor**:
+
+- **Shift**: push the current input token onto the stack and advance the cursor.
+- **Reduce**: when the top of the stack matches the right-hand side of a rule, pop those symbols and push the left-hand side (non-terminal).
+
+Example: parsing `3 + 4 * 2`
+
+```
+Stack                Input          Action
+[]                   3 + 4 * 2 EOF  SHIFT 3
+[3]                  + 4 * 2 EOF    REDUCE NUMBER → factor
+[factor]             + 4 * 2 EOF    REDUCE factor → term
+[term]               + 4 * 2 EOF    REDUCE term → expr
+[expr]               + 4 * 2 EOF    SHIFT +
+[expr +]             4 * 2 EOF      SHIFT 4
+[expr + 4]           * 2 EOF        REDUCE NUMBER → factor
+[expr + factor]      * 2 EOF        REDUCE factor → term
+[expr + term]        * 2 EOF        SHIFT *
+[expr + term *]      2 EOF          SHIFT 2
+[expr + term * 2]    EOF            REDUCE NUMBER → factor
+[expr + term * factor] EOF          REDUCE term * factor → term
+[expr + term]        EOF            REDUCE expr + term → expr
+[expr]               EOF            ACCEPT
+```
+
+### LL vs LR Trade-offs
+
+| Property | LL(k) / Recursive Descent | LR(k) |
+|---|---|---|
+| Direction | Top-down | Bottom-up |
+| Grammar class | Smaller (no left recursion) | Larger (handles more grammars) |
+| Error messages | Excellent (human-written) | Poor (state machine) |
+| Implementation | Hand-written = easy | Generator (bison, yacc) |
+| Used in | GCC, Clang, CPython, rustc | Many generated parsers |
+
+Production compilers almost universally prefer hand-written recursive descent + Pratt for expressions — the error message quality is simply better.
+
+---
+
+## 📚 7. Error Recovery
+
+A good parser should continue after errors to report multiple problems at once. Two common strategies:
+
+### Panic Mode
+When an unexpected token is seen, discard tokens until a *synchronization point* (e.g., `;`, `}`, `def`) is found, then resume. Simple but may skip large sections.
+
+### Error Productions
+Add explicit grammar rules for common mistakes:
+
+```python
+def parse_statement(self):
+    try:
+        return self._parse_statement_inner()
+    except SyntaxError as e:
+        self._report_error(e)
+        self._synchronize()  # skip to next ';' or '}'
+        return None          # return a sentinel node
+
+def _synchronize(self):
+    """Skip tokens until a statement boundary."""
+    while self._peek().type not in ('SEMI', 'RBRACE', 'EOF'):
+        self._advance()
+    self._match('SEMI')
+```
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [15.1 - Lexers & Tokenization](15.1---Lexers-&-Tokenization) — the token stream this parser consumes
+- [15.3 - Abstract Syntax Trees & Semantic Analysis](15.3---Abstract-Syntax-Trees-&-Semantic-Analysis) — what we build with parse results
+- [15.5 - Intermediate Representations & IR Design](15.5---Intermediate-Representations-&-IR-Design) — what comes after the AST
+
+### External
+- [Crafting Interpreters — Ch. 5 (Representing Code), Ch. 6 (Parsing Expressions)](https://craftinginterpreters.com/parsing-expressions.html)
+- [Pratt Parsing — Matklad blog (excellent tutorial)](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html)
+- [Top-Down Operator Precedence — Vaughan Pratt (original paper, 1973)](https://tdop.github.io/)
+- [Stanford CS143 — Lectures 4–7 (Parsing)](https://online.stanford.edu/courses/cs143-compilers)
+- [ANTLR4 grammar reference](https://github.com/antlr/antlr4/blob/master/doc/index.md)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"Recursive descent can't handle left recursion."** True — but EBNF loops eliminate left recursion naturally. Most production parsers use EBNF-style iteration instead of left-recursive rules.
+- **"Pratt parsers are only for expressions."** They handle expressions beautifully. Statements (if, while, return) are usually handled by a surrounding recursive descent layer. Many parsers are a Pratt expression parser embedded in a recursive descent statement parser.
+- **"LR parsers are always better."** LR parsers handle more grammars but produce worse error messages. The trade-off is well-understood: for a language you control, LL/recursive descent wins on developer experience.
+- **"The parse tree IS the AST."** No — the parse tree includes every grammar artifact (parentheses, semicolons, operator tokens). The AST is a distilled semantic tree. Most compilers build the AST *during* parsing, not as a separate step from the parse tree.
+
+---
+
+*Next: [15.3 - Abstract Syntax Trees & Semantic Analysis](15.3---Abstract-Syntax-Trees-&-Semantic-Analysis) — Annotating the tree with meaning.*

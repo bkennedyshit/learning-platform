@@ -1,0 +1,974 @@
+---
+title: "Generative Models Gans Diffusion"
+subject: "AI & Machine Learning Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "23.6"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 23.6 — Generative Models: GANs & Diffusion
+
+> *"The most important recent development in deep learning is adversarial training — a framework where two networks compete, and both improve."*
+> — **Ian Goodfellow**, *Generative Adversarial Networks* (2014)
+
+Generative models learn to produce new data samples from a learned distribution. This chapter covers three paradigms: GANs (adversarial training), VAEs (variational inference), and Diffusion Models (iterative denoising). We derive the GAN minimax objective, the ELBO for VAEs, and the forward/reverse diffusion process with its connection to score matching.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Derive the GAN minimax objective and prove the optimal discriminator.
+2. Explain mode collapse and training instability in GANs.
+3. Derive the Evidence Lower Bound (ELBO) for Variational Autoencoders.
+4. Define the forward diffusion process as a Markov chain adding Gaussian noise.
+5. Derive the reverse process and its connection to score functions $\nabla_x \log p(x)$.
+6. Explain the noise schedule ($\beta_t$, $\alpha_t$, $\bar{\alpha}_t$) and the reparameterization trick.
+7. Describe the U-Net architecture used in diffusion models.
+
+---
+
+## 🖼️ Visual Anchor — Forward & Reverse Diffusion
+
+![track-10__10.6-fig1](track-10__10.6-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 23.6.1 — Generative Adversarial Network (GAN)
+
+A GAN consists of two networks:
+- **Generator** $G: \mathbb{R}^z \to \mathbb{R}^d$ maps latent noise $\mathbf{z} \sim p_z$ to fake data
+- **Discriminator** $D: \mathbb{R}^d \to [0,1]$ classifies real vs. fake
+
+They play a minimax game:
+
+$$
+\min_G \max_D \; \mathbb{E}_{x \sim p_{data}}[\log D(x)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z)))]
+$$
+
+### Definition 23.6.2 — KL Divergence
+
+The **Kullback-Leibler divergence** from distribution $q$ to $p$:
+
+$$
+D_{KL}(q \| p) = \mathbb{E}_{x \sim q}\left[\log\frac{q(x)}{p(x)}\right] = \int q(x)\log\frac{q(x)}{p(x)}\,dx \geq 0
+$$
+
+$D_{KL} = 0$ iff $q = p$ a.e. It is not symmetric: $D_{KL}(q\|p) \neq D_{KL}(p\|q)$.
+
+### Definition 23.6.3 — Evidence Lower Bound (ELBO)
+
+For a latent variable model $p_\theta(x) = \int p_\theta(x|z)p(z)\,dz$:
+
+$$
+\log p_\theta(x) \geq \mathbb{E}_{z \sim q_\phi(z|x)}[\log p_\theta(x|z)] - D_{KL}(q_\phi(z|x) \| p(z)) = \text{ELBO}
+$$
+
+### Definition 23.6.4 — Forward Diffusion Process
+
+A Markov chain that gradually adds Gaussian noise over $T$ steps:
+
+$$
+q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t}\,x_{t-1}, \beta_t I)
+$$
+
+where $\beta_1, \ldots, \beta_T$ is the **noise schedule** (typically $\beta_t \in [10^{-4}, 0.02]$).
+
+**Key property:** We can sample $x_t$ directly from $x_0$ without iterating:
+
+$$
+q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t}\,x_0, (1-\bar{\alpha}_t)I)
+$$
+
+where $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^t \alpha_s$.
+
+### Definition 23.6.5 — Reverse Diffusion (Denoising)
+
+The learned reverse process:
+
+$$
+p_\theta(x_{t-1}|x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \sigma_t^2 I)
+$$
+
+The neural network predicts either the noise $\epsilon_\theta(x_t, t)$ or the clean image $\hat{x}_0$.
+
+### Definition 23.6.6 — Diffusion Training Objective (Simplified)
+
+$$
+\mathcal{L}_{simple} = \mathbb{E}_{t, x_0, \epsilon}\left[\|\epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, t)\|^2\right]
+$$
+
+where $\epsilon \sim \mathcal{N}(0, I)$, $t \sim \text{Uniform}(1, T)$.
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 10.6.P1 (Implicit Density via Transformation):** A generator $G$ defines an implicit probability distribution $p_G$ by pushing forward the latent distribution: $p_G(x) = p_z(G^{-1}(x))|det(J_{G^{-1}})|$ (when $G$ is invertible).
+
+**Postulate 10.6.P2 (Diffusion Converges to Gaussian):** As $T \to \infty$ with appropriate schedule, $q(x_T|x_0) \to \mathcal{N}(0, I)$ regardless of the data distribution.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 23.6.1 — Optimal Discriminator
+
+For fixed $G$, the optimal discriminator is:
+
+$$
+D^*(x) = \frac{p_{data}(x)}{p_{data}(x) + p_G(x)}
+$$
+
+**Proof.** The discriminator maximizes $V(D) = \int [p_{data}(x)\log D(x) + p_G(x)\log(1-D(x))]\,dx$. For each $x$, maximize $f(d) = a\log d + b\log(1-d)$ where $a = p_{data}(x)$, $b = p_G(x)$. Setting $f'(d) = a/d - b/(1-d) = 0$ gives $d = a/(a+b)$. $\blacksquare$
+
+### Lemma 23.6.2 — KL Divergence for Gaussians
+
+For $q = \mathcal{N}(\mu, \sigma^2)$ and $p = \mathcal{N}(0, 1)$:
+
+$$
+D_{KL}(q \| p) = \frac{1}{2}\left(\sigma^2 + \mu^2 - 1 - \log\sigma^2\right)
+$$
+
+### Lemma 23.6.3 — Reparameterization Trick
+
+To backpropagate through sampling $z \sim \mathcal{N}(\mu, \sigma^2)$:
+
+$$
+z = \mu + \sigma \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)
+$$
+
+Now $\partial z/\partial \mu = 1$ and $\partial z/\partial \sigma = \epsilon$ — gradients flow through.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 23.6.1 — GAN Global Optimum
+
+At the Nash equilibrium of the minimax game: $p_G = p_{data}$ and $D^*(x) = 1/2$ everywhere. The minimax value is $-\log 4$.
+
+### Theorem 23.6.2 — Diffusion Loss Equals Denoising Score Matching
+
+The simplified diffusion objective $\mathcal{L}_{simple}$ is equivalent (up to weighting) to denoising score matching:
+
+$$
+\mathcal{L} \propto \mathbb{E}_t\left[\lambda(t)\|\nabla_{x_t}\log q(x_t|x_0) - s_\theta(x_t, t)\|^2\right]
+$$
+
+where $s_\theta$ is the learned score function and $\nabla_{x_t}\log q(x_t|x_0) = -\epsilon/\sqrt{1-\bar{\alpha}_t}$.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 GAN Minimax — Optimal Generator Proof
+
+**Step 1.** Substitute $D^*$ into the value function:
+
+$$
+V(G, D^*) = \mathbb{E}_{x \sim p_{data}}\left[\log\frac{p_{data}(x)}{p_{data}(x)+p_G(x)}\right] + \mathbb{E}_{x \sim p_G}\left[\log\frac{p_G(x)}{p_{data}(x)+p_G(x)}\right]
+$$
+
+**Step 2.** Let $m(x) = \frac{p_{data}(x)+p_G(x)}{2}$. Then:
+
+$$
+V(G, D^*) = -\log 4 + D_{KL}(p_{data}\|m) + D_{KL}(p_G\|m) = -\log 4 + 2\cdot JSD(p_{data}\|p_G)
+$$
+
+where $JSD$ is the Jensen-Shannon divergence.
+
+**Step 3.** Since $JSD \geq 0$ with equality iff $p_{data} = p_G$, the minimum of $V(G, D^*)$ is $-\log 4$, achieved when $p_G = p_{data}$. $\blacksquare$
+
+### 5.2 ELBO Derivation
+
+**Step 1.** Start with log-evidence:
+
+$$
+\log p_\theta(x) = \log\int p_\theta(x,z)\,dz = \log\int \frac{p_\theta(x,z)}{q_\phi(z|x)}q_\phi(z|x)\,dz
+$$
+
+**Step 2.** Apply Jensen's inequality ($\log$ is concave):
+
+$$
+\geq \int q_\phi(z|x)\log\frac{p_\theta(x,z)}{q_\phi(z|x)}\,dz = \mathbb{E}_q[\log p_\theta(x|z)] - D_{KL}(q_\phi(z|x)\|p(z))
+$$
+
+**Step 3.** The gap is exactly $D_{KL}(q_\phi(z|x)\|p_\theta(z|x)) \geq 0$. Maximizing ELBO simultaneously:
+- Makes the decoder $p_\theta(x|z)$ reconstruct well (reconstruction term)
+- Makes the encoder $q_\phi(z|x)$ close to the prior (regularization term)
+
+### 5.3 Forward Diffusion — Closed Form for $q(x_t|x_0)$
+
+**Step 1.** Single step: $x_t = \sqrt{\alpha_t}x_{t-1} + \sqrt{\beta_t}\epsilon_t$ where $\alpha_t = 1-\beta_t$.
+
+**Step 2.** Recursion: $x_t = \sqrt{\alpha_t}\sqrt{\alpha_{t-1}}x_{t-2} + \sqrt{\alpha_t}\sqrt{\beta_{t-1}}\epsilon_{t-1} + \sqrt{\beta_t}\epsilon_t$.
+
+**Step 3.** After $t$ steps: $x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon$ where $\bar{\alpha}_t = \prod_{s=1}^t\alpha_s$ and $\epsilon \sim \mathcal{N}(0,I)$.
+
+**Proof of noise variance:** The sum of independent Gaussians $\sqrt{\alpha_t}\sqrt{\beta_{t-1}}\epsilon_{t-1}$ and $\sqrt{\beta_t}\epsilon_t$ has variance $\alpha_t\beta_{t-1} + \beta_t = \alpha_t(1-\alpha_{t-1}) + (1-\alpha_t) = 1 - \alpha_t\alpha_{t-1}$. By induction: total noise variance = $1 - \bar{\alpha}_t$. $\blacksquare$
+
+---
+
+## 💻 6. Code Examples
+
+### Forward Diffusion and Noise Schedule
+
+```python
+import numpy as np
+
+def forward_diffusion(x0, T=1000, beta_start=1e-4, beta_end=0.02):
+    """Forward diffusion: add noise progressively. x0: (d,)"""
+    betas = np.linspace(beta_start, beta_end, T)  # (T,)
+    alphas = 1 - betas                              # (T,)
+    alpha_bar = np.cumprod(alphas)                  # (T,)
+    
+    # Sample x_t directly (closed form)
+    t = np.random.randint(0, T)
+    noise = np.random.randn(*x0.shape)              # (d,)
+    x_t = np.sqrt(alpha_bar[t]) * x0 + np.sqrt(1 - alpha_bar[t]) * noise  # (d,)
+    
+    return x_t, noise, t, alpha_bar[t]
+
+def kl_divergence_gaussians(mu, log_var):
+    """KL(N(mu, sigma^2) || N(0, 1)). mu, log_var: (d,)"""
+    return -0.5 * np.sum(1 + log_var - mu**2 - np.exp(log_var))
+
+# Demo
+x0 = np.array([1.0, 2.0, 3.0])
+print("Forward diffusion demo:")
+for _ in range(5):
+    x_t, noise, t, ab = forward_diffusion(x0)
+    print(f"  t={t:4d}, alpha_bar={ab:.4f}, ||x_t||={np.linalg.norm(x_t):.3f}")
+```
+
+### Simple VAE Encoder-Decoder
+
+```python
+import numpy as np
+
+class SimpleVAE:
+    """Minimal VAE with linear encoder/decoder for demonstration."""
+    
+    def __init__(self, input_dim=4, latent_dim=2):
+        self.d_in = input_dim
+        self.d_z = latent_dim
+        # Encoder: input -> (mu, log_var)
+        self.W_enc = np.random.randn(input_dim, 2*latent_dim) * 0.1  # (4, 4)
+        # Decoder: z -> reconstruction
+        self.W_dec = np.random.randn(latent_dim, input_dim) * 0.1    # (2, 4)
+    
+    def encode(self, x):
+        """x: (d_in,) -> mu: (d_z,), log_var: (d_z,)"""
+        h = x @ self.W_enc                    # (2*d_z,)
+        mu = h[:self.d_z]                     # (d_z,)
+        log_var = h[self.d_z:]                # (d_z,)
+        return mu, log_var
+    
+    def reparameterize(self, mu, log_var):
+        """Sample z using reparameterization trick."""
+        std = np.exp(0.5 * log_var)           # (d_z,)
+        eps = np.random.randn(*mu.shape)      # (d_z,)
+        z = mu + std * eps                    # (d_z,)
+        return z
+    
+    def decode(self, z):
+        """z: (d_z,) -> x_recon: (d_in,)"""
+        return z @ self.W_dec                 # (d_in,)
+    
+    def forward(self, x):
+        """Full forward pass. Returns: recon, mu, log_var"""
+        mu, log_var = self.encode(x)
+        z = self.reparameterize(mu, log_var)
+        x_recon = self.decode(z)
+        return x_recon, mu, log_var
+    
+    def loss(self, x, x_recon, mu, log_var):
+        """ELBO loss = reconstruction + KL"""
+        recon_loss = 0.5 * np.sum((x - x_recon)**2)
+        kl_loss = -0.5 * np.sum(1 + log_var - mu**2 - np.exp(log_var))
+        return recon_loss + kl_loss, recon_loss, kl_loss
+
+# Demo
+vae = SimpleVAE(input_dim=4, latent_dim=2)
+x = np.array([1.0, -0.5, 0.3, 0.8])
+x_recon, mu, log_var = vae.forward(x)
+total, recon, kl = vae.loss(x, x_recon, mu, log_var)
+print(f"Input:  {x}")
+print(f"Recon:  {x_recon.round(4)}")
+print(f"Latent: mu={mu.round(4)}, log_var={log_var.round(4)}")
+print(f"Loss:   total={total:.4f} (recon={recon:.4f}, KL={kl:.4f})")
+```
+
+### GAN Training Loop (Conceptual)
+
+```python
+import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
+
+class SimpleGAN:
+    """Minimal 1D GAN: learn to generate from N(3, 0.5^2)."""
+    
+    def __init__(self):
+        # Generator: z -> x (linear: x = w_g * z + b_g)
+        self.w_g = np.random.randn() * 0.1
+        self.b_g = 0.0
+        # Discriminator: x -> probability real (linear + sigmoid)
+        self.w_d = np.random.randn() * 0.1
+        self.b_d = 0.0
+    
+    def generate(self, z):
+        return self.w_g * z + self.b_g
+    
+    def discriminate(self, x):
+        return sigmoid(self.w_d * x + self.b_d)
+    
+    def train_step(self, real_samples, lr=0.01):
+        batch_size = len(real_samples)
+        z = np.random.randn(batch_size)
+        fake_samples = self.generate(z)
+        
+        # Discriminator gradients
+        d_real = self.discriminate(real_samples)
+        d_fake = self.discriminate(fake_samples)
+        
+        # d/d(w_d) of log(D(x)) = (1-D(x)) * x
+        grad_w_d = np.mean((1-d_real)*real_samples) - np.mean(d_fake*fake_samples)
+        grad_b_d = np.mean(1-d_real) - np.mean(d_fake)
+        
+        self.w_d += lr * grad_w_d
+        self.b_d += lr * grad_b_d
+        
+        # Generator gradient: maximize log(D(G(z)))
+        d_fake_new = self.discriminate(self.generate(z))
+        grad_w_g = np.mean((1-d_fake_new) * self.w_d * z)
+        grad_b_g = np.mean((1-d_fake_new) * self.w_d)
+        
+        self.w_g += lr * grad_w_g
+        self.b_g += lr * grad_b_g
+        
+        return np.mean(np.log(d_real + 1e-8) + np.log(1-d_fake + 1e-8))
+
+# Train
+gan = SimpleGAN()
+for epoch in range(2000):
+    real = np.random.normal(3.0, 0.5, size=32)
+    loss = gan.train_step(real, lr=0.01)
+    if epoch % 500 == 0:
+        fake = gan.generate(np.random.randn(1000))
+        print(f"Epoch {epoch}: G mean={fake.mean():.3f}, std={fake.std():.3f} "
+              f"(target: mean=3.0, std=0.5)")
+```
+
+> **See also:** `_practice/scripts/10.6_diffusion.py` for noise schedule analysis and KL computation.
+
+---
+
+## 🧮 7. Worked Examples
+
+### Example 23.6.E1 — Optimal Discriminator Computation
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** At point $x$, $p_{data}(x) = 0.8$, $p_G(x) = 0.2$. Find $D^*(x)$ and the value function contribution.
+
+$D^*(x) = \frac{0.8}{0.8+0.2} = 0.8$.
+
+Value contribution: $0.8\log(0.8) + 0.2\log(1-0.8) = 0.8(-0.223) + 0.2(-1.609) = -0.178 - 0.322 = -0.500$.
+
+At equilibrium ($p_G = p_{data}$): $D^* = 0.5$, contribution = $\log(0.5) + \log(0.5) = -\log 4 = -1.386$ per unit probability.
+
+</details>
+
+### Example 23.6.E2 — Diffusion Noise Schedule
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Linear schedule $\beta_t$ from $10^{-4}$ to $0.02$ over $T=1000$ steps. Compute $\bar{\alpha}_{500}$ and $\bar{\alpha}_{1000}$.
+
+$\beta_t = 10^{-4} + (0.02 - 10^{-4})\frac{t-1}{999}$. Average $\beta \approx 0.01$.
+
+$\alpha_t = 1 - \beta_t \approx 0.99$ on average.
+
+$\bar{\alpha}_{500} = \prod_{t=1}^{500}\alpha_t \approx 0.99^{500}$... but with varying $\beta$:
+
+Using $\log\bar{\alpha}_t = \sum_{s=1}^t\log(1-\beta_s) \approx -\sum_{s=1}^t\beta_s$:
+
+$\sum_{s=1}^{500}\beta_s \approx 500 \times \frac{10^{-4}+0.01}{2} = 500 \times 0.00505 = 2.525$
+
+$\bar{\alpha}_{500} \approx e^{-2.525} = 0.080$. Signal is 8% of original — mostly noise.
+
+$\sum_{s=1}^{1000}\beta_s \approx 1000 \times 0.01 = 10$. $\bar{\alpha}_{1000} \approx e^{-10} \approx 0.000045$ — essentially pure noise.
+
+</details>
+
+### Example 23.6.E3 — VAE KL Divergence Term
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Encoder outputs $\mu = (1.5, -0.3)$, $\log\sigma^2 = (-0.5, 0.2)$. Compute $D_{KL}(q\|p)$.
+
+$$
+D_{KL} = -\frac{1}{2}\sum_{j=1}^2(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2)
+$$
+
+Dimension 1: $1 + (-0.5) - 1.5^2 - e^{-0.5} = 1 - 0.5 - 2.25 - 0.6065 = -2.3565$
+
+Dimension 2: $1 + 0.2 - (-0.3)^2 - e^{0.2} = 1 + 0.2 - 0.09 - 1.2214 = -0.1114$
+
+$D_{KL} = -\frac{1}{2}(-2.3565 + (-0.1114)) = -\frac{1}{2}(-2.4679) = 1.234$
+
+</details>
+
+### Example 23.6.E4 — Reparameterization Trick
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Encoder outputs $\mu = 2.0$, $\sigma = 0.5$. Sample $\epsilon = 1.3$ from $\mathcal{N}(0,1)$. Compute $z$ and verify gradients flow.
+
+**Reparameterized sample:**
+
+$$
+z = \mu + \sigma \cdot \epsilon = 2.0 + 0.5 \times 1.3 = 2.65
+$$
+
+**Gradients:**
+
+$$
+\frac{\partial z}{\partial \mu} = 1, \quad \frac{\partial z}{\partial \sigma} = \epsilon = 1.3
+$$
+
+Without reparameterization, $z \sim \mathcal{N}(\mu, \sigma^2)$ — sampling is non-differentiable. With reparameterization, the stochasticity is in $\epsilon$ (which doesn't depend on parameters), so gradients flow through $\mu$ and $\sigma$.
+
+</details>
+
+### Example 23.6.E5 — GAN Training Step
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Discriminator outputs $D(x_{real}) = 0.8$ for a real sample and $D(G(z)) = 0.3$ for a fake sample. Compute the discriminator loss and generator loss.
+
+**Discriminator loss** (maximize, so we negate for gradient descent):
+
+$$
+\mathcal{L}_D = -[\log D(x_{real}) + \log(1 - D(G(z)))] = -[\log(0.8) + \log(0.7)]
+$$
+
+$$
+= -[-0.2231 + (-0.3567)] = -(-0.5798) = 0.5798
+$$
+
+**Generator loss** (minimize $\log(1-D(G(z)))$ or equivalently maximize $\log D(G(z))$):
+
+$$
+\mathcal{L}_G = -\log D(G(z)) = -\log(0.3) = 1.204
+$$
+
+**Interpretation:** The discriminator is doing well (correctly assigns high probability to real, low to fake). The generator has high loss — it needs to improve to fool the discriminator.
+
+**Gradient for generator:** $\frac{\partial\mathcal{L}_G}{\partial D(G(z))} = -1/D(G(z)) = -1/0.3 = -3.33$. This large gradient drives the generator to produce outputs that increase $D(G(z))$.
+
+</details>
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### ⚠️ Common Pitfalls
+
+**Pitfall 1 — GAN Mode Collapse:** The generator learns to produce only a few modes of the data distribution, ignoring diversity. The discriminator can't distinguish these few outputs from real data. **Solutions:** Wasserstein GAN (WGAN), spectral normalization, progressive growing.
+
+**Pitfall 2 — VAE Posterior Collapse:** The decoder becomes so powerful it ignores the latent code $z$, and the encoder collapses to the prior $q(z|x) \approx p(z)$. The KL term goes to zero but reconstruction suffers. **Solutions:** KL annealing, free bits, more expressive priors.
+
+**Pitfall 3 — Diffusion Sampling Speed:** Generating one image requires $T=1000$ sequential denoising steps (each a full neural network forward pass). **Solutions:** DDIM (deterministic sampling with fewer steps), distillation, consistency models.
+
+---
+
+### 📝 Additional Derivations
+
+### 5.4 Wasserstein GAN Objective
+
+The Wasserstein-1 distance (Earth Mover's Distance):
+
+$$
+W(p_{data}, p_G) = \sup_{\|f\|_L \leq 1} \mathbb{E}_{x \sim p_{data}}[f(x)] - \mathbb{E}_{x \sim p_G}[f(x)]
+$$
+
+where the supremum is over 1-Lipschitz functions. The WGAN objective replaces the discriminator with a **critic** $f_w$ (no sigmoid):
+
+$$
+\min_G \max_{w: \|f_w\|_L \leq 1} \mathbb{E}_{x \sim p_{data}}[f_w(x)] - \mathbb{E}_{z \sim p_z}[f_w(G(z))]
+$$
+
+**Advantages:** Provides meaningful gradients even when supports don't overlap (unlike JS divergence). Training is more stable.
+
+### 5.5 Diffusion Reverse Process — Mean Prediction
+
+The true reverse posterior (tractable when conditioned on $x_0$):
+
+$$
+q(x_{t-1}|x_t, x_0) = \mathcal{N}(x_{t-1}; \tilde{\mu}_t(x_t, x_0), \tilde{\beta}_t I)
+$$
+
+where:
+
+$$
+\tilde{\mu}_t = \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1-\bar{\alpha}_t}x_0 + \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}x_t
+$$
+
+$$
+\tilde{\beta}_t = \frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t
+$$
+
+Since $x_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(x_t - \sqrt{1-\bar{\alpha}_t}\epsilon)$, the network predicts $\epsilon_\theta(x_t, t)$ and we compute:
+
+$$
+\mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t, t)\right)
+$$
+
+### 5.6 U-Net Architecture for Diffusion
+
+The denoising network $\epsilon_\theta(x_t, t)$ typically uses a U-Net:
+
+1. **Encoder:** Sequence of ResBlocks + downsampling (stride-2 conv), doubling channels at each level
+2. **Bottleneck:** Self-attention at lowest resolution
+3. **Decoder:** ResBlocks + upsampling (transposed conv), with skip connections from encoder
+4. **Time conditioning:** Sinusoidal embedding of $t$ → MLP → added to each ResBlock via FiLM (Feature-wise Linear Modulation): $\gamma(t) \odot h + \beta(t)$
+
+**Parameter count (typical):** 500M–2B for image generation models (Stable Diffusion uses ~860M in the U-Net).
+
+---
+
+### Internal Cross-links
+- KL divergence and entropy: [5.5 - Microstates & Ensembles](5.5---Microstates-&-Ensembles)
+- Probability distributions: [Subject_Plan](Subject_Plan)
+- Neural network training: [23.2 - Deep Neural Networks - Backprop & Architecture](23.2---Deep-Neural-Networks---Backprop-&-Architecture)
+- Transformer backbone for diffusion: [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs)
+- Optimization: [23.1 - Statistical Learning & Optimization](23.1---Statistical-Learning-&-Optimization)
+
+### External References
+- **Goodfellow et al. (2014)** — *Generative Adversarial Networks* ([arXiv:1406.2661](https://arxiv.org/abs/1406.2661))
+- **Ho et al. (2020)** — *Denoising Diffusion Probabilistic Models* ([arXiv:2006.11239](https://arxiv.org/abs/2006.11239))
+- **Kingma & Welling (2014)** — *Auto-Encoding Variational Bayes* ([arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
+- **Goodfellow et al.** — *Deep Learning*, Chapter 20: Deep Generative Models
+- **Lilian Weng** — *What are Diffusion Models?* ([lilianweng.github.io](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/))
+
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — GAN Minimax Objective: Jensen-Shannon Divergence Derivation
+
+**Problem:** Starting from the GAN value function $V(G, D)$, derive that (a) the optimal discriminator for fixed $G$ is $D^*(x) = \frac{p_{data}(x)}{p_{data}(x) + p_g(x)}$, and (b) at the optimal discriminator, the generator minimizes the Jensen-Shannon divergence between $p_{data}$ and $p_g$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: The GAN Value Function
+
+$$
+\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}}[\log D(x)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z)))]
+$$
+
+Rewriting the second term using the change of variables $x = G(z)$:
+
+$$
+V(D, G) = \mathbb{E}_{x \sim p_{data}}[\log D(x)] + \mathbb{E}_{x \sim p_g}[\log(1 - D(x))]
+$$
+
+$$
+= \int_x p_{data}(x) \log D(x) + p_g(x) \log(1 - D(x)) \, dx
+$$
+
+#### Step 2: Optimal Discriminator (Fixed G)
+
+For fixed $G$, we maximize $V$ w.r.t. $D(x)$ pointwise. For each $x$, we maximize:
+
+$$
+f(D) = a \log D + b \log(1 - D), \quad a = p_{data}(x), \; b = p_g(x)
+$$
+
+Taking the derivative and setting to zero:
+
+$$
+f'(D) = \frac{a}{D} - \frac{b}{1-D} = 0
+$$
+
+$$
+\frac{a}{D} = \frac{b}{1-D} \implies a(1-D) = bD \implies a - aD = bD \implies a = D(a+b)
+$$
+
+$$
+D^*(x) = \frac{a}{a+b} = \frac{p_{data}(x)}{p_{data}(x) + p_g(x)}
+$$
+
+Verify this is a maximum: $f''(D) = -\frac{a}{D^2} - \frac{b}{(1-D)^2} \lt  0$ for $a, b \gt  0$. ✓
+
+#### Step 3: Value Function at Optimal Discriminator
+
+Substituting $D^*$ back:
+
+$$
+V(D^*, G) = \int p_{data}(x) \log \frac{p_{data}(x)}{p_{data}(x) + p_g(x)} + p_g(x) \log \frac{p_g(x)}{p_{data}(x) + p_g(x)} \, dx
+$$
+
+#### Step 4: Relate to Jensen-Shannon Divergence
+
+The JSD is defined as:
+
+$$
+\text{JSD}(P \| Q) = \frac{1}{2} D_{KL}(P \| M) + \frac{1}{2} D_{KL}(Q \| M), \quad M = \frac{P + Q}{2}
+$$
+
+Let $P = p_{data}$, $Q = p_g$, $M = \frac{p_{data} + p_g}{2}$. Then:
+
+$$
+D_{KL}(P \| M) = \int p_{data} \log \frac{p_{data}}{(p_{data}+p_g)/2} \, dx = \int p_{data} \log \frac{2 p_{data}}{p_{data}+p_g} \, dx
+$$
+
+$$
+= \int p_{data} \log \frac{p_{data}}{p_{data}+p_g} \, dx + \log 2
+$$
+
+Similarly for $D_{KL}(Q \| M)$. Therefore:
+
+$$
+V(D^*, G) = \int p_{data} \log \frac{p_{data}}{p_{data}+p_g} + p_g \log \frac{p_g}{p_{data}+p_g} \, dx
+$$
+
+$$
+= -\log 4 + 2 \cdot \text{JSD}(p_{data} \| p_g)
+$$
+
+#### Step 5: Generator's Objective
+
+The generator minimizes:
+
+$$
+\min_G V(D^*, G) = -\log 4 + 2 \cdot \text{JSD}(p_{data} \| p_g)
+$$
+
+Since $\text{JSD} \geq 0$ with equality iff $p_{data} = p_g$, the global minimum is achieved when $p_g = p_{data}$, giving $V = -\log 4$.
+
+**Final Answer:** The GAN minimax game is equivalent to minimizing the Jensen-Shannon divergence:
+
+$$
+\min_G \max_D V(D,G) = -\log 4 + 2 \cdot \text{JSD}(p_{data} \| p_g)
+$$
+
+</details>
+
+### Example 9.2 — DDPM Forward Process: Deriving the Closed-Form $q(x_t | x_0)$
+
+**Problem:** In Denoising Diffusion Probabilistic Models, the forward process adds Gaussian noise incrementally: $q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t} x_{t-1}, \beta_t I)$. Derive the closed-form expression for $q(x_t | x_0)$ that allows direct sampling of any noisy version without iterating through all intermediate steps.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Reparameterization of One Step
+
+Using the reparameterization trick, one forward step can be written as:
+
+$$
+x_t = \sqrt{1 - \beta_t} \, x_{t-1} + \sqrt{\beta_t} \, \epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, I)
+$$
+
+Define $\alpha_t = 1 - \beta_t$, so:
+
+$$
+x_t = \sqrt{\alpha_t} \, x_{t-1} + \sqrt{1 - \alpha_t} \, \epsilon_t
+$$
+
+#### Step 2: Recursive Expansion
+
+Expand $x_{t-1}$:
+
+$$
+x_t = \sqrt{\alpha_t}\left(\sqrt{\alpha_{t-1}} \, x_{t-2} + \sqrt{1-\alpha_{t-1}} \, \epsilon_{t-1}\right) + \sqrt{1-\alpha_t} \, \epsilon_t
+$$
+
+$$
+= \sqrt{\alpha_t \alpha_{t-1}} \, x_{t-2} + \sqrt{\alpha_t(1-\alpha_{t-1})} \, \epsilon_{t-1} + \sqrt{1-\alpha_t} \, \epsilon_t
+$$
+
+#### Step 3: Merge Gaussian Noise Terms
+
+The sum of two independent Gaussians $\mathcal{N}(0, \sigma_1^2 I) + \mathcal{N}(0, \sigma_2^2 I) = \mathcal{N}(0, (\sigma_1^2 + \sigma_2^2)I)$.
+
+The combined variance of the two noise terms:
+
+$$
+\alpha_t(1-\alpha_{t-1}) + (1-\alpha_t) = \alpha_t - \alpha_t\alpha_{t-1} + 1 - \alpha_t = 1 - \alpha_t\alpha_{t-1}
+$$
+
+Therefore:
+
+$$
+x_t = \sqrt{\alpha_t \alpha_{t-1}} \, x_{t-2} + \sqrt{1 - \alpha_t\alpha_{t-1}} \, \bar{\epsilon}, \quad \bar{\epsilon} \sim \mathcal{N}(0, I)
+$$
+
+#### Step 4: Induction to $x_0$
+
+Define $\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s$. By induction, at each step the pattern holds:
+
+$$
+x_t = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \, \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)
+$$
+
+**Proof by induction:**
+- Base case ($t=1$): $x_1 = \sqrt{\alpha_1} x_0 + \sqrt{1-\alpha_1}\epsilon_1$. Here $\bar{\alpha}_1 = \alpha_1$. ✓
+- Inductive step: Assume $x_{t-1} = \sqrt{\bar{\alpha}_{t-1}} x_0 + \sqrt{1-\bar{\alpha}_{t-1}} \bar{\epsilon}$. Then:
+
+$$
+x_t = \sqrt{\alpha_t}(\sqrt{\bar{\alpha}_{t-1}} x_0 + \sqrt{1-\bar{\alpha}_{t-1}} \bar{\epsilon}) + \sqrt{1-\alpha_t}\epsilon_t
+$$
+
+$$
+= \sqrt{\alpha_t \bar{\alpha}_{t-1}} x_0 + \underbrace{\sqrt{\alpha_t(1-\bar{\alpha}_{t-1})} \bar{\epsilon} + \sqrt{1-\alpha_t}\epsilon_t}_{\text{combined noise}}
+$$
+
+Combined variance: $\alpha_t(1-\bar{\alpha}_{t-1}) + (1-\alpha_t) = 1 - \alpha_t\bar{\alpha}_{t-1} = 1 - \bar{\alpha}_t$. ✓
+
+#### Step 5: The Closed-Form Distribution
+
+$$
+q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} \, x_0, \; (1-\bar{\alpha}_t) I)
+$$
+
+**Practical significance:** This allows:
+1. Training: sample any $t$ uniformly, compute $x_t$ directly from $x_0$ in one step
+2. The noise prediction network $\epsilon_\theta(x_t, t)$ is trained to predict $\epsilon$ from $x_t$
+3. The training loss simplifies to: $\mathcal{L} = \mathbb{E}_{t, x_0, \epsilon}\left[\|\epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, \; t)\|^2\right]$
+
+#### Step 6: Signal-to-Noise Ratio
+
+The SNR at time $t$ is:
+
+$$
+\text{SNR}(t) = \frac{\bar{\alpha}_t}{1 - \bar{\alpha}_t}
+$$
+
+As $t \to T$: $\bar{\alpha}_T \to 0$, so $\text{SNR} \to 0$ (pure noise). As $t \to 0$: $\bar{\alpha}_0 \to 1$, so $\text{SNR} \to \infty$ (clean signal).
+
+**Final Answer:**
+
+$$
+q(x_t | x_0) = \mathcal{N}\left(\sqrt{\bar{\alpha}_t} \, x_0, \; (1-\bar{\alpha}_t)I\right), \quad \bar{\alpha}_t = \prod_{s=1}^t (1-\beta_s)
+$$
+
+</details>
+
+
+### Example 9.3 — DDPM Reverse Process: Variational Lower Bound Derivation
+
+**Problem:** Derive the variational lower bound (VLB) for the DDPM reverse process, showing how the training objective decomposes into a sum of KL divergences that can each be computed in closed form.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: The Reverse Process
+
+The reverse process is parameterized as:
+
+$$
+p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \sigma_t^2 I)
+$$
+
+The joint reverse:
+
+$$
+p_\theta(x_{0:T}) = p(x_T) \prod_{t=1}^{T} p_\theta(x_{t-1} | x_t)
+$$
+
+where $p(x_T) = \mathcal{N}(0, I)$.
+
+#### Step 2: Evidence Lower Bound (ELBO)
+
+The log-likelihood is bounded by:
+
+$$
+\log p_\theta(x_0) \geq \mathbb{E}_{q(x_{1:T}|x_0)}\left[\log \frac{p_\theta(x_{0:T})}{q(x_{1:T}|x_0)}\right] = -\mathcal{L}_{\text{VLB}}
+$$
+
+Expanding:
+
+$$
+\mathcal{L}_{\text{VLB}} = \mathbb{E}_q\left[-\log \frac{p_\theta(x_{0:T})}{q(x_{1:T}|x_0)}\right]
+$$
+
+#### Step 3: Decompose the VLB
+
+$$
+\mathcal{L}_{\text{VLB}} = \mathbb{E}_q\left[-\log p(x_T) - \sum_{t=1}^T \log \frac{p_\theta(x_{t-1}|x_t)}{q(x_t|x_{t-1})}\right]
+$$
+
+Using Bayes' rule on the forward process: $q(x_{t-1}|x_t, x_0) = \frac{q(x_t|x_{t-1})q(x_{t-1}|x_0)}{q(x_t|x_0)}$, we can rewrite:
+
+$$
+\mathcal{L}_{\text{VLB}} = \underbrace{D_{KL}(q(x_T|x_0) \| p(x_T))}_{L_T} + \sum_{t=2}^{T} \underbrace{D_{KL}(q(x_{t-1}|x_t, x_0) \| p_\theta(x_{t-1}|x_t))}_{L_{t-1}} - \underbrace{\log p_\theta(x_0|x_1)}_{L_0}
+$$
+
+#### Step 4: The Posterior $q(x_{t-1}|x_t, x_0)$ is Tractable
+
+Since both $q(x_t|x_{t-1})$ and $q(x_{t-1}|x_0)$ are Gaussian, the posterior is also Gaussian:
+
+$$
+q(x_{t-1}|x_t, x_0) = \mathcal{N}(x_{t-1}; \tilde{\mu}_t(x_t, x_0), \tilde{\beta}_t I)
+$$
+
+where:
+
+$$
+\tilde{\mu}_t = \frac{\sqrt{\bar{\alpha}_{t-1}} \beta_t}{1 - \bar{\alpha}_t} x_0 + \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t} x_t
+$$
+
+$$
+\tilde{\beta}_t = \frac{(1-\bar{\alpha}_{t-1})\beta_t}{1-\bar{\alpha}_t}
+$$
+
+#### Step 5: KL Between Two Gaussians
+
+For two Gaussians with the same (scalar) variance:
+
+$$
+D_{KL}(\mathcal{N}(\mu_1, \sigma^2 I) \| \mathcal{N}(\mu_2, \sigma^2 I)) = \frac{1}{2\sigma^2}\|\mu_1 - \mu_2\|^2
+$$
+
+Therefore each $L_{t-1}$ term becomes:
+
+$$
+L_{t-1} = \frac{1}{2\sigma_t^2} \|\tilde{\mu}_t(x_t, x_0) - \mu_\theta(x_t, t)\|^2
+$$
+
+#### Step 6: Reparameterize in Terms of Noise Prediction
+
+Since $x_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(x_t - \sqrt{1-\bar{\alpha}_t}\epsilon)$, substituting into $\tilde{\mu}_t$:
+
+$$
+\tilde{\mu}_t = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon\right)
+$$
+
+If we parameterize $\mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t, t)\right)$, then:
+
+$$
+L_{t-1} \propto \|\epsilon - \epsilon_\theta(x_t, t)\|^2
+$$
+
+This is the simplified training objective used in practice (Ho et al., 2020).
+
+**Final Answer:**
+
+$$
+\mathcal{L}_{\text{simple}} = \mathbb{E}_{t, x_0, \epsilon}\left[\|\epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, \; t)\|^2\right]
+$$
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 23.1 Variational Autoencoder (VAE) ELBO Derivation
+
+The VAE maximizes the evidence lower bound on $\log p_\theta(x)$:
+
+$$
+\log p_\theta(x) = \log \int p_\theta(x|z) p(z) \, dz
+$$
+
+Introducing an approximate posterior $q_\phi(z|x)$:
+
+$$
+\log p_\theta(x) = \log \int \frac{p_\theta(x|z)p(z)}{q_\phi(z|x)} q_\phi(z|x) \, dz \geq \int q_\phi(z|x) \log \frac{p_\theta(x|z)p(z)}{q_\phi(z|x)} \, dz
+$$
+
+The inequality follows from Jensen's inequality ($\log$ is concave). Expanding:
+
+$$
+\text{ELBO} = \mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] - D_{KL}(q_\phi(z|x) \| p(z))
+$$
+
+**Term 1 (Reconstruction):** Measures how well the decoder reconstructs $x$ from sampled $z$. For Gaussian decoder with fixed variance: $-\frac{1}{2\sigma^2}\|x - \mu_\theta(z)\|^2$ (i.e., MSE loss).
+
+**Term 2 (Regularization):** Keeps the encoder close to the prior. For Gaussian encoder $q_\phi(z|x) = \mathcal{N}(\mu_\phi(x), \sigma_\phi^2(x)I)$ and standard normal prior $p(z) = \mathcal{N}(0, I)$:
+
+$$
+D_{KL} = \frac{1}{2}\sum_{j=1}^{d}\left(\sigma_{\phi,j}^2 + \mu_{\phi,j}^2 - 1 - \log \sigma_{\phi,j}^2\right)
+$$
+
+This has a closed-form solution — no sampling needed for the KL term.
+
+**The reparameterization trick:** To backpropagate through the sampling $z \sim q_\phi(z|x)$:
+
+$$
+z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)
+$$
+
+This moves the stochasticity to $\epsilon$ (which doesn't depend on $\phi$), making the gradient $\nabla_\phi \text{ELBO}$ well-defined.
+
+### 23.2 Classifier-Free Guidance Derivation
+
+**Problem:** In conditional generation, we want to amplify the effect of the conditioning signal $c$ (e.g., text prompt) on the generated output.
+
+**Score-based formulation:** The conditional score is:
+
+$$
+\nabla_x \log p(x|c) = \nabla_x \log p(x) + \nabla_x \log p(c|x)
+$$
+
+Classifier guidance (Dhariwal & Nichol, 2021) uses a separate classifier $p(c|x)$. Classifier-free guidance eliminates this by noting:
+
+$$
+\nabla_x \log p(c|x) = \nabla_x \log p(x|c) - \nabla_x \log p(x)
+$$
+
+**Guided score with scale $w$:**
+
+$$
+\tilde{\epsilon}_\theta(x_t, c) = \epsilon_\theta(x_t, \varnothing) + w \cdot (\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \varnothing))
+$$
+
+$$
+= (1-w)\epsilon_\theta(x_t, \varnothing) + w \cdot \epsilon_\theta(x_t, c)
+$$
+
+where $\varnothing$ denotes the unconditional (null) conditioning and $w > 1$ amplifies the conditional signal.
+
+**Training:** During training, randomly drop the conditioning (replace $c$ with $\varnothing$) with probability $p_{\text{uncond}}$ (typically 10–20%). This trains a single model to produce both conditional and unconditional predictions.
+
+**Why $w > 1$ works:** It moves the sample further from the unconditional distribution toward the conditional distribution, effectively sharpening the conditional mode at the cost of diversity. Typical values: $w = 7.5$ for Stable Diffusion, $w = 3.0$ for DALL-E 2.
+
+### 23.3 DDIM: Deterministic Sampling
+
+DDIM (Song et al., 2020) generalizes DDPM by defining a non-Markovian forward process that shares the same marginals $q(x_t|x_0)$ but allows deterministic sampling:
+
+$$
+x_{t-1} = \sqrt{\bar{\alpha}_{t-1}} \underbrace{\left(\frac{x_t - \sqrt{1-\bar{\alpha}_t}\epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}\right)}_{\text{predicted } x_0} + \sqrt{1-\bar{\alpha}_{t-1} - \sigma_t^2} \cdot \epsilon_\theta(x_t, t) + \sigma_t \epsilon_t
+$$
+
+Setting $\sigma_t = 0$ gives deterministic sampling (DDIM), while $\sigma_t = \sqrt{\frac{(1-\bar{\alpha}_{t-1})\beta_t}{1-\bar{\alpha}_t}}$ recovers DDPM.
+
+**Key advantage:** DDIM can skip steps. Instead of denoising through all $T = 1000$ steps, use a subsequence $\tau = [1, 50, 100, \ldots, 1000]$ of length $S \ll T$. The quality degrades gracefully: 50 DDIM steps ≈ 1000 DDPM steps in FID score.
+
+**Latent interpolation:** Since DDIM is deterministic, the mapping $x_0 \to x_T$ is invertible. This enables semantic interpolation: encode two images to their latent $x_T$, interpolate in latent space, then decode — producing smooth semantic transitions.
+
+---

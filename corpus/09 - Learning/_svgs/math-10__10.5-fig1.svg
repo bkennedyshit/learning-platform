@@ -1,0 +1,67 @@
+<svg viewBox="0 0 650 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="aero-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .aero-body { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .aero-lift { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    .aero-drag { stroke: #ff6b6b; stroke-width: 3; fill: none; }
+    .aero-weight { stroke: var(--text-muted, #8b949e); stroke-width: 3; fill: none; }
+    .aero-thrust { stroke: #51cf66; stroke-width: 3; fill: none; }
+    .aero-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .aero-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .aero-angle { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; }
+    .aero-wind { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 8 4; fill: none; }
+    .aero-lift { transform-origin: 340px 210px; animation: pulseForce 2s ease-in-out infinite alternate; }
+    .aero-drag { transform-origin: 340px 215px; animation: pulseForce 2s ease-in-out infinite alternate 0.5s; }
+    .aero-thrust { transform-origin: 340px 215px; animation: pulseForce 2s ease-in-out infinite alternate 1s; }
+    @keyframes pulseForce { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+    .aero-wind { stroke-dasharray: 10; animation: windFlow 1s linear infinite; }
+    @keyframes windFlow { to { stroke-dashoffset: -20; } }
+  </style>
+
+  <!-- Aircraft body (simplified) -->
+  <path d="M 200 220 L 350 200 L 450 210 L 480 215 L 450 220 L 350 225 L 200 230 Z" class="aero-body"/>
+  <!-- Wing -->
+  <path d="M 280 180 L 350 210 L 280 240" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="var(--background-secondary, #161b22)"/>
+  <!-- Tail -->
+  <path d="M 460 200 L 480 185 L 480 215" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" fill="none"/>
+
+  <!-- Lift vector (up) -->
+  <line x1="340" y1="210" x2="340" y2="110" class="aero-lift" marker-end="url(#aero-arrow)"/>
+  <text x="350" y="105" class="aero-accent">L (Lift)</text>
+
+  <!-- Weight vector (down) -->
+  <line x1="340" y1="225" x2="340" y2="330" class="aero-weight" marker-end="url(#aero-arrow)"/>
+  <text x="350" y="345" class="aero-label" fill="var(--text-muted, #8b949e)">W = mg</text>
+
+  <!-- Drag vector (backward along flight path) -->
+  <line x1="340" y1="215" x2="230" y2="225" class="aero-drag" marker-end="url(#aero-arrow)"/>
+  <text x="180" y="235" class="aero-label" fill="#ff6b6b">D (Drag)</text>
+
+  <!-- Thrust vector (forward) -->
+  <line x1="200" y1="225" x2="140" y2="220" class="aero-thrust" marker-end="url(#aero-arrow)" transform="rotate(180,170,222)"/>
+  <line x1="340" y1="215" x2="440" y2="208" class="aero-thrust" marker-end="url(#aero-arrow)"/>
+  <text x="445" y="200" class="aero-label" fill="#51cf66">T (Thrust)</text>
+
+  <!-- Flight path angle γ -->
+  <line x1="100" y1="240" x2="550" y2="240" class="aero-wind"/>
+  <text x="555" y="245" class="aero-label">Horizon</text>
+  <line x1="200" y1="240" x2="450" y2="215" class="aero-wind" stroke-dasharray="none" stroke="var(--text-accent, #79c0ff)"/>
+  <path d="M 280 240 A 40 40 0 0 0 290 235" class="aero-angle"/>
+  <text x="295" y="250" class="aero-label" fill="var(--text-accent, #79c0ff)">γ (flight path)</text>
+
+  <!-- Angle of attack α -->
+  <path d="M 380 210 A 20 20 0 0 0 375 205" class="aero-angle" stroke="var(--interactive-accent, #58a6ff)"/>
+  <text x="390" y="195" class="aero-accent">α</text>
+
+  <!-- Info box -->
+  <rect x="10" y="10" width="220" height="100" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="120" y="30" class="aero-accent" text-anchor="middle">Equilibrium Flight</text>
+  <text x="20" y="50" class="aero-label">L = W cos γ</text>
+  <text x="20" y="68" class="aero-label">T = D + W sin γ</text>
+  <text x="20" y="86" class="aero-label">L/D = glide ratio</text>
+  <text x="20" y="104" class="aero-label">γ = climb angle</text>
+</svg>

@@ -1,0 +1,39 @@
+<svg viewBox="0 0 680 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="pid-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pid-ax { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; }
+    .pid-ss { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 6 3; }
+    .pid-p { stroke: #ff6b6b; stroke-width: 2.5; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawPID 4s ease-in-out infinite; }
+    .pid-pi { stroke: #4dabf7; stroke-width: 2.5; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawPID 4s ease-in-out infinite 0.2s; }
+    .pid-pid { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawPID 4s ease-in-out infinite 0.4s; }
+    @keyframes drawPID { 0% { stroke-dashoffset: 800; } 50%, 100% { stroke-dashoffset: 0; } }
+    .pid-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .pid-acc { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <!-- Axes -->
+  <line x1="60" y1="300" x2="640" y2="300" class="pid-ax" marker-end="url(#pid-arr)"/>
+  <line x1="60" y1="310" x2="60" y2="30" class="pid-ax" marker-end="url(#pid-arr)"/>
+  <text x="650" y="305" class="pid-lbl">t</text>
+  <text x="55" y="25" class="pid-lbl">y(t)</text>
+
+  <!-- Setpoint -->
+  <line x1="60" y1="100" x2="640" y2="100" class="pid-ss"/>
+  <text x="645" y="105" class="pid-lbl" fill="var(--text-accent, #79c0ff)">setpoint</text>
+
+  <!-- P-only: steady-state error, some overshoot -->
+  <path d="M 60 300 C 100 300 140 80 180 80 C 220 80 240 130 270 130 C 300 130 310 115 340 115 C 370 115 380 120 420 120 L 640 120" class="pid-p"/>
+  <text x="500" y="115" class="pid-lbl" fill="#ff6b6b" font-weight="bold">P only (e_ss ≠ 0)</text>
+
+  <!-- PI: no steady-state error, more overshoot -->
+  <path d="M 60 300 C 100 300 130 60 170 60 C 210 60 230 120 260 120 C 290 120 300 90 330 90 C 360 90 380 102 420 102 C 460 102 500 100 540 100 L 640 100" class="pid-pi"/>
+  <text x="500" y="60" class="pid-lbl" fill="#4dabf7" font-weight="bold">PI (e_ss = 0, more OS)</text>
+
+  <!-- PID: fast, less overshoot, no error -->
+  <path d="M 60 300 C 100 300 130 70 160 75 C 190 80 210 105 240 105 C 270 105 290 98 320 98 C 350 98 380 100 420 100 L 640 100" class="pid-pid"/>
+  <text x="500" y="85" class="pid-acc">PID (fast, low OS, e_ss=0)</text>
+</svg>

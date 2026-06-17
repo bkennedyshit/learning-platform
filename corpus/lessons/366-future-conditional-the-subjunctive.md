@@ -1,0 +1,248 @@
+---
+title: "36.6 — Future, Conditional & The Subjunctive"
+subject: "Spanish"
+catalog: advanced
+audience_tier: higher-education
+chapter: "36.6"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [Learning Index](00---09---Learning-Index)*
+
+# 36.6 — Future, Conditional & The Subjunctive
+
+> *"The subjunctive is the mood that Spanish uses whenever English would use… a prayer, a doubt, a wish, a fear, a recommendation, or an emotion. Which is most of what makes life interesting."*
+
+This chapter has three parts. The future and conditional are conceptually simple (regular endings, few irregulars) and are covered quickly. The subjunctive is the grammar concept that defines fluency at B1→B2 — it is the entire mood system for expressing subjectivity (wishes, doubt, emotion, hypotheticals). Take the time it needs.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Form and use the future tense (synthetic and periphrastic *ir a* + infinitive).
+2. Form and use the conditional tense.
+3. Recognize and apply the four most common subjunctive trigger categories (WEIRDO).
+4. Form the present subjunctive for regular and major irregular verbs.
+5. Form the imperfect subjunctive and use it in hypothetical *si*-clauses.
+6. Construct and navigate real, hypothetical, and counterfactual *si*-clauses correctly.
+
+---
+
+## 📚 1. The Future Tense
+
+### Synthetic future (one word)
+
+Formed by adding future endings directly to the **full infinitive** (not the stem):
+
+| Person | Ending | hablar | comer | vivir |
+|--------|--------|--------|-------|-------|
+| yo | -é | hablaré | comeré | viviré |
+| tú | -ás | hablarás | comerás | vivirás |
+| él/ella | -á | hablará | comerá | vivirá |
+| nosotros | -emos | hablaremos | comeremos | viviremos |
+| vosotros | -éis | hablaréis | comeréis | viviréis |
+| ellos | -án | hablarán | comerán | vivirán |
+
+**Irregular future stems (same 12 for conditional):**
+
+| Verb | Irregular stem |
+|------|---------------|
+| *tener* | tendr- |
+| *venir* | vendr- |
+| *poner* | pondr- |
+| *salir* | saldr- |
+| *valer* | valdr- |
+| *poder* | podr- |
+| *saber* | sabr- |
+| *haber* | habr- |
+| *hacer* | har- |
+| *decir* | dir- |
+| *querer* | querr- |
+
+*Tendré tiempo.* (I will have time.) | *Vendrán mañana.* (They will come tomorrow.)
+
+### Periphrastic future: IR A + infinitive
+
+More common in speech, especially in Latin America:
+*Voy a hablar con él.* (I'm going to talk to him.)
+*¿Qué vas a hacer?* (What are you going to do?)
+
+### Future for supposition/probability (present conjecture)
+*Serán las tres.* (It must be around three. / I suppose it's around three.)
+*Estará en casa.* (She's probably at home.)
+
+---
+
+## 📚 2. The Conditional Tense
+
+Formed the same way as the future — endings on the **full infinitive** — but with different endings:
+
+| Person | Ending | hablar |
+|--------|--------|--------|
+| yo | -ía | hablaría |
+| tú | -ías | hablarías |
+| él/ella | -ía | hablaría |
+| nosotros | -íamos | hablaríamos |
+| vosotros | -íais | hablaríais |
+| ellos | -ían | hablarían |
+
+Same irregular stems as the future (*tendr-, vendr-, pondr-*, etc.)
+
+**Uses:**
+- **Hypothetical present/future:** *Con más tiempo, aprendería japonés.* (With more time, I would learn Japanese.)
+- **Polite requests:** *¿Podría ayudarme?* (Could you help me? — more polite than ¿Puede?)
+- **Reported speech — past future:** *Dijo que vendría.* (He said he would come.)
+- **Probability in the past:** *Serían las tres cuando llegó.* (It must have been around three when he arrived.)
+
+---
+
+## 📚 3. The Subjunctive Mood
+
+The indicative mood states facts and reality. The **subjunctive mood expresses subjectivity** — wishes, doubts, emotions, recommendations, hypotheticals. It appears in dependent clauses introduced by *que* after certain main clauses.
+
+### The WEIRDO categories — triggers for the subjunctive
+
+| Letter | Category | Trigger examples | Example |
+|--------|---------|-----------------|---------|
+| **W** | Wishes / wants / will | *querer que, desear que, esperar que* | *Quiero que **vengas**.* (I want you to come.) |
+| **E** | Emotion | *alegrarse de que, sentir que, tener miedo de que, estar feliz de que* | *Me alegra que **estés** bien.* (I'm glad you're well.) |
+| **I** | Impersonal expressions | *es necesario que, es importante que, es bueno que* | *Es necesario que **practiques**.* (It's necessary that you practice.) |
+| **R** | Recommendations / requests | *recomendar que, pedir que, insistir en que, sugerir que* | *Te recomiendo que **estudies**.* (I recommend you study.) |
+| **D** | Doubt / denial / disbelief | *dudar que, no creer que, no pensar que, negar que* | *Dudo que **sea** verdad.* (I doubt it's true.) |
+| **O** | Ojalá + expressions of hope | *ojalá (que)* | *Ojalá **llueva** mañana.* (I hope it rains tomorrow.) |
+
+> **The key rule:** Two different subjects → subjunctive in the dependent clause. Same subject → infinitive.
+> *Quiero **ir**.* (I want to go. — same subject: yo)
+> *Quiero que **vayas**.* (I want you to go. — different subjects: yo / tú)
+
+### Present Subjunctive Formation
+
+**Step 1:** Take the yo form of the present indicative.
+**Step 2:** Drop the -o.
+**Step 3:** Add the "opposite vowel" endings.
+
+| Person | -AR (hablar → habl**o** → habl-) | -ER/-IR (comer → com**o** → com-) |
+|--------|--------------------------------|----------------------------------|
+| yo | habl**e** | com**a** |
+| tú | habl**es** | com**as** |
+| él/ella | habl**e** | com**a** |
+| nosotros | habl**emos** | com**amos** |
+| vosotros | habl**éis** | com**áis** |
+| ellos | habl**en** | com**an** |
+
+> **"Yo form" rule:** Because the subjunctive derives from the yo present indicative, all irregularities from the yo form carry over:
+> *tener → yo tengo → subjunctive: tenga, tengas, tenga…*
+> *hacer → yo hago → subjunctive: haga, hagas, haga…*
+> *conocer → yo conozco → subjunctive: conozca…*
+> *decir → yo digo → subjunctive: diga…*
+
+### Completely irregular present subjunctives (6)
+
+| Verb | Subjunctive forms |
+|------|-----------------|
+| *ser* | sea, seas, sea, seamos, seáis, sean |
+| *estar* | esté, estés, esté, estemos, estéis, estén |
+| *ir* | vaya, vayas, vaya, vayamos, vayáis, vayan |
+| *saber* | sepa, sepas, sepa, sepamos, sepáis, sepan |
+| *haber* | haya, hayas, haya, hayamos, hayáis, hayan |
+| *dar* | dé, des, dé, demos, deis, den |
+
+---
+
+## 📚 4. Imperfect Subjunctive
+
+Used when the main clause is in the past (preterite, imperfect, conditional) — the "sequence of tenses" rule.
+
+Formed from the **3rd person plural preterite**: drop -ron, add imperfect subjunctive endings.
+
+*hablaron → habla-* → *hablara / hablase* (two equivalent forms; -ra is more common in speech)
+
+| Person | -RA form | -SE form |
+|--------|---------|---------|
+| yo | habla**ra** | habla**se** |
+| tú | habla**ras** | habla**ses** |
+| él/ella | habla**ra** | habla**se** |
+| nosotros | hablá**ramos** | hablá**semos** |
+| vosotros | habla**rais** | habla**seis** |
+| ellos | habla**ran** | habla**sen** |
+
+*Quería que **vinieras**.* (She wanted you to come.)
+*Era importante que **estudiaran**.* (It was important that they study.)
+*Si **tuviera** dinero, viajaría.* (If I had money, I would travel.)
+
+---
+
+## 📚 5. Si-Clauses (Conditionals)
+
+The three types of *si*-clauses follow strict tense combinations:
+
+| Type | Meaning | Si-clause | Main clause |
+|------|---------|-----------|------------|
+| **Real/Open** | Likely, possible future | *si + present indicative* | Future or present |
+| **Hypothetical** | Unlikely or imaginary present/future | *si + imperfect subjunctive* | Conditional |
+| **Counterfactual** | Impossible (past) | *si + pluperfect subjunctive* | Conditional perfect |
+
+**Examples:**
+
+**Real:** *Si **tienes** tiempo, **vendrás** a la fiesta.* (If you have time, you'll come to the party.)
+
+**Hypothetical:** *Si **tuviera** tiempo, **vendría** a la fiesta.* (If I had time, I would come to the party — but I don't.)
+
+**Counterfactual:** *Si **hubiera tenido** tiempo, **habría venido**.* (If I had had time, I would have come — but I didn't.)
+
+> **NEVER:** *si + future* or *si + conditional* — these combinations do not exist in standard Spanish.
+
+---
+
+## 📚 6. Useful Subjunctive Trigger Phrases
+
+**High-frequency phrases that always trigger subjunctive:**
+
+*espero que…* (I hope that…) | *ojalá (que)…* (I hope / God willing…) | *quiero que…* (I want…to) | *necesito que…* (I need…to) | *es importante que…* | *es posible que…* | *no creo que…* | *dudo que…* | *cuando* + future event (present subjunctive) | *para que…* (so that…) | *antes de que…* (before…) | *sin que…* (without…ing) | *con tal de que…* (provided that…) | *a menos que…* (unless…) | *aunque* (even if — with subjunctive for hypothetical)
+
+---
+
+## ⚠️ 7. Common Errors
+
+| Error | Wrong | Right |
+|-------|-------|-------|
+| Indicative after emotion trigger | *Espero que estás bien.* | *Espero que **estés** bien.* |
+| Si + conditional | *Si tendría dinero…* | *Si **tuviera** dinero…* |
+| Infinitive with different subjects | *Quiero ir tú.* | *Quiero que **vayas**.* |
+| Wrong *ser* subjunctive | *Espero que está lista.* | *Espero que **sea** lista.* |
+
+---
+
+## 🧮 8. Hands-On Lab
+
+**Drill:** Run `17.6_subjunctive_drill.py --mode present --count 20`.
+
+**Si-clause exercise:** Complete the three types for each scenario:
+1. (Win the lottery): Real / Hypothetical / Counterfactual
+2. (Have more time): same three types
+3. (Know the answer): same three types
+
+---
+
+## 🖼️ Visual Anchor
+![span-36__fig4](span-36__fig4.svg)
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal Links
+- Previous: [36.5 - Past Tenses](36.5---Past-Tenses)
+- Next: [36.7 - Idioms, Expressions & Regional Variation](36.7---Idioms,-Expressions-&-Regional-Variation)
+
+### External Resources
+- [Language Transfer — Complete Spanish](https://www.languagetransfer.org/complete-spanish) — subjunctive tracks
+- [SpanishDict — Subjunctive Guide](https://www.spanishdict.com/guide/introduction-to-the-subjunctive)
+- *A New Reference Grammar of Modern Spanish* (Butt & Benjamin) — Ch. 16: The Subjunctive
+- *Practice Makes Perfect: Spanish Verb Tenses* (Richmond) — subjunctive chapters

@@ -1,0 +1,65 @@
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .section { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted, #8b949e); font-weight: bold; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arr); }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="300" y="22" class="title" text-anchor="middle">Rust Type System Architecture</text>
+
+  <!-- Enums -->
+  <rect x="20" y="40" width="170" height="100" class="box-accent"/>
+  <text x="105" y="60" class="label-bold" text-anchor="middle">Enums (Tagged Unions)</text>
+  <text x="30" y="80" class="label">Option&lt;T&gt; = Some(T) | None</text>
+  <text x="30" y="96" class="label">Result&lt;T,E&gt; = Ok(T) | Err(E)</text>
+  <text x="30" y="112" class="label">Custom: Message { Quit,</text>
+  <text x="30" y="128" class="label">  Move{x,y}, Write(String) }</text>
+
+  <!-- Traits -->
+  <rect x="215" y="40" width="170" height="100" class="box-accent"/>
+  <text x="300" y="60" class="label-bold" text-anchor="middle">Traits (Interfaces)</text>
+  <text x="225" y="80" class="label">trait Draw { fn draw(&amp;self); }</text>
+  <text x="225" y="96" class="label">impl Draw for Circle {..}</text>
+  <text x="225" y="112" class="label">Default impls + supertraits</text>
+  <text x="225" y="128" class="label">Derive: Debug, Clone, Eq</text>
+
+  <!-- Generics -->
+  <rect x="410" y="40" width="170" height="100" class="box-accent"/>
+  <text x="495" y="60" class="label-bold" text-anchor="middle">Generics</text>
+  <text x="420" y="80" class="label">fn max&lt;T: Ord&gt;(a: T, b: T)</text>
+  <text x="420" y="96" class="label">struct Vec&lt;T&gt; { ... }</text>
+  <text x="420" y="112" class="label">Monomorphization:</text>
+  <text x="420" y="128" class="label">  compile-time specialization</text>
+
+  <!-- Dispatch -->
+  <text x="300" y="165" class="section" text-anchor="middle">DISPATCH MECHANISMS</text>
+
+  <rect x="60" y="175" width="200" height="55" class="box"/>
+  <text x="160" y="195" class="label-bold" text-anchor="middle">Static Dispatch (impl Trait)</text>
+  <text x="70" y="215" class="label">Monomorphized → zero cost</text>
+  <text x="70" y="225" class="label">Compiler knows exact type</text>
+
+  <rect x="340" y="175" width="200" height="55" class="box"/>
+  <text x="440" y="195" class="label-bold" text-anchor="middle">Dynamic Dispatch (dyn Trait)</text>
+  <text x="350" y="215" class="label">vtable lookup → small cost</text>
+  <text x="350" y="225" class="label">Heterogeneous collections</text>
+
+  <!-- Pattern matching -->
+  <text x="300" y="260" class="section" text-anchor="middle">PATTERN MATCHING (Exhaustive)</text>
+  <rect x="40" y="270" width="520" height="95" class="box"/>
+  <text x="50" y="290" class="label">match value {</text>
+  <text x="50" y="306" class="label">    Pattern::Variant { field } =&gt; ...,   // Destructure</text>
+  <text x="50" y="322" class="label">    x if x &gt; 10 =&gt; ...,                  // Guard clause</text>
+  <text x="50" y="338" class="label">    1..=9 =&gt; ...,                          // Range pattern</text>
+  <text x="50" y="354" class="label">    _ =&gt; ...,                              // Catch-all (compiler enforces coverage)</text>
+  <text x="50" y="365" class="label">}</text>
+</svg>

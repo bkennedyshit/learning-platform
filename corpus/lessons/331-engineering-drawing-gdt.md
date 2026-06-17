@@ -1,0 +1,264 @@
+---
+title: "33.1 — Engineering Drawing & GD&T"
+subject: "Mechanical Engineering & Fabrication"
+catalog: advanced
+audience_tier: higher-education
+chapter: "33.1"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 33.1 — Engineering Drawing & GD&T
+
+> *"A drawing is not a picture of an object — it is a contract between the designer and the manufacturer."*
+
+Engineering drawing is the language that turns a 3D idea into a set of physical instructions a machinist or fabricator can execute precisely. Your AET background gives you a massive head start — construction drawings share the same fundamentals: orthographic views, dimensioning, notes. GD&T (Geometric Dimensioning & Tolerancing) adds a formal mathematical language for specifying allowable variation that is far more powerful (and more manufactureable) than ±0.1mm stacked everywhere.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Create and read **multi-view orthographic drawings** (front, top, right side) in first-angle and third-angle projection, with correct line types.
+2. Identify and populate a standard **title block** (part name, material, scale, general tolerance, drawing number, revision).
+3. Interpret and apply **10+ GD&T symbols** from ASME Y14.5-2018.
+4. Construct a **datum reference frame** (A→B→C) and explain the three-plane concept.
+5. Read and write a **feature control frame** and correctly interpret MMC/LMC modifiers.
+6. Create a dimensioned drawing in **FreeCAD TechDraw** workbench.
+
+---
+
+## 🖼️ Visual Anchor
+
+![mech__34.1-fig1](mech__34.1-fig1.svg)
+
+---
+
+## 📚 1. Orthographic Projection
+
+### 1.1 First-Angle vs Third-Angle
+
+All engineering drawings use either first-angle (ISO/European) or third-angle (ANSI/US) projection. The **projection symbol** (truncated cone view) in the title block tells you which.
+
+| Aspect | First-Angle (ISO) | Third-Angle (ANSI) |
+|--------|-----------|------------|
+| Front view | Centre | Centre |
+| Top view | **Below** front | **Above** front |
+| Right side | **Left** of front | **Right** of front |
+| Projection symbol | Solid cone left of dashed | Dashed cone left of solid |
+| Common regions | Europe, Asia | USA, Canada |
+
+**Rule:** Always include the projection symbol. A drawing without it is ambiguous.
+
+### 1.2 Standard Line Types (ISO 128)
+
+| Line type | Appearance | Meaning |
+|-----------|-----------|---------|
+| Continuous thick | Solid | Visible edges |
+| Continuous thin | Thin solid | Dimensions, hatching |
+| Dashed thin | - - - - | Hidden edges |
+| Chain thin | -.-.-.  | Centrelines |
+| Chain thick + thin | Phantom line | Adjacent parts, bend lines |
+
+### 1.3 Standard Views
+
+A minimum drawing has three views: **front (elevation)**, **plan (top)**, and **end (side)**. Additional views used when needed:
+
+- **Section view**: cut through the part, reveal interior. Label A-A, B-B etc.
+- **Detail view**: magnified portion with a circle callout. Scale stated.
+- **Auxiliary view**: perpendicular to an inclined surface (your AET background — exactly like building elevations on raked roofs).
+- **Broken view**: long uniform parts shortened with break symbols.
+
+---
+
+## 📚 2. Title Block
+
+A complete title block contains:
+
+| Field | Content |
+|-------|---------|
+| Part name | Descriptive name (e.g. "MOTOR MOUNT BRACKET") |
+| Drawing number | Unique identifier + revision letter (A, B, C…) |
+| Material | Specific alloy & temper (e.g. "AL 6061-T6") |
+| Scale | Ratio (1:1, 1:2, 2:1) or NONE for detail drawings |
+| General tolerance | Default tolerance for dimensions WITHOUT callouts |
+| Surface finish | Default Ra or Rz for unspecified surfaces |
+| Projection symbol | First or third angle |
+| Designer, checker, approval | Names + dates |
+| Sheet | 1 of N |
+
+**General tolerance example:**
+```
+UNLESS OTHERWISE SPECIFIED:
+  LINEAR DIMENSIONS: ±0.1mm
+  ANGULAR DIMENSIONS: ±0.5°
+  SURFACE FINISH: Ra 3.2
+```
+
+---
+
+## 📚 3. GD&T — The Five Categories
+
+GD&T replaces coordinate ± tolerances with **tolerance zones** applied to geometric features. Governed by **ASME Y14.5-2018** (US) or **ISO 1101** (international).
+
+### 3.1 The Feature Control Frame
+
+```
+┌────────┬───────────────┬────┬────┐
+│ symbol │ tolerance     │ M  │ A  │
+└────────┴───────────────┴────┴────┘
+  ⊕         ⌀0.025 M        A
+```
+
+Reading left to right:
+1. **Geometric characteristic symbol** (⊕ = true position)
+2. **Tolerance value** (⌀ prefix = cylindrical zone; no prefix = width zone)
+3. **Material condition modifier** (M = MMC, L = LMC, blank = RFS)
+4. **Primary datum** (A), secondary (B), tertiary (C)
+
+### 3.2 The Five GD&T Categories
+
+| Category | Symbols | Always need datum? |
+|---------|---------|-------------------|
+| **Form** | Flatness, Straightness, Roundness, Cylindricity | ❌ Never |
+| **Orientation** | Perpendicularity, Parallelism, Angularity | ✅ Always |
+| **Location** | True Position, Concentricity, Symmetry | ✅ Always |
+| **Runout** | Circular Runout, Total Runout | ✅ Always |
+| **Profile** | Profile of Line, Profile of Surface | Either |
+
+**Memory rule:** *Form controls the shape of a feature by itself. Everything else requires a reference (datum) to compare against.*
+
+### 3.3 Datum Reference Frame (DRF)
+
+Three mutually perpendicular datum planes establish the coordinate system for the part:
+
+- **Primary datum A** — touches 3 points minimum (establishes one plane, removes 3 DOF)
+- **Secondary datum B** — touches 2 points minimum (establishes perpendicular plane, removes 2 DOF)
+- **Tertiary datum C** — touches 1 point minimum (last plane, removes 1 DOF)
+
+Total: 6 DOF removed → part completely located.
+
+**Critical:** you must inspect the part with the primary datum flat on the surface plate first, then locate to secondary, then tertiary. In the wrong order, measurements are meaningless.
+
+### 3.4 Material Condition Modifiers
+
+| Symbol | Name | Meaning | Bonus tolerance? |
+|--------|------|---------|-----------------|
+| **(M)** | MMC | Maximum Material Condition: largest shaft / smallest hole | Yes — as feature departs from MMC |
+| **(L)** | LMC | Least Material Condition: smallest shaft / largest hole | Yes |
+| (blank) | RFS | Regardless of Feature Size: tolerance applies always | No |
+
+**Practical example:** A bolt pattern with position ⌀0.5(M) on M10 bolts (MMC = 10.0mm, LMC = 9.6mm). If the actual bolt is 9.8mm (0.2mm below MMC), you gain 0.2mm bonus tolerance → total position tolerance = 0.7mm. This is why MMC is used for clearance-fit hole patterns — the more the bolt shrinks, the less precise the location needs to be.
+
+---
+
+## 📚 4. Key GD&T Symbols Reference
+
+| Symbol | Name | Controls |
+|--------|------|---------|
+| — | Straightness | Elements of a line or axis |
+| ⊓ | Flatness | Surface relative to itself |
+| ○ | Roundness (Circularity) | Cross-section roundness |
+| ⌭ | Cylindricity | Combined roundness + straightness of cylinder |
+| ⌒ | Profile of Line | 2D profile tolerance |
+| ⌓ | Profile of Surface | 3D surface tolerance |
+| ∠ | Angularity | Angle relative to datum |
+| ⊥ | Perpendicularity | 90° relative to datum |
+| ∥ | Parallelism | Parallel to datum |
+| ⊕ | True Position | Location of feature axis/surface relative to DRF |
+| ◎ | Concentricity | Axis to axis coaxiality |
+| ⌖ | Symmetry | Symmetry about datum plane |
+| ↗ | Circular Runout | Surface runout around axis |
+| ⇱ | Total Runout | Combined surface deviation in rotation |
+
+---
+
+## 📚 5. Surface Finish Notation
+
+Surface finish is specified with a "tick mark" symbol with the Ra or Rz value:
+
+| Symbol on drawing | Ra value | Typical process |
+|---|---|---|
+| ∇∇∇∇ (4 chevrons) | Ra 0.4 µm | Grinding, honing |
+| ∇∇∇ (3 chevrons) | Ra 0.8–1.6 µm | Fine CNC milling, turning |
+| ∇∇ (2 chevrons) | Ra 3.2 µm | Standard CNC milling |
+| ∇ (1 chevron) | Ra 6.3 µm | Rough milling, saw cut |
+
+> **Ra** = arithmetic mean roughness. **Rz** = average of 5 highest peak-to-valley measures. Rz ≈ 4–7× Ra approximately.
+
+---
+
+## 🛠️ 6. Worked Example — Bearing Housing Drawing
+
+### Part description
+An aluminium bearing housing: Ø30H7 bore for a 6206 bearing, 4× M6 mounting holes on a 70mm bolt circle, mounting face flatness critical for alignment.
+
+### Drawing callouts
+
+**On the bore:**
+```
+Feature control frame: ⌭ 0.005    (cylindricity ≤ 0.005mm — form only, no datum)
+Dimension: Ø30 +0.021/0           (H7 tolerance — from ISO 286 table)
+Surface finish: Ra 0.8             (bearing seat quality)
+```
+
+**On the mounting face:**
+```
+Feature control frame: ⊓ 0.01 A   (flatness 0.01mm relative to datum A)
+Datum A: the flat machined mounting face itself
+```
+
+**On the bolt circle:**
+```
+Feature control frame: ⊕ ⌀0.2 M A B C   (true position ⌀0.2mm at MMC, datums A, B, C)
+Bolt hole diameter: Ø6.6 +0.15/0  (clearance for M6)
+```
+
+**Reading the position callout:**
+- Primary datum A: mounting face (flat)
+- Secondary datum B: the bore axis (establishes XY centre)
+- Tertiary datum C: one hole (establishes rotation)
+- Position ⌀0.2(M): each hole must lie within ⌀0.2mm cylindrical zone at MMC; bonus tolerance accrues as hole grows
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+1. **"I can just put ±0.5mm everywhere."** This ignores fit requirements. A bearing bore with ±0.5mm will have the bearing rattling or seizing randomly. Use ISO fit tables (H7/k6 etc.) for mating features.
+
+2. **"GD&T is only for aerospace."** CNC shops charge more for tighter tolerances whether you specify them or not. Without GD&T, the machinist guesses. With it, you pay only for what you need.
+
+3. **"The tolerance on the drawing matches what the machine makes."** Machines drift. The drawing is the *acceptance criterion*, not the machine setting. A good machinist aims for nominal, not the tolerance limit.
+
+4. **"Datum order doesn't matter."** It absolutely does. Primary→Secondary→Tertiary determines how the part is fixtured for inspection. Wrong order = wrong measurements.
+
+5. **"Roundness and cylindricity are the same."** Roundness measures ONE cross-section. Cylindricity measures the entire cylinder — it's the combination of roundness AND straightness over the full length.
+
+6. **"My 3D print doesn't need a drawing."** Even for 3D printed parts, a drawing with critical dimensions and fit annotations catches slicer errors, scaling issues, and orientation ambiguity before committing to a long print.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [33.6 - Tolerancing, Fits & Assemblies](33.6---Tolerancing,-Fits-&-Assemblies) — ISO fit system, stack-up analysis
+- [33.7 - FreeCAD & Parametric Modelling](33.7---FreeCAD-&-Parametric-Modelling) — TechDraw workbench for generating drawings
+- [33.3 - Manufacturing Processes & DFM](33.3---Manufacturing-Processes-&-DFM) — DFM constraints that affect what you can dimension
+- [Subject_Plan](Subject_Plan) — 3D foundation this drawing practice extends
+
+### External
+- [ASME Y14.5-2018 Standard](https://www.asme.org/codes-standards/find-codes-standards/y14-5-dimensioning-tolerancing) — the governing standard
+- [GD&T Basics (free tutorials)](https://www.gdandtbasics.com/) — well-structured free resource
+- [EngineersEdge GD&T Reference](https://www.engineersedge.com/gdt/) — symbols, definitions, examples
+- [MIT OCW 2.008 Drawing Lectures](https://ocw.mit.edu/courses/2-008-design-and-manufacturing-ii-spring-2004/) — university-level treatment
+- [ISO 1101:2017 Standard overview](https://www.iso.org/standard/66777.html) — international equivalent
+
+---
+
+*Prev: [LEARNING_PATH](LEARNING_PATH) | Next: [33.2 - Materials Science & Selection](33.2---Materials-Science-&-Selection)*

@@ -1,0 +1,139 @@
+<svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-gpu" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .gpu-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; transition: all 0.3s ease; }
+    .gpu-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.12; filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+    .cpu-box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; rx: 6; transition: all 0.3s ease; }
+    .cpu-box:hover { fill: var(--text-muted, #8b949e); fill-opacity: 0.05; filter: drop-shadow(0 0 4px var(--text-muted, #8b949e)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+    
+    /* Advanced Animations */
+    .data-flow { 
+      stroke: var(--text-accent, #79c0ff); 
+      stroke-width: 1.5; 
+      stroke-dasharray: 6,4; 
+      fill: none; 
+      animation: data-flow-move 1s linear infinite; 
+    }
+    
+    .data-flow-slow { 
+      stroke: var(--text-muted, #8b949e); 
+      stroke-width: 1.5; 
+      stroke-dasharray: 6,4; 
+      fill: none; 
+      animation: data-flow-move 2.5s linear infinite; 
+    }
+
+    @keyframes data-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Processing and Cache units animation */
+    .vram-active {
+      animation: vram-glow 4s ease-in-out infinite;
+    }
+    .l2-active {
+      animation: l2-glow 3s ease-in-out infinite;
+    }
+    .sm-active {
+      animation: sm-glow 2.5s ease-in-out infinite;
+    }
+    .tensor-active {
+      stroke: #ff7b72;
+      animation: tensor-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes vram-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); fill: rgba(88, 166, 255, 0.01); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(121, 192, 255, 0.05); filter: drop-shadow(0 0 3px rgba(88, 166, 255, 0.4)); }
+    }
+
+    @keyframes l2-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); fill: rgba(88, 166, 255, 0.01); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(121, 192, 255, 0.07); filter: drop-shadow(0 0 4px rgba(88, 166, 255, 0.5)); }
+    }
+
+    @keyframes sm-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.04); filter: drop-shadow(0 0 5px rgba(88, 166, 255, 0.3)); }
+    }
+
+    @keyframes tensor-glow {
+      0%, 100% { stroke: #ff7b72; stroke-width: 2; fill: rgba(255, 123, 114, 0.02); }
+      50% { stroke: #ff9e96; stroke-width: 2.5; fill: rgba(255, 123, 114, 0.12); filter: drop-shadow(0 0 6px rgba(255, 123, 114, 0.6)); }
+    }
+
+    .bandwidth { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-accent, #79c0ff); font-weight: bold; pointer-events: none; }
+  </style>
+
+  <!-- Title -->
+  <text x="350" y="30" class="title" text-anchor="middle">GPU Memory Hierarchy &amp; Data Flow</text>
+
+  <!-- GPU Card -->
+  <rect x="30" y="50" width="440" height="380" class="gpu-box" stroke-width="3"/>
+  <text x="250" y="75" class="title" text-anchor="middle">GPU (RTX 4090)</text>
+
+  <!-- VRAM -->
+  <rect x="60" y="90" width="380" height="80" class="gpu-box vram-active"/>
+  <text x="250" y="115" class="label" text-anchor="middle" font-weight="bold">VRAM (24 GB GDDR6X)</text>
+  <text x="250" y="135" class="sublabel" text-anchor="middle">Model Weights | Activations | KV Cache | Gradients</text>
+  <text x="250" y="155" class="bandwidth" text-anchor="middle">↕ 1,008 GB/s bandwidth</text>
+
+  <!-- L2 Cache -->
+  <rect x="100" y="190" width="300" height="55" class="gpu-box l2-active"/>
+  <text x="250" y="215" class="label" text-anchor="middle" font-weight="bold">L2 Cache (72 MB)</text>
+  <text x="250" y="233" class="sublabel" text-anchor="middle">Shared across all SMs</text>
+
+  <!-- SMs -->
+  <rect x="60" y="265" width="170" height="80" class="gpu-box sm-active"/>
+  <text x="145" y="290" class="label" text-anchor="middle" font-weight="bold">SM Cluster (128 SMs)</text>
+  <text x="145" y="310" class="sublabel" text-anchor="middle">16,384 CUDA Cores</text>
+  <text x="145" y="328" class="sublabel" text-anchor="middle">512 Tensor Cores</text>
+
+  <!-- Registers/L1 -->
+  <rect x="250" y="265" width="190" height="80" class="gpu-box sm-active"/>
+  <text x="345" y="290" class="label" text-anchor="middle" font-weight="bold">Per-SM Resources</text>
+  <text x="345" y="310" class="sublabel" text-anchor="middle">L1 Cache: 128 KB</text>
+  <text x="345" y="328" class="sublabel" text-anchor="middle">Registers: 256 KB</text>
+
+  <!-- Tensor Core detail -->
+  <rect x="100" y="365" width="300" height="45" class="gpu-box tensor-active" stroke-dasharray="4,2"/>
+  <text x="250" y="390" class="label" text-anchor="middle">Tensor Cores: FP16 @ 330 TFLOPS | FP32 @ 83 TFLOPS</text>
+
+  <!-- CPU/System -->
+  <rect x="510" y="90" width="170" height="80" class="cpu-box"/>
+  <text x="595" y="115" class="label" text-anchor="middle" font-weight="bold">System RAM</text>
+  <text x="595" y="135" class="sublabel" text-anchor="middle">64 GB DDR5</text>
+  <text x="595" y="155" class="sublabel" text-anchor="middle">Optimizer States</text>
+
+  <rect x="510" y="200" width="170" height="60" class="cpu-box"/>
+  <text x="595" y="225" class="label" text-anchor="middle" font-weight="bold">CPU</text>
+  <text x="595" y="245" class="sublabel" text-anchor="middle">Data Loading / Preprocessing</text>
+
+  <rect x="510" y="290" width="170" height="60" class="cpu-box"/>
+  <text x="595" y="315" class="label" text-anchor="middle" font-weight="bold">NVMe Storage</text>
+  <text x="595" y="335" class="sublabel" text-anchor="middle">Model Checkpoints / Datasets</text>
+
+  <!-- PCIe connection -->
+  <line x1="470" y1="130" x2="510" y2="130" class="data-flow" marker-end="url(#arrow-gpu)"/>
+  <text x="490" y="120" class="bandwidth" text-anchor="middle">PCIe 4.0</text>
+  <text x="490" y="145" class="bandwidth" text-anchor="middle">32 GB/s</text>
+
+  <!-- Storage connection -->
+  <line x1="595" y1="260" x2="595" y2="290" class="data-flow-slow" marker-end="url(#arrow-gpu)"/>
+  <text x="640" y="280" class="bandwidth">7 GB/s</text>
+
+  <!-- Multi-GPU -->
+  <rect x="510" y="380" width="170" height="50" class="gpu-box" stroke-dasharray="4,2"/>
+  <text x="595" y="400" class="label" text-anchor="middle" font-weight="bold">GPU 2 (NCCL)</text>
+  <text x="595" y="418" class="sublabel" text-anchor="middle">PCIe P2P: 32 GB/s</text>
+
+  <line x1="470" y1="400" x2="510" y2="400" class="data-flow" marker-end="url(#arrow-gpu)"/>
+</svg>

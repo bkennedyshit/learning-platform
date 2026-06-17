@@ -1,0 +1,169 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title       { font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; fill: var(--text-normal, #c9d1d9); }
+    .subtitle    { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .section-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    
+    /* Precedence Matrix Styles */
+    .matrix-box  { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .class-lbl   { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: 600; fill: var(--text-accent, #79c0ff); }
+    .pronoun-txt { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .p-order     { font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: bold; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    
+    /* Clitic Rules Styles */
+    .rule-box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .rule-box-ac { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.2; rx: 6; }
+    .rule-lbl    { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    .syntax-txt  { font-family: 'Courier New', monospace; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .ex-txt      { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-style: italic; fill: var(--text-muted, #8b949e); }
+    
+    /* Morph Box Styles */
+    .morph-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .glow-rect   { fill: none; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 4 2; }
+  </style>
+
+  <defs>
+    <marker id="morph-arrow-head" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="30" y="35" class="title">SPANISH OBJECT PRONOUN placement &amp; PRECEDENCE</text>
+  <text x="30" y="50" class="subtitle">Systematic hierarchy for clitic pronouns and positioning syntax</text>
+
+  <!-- ================= LEFT COLUMN: ORDER OF PRECEDENCE & LE -> SE ================= -->
+  <!-- Section Title -->
+  <text x="30" y="85" class="section-lbl">1. THE ORDER OF PRECEDENCE (IO + DO)</text>
+
+  <!-- Precedence Order Horizontal Flow -->
+  <g transform="translate(30, 95)">
+    <!-- Main Box -->
+    <rect x="0" y="0" width="250" height="135" class="matrix-box" />
+
+    <!-- Header Row -->
+    <text x="15" y="25" class="class-lbl">PRECEDENCE HIERARCHY (LEFT TO RIGHT):</text>
+
+    <!-- Priority 1: Reflexive -->
+    <g transform="translate(15, 38)">
+      <rect x="0" y="0" width="65" height="42" rx="4" fill="var(--background-primary, #0d1117)" stroke="var(--text-muted, #8b949e)" stroke-width="0.8" opacity="0.7"/>
+      <text x="32" y="16" class="class-lbl" text-anchor="middle" style="font-size: 8px;">1. REFLEXIVE</text>
+      <text x="32" y="32" class="pronoun-txt" style="fill: var(--interactive-accent, #58a6ff); font-weight: bold;">me / te / se</text>
+    </g>
+
+    <!-- Arrow 1 -->
+    <line x1="85" y1="59" x2="95" y2="59" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" marker-end="url(#morph-arrow-head)"/>
+
+    <!-- Priority 2: Indirect Object -->
+    <g transform="translate(100, 38)">
+      <rect x="0" y="0" width="65" height="42" rx="4" fill="var(--background-primary, #0d1117)" stroke="var(--text-muted, #8b949e)" stroke-width="0.8" opacity="0.7"/>
+      <text x="32" y="16" class="class-lbl" text-anchor="middle" style="font-size: 8px;">2. INDIRECT</text>
+      <text x="32" y="32" class="pronoun-txt" style="fill: var(--interactive-accent, #58a6ff); font-weight: bold;">me / te / le</text>
+    </g>
+
+    <!-- Arrow 2 -->
+    <line x1="170" y1="59" x2="180" y2="59" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" marker-end="url(#morph-arrow-head)"/>
+
+    <!-- Priority 3: Direct Object -->
+    <g transform="translate(185, 38)">
+      <rect x="0" y="0" width="50" height="42" rx="4" fill="var(--background-primary, #0d1117)" stroke="var(--text-muted, #8b949e)" stroke-width="0.8" opacity="0.7"/>
+      <text x="25" y="16" class="class-lbl" text-anchor="middle" style="font-size: 8px;">3. DIRECT</text>
+      <text x="25" y="32" class="pronoun-txt" style="fill: var(--interactive-accent, #58a6ff); font-weight: bold;">lo / la</text>
+    </g>
+
+    <!-- Precedence Rule Note -->
+    <rect x="15" y="90" width="220" height="32" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.5"/>
+    <text x="125" y="103" class="class-lbl" text-anchor="middle" style="font-size: 9px; fill: var(--text-normal, #c9d1d9);">RULE: Indirect always goes before Direct</text>
+    <text x="125" y="116" class="class-lbl" text-anchor="middle" style="font-size: 9px; fill: var(--text-normal, #c9d1d9);">Formula: "People (IO) before Things (DO)"</text>
+  </g>
+
+  <!-- Le -> Se Morph Box -->
+  <text x="30" y="255" class="section-lbl">2. THE EUPHONIC "LE → SE" MUTATION</text>
+  <g transform="translate(30, 265)">
+    <rect x="0" y="0" width="250" height="120" class="matrix-box" stroke="var(--interactive-accent, #58a6ff)" />
+    
+    <!-- Morph Components -->
+    <!-- Input clash -->
+    <g transform="translate(15, 25)">
+      <rect x="0" y="0" width="70" height="60" rx="4" fill="var(--background-primary, #0d1117)" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+      <text x="35" y="20" class="class-lbl" text-anchor="middle" style="font-size: 8px;">SOUND CLASH</text>
+      <text x="35" y="38" class="pronoun-txt" style="fill: #f85149; font-weight: bold;">le + lo</text>
+      <text x="35" y="50" class="card-muted" text-anchor="middle" style="font-size: 8px;">(les + la, etc.)</text>
+    </g>
+
+    <!-- Morphing animation line -->
+    <path d="M 95 55 L 140 55" class="morph-arrow" marker-end="url(#morph-arrow-head)">
+      <animate attributeName="stroke-dasharray" values="5,5;15,5;5,5" dur="3s" repeatCount="indefinite" />
+    </path>
+    <text x="120" y="45" class="class-lbl" text-anchor="middle" style="font-size: 8px; fill: var(--interactive-accent, #58a6ff);">MUTATES</text>
+
+    <!-- Output result -->
+    <g transform="translate(155, 25)">
+      <rect x="0" y="0" width="80" height="60" rx="4" fill="var(--background-primary, #0d1117)" stroke="var(--text-accent, #79c0ff)" stroke-width="1.2"/>
+      <text x="40" y="20" class="class-lbl" text-anchor="middle" style="font-size: 8px; fill: var(--text-accent, #79c0ff);">EUPHONIC</text>
+      <text x="40" y="38" class="pronoun-txt" style="fill: var(--text-accent, #79c0ff); font-weight: bold;">se lo</text>
+      <text x="40" y="50" class="card-muted" text-anchor="middle" style="font-size: 8px; fill: var(--text-accent, #79c0ff);">(se la, se los)</text>
+      
+      <!-- Glow outline animation -->
+      <rect x="-2" y="-2" width="84" height="64" rx="6" class="glow-rect">
+        <animate attributeName="stroke-opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    
+    <text x="125" y="105" class="class-lbl" text-anchor="middle" style="font-size: 9px; fill: var(--text-muted, #8b949e);">Le/Les changes to SE before Lo/La/Los/Las</text>
+  </g>
+
+  <!-- ================= RIGHT COLUMN: PLACEMENT RULES ================= -->
+  <text x="310" y="85" class="section-lbl">3. CLITIC PLACEMENT SYNTAX RULES</text>
+  
+  <g transform="translate(310, 95)">
+    <!-- Rule 1: Conjugated Verb -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="260" height="65" class="rule-box" />
+      <text x="15" y="20" class="rule-lbl">RULE 1: Before Conjugated Verbs</text>
+      <text x="15" y="38" class="syntax-txt" xml:space="preserve"><tspan fill="var(--interactive-accent, #58a6ff)">[Lo]</tspan> veo.</text>
+      <text x="15" y="52" class="ex-txt">"I see it." — Single pronoun MUST precede the verb.</text>
+    </g>
+
+    <!-- Rule 2: Infinitive / Gerund (Dual Placement) -->
+    <g transform="translate(0, 77)">
+      <rect x="0" y="0" width="260" height="85" class="rule-box-ac" />
+      <text x="15" y="20" class="rule-lbl" style="fill: var(--interactive-accent, #58a6ff);">RULE 2: Dual Option (Infinitives / Gerunds)</text>
+      
+      <!-- Option A (Before) -->
+      <g>
+        <text x="15" y="42" class="syntax-txt" xml:space="preserve"><tspan fill="var(--interactive-accent, #58a6ff)">Lo</tspan> quiero ver.</text>
+        <text x="15" y="54" class="ex-txt" style="font-size: 9px;">Option A: Before conjugated helper verb</text>
+        <animate attributeName="opacity" values="1;1;0.3;0.3;1" dur="4s" repeatCount="indefinite"/>
+      </g>
+      
+      <!-- Divider/OR -->
+      <text x="135" y="42" class="class-lbl" text-anchor="middle">OR</text>
+
+      <!-- Option B (Attached) -->
+      <g>
+        <text x="160" y="42" class="syntax-txt" xml:space="preserve">Quiero ver<tspan fill="var(--interactive-accent, #58a6ff)">lo</tspan>.</text>
+        <text x="160" y="54" class="ex-txt" style="font-size: 9px;">Option B: Attached to end</text>
+        <animate attributeName="opacity" values="0.3;0.3;1;1;0.3" dur="4s" repeatCount="indefinite"/>
+      </g>
+      
+      <text x="15" y="74" class="ex-txt" style="font-size: 9px; fill: var(--text-normal, #c9d1d9);">Both sentences are exactly equivalent in meaning.</text>
+    </g>
+
+    <!-- Rule 3: Affirmative Imperative -->
+    <g transform="translate(0, 174)">
+      <rect x="0" y="0" width="260" height="60" class="rule-box" />
+      <text x="15" y="18" class="rule-lbl">RULE 3: Affirmative Commands (Attached)</text>
+      <text x="15" y="36" class="syntax-txt" xml:space="preserve">¡Dí<tspan fill="var(--interactive-accent, #58a6ff)">me</tspan><tspan fill="var(--text-accent, #79c0ff)">lo</tspan>!</text>
+      <text x="15" y="50" class="ex-txt">"Tell it to me!" — Attached to the end. Note added accent.</text>
+    </g>
+
+    <!-- Rule 4: Negative Imperative -->
+    <g transform="translate(0, 246)">
+      <rect x="0" y="0" width="260" height="60" class="rule-box" />
+      <text x="15" y="18" class="rule-lbl">RULE 4: Negative Commands (Before)</text>
+      <text x="15" y="36" class="syntax-txt" xml:space="preserve">No <tspan fill="var(--interactive-accent, #58a6ff)">lo</tspan> compres.</text>
+      <text x="15" y="50" class="ex-txt">"Don't buy it." — Pronouns go between 'No' and the verb.</text>
+    </g>
+  </g>
+</svg>

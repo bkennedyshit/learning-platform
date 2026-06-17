@@ -1,0 +1,59 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="tr-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L7 5 L0 8z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .tr-title { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .tr-label { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-normal, #c9d1d9); }
+    .tr-accent { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .tr-warn { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:#e74c3c; font-weight:bold; }
+    .tr-landscape { fill:none; stroke:var(--text-normal, #c9d1d9); stroke-width:2.5; stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLand 3s ease-out forwards; }
+    .tr-agent { fill:#e74c3c; stroke:var(--text-normal, #c9d1d9); stroke-width:1.5; animation: bounce 2s infinite; }
+    .tr-goal { fill:#2ecc71; stroke:var(--text-normal, #c9d1d9); stroke-width:1.5; animation: pulse 2s infinite alternate; }
+    .tr-barrier { fill:#e74c3c; opacity:0.2; animation: fadeBarrier 4s infinite alternate; }
+    .tr-axis { stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .tr-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:5; }
+    .tr-explore { stroke:var(--interactive-accent, #58a6ff); stroke-width:1.5; fill:none; stroke-dasharray:4 3; animation: march 1s linear infinite; }
+    @keyframes drawLand { to { stroke-dashoffset: 0; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes pulse { from { stroke-width: 1.5; r: 8; } to { stroke-width: 4; r: 10; } }
+    @keyframes fadeBarrier { from { opacity: 0.1; } to { opacity: 0.3; } }
+    @keyframes march { to { stroke-dashoffset: -14; } }
+  </style>
+  <!-- Reward landscape curve -->
+  <line x1="50" y1="300" x2="650" y2="300" class="tr-axis"/>
+  <line x1="50" y1="300" x2="50" y2="30" class="tr-axis"/>
+  <text x="350" y="330" class="tr-label" text-anchor="middle">Action Space: Isolation ←→ Vulnerability</text>
+  <text x="30" y="165" class="tr-label" text-anchor="middle" transform="rotate(-90,30,165)">Expected Return</text>
+  <!-- Landscape: local min at isolation, global max at connection, deep valley between -->
+  <path d="M70 180 Q120 170 170 175 Q220 180 270 250 Q320 320 370 340 Q420 320 470 200 Q520 100 570 80 Q620 90 650 100" class="tr-landscape"/>
+  <!-- Barrier region (the "valley of vulnerability") -->
+  <rect x="250" y="240" width="180" height="100" class="tr-barrier" rx="5"/>
+  <text x="340" y="360" class="tr-warn" text-anchor="middle">Valley of Vulnerability</text>
+  <text x="340" y="375" class="tr-label" text-anchor="middle">(extreme negative reward zone)</text>
+  <!-- Local minimum (isolation) -->
+  <circle cx="170" cy="175" r="8" class="tr-agent"/>
+  <text x="170" y="160" class="tr-warn" text-anchor="middle">STUCK HERE</text>
+  <text x="170" y="145" class="tr-label" text-anchor="middle">Local min: Isolation</text>
+  <text x="170" y="195" class="tr-label" text-anchor="middle">Q(isolate)=+1</text>
+  <!-- Global maximum (connection) -->
+  <circle cx="570" cy="80" r="8" class="tr-goal"/>
+  <text x="570" y="65" class="tr-accent" text-anchor="middle">Global max: Connection</text>
+  <text x="570" y="100" class="tr-label" text-anchor="middle">Q*(trust)=+8</text>
+  <!-- Arrow showing required exploration -->
+  <path d="M185 175 Q300 175 350 250" class="tr-explore"/>
+  <text x="280" y="200" class="tr-accent">ε must overcome this barrier</text>
+  <!-- Right panel -->
+  <rect x="420" y="140" width="250" height="180" class="tr-box"/>
+  <text x="545" y="162" class="tr-title" text-anchor="middle">The Avoidance Trap</text>
+  <text x="435" y="185" class="tr-label">• Q(trust) = −20 (from trauma)</text>
+  <text x="435" y="203" class="tr-label">• Q(isolate) = +1 (reliable)</text>
+  <text x="435" y="221" class="tr-label">• True Q*(trust) = +8</text>
+  <text x="435" y="239" class="tr-label">• But agent never explores to learn</text>
+  <text x="435" y="265" class="tr-accent">Solutions:</text>
+  <text x="435" y="283" class="tr-label">1. Increase ε (exposure therapy)</text>
+  <text x="435" y="301" class="tr-label">2. Reward shaping (safe context)</text>
+  <text x="435" y="319" class="tr-label">3. Optimistic init (cognitive reframe)</text>
+</svg>

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .text { font-family: monospace; font-size: 14px; fill: #333; }
+      .bold { font-weight: bold; }
+      .membox { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 2; }
+      .danger { fill: #f8d7da; stroke: #f5c6cb; }
+      .safe { fill: #d4edda; stroke: #c3e6cb; }
+    </style>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="#ffffff" />
+  
+  <text x="400" y="50" text-anchor="middle" class="text bold" font-size="20px">Buffer Overflow on the Stack</text>
+  
+  <!-- Memory Layout -->
+  <g transform="translate(300, 100)">
+    <!-- Return Address -->
+    <rect x="0" y="0" width="200" height="40" class="membox danger" />
+    <text x="100" y="25" text-anchor="middle" class="text">Return Address</text>
+    
+    <!-- Saved Frame Pointer -->
+    <rect x="0" y="40" width="200" height="40" class="membox" />
+    <text x="100" y="65" text-anchor="middle" class="text">Saved EBP</text>
+    
+    <!-- Buffer -->
+    <rect x="0" y="80" width="200" height="120" class="membox safe" />
+    <text x="100" y="145" text-anchor="middle" class="text">char buffer[8]</text>
+  </g>
+  
+  <!-- Exploit Animation -->
+  <g transform="translate(300, 100)">
+    <text x="10" y="190" class="text bold" fill="#dc3545">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+      A
+    </text>
+    <text x="30" y="190" class="text bold" fill="#dc3545">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.1;0.2;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+      A
+    </text>
+    <text x="50" y="190" class="text bold" fill="#dc3545">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.2;0.3;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+      A
+    </text>
+    <!-- Overwriting EBP -->
+    <rect x="0" y="40" width="200" height="40" fill="#dc3545" opacity="0">
+       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.5;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+    </rect>
+    <text x="100" y="65" text-anchor="middle" class="text bold" fill="#fff" opacity="0">
+       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.5;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+       AAAA
+    </text>
+    
+    <!-- Overwriting Return Address -->
+    <rect x="0" y="0" width="200" height="40" fill="#8b0000" opacity="0">
+       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.7;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+    </rect>
+    <text x="100" y="25" text-anchor="middle" class="text bold" fill="#fff" opacity="0">
+       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.7;0.9;1" begin="0s" dur="4s" repeatCount="indefinite" />
+       0xDEADBEEF (Malicious)
+    </text>
+  </g>
+  
+  <!-- Add marker definition -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333" />
+    </marker>
+  </defs>
+
+  <path d="M 250 250 L 250 100" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="240" y="175" text-anchor="end" class="text">Stack Grows Up</text>
+</svg>

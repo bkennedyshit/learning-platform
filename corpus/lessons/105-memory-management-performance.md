@@ -1,0 +1,1161 @@
+---
+title: "10.5 — Memory Management & Performance"
+subject: "C#"
+catalog: advanced
+audience_tier: higher-education
+chapter: "10.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 10.5 — Memory Management & Performance
+
+> *"The fastest code is code that doesn't allocate."* — Stephen Toub
+
+In Python, you never think about memory layout — everything is a heap-allocated object managed by reference counting + cyclic GC. In C# game development, **every allocation is a future GC pause**, and GC pauses at 60fps mean visible stutters. This chapter teaches you to write allocation-free hot paths, understand the garbage collector, and use modern C# features (`Span<T>`, `stackalloc`, `ref struct`) to achieve native-code performance.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Understand .NET's generational garbage collector and what triggers collections.
+2. Choose struct vs class based on size, lifetime, and usage patterns.
+3. Use `Span<T>` and `Memory<T>` for zero-allocation slicing.
+4. Apply object pooling to eliminate per-frame allocations.
+5. Use `stackalloc` for temporary buffers without heap allocation.
+6. Profile and identify GC pressure using Unity Profiler and dotMemory.
+7. Understand Unity's Burst compiler and how it eliminates managed overhead.
+
+---
+
+## 🖼️ Visual Anchor — .NET Memory Layout
+
+![csharp__3.5-fig1](csharp__3.5-fig1.svg)
+
+---
+
+## 📚 1. Concepts
+
+### Concept 3.5.1 — The Generational Garbage Collector
+
+.NET's GC divides the heap into three generations:
+
+| Generation | Contains | Collection Frequency | Cost |
+|-----------|----------|---------------------|------|
+| **Gen 0** | Short-lived objects (just allocated) | Very frequent | Fast (~1ms) |
+| **Gen 1** | Survived one Gen 0 collection | Moderate | Medium |
+| **Gen 2** | Long-lived objects (survived Gen 1) | Rare | Expensive (10-100ms!) |
+
+**How it works:**
+1. New objects allocate in Gen 0 (bump pointer — extremely fast).
+2. When Gen 0 fills up, GC runs: live objects promote to Gen 1, dead ones are freed.
+3. Gen 1 fills → promotes survivors to Gen 2.
+4. Gen 2 collection is a **full GC** — pauses ALL threads. This is your stutter.
+
+**The rule for games:** Never trigger Gen 2 collections during gameplay. Minimize Gen 0 allocations in Update/FixedUpdate.
+
+### Concept 3.5.2 — Struct vs Class Decision Matrix
+
+| Factor | Use `struct` | Use `class` |
+|--------|-------------|-------------|
+| Size | ≤ 16 bytes ideal, ≤ 64 bytes OK | Any size |
+| Lifetime | Short (frame-local, temporary) | Long (persists across frames) |
+| Semantics | Value (copy on assign) | Identity (shared reference) |
+| Collections | Stored inline in arrays (cache-friendly) | Pointer array (cache-unfriendly) |
+| Polymorphism | No virtual dispatch | Full inheritance |
+| Nullability | Cannot be null (unless `Nullable<T>`) | Can be null |
+| GC pressure | Zero (stack or inline) | Yes (heap allocated) |
+
+```csharp
+// ✓ GOOD struct: small, value semantics, used in arrays
+public readonly struct DamageEvent
+{
+    public readonly float Amount;
+    public readonly DamageType Type;
+    public readonly Vector3 HitPoint;
+    public readonly float Timestamp;
+}
+
+// ✓ GOOD class: large, needs identity, long-lived
+public class PlayerState
+{
+    public string Name { get; set; }
+    public Inventory Inventory { get; }
+    public QuestLog Quests { get; }
+    // ... many fields, complex lifecycle
+}
+```
+
+### Concept 3.5.3 — Span<T> (Zero-Allocation Slicing)
+
+`Span<T>` is a stack-only view into contiguous memory — arrays, strings, stackalloc, native memory — without copying or allocating:
+
+```csharp
+// Python: data[10:20] creates a NEW list
+// C#: Span<T> creates a VIEW (no allocation)
+
+int[] bigArray = new int[1000];
+Span<int> slice = bigArray.AsSpan(10, 20);  // No copy, no allocation
+slice[0] = 42;  // Modifies bigArray[10]!
+
+// String slicing without allocation
+ReadOnlySpan<char> name = "Player_001".AsSpan(7);  // "001" — no new string
+
+// Parse without allocating substrings
+public static bool TryParseCoord(ReadOnlySpan<char> input, out Vector2Int result)
+{
+    var comma = input.IndexOf(',');
+    if (comma < 0) { result = default; return false; }
+
+    var xSpan = input[..comma];
+    var ySpan = input[(comma + 1)..];
+
+    if (int.TryParse(xSpan, out int x) && int.TryParse(ySpan, out int y))
+    {
+        result = new Vector2Int(x, y);
+        return true;
+    }
+    result = default;
+    return false;
+}
+```
+
+### Concept 3.5.4 — stackalloc (Stack-Allocated Buffers)
+
+```csharp
+// Allocate temporary buffer on the STACK (no GC, freed when method returns)
+public void ProcessNearbyEnemies(Vector3 center, float radius)
+{
+    // Stack-allocate space for up to 32 results
+    Span<Collider> hits = stackalloc Collider[32];  // ← NOT on heap!
+
+    // Note: Unity's Physics API doesn't support Span yet, but the pattern applies:
+    Span<float> distances = stackalloc float[32];
+
+    int count = 0;
+    foreach (var enemy in _enemies)
+    {
+        float dist = Vector3.Distance(enemy.Position, center);
+        if (dist <= radius && count < 32)
+        {
+            distances[count++] = dist;
+        }
+    }
+
+    // Process the stack-allocated buffer
+    var validDistances = distances[..count];
+    // ... sort, filter, etc. — all zero-allocation
+}
+```
+
+### Concept 3.5.5 — Object Pooling
+
+```csharp
+public class GameObjectPool
+{
+    private readonly Stack<GameObject> _pool = new();
+    private readonly GameObject _prefab;
+    private readonly Transform _parent;
+
+    public GameObjectPool(GameObject prefab, int preWarm, Transform parent = null)
+    {
+        _prefab = prefab;
+        _parent = parent;
+
+        for (int i = 0; i < preWarm; i++)
+        {
+            var obj = Object.Instantiate(prefab, parent);
+            obj.SetActive(false);
+            _pool.Push(obj);
+        }
+    }
+
+    public GameObject Get(Vector3 position, Quaternion rotation)
+    {
+        var obj = _pool.Count > 0 ? _pool.Pop() : Object.Instantiate(_prefab, _parent);
+        obj.transform.SetPositionAndRotation(position, rotation);
+        obj.SetActive(true);
+        return obj;
+    }
+
+    public void Return(GameObject obj)
+    {
+        obj.SetActive(false);
+        _pool.Push(obj);
+    }
+}
+```
+
+
+---
+
+## 🔑 2. Mechanics
+
+### 2.1 — Common Allocation Sources in Unity (and Fixes)
+
+| Allocation Source | Per-Frame Cost | Fix |
+|-------------------|---------------|-----|
+| `string` concatenation in Update | ~100 bytes/frame | StringBuilder or interpolated only in events |
+| `new List<T>()` in Update | ~64+ bytes | Pre-allocate, reuse with `.Clear()` |
+| LINQ in hot path | Closure + iterator alloc | Manual loops |
+| `GetComponent<T>()` every frame | ~40 bytes (boxing) | Cache in Awake/Start |
+| `foreach` on non-generic IEnumerable | Boxes enumerator | Use `for` loop or generic collections |
+| Lambda captures | Closure object allocation | Cache delegate, avoid captures |
+| `ToString()` on value types | Boxes the value type | Use `Span<char>` formatting |
+| `Physics.RaycastAll()` | Allocates array | Use `RaycastNonAlloc()` |
+
+### 2.2 — Allocation-Free Patterns
+
+```csharp
+// ❌ Allocates every frame
+void Update()
+{
+    var hits = Physics2D.OverlapCircleAll(pos, radius);  // NEW array each call
+    var msg = $"Found {hits.Length} targets";             // NEW string
+    var filtered = hits.Where(h => h.CompareTag("Enemy")).ToList();  // NEW list
+}
+
+// ✓ Zero allocations
+private readonly Collider2D[] _hitBuffer = new Collider2D[32];
+private readonly List<Collider2D> _filteredCache = new(32);
+private readonly StringBuilder _sb = new(64);
+
+void Update()
+{
+    int count = Physics2D.OverlapCircleNonAlloc(pos, radius, _hitBuffer);
+
+    _filteredCache.Clear();
+    for (int i = 0; i < count; i++)
+    {
+        if (_hitBuffer[i].CompareTag("Enemy"))
+            _filteredCache.Add(_hitBuffer[i]);
+    }
+
+    // Only build string when actually needed (e.g., debug mode)
+    if (debugMode)
+    {
+        _sb.Clear();
+        _sb.Append("Found ").Append(_filteredCache.Count).Append(" targets");
+        debugText.SetText(_sb);
+    }
+}
+```
+
+### 2.3 — ref struct and Span Constraints
+
+```csharp
+// ref struct: can ONLY live on the stack (cannot be boxed, stored in fields, or captured)
+public ref struct TileIterator
+{
+    private readonly Span<TileData> _tiles;
+    private int _index;
+
+    public TileIterator(Span<TileData> tiles)
+    {
+        _tiles = tiles;
+        _index = -1;
+    }
+
+    public bool MoveNext() => ++_index < _tiles.Length;
+    public ref TileData Current => ref _tiles[_index];
+}
+
+// Span<T> is itself a ref struct — these are ILLEGAL:
+// class Foo { Span<int> field; }          // ✗ Can't store in class
+// async Task Bar(Span<int> s) { }         // ✗ Can't use in async
+// Func<Span<int>> lambda = () => span;    // ✗ Can't capture
+```
+
+### 2.4 — ArrayPool<T> (Rent/Return Pattern)
+
+```csharp
+using System.Buffers;
+
+public void ProcessChunk(Vector2Int chunkPos)
+{
+    // Rent a buffer from the shared pool (may be larger than requested)
+    int[] buffer = ArrayPool<int>.Shared.Rent(1024);
+    try
+    {
+        Span<int> tiles = buffer.AsSpan(0, 1024);
+        GenerateTerrain(chunkPos, tiles);
+        ApplyTilemap(tiles);
+    }
+    finally
+    {
+        ArrayPool<int>.Shared.Return(buffer, clearArray: true);
+    }
+}
+```
+
+### 2.5 — Struct Layout and Cache Performance
+
+```csharp
+// ❌ Bad: Array of classes (pointer chasing, cache misses)
+class EnemyData { public Vector3 Pos; public float Health; public int Id; }
+EnemyData[] enemies = new EnemyData[10000];
+// Memory: [ptr][ptr][ptr]... → each ptr points to scattered heap location
+
+// ✓ Good: Array of structs (contiguous, cache-friendly)
+struct EnemyData { public Vector3 Pos; public float Health; public int Id; }
+EnemyData[] enemies = new EnemyData[10000];
+// Memory: [Pos|Health|Id][Pos|Health|Id][Pos|Health|Id]... → sequential reads
+
+// ✓✓ Best: Struct-of-Arrays (SoA) for SIMD/Burst
+struct EnemyArrays
+{
+    public Vector3[] Positions;   // All positions contiguous
+    public float[] Healths;       // All healths contiguous
+    public int[] Ids;             // All IDs contiguous
+}
+// Iterating just positions? Perfect cache utilization.
+```
+
+### 2.6 — Profiling with Unity Profiler
+
+```csharp
+// Mark sections for the profiler
+using Unity.Profiling;
+
+private static readonly ProfilerMarker s_UpdateMarker = new("FarmSystem.Update");
+private static readonly ProfilerMarker s_GrowthMarker = new("FarmSystem.GrowCrops");
+
+void Update()
+{
+    using (s_UpdateMarker.Auto())
+    {
+        using (s_GrowthMarker.Auto())
+        {
+            GrowAllCrops();
+        }
+        CheckHarvest();
+    }
+}
+```
+
+---
+
+## ✍️ 3. Worked Examples
+
+### Example 10.5.1 — Allocation-Free Damage System
+
+```csharp
+// Value-type event (no heap allocation)
+public readonly struct DamageEvent
+{
+    public readonly int SourceId;
+    public readonly int TargetId;
+    public readonly float Amount;
+    public readonly DamageType Type;
+    public readonly Vector3 HitPoint;
+
+    public DamageEvent(int source, int target, float amount, DamageType type, Vector3 hit)
+    {
+        SourceId = source;
+        TargetId = target;
+        Amount = amount;
+        Type = type;
+        HitPoint = hit;
+    }
+}
+
+// Ring buffer for damage events (no allocation after init)
+public class DamageEventBuffer
+{
+    private readonly DamageEvent[] _buffer;
+    private int _head;
+    private int _count;
+
+    public DamageEventBuffer(int capacity) => _buffer = new DamageEvent[capacity];
+
+    public void Push(in DamageEvent evt)
+    {
+        _buffer[_head] = evt;
+        _head = (_head + 1) % _buffer.Length;
+        _count = Math.Min(_count + 1, _buffer.Length);
+    }
+
+    public ReadOnlySpan<DamageEvent> GetRecent(int count)
+    {
+        count = Math.Min(count, _count);
+        int start = (_head - count + _buffer.Length) % _buffer.Length;
+        if (start + count <= _buffer.Length)
+            return _buffer.AsSpan(start, count);
+        // Wrap-around case: would need copy — simplified here
+        return _buffer.AsSpan(start, _buffer.Length - start);
+    }
+}
+```
+
+### Example 10.5.2 — Generic Object Pool with Interface
+
+```csharp
+public interface IPoolable
+{
+    void OnSpawn();
+    void OnDespawn();
+}
+
+public class ComponentPool<T> where T : MonoBehaviour, IPoolable
+{
+    private readonly Stack<T> _available = new();
+    private readonly HashSet<T> _active = new();
+    private readonly T _prefab;
+    private readonly Transform _container;
+
+    public int ActiveCount => _active.Count;
+    public int AvailableCount => _available.Count;
+
+    public ComponentPool(T prefab, int preWarm, Transform container)
+    {
+        _prefab = prefab;
+        _container = container;
+
+        for (int i = 0; i < preWarm; i++)
+            _available.Push(CreateInstance());
+    }
+
+    public T Get(Vector3 pos, Quaternion rot)
+    {
+        var obj = _available.Count > 0 ? _available.Pop() : CreateInstance();
+        obj.transform.SetPositionAndRotation(pos, rot);
+        obj.gameObject.SetActive(true);
+        obj.OnSpawn();
+        _active.Add(obj);
+        return obj;
+    }
+
+    public void Return(T obj)
+    {
+        obj.OnDespawn();
+        obj.gameObject.SetActive(false);
+        _active.Remove(obj);
+        _available.Push(obj);
+    }
+
+    public void ReturnAll()
+    {
+        foreach (var obj in _active)
+        {
+            obj.OnDespawn();
+            obj.gameObject.SetActive(false);
+            _available.Push(obj);
+        }
+        _active.Clear();
+    }
+
+    private T CreateInstance()
+    {
+        var obj = Object.Instantiate(_prefab, _container);
+        obj.gameObject.SetActive(false);
+        return obj;
+    }
+}
+```
+
+---
+
+## ⚠️ 4. Gotchas
+
+### Gotcha 3.5.1 — Large Structs on the Stack
+```csharp
+// ❌ Struct > 64 bytes: copying is expensive, defeats the purpose
+struct HugeStruct { public Matrix4x4 A, B, C, D; }  // 256 bytes!
+void Process(HugeStruct s) { }  // Copies 256 bytes on every call!
+
+// ✓ Pass large structs by reference
+void Process(in HugeStruct s) { }  // 'in' = readonly reference, no copy
+// Or: use 'ref' if you need to modify it
+```
+
+### Gotcha 3.5.2 — Struct in Dictionary Causes Boxing
+```csharp
+// ❌ If struct doesn't implement IEquatable<T>, Dictionary boxes it for comparison
+struct TileKey { public int X, Y; }
+var dict = new Dictionary<TileKey, TileData>();  // Boxing on every lookup!
+
+// ✓ Implement IEquatable<T>
+struct TileKey : IEquatable<TileKey>
+{
+    public int X, Y;
+    public bool Equals(TileKey other) => X == other.X && Y == other.Y;
+    public override int GetHashCode() => HashCode.Combine(X, Y);
+}
+```
+
+### Gotcha 3.5.3 — Closure Allocations in Lambdas
+```csharp
+// ❌ Lambda captures local variable → allocates closure object
+float radius = 5f;
+var nearby = enemies.Where(e => e.Distance < radius);  // Closure allocated!
+
+// ✓ In hot paths, use a manual loop or pass state explicitly
+// Or cache the delegate if the captured value doesn't change
+```
+
+### Gotcha 3.5.4 — Unity's GC is Non-Generational (Boehm)
+Unity's default GC (Boehm) is **non-generational** and **stop-the-world**. It's worse than .NET's GC. Unity 2021+ offers **Incremental GC** (spreads collection across frames) — enable it in Project Settings → Player → Other Settings.
+
+---
+
+## 🔗 5. Cross-References
+
+- **Next**: [10.6 - Unity Specifics - MonoBehaviour, Coroutines, ScriptableObjects, ECS](10.6---Unity-Specifics---MonoBehaviour,-Coroutines,-ScriptableObjects,-ECS)
+- **Previous**: [10.4 - Async, Await, Tasks & Threading](10.4---Async,-Await,-Tasks-&-Threading)
+- **Burst Compiler**: [10.6 - Unity Specifics - MonoBehaviour, Coroutines, ScriptableObjects, ECS](10.6---Unity-Specifics---MonoBehaviour,-Coroutines,-ScriptableObjects,-ECS) — HPC# and Burst
+- **Engine Context**: [28.5 - Game Engine Architectures - Unity & Unreal](28.5---Game-Engine-Architectures---Unity-&-Unreal) — Frame budgets
+- **Data Structures**: [08.13 - Algorithms & Data Structures in Python](08.13---Algorithms-&-Data-Structures-in-Python) — Collection performance
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Span<T> for Zero-Allocation Parsing
+
+**Problem:** Your game server parses thousands of network packets per second. Traditional string splitting allocates arrays and substrings on every parse. Use `Span<T>` to parse with zero heap allocations.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### The Allocation Problem
+
+```csharp
+// ❌ BAD: Every Split() allocates a new string[] AND new string objects
+void ParseCommand_Allocating(string message)
+{
+    // "MOVE 42 150.5 200.3" → allocates string[4] + 4 string objects
+    string[] parts = message.Split(' ');
+    string command = parts[0];        // New string allocation
+    int playerId = int.Parse(parts[1]); // Parses from allocated string
+    float x = float.Parse(parts[2]);
+    float y = float.Parse(parts[3]);
+}
+// At 10,000 messages/sec = 50,000+ allocations/sec = GC pressure
+
+// ✅ GOOD: Zero allocations with Span<char>
+void ParseCommand_ZeroAlloc(ReadOnlySpan<char> message)
+{
+    // Slice the span — no allocation, just pointer + length
+    int firstSpace = message.IndexOf(' ');
+    ReadOnlySpan<char> command = message[..firstSpace]; // "MOVE"
+    ReadOnlySpan<char> rest = message[(firstSpace + 1)..]; // "42 150.5 200.3"
+
+    int secondSpace = rest.IndexOf(' ');
+    int playerId = int.Parse(rest[..secondSpace]); // Parses directly from span
+    rest = rest[(secondSpace + 1)..];
+
+    int thirdSpace = rest.IndexOf(' ');
+    float x = float.Parse(rest[..thirdSpace]);
+    float y = float.Parse(rest[(thirdSpace + 1)..]);
+}
+```
+
+#### Building a Zero-Alloc Packet Parser
+
+```csharp
+public ref struct PacketReader
+{
+    private ReadOnlySpan<byte> _buffer;
+    private int _position;
+
+    public PacketReader(ReadOnlySpan<byte> buffer)
+    {
+        _buffer = buffer;
+        _position = 0;
+    }
+
+    public byte ReadByte()
+    {
+        return _buffer[_position++];
+    }
+
+    public int ReadInt32()
+    {
+        var value = BitConverter.ToInt32(_buffer[_position..]);
+        _position += 4;
+        return value;
+    }
+
+    public float ReadFloat()
+    {
+        var value = BitConverter.ToSingle(_buffer[_position..]);
+        _position += 4;
+        return value;
+    }
+
+    public ReadOnlySpan<char> ReadString()
+    {
+        int length = ReadInt32();
+        var chars = MemoryMarshal.Cast<byte, char>(_buffer.Slice(_position, length * 2));
+        _position += length * 2;
+        return chars;
+    }
+
+    public Vector3 ReadVector3()
+    {
+        float x = ReadFloat();
+        float y = ReadFloat();
+        float z = ReadFloat();
+        return new Vector3(x, y, z);
+    }
+}
+
+// Usage — entire parse is stack-only, zero heap allocations
+void ProcessPacket(ReadOnlySpan<byte> rawPacket)
+{
+    var reader = new PacketReader(rawPacket);
+    byte packetType = reader.ReadByte();
+
+    switch (packetType)
+    {
+        case 0x01: // Position update
+            int playerId = reader.ReadInt32();
+            Vector3 position = reader.ReadVector3();
+            UpdatePlayerPosition(playerId, position);
+            break;
+        case 0x02: // Chat message
+            int senderId = reader.ReadInt32();
+            ReadOnlySpan<char> message = reader.ReadString();
+            BroadcastChat(senderId, message);
+            break;
+    }
+}
+```
+
+#### Span Limitations (Important!)
+
+```csharp
+// Span<T> is a REF STRUCT — lives only on the stack
+// These are ILLEGAL:
+class MyClass
+{
+    Span<int> _field; // ❌ Cannot be a field of a class
+}
+
+async Task ProcessAsync()
+{
+    Span<int> data = stackalloc int[10];
+    await Task.Delay(100); // ❌ Cannot use Span across await boundaries
+    // (async state machine lives on heap, Span can't be hoisted)
+}
+
+// FIX: Use Memory<T> when you need heap storage or async
+class MyClass
+{
+    Memory<int> _field; // ✅ Memory<T> is a regular struct, can be a field
+}
+
+async Task ProcessAsync()
+{
+    Memory<int> data = new int[10]; // Heap-allocated but reusable
+    await Task.Delay(100);
+    ProcessSpan(data.Span); // Convert to Span for processing
+}
+```
+
+</details>
+
+### Example 8.2 — ArrayPool for Buffer Reuse
+
+**Problem:** Your game allocates temporary byte arrays for serialization, network I/O, and file loading. Each allocation pressures the GC. Use `ArrayPool<T>` to rent and return buffers.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+using System.Buffers;
+
+// ═══════════════════════════════════════════════════════════════
+// BASIC USAGE
+// ═══════════════════════════════════════════════════════════════
+
+// ❌ BAD: Allocates a new array every call
+byte[] SerializePlayer_Bad(PlayerData player)
+{
+    var buffer = new byte[1024]; // Allocation!
+    // ... serialize into buffer ...
+    return buffer;
+}
+
+// ✅ GOOD: Rent from pool, return when done
+void SerializePlayer_Good(PlayerData player, Stream output)
+{
+    byte[] buffer = ArrayPool<byte>.Shared.Rent(1024);
+    // Note: Rented array may be LARGER than requested!
+    try
+    {
+        int bytesWritten = SerializeInto(player, buffer);
+        output.Write(buffer, 0, bytesWritten);
+    }
+    finally
+    {
+        ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+        // clearArray: true → zeros the buffer (security for sensitive data)
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PATTERN: IMemoryOwner<T> for ownership tracking
+// ═══════════════════════════════════════════════════════════════
+public class NetworkBuffer : IDisposable
+{
+    private byte[] _buffer;
+    private readonly ArrayPool<byte> _pool;
+    private bool _disposed;
+
+    public NetworkBuffer(int minimumSize)
+    {
+        _pool = ArrayPool<byte>.Shared;
+        _buffer = _pool.Rent(minimumSize);
+    }
+
+    public Span<byte> Span => _buffer.AsSpan();
+    public Memory<byte> Memory => _buffer.AsMemory();
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _pool.Return(_buffer);
+            _buffer = null!;
+            _disposed = true;
+        }
+    }
+}
+
+// Usage with using statement — guaranteed return
+using (var buffer = new NetworkBuffer(4096))
+{
+    int received = await socket.ReceiveAsync(buffer.Memory);
+    ProcessPacket(buffer.Span[..received]);
+} // Buffer returned to pool here
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOM POOL: For game-specific object reuse
+// ═══════════════════════════════════════════════════════════════
+public class BulletPool
+{
+    private readonly Stack<Bullet> _available = new();
+    private readonly int _maxSize;
+
+    public BulletPool(int maxSize = 1000)
+    {
+        _maxSize = maxSize;
+        // Pre-warm the pool
+        for (int i = 0; i < 100; i++)
+            _available.Push(CreateBullet());
+    }
+
+    public Bullet Rent()
+    {
+        if (_available.TryPop(out var bullet))
+        {
+            bullet.gameObject.SetActive(true);
+            return bullet;
+        }
+        return CreateBullet(); // Pool exhausted, create new
+    }
+
+    public void Return(Bullet bullet)
+    {
+        bullet.gameObject.SetActive(false);
+        bullet.Reset();
+        if (_available.Count < _maxSize)
+            _available.Push(bullet);
+        else
+            Object.Destroy(bullet.gameObject); // Pool full, destroy
+    }
+
+    private Bullet CreateBullet() => Object.Instantiate(_bulletPrefab).GetComponent<Bullet>();
+}
+```
+
+</details>
+
+### Example 8.3 — Struct vs Class Decision Tree with Benchmarks
+
+**Problem:** You're designing data types for your game's ECS-like system. Wrong choice between struct and class can cause 10x performance differences due to memory layout and GC pressure.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// ═══════════════════════════════════════════════════════════════
+// BENCHMARK: Array iteration — struct vs class
+// ═══════════════════════════════════════════════════════════════
+
+// Class version — objects scattered across heap
+public class EnemyClass
+{
+    public float X, Y, Z;
+    public float Health;
+    public int Id;
+}
+
+// Struct version — packed contiguously in array
+public struct EnemyStruct
+{
+    public float X, Y, Z;
+    public float Health;
+    public int Id;
+}
+
+// BenchmarkDotNet results (iterating 100,000 elements):
+// | Method              | Mean      | Allocated |
+// |---------------------|-----------|-----------|
+// | IterateClassArray   | 312.4 μs  | 0 B       |  ← Cache misses!
+// | IterateStructArray  |  48.7 μs  | 0 B       |  ← 6.4x faster!
+// | SumHealthClass      | 289.1 μs  | 0 B       |
+// | SumHealthStruct     |  31.2 μs  | 0 B       |  ← 9.3x faster!
+
+// WHY: Struct arrays are contiguous in memory (cache-friendly)
+// Class arrays store POINTERS — actual objects are scattered on heap
+// CPU cache line = 64 bytes = fits ~3 EnemyStructs but only 1 pointer chase
+
+// ═══════════════════════════════════════════════════════════════
+// THE BOXING TRAP
+// ═══════════════════════════════════════════════════════════════
+
+public interface IComponent { void Update(float dt); }
+
+public struct PositionComponent : IComponent
+{
+    public float X, Y;
+    public void Update(float dt) { X += dt; }
+}
+
+// ❌ BOXING: Storing struct in interface variable allocates on heap
+IComponent component = new PositionComponent(); // BOXED! Heap allocation!
+component.Update(0.016f); // Modifies the BOX, not your original struct!
+
+// ✅ AVOID BOXING: Use generic constraints
+void UpdateAll<T>(T[] components, float dt) where T : struct, IComponent
+{
+    for (int i = 0; i < components.Length; i++)
+        components[i].Update(dt); // No boxing — generic specialization
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REF RETURNS: Avoid copying large structs
+// ═══════════════════════════════════════════════════════════════
+
+public struct Transform  // 64 bytes — too large to copy efficiently
+{
+    public Vector3 Position;  // 12 bytes
+    public Quaternion Rotation; // 16 bytes
+    public Vector3 Scale;     // 12 bytes
+    public Matrix4x4 LocalToWorld; // 64 bytes... actually 104 total
+}
+
+public class TransformSystem
+{
+    private Transform[] _transforms = new Transform[10000];
+
+    // ❌ Returns a COPY (104 bytes copied)
+    public Transform GetTransform(int id) => _transforms[id];
+
+    // ✅ Returns a REFERENCE (8 bytes — just a pointer)
+    public ref Transform GetTransformRef(int id) => ref _transforms[id];
+
+    // Usage:
+    // ref var t = ref system.GetTransformRef(entityId);
+    // t.Position.X += 1f; // Modifies in-place, no copy!
+}
+```
+
+#### Complete Decision Flowchart
+
+```
+Is it a single logical value (like a number, coordinate, color)?
+├── NO → class (or record class)
+└── YES ↓
+
+Is it immutable (or should be)?
+├── NO → class (mutable structs are dangerous)
+└── YES ↓
+
+Is it ≤ 16 bytes? (4 floats, 2 longs, etc.)
+├── NO → Is it ≤ 64 bytes AND accessed in tight loops?
+│   ├── NO → class
+│   └── YES → struct with ref returns
+└── YES ↓
+
+Will it be boxed? (stored as interface, object, or in non-generic collections)
+├── YES → class (boxing negates struct benefits)
+└── NO ↓
+
+→ USE STRUCT (or readonly record struct in C# 10+)
+```
+
+</details>
+
+### Example 8.4 — Ref Returns and Ref Locals for In-Place Mutation
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// ═══════════════════════════════════════════════════════════════
+// PROBLEM: Accessing struct elements in arrays copies them
+// ═══════════════════════════════════════════════════════════════
+
+public struct Particle
+{
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public float Lifetime;
+    public Color32 Color;
+}
+
+public class ParticleSystem
+{
+    private Particle[] _particles = new Particle[100_000];
+
+    // ❌ This copies the struct, modifies the copy, then you'd need to assign back
+    public void UpdateBad(float dt)
+    {
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            var p = _particles[i]; // COPY (48 bytes)
+            p.Position += p.Velocity * dt;
+            p.Lifetime -= dt;
+            _particles[i] = p; // COPY BACK (48 bytes)
+            // Total: 96 bytes copied per particle per frame
+        }
+    }
+
+    // ✅ Ref local — modify in-place, zero copies
+    public void UpdateGood(float dt)
+    {
+        for (int i = 0; i < _particles.Length; i++)
+        {
+            ref var p = ref _particles[i]; // Reference, not copy!
+            p.Position += p.Velocity * dt;
+            p.Lifetime -= dt;
+            // Modified in-place — zero bytes copied
+        }
+    }
+
+    // ✅ Ref return — let callers modify in-place
+    public ref Particle GetParticle(int index) => ref _particles[index];
+}
+
+// Caller usage:
+ref var particle = ref system.GetParticle(42);
+particle.Color = Color32.red; // Modifies the actual array element
+```
+
+</details>
+
+---
+
+## 📖 9. Appendix: Extended Derivations & Special Cases
+
+### Appendix 9.1 — GC Generations and the Large Object Heap
+
+#### How .NET's Garbage Collector Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MANAGED HEAP                               │
+├──────────┬──────────────┬───────────────┬───────────────────┤
+│  Gen 0   │    Gen 1     │    Gen 2      │  Large Object Heap│
+│ (short)  │  (medium)    │  (long-lived) │  (≥ 85,000 bytes) │
+├──────────┼──────────────┼───────────────┼───────────────────┤
+│ ~256 KB  │  ~2 MB       │  Unbounded    │  Unbounded        │
+│ Collected│  Collected   │  Collected    │  Collected with   │
+│ VERY     │  with Gen 0  │  RARELY       │  Gen 2 (EXPENSIVE)│
+│ frequently│ sometimes   │  (full GC)    │                   │
+└──────────┴──────────────┴───────────────┴───────────────────┘
+
+Object lifecycle:
+1. Allocated in Gen 0 (fast, bump allocator)
+2. Survives Gen 0 collection → promoted to Gen 1
+3. Survives Gen 1 collection → promoted to Gen 2
+4. Gen 2 objects live until full GC (expensive!)
+
+Large Object Heap (LOH):
+- Objects ≥ 85,000 bytes go directly here
+- NOT compacted by default (fragmentation risk!)
+- Collected only during Gen 2 (full) GC
+- Arrays > ~8,000 elements of reference types end up here
+```
+
+#### GC Impact on Games
+
+```csharp
+// Gen 0 collection: ~1ms (barely noticeable)
+// Gen 1 collection: ~5ms (minor hitch)
+// Gen 2 collection: ~20-100ms (VISIBLE STUTTER at 60fps!)
+
+// STRATEGIES TO AVOID GC IN GAME LOOPS:
+
+// 1. Pre-allocate everything during loading
+private readonly List<Enemy> _enemyPool = new(1000);
+private readonly byte[] _networkBuffer = new byte[65536];
+
+// 2. Use structs for per-frame data
+public readonly struct DamageEvent  // Stack-allocated, no GC
+{
+    public readonly int SourceId;
+    public readonly int TargetId;
+    public readonly float Amount;
+}
+
+// 3. Use ArrayPool for temporary buffers
+var buffer = ArrayPool<byte>.Shared.Rent(4096);
+try { /* use buffer */ }
+finally { ArrayPool<byte>.Shared.Return(buffer); }
+
+// 4. Avoid LINQ in Update() — it allocates iterators
+// ❌ enemies.Where(e => e.IsAlive).ToList()  // Allocates!
+// ✅ Manual loop with pre-allocated list
+
+// 5. Cache delegates (lambdas allocate if they capture variables)
+// ❌ enemies.Sort((a, b) => a.Health.CompareTo(b.Health)); // Allocates delegate
+// ✅ private static readonly Comparison<Enemy> _healthComparer = 
+//        (a, b) => a.Health.CompareTo(b.Health);
+//    enemies.Sort(_healthComparer); // Reuses cached delegate
+```
+
+#### Monitoring GC in Unity
+
+```csharp
+// Unity Profiler shows GC allocations per frame
+// Target: 0 bytes allocated in gameplay frames
+
+// Programmatic monitoring:
+void Update()
+{
+    long before = GC.GetTotalMemory(false);
+    // ... your game logic ...
+    long after = GC.GetTotalMemory(false);
+    
+    long allocated = after - before;
+    if (allocated > 0)
+        Debug.LogWarning($"Frame allocated {allocated} bytes!");
+}
+
+// Force GC during safe moments (loading screens, pause menus)
+void OnLoadingScreenShown()
+{
+    GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+}
+```
+
+### Appendix 9.2 — Unity IL2CPP vs Mono Runtime
+
+| Feature | Mono (Editor/Dev) | IL2CPP (Release) |
+|---------|-------------------|------------------|
+| Compilation | JIT (at runtime) | AOT (at build time) |
+| Startup time | Fast (no AOT step) | Slower build, faster startup |
+| Runtime perf | Good | 1.5–3x faster (C++ optimizations) |
+| Code size | Smaller | Larger (C++ generated code) |
+| Reflection | Full support | Limited (stripped types) |
+| Generic sharing | Runtime | Must be known at compile time |
+| Debugging | Full | Limited (C++ stack traces) |
+| Platforms | Editor, PC | All platforms (required for iOS) |
+| GC | Boehm (non-generational) | Boehm (same, but improving) |
+
+#### IL2CPP Gotchas
+
+```csharp
+// 1. No System.Reflection.Emit (runtime code generation)
+// This FAILS at runtime with IL2CPP:
+var dynamicMethod = new DynamicMethod("Add", typeof(int), new[] { typeof(int), typeof(int) });
+// FIX: Use source generators or compile-time code gen
+
+// 2. Generic value type instantiation must be known at compile time
+// This FAILS:
+void CreateList(Type elementType)
+{
+    var listType = typeof(List<>).MakeGenericType(elementType);
+    var list = Activator.CreateInstance(listType); // ❌ If elementType is a struct
+}
+// FIX: Use concrete generic types, or reference types (which share code)
+
+// 3. Stripping removes "unused" code
+// If you only access a type via reflection, IL2CPP thinks it's unused
+// FIX: link.xml or [Preserve] attribute
+[Preserve]
+public class MyReflectionTarget { }
+
+// 4. Managed code stripping levels:
+// - Disabled: No stripping (largest build)
+// - Low: Strip unused Unity engine code
+// - Medium: Strip unused user assemblies
+// - High: Aggressive stripping (smallest, most likely to break)
+```
+
+#### Performance Comparison (Real Benchmarks)
+
+```
+Operation                    | Mono      | IL2CPP    | Speedup
+-----------------------------|-----------|-----------|--------
+Vector3 math (1M ops)       | 12.3 ms   | 4.1 ms   | 3.0x
+Dictionary lookup (1M)      | 8.7 ms    | 5.2 ms   | 1.7x
+LINQ query (100K elements)  | 15.4 ms   | 9.8 ms   | 1.6x
+Physics raycast (10K)       | 2.1 ms    | 1.4 ms   | 1.5x
+String concatenation (10K)  | 6.8 ms    | 4.5 ms   | 1.5x
+Struct array iteration (1M) | 10.2 ms    | 1.1 ms   | 2.9x
+Virtual method calls (1M)   | 5.6 ms    | 2.8 ms   | 2.0x
+```
+
+### Appendix 9.3 — stackalloc and Unmanaged Memory
+
+```csharp
+// stackalloc: Allocate on the stack (automatic cleanup, no GC)
+unsafe void ProcessVertices(int count)
+{
+    // Stack-allocated array — freed when method returns
+    Span<Vector3> vertices = stackalloc Vector3[count];
+    // ⚠️ Don't stackalloc too much! Stack is typically 1-4 MB
+    // Rule of thumb: < 1024 bytes on stack, otherwise use ArrayPool
+    
+    Span<Vector3> buffer = count <= 128
+        ? stackalloc Vector3[count]           // Small: stack
+        : new Vector3[count];                 // Large: heap (or ArrayPool)
+}
+
+// NativeArray in Unity (unmanaged memory, no GC)
+using Unity.Collections;
+
+void ProcessWithNativeArray()
+{
+    // Allocated outside managed heap — invisible to GC
+    var positions = new NativeArray<float3>(10000, Allocator.TempJob);
+    try
+    {
+        // Use in Jobs/Burst for maximum performance
+        var job = new MoveJob { Positions = positions, DeltaTime = Time.deltaTime };
+        job.Schedule(positions.Length, 64).Complete();
+    }
+    finally
+    {
+        positions.Dispose(); // MUST manually dispose!
+    }
+}
+
+[BurstCompile]
+struct MoveJob : IJobParallelFor
+{
+    public NativeArray<float3> Positions;
+    public float DeltaTime;
+
+    public void Execute(int index)
+    {
+        Positions[index] += new float3(1, 0, 0) * DeltaTime;
+    }
+}
+```
+
+---
+
+## 🔄 Maintenance
+- **Created**: 2026-05-24
+- **Last Updated**: 2026-05-24

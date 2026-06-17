@@ -1,0 +1,105 @@
+<svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="efield-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <radialGradient id="pos-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neg-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--text-accent, #79c0ff)" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="var(--text-accent, #79c0ff)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <style>
+    .field-line {
+      stroke: var(--text-muted, #8b949e);
+      stroke-width: 1.2;
+      fill: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      stroke-dasharray: 10, 5;
+      animation: fieldFlow 2s linear infinite;
+    }
+    @keyframes fieldFlow {
+      to { stroke-dashoffset: -15; }
+    }
+    .field-line:hover {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2.2;
+      filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff));
+    }
+    .charge-pos { fill: var(--interactive-accent, #58a6ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .charge-neg { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .charge-label { font-family: Inter, system-ui, sans-serif; font-size: 18px; font-weight: bold; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .eq-label { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .equipotential {
+      stroke: var(--text-accent, #79c0ff);
+      stroke-width: 0.8;
+      stroke-dasharray: 4,3;
+      fill: none;
+      opacity: 0.6;
+      animation: equipFlow 3s linear infinite reverse;
+    }
+    @keyframes equipFlow {
+      to { stroke-dashoffset: 7; }
+    }
+    .pulse-dot {
+      fill: var(--interactive-accent, #58a6ff);
+      opacity: 0.8;
+    }
+    @keyframes pulsate {
+      0%, 100% { r: 3; opacity: 0.8; }
+      50% { r: 6; opacity: 0.3; }
+    }
+    .pulse-dot { animation: pulsate 2s ease-in-out infinite; }
+  </style>
+
+  <!-- Title -->
+  <text x="300" y="25" class="title-label">Electric Dipole Field Lines &amp; Equipotentials</text>
+
+  <!-- Glow effects behind charges -->
+  <circle cx="200" cy="250" r="60" fill="url(#pos-glow)"/>
+  <circle cx="400" cy="250" r="60" fill="url(#neg-glow)"/>
+
+  <!-- Field lines from +q to -q (symmetric dipole pattern) -->
+  <!-- Top field lines -->
+  <path d="M 215 250 C 220 180, 380 180, 385 250" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 215 245 C 230 140, 370 140, 385 245" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 215 240 C 250 80, 350 80, 385 240" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 210 235 C 260 40, 340 40, 390 235" class="field-line" marker-end="url(#efield-arrow)"/>
+  
+  <!-- Bottom field lines -->
+  <path d="M 215 255 C 220 320, 380 320, 385 255" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 215 260 C 230 360, 370 360, 385 260" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 215 265 C 250 420, 350 420, 385 265" class="field-line" marker-end="url(#efield-arrow)"/>
+  <path d="M 210 270 C 260 460, 340 460, 390 270" class="field-line" marker-end="url(#efield-arrow)"/>
+
+  <!-- Outer field lines (wrapping around) -->
+  <path d="M 200 235 C 150 100, 50 200, 100 250 C 50 300, 150 400, 200 265" class="field-line"/>
+  <path d="M 400 235 C 450 100, 550 200, 500 250 C 550 300, 450 400, 400 265" class="field-line"/>
+
+  <!-- Equipotential lines (dashed, perpendicular to field) -->
+  <ellipse cx="250" cy="250" rx="20" ry="60" class="equipotential"/>
+  <ellipse cx="350" cy="250" rx="20" ry="60" class="equipotential"/>
+  <line x1="300" y1="100" x2="300" y2="400" class="equipotential"/>
+
+  <!-- Charges -->
+  <circle cx="200" cy="250" r="16" class="charge-pos"/>
+  <text x="200" y="256" class="charge-label">+</text>
+  <circle cx="400" cy="250" r="16" class="charge-neg"/>
+  <text x="400" y="256" class="charge-label">−</text>
+
+  <!-- Labels -->
+  <text x="200" y="290" class="eq-label">+q</text>
+  <text x="400" y="290" class="eq-label">−q</text>
+  <text x="300" y="480" class="eq-label">φ = 0 (midplane)</text>
+
+  <!-- Animated pulse on a field line -->
+  <circle class="pulse-dot" cx="300" cy="180" r="3">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M -85 70 C -80 0, 80 0, 85 70"/>
+  </circle>
+</svg>

@@ -1,0 +1,335 @@
+---
+title: "16.3 — LSM-Trees & Write-Optimized Storage"
+subject: "Databases & Storage Engines"
+catalog: advanced
+audience_tier: higher-education
+chapter: "16.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 16.3 — LSM-Trees & Write-Optimized Storage
+
+> *"The insight of LevelDB is simple: if you always write sequentially, the disk is always fast."* — paraphrased from Jeff Dean's original design notes
+
+> *"An LSM-tree is a lie to the write path ('it's done!') and an honest conversation with the read path ('let me check a few places')."*
+
+The Log-Structured Merge-tree (LSM-tree) is the most important alternative to B-trees for write-heavy workloads. Understanding it is essential because it underlies every major write-optimised system: RocksDB, Cassandra, HBase, LevelDB, TiKV, and Yugabyte DocDB. Where [the B-tree](16.2---B-Trees-&-Page-Management) is the world's best read structure, the LSM-tree is the world's best write structure — and the price you pay in read complexity is paid back through Bloom filters.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Trace a write through the full LSM write path: **WAL → MemTable (skiplist) → immutable MemTable → flush → SSTable**.
+2. Explain the structure of an **SSTable** (sorted string table): index block, data blocks, Bloom filter block.
+3. Describe **leveled compaction** (RocksDB default): L0 overlapping → L1 non-overlapping → L2 10× larger.
+4. Describe **tiered (size-tiered) compaction** and explain the write-amplification vs read-amplification trade-off.
+5. Construct a **Bloom filter** bit array by hand for a small example and explain why false negatives are impossible.
+6. Explain the **write-amplification / read-amplification / space-amplification (WA/RA/SA)** triangle for each compaction strategy.
+7. Trace a **read path** with Bloom filter guards and explain why most L2+ probes are skipped.
+
+---
+
+## 🖼️ Visual Anchor
+
+![db-16__fig1](db-16__fig1.svg)
+
+*Figure 30.3.1 — LSM-tree write path (MemTable → L0 SSTables → compaction → Bloom filter guards on read).*
+
+---
+
+## 📚 1. The Core Insight: Turn Random Writes into Sequential Writes
+
+The fundamental problem with B-trees on rotating disks (and even on SSDs at high throughput) is that writes are *random*. Inserting key 5000 goes to one page; inserting key 1 goes to a completely different page. Each page write is a random I/O.
+
+**LSM-tree insight**: accept all writes sequentially into memory, accumulate them, and flush sorted runs to disk. Never modify existing on-disk data — only append. The sequential nature of all disk writes makes LSM-trees 10–100× faster to write than B-trees on spinning disks, and still 2–5× faster on SSDs.
+
+The trade-off: reads now need to consult multiple sorted runs (since the data isn't in one place), and background **compaction** work must periodically merge runs to bound read amplification.
+
+---
+
+## 📚 2. The Write Path
+
+### 2.1 Write-Ahead Log (WAL)
+
+Every write first appends to a **WAL** — a sequential log on disk that ensures crash recovery. The WAL record is simple: `(sequence_number, key, value, operation_type)`. The WAL is written sequentially and is the only durable write until the MemTable is flushed.
+
+```
+WAL entry: [seq=10042 | PUT | "user:9001" | {name:"Alice", age:30}]
+WAL entry: [seq=10043 | DEL | "user:9000" | tombstone]
+```
+
+### 2.2 MemTable (In-Memory Sorted Structure)
+
+Writes are applied to an in-memory **MemTable** — a sorted data structure, typically a **skip list** (in LevelDB, RocksDB) or a **red-black tree** (in some implementations). The MemTable absorbs all writes in O(log n) time without any disk I/O.
+
+A **skip list** provides O(log n) insert, search, and delete with simpler concurrent access than balanced BSTs:
+
+```
+Skip list for MemTable:
+Level 3: ------[10]----------------------------------[90]--
+Level 2: ------[10]----------[40]--------------------[90]--
+Level 1: ------[10]---[20]---[40]---[60]---[80]------[90]--
+Level 0: [5]---[10]---[20]---[30]---[40]---[60]---[80][90]--
+```
+
+When the MemTable reaches its size limit (default 64 MB in RocksDB), it becomes **immutable** (read-only) and a new empty MemTable is created for incoming writes. The immutable MemTable is then flushed to disk as an SSTable by a background thread.
+
+### 2.3 SSTable (Sorted String Table)
+
+An **SSTable** (Sorted String Table) is an immutable, sorted, persistent file. The "sorted" part is key — because the MemTable was a sorted structure in memory, flushing it to disk produces a perfectly sorted file with zero random I/O.
+
+SSTable internal structure:
+
+```
+SSTable file on disk:
+┌────────────────────────────────────────┐
+│  Data Block 0: [(k1,v1),(k2,v2),...]   │  ← sorted key-value pairs
+│  Data Block 1: [(k100,v100),...]       │  ← ~4 KB each
+│  ...                                   │
+│  Data Block N                          │
+├────────────────────────────────────────┤
+│  Index Block: [(k_last_in_block0, offset0), (k_last_in_block1, offset1)...]  │
+│  ← binary search to find which data block contains a key                     │
+├────────────────────────────────────────┤
+│  Bloom Filter Block: [bit array]       │  ← one per SSTable (or per block)
+├────────────────────────────────────────┤
+│  Meta Index Block: offsets to above    │
+│  Footer: magic number + meta_index_ptr │
+└────────────────────────────────────────┘
+```
+
+**Reading from an SSTable:**
+1. Binary search the Index Block to find which Data Block might contain the key — O(log B) where B = number of blocks.
+2. Load the Data Block — one 4 KB page read.
+3. Linear scan within the Data Block — O(block size / avg_entry_size).
+
+---
+
+## 📚 3. Bloom Filters — The Read Path Optimisation
+
+Without Bloom filters, a read that misses the MemTable would have to probe EVERY SSTable from newest to oldest. For N levels with M SSTables each, this is O(N×M) disk reads per point lookup.
+
+Bloom filters cut this to near-O(1) by giving a probabilistic fast answer to: *"Is key K definitely NOT in this SSTable?"*
+
+### 3.1 Bloom Filter Construction
+
+A Bloom filter is:
+- A **bit array** of `m` bits, all initially 0
+- `k` independent hash functions h₁, h₂, ..., hₖ, each mapping a key to a position in [0, m)
+
+**Inserting key K:**
+```
+Set bits h₁(K), h₂(K), ..., hₖ(K) to 1
+```
+
+**Querying key K:**
+```
+Compute h₁(K), h₂(K), ..., hₖ(K)
+If ALL k bits are 1 → "probably present" (may be a false positive)
+If ANY bit is 0    → "definitely NOT present" (no false negative possible)
+```
+
+**Why no false negatives?** Because inserting a key only sets bits — it never clears them. If a key was inserted, all its bits are set. If any of those bits is 0, the key was never inserted.
+
+### 3.2 Worked Example (m=8 bits, k=2 hash functions)
+
+```
+Bit array: [0|0|0|0|0|0|0|0]
+            0 1 2 3 4 5 6 7
+
+Insert "alice": h₁("alice")=3, h₂("alice")=6
+  Bit array: [0|0|0|1|0|0|1|0]
+
+Insert "bob": h₁("bob")=1, h₂("bob")=4
+  Bit array: [0|1|0|1|1|0|1|0]
+
+Query "alice": h₁=3 (bit=1) ✓, h₂=6 (bit=1) ✓ → "probably present"
+Query "carol": h₁("carol")=2 (bit=0) → "definitely NOT present" → skip SSTable!
+Query "dave":  h₁("dave")=1 (bit=1) ✓, h₂("dave")=4 (bit=1) ✓ → "probably present"
+  → But "dave" was never inserted! This is a FALSE POSITIVE.
+     We load the SSTable and find dave is not there. Wasted 1 disk read.
+```
+
+### 3.3 False Positive Rate Formula
+
+For a Bloom filter with `m` bits, `k` hash functions, and `n` inserted elements:
+
+```
+False positive rate ≈ (1 - e^(-kn/m))^k
+
+Optimum k = (m/n) × ln(2)  [minimizes false positive rate for given m/n ratio]
+
+At m/n = 10 bits/element, k=7:  FPR ≈ 1%
+At m/n = 14 bits/element, k=10: FPR ≈ 0.1%
+```
+
+**RocksDB default**: 10 bits/key per SSTable Bloom filter → ~1% false positive rate. This means 99% of "key not present" SSTable probes are skipped with no disk I/O.
+
+---
+
+## 📚 4. Compaction: Merging SSTables
+
+Flushed SSTables accumulate on disk. Without compaction:
+- Multiple SSTables may contain different versions of the same key
+- Deleted keys ("tombstones") persist forever
+- Read amplification grows unboundedly (must check every SSTable)
+
+**Compaction** merges multiple SSTables into fewer, larger, more organised SSTables. The key design decision is the compaction strategy.
+
+### 4.1 L0 — The Entry Level
+
+L0 is special: it contains SSTables that were just flushed from the MemTable. L0 SSTables have **overlapping key ranges** (because each was flushed independently). This means:
+- A read may need to check ALL L0 SSTables for a key (not just one)
+- L0 typically triggers compaction quickly (default: 4 L0 files triggers a compaction)
+
+### 4.2 Leveled Compaction (RocksDB Default)
+
+In leveled compaction, levels L1 and above have **non-overlapping key ranges**:
+
+```
+L1 (target: 10 MB):
+  [a–m]: SSTable 1    [n–z]: SSTable 2
+  (no key range overlap within a level)
+
+L2 (target: 100 MB, 10× L1):
+  [a–d][e–h][i–m][n–r][s–z]: 5 SSTables
+
+L3 (target: 1 GB, 10× L2):
+  ...
+```
+
+**Compaction process:**
+1. Take one SSTable from L_i and merge it with all overlapping SSTables from L_{i+1}
+2. Write the merged result to new SSTables in L_{i+1}
+3. Delete the input SSTables
+
+**Read with leveled compaction:**
+- L0: check all L0 SSTables (Bloom filter helps skip most)
+- L1 and below: binary search to find which SINGLE SSTable on each level covers the key, then check its Bloom filter
+
+**Write amplification:** ≈ 10–30× for leveled compaction. Each byte eventually gets compacted through multiple levels.
+
+**Read amplification:** ≈ 1 file per level (after Bloom filter filtering) = ~O(levels) = 5–7 files total.
+
+### 4.3 Tiered (Size-Tiered) Compaction
+
+In tiered compaction (Cassandra's default, RocksDB's universal compaction):
+- SSTables are grouped into size tiers
+- All SSTables of similar size are merged together into one larger SSTable
+- Overlapping key ranges are allowed within a tier
+
+**Write amplification:** ≈ 4× (much lower — fewer compaction rounds)
+**Read amplification:** higher — multiple overlapping SSTables at each tier
+
+**Use tiered when**: write throughput matters more than read consistency (e.g., Cassandra time-series ingestion).
+**Use leveled when**: read latency predictability matters (e.g., RocksDB backing a web database).
+
+### 4.4 The WA/RA/SA Triangle
+
+```
+            Low Write Amplification
+                     ↑
+           Tiered    │    
+           compaction│    
+                ●    │    
+                     │         ● Leveled
+                     │           compaction
+                     │
+                     └──────────────────────→ Low Read Amplification
+
+Space amplification (SA) is the third axis:
+  Tiered: higher SA (multiple copies of same key across tiers until compaction)
+  Leveled: lower SA (each key exists in at most 2 levels at any time)
+```
+
+**The DDIA summary (paraphrased)**: LSM-trees with leveled compaction write data multiple times due to repeated compaction. Each byte written by the application may be written to disk 10–30 times over the engine's lifetime. For sequential write workloads (time-series, logging), this is still much better than a B-tree's random-write pattern.
+
+---
+
+## 📚 5. Tombstones: Deleting in an Append-Only System
+
+You cannot delete from an immutable SSTable. Instead, LSM-trees use **tombstones** — special entries that mark a key as deleted:
+
+```
+WAL entry: [seq=10043 | DEL | "user:9000" | tombstone_marker]
+```
+
+When the MemTable is flushed, the tombstone becomes part of the SSTable. During compaction, when a tombstone meets an older version of the same key, the old key + tombstone are both discarded. Until compaction, the tombstone persists on disk and the read path must check for it.
+
+**Tombstone accumulation** is a real operational problem in Cassandra: if you delete millions of rows but compaction hasn't run, reads must sift through millions of tombstones, causing severe read latency. This is the "tombstone storm" problem.
+
+---
+
+## 📚 6. Worked Comparison: PostgreSQL vs RocksDB Write Path
+
+### Writing 1 million rows
+
+| Step | PostgreSQL (B-tree) | RocksDB (LSM-tree) |
+|---|---|---|
+| WAL write | Append to WAL sequentially | Append to WAL sequentially |
+| Modify in memory | Find B-tree leaf page, modify | Insert into MemTable (skiplist) |
+| Disk write | Dirty page → background flush (random I/O) | Flush MemTable → SSTable (sequential I/O) |
+| Compaction | None (splits are amortised) | Background compaction merging SSTables |
+| Write amplification | ~3–5× (WAL + page write + fsync) | ~10–30× (leveled) but sequential |
+
+PostgreSQL's random writes are fine for NVMe SSDs but struggle on HDDs and under sustained high-throughput write workloads. RocksDB's sequential writes allow it to sustain 100k+ writes/second on SSDs where PostgreSQL would reach I/O saturation.
+
+---
+
+## 📚 7. RocksDB Configuration Cheat Sheet
+
+```
+# Key RocksDB configuration knobs
+write_buffer_size = 64MB        # MemTable size before flush
+max_write_buffer_number = 2     # Number of MemTables allowed (doubles as write stalls)
+level0_file_num_compaction_trigger = 4   # L0 files before triggering compaction
+level0_slowdown_writes_trigger = 20      # Start slowing writes
+level0_stop_writes_trigger = 36          # Stop writes entirely
+max_bytes_for_level_base = 256MB         # L1 target size
+max_bytes_for_level_multiplier = 10      # L_i+1 = 10× L_i
+target_file_size_base = 64MB            # Target SSTable size at L1
+bloom_bits_per_key = 10                 # Bloom filter density
+block_size = 4096                       # Data block size within SSTable
+```
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [16.1 - Storage Engine Fundamentals](16.1---Storage-Engine-Fundamentals) — page layout and buffer pool context
+- [16.2 - B-Trees & Page Management](16.2---B-Trees-&-Page-Management) — the contrasting index structure
+- [16.4 - Transaction Management & ACID](16.4---Transaction-Management-&-ACID) — RocksDB provides ACID via its WAL
+- [16.5 - Write-Ahead Logging & Recovery](16.5---Write-Ahead-Logging-&-Recovery) — the WAL is shared between B-tree and LSM-tree
+- [27.3 - Databases at Scale](27.3---Databases-at-Scale) — when to choose Cassandra (LSM) vs PostgreSQL (B-tree)
+
+### External
+- [DDIA Chapter 3 — Storage and Retrieval: SSTables and LSM-Trees](https://dataintensive.net/)
+- [LevelDB source code — db/version_set.cc for compaction](https://github.com/google/leveldb)
+- [RocksDB wiki — Compaction](https://github.com/facebook/rocksdb/wiki/Compaction)
+- [RocksDB wiki — Bloom Filters](https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter)
+- [Database Internals — Alex Petrov, Ch. 7–8 (LSM-trees)](https://www.databass.dev/)
+- [CMU 15-445 Lecture 10 — Sorting & Aggregation Algorithms](https://15445.courses.cs.cmu.edu/)
+- [Bigtable paper — Chang et al. 2006](https://dl.acm.org/doi/10.1145/1365815.1365816)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"LSM-trees have no WAL."** Wrong — they have a WAL for crash recovery. The MemTable is volatile. The WAL is what makes the MemTable durable before it flushes.
+- **"LSM-trees can't handle reads."** Bloom filters reduce read overhead dramatically. For point lookups on RocksDB with 10 bits/key, 99% of level probes are skipped. Read latency is competitive with B-trees for many workloads.
+- **"Compaction is free."** Compaction consumes significant I/O and CPU in the background. Write stalls occur when L0 fills faster than compaction can drain it. Monitoring `rocksdb.estimate-pending-compaction-bytes` is a production necessity.
+- **"Delete just removes the data."** Deletes create tombstones that persist until compaction. Applications that delete heavily (e.g., TTL-expiring rows) must ensure compaction keeps up or suffer severe tombstone accumulation.
+- **"Cassandra is always faster than Postgres."** Cassandra (LSM-tree) is faster for write-heavy, append-heavy workloads. For read-heavy workloads with complex queries, PostgreSQL (B-tree + MVCC + planner) is competitive or faster.
+
+---
+
+*Next: [16.4 - Transaction Management & ACID](16.4---Transaction-Management-&-ACID) — What exactly does the database promise when you hit commit?*

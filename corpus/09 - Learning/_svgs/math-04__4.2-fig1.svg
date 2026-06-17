@@ -1,0 +1,47 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="va-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .va-ax{stroke:var(--text-muted, #8b949e);stroke-width:1.2;fill:none}
+    .va-phys{stroke:var(--interactive-accent, #58a6ff);stroke-width:3;fill:none;stroke-linecap:round}
+    .va-virt{stroke:var(--text-muted, #8b949e);stroke-width:1.8;fill:none;stroke-dasharray:6 4;opacity:0.7}
+    .va-dot{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5}
+    .va-lbl{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--text-normal, #c9d1d9)}
+    .va-acc{font-family:Inter,system-ui,sans-serif;font-size:14px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .va-anim{stroke:var(--interactive-accent, #58a6ff);stroke-width:2;fill:none;stroke-dasharray:400;stroke-dashoffset:400;animation:vaDraw 3s ease-in-out infinite}
+    @keyframes vaDraw{0%{stroke-dashoffset:400}50%{stroke-dashoffset:0}100%{stroke-dashoffset:400}}
+  </style>
+  <!-- Axes -->
+  <line x1="60" y1="300" x2="560" y2="300" class="va-ax" marker-end="url(#va-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <line x1="60" y1="300" x2="60" y2="30" class="va-ax" marker-end="url(#va-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <text x="565" y="315" class="va-lbl">t</text>
+  <text x="45" y="28" class="va-lbl">q</text>
+  <!-- Fixed endpoints -->
+  <circle cx="100" cy="250" r="6" class="va-dot"/>
+  <text x="80" y="270" class="va-lbl">(t₁,q₁)</text>
+  <circle cx="500" cy="100" r="6" class="va-dot"/>
+  <text x="505" y="95" class="va-lbl">(t₂,q₂)</text>
+  <!-- Virtual (non-physical) paths -->
+  <path d="M100 250 C 200 50, 350 350, 500 100" class="va-virt"/>
+  <path d="M100 250 C 150 200, 400 50, 500 100" class="va-virt"/>
+  <path d="M100 250 C 250 300, 450 200, 500 100" class="va-virt"/>
+  <!-- Physical path (stationary action) -->
+  <path id="phys-path" d="M100 250 C 200 180, 380 120, 500 100" class="va-phys"/>
+  <path d="M100 250 C 200 180, 380 120, 500 100" class="va-anim"/>
+  <!-- Particle moving along physical path -->
+  <circle r="6" class="va-dot">
+    <animateMotion dur="3s" repeatCount="indefinite">
+      <mpath href="#phys-path"/>
+    </animateMotion>
+  </circle>
+  <!-- Labels -->
+  <text x="280" y="140" class="va-acc">δS = 0 (physical path)</text>
+  <text x="200" y="80" class="va-lbl" fill="var(--text-muted, #8b949e)">virtual paths</text>
+  <!-- Info box -->
+  <rect x="320" y="240" width="230" height="55" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="435" y="262" class="va-acc" text-anchor="middle">S[q] = ∫ L(q,q̇,t) dt</text>
+  <text x="435" y="282" class="va-lbl" text-anchor="middle">Action is stationary on physical path</text>
+</svg>

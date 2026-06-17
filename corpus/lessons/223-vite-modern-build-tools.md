@@ -1,0 +1,840 @@
+---
+title: "Vite Modern Build Tools"
+subject: "App Architectures & Frameworks"
+catalog: advanced
+audience_tier: higher-education
+chapter: "22.3"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 22.3 — Vite & Modern Build Tools
+
+> *"Vite is not a bundler. It's a dev server that leverages native ES modules in the browser during development, and only bundles for production. This distinction is everything."*
+> — **Evan You**, Creator of Vite & Vue.js (2021)
+
+The JavaScript build tool landscape underwent a revolution between 2020–2024. Webpack — the dominant bundler for a decade — was challenged by tools that exploit two key advances: **native ES modules in browsers** (eliminating the need to bundle during development) and **native-speed compilers** written in Go (esbuild) and Rust (SWC, Turbopack). Vite sits at the center of this revolution: it uses esbuild for dependency pre-bundling, native ESM for dev serving, and Rollup for optimized production builds.
+
+This chapter builds your understanding of **why** modern build tools exist, **how** they work internally, and **when** to choose each approach. This is not framework-specific — Vite powers React, Vue, Svelte, Solid, and Angular projects alike.
+
+---
+
+## 🎯 Learning Objectives
+
+1. **Explain why native ESM eliminates bundling during development** — understand the browser's module resolution and how Vite exploits it for instant server start.
+2. **Trace the Hot Module Replacement (HMR) pipeline** — from file save to browser update without full page reload.
+3. **Distinguish esbuild, Rollup, and SWC roles** — why Vite uses different tools for different phases.
+4. **Configure Vite for production optimization** — code splitting, tree shaking, CSS extraction, asset hashing, and chunk strategies.
+5. **Author a Vite plugin** — understand the plugin hook lifecycle and how to transform code at build time.
+6. **Architect multi-environment builds** — environment variables, mode-specific configs, and library mode for publishing packages.
+7. **Compare Vite with alternatives** — Webpack, Turbopack, Rspack, and when each is appropriate.
+
+---
+
+## 🖼️ Visual Anchor — Vite Dev Server vs Production Build Pipeline
+
+![track-08__8.3-fig1](track-08__8.3-fig1.svg)
+
+---
+
+## 🧩 1. Mental Model
+
+**Vite's core insight: Don't bundle during development.**
+
+Traditional bundlers (Webpack) must crawl your entire dependency graph, transform every file, and concatenate them into bundles **before** the dev server can serve anything. For large projects, this means 30–60 second cold starts and multi-second HMR updates.
+
+Vite inverts this model:
+
+1. **Dev server starts instantly** — it doesn't process your source code upfront.
+2. **Browser requests modules on demand** — when the browser encounters `import './App.tsx'`, it sends an HTTP request to Vite's dev server.
+3. **Vite transforms on-the-fly** — only the requested file is compiled (TSX → JS), then served as a native ES module.
+4. **Dependencies are pre-bundled once** — `node_modules` (which rarely change) are pre-bundled by esbuild into single ESM files on first run, then cached.
+
+```
+Traditional Bundler (Webpack):
+  Source → [Bundle ALL files] → Bundle.js → Serve → Browser
+  Cold start: 30-60s for large projects
+
+Vite:
+  Source → [Pre-bundle deps only] → Dev Server ready (< 500ms)
+  Browser requests file → Transform that ONE file → Serve as ESM
+  Cold start: < 500ms regardless of project size
+```
+
+**For production**, Vite uses Rollup because:
+- Rollup produces smaller bundles (superior tree-shaking via ESM static analysis).
+- Rollup has mature code-splitting with manual chunk control.
+- Native ESM in production has waterfall loading issues (each import triggers a new HTTP request) — bundling eliminates this.
+
+---
+
+## 📊 2. Architecture Map
+
+```mermaid
+graph TD
+    subgraph "Development Mode"
+        A[vite dev] --> B[Dependency Pre-bundling<br/>esbuild: CJS→ESM, flatten]
+        B --> C[Dev Server<br/>Koa-based HTTP server]
+        C --> D[Module Graph<br/>Track import relationships]
+        D --> E[Transform Pipeline<br/>Plugin hooks: resolveId → load → transform]
+        E --> F[Serve as ESM<br/>Content-Type: application/javascript]
+        F --> G[Browser<br/>Native import resolution]
+        G -->|File change| H[HMR Engine<br/>WebSocket notification]
+        H -->|Invalidate module| D
+    end
+
+    subgraph "Production Build"
+        I[vite build] --> J[Rollup<br/>Full bundle pipeline]
+        J --> K[resolveId → load → transform<br/>Same plugin hooks as dev]
+        K --> L[Tree Shaking<br/>Remove dead code via ESM analysis]
+        L --> M[Code Splitting<br/>Dynamic imports → separate chunks]
+        M --> N[Minification<br/>esbuild or Terser]
+        N --> O[Asset Pipeline<br/>Hash filenames, inline small assets]
+        O --> P[dist/ output<br/>Ready for deployment]
+    end
+
+    subgraph "Plugin System"
+        Q[Vite Plugin] --> R[Rollup-compatible hooks<br/>resolveId, load, transform, renderChunk]
+        Q --> S[Vite-specific hooks<br/>configureServer, handleHotUpdate, transformIndexHtml]
+    end
+```
+
+---
+
+## 📚 3. Core Concepts & Terminology
+
+### Definition 22.3.1 — Native ES Modules (ESM)
+
+ES Modules are the JavaScript standard module system (`import`/`export`). Modern browsers natively support them via `<script type="module">`:
+
+```html
+<!-- Browser fetches main.js, sees its imports, fetches those too -->
+<script type="module" src="/src/main.tsx"></script>
+```
+
+When the browser encounters `import { useState } from 'react'` inside a module, it sends an HTTP request to resolve that import. Vite's dev server intercepts these requests and serves the appropriate transformed file.
+
+**Key property:** ESM imports are **statically analyzable** — the import paths are string literals known at parse time (not runtime). This enables tree-shaking: bundlers can determine which exports are actually used and eliminate dead code.
+
+### Definition 22.3.2 — Dependency Pre-bundling
+
+Most npm packages are published as CommonJS (`require()`/`module.exports`), not ESM. Browsers cannot execute CommonJS. Additionally, packages like `lodash-es` have hundreds of internal modules — loading each as a separate HTTP request would create a waterfall.
+
+Vite's pre-bundling step (powered by esbuild) solves both problems:
+1. **Converts CJS to ESM** — so the browser can import them.
+2. **Flattens internal modules** — `lodash-es` (600+ files) becomes one file.
+
+Pre-bundling runs once on first `vite dev`, caches results in `node_modules/.vite/`, and only re-runs when `package.json` dependencies change.
+
+### Definition 22.3.3 — Hot Module Replacement (HMR)
+
+HMR is the mechanism that updates your running application when you save a file, **without a full page reload**. It preserves application state (form inputs, scroll position, component state).
+
+Vite's HMR works via:
+1. File system watcher detects a change.
+2. Vite invalidates the changed module in its module graph.
+3. Vite sends a WebSocket message to the browser: `{ type: 'update', path: '/src/App.tsx' }`.
+4. The browser's HMR client re-imports the updated module.
+5. Framework-specific HMR handlers (e.g., `react-refresh`) swap the component without losing state.
+
+### Definition 22.3.4 — Rollup Plugin Interface
+
+Vite's plugin system extends Rollup's plugin interface. A plugin is an object with named hook functions that Vite calls at specific points in the build pipeline:
+
+```typescript
+interface Plugin {
+  name: string;                          // Plugin identifier
+  resolveId?(source, importer): string;  // Resolve import paths
+  load?(id): string;                     // Provide file contents
+  transform?(code, id): string;          // Transform source code
+  configureServer?(server): void;        // Add dev server middleware (Vite-only)
+  handleHotUpdate?(ctx): void;           // Custom HMR logic (Vite-only)
+  transformIndexHtml?(html): string;     // Modify index.html (Vite-only)
+}
+```
+
+### Definition 22.3.5 — Tree Shaking
+
+Tree shaking is dead code elimination based on ESM static analysis. If you import only `{ map }` from a utility library, the bundler can prove that other exports (`filter`, `reduce`) are never used and exclude them from the bundle.
+
+```typescript
+// Only `map` is included in the bundle — `filter` and `reduce` are tree-shaken out
+import { map } from './utils'; // utils.ts exports map, filter, reduce
+```
+
+**Requirements for tree shaking:**
+- Code must use ESM (`import`/`export`), not CJS (`require`).
+- No side effects in module top-level scope (or mark `"sideEffects": false` in package.json).
+- Rollup/esbuild must be able to prove the unused export has no observable side effects.
+
+### Definition 22.3.6 — Code Splitting
+
+Code splitting divides your application into multiple chunks that load on demand. The primary mechanism is **dynamic imports**:
+
+```typescript
+// This creates a separate chunk that loads only when the user navigates to /dashboard
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+```
+
+Vite/Rollup automatically creates chunk boundaries at dynamic import points. You can also configure manual chunks for vendor libraries:
+
+```typescript
+// vite.config.ts
+build: {
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'vendor-react': ['react', 'react-dom'],
+        'vendor-charts': ['d3', 'recharts'],
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🔑 4. Bare-Bones Boilerplate
+
+### Minimal Vite Project Structure
+
+```bash
+my-app/
+├── index.html          # Entry point (Vite uses HTML as entry, not JS)
+├── vite.config.ts      # Build configuration
+├── package.json
+├── tsconfig.json
+└── src/
+    ├── main.tsx        # Application entry (referenced from index.html)
+    ├── App.tsx
+    └── vite-env.d.ts   # Type declarations for Vite-specific features
+```
+
+### index.html (The True Entry Point)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Vite App</title>
+</head>
+<body>
+  <div id="root"></div>
+  <!--
+    type="module" tells the browser to treat this as an ES module.
+    In dev: browser requests /src/main.tsx from Vite's dev server.
+    In prod: Vite replaces this with the hashed bundle path.
+  -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
+```
+
+### vite.config.ts (Annotated)
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// defineConfig provides TypeScript intellisense for all options
+export default defineConfig({
+  // Plugins extend Vite's capabilities
+  plugins: [
+    react(), // Enables JSX transform + React Fast Refresh (HMR)
+  ],
+
+  // Dev server configuration
+  server: {
+    port: 3000,          // Dev server port
+    open: true,          // Auto-open browser on start
+    proxy: {
+      // Proxy API requests to backend during development
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+  },
+
+  // Production build configuration
+  build: {
+    outDir: 'dist',       // Output directory
+    sourcemap: true,      // Generate source maps for debugging
+    target: 'es2022',     // Browser target (determines syntax transforms)
+    rollupOptions: {
+      output: {
+        // Manual chunk splitting for better caching
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Group all node_modules into a vendor chunk
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
+
+  // Path resolution
+  resolve: {
+    alias: {
+      '@': '/src', // Import as '@/components/Button' instead of '../../components/Button'
+    },
+  },
+});
+```
+
+### Environment Variables
+
+```bash
+# .env — loaded in all modes
+VITE_APP_TITLE=My App
+
+# .env.development — loaded only in dev mode
+VITE_API_URL=http://localhost:8080/api
+
+# .env.production — loaded only in production build
+VITE_API_URL=https://api.production.com
+
+# .env.local — local overrides (gitignored)
+VITE_API_KEY=secret_dev_key_123
+```
+
+```typescript
+// Accessing env vars in code (must be prefixed with VITE_)
+const apiUrl = import.meta.env.VITE_API_URL;
+const mode = import.meta.env.MODE; // 'development' or 'production'
+const isDev = import.meta.env.DEV; // boolean
+const isProd = import.meta.env.PROD; // boolean
+
+// Type safety: declare in src/vite-env.d.ts
+/// <reference types="vite/client" />
+interface ImportMetaEnv {
+  readonly VITE_API_URL: string;
+  readonly VITE_APP_TITLE: string;
+}
+```
+
+---
+
+
+## 🔍 5. Lifecycle & Data Flow Deep Dive
+
+### What Happens When You Run `vite dev`
+
+**Step 1: Config Resolution**
+Vite reads `vite.config.ts`, merges with CLI flags and defaults. Plugins are initialized.
+
+**Step 2: Dependency Pre-bundling (esbuild)**
+Vite scans your source code for bare imports (`import React from 'react'`), identifies all dependencies, and runs esbuild to:
+- Convert CJS packages to ESM format.
+- Flatten deep import chains (e.g., `react-dom` internally imports 30+ files → becomes 1 file).
+- Cache results in `node_modules/.vite/deps/`.
+
+```bash
+# First run output:
+Pre-bundling dependencies:
+  react
+  react-dom
+  react-dom/client
+  zustand
+(this is done once and cached)
+```
+
+**Step 3: HTTP Server Starts**
+A Koa-based HTTP server starts on the configured port. It's ready in < 300ms because it hasn't processed any source files yet.
+
+**Step 4: Browser Requests index.html**
+Browser loads `index.html`. Vite's `transformIndexHtml` hook processes it (injects HMR client script).
+
+**Step 5: Browser Requests main.tsx**
+The `<script type="module" src="/src/main.tsx">` triggers a request. Vite's transform pipeline:
+1. `resolveId` — resolves the file path.
+2. `load` — reads the file from disk.
+3. `transform` — compiles TSX to JS (via esbuild), rewrites bare imports:
+   ```javascript
+   // Before transform:
+   import React from 'react';
+   // After transform:
+   import React from '/node_modules/.vite/deps/react.js?v=abc123';
+   ```
+4. Serves the transformed JS with `Content-Type: application/javascript`.
+
+**Step 6: Cascade of Module Requests**
+Browser parses `main.js`, sees `import App from './App.tsx'`, sends another request. Each import triggers on-demand transformation. Only files actually imported are processed.
+
+**Step 7: HMR Connection Established**
+Vite injects a WebSocket client into the page. It connects to the dev server for real-time updates.
+
+### What Happens When You Save a File (HMR)
+
+```
+1. File system watcher detects change: src/components/Button.tsx modified
+2. Vite re-transforms ONLY that file (< 5ms for esbuild)
+3. Vite walks the module graph to find the HMR boundary:
+   - Does Button.tsx accept HMR? (React Fast Refresh: yes)
+   - If not, walk up to parent until finding a boundary or reaching root (full reload)
+4. WebSocket message sent: { type: 'update', updates: [{ path: '/src/components/Button.tsx' }] }
+5. Browser HMR client receives message
+6. Browser re-imports the module: import('/src/components/Button.tsx?t=1234567890')
+   (timestamp query param busts the browser's module cache)
+7. React Fast Refresh patches the component in-place, preserving state
+```
+
+**Why Vite HMR is fast regardless of app size:** Only the changed module (and its direct dependents up to the HMR boundary) are re-processed. Webpack must rebuild the entire chunk containing the changed module.
+
+### What Happens When You Run `vite build`
+
+```
+1. Rollup resolves the entry point (index.html → main.tsx)
+2. Rollup builds the complete module graph (all imports, recursively)
+3. Plugins transform each module (same hooks as dev: resolveId, load, transform)
+4. Tree shaking: Rollup marks unused exports, removes dead code
+5. Code splitting: dynamic imports become chunk boundaries
+6. Chunk optimization: shared modules extracted into common chunks
+7. Minification: esbuild minifies each chunk (faster than Terser)
+8. Asset handling: images < 4KB inlined as base64, others hashed and copied
+9. CSS: extracted into separate files, minified, autoprefixed
+10. HTML: script/link tags updated with hashed filenames
+11. Output written to dist/
+```
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Anti-Pattern 8.3.1 — CJS Dependencies Breaking Dev Mode
+
+```typescript
+// ❌ PROBLEM: Some packages only ship CJS, causing errors in dev
+// Error: "require is not defined" or "module is not defined"
+
+// This happens when a dependency uses require() internally
+// and Vite's pre-bundling didn't catch it (e.g., conditional requires)
+
+// ✅ FIX: Force pre-bundling of problematic packages
+// vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    include: ['problematic-package', 'problematic-package/sub-module'],
+    // Force esbuild to pre-bundle these, converting CJS → ESM
+  },
+});
+```
+
+### Anti-Pattern 8.3.2 — Environment Variable Leaks
+
+```typescript
+// ❌ SECURITY BUG: Using process.env exposes server secrets to client
+// Vite replaces import.meta.env.VITE_* at build time via string replacement.
+// If you accidentally use a non-VITE_ prefixed var, it won't be replaced
+// and will be undefined (or worse, if using a plugin that exposes process.env).
+
+// .env
+DATABASE_URL=postgres://user:password@host/db  // ← NOT prefixed with VITE_
+VITE_API_URL=https://api.example.com           // ← Correctly prefixed
+
+// ❌ This would be undefined (Vite intentionally blocks non-VITE_ vars)
+const db = import.meta.env.DATABASE_URL; // undefined — good, but confusing
+
+// ✅ Only VITE_-prefixed variables are exposed to client code
+const api = import.meta.env.VITE_API_URL; // "https://api.example.com"
+
+// For server-side code (SSR), use process.env directly or a .env loader
+```
+
+### Anti-Pattern 8.3.3 — Importing Large Libraries Without Tree Shaking
+
+```typescript
+// ❌ BAD: Imports entire lodash (70KB+ gzipped)
+import _ from 'lodash';
+const result = _.debounce(fn, 300);
+
+// ✅ GOOD: Import only what you need (tree-shakeable)
+import { debounce } from 'lodash-es'; // ESM version of lodash
+const result = debounce(fn, 300);
+
+// ✅ BETTER: Use a tiny focused package
+import debounce from 'just-debounce-it'; // 200 bytes
+```
+
+### Anti-Pattern 8.3.4 — Dev/Prod Behavior Mismatch
+
+```typescript
+// ❌ PROBLEM: Code works in dev but breaks in production
+// Common causes:
+// 1. Relying on file system structure that Rollup flattens
+// 2. Dynamic imports with variable paths (can't be statically analyzed)
+// 3. Global side effects that tree-shaking removes
+
+// ❌ Dynamic import with variable — Rollup can't analyze this
+const module = await import(`./pages/${pageName}.tsx`); // Breaks in prod!
+
+// ✅ FIX: Use Vite's glob import
+const pages = import.meta.glob('./pages/*.tsx');
+// Returns: { './pages/Home.tsx': () => import('./pages/Home.tsx'), ... }
+const module = await pages[`./pages/${pageName}.tsx`]();
+```
+
+### Anti-Pattern 8.3.5 — Missing CSS Extraction in Library Mode
+
+```typescript
+// ❌ PROBLEM: Building a component library, but CSS isn't included
+// By default, library mode injects CSS via JS (fine for apps, bad for libraries)
+
+// ✅ FIX: Extract CSS separately for library consumers
+// vite.config.ts
+export default defineConfig({
+  build: {
+    lib: {
+      entry: 'src/index.ts',
+      formats: ['es', 'cjs'],
+    },
+    cssCodeSplit: true, // Each component gets its own CSS file
+    rollupOptions: {
+      external: ['react', 'react-dom'], // Don't bundle peer deps
+    },
+  },
+});
+// Consumers import CSS: import 'your-lib/dist/style.css';
+```
+
+---
+
+## 🧮 7. Worked Patterns
+
+### Pattern 8.3.A — Custom Vite Plugin: Auto-Import SVG as React Components
+
+<details>
+<summary>🔍 Complete Implementation</summary>
+
+```typescript
+// plugins/svg-react.ts
+import { Plugin } from 'vite';
+import { readFileSync } from 'fs';
+import { optimize } from 'svgo';
+
+/**
+ * Vite plugin that transforms .svg?react imports into React components.
+ * Usage: import Logo from './logo.svg?react';
+ *        <Logo className="icon" />
+ */
+export function svgReactPlugin(): Plugin {
+  return {
+    name: 'svg-react', // Unique plugin name (for debugging)
+
+    // resolveId: called when Vite encounters an import statement.
+    // We intercept .svg?react imports and mark them for our plugin.
+    resolveId(source, importer) {
+      if (source.endsWith('.svg?react')) {
+        // Return the resolved path with our custom suffix
+        // This tells Vite "I'll handle loading this module"
+        return source;
+      }
+      return null; // null = let other plugins/default resolution handle it
+    },
+
+    // load: called to get the contents of a module.
+    // For our .svg?react modules, we read the SVG and convert to a React component.
+    load(id) {
+      if (!id.endsWith('.svg?react')) return null;
+
+      // Strip the ?react suffix to get the actual file path
+      const filePath = id.replace('?react', '');
+      const svgContent = readFileSync(filePath, 'utf-8');
+
+      // Optimize SVG with SVGO (remove metadata, minify)
+      const { data: optimizedSvg } = optimize(svgContent, {
+        plugins: ['preset-default', 'removeDimensions'],
+      });
+
+      // Convert SVG string to a React component
+      // Replace svg attributes with React-compatible props
+      const componentCode = `
+        import React from 'react';
+        export default function SvgComponent(props) {
+          return (
+            ${optimizedSvg.replace('<svg', '<svg {...props}')}
+          );
+        }
+      `;
+
+      return componentCode;
+    },
+  };
+}
+
+// Usage in vite.config.ts:
+// import { svgReactPlugin } from './plugins/svg-react';
+// plugins: [react(), svgReactPlugin()]
+```
+
+</details>
+
+### Pattern 8.3.B — Multi-Page Application (MPA) Configuration
+
+<details>
+<summary>🔍 Complete Implementation</summary>
+
+```typescript
+// vite.config.ts — Multi-page setup
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      // Multiple entry points: each HTML file is a separate page
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin/index.html'),
+        login: resolve(__dirname, 'login/index.html'),
+      },
+      output: {
+        // Organize output by page
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/chunks/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+  },
+});
+
+// Project structure:
+// ├── index.html              → main entry (/)
+// ├── admin/index.html        → admin entry (/admin/)
+// ├── login/index.html        → login entry (/login/)
+// ├── src/
+// │   ├── main.ts             → JS for main page
+// │   ├── admin.ts            → JS for admin page
+// │   └── login.ts            → JS for login page
+// └── vite.config.ts
+```
+
+</details>
+
+### Pattern 8.3.C — Library Mode Build for npm Publishing
+
+<details>
+<summary>🔍 Complete Implementation</summary>
+
+```typescript
+// vite.config.ts — Library mode
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import dts from 'vite-plugin-dts'; // Generates .d.ts type declarations
+
+export default defineConfig({
+  plugins: [
+    react(),
+    dts({ include: ['src'] }), // Generate TypeScript declarations
+  ],
+  build: {
+    lib: {
+      // Entry point for the library
+      entry: resolve(__dirname, 'src/index.ts'),
+      // Library name (for UMD/IIFE builds)
+      name: 'MyComponentLib',
+      // Output file naming
+      fileName: (format) => `my-lib.${format}.js`,
+      // Output formats: ESM for modern bundlers, CJS for Node/legacy
+      formats: ['es', 'cjs'],
+    },
+    rollupOptions: {
+      // Externalize peer dependencies — don't bundle them into the library.
+      // Consumers provide their own react/react-dom.
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+        },
+      },
+    },
+    // Generate source maps for debugging
+    sourcemap: true,
+    // Don't minify library code (consumers will minify their own bundle)
+    minify: false,
+  },
+});
+```
+
+```json
+// package.json — Proper exports configuration
+{
+  "name": "my-component-lib",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/my-lib.cjs.js",
+  "module": "./dist/my-lib.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/my-lib.es.js",
+      "require": "./dist/my-lib.cjs.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/style.css"
+  },
+  "files": ["dist"],
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
+```
+
+</details>
+
+### Pattern 8.3.D — Performance Optimization: Bundle Analysis & Chunk Strategy
+
+<details>
+<summary>🔍 Complete Implementation</summary>
+
+```typescript
+// vite.config.ts — Advanced chunk splitting strategy
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer'; // Bundle visualization
+
+export default defineConfig({
+  plugins: [
+    react(),
+    // Generate a visual bundle report (open stats.html after build)
+    visualizer({
+      filename: 'dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
+  build: {
+    // Target modern browsers only (smaller output, no polyfills)
+    target: 'es2022',
+    // Warn if any chunk exceeds 500KB
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Strategy: separate vendor chunks by update frequency
+          if (id.includes('node_modules')) {
+            // React ecosystem: rarely changes, cache aggressively
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+            // UI library: changes occasionally
+            if (id.includes('@radix-ui') || id.includes('tailwind')) {
+              return 'vendor-ui';
+            }
+            // Data fetching: changes occasionally
+            if (id.includes('@tanstack') || id.includes('axios')) {
+              return 'vendor-data';
+            }
+            // Everything else in node_modules
+            return 'vendor-misc';
+          }
+        },
+      },
+    },
+    // Use esbuild for minification (10x faster than Terser, slightly larger output)
+    minify: 'esbuild',
+    // Or use Terser for maximum compression (slower build):
+    // minify: 'terser',
+    // terserOptions: { compress: { drop_console: true } },
+  },
+});
+```
+
+</details>
+
+---
+
+## 💻 8. Production-Grade Stack Checklist
+
+### Build Tool Selection Guide
+
+| Project Type | Recommended Tool | Why |
+|-------------|-----------------|-----|
+| New SPA (React/Vue/Svelte) | **Vite** | Fastest DX, excellent defaults |
+| Next.js app | **Turbopack** (built-in) | Integrated with Next.js, Rust-speed |
+| Angular app | **Angular CLI** (esbuild) | Built-in since Angular 17 |
+| Legacy Webpack project | **Rspack** (drop-in replacement) | Rust-based, Webpack-compatible config |
+| Monorepo with shared packages | **Turborepo + Vite** | Task caching + fast builds |
+| Component library | **Vite (library mode)** | ESM + CJS output, tree-shakeable |
+
+### Vite Plugin Ecosystem (Essential Plugins)
+
+```bash
+# React
+@vitejs/plugin-react          # JSX transform + Fast Refresh
+# OR
+@vitejs/plugin-react-swc      # Same but uses SWC (Rust) instead of Babel — faster
+
+# TypeScript
+vite-plugin-dts               # Generate .d.ts declarations for libraries
+vite-tsconfig-paths            # Resolve TS path aliases automatically
+
+# Testing
+vitest                         # Vite-native test runner (replaces Jest)
+
+# PWA
+vite-plugin-pwa               # Service worker generation + manifest
+
+# Analysis
+rollup-plugin-visualizer       # Bundle size visualization
+vite-plugin-inspect            # Inspect plugin transforms in browser
+```
+
+### Performance Checklist
+
+- [ ] `build.target: 'es2022'` — Don't transpile for dead browsers
+- [ ] Dynamic imports for route-level code splitting
+- [ ] `manualChunks` separating vendor code by update frequency
+- [ ] Images: use `<img>` with `loading="lazy"` + Vite's asset handling
+- [ ] Fonts: preload critical fonts, use `font-display: swap`
+- [ ] CSS: Tailwind with `content` config for purging, or CSS Modules
+- [ ] Compression: Enable Brotli/gzip on your CDN/server
+- [ ] Cache headers: Hashed filenames enable `Cache-Control: immutable`
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal Vault Links
+
+- [22.1 - React & Next.js - Functional Components & Hooks](22.1---React-&-Next.js---Functional-Components-&-Hooks) — Vite is the default build tool for React projects (replaces Create React App).
+- [22.2 - Angular - Class-based Architecture & RxJS](22.2---Angular---Class-based-Architecture-&-RxJS) — Angular CLI uses esbuild internally since v17, sharing Vite's philosophy.
+- [22.4 - PyQt6 & PySide6 - Signals, Slots & Event Loops](22.4---PyQt6-&-PySide6---Signals,-Slots-&-Event-Loops) — Desktop apps don't use web bundlers, but PyInstaller/Nuitka serve a similar "packaging for distribution" role.
+- [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs) — Build tools for ML: ONNX Runtime bundling, WebGPU shader compilation.
+
+### Official Documentation
+
+- **Vite docs:** https://vitejs.dev — Configuration reference, plugin API, migration guides.
+- **Rollup docs:** https://rollupjs.org — Plugin hooks, output options, tree-shaking details.
+- **esbuild docs:** https://esbuild.github.io — Transform API, content types, architecture.
+- **Vitest docs:** https://vitest.dev — Vite-native testing with Jest-compatible API.
+
+### Conference Talks & Articles
+
+- Evan You, *"Vite: Rethinking Frontend Tooling"* (ViteConf 2022) — Design philosophy and architecture.
+- Evan You, *"The State of Vite"* (ViteConf 2023) — Rolldown (Rust-based Rollup replacement), future plans.
+- Patak, *"Vite's Module Graph"* (blog) — Deep dive into how Vite tracks module dependencies.
+- Anthony Fu, *"Vite Plugin Patterns"* — Common plugin authoring patterns and best practices.
+
+### Key Mental Models to Remember
+
+1. **Dev ≠ Prod pipeline.** Vite uses completely different tools for development (native ESM + esbuild) vs production (Rollup). This is intentional — each tool is optimal for its phase.
+2. **The browser is the bundler in dev.** The browser's native module loader does the work of resolving imports. Vite just transforms individual files on demand.
+3. **Pre-bundling is the secret sauce.** Without it, importing `react` would trigger 30+ HTTP requests for internal modules. Pre-bundling collapses these into one request.
+4. **Hashed filenames enable aggressive caching.** `vendor-react-a1b2c3.js` can be cached forever — when React updates, the hash changes, and browsers fetch the new file.
+
+---
+
+*Next: [22.4 - PyQt6 & PySide6 - Signals, Slots & Event Loops](22.4---PyQt6-&-PySide6---Signals,-Slots-&-Event-Loops) →*

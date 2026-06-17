@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #1e1e2e; }
+      .text-light { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 15px; }
+      .text-bold { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: bold; }
+      .title { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 22px; font-weight: bold; text-anchor: middle; }
+      .timeline { stroke: #585b70; stroke-width: 3px; stroke-dasharray: 6; }
+      .msg-line { stroke: #89b4fa; stroke-width: 3px; marker-end: url(#arrow); }
+      .msg-line-rev { stroke: #a6e3a1; stroke-width: 3px; marker-end: url(#arrow-rev); }
+      .msg-data { stroke: #f9e2af; stroke-width: 4px; marker-end: url(#arrow-data); }
+      .box { fill: #313244; stroke: #45475a; stroke-width: 2px; rx: 8px; }
+      .code { fill: #bac2de; font-family: 'Fira Code', monospace; font-size: 13px; }
+      .highlight { fill: #cba6f7; font-weight: bold; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#89b4fa" />
+    </marker>
+    <marker id="arrow-rev" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a6e3a1" />
+    </marker>
+    <marker id="arrow-data" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f9e2af" />
+    </marker>
+  </defs>
+  <rect width="800" height="500" class="bg" />
+  
+  <text x="400" y="40" class="title">TCP 3-Way Handshake &amp; Data Transfer</text>
+
+  <!-- Client & Server headers -->
+  <rect x="150" y="70" width="100" height="40" class="box" />
+  <text x="200" y="95" class="text-bold" text-anchor="middle">Client</text>
+  
+  <rect x="550" y="70" width="100" height="40" class="box" />
+  <text x="600" y="95" class="text-bold" text-anchor="middle">Server</text>
+  
+  <line x1="200" y1="110" x2="200" y2="480" class="timeline" />
+  <line x1="600" y1="110" x2="600" y2="480" class="timeline" />
+
+  <!-- SYN -->
+  <line x1="200" y1="150" x2="590" y2="190" class="msg-line" />
+  <text x="350" y="160" class="text-bold" style="fill:#89b4fa;">SYN</text>
+  <text x="260" y="180" class="code">Seq=<tspan class="highlight">0</tspan> (ISN_c)</text>
+  
+  <!-- SYN-ACK -->
+  <line x1="600" y1="210" x2="210" y2="250" class="msg-line-rev" />
+  <text x="430" y="215" class="text-bold" style="fill:#a6e3a1;">SYN-ACK</text>
+  <text x="360" y="240" class="code">Seq=<tspan class="highlight">0</tspan> (ISN_s), Ack=<tspan class="highlight">1</tspan></text>
+  
+  <!-- ACK -->
+  <line x1="200" y1="270" x2="590" y2="310" class="msg-line" />
+  <text x="350" y="280" class="text-bold" style="fill:#89b4fa;">ACK</text>
+  <text x="260" y="300" class="code">Seq=1, Ack=1</text>
+  
+  <rect x="250" y="320" width="300" height="30" fill="#181825" stroke="#313244" rx="4" />
+  <text x="400" y="340" class="text-bold" style="fill:#f38ba8;" text-anchor="middle">Connection ESTABLISHED (1 RTT)</text>
+
+  <!-- DATA -->
+  <line x1="200" y1="380" x2="590" y2="420" class="msg-data" />
+  <text x="350" y="390" class="text-bold" style="fill:#f9e2af;">HTTP GET</text>
+  <text x="260" y="410" class="code">Seq=1, Ack=1, Len=400</text>
+  
+  <line x1="600" y1="440" x2="210" y2="480" class="msg-line-rev" />
+  <text x="430" y="445" class="text-bold" style="fill:#a6e3a1;">ACK</text>
+  <text x="360" y="470" class="code">Seq=1, Ack=<tspan class="highlight">401</tspan></text>
+
+  <!-- States -->
+  <text x="130" y="150" class="code" style="fill:#6c7086; text-anchor:end;">SYN_SENT</text>
+  <text x="130" y="260" class="code" style="fill:#6c7086; text-anchor:end;">ESTABLISHED</text>
+  
+  <text x="670" y="200" class="code" style="fill:#6c7086;">SYN_RCVD</text>
+  <text x="670" y="320" class="code" style="fill:#6c7086;">ESTABLISHED</text>
+
+  <!-- Animation -->
+  <circle cx="200" cy="150" r="5" fill="#89b4fa">
+    <animate attributeName="cx" values="200;590;590" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="cy" values="150;190;190" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="1;1;0" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  <circle cx="600" cy="210" r="5" fill="#a6e3a1">
+    <animate attributeName="cx" values="600;600;210;210" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="cy" values="210;210;250;250" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.25;0.5;1" dur="4s" repeatCount="indefinite" />
+  </circle>
+</svg>

@@ -1,0 +1,114 @@
+<svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-type" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .type-node { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.25s ease; cursor: pointer; }
+    .type-node:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .mutable-node { fill: var(--background-secondary, #161b22); stroke: #e06c75; stroke-width: 2; rx: 6; transition: all 0.25s ease; cursor: pointer; }
+    .mutable-node:hover { filter: drop-shadow(0 0 5px #e06c75); }
+    .immutable-node { fill: var(--background-secondary, #161b22); stroke: #98c379; stroke-width: 2; rx: 6; transition: all 0.25s ease; cursor: pointer; }
+    .immutable-node:hover { filter: drop-shadow(0 0 5px #98c379); }
+    .type-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .category-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; font-style: italic; }
+    .title-text { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .inherit-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; marker-end: url(#arrow-type); }
+    .legend-text { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .root-node { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .pulse-root { animation: rootPulse 3s ease-in-out infinite; }
+    @keyframes rootPulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.25; } }
+  </style>
+
+  <text x="350" y="25" class="title-text">Python Object Hierarchy — Everything Is an object</text>
+
+  <!-- Root: object -->
+  <rect x="300" y="40" width="100" height="35" class="root-node pulse-root"/>
+  <rect x="300" y="40" width="100" height="35" class="type-node"/>
+  <text x="350" y="62" class="type-label">object</text>
+
+  <!-- Level 1: Major categories -->
+  <!-- Numbers -->
+  <line x1="350" y1="75" x2="120" y2="110" class="inherit-line"/>
+  <line x1="350" y1="75" x2="350" y2="110" class="inherit-line"/>
+  <line x1="350" y1="75" x2="580" y2="110" class="inherit-line"/>
+
+  <text x="120" y="105" class="category-label">Numeric</text>
+  <text x="350" y="105" class="category-label">Sequences</text>
+  <text x="580" y="105" class="category-label">Mappings &amp; Sets</text>
+
+  <!-- Numeric types (immutable) -->
+  <rect x="40" y="115" width="70" height="30" class="immutable-node"/>
+  <text x="75" y="134" class="type-label">int</text>
+  <rect x="120" y="115" width="70" height="30" class="immutable-node"/>
+  <text x="155" y="134" class="type-label">float</text>
+  <rect x="80" y="160" width="80" height="30" class="immutable-node"/>
+  <text x="120" y="179" class="type-label">complex</text>
+  <rect x="40" y="160" width="35" height="30" class="immutable-node"/>
+  <text x="57" y="179" class="type-label">bool</text>
+
+  <!-- Sequences -->
+  <!-- Immutable -->
+  <rect x="270" y="115" width="70" height="30" class="immutable-node"/>
+  <text x="305" y="134" class="type-label">str</text>
+  <rect x="350" y="115" width="70" height="30" class="immutable-node"/>
+  <text x="385" y="134" class="type-label">tuple</text>
+  <rect x="430" y="115" width="70" height="30" class="immutable-node"/>
+  <text x="465" y="134" class="type-label">bytes</text>
+  <!-- Mutable -->
+  <rect x="270" y="160" width="70" height="30" class="mutable-node"/>
+  <text x="305" y="179" class="type-label">list</text>
+  <rect x="350" y="160" width="85" height="30" class="mutable-node"/>
+  <text x="392" y="179" class="type-label">bytearray</text>
+
+  <!-- Mappings & Sets -->
+  <rect x="540" y="115" width="70" height="30" class="mutable-node"/>
+  <text x="575" y="134" class="type-label">dict</text>
+  <rect x="620" y="115" width="60" height="30" class="mutable-node"/>
+  <text x="650" y="134" class="type-label">set</text>
+  <rect x="540" y="160" width="90" height="30" class="immutable-node"/>
+  <text x="585" y="179" class="type-label">frozenset</text>
+
+  <!-- Memory Model Section -->
+  <rect x="30" y="220" width="640" height="240" rx="10" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="350" y="240" class="title-text">Memory Model: Names → References → Objects</text>
+
+  <!-- Variable binding illustration -->
+  <rect x="60" y="260" width="80" height="30" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <text x="100" y="280" class="type-label">x = 42</text>
+  <rect x="60" y="310" width="80" height="30" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <text x="100" y="330" class="type-label">y = x</text>
+
+  <!-- Arrow to same object -->
+  <line x1="140" y1="275" x2="220" y2="295" class="inherit-line"/>
+  <line x1="140" y1="325" x2="220" y2="305" class="inherit-line"/>
+
+  <!-- The object -->
+  <rect x="220" y="280" width="100" height="40" class="immutable-node"/>
+  <text x="270" y="295" class="type-label">int: 42</text>
+  <text x="270" y="310" class="category-label">id: 0x7f...</text>
+
+  <!-- Mutable example -->
+  <rect x="400" y="260" width="100" height="30" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <text x="450" y="280" class="type-label">a = [1,2,3]</text>
+  <rect x="400" y="310" width="100" height="30" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <text x="450" y="330" class="type-label">b = a</text>
+
+  <line x1="500" y1="275" x2="560" y2="295" class="inherit-line"/>
+  <line x1="500" y1="325" x2="560" y2="305" class="inherit-line"/>
+
+  <rect x="560" y="275" width="100" height="50" class="mutable-node"/>
+  <text x="610" y="295" class="type-label">list: [1,2,3]</text>
+  <text x="610" y="315" class="category-label">⚠️ shared!</text>
+
+  <!-- Legend -->
+  <rect x="200" y="380" width="15" height="15" class="immutable-node"/>
+  <text x="225" y="392" class="legend-text">Immutable (hashable, safe as dict key)</text>
+  <rect x="420" y="380" width="15" height="15" class="mutable-node"/>
+  <text x="445" y="392" class="legend-text">Mutable (not hashable, aliasing danger)</text>
+
+  <!-- Key insight -->
+  <text x="350" y="440" class="category-label">Variables are names bound to references. Assignment never copies data.</text>
+  <text x="350" y="458" class="category-label">Mutation through one name is visible through all aliases.</text>
+</svg>

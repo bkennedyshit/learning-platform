@@ -1,0 +1,45 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="wave-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .e-wave { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .b-wave { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; }
+    .prop-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math-label { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .b-label { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    @keyframes propagate {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-160px); }
+    }
+    .wave-group { animation: propagate 2s linear infinite; }
+  </style>
+
+  <text x="350" y="25" class="label" text-anchor="middle" font-weight="bold" font-size="15">EM Plane Wave: E ⊥ B ⊥ k</text>
+
+  <!-- Propagation axis -->
+  <line x1="50" y1="200" x2="680" y2="200" class="prop-axis" marker-end="url(#wave-arr)"/>
+  <text x="690" y="205" class="label">k̂ (propagation)</text>
+
+  <g class="wave-group">
+    <!-- E-field (vertical oscillation) -->
+    <path d="M 80 200 C 95 200, 100 120, 120 120 C 140 120, 145 200, 160 200 C 175 200, 180 280, 200 280 C 220 280, 225 200, 240 200 C 255 200, 260 120, 280 120 C 300 120, 305 200, 320 200 C 335 200, 340 280, 360 280 C 380 280, 385 200, 400 200 C 415 200, 420 120, 440 120 C 460 120, 465 200, 480 200 C 495 200, 500 280, 520 280 C 540 280, 545 200, 560 200 C 575 200, 580 120, 600 120 C 620 120, 625 200, 640 200 C 655 200, 660 280, 680 280 C 700 280, 705 200, 720 200 C 735 200, 740 120, 760 120 C 780 120, 785 200, 800 200 C 815 200, 820 280, 840 280 C 860 280, 865 200, 880 200" class="e-wave"/>
+
+    <!-- B-field (horizontal oscillation - shown as depth perspective) -->
+    <path d="M 80 200 C 95 200, 100 200, 120 185 C 140 170, 145 200, 160 200 C 175 200, 180 200, 200 215 C 220 230, 225 200, 240 200 C 255 200, 260 200, 280 185 C 300 170, 305 200, 320 200 C 335 200, 340 200, 360 215 C 380 230, 385 200, 400 200 C 415 200, 420 200, 440 185 C 460 170, 465 200, 480 200 C 495 200, 500 200, 520 215 C 540 230, 545 200, 560 200 C 575 200, 580 200, 600 185 C 620 170, 625 200, 640 200 C 655 200, 660 200, 680 215 C 700 230, 705 200, 720 200 C 735 200, 740 200, 760 185 C 780 170, 785 200, 800 200 C 815 200, 820 200, 840 215 C 860 230, 865 200, 880 200" class="b-wave"/>
+  </g>
+
+  <!-- Labels -->
+  <text x="50" y="110" class="math-label">E</text>
+  <text x="50" y="170" class="b-label">B</text>
+  <text x="350" y="370" class="label" text-anchor="middle">|E| = c|B|, S = (1/μ₀)E×B in k̂ direction</text>
+  
+  <!-- Wavelength indicator -->
+  <line x1="160" y1="320" x2="320" y2="320" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="160" y1="315" x2="160" y2="325" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="320" y1="315" x2="320" y2="325" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="240" y="340" class="label" text-anchor="middle">λ = 2π/k = cT</text>
+</svg>

@@ -1,0 +1,202 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .math   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10.5px; fill: var(--interactive-accent, #58a6ff); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .panel  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.3; }
+    .node   { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .even   { fill: #51cf66; opacity: 0.2; stroke: #51cf66; stroke-width: 1.2; }
+    .odd    { fill: #ffd93d; opacity: 0.2; stroke: #ffd93d; stroke-width: 1.2; }
+    .wire   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .accent { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">DFT &amp; FFT — Cooley-Tukey Butterfly for N=8</text>
+
+  <!-- ===== TOP LEFT: DFT formula ===== -->
+  <rect x="16" y="36" width="200" height="100" rx="5" class="panel"/>
+  <text x="116" y="54" class="label" text-anchor="middle" font-weight="bold">DFT Definition</text>
+  <text x="26" y="72" class="math">X[k] = Σₙ x[n]·W_N^{nk}</text>
+  <text x="26" y="88" class="math">W_N = e^{-j2π/N}</text>
+  <text x="26" y="106" class="small">k = 0…N−1 frequency bins</text>
+  <text x="26" y="120" class="small">Direct DFT:  O(N²)  operations</text>
+  <text x="26" y="132" class="small">FFT (radix-2): O(N log₂ N)</text>
+
+  <!-- ===== TOP MIDDLE: Key FFT properties ===== -->
+  <rect x="228" y="36" width="232" height="100" rx="5" class="panel"/>
+  <text x="344" y="54" class="label" text-anchor="middle" font-weight="bold">FFT Properties</text>
+  <text x="238" y="72" class="small">• Freq resolution: Δf = fs / N  Hz/bin</text>
+  <text x="238" y="86" class="small">• Highest freq bin: N/2 (Nyquist)</text>
+  <text x="238" y="100" class="small">• Leakage: non-integer cycles → spectral spread</text>
+  <text x="238" y="114" class="small">• Windowing reduces leakage (Hann, Hamming…)</text>
+  <text x="238" y="128" class="small">• Zero-padding interpolates spectrum (not resolution)</text>
+
+  <!-- ===== TOP RIGHT: Window comparison ===== -->
+  <rect x="472" y="36" width="232" height="100" rx="5" class="panel"/>
+  <text x="588" y="54" class="label" text-anchor="middle" font-weight="bold">Window Functions</text>
+  <text x="482" y="72" class="small">Rectangular: flat passband, high sidelobes (−13 dB)</text>
+  <text x="482" y="86" class="small">Hann:        −31 dB sidelobes, wider main lobe</text>
+  <text x="482" y="100" class="small">Hamming:     −43 dB, first null wider than Hann</text>
+  <text x="482" y="114" class="small">Blackman:    −58 dB sidelobes, widest main lobe</text>
+  <text x="482" y="128" class="small">Hann formula: w[n] = 0.5(1 − cos(2πn/(N−1)))</text>
+
+  <!-- ===== BUTTERFLY DIAGRAM: N=8 Cooley-Tukey ===== -->
+  <rect x="16" y="152" width="688" height="256" rx="4" class="box"/>
+  <text x="360" y="170" class="label" text-anchor="middle" font-weight="bold">Cooley-Tukey Butterfly: 8-point FFT = 3 stages (log₂8) × 4 butterflies each</text>
+
+  <!-- Input nodes x[0]..x[7] in bit-reversed order -->
+  <!-- Stage 0 (input) -->
+  <text x="50"  y="186" class="small" text-anchor="middle">x[0]</text>
+  <text x="50"  y="210" class="small" text-anchor="middle">x[4]</text>
+  <text x="50"  y="234" class="small" text-anchor="middle">x[2]</text>
+  <text x="50"  y="258" class="small" text-anchor="middle">x[6]</text>
+  <text x="50"  y="282" class="small" text-anchor="middle">x[1]</text>
+  <text x="50"  y="306" class="small" text-anchor="middle">x[5]</text>
+  <text x="50"  y="330" class="small" text-anchor="middle">x[3]</text>
+  <text x="50"  y="354" class="small" text-anchor="middle">x[7]</text>
+  <text x="50"  y="372" class="small" text-anchor="middle" fill="var(--text-muted,#8b949e)">bit-rev</text>
+
+  <!-- Stage 1 nodes -->
+  <g>
+    <!-- Even group top -->
+    <rect x="118" y="182" width="28" height="12" rx="3" class="even"/>
+    <text x="132" y="192" class="small" text-anchor="middle" fill="#51cf66">●</text>
+    <rect x="118" y="206" width="28" height="12" rx="3" class="even"/>
+    <rect x="118" y="230" width="28" height="12" rx="3" class="odd"/>
+    <rect x="118" y="254" width="28" height="12" rx="3" class="odd"/>
+    <rect x="118" y="278" width="28" height="12" rx="3" class="even"/>
+    <rect x="118" y="302" width="28" height="12" rx="3" class="even"/>
+    <rect x="118" y="326" width="28" height="12" rx="3" class="odd"/>
+    <rect x="118" y="350" width="28" height="12" rx="3" class="odd"/>
+  </g>
+
+  <!-- Stage 2 nodes -->
+  <g>
+    <rect x="218" y="182" width="28" height="12" rx="3" class="even"/>
+    <rect x="218" y="206" width="28" height="12" rx="3" class="even"/>
+    <rect x="218" y="230" width="28" height="12" rx="3" class="even"/>
+    <rect x="218" y="254" width="28" height="12" rx="3" class="even"/>
+    <rect x="218" y="278" width="28" height="12" rx="3" class="odd"/>
+    <rect x="218" y="302" width="28" height="12" rx="3" class="odd"/>
+    <rect x="218" y="326" width="28" height="12" rx="3" class="odd"/>
+    <rect x="218" y="350" width="28" height="12" rx="3" class="odd"/>
+  </g>
+
+  <!-- Stage 3 nodes (output) -->
+  <g>
+    <rect x="328" y="182" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="206" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="230" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="254" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="278" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="302" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="326" width="28" height="12" rx="3" class="node"/>
+    <rect x="328" y="350" width="28" height="12" rx="3" class="node"/>
+  </g>
+
+  <!-- Output labels -->
+  <text x="378" y="192" class="small">X[0]</text>
+  <text x="378" y="216" class="small">X[1]</text>
+  <text x="378" y="240" class="small">X[2]</text>
+  <text x="378" y="264" class="small">X[3]</text>
+  <text x="378" y="288" class="small">X[4]</text>
+  <text x="378" y="312" class="small">X[5]</text>
+  <text x="378" y="336" class="small">X[6]</text>
+  <text x="378" y="360" class="small">X[7]</text>
+
+  <!-- Wires: Stage 0 → Stage 1 (straight) -->
+  <line x1="68" y1="188" x2="118" y2="188" class="wire"/>
+  <line x1="68" y1="212" x2="118" y2="212" class="wire"/>
+  <line x1="68" y1="236" x2="118" y2="236" class="wire"/>
+  <line x1="68" y1="260" x2="118" y2="260" class="wire"/>
+  <line x1="68" y1="284" x2="118" y2="284" class="wire"/>
+  <line x1="68" y1="308" x2="118" y2="308" class="wire"/>
+  <line x1="68" y1="332" x2="118" y2="332" class="wire"/>
+  <line x1="68" y1="356" x2="118" y2="356" class="wire"/>
+
+  <!-- Butterfly crosses Stage1→Stage2 -->
+  <line x1="146" y1="188" x2="218" y2="188" class="wire"/>
+  <line x1="146" y1="212" x2="218" y2="212" class="wire"/>
+  <line x1="146" y1="236" x2="218" y2="236" class="wire"/>
+  <line x1="146" y1="260" x2="218" y2="260" class="wire"/>
+  <line x1="146" y1="284" x2="218" y2="284" class="wire"/>
+  <line x1="146" y1="308" x2="218" y2="308" class="wire"/>
+  <line x1="146" y1="332" x2="218" y2="332" class="wire"/>
+  <line x1="146" y1="356" x2="218" y2="356" class="wire"/>
+  <!-- Cross wires (butterfly) -->
+  <line x1="146" y1="188" x2="218" y2="212" class="accent" opacity="0.5"/>
+  <line x1="146" y1="212" x2="218" y2="188" class="accent" opacity="0.5"/>
+  <line x1="146" y1="236" x2="218" y2="260" class="accent" opacity="0.5"/>
+  <line x1="146" y1="260" x2="218" y2="236" class="accent" opacity="0.5"/>
+  <line x1="146" y1="284" x2="218" y2="308" class="accent" opacity="0.5"/>
+  <line x1="146" y1="308" x2="218" y2="284" class="accent" opacity="0.5"/>
+  <line x1="146" y1="332" x2="218" y2="356" class="accent" opacity="0.5"/>
+  <line x1="146" y1="356" x2="218" y2="332" class="accent" opacity="0.5"/>
+
+  <!-- Stage2→Stage3 wires + crosses (wider span) -->
+  <line x1="246" y1="188" x2="328" y2="188" class="wire"/>
+  <line x1="246" y1="212" x2="328" y2="212" class="wire"/>
+  <line x1="246" y1="236" x2="328" y2="236" class="wire"/>
+  <line x1="246" y1="260" x2="328" y2="260" class="wire"/>
+  <line x1="246" y1="284" x2="328" y2="284" class="wire"/>
+  <line x1="246" y1="308" x2="328" y2="308" class="wire"/>
+  <line x1="246" y1="332" x2="328" y2="332" class="wire"/>
+  <line x1="246" y1="356" x2="328" y2="356" class="wire"/>
+  <!-- Cross wires span 2 -->
+  <line x1="246" y1="188" x2="328" y2="236" class="accent" opacity="0.4"/>
+  <line x1="246" y1="236" x2="328" y2="188" class="accent" opacity="0.4"/>
+  <line x1="246" y1="212" x2="328" y2="260" class="accent" opacity="0.4"/>
+  <line x1="246" y1="260" x2="328" y2="212" class="accent" opacity="0.4"/>
+  <line x1="246" y1="284" x2="328" y2="332" class="accent" opacity="0.4"/>
+  <line x1="246" y1="332" x2="328" y2="284" class="accent" opacity="0.4"/>
+  <line x1="246" y1="308" x2="328" y2="356" class="accent" opacity="0.4"/>
+  <line x1="246" y1="356" x2="328" y2="308" class="accent" opacity="0.4"/>
+
+  <!-- Stage output arrows -->
+  <line x1="356" y1="188" x2="375" y2="188" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="212" x2="375" y2="212" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="236" x2="375" y2="236" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="260" x2="375" y2="260" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="284" x2="375" y2="284" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="308" x2="375" y2="308" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="332" x2="375" y2="332" class="arr" marker-end="url(#a3)"/>
+  <line x1="356" y1="356" x2="375" y2="356" class="arr" marker-end="url(#a3)"/>
+
+  <!-- Stage labels -->
+  <text x="132" y="175" class="small" text-anchor="middle" fill="#51cf66">Stage 1</text>
+  <text x="232" y="175" class="small" text-anchor="middle" fill="#51cf66">Stage 2</text>
+  <text x="342" y="175" class="small" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">Stage 3</text>
+
+  <!-- Twiddle factors W label -->
+  <text x="182" y="172" class="small" text-anchor="middle" fill="var(--text-muted,#8b949e)">W₈⁰ … W₈³</text>
+  <text x="282" y="172" class="small" text-anchor="middle" fill="var(--text-muted,#8b949e)">W₈⁰ W₈²</text>
+
+  <!-- RIGHT PANEL: complexity & applications -->
+  <rect x="420" y="152" width="284" height="256" rx="4" class="panel"/>
+  <text x="562" y="170" class="label" text-anchor="middle" font-weight="bold">FFT at a Glance</text>
+
+  <text x="432" y="190" class="small" font-weight="bold">Complexity comparison (N=1024):</text>
+  <text x="432" y="206" class="math">DFT:  N² = 1 048 576 ops</text>
+  <text x="432" y="222" class="math">FFT:  N·log₂N = 10 240 ops</text>
+  <text x="432" y="238" class="small" fill="#51cf66">→ 100× speedup!</text>
+
+  <text x="432" y="258" class="small" font-weight="bold">Frequency resolution rule:</text>
+  <text x="432" y="274" class="math">Δf = fs / N</text>
+  <text x="432" y="290" class="small">fs=44100, N=4096 → Δf ≈ 10.8 Hz/bin</text>
+  <text x="432" y="306" class="small">More points = finer frequency bins</text>
+
+  <text x="432" y="326" class="small" font-weight="bold">Practical FFT uses:</text>
+  <text x="432" y="342" class="small">• Spectrum analysis (pitch detection)</text>
+  <text x="432" y="358" class="small">• Fast convolution (audio effects)</text>
+  <text x="432" y="374" class="small">• STFT → spectrogram → mel features</text>
+  <text x="432" y="390" class="small">• Image processing (2D FFT)</text>
+  <text x="432" y="400" class="small">• scipy.fft / np.fft in Python</text>
+</svg>

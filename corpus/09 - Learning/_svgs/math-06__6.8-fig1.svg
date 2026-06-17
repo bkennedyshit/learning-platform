@@ -1,0 +1,68 @@
+<svg viewBox="0 0 580 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="shock-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .nozzle-wall { stroke: var(--text-normal, #c9d1d9); stroke-width: 3; fill: none; }
+    .shock-line { stroke: var(--text-accent, #79c0ff); stroke-width: 3; stroke-dasharray: none; }
+    .subsonic { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 150; stroke-dashoffset: 150; animation: subFlow 3s linear infinite; }
+    .supersonic { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 100; stroke-dashoffset: 100; animation: superFlow 2s linear infinite; }
+    @keyframes subFlow { to { stroke-dashoffset: 0; } }
+    @keyframes superFlow { to { stroke-dashoffset: 0; } }
+    .mach-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .throat-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .region-sub { fill: var(--interactive-accent, #58a6ff); opacity: 0.08; }
+    .region-super { fill: var(--text-accent, #79c0ff); opacity: 0.08; }
+    @keyframes shockPulse { 0%,100% { stroke-width: 3; opacity: 1; } 50% { stroke-width: 5; opacity: 0.7; } }
+    .shock-pulse { animation: shockPulse 1.5s ease-in-out infinite; }
+  </style>
+
+  <!-- Nozzle walls (converging-diverging) -->
+  <path d="M 40 100 Q 150 100 220 140 Q 260 160 280 165 Q 300 160 340 140 Q 420 100 540 80" class="nozzle-wall"/>
+  <path d="M 40 260 Q 150 260 220 220 Q 260 200 280 195 Q 300 200 340 220 Q 420 260 540 280" class="nozzle-wall"/>
+
+  <!-- Regions -->
+  <rect x="40" y="100" width="240" height="160" class="region-sub" rx="5"/>
+  <rect x="280" y="80" width="120" height="200" class="region-super" rx="5"/>
+
+  <!-- Throat line -->
+  <line x1="280" y1="165" x2="280" y2="195" class="throat-line"/>
+  <text x="280" y="210" class="label" text-anchor="middle" style="fill: var(--text-muted, #8b949e);">Throat (M=1)</text>
+
+  <!-- Normal shock -->
+  <line x1="400" y1="105" x2="400" y2="255" class="shock-line shock-pulse">
+    <animate attributeName="x1" values="400; 405; 395; 400" dur="0.2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="400; 405; 395; 400" dur="0.2s" repeatCount="indefinite"/>
+  </line>
+  <text x="400" y="95" class="mach-label" text-anchor="middle" style="fill: var(--text-accent, #79c0ff);">
+    <animate attributeName="x" values="400; 405; 395; 400" dur="0.2s" repeatCount="indefinite"/>
+    SHOCK
+  </text>
+
+  <!-- Streamlines -->
+  <path d="M 50 150 Q 150 150 220 165 Q 260 175 280 180 Q 320 175 380 155" class="subsonic"/>
+  <path d="M 50 180 Q 150 180 220 180 Q 260 180 280 180 Q 320 180 380 180" class="subsonic" style="animation-delay: 0.3s;"/>
+  <path d="M 50 210 Q 150 210 220 195 Q 260 185 280 180 Q 320 185 380 205" class="subsonic" style="animation-delay: 0.6s;"/>
+
+  <!-- Supersonic region streamlines -->
+  <path d="M 280 170 Q 320 160 380 145" class="supersonic"/>
+  <path d="M 280 180 Q 320 180 380 180" class="supersonic" style="animation-delay: 0.2s;"/>
+  <path d="M 280 190 Q 320 200 380 215" class="supersonic" style="animation-delay: 0.4s;"/>
+
+  <!-- Mach number labels -->
+  <text x="150" y="300" class="mach-label" text-anchor="middle">M &lt; 1 (subsonic)</text>
+  <text x="340" y="300" class="mach-label" text-anchor="middle" style="fill: var(--text-accent, #79c0ff);">M &gt; 1</text>
+  <text x="470" y="300" class="mach-label" text-anchor="middle">M &lt; 1</text>
+
+  <!-- Flow direction -->
+  <line x1="50" y1="70" x2="110" y2="70" style="stroke: var(--text-normal, #c9d1d9); stroke-width: 2; marker-end: url(#shock-arrow); color: var(--text-normal, #c9d1d9);"/>
+  <text x="120" y="75" class="label">Flow</text>
+
+  <!-- Title -->
+  <text x="290" y="340" class="title-label" text-anchor="middle">Normal Shock in Converging-Diverging Nozzle</text>
+</svg>

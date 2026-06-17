@@ -1,0 +1,198 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .mono-m { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .boxhi  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arr-hi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; }
+    .tok    { fill: var(--interactive-accent, #58a6ff); opacity: 0.20; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .tok-kw { fill: #ff6b6b; opacity: 0.25; stroke: #ff6b6b; stroke-width: 1; }
+    .tok-id { fill: #51cf66; opacity: 0.22; stroke: #51cf66; stroke-width: 1; }
+    .tok-nu { fill: #ffd93d; opacity: 0.22; stroke: #ffd93d; stroke-width: 1; }
+    .tok-op { fill: #cc5de8; opacity: 0.22; stroke: #cc5de8; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="c1-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="c1-ahi" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="22" class="title" text-anchor="middle">Lexer Pipeline — Source Text → Token Stream (Chapter 29.1)</text>
+
+  <!-- === TOP ROW: pipeline stages === -->
+  <!-- Stage 0: source -->
+  <rect x="18" y="40" width="120" height="44" rx="5" class="box"/>
+  <text x="78" y="58" class="label" text-anchor="middle" font-weight="bold">Source Text</text>
+  <text x="78" y="74" class="mono" text-anchor="middle">x = 3 + y * 2</text>
+
+  <line x1="138" y1="62" x2="158" y2="62" class="arr-hi" marker-end="url(#c1-ahi)"/>
+
+  <!-- Stage 1: regex patterns -->
+  <rect x="158" y="40" width="128" height="44" rx="5" class="boxhi"/>
+  <text x="222" y="58" class="label" text-anchor="middle" font-weight="bold">Regex Patterns</text>
+  <text x="222" y="72" class="mono-m" text-anchor="middle">[a-z_]\w* | \d+ | [+*=]</text>
+
+  <line x1="286" y1="62" x2="306" y2="62" class="arr-hi" marker-end="url(#c1-ahi)"/>
+
+  <!-- Stage 2: NFA -->
+  <rect x="306" y="40" width="100" height="44" rx="5" class="boxhi"/>
+  <text x="356" y="55" class="label" text-anchor="middle" font-weight="bold">NFA</text>
+  <text x="356" y="69" class="small" text-anchor="middle">Thompson</text>
+  <text x="356" y="80" class="small" text-anchor="middle">construction</text>
+
+  <line x1="406" y1="62" x2="426" y2="62" class="arr-hi" marker-end="url(#c1-ahi)"/>
+
+  <!-- Stage 3: DFA -->
+  <rect x="426" y="40" width="100" height="44" rx="5" class="boxhi"/>
+  <text x="476" y="55" class="label" text-anchor="middle" font-weight="bold">DFA</text>
+  <text x="476" y="69" class="small" text-anchor="middle">Subset</text>
+  <text x="476" y="80" class="small" text-anchor="middle">construction</text>
+
+  <line x1="526" y1="62" x2="546" y2="62" class="arr-hi" marker-end="url(#c1-ahi)"/>
+
+  <!-- Stage 4: min DFA -->
+  <rect x="546" y="40" width="110" height="44" rx="5" class="boxhi"/>
+  <text x="601" y="55" class="label" text-anchor="middle" font-weight="bold">Min-DFA</text>
+  <text x="601" y="69" class="small" text-anchor="middle">Hopcroft partition</text>
+  <text x="601" y="80" class="small" text-anchor="middle">refinement</text>
+
+  <line x1="656" y1="62" x2="676" y2="62" class="arr-hi" marker-end="url(#c1-ahi)"/>
+
+  <!-- Stage 5: tokens (right edge) -->
+  <rect x="676" y="40" width="30" height="44" rx="3" class="box"/>
+  <text x="691" y="66" class="small" text-anchor="middle" writing-mode="tb" transform="rotate(0)">TOK</text>
+
+  <!-- === NFA diagram (middle section) === -->
+  <rect x="18" y="102" width="330" height="148" rx="5" class="box"/>
+  <text x="183" y="120" class="label" text-anchor="middle" font-weight="bold">NFA — Thompson construction for [a-z]+ (identifier)</text>
+
+  <!-- NFA states -->
+  <!-- q0 -->
+  <circle cx="60"  cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1.5"/>
+  <text x="60" y="175" class="small" text-anchor="middle">q0</text>
+  <!-- q1 -->
+  <circle cx="140" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1.5"/>
+  <text x="140" y="175" class="small" text-anchor="middle">q1</text>
+  <!-- q2 -->
+  <circle cx="225" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1.5"/>
+  <circle cx="225" cy="170" r="20" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="225" y="175" class="small" text-anchor="middle">q2</text>
+  <!-- q3 -->
+  <circle cx="305" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1.5"/>
+  <circle cx="305" cy="170" r="20" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="305" y="175" class="small" text-anchor="middle">q3</text>
+
+  <!-- Arrows: q0→q1 ε -->
+  <line x1="76" y1="170" x2="124" y2="170" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="100" y="163" class="small" text-anchor="middle">ε</text>
+
+  <!-- q1→q2 [a-z] -->
+  <line x1="156" y1="170" x2="208" y2="170" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="182" y="163" class="small" text-anchor="middle">[a-z]</text>
+
+  <!-- q2→q3 ε -->
+  <line x1="241" y1="170" x2="284" y2="170" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="262" y="163" class="small" text-anchor="middle">ε</text>
+
+  <!-- q2 self-loop [a-z] -->
+  <path d="M 215 154 C 205 128 245 128 235 154" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="225" y="136" class="small" text-anchor="middle">[a-z]</text>
+
+  <text x="183" y="226" class="small" text-anchor="middle">Double ring = accepting state · ε = epsilon (free transition)</text>
+
+  <!-- === DFA diagram (right section) === -->
+  <rect x="362" y="102" width="340" height="148" rx="5" class="box"/>
+  <text x="532" y="120" class="label" text-anchor="middle" font-weight="bold">DFA — subset construction result</text>
+
+  <!-- DFA states -->
+  <circle cx="420" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1.5"/>
+  <text x="420" y="175" class="small" text-anchor="middle">S0</text>
+
+  <circle cx="510" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <circle cx="510" cy="170" r="20" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="510" y="175" class="small" text-anchor="middle">S1</text>
+
+  <circle cx="600" cy="170" r="16" fill="var(--background-secondary,#161b22)" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="600" y="175" class="small" text-anchor="middle">ERR</text>
+
+  <!-- S0→S1 [a-z] -->
+  <line x1="436" y1="170" x2="490" y2="170" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="463" y="163" class="small" text-anchor="middle">[a-z]</text>
+
+  <!-- S1 self-loop [a-z] -->
+  <path d="M 500 154 C 490 128 530 128 520 154" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="510" y="136" class="small" text-anchor="middle">[a-z]</text>
+
+  <!-- S0→ERR other -->
+  <path d="M 436 160 C 500 120 580 138 590 162" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="530" y="132" class="small" text-anchor="middle">other → REJECT</text>
+
+  <!-- S1→ERR other -->
+  <line x1="526" y1="170" x2="584" y2="170" class="arr" marker-end="url(#c1-arr)"/>
+  <text x="555" y="163" class="small" text-anchor="middle">other → emit</text>
+
+  <text x="532" y="226" class="small" text-anchor="middle">No ε-transitions · each state has exactly one transition per input symbol</text>
+
+  <!-- === BOTTOM: Token stream example === -->
+  <rect x="18" y="266" width="684" height="132" rx="5" class="box"/>
+  <text x="360" y="285" class="label" text-anchor="middle" font-weight="bold">Tokenizing  x = 3 + y * 2  (Maximal Munch Rule)</text>
+
+  <!-- Token boxes -->
+  <!-- x: IDENT -->
+  <rect x="30"  y="298" width="72" height="50" rx="4" class="tok-id"/>
+  <text x="66"  y="314" class="mono" text-anchor="middle">x</text>
+  <text x="66"  y="330" class="small" text-anchor="middle">IDENT</text>
+  <text x="66"  y="342" class="small" text-anchor="middle">"x"</text>
+
+  <!-- = : ASSIGN -->
+  <rect x="112" y="298" width="72" height="50" rx="4" class="tok-op"/>
+  <text x="148" y="314" class="mono" text-anchor="middle">=</text>
+  <text x="148" y="330" class="small" text-anchor="middle">ASSIGN</text>
+  <text x="148" y="342" class="small" text-anchor="middle">"="</text>
+
+  <!-- 3 : NUMBER -->
+  <rect x="194" y="298" width="72" height="50" rx="4" class="tok-nu"/>
+  <text x="230" y="314" class="mono" text-anchor="middle">3</text>
+  <text x="230" y="330" class="small" text-anchor="middle">NUMBER</text>
+  <text x="230" y="342" class="small" text-anchor="middle">3</text>
+
+  <!-- + : PLUS -->
+  <rect x="276" y="298" width="72" height="50" rx="4" class="tok-op"/>
+  <text x="312" y="314" class="mono" text-anchor="middle">+</text>
+  <text x="312" y="330" class="small" text-anchor="middle">PLUS</text>
+  <text x="312" y="342" class="small" text-anchor="middle">"+"</text>
+
+  <!-- y : IDENT -->
+  <rect x="358" y="298" width="72" height="50" rx="4" class="tok-id"/>
+  <text x="394" y="314" class="mono" text-anchor="middle">y</text>
+  <text x="394" y="330" class="small" text-anchor="middle">IDENT</text>
+  <text x="394" y="342" class="small" text-anchor="middle">"y"</text>
+
+  <!-- * : STAR -->
+  <rect x="440" y="298" width="72" height="50" rx="4" class="tok-op"/>
+  <text x="476" y="314" class="mono" text-anchor="middle">*</text>
+  <text x="476" y="330" class="small" text-anchor="middle">STAR</text>
+  <text x="476" y="342" class="small" text-anchor="middle">"*"</text>
+
+  <!-- 2 : NUMBER -->
+  <rect x="522" y="298" width="72" height="50" rx="4" class="tok-nu"/>
+  <text x="558" y="314" class="mono" text-anchor="middle">2</text>
+  <text x="558" y="330" class="small" text-anchor="middle">NUMBER</text>
+  <text x="558" y="342" class="small" text-anchor="middle">2</text>
+
+  <!-- EOF -->
+  <rect x="604" y="298" width="72" height="50" rx="4" class="box"/>
+  <text x="640" y="314" class="mono" text-anchor="middle">EOF</text>
+  <text x="640" y="330" class="small" text-anchor="middle">EOF</text>
+  <text x="640" y="342" class="small" text-anchor="middle">""</text>
+
+  <text x="360" y="390" class="small" text-anchor="middle">Whitespace consumed and discarded · maximal munch: always take the longest match · 8 tokens total</text>
+</svg>

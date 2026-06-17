@@ -1,0 +1,298 @@
+---
+title: "35.8 — Generative Music & AI Audio"
+subject: "Music Production & Sound Design"
+catalog: advanced
+audience_tier: higher-education
+chapter: "35.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 35.8 — Generative Music & AI Audio
+
+> *"The best generative music system is one you can't tell is a system."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Implement a simple **Markov chain melody generator** in Python.
+2. Describe L-Systems and cellular automata as generative rhythm/melody mechanisms.
+3. Generate 30-second audio from text prompts using **Meta MusicGen** (local or Hugging Face).
+4. Describe the architecture of MusicGen, Stable Audio, and Suno at a high level.
+5. Patch a basic generative sequence in **Bespoke Synth** or **VCV Rack**.
+6. Explain the **entropy increase** model of psychedelics and altered states (aesthetic, not chemical).
+
+---
+
+## 🖼️ Visual Anchor
+
+![music__35.8-fig1](music__35.8-fig1.svg)
+
+---
+
+## 📚 1. Generative Music — Why and What
+
+Generative music is **music that evolves according to rules or algorithms**, producing outputs that are:
+- Theoretically infinite (never exact repeats)
+- Structurally coherent (follow musical rules)
+- Partially unpredictable (surprise and novelty)
+
+**Historical context:**
+- **Brian Eno** coined the term "generative music" (1996): music that "thinks for itself"
+- **John Cage:** Chance operations (I-Ching, random events)
+- **Algorithmic composition:** Dating to the 1950s (Iannis Xenakis, Stochastic music)
+- **Today:** AI models + modular synths + live coding = the frontier
+
+---
+
+## 📚 2. Rule-Based Generative Systems
+
+### 2.1 Markov Chains
+
+A **first-order Markov chain** models music as a sequence where each note depends only on the current note. Higher-order chains consider more context.
+
+**Building a melody Markov model:**
+
+```python
+from collections import defaultdict
+import random
+
+def build_markov(sequence, order=1):
+    """Build a Markov transition table from a note sequence."""
+    transitions = defaultdict(list)
+    for i in range(len(sequence) - order):
+        state = tuple(sequence[i:i+order])  # Current state (n notes)
+        next_note = sequence[i+order]        # Following note
+        transitions[state].append(next_note)
+    return dict(transitions)
+
+def generate_markov(transitions, length=32, order=1):
+    """Generate a new sequence using Markov transitions."""
+    # Start from a random state in the model
+    start = random.choice(list(transitions.keys()))
+    sequence = list(start)
+    
+    for _ in range(length - order):
+        state = tuple(sequence[-order:])
+        if state in transitions:
+            next_note = random.choice(transitions[state])
+            sequence.append(next_note)
+        else:
+            # No transition found — jump to random known state
+            sequence.append(random.choice(list(transitions.keys()))[0])
+    
+    return sequence
+
+# Example: teach the model from a C major pentatonic motif
+source_melody = [60, 64, 67, 72, 67, 64, 60, 62, 64, 67, 64, 62, 60, 60]
+transitions = build_markov(source_melody, order=2)
+generated = generate_markov(transitions, length=32, order=2)
+print("Generated MIDI notes:", generated)
+```
+
+### 2.2 L-Systems (Lindenmayer Systems)
+
+L-Systems are string-rewriting systems originally for modeling plant growth. They map grammar rules to musical parameters.
+
+**Example: Fractal rhythm generator**
+
+```
+Axiom (starting string): F
+Rules:
+  F → F G F F G F (expand F to this)
+  G → G G (double G)
+Iteration 3: F G F F G F G G F G F F G F F G F F G F G G F G F F G F...
+
+Musical mapping:
+  F = 1/8th note (drum hit)
+  G = rest
+```
+
+**Result:** A fractal rhythmic pattern with self-similarity at multiple scales.
+
+### 2.3 Cellular Automata (Conway-style)
+
+Musical cellular automata: use a grid where each cell's next state depends on its neighbours. The spatial pattern is translated to musical pitch, rhythm, or velocity.
+
+**Example:** A 1D cellular automaton (Rule 30 or Rule 110) generates a binary pattern → map 1 = note on, 0 = rest. Each row is a new time step.
+
+---
+
+## 📚 3. AI Audio Generation Models (2026)
+
+### 3.1 Meta AudioCraft / MusicGen
+
+**Architecture:** Transformer-based sequence model conditioned on text descriptions and/or audio.
+
+**How to use (Python):**
+
+```python
+# Install: pip install audiocraft
+from audiocraft.models import MusicGen
+import torchaudio
+
+model = MusicGen.get_pretrained('facebook/musicgen-small')  # or 'medium', 'large'
+model.set_generation_params(duration=30)  # Generate 30 seconds
+
+descriptions = [
+    'lo-fi hip hop, 90 BPM, jazz piano, vinyl crackle, rainy night vibe',
+    'dark techno, 132 BPM, industrial 808 kick, analog synthesizers'
+]
+
+wav = model.generate(descriptions)
+
+for idx, one_wav in enumerate(wav):
+    torchaudio.save(f'musicgen_{idx}.wav', one_wav[None].cpu(), 32000)
+```
+
+**Available models:**
+- `musicgen-small`: 300M params, fast
+- `musicgen-medium`: 1.5B params, better quality
+- `musicgen-large`: 3.3B params, best quality
+
+**Continuation mode:**
+```python
+model.set_generation_params(duration=30)
+wav = model.generate_continuation(
+    prompt_waveform,  # 3-second audio prompt
+    prompt_sample_rate=32000,
+    descriptions=['continue the jazz piano groove']
+)
+```
+
+### 3.2 Stable Audio Open (Stability AI)
+
+- **Open-weights model** (Apache 2.0 — commercial use allowed)
+- Generates up to 190 seconds at 44.1kHz stereo
+- Text-to-audio: music and sound effects
+- Available: [huggingface.co/stabilityai/stable-audio-open-1.0](https://huggingface.co/stabilityai/stable-audio-open-1.0)
+
+### 3.3 Demucs — Source Separation
+
+**Meta Demucs** separates an audio file into stems: vocals, drums, bass, other.
+
+```python
+# Install: pip install demucs
+import subprocess
+subprocess.run(['python', '-m', 'demucs', 'track.mp3', '--out', 'output/'])
+# Output: output/htdemucs/track/{vocals, drums, bass, other}.wav
+```
+
+**Applications:**
+- Get clean drums from any song for sampling
+- Isolate vocals for remixing
+- Learn from separated stems
+
+---
+
+## 📚 4. Live Coding & Modular Environments
+
+### 4.1 Bespoke Synth (Free, Open-Source)
+
+Bespoke is a modular DAW where everything is a patch-cable connected module. Unique features:
+- **Python scripting module:** Write Python code that generates MIDI/note events in real time
+- **Programmatic modules:** Script module runs Python → outputs MIDI → feeds synth
+- Download: [bespokesynth.com](https://www.bespokesynth.com/)
+
+### 4.2 TidalCycles (Free, Haskell/SuperCollider)
+
+TidalCycles is a live-coding language for rhythmic pattern generation. Runs inside a Haskell REPL (ghci) → sends OSC to SuperCollider → generates sound.
+
+**Basic syntax:**
+```haskell
+-- Four on the floor
+d1 $ sound "bd bd bd bd"
+
+-- Snare on 2 and 4
+d2 $ sound "~ sn ~ sn"
+
+-- Hi-hat subdivisions with speed variation
+d3 $ sound "hh*8" # speed (irand 3)
+
+-- Pattern transformation: rev, slow, fast, chop
+d1 $ slow 2 $ sound "bd sn [bd bd] sn"
+d1 $ rev $ sound "bd sn hh cp"
+d1 $ chop 8 $ sound "breaks125"
+```
+
+### 4.3 VCV Rack 2 (Free, Open-Source)
+
+VCV Rack is a virtual Eurorack modular synthesiser. 600+ free modules.
+
+**Generative patching example:**
+- Bernoulli gate: randomly routes triggers to different voices
+- Random voltage source → pitch of oscillator
+- Clock dividers → create polyrhythmic patterns
+- Quad clock → 4 different time signatures simultaneously
+
+Download: [vcvrack.com](https://vcvrack.com/)
+
+---
+
+## 📚 5. AI Music Prompt Engineering
+
+The art of getting good results from text-to-music models:
+
+**Effective prompt structure:**
+```
+[Genre] + [Tempo] + [Key instruments] + [Mood/vibe] + [Era/reference]
+
+Example:
+"lo-fi hip hop, 85 BPM, soft Rhodes piano, mellow guitar, vintage 
+ vinyl texture, nostalgic melancholic late night feel"
+```
+
+**Specificity matters:**
+- "Electronic music" → generic
+- "Dark techno, 135 BPM, industrial 808 kick, analog synth bass, Berlin club scene" → much better
+
+**Instrument + playing style:**
+- Not just "piano" but "Rhodes piano played with gentle swing"
+- Not just "guitar" but "clean stratocaster with subtle tremolo"
+
+**Negative prompting** (some models support it):
+- "no vocals, no drums, instrumental only"
+- "no distortion, clean sound"
+
+---
+
+## ⚠️ 6. Common Misconceptions
+
+1. **"AI music generation will replace producers."** AI generates raw audio based on training data patterns. Human producers make contextual, intentional, emotionally-crafted decisions. AI is a generative tool, not a replacement for musical judgment.
+
+2. **"Markov chains can't produce good music."** With higher-order chains (order 3–5) trained on a specific melodic corpus, Markov models produce surprisingly coherent melodies that sound like variations of the source material.
+
+3. **"MusicGen understands music theory."** MusicGen learns statistical patterns from training data. It doesn't "understand" voice leading, harmonic function, or structural tension. It pattern-matches very effectively — which is different from understanding.
+
+4. **"VCV Rack generative patches play themselves indefinitely."** Without careful design, patches drift, modulate to extreme values, or repeat at audible periods. Design generative patches with range-limiting (slew limiters, Bernoulli gates) to stay interesting.
+
+5. **"TidalCycles is only for techno/electronic music."** TidalCycles can produce any genre — it's a pattern language. The limitation is SuperCollider synthesis quality; but you can connect TidalCycles to any MIDI-capable synthesiser or DAW.
+
+6. **"AI audio copyright is settled law."** As of 2026, AI-generated music copyright is actively being debated in courts and legislatures globally. Check your distribution service's AI disclosure requirements before uploading AI-generated content.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [35.7 - Audio Programming with JUCE & Python](35.7---Audio-Programming-with-JUCE-&-Python) — the programming foundation for generative systems
+- [Subject_Plan](Subject_Plan) — broader AI experiment context
+- [Subject_Plan](Subject_Plan) — mathematical foundation under AI audio
+
+### External
+- [Meta MusicGen (Hugging Face demo)](https://huggingface.co/spaces/facebook/MusicGen)
+- [Stable Audio Open (weights)](https://huggingface.co/stabilityai/stable-audio-open-1.0)
+- [Bespoke Synth](https://www.bespokesynth.com/)
+- [VCV Rack](https://vcvrack.com/)
+- [TidalCycles documentation](https://tidalcycles.org/docs/)
+- [Demucs (source separation)](https://github.com/facebookresearch/demucs)
+
+---
+
+*Prev: [35.7 - Audio Programming with JUCE & Python](35.7---Audio-Programming-with-JUCE-&-Python) | Back to: [Subject_Plan](Subject_Plan)*

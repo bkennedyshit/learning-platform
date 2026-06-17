@@ -1,0 +1,65 @@
+<svg viewBox="0 0 580 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="ed2-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ax2    { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .slab   { fill: var(--interactive-accent, #58a6ff); opacity: 0.12; }
+    .disk   { fill: var(--text-accent, #79c0ff); opacity: 0.18; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 5 3; }
+    .surf2  { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.2; fill: none; }
+    .ref2   { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; }
+    .lbl2   { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .math2  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .acc2   { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .pt2    { fill: var(--interactive-accent, #58a6ff); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Axes -->
+  <line x1="50"  y1="360" x2="400" y2="360" class="ax2" marker-end="url(#ed2-arrow)"/>
+  <line x1="50"  y1="360" x2="50"  y2="30"  class="ax2" marker-end="url(#ed2-arrow)"/>
+  <!-- Slab region around L (horizontal band) -->
+  <rect x="50" y="155" width="350" height="70" class="slab"/>
+  <line x1="50" y1="155" x2="400" y2="155" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="50" y1="225" x2="400" y2="225" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <!-- Disk region (projected as ellipse in oblique view) -->
+  <ellipse cx="220" cy="340" rx="70" ry="18" class="disk"/>
+  <!-- A curve going up through the slab region -->
+  <path d="M 100 310 Q 200 240 220 190 Q 240 160 320 140" class="surf2"/>
+  <!-- L reference line -->
+  <line x1="220" y1="190" x2="50"  y2="190" class="ref2"/>
+  <circle cx="220" cy="190" r="5" class="pt2"/>
+  <!-- Labels -->
+  <text x="408" y="363" class="math2">x,y</text>
+  <text x="36"  y="28"  class="math2">z</text>
+  <text x="30"  y="194" class="math2" text-anchor="end">L</text>
+  <text x="30"  y="160" class="acc2" text-anchor="end">L+ε</text>
+  <text x="30"  y="228" class="acc2" text-anchor="end">L−ε</text>
+  <text x="230" y="355" class="acc2" text-anchor="middle">δ-disk</text>
+  <text x="340" y="148" class="lbl2">f(x,y)</text>
+  <!-- Box annotation -->
+  <rect x="400" y="50" width="165" height="70" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="483" y="70"  class="lbl2" text-anchor="middle" font-weight="bold">∀ ε &gt; 0, ∃ δ &gt; 0:</text>
+  <text x="483" y="88"  class="lbl2" text-anchor="middle">‖(x,y)−(a,b)‖ &lt; δ</text>
+  <text x="483" y="108" class="lbl2" text-anchor="middle">⟹ |f(x,y)−L| &lt; ε</text>
+</svg>

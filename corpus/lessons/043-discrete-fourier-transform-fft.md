@@ -1,0 +1,401 @@
+---
+title: "04.3 — Discrete Fourier Transform & FFT"
+subject: "Signal Processing & DSP"
+catalog: advanced
+audience_tier: higher-education
+chapter: "04.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 04.3 — Discrete Fourier Transform & FFT
+
+> *"The FFT is a computer algorithm that computes the Discrete Fourier Transform (DFT) or its inverse. It is one of the most important algorithms ever created."* — paraphrased from [dspguide.com Chapter 12](https://www.dspguide.com/ch12.htm)
+
+The FFT is the engine inside every spectrum analyser, audio codec, radar system, speech recogniser, and neural vocoder. Understanding it is not optional for serious DSP work. This chapter covers the DFT definition, the Cooley-Tukey algorithm, and the practical rules for getting correct results (windowing, zero-padding, frequency resolution).
+
+Prerequisite: [04.2](04.2---Fourier-Series-&-Fourier-Transform) — the Fourier Transform theory. Next step: [04.4](04.4---Digital-Filters---FIR-&-IIR) — filters that process the FFT output.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Write the **DFT** and **IDFT** equations and interpret each symbol.
+2. Compute a small DFT by hand (N=4) to verify understanding.
+3. Explain the **Cooley-Tukey radix-2 butterfly** and why it reduces complexity from O(N²) to O(N log₂ N).
+4. Calculate **frequency resolution** Δf = fs/N and choose N for a desired resolution.
+5. Diagnose and cure **spectral leakage** with Hann, Hamming, Blackman, and Kaiser windows.
+6. Apply **zero-padding** and explain what it does (and does not) give you.
+7. Use **numpy.fft / scipy.fft** correctly, including normalization and one-sided vs. two-sided spectra.
+
+---
+
+## 🖼️ Visual Anchor
+
+![dsp-04__fig3](dsp-04__fig3.svg)
+
+*Diagram: 8-point Cooley-Tukey butterfly — three stages, bit-reversed input, twiddle factors W₈. Right panel: complexity comparison, frequency resolution rule, and practical FFT applications.*
+
+---
+
+## 📚 1. The Discrete Fourier Transform (DFT)
+
+### 1.1 Definition
+
+Given N complex (or real) samples x[0], x[1], …, x[N−1], the **DFT** produces N frequency-domain samples X[0], X[1], …, X[N−1]:
+
+```
+X[k] = Σ_{n=0}^{N−1}  x[n] · W_N^{nk}     k = 0, 1, …, N−1
+
+where  W_N = e^{−j2π/N}   (the N-th root of unity, "twiddle factor")
+```
+
+The **Inverse DFT (IDFT)**:
+
+```
+x[n] = (1/N) Σ_{k=0}^{N−1}  X[k] · W_N^{−nk}     n = 0, 1, …, N−1
+```
+
+### 1.2 Interpretation of the Output Bins
+
+Each DFT output bin k corresponds to a **discrete frequency**:
+
+```
+f_k = k · Δf = k · fs / N     Hz
+```
+
+| Bin k | Frequency | Notes |
+|-------|-----------|-------|
+| 0 | 0 Hz (DC) | Mean value of x[n] |
+| 1 | fs/N | Lowest non-DC frequency |
+| N/2 | fs/2 | Nyquist — highest unambiguous frequency |
+| N/2+1 … N−1 | fs/2 + Δf … fs−Δf | Mirror of bins 1…N/2−1 (negative freqs) |
+
+For **real-valued** input x[n], X[k] = X*[N−k] (conjugate symmetry). Only bins 0 through N/2 carry unique information — this is the **one-sided spectrum** returned by `numpy.fft.rfft`.
+
+### 1.3 Direct DFT Complexity
+
+Computing all N output bins from N input samples naively: each X[k] requires N complex multiplications + N complex additions. Total: **O(N²)** operations.
+
+For N = 1 024 000 (one second at 44 100 Hz, padded): that's ~ 10¹² multiplications. Entirely impractical.
+
+---
+
+## 📚 2. The Fast Fourier Transform (FFT) — Cooley-Tukey Algorithm
+
+### 2.1 Key Insight: Divide and Conquer
+
+Tukey (1965) and Cooley observed that the DFT can be split into two half-size DFTs:
+
+```
+X[k] = Σ_{n even} x[n] · W_N^{nk}  +  W_N^k · Σ_{n odd} x[n] · W_N^{nk}
+     = E[k]  +  W_N^k · O[k]
+     = DFT_N/2(even samples)  +  W_N^k · DFT_N/2(odd samples)
+```
+
+This is applied recursively (for N = power of 2, "radix-2"). Each level halves the problem size; there are log₂N levels.
+
+**Complexity: O(N · log₂N)** — the most important algorithm speedup in numerical computing.
+
+| N | Direct DFT ops | FFT ops | Speedup |
+|---|----------------|---------|---------|
+| 8 | 64 | 24 | 2.7× |
+| 64 | 4 096 | 384 | 10.7× |
+| 1 024 | 1 048 576 | 10 240 | 102× |
+| 65 536 | 4.3 × 10⁹ | 1 048 576 | 4 096× |
+| 1 048 576 | 10¹² | 20 971 520 | ~50 000× |
+
+### 2.2 The Butterfly Computation
+
+Each stage of the FFT consists of **N/2 butterfly** operations. A single butterfly takes two complex numbers (a, b) and produces two outputs:
+
+```
+a' = a + W_N^k · b
+b' = a − W_N^k · b
+```
+
+This is called a "butterfly" because the signal flow diagram looks like a butterfly's wings (see the SVG diagram). The twiddle factor W_N^k = e^{−j2πk/N} is a complex rotation.
+
+### 2.3 Bit-Reversal Permutation
+
+The radix-2 FFT with decimation-in-time (DIT) requires **bit-reversed** input ordering. For N=8:
+
+| n (decimal) | n (binary 3-bit) | Bit-reversed | n' |
+|---|---|---|---|
+| 0 | 000 | 000 | 0 |
+| 1 | 001 | 100 | 4 |
+| 2 | 010 | 010 | 2 |
+| 3 | 011 | 110 | 6 |
+| 4 | 100 | 001 | 1 |
+| 5 | 101 | 101 | 5 |
+| 6 | 110 | 011 | 3 |
+| 7 | 111 | 111 | 7 |
+
+After processing through log₂N = 3 stages of butterflies, the output arrives in natural order.
+
+### 2.4 Radix-2 Requirement and Work-Arounds
+
+The classic Cooley-Tukey FFT requires N = power of 2. In practice:
+- **Zero-pad** to the next power of 2 (most common — e.g., 1200 samples → pad to 2048).
+- **Mixed-radix FFT** (scipy.fft): handles arbitrary N efficiently using a mix of radix-2, -3, -4, -5 stages. `scipy.fft.fft(x)` with any N works well; prefer highly-composite N like 1260, 2520.
+- **Bluestein's algorithm (chirp-z)**: handles any prime N but adds overhead.
+
+---
+
+## 📚 3. Frequency Resolution and the Uncertainty Principle
+
+### 3.1 Frequency Resolution
+
+```
+Δf = fs / N     (Hz per bin)
+```
+
+Examples:
+
+| fs | N | Δf | Use case |
+|----|---|----|---------|
+| 44 100 Hz | 512 | 86.1 Hz | Rough pitch detection |
+| 44 100 Hz | 2 048 | 21.5 Hz | Audio analysis, good resolution |
+| 44 100 Hz | 8 192 | 5.4 Hz | Fine spectral detail |
+| 16 000 Hz | 512 | 31.3 Hz | Speech recognition (Whisper STFT) |
+| 16 000 Hz | 400 | 40.0 Hz | Standard speech analysis frame |
+
+**Rule:** to distinguish two tones 10 Hz apart, you need Δf ≤ 5 Hz, requiring N ≥ fs/5 = 8820 samples (≈ 200 ms at 44 100 Hz).
+
+### 3.2 The Time-Frequency Trade-off
+
+```
+Δf · Δt = 1     (the uncertainty product for rectangular windows)
+```
+
+Better frequency resolution (smaller Δf) requires longer time windows (larger Δt), and vice versa. This is not a hardware limitation — it is a **mathematical theorem** (consequence of the Heisenberg-Gabor uncertainty principle for time-frequency atoms).
+
+**Practical consequence for STFT:**
+- Long windows (e.g. 1024 samples at 44 100 Hz = 23.2 ms): good frequency resolution, poor time resolution — good for frequency analysis of sustained tones.
+- Short windows (e.g. 128 samples = 2.9 ms): good time resolution, poor frequency resolution — good for transient detection (drum hits, consonants).
+- Whisper uses 400-sample windows with 160-sample hop at 16 kHz (25 ms / 10 ms hop).
+
+---
+
+## 📚 4. Spectral Leakage and Windowing
+
+### 4.1 Why Leakage Happens
+
+The DFT assumes the N-sample block **repeats periodically**. If your signal does not have an integer number of cycles in the window, there is a **discontinuity** at the boundary between the last and first sample. This discontinuity creates high-frequency ringing — spectral leakage.
+
+**Effect:** energy from a tone at 440 Hz leaks into neighboring frequency bins (441 Hz, 439 Hz, 442 Hz, etc.), making the spectrum look smeared rather than a clean spike.
+
+### 4.2 Window Functions
+
+A **window function** w[n] is multiplied sample-by-sample with the data x[n] before the FFT. A good window goes to zero (or near zero) at both ends, eliminating the discontinuity.
+
+```
+y[n] = x[n] · w[n]    then FFT(y)
+```
+
+The window broadens the main lobe of each frequency but reduces the sidelobe amplitudes.
+
+| Window | Main-lobe width | Peak sidelobe | Use case |
+|--------|-----------------|---------------|---------|
+| **Rectangular** | Narrowest | −13 dB | When frequencies are well-separated |
+| **Hann** | 2× rectangular | −31 dB | General-purpose audio analysis (**default**) |
+| **Hamming** | 2× rectangular | −43 dB | Speech processing (designed for −43 dB) |
+| **Blackman** | 3× rectangular | −58 dB | High dynamic range, when sidelobes matter most |
+| **Kaiser (β=8)** | Adjustable | −80 dB | Communications, precision measurements |
+| **Flat-top** | Widest | −93 dB | Amplitude accuracy (calibration instruments) |
+
+**Hann window formula:**
+```
+w[n] = 0.5 · (1 − cos(2πn / (N−1)))     n = 0, 1, …, N−1
+```
+
+**Hamming window:**
+```
+w[n] = 0.54 − 0.46 · cos(2πn / (N−1))
+```
+
+The difference: Hamming doesn't go fully to zero at the edges, giving slightly better sidelobe suppression at the cost of end-point discontinuity.
+
+### 4.3 Window Energy Correction
+
+Multiplying by a window reduces the signal's total amplitude. To get correct absolute amplitude measurements, apply the **amplitude correction factor**:
+
+```
+amplitude_correction = N / Σ_n w[n]       (= 1 for rectangular)
+                     ≈ 2.0 for Hann
+                     ≈ 1.85 for Hamming
+```
+
+For power measurements, use the **power correction factor** = N / Σ_n w[n]².
+
+```python
+# Example: Hann-windowed amplitude-correct FFT
+window = np.hanning(N)
+X = np.fft.rfft(x * window)
+# Amplitude correction
+correction = N / np.sum(window)
+magnitude = 2 * np.abs(X) * correction / N   # factor 2 for one-sided
+```
+
+---
+
+## 📚 5. Zero-Padding
+
+**Zero-padding** appends M−N zeros to an N-sample block before computing the M-point DFT.
+
+**What zero-padding DOES:**
+- Increases the number of frequency bins → finer interpolation of the spectrum.
+- Makes the frequency display look smoother (picks up values between true bin frequencies).
+- **Does NOT increase frequency resolution** — you cannot resolve two tones closer than Δf = fs/N no matter how many zeros you add.
+
+**Analogy:** Zero-padding is like zooming into a photograph. You see more pixels between the actual data points, but the image does not become sharper — you're seeing interpolated values.
+
+**When to use it:**
+- To pick the exact peak of a spectral lobe (frequency interpolation).
+- To match FFT size to a power of 2 for efficiency.
+- To compute linear convolution without circular aliasing: use M ≥ N + L − 1 for convolving two sequences of length N and L.
+
+---
+
+## 📚 6. Circular vs. Linear Convolution
+
+The DFT computes **circular** (periodic) convolution, not linear convolution:
+
+```
+IDFT(DFT(x) · DFT(h)) = circular convolution of x and h
+```
+
+For filtering, we want linear convolution. **Solution: zero-pad both sequences to length N ≥ N_x + N_h − 1**, then circular convolution = linear convolution (the wraparound is moved past the valid data).
+
+This is the basis for **overlap-add** and **overlap-save** fast convolution algorithms:
+- Divide the long input into blocks of L samples.
+- Zero-pad each block to length N = L + N_h − 1 (next power of 2).
+- FFT, multiply by H[k], IFFT.
+- Discard the last N_h−1 samples (overlap region) and accumulate.
+
+---
+
+## 📚 7. Python: Correct FFT Usage
+
+```python
+import numpy as np
+from scipy.fft import fft, rfft, rfftfreq
+import matplotlib.pyplot as plt
+
+# ─── Generate test signal ───
+fs = 44100
+N  = 4096              # choose power of 2
+t  = np.arange(N) / fs
+
+# 1 kHz tone at amplitude 1.0, 2 kHz tone at 0.5
+x = np.sin(2*np.pi*1000*t) + 0.5*np.sin(2*np.pi*2000*t)
+
+# ─── Window the signal ───
+window = np.hanning(N)
+x_win = x * window
+
+# ─── Compute one-sided magnitude spectrum ───
+X = rfft(x_win)
+freqs = rfftfreq(N, d=1/fs)
+
+# Amplitude correction for Hann window
+ampl_correction = N / np.sum(window)
+magnitude = 2 * np.abs(X) * ampl_correction / N   # factor 2: one-sided
+
+# ─── Plot ───
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.semilogy(freqs, magnitude)
+plt.xlim(0, 4000)
+plt.xlabel("Hz"); plt.ylabel("Amplitude")
+plt.title("Hann-windowed FFT (log-Y)")
+
+plt.subplot(1, 2, 2)
+plt.plot(freqs, 20*np.log10(magnitude + 1e-10))   # dBFS
+plt.xlim(0, 4000); plt.ylim(-80, 5)
+plt.xlabel("Hz"); plt.ylabel("dBFS")
+plt.title("Magnitude Spectrum in dBFS")
+plt.tight_layout(); plt.show()
+
+# ─── Frequency resolution ───
+print(f"Δf = {fs/N:.2f} Hz/bin")
+print(f"Bins for 1 kHz: {1000/(fs/N):.1f}")
+```
+
+### 7.1 Common Pitfalls
+
+| Mistake | Symptom | Fix |
+|---------|---------|-----|
+| No window | Spectral leakage "skirt" around every tone | Apply `np.hanning(N)` before FFT |
+| Wrong normalization | Amplitude is N× or 2× off | Divide by N; multiply by 2 for one-sided |
+| Using `np.fft.fft` for real input | Wasted computation, both sides | Use `rfft` / `rfftfreq` for real signals |
+| Circular convolution | Edge artefacts in filtered audio | Zero-pad to length N_x + N_h − 1 |
+| Not checking sample rate | Wrong frequency axis | Always label axes with `rfftfreq(N, 1/fs)` |
+| FFT of entire track (no STFT) | Single static spectrum | Use STFT (`scipy.signal.stft`) for time-varying signals |
+
+---
+
+## 📚 8. The Short-Time Fourier Transform (STFT)
+
+The **STFT** applies the FFT repeatedly to overlapping short windows, producing a **time-frequency representation**:
+
+```
+STFT[m, k] = Σ_{n=0}^{N−1}  x[n + m·H] · w[n] · e^{−j2πkn/N}
+```
+
+where m = frame index, H = hop size (samples).
+
+**Spectrogram** = |STFT[m, k]|²
+
+The STFT is the direct input to many audio AI models (before mel filterbank application). Parameters:
+
+| Parameter | Whisper default | General audio |
+|-----------|----------------|---------------|
+| Window size (samples) | 400 | 512–4096 |
+| Hop size (samples) | 160 | 128–1024 |
+| Window function | Hann | Hann |
+| FFT size | 512 | Next power of 2 |
+| fs | 16 000 Hz | 22 050–44 100 Hz |
+
+See [04.7](04.7---Speech-&-Voice-Processing-(ASR-TTS-Foundations)) for STFT → mel spectrogram → Whisper model pipeline.
+
+---
+
+## 📚 9. Common Misconceptions
+
+- **"FFT = DFT, they give the same result."** Correct — FFT is just a fast algorithm for computing the DFT exactly. The output is identical.
+- **"More zero-padding = more resolution."** Zero-padding interpolates existing spectral information; it cannot reveal frequency content that wasn't captured during the original observation window.
+- **"Hann window is always better than rectangular."** Only if spectral leakage matters. For pulse radar, where you need exact pulse shape, rectangular (or flat-top) is preferred.
+- **"The FFT output is in Hz."** No — it's in bins. Convert: f_Hz = k · fs / N. Always use `rfftfreq(N, 1/fs)`.
+- **"scipy.fft is slower than numpy.fft."** scipy.fft is generally faster; it uses pocketfft under the hood and supports multi-threading via workers parameter.
+
+---
+
+## 🔗 10. Cross-links & Further Reading
+
+### Internal
+- [04.2 - Fourier Series & Fourier Transform](04.2---Fourier-Series-&-Fourier-Transform) — the theory this chapter implements
+- [04.4 - Digital Filters - FIR & IIR](04.4---Digital-Filters---FIR-&-IIR) — filters designed in the frequency domain
+- [04.5 - Audio Signal Processing & Psychoacoustics](04.5---Audio-Signal-Processing-&-Psychoacoustics) — FFT → mel filterbank → log-mel
+- [04.7 - Speech & Voice Processing (ASR-TTS Foundations)](04.7---Speech-&-Voice-Processing-(ASR-TTS-Foundations)) — STFT → Whisper
+- [04.8 - Spectral Analysis & Applications in AI](04.8---Spectral-Analysis-&-Applications-in-AI) — spectral features for AI models
+- [Subject_Plan](Subject_Plan) — full resource catalog
+
+### External
+- [dspguide.com — Chapter 12: The Fast Fourier Transform](https://www.dspguide.com/ch12.htm) — Steven W. Smith, completely free
+- [Julius O. Smith — The DFT Matrix (CCRMA)](https://ccrma.stanford.edu/~jos/mdft/DFT_Matrix.html)
+- [scipy.fft documentation](https://docs.scipy.org/doc/scipy/reference/fft.html)
+- [numpy.fft documentation](https://numpy.org/doc/stable/reference/routines.fft.html)
+- [Librosa — short-time Fourier transform](https://librosa.org/doc/latest/generated/librosa.stft.html)
+- [Cooley-Tukey FFT paper (1965) — original](https://www.ams.org/journals/mcom/1965-19-090/S0025-5718-1965-0178586-1/)
+
+---
+
+*Next: [04.4 - Digital Filters - FIR & IIR](04.4---Digital-Filters---FIR-&-IIR) — Using the frequency domain to design filters that shape, remove, or isolate frequency content.*

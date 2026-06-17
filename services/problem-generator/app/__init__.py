@@ -1,0 +1,1 @@
+"""Problem generator sidecar package."""

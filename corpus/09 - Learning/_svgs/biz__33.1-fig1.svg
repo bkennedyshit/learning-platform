@@ -1,0 +1,119 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .funnel-1 { fill: var(--interactive-accent, #58a6ff); opacity: 0.25; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: funnelPulse1 4s infinite ease-in-out; }
+    .funnel-2 { fill: var(--interactive-accent, #58a6ff); opacity: 0.4; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: funnelPulse2 4s infinite ease-in-out 0.5s; }
+    .funnel-3 { fill: #ffd93d; opacity: 0.3; stroke: #ffd93d; stroke-width: 1.5; animation: funnelPulse3 4s infinite ease-in-out 1s; }
+    .funnel-4 { fill: #51cf66; opacity: 0.35; stroke: #51cf66; stroke-width: 1.5; animation: funnelPulse4 4s infinite ease-in-out 1.5s; }
+    .funnel-5 { fill: #ff6b6b; opacity: 0.4; stroke: #ff6b6b; stroke-width: 1.5; animation: funnelPulse5 4s infinite ease-in-out 2s; }
+    .signal-good { fill: #51cf66; opacity: 0.2; stroke: #51cf66; stroke-width: 1; animation: goodSignalPulse 3s infinite ease-in-out; }
+    .signal-bad { fill: #ff6b6b; opacity: 0.2; stroke: #ff6b6b; stroke-width: 1; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .accent { fill: var(--interactive-accent, #58a6ff); }
+
+    @keyframes funnelPulse1 {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 0.45; stroke-width: 2.2; }
+    }
+    @keyframes funnelPulse2 {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.65; stroke-width: 2.2; }
+    }
+    @keyframes funnelPulse3 {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.55; stroke-width: 2.2; }
+    }
+    @keyframes funnelPulse4 {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.65; stroke-width: 2.5; }
+    }
+    @keyframes funnelPulse5 {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.7; stroke-width: 2.5; }
+    }
+    @keyframes goodSignalPulse {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.45; }
+    }
+    @keyframes flowArrows {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz1-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Idea Validation Funnel — From Assumption to Evidence-Backed PMF</text>
+
+  <!-- LEFT: Validation Funnel -->
+  <!-- Funnel Level 1 — Brainstorm -->
+  <polygon points="80,42 440,42 400,90 120,90" class="funnel-1"/>
+  <text x="260" y="70" class="bold" text-anchor="middle">BRAINSTORM — Many Ideas</text>
+  <text x="260" y="84" class="sublabel" text-anchor="middle">Living in the future · Personal pain · Market observation</text>
+
+  <!-- Funnel Level 2 — Hypothesis -->
+  <polygon points="120,94 400,94 370,142 150,142" class="funnel-2"/>
+  <text x="260" y="120" class="bold" text-anchor="middle">PROBLEM HYPOTHESIS</text>
+  <text x="260" y="134" class="sublabel" text-anchor="middle">[Persona] + [Job] + [Friction] + [Severity] + [WTP estimate]</text>
+
+  <!-- Funnel Level 3 — Discovery Interviews -->
+  <polygon points="150,146 370,146 345,194 175,194" class="funnel-3"/>
+  <text x="260" y="172" class="bold" text-anchor="middle">CUSTOMER DISCOVERY (10 Interviews)</text>
+  <text x="260" y="186" class="sublabel" text-anchor="middle">The Mom Test · Past behavior · Urgency signals</text>
+
+  <!-- Funnel Level 4 — Validated Problem -->
+  <polygon points="175,198 345,198 325,246 195,246" class="funnel-4"/>
+  <text x="260" y="224" class="bold" text-anchor="middle">VALIDATED PROBLEM (≥7/10 Level 4–5)</text>
+  <text x="260" y="238" class="sublabel" text-anchor="middle">Painful enough · Already tried to solve it · WTP confirmed</text>
+
+  <!-- Funnel Level 5 — MVP + PMF signal -->
+  <polygon points="195,250 325,250 310,295 210,295" class="funnel-5"/>
+  <text x="260" y="274" class="bold" text-anchor="middle">MINIMUM VIABLE TEST</text>
+  <text x="260" y="288" class="sublabel" text-anchor="middle">Landing page · Pre-sell · Concierge MVP</text>
+
+  <!-- PMF arrow and outcome -->
+  <line x1="260" y1="298" x2="260" y2="330" class="arrow" marker-end="url(#biz1-arr)"/>
+  <rect x="190" y="332" width="140" height="38" rx="6" class="funnel-4"/>
+  <text x="260" y="350" class="bold" text-anchor="middle">PMF SIGNAL</text>
+  <text x="260" y="364" class="sublabel" text-anchor="middle">40% "very disappointed" · Pull from market</text>
+
+  <!-- RIGHT panel: Signal quality guide -->
+  <rect x="465" y="38" width="238" height="340" class="box" rx="6"/>
+  <text x="584" y="60" class="bold" text-anchor="middle">Signal Quality Guide</text>
+
+  <!-- Bad signals -->
+  <rect x="478" y="68" width="212" height="80" class="signal-bad" rx="4"/>
+  <text x="584" y="85" class="label" text-anchor="middle" fill="#ff6b6b">❌ Weak Signals (Ignore)</text>
+  <text x="484" y="102" class="sublabel">"That sounds interesting!"</text>
+  <text x="484" y="116" class="sublabel">"I would definitely use that."</text>
+  <text x="484" y="130" class="sublabel">"Great idea, keep building."</text>
+  <text x="484" y="144" class="sublabel">Survey: "Would you pay $X?" → "Yes"</text>
+
+  <!-- Good signals -->
+  <rect x="478" y="158" width="212" height="130" class="signal-good" rx="4"/>
+  <text x="584" y="175" class="label" text-anchor="middle" fill="#51cf66">✅ Strong Signals (Act On)</text>
+  <text x="484" y="192" class="sublabel">Already paid for adjacent solution</text>
+  <text x="484" y="206" class="sublabel">Built a script/spreadsheet workaround</text>
+  <text x="484" y="220" class="sublabel">Brought it up before you asked</text>
+  <text x="484" y="234" class="sublabel">Used emotional language: "hate," "kills me"</text>
+  <text x="484" y="248" class="sublabel">Referred you to others with same pain</text>
+  <text x="484" y="262" class="sublabel">Asked how to buy / sign up NOW</text>
+  <text x="484" y="276" class="sublabel">Gave credit card at end of conversation</text>
+
+  <!-- JTBD reminder -->
+  <rect x="478" y="298" width="212" height="68" rx="4" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="584" y="315" class="label" text-anchor="middle">JTBD Reminder</text>
+  <text x="484" y="330" class="sublabel">Customers hire products to do a job.</text>
+  <text x="484" y="344" class="sublabel">Ask: what job are they firing their</text>
+  <text x="484" y="358" class="sublabel">current solution from?</text>
+
+  <!-- Bottom note -->
+  <text x="360" y="400" class="sublabel" text-anchor="middle">Principle: build the funnel left-to-right — never skip levels. A "great idea" that skips discovery builds for a problem that doesn't exist at sufficient urgency.</text>
+</svg>

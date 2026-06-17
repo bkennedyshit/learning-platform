@@ -1,0 +1,94 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-stl" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .container-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; cursor: pointer; }
+    .container-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .algo-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .iter-box { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; stroke-dasharray: 5,3; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .connect { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-stl); }
+    .range-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-stl); }
+  </style>
+
+  <text x="350" y="22" class="title">STL Architecture — Containers × Iterators × Algorithms</text>
+
+  <!-- Containers column -->
+  <text x="100" y="50" class="section-label">Containers</text>
+  <rect x="30" y="60" width="140" height="30" class="container-box"/>
+  <text x="100" y="79" class="label">vector (contiguous)</text>
+  <rect x="30" y="95" width="140" height="30" class="container-box"/>
+  <text x="100" y="114" class="label">deque (chunked)</text>
+  <rect x="30" y="130" width="140" height="30" class="container-box"/>
+  <text x="100" y="149" class="label">list (linked)</text>
+  <rect x="30" y="165" width="140" height="30" class="container-box"/>
+  <text x="100" y="184" class="label">unordered_map</text>
+  <rect x="30" y="200" width="140" height="30" class="container-box"/>
+  <text x="100" y="219" class="label">set (tree)</text>
+
+  <!-- Iterators column -->
+  <text x="310" y="50" class="section-label">Iterators (the glue)</text>
+  <rect x="230" y="60" width="160" height="30" class="iter-box"/>
+  <text x="310" y="79" class="label">Contiguous (vector)</text>
+  <rect x="230" y="95" width="160" height="30" class="iter-box"/>
+  <text x="310" y="114" class="label">Random Access (deque)</text>
+  <rect x="230" y="130" width="160" height="30" class="iter-box"/>
+  <text x="310" y="149" class="label">Bidirectional (list)</text>
+  <rect x="230" y="165" width="160" height="30" class="iter-box"/>
+  <text x="310" y="184" class="label">Forward (unord_map)</text>
+
+  <!-- Algorithms column -->
+  <text x="550" y="50" class="section-label">Algorithms</text>
+  <rect x="440" y="60" width="140" height="30" class="algo-box"/>
+  <text x="510" y="79" class="label">sort (random_acc)</text>
+  <rect x="440" y="95" width="140" height="30" class="algo-box"/>
+  <text x="510" y="114" class="label">find (forward)</text>
+  <rect x="440" y="130" width="140" height="30" class="algo-box"/>
+  <text x="510" y="149" class="label">transform (input)</text>
+  <rect x="440" y="165" width="140" height="30" class="algo-box"/>
+  <text x="510" y="184" class="label">accumulate (input)</text>
+  <rect x="440" y="200" width="140" height="30" class="algo-box"/>
+  <text x="510" y="219" class="label">partition (bidir)</text>
+
+  <!-- Connection arrows -->
+  <line x1="170" y1="75" x2="230" y2="75" class="connect"/>
+  <line x1="170" y1="110" x2="230" y2="110" class="connect"/>
+  <line x1="170" y1="145" x2="230" y2="145" class="connect"/>
+  <line x1="170" y1="180" x2="230" y2="180" class="connect"/>
+  <line x1="390" y1="75" x2="440" y2="75" class="connect"/>
+  <line x1="390" y1="110" x2="440" y2="110" class="connect"/>
+  <line x1="390" y1="145" x2="440" y2="145" class="connect"/>
+
+  <!-- Ranges pipeline -->
+  <text x="350" y="260" class="section-label">C++20 Ranges Pipeline (lazy evaluation)</text>
+  <rect x="30" y="275" width="90" height="35" class="container-box"/>
+  <text x="75" y="296" class="label">data</text>
+  <line x1="120" y1="292" x2="145" y2="292" class="range-arrow"/>
+
+  <rect x="145" y="275" width="100" height="35" class="algo-box"/>
+  <text x="195" y="290" class="label">filter</text>
+  <text x="195" y="303" class="detail">x % 2 == 0</text>
+  <line x1="245" y1="292" x2="270" y2="292" class="range-arrow"/>
+
+  <rect x="270" y="275" width="100" height="35" class="algo-box"/>
+  <text x="320" y="290" class="label">transform</text>
+  <text x="320" y="303" class="detail">x * x</text>
+  <line x1="370" y1="292" x2="395" y2="292" class="range-arrow"/>
+
+  <rect x="395" y="275" width="80" height="35" class="algo-box"/>
+  <text x="435" y="290" class="label">take(3)</text>
+  <text x="435" y="303" class="detail">limit</text>
+  <line x1="475" y1="292" x2="500" y2="292" class="range-arrow"/>
+
+  <rect x="500" y="275" width="90" height="35" class="container-box"/>
+  <text x="545" y="296" class="label">result</text>
+
+  <text x="350" y="335" class="detail">| operator chains views — no intermediate allocations — lazy evaluation</text>
+  <text x="350" y="355" class="detail">Python equivalent: (x**2 for x in data if x % 2 == 0)[:3]</text>
+</svg>

@@ -1,0 +1,84 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="hb-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .hb-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; fill: none; }
+    .hb-vec { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#hb-arrow); }
+    .hb-proj { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 5 5; animation: dashProj 1s linear infinite; }
+    @keyframes dashProj { to { stroke-dashoffset: -10; } }
+    .hb-basis { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#hb-arrow); }
+    .hb-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .hb-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .hb-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 8; }
+    .hb-dot { fill: var(--interactive-accent, #58a6ff); animation: pulseDot 2s infinite alternate; }
+    @keyframes pulseDot { to { r: 6; fill-opacity: 0.8; } }
+    .hb-ket { font-family: 'Latin Modern Math', serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); }
+    .hb-bra { font-family: 'Latin Modern Math', serif; font-size: 16px; fill: var(--text-accent, #79c0ff); }
+    .hb-op-circle { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; cursor: pointer; transition: all 0.3s; }
+    .hb-op-circle:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.15; stroke-width: 3; }
+    .hb-anim-vec {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2.5;
+      fill: none;
+      marker-end: url(#hb-arrow);
+    }
+  </style>
+
+  <!-- Left panel: Abstract Hilbert space -->
+  <text x="120" y="25" class="hb-accent" text-anchor="middle">Hilbert Space ℋ</text>
+  
+  <!-- Basis vectors -->
+  <line x1="120" y1="200" x2="120" y2="60" class="hb-basis"/>
+  <text x="128" y="55" class="hb-label">|1⟩</text>
+  <line x1="120" y1="200" x2="240" y2="200" class="hb-basis"/>
+  <text x="248" y="197" class="hb-label">|2⟩</text>
+  <line x1="120" y1="200" x2="180" y2="260" class="hb-basis"/>
+  <text x="185" y="275" class="hb-label">|3⟩</text>
+
+  <!-- State vector |ψ⟩ (animated rotation) -->
+  <line x1="120" y1="200" x2="200" y2="120" class="hb-anim-vec"/>
+  <circle cx="200" cy="120" r="4" class="hb-dot"/>
+  <text x="208" y="115" class="hb-ket">|ψ⟩</text>
+
+  <!-- Projection dashed line -->
+  <line x1="200" y1="120" x2="200" y2="200" class="hb-proj"/>
+  <line x1="200" y1="200" x2="120" y2="200" class="hb-proj"/>
+
+  <!-- Middle panel: Operator action -->
+  <rect x="280" y="40" width="150" height="300" class="hb-box"/>
+  <text x="355" y="70" class="hb-accent" text-anchor="middle">Operators</text>
+  
+  <circle cx="355" cy="110" r="25" class="hb-op-circle"/>
+  <text x="355" y="115" class="hb-label" text-anchor="middle">Ĥ</text>
+  <text x="355" y="135" class="hb-label" text-anchor="middle" font-size="11" fill="var(--text-muted, #8b949e)">Hermitian</text>
+
+  <circle cx="355" cy="190" r="25" class="hb-op-circle"/>
+  <text x="355" y="195" class="hb-label" text-anchor="middle">Û</text>
+  <text x="355" y="215" class="hb-label" text-anchor="middle" font-size="11" fill="var(--text-muted, #8b949e)">Unitary</text>
+
+  <circle cx="355" cy="270" r="25" class="hb-op-circle"/>
+  <text x="355" y="275" class="hb-label" text-anchor="middle">P̂</text>
+  <text x="355" y="295" class="hb-label" text-anchor="middle" font-size="11" fill="var(--text-muted, #8b949e)">Projector</text>
+
+  <!-- Right panel: Dual space -->
+  <text x="560" y="25" class="hb-bra" text-anchor="middle">Dual Space ℋ*</text>
+  
+  <rect x="470" y="60" width="180" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5"/>
+  <text x="560" y="90" class="hb-bra" text-anchor="middle">⟨ψ| = (|ψ⟩)†</text>
+
+  <rect x="470" y="130" width="180" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="560" y="160" class="hb-label" text-anchor="middle">⟨ψ|φ⟩ = scalar (ℂ)</text>
+
+  <rect x="470" y="200" width="180" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="560" y="230" class="hb-label" text-anchor="middle">|ψ⟩⟨φ| = operator</text>
+
+  <rect x="470" y="270" width="180" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="560" y="300" class="hb-label" text-anchor="middle">Σ|n⟩⟨n| = 𝟙</text>
+
+  <!-- Bottom formula -->
+  <rect x="100" y="330" width="500" height="40" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="350" y="356" class="hb-ket" text-anchor="middle">|ψ⟩ = Σₙ cₙ|n⟩,  cₙ = ⟨n|ψ⟩,  Σₙ|cₙ|² = 1</text>
+</svg>

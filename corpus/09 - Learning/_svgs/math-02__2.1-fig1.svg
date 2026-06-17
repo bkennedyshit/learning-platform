@@ -1,0 +1,76 @@
+<svg viewBox="0 0 620 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+    <marker id="arrm" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .axis  { stroke: var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .vec   { stroke: var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; marker-end:url(#arr); }
+    .vec2  { stroke: var(--text-accent, #79c0ff); stroke-width:2.5; fill:none; marker-end:url(#arr2); }
+    .vecm  { stroke: var(--text-muted, #8b949e); stroke-width:1.5; stroke-dasharray:5 3; fill:none; marker-end:url(#arrm); }
+    .span  { fill: var(--interactive-accent, #58a6ff); opacity:0; }
+    .lbl   { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); }
+    .lbl-a { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .lbl-b { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-accent, #79c0ff); font-weight:bold; }
+  </style>
+
+  <!-- Grid -->
+  <line x1="60" y1="40" x2="60" y2="400" class="axis"/>
+  <line x1="20" y1="360" x2="600" y2="360" class="axis"/>
+  <!-- Span shading (plane through origin for two independent vectors) -->
+  <polygon points="310,360 490,200 580,280 400,440" class="span">
+    <animate attributeName="opacity" from="0" to="0.07" begin="2.4s" dur="1s" fill="freeze" />
+  </polygon>
+  <!-- Vector u = (3,2) scaled to SVG -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.2s" dur="0.01s" fill="freeze" />
+    <line x1="310" y1="360" x2="490" y2="200" class="vec">
+      <animate attributeName="x2" values="310;490" begin="0.2s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="360;200" begin="0.2s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <!-- Vector v = (1,-1) scaled to SVG -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.4s" dur="0.01s" fill="freeze" />
+    <line x1="310" y1="360" x2="400" y2="440" class="vec2">
+      <animate attributeName="x2" values="310;400" begin="0.4s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="360;440" begin="0.4s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <!-- Parallelogram completion: u+v -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="1.2s" dur="0.01s" fill="freeze" />
+    <line x1="490" y1="200" x2="580" y2="280" class="vecm">
+      <animate attributeName="x2" values="490;580" begin="1.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="200;280" begin="1.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+    <line x1="400" y1="440" x2="580" y2="280" class="vecm">
+      <animate attributeName="x2" values="400;580" begin="1.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="440;280" begin="1.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="1.8s" dur="0.01s" fill="freeze" />
+    <line x1="310" y1="360" x2="580" y2="280" class="vec">
+      <animate attributeName="x2" values="310;580" begin="1.8s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="360;280" begin="1.8s" dur="0.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <!-- Labels -->
+  <text x="496" y="196" class="lbl-a" opacity="0">u<animate attributeName="opacity" to="1" begin="0.8s" dur="0.3s" fill="freeze"/></text>
+  <text x="406" y="456" class="lbl-b" opacity="0">v<animate attributeName="opacity" to="1" begin="1.0s" dur="0.3s" fill="freeze"/></text>
+  <text x="586" y="276" class="lbl" opacity="0">u+v<animate attributeName="opacity" to="1" begin="2.4s" dur="0.3s" fill="freeze"/></text>
+  <text x="300" y="378" class="lbl">O</text>
+  <text x="320" y="50" class="lbl" font-weight="bold">Span{u,v} = shaded plane</text>
+  <text x="320" y="68" class="lbl" fill="var(--text-muted, #8b949e)">Parallelogram law: u+v traces the diagonal</text>
+</svg>

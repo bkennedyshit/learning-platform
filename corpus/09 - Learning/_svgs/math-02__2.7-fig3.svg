@@ -1,0 +1,60 @@
+<svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <style>
+    .qrb  { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:6; }
+    .qrt  { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); }
+    .qrm  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+             fill:var(--text-normal, #c9d1d9); }
+    .qra  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+             fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .qrq  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+             fill:var(--text-accent, #79c0ff); font-weight:bold; }
+    .qreq { font-family:'Latin Modern Math',serif; font-size:15px; fill:var(--text-normal, #c9d1d9); }
+    .qrlt { stroke:var(--text-muted, #8b949e); stroke-width:1; fill:none; stroke-dasharray:4 3; }
+  </style>
+  <!-- A box -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="0.5s" dur="0.5s" fill="freeze" />
+    <rect x="20" y="60" width="80" height="140" rx="6" class="qrb"/>
+    <text x="60" y="135" class="qra" text-anchor="middle">A</text>
+    <text x="60" y="215" class="qrt" text-anchor="middle">m × n</text>
+    <text x="60" y="230" class="qrt" text-anchor="middle">lin. indep. cols</text>
+  </g>
+  <!-- = sign -->
+  <text x="112" y="138" class="qreq" opacity="0">=
+    <animate attributeName="opacity" to="1" begin="1.2s" dur="0.5s" fill="freeze" />
+  </text>
+  <!-- Q box -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="1.9s" dur="0.5s" fill="freeze" />
+    <rect x="130" y="60" width="80" height="140" rx="6" class="qrb"/>
+    <text x="170" y="125" class="qrq" text-anchor="middle">Q</text>
+    <text x="170" y="148" class="qrt" text-anchor="middle" font-size="11px">orthonormal</text>
+    <text x="170" y="163" class="qrt" text-anchor="middle" font-size="11px">columns</text>
+    <text x="170" y="215" class="qrt" text-anchor="middle">m × n</text>
+    <text x="170" y="230" class="qrt" text-anchor="middle">QᵀQ = Iₙ</text>
+  </g>
+  <!-- · sign -->
+  <text x="222" y="138" class="qreq" opacity="0">·
+    <animate attributeName="opacity" to="1" begin="2.6s" dur="0.5s" fill="freeze" />
+  </text>
+  <!-- R box (upper triangular) -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.5s" fill="freeze" />
+    <rect x="234" y="90" width="120" height="90" rx="6" class="qrb"/>
+    <text x="265" y="125" class="qrm" text-anchor="middle" font-weight="bold">R</text>
+    <text x="340" y="108" class="qrt" font-size="10px">✱ ✱ ✱</text>
+    <text x="340" y="124" class="qrt" font-size="10px">0 ✱ ✱</text>
+    <text x="340" y="140" class="qrt" font-size="10px">0 0 ✱</text>
+    <text x="294" y="215" class="qrt" text-anchor="middle">n × n</text>
+    <text x="294" y="230" class="qrt" text-anchor="middle">upper triangular, diag &gt; 0</text>
+  </g>
+  <!-- annotations -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="4.0s" dur="0.5s" fill="freeze" />
+    <text x="420" y="90" class="qrt">R entries:</text>
+    <text x="420" y="108" class="qrt">rᵢⱼ = ⟨aⱼ, qᵢ⟩</text>
+    <text x="420" y="126" class="qrt">(Gram-Schmidt</text>
+    <text x="420" y="144" class="qrt">projections)</text>
+    <line x1="415" y1="95" x2="360" y2="120" class="qrlt"/>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;height:auto;">
+  <defs>
+    <marker id="arrow-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent, #58a6ff)" />
+    </marker>
+    <marker id="arrow-wperp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-accent, #79c0ff)" />
+    </marker>
+  </defs>
+  <style>
+    .oc-a{stroke:var(--interactive-accent, #58a6ff);stroke-width:2;fill:none;}
+    .oc-b{stroke:var(--text-accent, #79c0ff);stroke-width:2;fill:none;}
+    .oc-l{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+    .oc-ax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none;}
+    .oc-rt{fill:none;stroke:var(--text-muted, #8b949e);stroke-width:1.2;}
+  </style>
+  <line x1="180" y1="20" x2="180" y2="180" class="oc-ax"/>
+  <line x1="20" y1="100" x2="340" y2="100" class="oc-ax"/>
+  <!-- W: a line through origin -->
+  <line x1="80" y1="40" x2="280" y2="160" class="oc-a"/>
+  <text x="285" y="157" class="oc-l" fill="var(--interactive-accent, #58a6ff)">W</text>
+  <!-- W⊥: perpendicular line -->
+  <line x1="80" y1="160" x2="280" y2="40" class="oc-b"/>
+  <text x="285" y="40" class="oc-l" fill="var(--text-accent, #79c0ff)">W⊥</text>
+  <!-- Right angle mark at origin -->
+  <rect x="185" y="94" width="10" height="10" class="oc-rt"/>
+  <text x="160" y="115" class="oc-l">O</text>
+  <text x="30" y="190" class="oc-l">dim W + dim W⊥ = n</text>
+  <!-- Animated basis vectors -->
+  <line x1="180" y1="100" x2="260" y2="148" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5" marker-end="url(#arrow-w)">
+    <animate attributeName="x2" values="180;260;180" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="100;148;100" dur="3s" repeatCount="indefinite"/>
+  </line>
+  <line x1="180" y1="100" x2="100" y2="148" stroke="var(--text-accent, #79c0ff)" stroke-width="2.5" marker-end="url(#arrow-wperp)">
+    <animate attributeName="x2" values="180;100;180" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="100;148;100" dur="3s" repeatCount="indefinite"/>
+  </line>
+</svg>

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style="background-color: #1e1e2e; font-family: sans-serif;">
+  <style>
+    .title { fill: #cdd6f4; font-size: 24px; font-weight: bold; text-anchor: middle; }
+    .label { fill: #a6adc8; font-size: 14px; }
+    .timeline { stroke: #45475a; stroke-width: 4; }
+    .txn-box { fill: #313244; stroke: #89b4fa; stroke-width: 2; rx: 8; }
+    .txn-text { fill: #cdd6f4; font-size: 14px; font-family: monospace; }
+    .event-point { fill: #f38ba8; }
+    .msg { fill: #a6e3a1; font-size: 14px; font-weight: bold; }
+  </style>
+
+  <text x="400" y="40" class="title">MVCC: Multi-Version Concurrency Control</text>
+
+  <!-- Time Axis -->
+  <line x1="100" y1="100" x2="100" y2="500" class="timeline" />
+  <line x1="90" y1="100" x2="110" y2="100" class="timeline" />
+  <line x1="90" y1="500" x2="110" y2="500" class="timeline" />
+  <text x="50" y="105" class="label">Time</text>
+
+  <!-- Transaction 1 (Writer) -->
+  <rect x="150" y="150" width="250" height="200" class="txn-box" />
+  <text x="160" y="175" class="txn-text" fill="#89b4fa" font-weight="bold">Transaction 1 (TxID: 100)</text>
+  <text x="160" y="210" class="txn-text">BEGIN;</text>
+  <text x="160" y="240" class="txn-text">UPDATE accounts</text>
+  <text x="160" y="260" class="txn-text">SET bal = 500 WHERE id = 1;</text>
+  <text x="160" y="320" class="txn-text">COMMIT;</text>
+
+  <!-- Transaction 2 (Reader) -->
+  <rect x="450" y="200" width="280" height="200" class="txn-box" />
+  <text x="460" y="225" class="txn-text" fill="#f9e2af" font-weight="bold">Transaction 2 (TxID: 101)</text>
+  <text x="460" y="260" class="txn-text">BEGIN ISOLATION LEVEL</text>
+  <text x="460" y="280" class="txn-text">  REPEATABLE READ;</text>
+  
+  <text x="460" y="340" class="txn-text">SELECT bal FROM accounts</text>
+  <text x="460" y="360" class="txn-text">WHERE id = 1;</text>
+
+  <!-- Database State -->
+  <rect x="150" y="400" width="580" height="100" fill="#181825" stroke="#f38ba8" stroke-width="2" rx="8" />
+  <text x="160" y="425" class="txn-text" fill="#f38ba8" font-weight="bold">Row Versions (Accounts id=1)</text>
+  
+  <g transform="translate(160, 450)">
+    <text x="0" y="0" class="txn-text">V1: bal=1000, xmin=90, xmax=</text>
+    <text x="210" y="0" class="txn-text" fill="#f38ba8">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0; 0.4; 0.9; 1" dur="8s" repeatCount="indefinite" />
+      100
+    </text>
+    
+    <text x="300" y="0" class="txn-text">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0; 0.4; 0.9; 1" dur="8s" repeatCount="indefinite" />
+      V2: bal=500, xmin=100, xmax=0
+    </text>
+  </g>
+
+  <!-- Animations / Messages -->
+  <g>
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0; 0.4; 0.5; 0.9; 1" dur="8s" repeatCount="indefinite" />
+    <line x1="300" y1="320" x2="100" y2="320" stroke="#f9e2af" stroke-width="2" stroke-dasharray="4" />
+    <text x="400" y="380" class="msg" fill="#f9e2af">T2 sees V1 (bal=1000)</text>
+    <text x="400" y="400" class="label" fill="#a6adc8">Because T1 committed AFTER T2's snapshot</text>
+  </g>
+
+</svg>

@@ -1,0 +1,75 @@
+<svg viewBox="0 0 650 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .pyramid-layer { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; transition: all 0.3s; cursor: pointer; }
+    .pyramid-layer:hover { filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); stroke-width: 2.5; }
+    .unit { fill: var(--interactive-accent, #58a6ff); opacity: 0.3; }
+    .integration { fill: #e5c07b; opacity: 0.3; }
+    .e2e { fill: #e06c75; opacity: 0.3; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .detail { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .axis-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .arrow-line { stroke: var(--text-muted, #8b949e); stroke-width: 1; marker-end: url(#arr-test); }
+    .tool-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 4; transition: all 0.2s; cursor: pointer; }
+    .tool-box:hover { stroke: var(--interactive-accent, #58a6ff); }
+    .tool-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+  </style>
+  <defs>
+    <marker id="arr-test" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="220" y="25" class="title">Testing Pyramid &amp; Feedback Loop</text>
+
+  <!-- Pyramid -->
+  <polygon points="220,50 60,300 380,300" class="pyramid-layer unit"/>
+  <polygon points="220,50 110,200 330,200" class="pyramid-layer integration"/>
+  <polygon points="220,50 160,120 280,120" class="pyramid-layer e2e"/>
+
+  <!-- Labels -->
+  <text x="220" y="100" class="label">E2E</text>
+  <text x="220" y="115" class="detail">Slow, brittle, expensive</text>
+  <text x="220" y="170" class="label">Integration</text>
+  <text x="220" y="185" class="detail">DB, API, filesystem</text>
+  <text x="220" y="260" class="label">Unit Tests</text>
+  <text x="220" y="275" class="detail">Fast, isolated, many</text>
+
+  <!-- Axes -->
+  <line x1="30" y1="50" x2="30" y2="300" class="arrow-line"/>
+  <text x="25" y="170" class="axis-label" transform="rotate(-90, 25, 170)">Speed →</text>
+  <line x1="60" y1="320" x2="380" y2="320" class="arrow-line"/>
+  <text x="220" y="340" class="axis-label">Quantity →</text>
+
+  <!-- Right side: Tool chain -->
+  <rect x="420" y="40" width="100" height="30" class="tool-box"/>
+  <text x="470" y="60" class="tool-label">pytest</text>
+
+  <rect x="540" y="40" width="80" height="30" class="tool-box"/>
+  <text x="580" y="60" class="tool-label">coverage</text>
+
+  <rect x="420" y="85" width="100" height="30" class="tool-box"/>
+  <text x="470" y="105" class="tool-label">hypothesis</text>
+
+  <rect x="540" y="85" width="80" height="30" class="tool-box"/>
+  <text x="580" y="105" class="tool-label">mock</text>
+
+  <rect x="420" y="130" width="100" height="30" class="tool-box"/>
+  <text x="470" y="150" class="tool-label">debugpy</text>
+
+  <rect x="540" y="130" width="80" height="30" class="tool-box"/>
+  <text x="580" y="150" class="tool-label">pdb</text>
+
+  <rect x="420" y="175" width="100" height="30" class="tool-box"/>
+  <text x="470" y="195" class="tool-label">logging</text>
+
+  <rect x="540" y="175" width="80" height="30" class="tool-box"/>
+  <text x="580" y="195" class="tool-label">structlog</text>
+
+  <!-- Feedback loop -->
+  <rect x="420" y="240" width="200" height="80" rx="6" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="520" y="260" class="label" fill="var(--interactive-accent, #58a6ff)">Feedback Loop</text>
+  <text x="520" y="280" class="detail">Write test → Run → Fail →</text>
+  <text x="520" y="295" class="detail">Implement → Pass → Refactor</text>
+  <text x="520" y="310" class="detail">(Red-Green-Refactor)</text>
+</svg>

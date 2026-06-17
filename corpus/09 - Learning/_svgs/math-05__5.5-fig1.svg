@@ -1,0 +1,52 @@
+<svg viewBox="0 0 540 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:540px;height:auto;">
+  <style>
+    .ps-axis { stroke:var(--text-normal, #c9d1d9); stroke-width:1.5; fill:none; }
+    .ps-cell { fill:none; stroke:var(--text-muted, #8b949e); stroke-width:0.5; }
+    .ps-pt { fill:var(--interactive-accent, #58a6ff); opacity:0.7; }
+    @keyframes wander { 0%{transform:translate(0,0)} 25%{transform:translate(2px,-1px)} 50%{transform:translate(-1px,2px)} 75%{transform:translate(1px,1px)} 100%{transform:translate(0,0)} }
+    .ps-move { animation: wander 3s ease-in-out infinite; }
+    @keyframes pulse-shell {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .ps-shell { fill:none; stroke:var(--interactive-accent, #58a6ff); stroke-width:2; stroke-dasharray:6 3; animation: pulse-shell 3s ease-in-out infinite; transform-origin: 175px 205px; }
+  </style>
+  <defs>
+    <marker id="psa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <!-- Phase space axes -->
+  <line x1="50" y1="330" x2="300" y2="330" class="ps-axis" marker-end="url(#psa)"/>
+  <line x1="50" y1="330" x2="50" y2="50" class="ps-axis" marker-end="url(#psa)"/>
+  <text x="310" y="335" class="ps-lbl">q (position)</text>
+  <text x="45" y="40" class="ps-lbl" text-anchor="end">p (momentum)</text>
+  <!-- Grid cells (h^f sized) -->
+  <rect x="50" y="80" width="250" height="250" class="ps-cell"/>
+  <line x1="100" y1="80" x2="100" y2="330" class="ps-cell"/>
+  <line x1="150" y1="80" x2="150" y2="330" class="ps-cell"/>
+  <line x1="200" y1="80" x2="200" y2="330" class="ps-cell"/>
+  <line x1="250" y1="80" x2="250" y2="330" class="ps-cell"/>
+  <line x1="50" y1="130" x2="300" y2="130" class="ps-cell"/>
+  <line x1="50" y1="180" x2="300" y2="180" class="ps-cell"/>
+  <line x1="50" y1="230" x2="300" y2="230" class="ps-cell"/>
+  <line x1="50" y1="280" x2="300" y2="280" class="ps-cell"/>
+  <!-- Energy shell -->
+  <ellipse cx="175" cy="205" rx="110" ry="100" class="ps-shell"/>
+  <text x="175" y="360" class="ps-acc" text-anchor="middle">Energy shell: E ≤ H(q,p) ≤ E+δE</text>
+  <!-- Microstates (phase points) -->
+  <circle cx="120" cy="150" r="4" class="ps-pt ps-move"/>
+  <circle cx="180" cy="200" r="4" class="ps-pt ps-move" style="animation-delay:0.5s"/>
+  <circle cx="220" cy="170" r="4" class="ps-pt ps-move" style="animation-delay:1s"/>
+  <circle cx="150" cy="250" r="4" class="ps-pt ps-move" style="animation-delay:1.5s"/>
+  <circle cx="250" cy="220" r="4" class="ps-pt ps-move" style="animation-delay:2s"/>
+  <circle cx="100" cy="200" r="4" class="ps-pt ps-move" style="animation-delay:0.3s"/>
+  <circle cx="200" cy="280" r="4" class="ps-pt ps-move" style="animation-delay:0.8s"/>
+  <!-- Info box -->
+  <rect x="330" y="60" width="190" height="140" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="425" y="85" class="ps-acc" text-anchor="middle">Fundamental Postulate</text>
+  <text x="425" y="110" class="ps-lbl" text-anchor="middle">All accessible microstates</text>
+  <text x="425" y="128" class="ps-lbl" text-anchor="middle">are equally probable</text>
+  <text x="425" y="155" class="ps-acc" text-anchor="middle">S = k_B ln Ω</text>
+  <text x="425" y="180" class="ps-lbl" text-anchor="middle">Ω = # microstates in shell</text>
+</svg>

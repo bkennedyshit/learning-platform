@@ -1,0 +1,64 @@
+<svg viewBox="0 0 580 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="euler-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <linearGradient id="pressure-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color: var(--interactive-accent, #58a6ff); stop-opacity: 0.4"/>
+      <stop offset="100%" style="stop-color: var(--interactive-accent, #58a6ff); stop-opacity: 0.05"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .nozzle-wall { stroke: var(--text-normal, #c9d1d9); stroke-width: 3; fill: none; }
+    .streamline-euler { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; stroke-dasharray: 300; stroke-dashoffset: 300; animation: eulerFlow 3.5s linear infinite; }
+    @keyframes eulerFlow { to { stroke-dashoffset: 0; } }
+    .pressure-fill { fill: url(#pressure-grad); }
+    .vel-arrow { stroke: var(--text-accent, #79c0ff); stroke-width: 2.2; fill: none; marker-end: url(#euler-arrow); color: var(--text-accent, #79c0ff); transition: all 0.2s; cursor: pointer; }
+    .vel-arrow:hover { stroke-width: 3.5; filter: drop-shadow(0 0 3px var(--text-accent, #79c0ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+  </style>
+
+  <!-- Pressure shading (higher on left, lower on right) -->
+  <rect x="40" y="80" width="500" height="200" class="pressure-fill" rx="5"/>
+
+  <!-- Nozzle walls (converging) -->
+  <path d="M 40 80 Q 200 80 290 130 Q 380 160 540 160" class="nozzle-wall"/>
+  <path d="M 40 280 Q 200 280 290 230 Q 380 200 540 200" class="nozzle-wall"/>
+
+  <!-- Streamlines (converging toward throat) -->
+  <path d="M 40 120 Q 200 120 290 155 Q 380 170 540 170" class="streamline-euler"/>
+  <path d="M 40 180 Q 200 180 290 180 Q 380 180 540 180" class="streamline-euler" style="animation-delay: 0.4s;"/>
+  <path d="M 40 240 Q 200 240 290 205 Q 380 190 540 190" class="streamline-euler" style="animation-delay: 0.8s;"/>
+
+  <!-- Velocity arrows (short on left, long on right) -->
+  <line x1="80" y1="180" x2="115" y2="180" class="vel-arrow">
+    <animate attributeName="x1" values="80; 85; 80" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="115; 120; 115" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="200" y1="180" x2="245" y2="180" class="vel-arrow">
+    <animate attributeName="x1" values="200; 208; 200" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="245; 253; 245" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="350" y1="180" x2="420" y2="180" class="vel-arrow">
+    <animate attributeName="x1" values="350; 365; 350" dur="1s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="420; 435; 420" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="460" y1="180" x2="535" y2="180" class="vel-arrow">
+    <animate attributeName="x1" values="460; 480; 460" dur="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="535; 555; 535" dur="0.8s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Pressure labels -->
+  <text x="100" y="310" class="label-bold">High P</text>
+  <text x="440" y="310" class="label-bold" style="opacity: 0.6;">Low P</text>
+
+  <!-- Velocity labels -->
+  <text x="80" y="70" class="label">v₁ (slow)</text>
+  <text x="440" y="150" class="label" style="fill: var(--text-accent, #79c0ff);">v₂ (fast)</text>
+
+  <!-- Bernoulli equation -->
+  <text x="290" y="340" class="title-label" text-anchor="middle">P + ½ρv² = const along streamline</text>
+</svg>

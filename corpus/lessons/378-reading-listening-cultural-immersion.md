@@ -1,0 +1,259 @@
+---
+title: "37.8 — Reading, Listening & Cultural Immersion"
+subject: "Japanese"
+catalog: advanced
+audience_tier: higher-education
+chapter: "37.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [Learning Index](00---09---Learning-Index)*
+
+# 37.8 — Reading, Listening & Cultural Immersion
+
+> *"You don't learn a language. You get used to it. The getting-used-to happens through massive, repeated exposure to comprehensible input."*
+
+Grammar chapters give you the scaffolding. Immersion builds the house. Japanese has a reputation as one of the hardest languages for English speakers — but that reputation is mostly earned by people who grind grammar textbooks without ever watching anime, reading manga, or listening to real speech. This chapter gives you the strategy, the media stack, and the cultural context to make every hour of immersion productive.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Build and maintain a daily immersion routine structured around your current level.
+2. Use NHK Easy News as your primary reading resource at N5–N4 level.
+3. Use anime and drama with Japanese subtitles as a listening resource from N4+.
+4. Apply the Anki sentence-mining workflow to extract vocabulary from native media.
+5. Navigate the key cultural contexts: social hierarchy, gift-giving, group dynamics, anime/manga culture, and digital communication.
+6. Understand what N3 looks like in practice and how to get there from N4.
+
+---
+
+## 📚 1. The Immersion Stack — By Level
+
+### N5 Level (after chapters 18.1–37.4)
+
+| Medium | Resource | Why |
+|--------|---------|-----|
+| **Listening** | [Comprehensible Japanese — Absolute Beginner](https://www.youtube.com/@cijapanese) | Krashen-style input; 100% in Japanese at near-zero level |
+| **Listening** | [JapanesePod101 — Absolute Beginner](https://www.japanesepod101.com/) | Structured with English explanation |
+| **Reading** | [NHK World Easy Japanese — audio phrases](https://www3.nhk.or.jp/nhkworld/en/learnjapanese/) | Japanese in real context |
+| **Reading** | Hiragana-only graded readers (Olly Richards series) | Simplified but natural grammar |
+| **Vocabulary** | Anki Core 2000 + JLPT N5 deck | Frequency-based SR |
+| **Kanji** | Wanikani (free tier) or Anki N5 kanji deck | Daily SRS for kanji |
+
+### N4 Level (after chapters 18.5–37.6)
+
+| Medium | Resource | Why |
+|--------|---------|-----|
+| **Listening** | [Comprehensible Japanese — Beginner](https://www.youtube.com/@cijapanese) | Graduated difficulty; all Japanese |
+| **Reading** | [NHK Web Easy](https://www3.nhk.or.jp/news/easy/) | Real news simplified for learners and children; furigana on kanji |
+| **Anime** | *Shirokuma Cafe*, *Doraemon*, *Yotsuba&!* (manga) | Simple, clear speech; daily life vocabulary |
+| **Vocabulary** | Anki Core 2000 + JLPT N4 deck | Expand vocabulary base |
+| **Grammar** | [Bunpro N4 grammar points](https://bunpro.jp/) | SRS for N4 grammar patterns |
+
+### N3 Level (after chapters 18.7–37.8)
+
+| Medium | Resource | Why |
+|--------|---------|-----|
+| **Anime** | *My Hero Academia, Spirited Away, Terrace House* (with JP subtitles) | Native speed, natural speech |
+| **Reading** | NHK Web Easy → NHK regular news | Graduated difficulty |
+| **Manga** | *Yotsubato!* → manga with furigana → manga without furigana | Graded reading practice |
+| **Listening** | [Comprehensible Japanese — Intermediate](https://www.youtube.com/@cijapanese) | Near-native speed |
+| **Grammar** | Bunpro N3 grammar points | Systematic N3 grammar |
+| **Vocabulary** | Anki Core 6000 + sentence mining | Frequency + media-derived |
+
+---
+
+## 📚 2. NHK Web Easy — Your Primary Reading Resource
+
+[NHK Web Easy](https://www3.nhk.or.jp/news/easy/) publishes simplified versions of real news stories:
+- **Furigana** on all kanji — you can read any article even before knowing the kanji
+- **Vocabulary popups** — hover for definitions
+- **Audio** — the article is read aloud by a professional speaker
+- **Real news** — you're reading actual current events, not made-up learner content
+- **Updated daily** — always fresh material
+
+**Daily NHK Easy routine (N4+):**
+1. Read the headline. Predict the content.
+2. Listen to the audio once without reading.
+3. Read the article. Look up only words that block comprehension.
+4. Listen again while reading.
+5. Write a 2-sentence summary in Japanese from memory.
+
+> After 3 months of daily NHK Easy reading at N4 level, passive vocabulary grows by ~500–1000 words. Reading speed doubles.
+
+---
+
+## 📚 3. Anime as a Learning Tool
+
+Anime is one of the best free Japanese learning resources — but only if used actively.
+
+### Subtitle Strategy by Level
+
+| Level | Subtitle approach |
+|-------|-----------------|
+| N5 | English subtitles; focus on picking out known words/patterns |
+| N4 | **Japanese subtitles** — the breakthrough move. You read and listen simultaneously. |
+| N3+ | Japanese subtitles → work toward no subtitles |
+
+> **The Japanese subtitles moment is transformative.** At N4, you recognize enough grammar that Japanese subtitles become a self-correcting tool — you hear something, read it, and the patterns reinforce each other. English subtitles bypass Japanese entirely and produce no acquisition.
+
+### Tools for Anime Study
+
+**[Language Reactor](https://www.languagereactor.com/)** (Chrome extension, Netflix/YouTube):
+- Dual subtitles (Japanese + English)
+- Click any word for instant definition
+- Export unknown words to Anki
+
+**[Animelon](https://animelon.com/)** — anime with Japanese subtitles and built-in dictionary lookup.
+
+**[Mokuro](https://github.com/kha-white/mokuro)** — converts manga to HTML with hover-lookup (for offline manga).
+
+### Recommended Anime by Level
+
+| Level | Title | Why |
+|-------|-------|-----|
+| N5 | *Shirokuma Cafe* | Simple vocabulary, clear speech, daily life |
+| N5 | *Peppa Pig Japanese dub* | Extremely simple; native children's level |
+| N4 | *Yotsuba&!* (manga) | N4 vocabulary; everyday Japanese; no fantasy vocabulary |
+| N4 | *Doraemon* | Clear speech; N4-N3 vocabulary |
+| N3 | *My Hero Academia* | Engaging; varied vocabulary; lots of exclamations |
+| N3 | *Spirited Away* | Studio Ghibli; clear speech; cultural depth |
+| N3 | *Terrace House* | Real people talking naturally — no scripted anime speech |
+
+---
+
+## 📚 4. Sentence Mining — Building Your Own Anki Deck
+
+Sentence mining = extracting sentences from native media into Anki. It's the highest-return vocabulary method at intermediate level because:
+- The sentences come from content you're actually consuming (high retention)
+- You hear/read the word in context (not isolated)
+- You choose what matters to *you*
+
+**Workflow:**
+1. Watch/read native media with [Yomichan/Yomitan](https://github.com/themoeway/yomitan) or Language Reactor.
+2. When you encounter an unknown word in a sentence you otherwise understand 95%+: **mine it**.
+3. Create an Anki card: sentence on front, word + definition + audio on back.
+4. Review daily.
+
+**The i+1 principle (Krashen):** The sentence should be understandable except for one unknown word. *i* = what you know; *i+1* = one step beyond. Mining sentences with 5+ unknowns doesn't produce acquisition — it produces frustration.
+
+---
+
+## 📚 5. Cultural Literacy — Japan
+
+Japanese language and culture are inseparable. These are the cultural contexts you will encounter in media and in real life:
+
+### 5.1 Social Hierarchy and In-Group/Out-Group (uchi/soto)
+
+| Concept | Japanese | Meaning |
+|---------|---------|---------|
+| In-group | uchi (内) | Your own group: family, company, school |
+| Out-group | soto (外) | People outside your group |
+
+Keigo mirrors this: you use kenjougo for your in-group's actions when speaking to out-group members (even about your *boss*). This is why a Japanese receptionist says "田中は本日おりません" (using humble おる for their own boss) when speaking to a customer.
+
+### 5.2 Gift-Giving Culture (お土産 — omiyage)
+
+When you travel anywhere in Japan (or return from abroad), you bring *omiyage* — local food gifts — for your colleagues, family, and group. Not a gesture: a social obligation. Arriving without omiyage after a trip is a social signal.
+
+The gift is usually presented with *つまらないものですが…* ("It's nothing special, but…") — kenjougo for your own gift.
+
+### 5.3 Wa (和) — Group Harmony
+
+Japanese social organization prioritizes group harmony over individual expression. This manifests in:
+- Indirect refusals (*ちょっと…* = "a little…" = actually "no")
+- Public agreement, private dissent
+- Consensus-driven decision making (nemawashi — 根回し)
+- Avoiding direct confrontation
+
+> Understanding this prevents massive misreads. When a Japanese colleague says *難しいですね* (That's difficult, isn't it) in response to your proposal, they are politely declining.
+
+### 5.4 Anime, Manga, and Otaku Culture
+
+If you're learning Japanese partly through anime:
+- **isekai** (異世界) — "different world" — the dominant manga/anime genre (protagonist transported to another world)
+- **shōnen** (少年) — aimed at young males; action-focused (*Naruto, My Hero Academia*)
+- **shōjo** (少女) — aimed at young females; relationship-focused
+- **seinen** (青年) — aimed at adult males; mature themes
+- **josei** (女性) — aimed at adult women
+- **seiyuu** (声優) — voice actors; celebrities in Japan
+
+Anime Japanese ≠ real Japanese. Anime has:
+- Overly dramatic expressions (バカ! — "Idiot!")
+- Extremely formal/archaic speech in samurai shows
+- Exaggerated gendered speech patterns (*わ, の* at sentence end for female characters)
+
+Use anime as a supplement to real speech input (Terrace House, YouTube vlogs, NHK), not a replacement.
+
+### 5.5 Digital Communication
+
+| Platform | Japanese usage |
+|---------|---------------|
+| **Line** | The dominant messaging app in Japan (replaces WhatsApp/iMessage) |
+| **Twitter/X** | Extremely active Japanese community; great reading practice |
+| **Niconico** | Japanese video platform; heavy anime/game culture |
+| **2chan/5chan** | Japanese imageboard; source of internet slang and memes |
+
+**Common digital Japanese:**
+*www* = lol (笑 wara — "laugh" — abbreviated www)
+*草* (kusa = grass) = very funny (www looks like grass → 草)
+*なるほど* = I see / That makes sense
+*よろしくお願いします* = Please treat me well / Best regards (ubiquitous closing)
+
+---
+
+## 📚 6. The Path from N4 to N3 — What It Actually Looks Like
+
+N3 is the boundary between "studied Japanese" and "can engage with native content." Reaching it requires:
+
+| Milestone | What it means | How to get there |
+|---------|--------------|-----------------|
+| Read NHK Web Easy with ≤10% lookups | N3 vocabulary coverage | 6+ months of daily NHK reading |
+| Watch easy anime with JP subtitles at 70%+ comprehension | Listening + reading integration | Daily immersion with Language Reactor |
+| ~650 kanji recognized | N3 kanji set | Daily Wanikani or Anki kanji SRS |
+| ~3750 vocabulary words | N3 vocab set | Anki Core 6000 + sentence mining |
+| All N3 grammar patterns | ~50 new patterns beyond N4 | Bunpro N3 track |
+
+> **The plateau warning:** Many learners reach N4 and stall. The cause is almost always insufficient input hours. Grammar study cannot substitute for input. At N4, you should be spending 80% of your Japanese time on comprehensible input and 20% on grammar review.
+
+---
+
+## 🧮 7. Weekly Immersion Schedule (N4 Level)
+
+| Day | Activity | Time |
+|-----|---------|------|
+| Mon–Sun | Anki vocabulary + kanji review | 20–25 min |
+| Mon–Sun | Comprehensible Japanese video | 20 min |
+| Mon–Fri | NHK Web Easy article + summary | 10 min |
+| Tue/Thu | Language Reactor anime (JP subs) | 40 min |
+| Sat | Sentence mining from 1 episode | 30 min |
+| Sun | Bunpro grammar review | 20 min |
+| **Total** | | **~4 hrs/week** |
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Links
+- Previous: [37.7 - Politeness Levels & Honorifics (Keigo)](37.7---Politeness-Levels-&-Honorifics-(Keigo))
+- Back to track overview: [Subject_Plan](Subject_Plan)
+- Kanji strategy: [37.3 - Kanji — System Overview & First 100 (JLPT N5)](37.3---Kanji-—-System-Overview-&-First-100-(JLPT-N5)) and [README](README)
+
+### External Resources
+- [Comprehensible Japanese (YouTube)](https://www.youtube.com/@cijapanese) — the primary immersion resource
+- [NHK Web Easy](https://www3.nhk.or.jp/news/easy/) — daily graded reading
+- [Language Reactor](https://www.languagereactor.com/) — Netflix/YouTube dual subtitles
+- [Bunpro](https://bunpro.jp/) — grammar SRS
+- [Yomitan (browser extension)](https://github.com/themoeway/yomitan) — hover dictionary for web reading
+- [Animelon](https://animelon.com/) — anime with Japanese subtitles
+- [Wanikani](https://www.wanikani.com/) — kanji SRS
+- [Tofugu: Japanese Culture](https://www.tofugu.com/japan/) — cultural context articles
+- *Genki I & II* (Japan Times) — standard university textbook for N5–N4
+- *Tobira* (Kurosio Publishers) — standard N3–N2 textbook

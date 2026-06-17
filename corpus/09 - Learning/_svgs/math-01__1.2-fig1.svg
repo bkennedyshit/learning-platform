@@ -1,0 +1,106 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="d-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <style>
+    .axis      { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .grid      { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.35; }
+    .curve     { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.8; fill: none; }
+    .secant    { stroke: var(--text-muted, #8b949e); stroke-width: 1.4; fill: none; opacity: 0.85; }
+    .secant-1  { stroke-dasharray: 5 3; }
+    .secant-2  { stroke-dasharray: 4 3; opacity: 0.7; }
+    .secant-3  { stroke-dasharray: 3 3; opacity: 0.55; }
+    .tangent   { stroke: var(--text-accent, #79c0ff); stroke-width: 2.6; fill: none; }
+    .pt        { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; }
+    .pt-mov    { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .pt:hover  { fill: var(--interactive-accent, #58a6ff); r: 6; }
+    .label     { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math      { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 15px; fill: var(--text-normal, #c9d1d9); }
+    .math-acc  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    
+    .curve { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3 { 
+        stroke-dasharray: 1500; stroke-dashoffset: 1500; 
+        animation: fadeInDraw 1.5s ease-out 1s forwards; 
+    }
+    .secant, .secant-1, .secant-2, .secant-3 { 
+        animation: fadeIn 1s ease-out 1s both; 
+    }
+    .secant-3 { animation-delay: 1s; }
+    .secant-2 { animation-delay: 2s; }
+    .secant-1 { animation-delay: 3s; }
+    .tangent { animation-delay: 2s; }
+    
+    .errfill, .fill, .area { 
+        animation: fadeIn 1s ease-out 1.5s both; 
+    }
+    .pt, .pt-mov, .root { 
+        animation: fadeIn 0.5s ease-out 1s both; 
+    }
+    .t1 { animation: fadeIn 1s 1s both; }
+    .t2 { animation: fadeIn 1s 2.5s both; }
+    .t3 { animation: fadeIn 1s 4s both; }
+    .t5 { animation: fadeIn 1s 5.5s both; }
+    .true { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+  </style>
+
+  <!-- Grid -->
+  <g class="grid">
+    <line x1="60"  y1="40"  x2="60"  y2="370"/>
+    <line x1="160" y1="40"  x2="160" y2="370"/>
+    <line x1="260" y1="40"  x2="260" y2="370"/>
+    <line x1="360" y1="40"  x2="360" y2="370"/>
+    <line x1="460" y1="40"  x2="460" y2="370"/>
+    <line x1="560" y1="40"  x2="560" y2="370"/>
+    <line x1="60"  y1="80"  x2="560" y2="80"/>
+    <line x1="60"  y1="160" x2="560" y2="160"/>
+    <line x1="60"  y1="240" x2="560" y2="240"/>
+    <line x1="60"  y1="320" x2="560" y2="320"/>
+  </g>
+
+  <!-- Axes -->
+  <line x1="40"  y1="370" x2="580" y2="370" class="axis" marker-end="url(#d-arrow)"/>
+  <line x1="60"  y1="395" x2="60"  y2="30"  class="axis" marker-end="url(#d-arrow)"/>
+  <text x="585" y="374" class="label">x</text>
+  <text x="48"  y="28"  class="label">y</text>
+
+  <!-- The curve y = f(x) (a smooth quadratic-ish bend) -->
+  <path class="curve" d="M 70 340 Q 200 320 260 240 T 540 60"/>
+
+  <!-- Anchor point P = (a, f(a)) -->
+  <circle cx="180" cy="305" r="5" class="pt"/>
+  <text x="170" y="328" class="math">P=(a,f(a))</text>
+
+  <!-- Three secants converging to the tangent -->
+  <!-- Far secant: connects to a "far" point -->
+  <line x1="120" y1="355" x2="540" y2="60" class="secant secant-3" stroke="var(--text-muted, #8b949e)"/>
+  <circle cx="540" cy="60" r="4" class="pt-mov"/>
+  <text x="498" y="50"  class="label" fill="var(--text-muted, #8b949e)">large h</text>
+
+  <!-- Mid secant -->
+  <line x1="150" y1="330" x2="420" y2="120" class="secant secant-2" stroke="var(--text-muted, #8b949e)"/>
+  <circle cx="420" cy="120" r="4" class="pt-mov"/>
+  <text x="380" y="115" class="label" fill="var(--text-muted, #8b949e)">smaller h</text>
+
+  <!-- Near secant -->
+  <line x1="170" y1="313" x2="320" y2="200" class="secant secant-1" stroke="var(--text-muted, #8b949e)"/>
+  <circle cx="320" cy="200" r="4" class="pt-mov"/>
+  <text x="318" y="195" class="label" fill="var(--text-muted, #8b949e)">tiny h</text>
+
+  <!-- Tangent line at P -->
+  <line x1="60" y1="365" x2="380" y2="160" class="tangent"/>
+  <text x="320" y="155" class="math-acc">y = f(a) + f′(a)(x − a)</text>
+
+  <!-- Title block -->
+  <rect x="370" y="280" width="200" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="470" y="304" class="label" text-anchor="middle" font-weight="bold">As h → 0,</text>
+  <text x="470" y="324" class="label" text-anchor="middle">slope = [f(a+h) − f(a)] / h</text>
+  <text x="470" y="344" class="label" text-anchor="middle">→ f′(a)</text>
+</svg>

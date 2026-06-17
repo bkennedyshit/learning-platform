@@ -1,0 +1,71 @@
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <defs>
+    <marker id="lsarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .lsax { stroke:var(--text-normal, #c9d1d9); stroke-width:1.2; fill:none; }
+    .lspl { fill:var(--interactive-accent, #58a6ff); opacity:0.10; }
+    .lsv  { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none;
+             marker-end:url(#lsarr); }
+    .lsp  { stroke:var(--text-accent, #79c0ff); stroke-width:2.5; fill:none;
+             marker-end:url(#lsarr); }
+    .lse  { stroke:var(--text-muted, #8b949e); stroke-width:1.8; stroke-dasharray:5 3; fill:none;
+             marker-end:url(#lsarr); }
+    .lsrt { stroke:var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .lslb { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .lsla { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+             fill:var(--interactive-accent, #58a6ff); }
+    .lslp { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+             fill:var(--text-accent, #79c0ff); }
+    .lslm { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--text-muted, #8b949e); }
+  </style>
+  <!-- column space C(A) as a tilted plane -->
+  <polygon points="40,280 250,310 480,200 270,170" class="lspl"/>
+  <text x="460" y="185" class="lslb">C(A)</text>
+  <!-- origin -->
+  <circle cx="150" cy="260" r="4" fill="var(--text-normal, #c9d1d9)"/>
+  <text x="135" y="278" class="lslb">O</text>
+  <!-- b (outside the plane) -->
+  <line x1="150" y1="260" x2="150" y2="260" class="lsv" opacity="0">
+    <animate attributeName="opacity" to="1" begin="0.5s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="260" begin="0.5s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="80" begin="0.5s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="268" y="76" class="lsla" opacity="0">b
+    <animate attributeName="opacity" to="1" begin="1.1s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- Ax-hat = projection (in plane) -->
+  <line x1="150" y1="260" x2="150" y2="260" class="lsp" opacity="0">
+    <animate attributeName="opacity" to="1" begin="1.6s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="340" begin="1.6s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="200" begin="1.6s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="348" y="197" class="lslp" opacity="0">Ax̂ = p
+    <animate attributeName="opacity" to="1" begin="2.2s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- error e = b - p -->
+  <line x1="260" y1="80" x2="260" y2="80" class="lse" opacity="0">
+    <animate attributeName="opacity" to="1" begin="2.7s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x1" to="340" begin="2.7s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y1" to="200" begin="2.7s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="268" y="142" class="lslm" opacity="0">e = b − Ax̂
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- right angle at foot -->
+  <polyline points="330,206 322,193 335,186" class="lsrt" opacity="0">
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </polyline>
+  <!-- normal equations label -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="4.0s" dur="0.5s" fill="freeze" />
+    <rect x="30" y="30" width="230" height="50" rx="5" fill="var(--background-secondary, #161b22)"
+          stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+    <text x="145" y="52" class="lslb" text-anchor="middle" font-weight="bold">Normal Equations</text>
+    <text x="145" y="70" class="lslb" text-anchor="middle">AᵀAx̂ = Aᵀb   ⟺   e ⊥ C(A)</text>
+  </g>
+</svg>

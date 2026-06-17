@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="100%" height="100%">
+  <rect width="700" height="450" fill="#181825" rx="15" />
+  <text x="350" y="40" font-family="sans-serif" font-size="24" font-weight="bold" fill="#cdd6f4" text-anchor="middle">Markov Decision Process (MDP)</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cba6f7" />
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#11111b" />
+    </filter>
+  </defs>
+
+  <!-- Environment Box -->
+  <rect x="250" y="230" width="200" height="150" fill="#313244" rx="10" filter="url(#shadow)" stroke="#45475a" stroke-width="2"/>
+  <text x="350" y="310" font-family="sans-serif" font-size="20" font-weight="bold" fill="#bac2de" text-anchor="middle">Environment</text>
+
+  <!-- Agent Box -->
+  <rect x="250" y="90" width="200" height="80" fill="#89b4fa" rx="10" filter="url(#shadow)" />
+  <text x="350" y="135" font-family="sans-serif" font-size="20" font-weight="bold" fill="#11111b" text-anchor="middle">Agent</text>
+
+  <!-- Arrows -->
+  <!-- Action -->
+  <path id="actionPath" d="M 450 130 C 550 130 550 300 450 300" fill="none" stroke="#cba6f7" stroke-width="4" marker-end="url(#arrow)" />
+  <text x="560" y="220" font-family="sans-serif" font-size="16" font-weight="bold" fill="#cba6f7">Action (a_t)</text>
+  
+  <circle r="6" fill="#f9e2af">
+    <animateMotion dur="2.5s" repeatCount="indefinite" path="M 450 130 C 550 130 550 300 450 300" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="2.5s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- State & Reward -->
+  <path id="statePath" d="M 250 280 C 120 280 120 120 250 120" fill="none" stroke="#a6e3a1" stroke-width="4" marker-end="url(#arrow)" />
+  <text x="140" y="190" font-family="sans-serif" font-size="16" font-weight="bold" fill="#a6e3a1" text-anchor="end">State (s_t)</text>
+  
+  <path id="rewardPath" d="M 250 330 C 80 330 80 145 250 145" fill="none" stroke="#f9e2af" stroke-width="4" marker-end="url(#arrow)" stroke-dasharray="6,4"/>
+  <text x="100" y="260" font-family="sans-serif" font-size="16" font-weight="bold" fill="#f9e2af" text-anchor="end">Reward (r_t)</text>
+  
+  <circle r="6" fill="#89dceb">
+    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.25s" path="M 250 280 C 120 280 120 120 250 120" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="2.5s" repeatCount="indefinite" begin="1.25s" />
+  </circle>
+  
+  <circle r="6" fill="#f9e2af">
+    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.25s" path="M 250 330 C 80 330 80 145 250 145" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="2.5s" repeatCount="indefinite" begin="1.25s" />
+  </circle>
+
+</svg>

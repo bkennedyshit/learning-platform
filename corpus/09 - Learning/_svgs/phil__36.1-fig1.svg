@@ -1,0 +1,100 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .hard{fill:var(--background-secondary,#161b22);stroke:var(--interactive-accent,#58a6ff);stroke-width:2;}
+    .easy{fill:var(--background-secondary,#161b22);stroke:#51cf66;stroke-width:1.2;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.1 — The Hard Problem of Consciousness: Easy vs Hard, Chalmers &amp; Explanatory Gap</text>
+  <!-- Two-column problem types -->
+  <rect x="20" y="35" width="330" height="210" class="box" rx="4"/>
+  <text x="185" y="52" class="label" text-anchor="middle" font-weight="bold">Easy Problems vs. The Hard Problem</text>
+  <!-- Easy problems -->
+  <rect x="30" y="60" width="150" height="175" class="easy" rx="4"/>
+  <text x="105" y="77" class="sub" text-anchor="middle" font-weight="bold" fill="#51cf66">EASY PROBLEMS</text>
+  <text x="105" y="90" class="sub" text-anchor="middle">(Hard but scientifically tractable)</text>
+  <text x="40" y="108" class="sub">• How does the brain integrate</text>
+  <text x="40" y="120" class="sub">  information from senses?</text>
+  <text x="40" y="134" class="sub">• How does attention focus?</text>
+  <text x="40" y="146" class="sub">• How do we report mental states?</text>
+  <text x="40" y="160" class="sub">• How does waking differ from sleep?</text>
+  <text x="40" y="174" class="sub">• How are memories stored?</text>
+  <text x="40" y="188" class="sub">• How do we control behaviour?</text>
+  <text x="105" y="205" class="sub" text-anchor="middle">→ Functional explanation suffices</text>
+  <text x="105" y="218" class="sub" text-anchor="middle">→ Mechanism → function → done</text>
+  <!-- Hard problem -->
+  <rect x="190" y="60" width="150" height="175" class="hard" rx="4"/>
+  <text x="265" y="77" class="sub" text-anchor="middle" font-weight="bold" fill="var(--interactive-accent,#58a6ff)">THE HARD PROBLEM</text>
+  <text x="265" y="90" class="sub" text-anchor="middle">(Chalmers 1995)</text>
+  <text x="200" y="108" class="sub">Why is there subjective</text>
+  <text x="200" y="120" class="sub">experience at ALL?</text>
+  <text x="200" y="136" class="sub">Why does neural firing</text>
+  <text x="200" y="148" class="sub">feel like anything?</text>
+  <text x="200" y="164" class="sub">Why red looks red</text>
+  <text x="200" y="176" class="sub">to you (not to a camera)?</text>
+  <text x="200" y="192" class="sub">Why does pain HURT</text>
+  <text x="200" y="204" class="sub">vs just trigger avoidance?</text>
+  <text x="265" y="222" class="sub" text-anchor="middle">→ Functional explanation</text>
+  <text x="265" y="232" class="sub" text-anchor="middle">→ seems INSUFFICIENT</text>
+  <!-- Explanatory gap diagram -->
+  <rect x="365" y="35" width="335" height="210" class="box" rx="4"/>
+  <text x="532" y="52" class="label" text-anchor="middle" font-weight="bold">The Explanatory Gap &amp; Zombie Argument</text>
+  <!-- Gap bridge diagram -->
+  <rect x="375" y="65" width="120" height="50" fill="#1a2a3a" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="3"/>
+  <text x="435" y="88" class="sub" text-anchor="middle">Neural correlates</text>
+  <text x="435" y="100" class="sub" text-anchor="middle">of consciousness (NCCs)</text>
+  <rect x="375" y="130" width="120" height="50" fill="#1a3a2a" stroke="#51cf66" stroke-width="1.2" rx="3"/>
+  <text x="435" y="153" class="sub" text-anchor="middle">Subjective</text>
+  <text x="435" y="165" class="sub" text-anchor="middle">experience (qualia)</text>
+  <!-- The gap arrow with ? -->
+  <line x1="435" y1="115" x2="435" y2="130" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <text x="445" y="125" class="sub" fill="#ff6b6b">? GAP ?</text>
+  <!-- Zombie argument -->
+  <text x="510" y="72" class="sub" font-weight="bold">Philosophical Zombie</text>
+  <text x="510" y="84" class="sub">(Chalmers thought exp):</text>
+  <text x="510" y="98" class="sub">A being physically identical</text>
+  <text x="510" y="110" class="sub">to a human, but with NO</text>
+  <text x="510" y="122" class="sub">inner experience — dark inside.</text>
+  <text x="510" y="138" class="sub">If conceivable → consciousness</text>
+  <text x="510" y="150" class="sub">is NOT logically necessitated</text>
+  <text x="510" y="162" class="sub">by physical structure alone.</text>
+  <text x="510" y="178" class="sub">Dennett: zombies are NOT</text>
+  <text x="510" y="190" class="sub">conceivable — just confused</text>
+  <text x="510" y="202" class="sub">introspection. Debate ongoing.</text>
+  <text x="532" y="225" class="sub" text-anchor="middle">Nagel's "What Is It Like to Be a Bat?" (1974): even knowing all bat neuroscience</text>
+  <text x="532" y="237" class="sub" text-anchor="middle">doesn't explain what echolocation FEELS like from inside.</text>
+  <!-- Bottom: responses and positions -->
+  <rect x="20" y="262" width="680" height="140" class="box" rx="4"/>
+  <text x="360" y="279" class="label" text-anchor="middle" font-weight="bold">Major Responses to the Hard Problem</text>
+  <rect x="30" y="290" width="120" height="60" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3"/>
+  <text x="90" y="307" class="sub" text-anchor="middle" font-weight="bold">Property Dualism</text>
+  <text x="90" y="320" class="sub" text-anchor="middle">One substance, two</text>
+  <text x="90" y="333" class="sub" text-anchor="middle">properties: physical</text>
+  <text x="90" y="346" class="sub" text-anchor="middle">and phenomenal</text>
+  <rect x="165" y="290" width="120" height="60" fill="none" stroke="#51cf66" stroke-width="1" rx="3"/>
+  <text x="225" y="307" class="sub" text-anchor="middle" font-weight="bold">Illusionism</text>
+  <text x="225" y="320" class="sub" text-anchor="middle">Hard problem is</text>
+  <text x="225" y="333" class="sub" text-anchor="middle">an illusion. We are</text>
+  <text x="225" y="346" class="sub" text-anchor="middle">confused about our own</text>
+  <rect x="300" y="290" width="120" height="60" fill="none" stroke="#ffd93d" stroke-width="1" rx="3"/>
+  <text x="360" y="307" class="sub" text-anchor="middle" font-weight="bold">Panpsychism</text>
+  <text x="360" y="320" class="sub" text-anchor="middle">Consciousness is</text>
+  <text x="360" y="333" class="sub" text-anchor="middle">fundamental, like mass.</text>
+  <text x="360" y="346" class="sub" text-anchor="middle">Electrons have micro-exp</text>
+  <rect x="435" y="290" width="120" height="60" fill="none" stroke="#ff6b6b" stroke-width="1" rx="3"/>
+  <text x="495" y="307" class="sub" text-anchor="middle" font-weight="bold">Mysterianism</text>
+  <text x="495" y="320" class="sub" text-anchor="middle">Real but cognitively</text>
+  <text x="495" y="333" class="sub" text-anchor="middle">closed to humans.</text>
+  <text x="495" y="346" class="sub" text-anchor="middle">(McGinn 1989)</text>
+  <rect x="570" y="290" width="120" height="60" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1" rx="3"/>
+  <text x="630" y="307" class="sub" text-anchor="middle" font-weight="bold">Physicalism</text>
+  <text x="630" y="320" class="sub" text-anchor="middle">No explanatory gap —</text>
+  <text x="630" y="333" class="sub" text-anchor="middle">just lack of complete</text>
+  <text x="630" y="346" class="sub" text-anchor="middle">physical theory (yet)</text>
+  <text x="360" y="370" class="sub" text-anchor="middle">Key texts: Chalmers "Facing Up" (1995) free PDF at consc.net · Nagel "What Is It Like to Be a Bat?" · Dennett "Quining Qualia"</text>
+  <text x="360" y="385" class="sub" text-anchor="middle">AI relevance: if consciousness requires substrate beyond function, no amount of computation guarantees AI sentience. If illusionism is right, sufficiently complex AI may already have it.</text>
+  <text x="360" y="400" class="sub" text-anchor="middle">SEP entry: plato.stanford.edu/entries/consciousness/ — the authoritative free reference for every position.</text>
+</svg>

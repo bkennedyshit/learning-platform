@@ -1,0 +1,84 @@
+<svg viewBox="0 0 700 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="coe-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .coe-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.15; }
+    .coe-ref-plane { fill: var(--text-muted, #8b949e); opacity: 0.08; stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .coe-orbit { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .coe-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .coe-angle { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+    .coe-node { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; }
+    .coe-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .coe-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .coe-focus { fill: var(--interactive-accent, #58a6ff); }
+    .coe-sat { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
+    .coe-sat:hover { r: 8; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .coe-orbit { stroke-dasharray: 900; stroke-dashoffset: 900; animation: drawCOE 6s linear infinite; }
+    @keyframes drawCOE { 0% { stroke-dashoffset: 900; } 100% { stroke-dashoffset: 0; } }
+  </style>
+
+  <!-- Reference (equatorial) plane -->
+  <polygon points="50,320 350,420 650,320 350,220" class="coe-ref-plane"/>
+  <text x="360" y="440" class="coe-label" text-anchor="middle">Reference Plane (Equatorial)</text>
+
+  <!-- Coordinate axes -->
+  <line x1="350" y1="320" x2="600" y2="320" class="coe-axis" marker-end="url(#coe-arrow)"/>
+  <text x="610" y="325" class="coe-label">X̂ (♈ Vernal Equinox)</text>
+  <line x1="350" y1="320" x2="200" y2="400" class="coe-axis" marker-end="url(#coe-arrow)"/>
+  <text x="170" y="410" class="coe-label">Ŷ</text>
+  <line x1="350" y1="320" x2="350" y2="80" class="coe-axis" marker-end="url(#coe-arrow)"/>
+  <text x="355" y="70" class="coe-label">Ẑ (North Pole)</text>
+
+  <!-- Central body -->
+  <circle cx="350" cy="320" r="8" class="coe-focus"/>
+
+  <!-- Line of nodes -->
+  <line x1="200" y1="320" x2="520" y2="280" class="coe-node"/>
+  <text x="530" y="278" class="coe-label">Line of Nodes</text>
+  <!-- Ascending node marker -->
+  <circle cx="440" cy="295" r="4" fill="var(--text-accent, #79c0ff)"/>
+  <text x="450" y="290" class="coe-accent">☊ Ω</text>
+
+  <!-- RAAN angle Ω -->
+  <path d="M 400 320 A 50 20 0 0 0 430 305" class="coe-angle"/>
+  <text x="420" y="335" class="coe-accent">Ω</text>
+
+  <!-- Orbital plane (tilted ellipse) -->
+  <ellipse cx="370" cy="240" rx="180" ry="80" transform="rotate(-15, 370, 240)" class="coe-orbit"/>
+
+  <!-- Periapsis direction -->
+  <line x1="350" y1="320" x2="220" y2="200" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" stroke-dasharray="4 2" fill="none"/>
+  <text x="200" y="195" class="coe-accent">Periapsis (ω)</text>
+
+  <!-- Argument of periapsis arc -->
+  <path d="M 440 295 A 40 40 0 0 0 380 270" class="coe-angle"/>
+  <text x="425" y="270" class="coe-accent">ω</text>
+
+  <!-- True anomaly arc -->
+  <path d="M 380 270 A 30 30 0 0 0 360 250" class="coe-angle" stroke="var(--interactive-accent, #58a6ff)"/>
+  <text x="365" y="248" class="coe-accent">ν</text>
+
+  <!-- Satellite position (Animated) -->
+  <g transform="rotate(-15, 370, 240)">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 190,240 A 180,80 0 0,1 370,160 A 180,80 0 0,1 550,240 A 180,80 0 0,1 370,320 A 180,80 0 0,1 190,240" />
+    <circle cx="0" cy="0" r="6" class="coe-sat"/>
+    <text x="-20" y="-10" class="coe-label" transform="rotate(15)">Satellite</text>
+  </g>
+
+  <!-- Inclination angle -->
+  <path d="M 350 320 A 60 60 0 0 0 350 260" stroke="var(--text-accent, #79c0ff)" stroke-width="2" fill="none"/>
+  <text x="320" y="285" class="coe-accent">i</text>
+
+  <!-- Info box -->
+  <rect x="10" y="10" width="250" height="140" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="135" y="32" class="coe-accent" text-anchor="middle">6 Classical Orbital Elements</text>
+  <text x="20" y="52" class="coe-label">a — Semi-major axis (size)</text>
+  <text x="20" y="70" class="coe-label">e — Eccentricity (shape)</text>
+  <text x="20" y="88" class="coe-label">i — Inclination (tilt)</text>
+  <text x="20" y="106" class="coe-label">Ω — RAAN (node orientation)</text>
+  <text x="20" y="124" class="coe-label">ω — Argument of periapsis</text>
+  <text x="20" y="142" class="coe-label">ν — True anomaly (position)</text>
+</svg>

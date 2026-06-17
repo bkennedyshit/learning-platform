@@ -1,0 +1,75 @@
+<svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <style>
+    .force-box { fill: var(--background-secondary); stroke: var(--text-normal); stroke-width: 2.5; }
+    .force-arrow { color: var(--interactive-accent); stroke: currentColor; stroke-width: 3; fill: none; transition: all 0.2s ease; cursor: pointer; }
+    .force-arrow:hover { color: var(--h1-color); stroke-width: 4; }
+    .ground-line { stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 4,4; }
+    .text-title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal); font-weight: bold; }
+    .text-val { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted); font-weight: 600; }
+  </style>
+
+  <!-- ================= LEFT: BALANCED FORCES ================= -->
+  <!-- Ground -->
+  <line x1="20" y1="170" x2="280" y2="170" class="ground-line"/>
+  
+  <!-- Object Box -->
+  <rect x="110" y="90" width="80" height="80" rx="4" class="force-box"/>
+  <text x="150" y="135" class="text-title" text-anchor="middle">Object A</text>
+
+  <!-- Balanced Force Vectors -->
+  <!-- Gravity (Down, 10N) -->
+  <line x1="150" y1="130" x2="150" y2="210" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="160" y="205" class="text-val">Gravity (10 N)</text>
+
+  <!-- Normal Force (Up, 10N) -->
+  <line x1="150" y1="130" x2="150" y2="50" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="160" y="60" class="text-val">Normal Force (10 N)</text>
+
+  <!-- Pull Force (Right, 5N) -->
+  <line x1="150" y1="130" x2="220" y2="130" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="215" y="115" class="text-val">Pull (5 N)</text>
+
+  <!-- Friction Force (Left, 5N) -->
+  <line x1="150" y1="130" x2="80" y2="130" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="40" y="115" class="text-val">Friction (5 N)</text>
+
+  <!-- Balanced Labels -->
+  <text x="150" y="25" class="text-title" text-anchor="middle">Balanced Forces (Net Force = 0 N)</text>
+  <text x="150" y="40" class="text-val" text-anchor="middle">Result: Constant Speed / At Rest</text>
+
+
+  <!-- ================= RIGHT: UNBALANCED FORCES ================= -->
+  <!-- Ground -->
+  <line x1="320" y1="170" x2="580" y2="170" class="ground-line"/>
+  
+  <!-- Object Box -->
+  <rect x="410" y="90" width="80" height="80" rx="4" class="force-box"/>
+  <text x="450" y="135" class="text-title" text-anchor="middle">Object B</text>
+
+  <!-- Unbalanced Force Vectors -->
+  <!-- Gravity (Down, 10N) -->
+  <line x1="450" y1="130" x2="450" y2="210" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="460" y="205" class="text-val">Gravity (10 N)</text>
+
+  <!-- Normal Force (Up, 10N) -->
+  <line x1="450" y1="130" x2="450" y2="50" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="460" y="60" class="text-val">Normal Force (10 N)</text>
+
+  <!-- Strong Pull Force (Right, 12N) -->
+  <line x1="450" y1="130" x2="560" y2="130" class="force-arrow" marker-end="url(#arrow)" stroke-width="4.5"/>
+  <text x="525" y="115" class="text-val" font-weight="bold">Pull (12 N)</text>
+
+  <!-- Weak Friction Force (Left, 4N) -->
+  <line x1="450" y1="130" x2="400" y2="130" class="force-arrow" marker-end="url(#arrow)"/>
+  <text x="350" y="115" class="text-val">Friction (4 N)</text>
+
+  <!-- Unbalanced Labels -->
+  <text x="450" y="25" class="text-title" text-anchor="middle">Unbalanced Forces (Net Force = 8 N Right)</text>
+  <text x="450" y="40" class="text-val" text-anchor="middle" fill="var(--h1-color)">Result: Acceleration to the Right</text>
+</svg>

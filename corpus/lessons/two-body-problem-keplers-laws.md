@@ -1,0 +1,1025 @@
+---
+title: "Two-Body Problem & Kepler's Laws"
+subject: "Aerospace Engineering & Orbital Mechanics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "10.1"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 10.1 — Two-Body Problem & Kepler's Laws
+
+> *"The Earth is the cradle of humanity, but mankind cannot stay in the cradle forever."*
+> — **Konstantin Tsiolkovsky**, 1911
+
+The two-body problem is the cornerstone of orbital mechanics: given two point masses interacting solely through Newtonian gravity, determine their motion for all time. By reducing the problem to an equivalent one-body system via the reduced mass, we derive the orbit equation — a conic section — and recover Kepler's three empirical laws as rigorous mathematical consequences of Newton's law of universal gravitation. This chapter builds the entire machinery from first principles.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Reduce the two-body gravitational problem to an equivalent one-body problem using the reduced mass $\mu_r$ and relative coordinates.
+2. Derive the **orbit equation** $r(\theta) = \frac{p}{1 + e\cos\theta}$ from Newton's second law and angular momentum conservation.
+3. State and prove **Kepler's three laws** from Newtonian mechanics.
+4. Derive the **Vis-Viva equation** $v^2 = \mu\left(\frac{2}{r} - \frac{1}{a}\right)$ from energy conservation.
+5. Compute orbital periods, velocities, and energies for circular and elliptical orbits.
+6. Apply the gravitational parameter $\mu = GM$ to solve practical orbit problems (ISS, GPS, GEO satellites).
+
+---
+
+## 🖼️ Visual Anchor — Keplerian Elliptical Orbit
+
+![math-10__10.1-fig1](math-10__10.1-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 10.1.1 — The Two-Body Problem
+
+The **two-body problem** consists of two point masses $m_1$ and $m_2$ interacting solely through their mutual gravitational attraction. The equations of motion in an inertial frame are:
+
+$$
+m_1 \ddot{\mathbf{r}}_1 = \frac{G m_1 m_2}{|\mathbf{r}_2 - \mathbf{r}_1|^3}(\mathbf{r}_2 - \mathbf{r}_1)
+$$
+
+$$
+m_2 \ddot{\mathbf{r}}_2 = \frac{G m_1 m_2}{|\mathbf{r}_1 - \mathbf{r}_2|^3}(\mathbf{r}_1 - \mathbf{r}_2)
+$$
+
+where $G = 6.674 \times 10^{-11}$ N·m²/kg² is Newton's gravitational constant.
+
+### Definition 10.1.2 — Relative Position Vector
+
+Define the **relative position vector** from $m_1$ to $m_2$:
+
+$$
+\mathbf{r} = \mathbf{r}_2 - \mathbf{r}_1
+$$
+
+The relative distance is $r = |\mathbf{r}|$.
+
+### Definition 10.1.3 — Reduced Mass
+
+The **reduced mass** of the two-body system is:
+
+$$
+\mu_r = \frac{m_1 m_2}{m_1 + m_2}
+$$
+
+This allows the two-body problem to be rewritten as an equivalent one-body problem: a particle of mass $\mu_r$ orbiting a fixed center of force.
+
+### Definition 10.1.4 — Gravitational Parameter
+
+The **standard gravitational parameter** is:
+
+$$
+\mu = G(m_1 + m_2)
+$$
+
+For spacecraft orbiting a planet where $m_{\text{spacecraft}} \ll M_{\text{planet}}$, this simplifies to $\mu \approx GM$. Key values:
+
+| Body | $\mu$ (km³/s²) |
+|------|----------------|
+| Earth | 398,600.4418 |
+| Sun | 1.327 × 10¹¹ |
+| Moon | 4,902.8 |
+| Mars | 42,828.4 |
+| Jupiter | 1.267 × 10⁸ |
+
+### Definition 10.1.5 — Specific Angular Momentum
+
+The **specific angular momentum** (angular momentum per unit mass) of the orbiting body is:
+
+$$
+\mathbf{h} = \mathbf{r} \times \dot{\mathbf{r}} = \mathbf{r} \times \mathbf{v}
+$$
+
+Its magnitude $h = |\mathbf{h}|$ is conserved in the two-body problem (since gravity is a central force producing zero torque about the center of force). The constancy of $\mathbf{h}$ implies the orbit lies in a fixed plane perpendicular to $\mathbf{h}$.
+
+### Definition 10.1.6 — Specific Orbital Energy
+
+The **specific mechanical energy** (total energy per unit mass) is:
+
+$$
+\varepsilon = \frac{v^2}{2} - \frac{\mu}{r}
+$$
+
+This is the sum of specific kinetic energy $\frac{v^2}{2}$ and specific gravitational potential energy $-\frac{\mu}{r}$. Since gravity is conservative, $\varepsilon$ is constant along the orbit.
+
+The sign of $\varepsilon$ determines the orbit type:
+- $\varepsilon < 0$: Elliptical orbit (bound)
+- $\varepsilon = 0$: Parabolic trajectory (escape)
+- $\varepsilon > 0$: Hyperbolic trajectory (unbound)
+
+### Definition 10.1.7 — Semi-Latus Rectum
+
+The **semi-latus rectum** $p$ is the orbital parameter relating angular momentum to the gravitational parameter:
+
+$$
+p = \frac{h^2}{\mu}
+$$
+
+Geometrically, $p$ is the distance from the focus to the orbit measured perpendicular to the major axis (at true anomaly $\theta = 90°$).
+
+### Definition 10.1.8 — Eccentricity
+
+The **eccentricity** $e$ is a dimensionless parameter characterizing the shape of the conic section:
+
+$$
+e = \sqrt{1 + \frac{2\varepsilon h^2}{\mu^2}}
+$$
+
+| Eccentricity | Orbit Type |
+|:---:|:---:|
+| $e = 0$ | Circle |
+| $0 < e < 1$ | Ellipse |
+| $e = 1$ | Parabola |
+| $e > 1$ | Hyperbola |
+
+### Definition 10.1.9 — True Anomaly
+
+The **true anomaly** $\theta$ (or $\nu$) is the angle measured at the focus (central body) from the periapsis direction to the current position of the orbiting body, measured in the direction of orbital motion.
+
+### Definition 10.1.10 — The Orbit Equation (Trajectory Equation)
+
+The polar equation of the orbit with the focus at the origin is:
+
+$$
+r(\theta) = \frac{p}{1 + e\cos\theta} = \frac{h^2/\mu}{1 + e\cos\theta}
+$$
+
+This is the equation of a conic section (ellipse, parabola, or hyperbola) with one focus at the origin.
+
+### Definition 10.1.11 — Periapsis and Apoapsis
+
+For an elliptical orbit ($0 \leq e < 1$):
+
+- **Periapsis** (closest approach): $r_p = \frac{p}{1+e} = a(1-e)$, occurring at $\theta = 0$.
+- **Apoapsis** (farthest point): $r_a = \frac{p}{1-e} = a(1+e)$, occurring at $\theta = \pi$.
+
+The semi-major axis relates to these as $a = \frac{r_p + r_a}{2}$.
+
+### Definition 10.1.12 — Kepler's Three Laws (Statement)
+
+**Kepler's First Law (Law of Ellipses):** Each planet moves in an elliptical orbit with the Sun at one focus.
+
+**Kepler's Second Law (Law of Equal Areas):** The radius vector from the Sun to a planet sweeps out equal areas in equal time intervals.
+
+**Kepler's Third Law (Harmonic Law):** The square of the orbital period is proportional to the cube of the semi-major axis:
+
+$$
+T^2 = \frac{4\pi^2}{\mu} a^3
+$$
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 10.1.A1 — Newton's Law of Universal Gravitation
+
+Every particle of matter in the universe attracts every other particle with a force directed along the line joining them, proportional to the product of their masses and inversely proportional to the square of the distance between them:
+
+$$
+\mathbf{F}_{12} = -\frac{Gm_1 m_2}{r^2}\hat{\mathbf{r}}
+$$
+
+where $\hat{\mathbf{r}}$ points from $m_1$ to $m_2$ and the negative sign indicates attraction.
+
+### Axiom 10.1.A2 — Newton's Second Law (Inertial Frame)
+
+In an inertial reference frame, the net force on a body equals the rate of change of its linear momentum:
+
+$$
+\mathbf{F} = m\ddot{\mathbf{r}} = m\mathbf{a}
+$$
+
+### Axiom 10.1.A3 — Conservation of Mechanical Energy
+
+In a system with only conservative forces (gravity), the total mechanical energy is constant:
+
+$$
+E = T + V = \frac{1}{2}mv^2 - \frac{GMm}{r} = \text{const}
+$$
+
+### Axiom 10.1.A4 — Conservation of Angular Momentum
+
+For a central force $\mathbf{F} = F(r)\hat{\mathbf{r}}$, the torque about the center of force is zero:
+
+$$
+\boldsymbol{\tau} = \mathbf{r} \times \mathbf{F} = \mathbf{r} \times F(r)\hat{\mathbf{r}} = F(r)(\mathbf{r} \times \hat{\mathbf{r}}) = \mathbf{0}
+$$
+
+Therefore $\frac{d\mathbf{h}}{dt} = \frac{d}{dt}(\mathbf{r} \times \mathbf{v}) = \mathbf{0}$, so $\mathbf{h} = \mathbf{r} \times \mathbf{v} = \text{const}$.
+
+### Axiom 10.1.A5 — Point-Mass Approximation
+
+For bodies whose separation $r$ is much larger than their physical radii, the gravitational interaction is identical to that between point masses located at their centers of mass (Shell Theorem consequence).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 10.1.1 — Reduction to Relative Motion
+
+**Statement:** The two-body problem reduces to an equivalent one-body problem: a particle of reduced mass $\mu_r = \frac{m_1 m_2}{m_1 + m_2}$ moving under a central force about a fixed center, with the equation of motion:
+
+$$
+\ddot{\mathbf{r}} = -\frac{\mu}{r^3}\mathbf{r} = -\frac{\mu}{r^2}\hat{\mathbf{r}}
+$$
+
+where $\mu = G(m_1 + m_2)$ and $\mathbf{r} = \mathbf{r}_2 - \mathbf{r}_1$.
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.1</summary>
+
+From Newton's second law applied to each body:
+
+$$
+\ddot{\mathbf{r}}_1 = \frac{Gm_2}{r^3}\mathbf{r}, \qquad \ddot{\mathbf{r}}_2 = -\frac{Gm_1}{r^3}\mathbf{r}
+$$
+
+Subtract the first from the second:
+
+$$
+\ddot{\mathbf{r}}_2 - \ddot{\mathbf{r}}_1 = -\frac{G(m_1 + m_2)}{r^3}\mathbf{r}
+$$
+
+Since $\mathbf{r} = \mathbf{r}_2 - \mathbf{r}_1$, we have $\ddot{\mathbf{r}} = \ddot{\mathbf{r}}_2 - \ddot{\mathbf{r}}_1$, giving:
+
+$$
+\ddot{\mathbf{r}} = -\frac{\mu}{r^3}\mathbf{r}
+$$
+
+This is the equation of motion for a single particle in a gravitational field with parameter $\mu = G(m_1 + m_2)$. $\blacksquare$
+
+</details>
+
+### Lemma 10.1.2 — Planar Motion from Angular Momentum Conservation
+
+**Statement:** Since $\mathbf{h} = \mathbf{r} \times \mathbf{v}$ is constant and non-zero, the position vector $\mathbf{r}$ is always perpendicular to the fixed vector $\mathbf{h}$. Therefore the orbit lies entirely in a fixed plane.
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.2</summary>
+
+By definition, $\mathbf{h} = \mathbf{r} \times \mathbf{v}$, so $\mathbf{r} \cdot \mathbf{h} = \mathbf{r} \cdot (\mathbf{r} \times \mathbf{v}) = 0$ (scalar triple product with repeated vector). Similarly $\mathbf{v} \cdot \mathbf{h} = 0$.
+
+Since $\mathbf{h}$ is constant (Axiom 10.1.A4), both $\mathbf{r}(t)$ and $\mathbf{v}(t)$ remain perpendicular to the fixed direction $\hat{\mathbf{h}}$ for all time. This defines a fixed plane through the origin with normal $\hat{\mathbf{h}}$. $\blacksquare$
+
+</details>
+
+### Lemma 10.1.3 — Polar Coordinate Equations of Motion
+
+**Statement:** In polar coordinates $(r, \theta)$ within the orbital plane, the equations of motion become:
+
+$$
+\ddot{r} - r\dot{\theta}^2 = -\frac{\mu}{r^2} \quad \text{(radial)}
+$$
+
+$$
+r\ddot{\theta} + 2\dot{r}\dot{\theta} = 0 \quad \text{(transverse)}
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.3</summary>
+
+In polar coordinates, the position vector is $\mathbf{r} = r\hat{\mathbf{r}}$. The acceleration in polar coordinates is:
+
+$$
+\mathbf{a} = (\ddot{r} - r\dot{\theta}^2)\hat{\mathbf{r}} + (r\ddot{\theta} + 2\dot{r}\dot{\theta})\hat{\boldsymbol{\theta}}
+$$
+
+The gravitational force is purely radial: $\mathbf{F}/m = -\frac{\mu}{r^2}\hat{\mathbf{r}}$.
+
+Equating radial components: $\ddot{r} - r\dot{\theta}^2 = -\frac{\mu}{r^2}$.
+
+Equating transverse components: $r\ddot{\theta} + 2\dot{r}\dot{\theta} = 0$.
+
+The transverse equation can be rewritten as:
+
+$$
+\frac{1}{r}\frac{d}{dt}(r^2\dot{\theta}) = 0 \implies r^2\dot{\theta} = h = \text{const}
+$$
+
+This confirms angular momentum conservation: $h = r^2\dot{\theta}$. $\blacksquare$
+
+</details>
+
+### Lemma 10.1.4 — The Binet Substitution
+
+**Statement:** Substituting $u = 1/r$ and using $\theta$ as the independent variable (with $h = r^2\dot\theta$), the radial equation of motion transforms into:
+
+$$
+\frac{d^2u}{d\theta^2} + u = \frac{\mu}{h^2}
+$$
+
+This is a linear second-order ODE with constant coefficients.
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.4</summary>
+
+Let $u = 1/r$, so $r = 1/u$. Since $h = r^2\dot\theta$, we have $\dot\theta = hu^2$.
+
+Compute $\dot{r}$:
+
+$$
+\dot{r} = \frac{dr}{dt} = \frac{dr}{d\theta}\dot\theta = -\frac{1}{u^2}\frac{du}{d\theta} \cdot hu^2 = -h\frac{du}{d\theta}
+$$
+
+Compute $\ddot{r}$:
+
+$$
+\ddot{r} = \frac{d\dot{r}}{dt} = \frac{d\dot{r}}{d\theta}\dot\theta = -h\frac{d^2u}{d\theta^2} \cdot hu^2 = -h^2u^2\frac{d^2u}{d\theta^2}
+$$
+
+Substitute into the radial equation $\ddot{r} - r\dot\theta^2 = -\mu/r^2$:
+
+$$
+-h^2u^2\frac{d^2u}{d\theta^2} - \frac{1}{u}(hu^2)^2 = -\mu u^2
+$$
+
+$$
+-h^2u^2\frac{d^2u}{d\theta^2} - h^2u^3 = -\mu u^2
+$$
+
+Divide through by $-h^2u^2$:
+
+$$
+\frac{d^2u}{d\theta^2} + u = \frac{\mu}{h^2}
+$$
+
+$\blacksquare$
+
+</details>
+
+### Lemma 10.1.5 — Solution of the Orbit ODE
+
+**Statement:** The general solution of $\frac{d^2u}{d\theta^2} + u = \frac{\mu}{h^2}$ is:
+
+$$
+u(\theta) = \frac{\mu}{h^2} + C\cos(\theta - \theta_0)
+$$
+
+where $C$ and $\theta_0$ are constants of integration. Choosing $\theta_0 = 0$ (periapsis at $\theta = 0$) and defining $e = Ch^2/\mu$:
+
+$$
+r(\theta) = \frac{h^2/\mu}{1 + e\cos\theta} = \frac{p}{1 + e\cos\theta}
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.5</summary>
+
+The ODE $\frac{d^2u}{d\theta^2} + u = \frac{\mu}{h^2}$ is a second-order linear ODE with constant coefficients.
+
+**Homogeneous solution:** $\frac{d^2u}{d\theta^2} + u = 0$ has general solution $u_h = C\cos(\theta - \theta_0)$.
+
+**Particular solution:** Since the RHS is constant, try $u_p = \text{const}$. Then $\frac{d^2u_p}{d\theta^2} = 0$, so $u_p = \frac{\mu}{h^2}$.
+
+**General solution:**
+
+$$
+u(\theta) = \frac{\mu}{h^2} + C\cos(\theta - \theta_0)
+$$
+
+Choose the reference direction so that periapsis occurs at $\theta = 0$. At periapsis, $r$ is minimum, so $u$ is maximum. This requires $\cos(\theta - \theta_0) = 1$ at $\theta = 0$, giving $\theta_0 = 0$.
+
+Define the eccentricity $e = \frac{Ch^2}{\mu}$, so $C = \frac{e\mu}{h^2}$:
+
+$$
+u = \frac{\mu}{h^2}(1 + e\cos\theta)
+$$
+
+Since $r = 1/u$:
+
+$$
+r(\theta) = \frac{h^2/\mu}{1 + e\cos\theta} = \frac{p}{1 + e\cos\theta}
+$$
+
+where $p = h^2/\mu$ is the semi-latus rectum. $\blacksquare$
+
+</details>
+
+### Lemma 10.1.6 — Areal Velocity is Constant (Kepler's Second Law Precursor)
+
+**Statement:** The rate at which the radius vector sweeps area is:
+
+$$
+\frac{dA}{dt} = \frac{1}{2}r^2\dot\theta = \frac{h}{2} = \text{const}
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 10.1.6</summary>
+
+In polar coordinates, the infinitesimal area swept by the radius vector in time $dt$ is:
+
+$$
+dA = \frac{1}{2}r^2\,d\theta
+$$
+
+Therefore:
+
+$$
+\frac{dA}{dt} = \frac{1}{2}r^2\frac{d\theta}{dt} = \frac{1}{2}r^2\dot\theta = \frac{h}{2}
+$$
+
+Since $h$ is constant (angular momentum conservation), the areal velocity $\frac{dA}{dt}$ is constant. $\blacksquare$
+
+</details>
+
+
+
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 10.1.1 — Kepler's First Law (Law of Ellipses)
+
+Under an inverse-square central force $\mathbf{F} = -\frac{\mu m}{r^2}\hat{\mathbf{r}}$, the orbit of the secondary body relative to the primary is a **conic section** (ellipse, parabola, or hyperbola) with the primary at one focus. The orbit equation is:
+
+$$
+r(\theta) = \frac{p}{1 + e\cos\theta}
+$$
+
+where $p = h^2/\mu$ and $e \geq 0$ is the eccentricity.
+
+### Theorem 10.1.2 — Kepler's Second Law (Equal Areas in Equal Times)
+
+The radius vector from the focus to the orbiting body sweeps out equal areas in equal time intervals:
+
+$$
+\frac{dA}{dt} = \frac{h}{2} = \text{const}
+$$
+
+This is a direct consequence of angular momentum conservation under a central force.
+
+### Theorem 10.1.3 — Kepler's Third Law (Harmonic Law)
+
+For an elliptical orbit with semi-major axis $a$, the orbital period $T$ satisfies:
+
+$$
+T^2 = \frac{4\pi^2}{\mu}a^3
+$$
+
+Equivalently: $T = 2\pi\sqrt{\frac{a^3}{\mu}}$.
+
+For two bodies orbiting the same central mass, $\frac{T_1^2}{T_2^2} = \frac{a_1^3}{a_2^3}$.
+
+### Theorem 10.1.4 — The Vis-Viva Equation
+
+For any Keplerian orbit (ellipse, parabola, or hyperbola) with semi-major axis $a$, the speed $v$ at distance $r$ from the focus is:
+
+$$
+v^2 = \mu\left(\frac{2}{r} - \frac{1}{a}\right)
+$$
+
+Special cases:
+- **Circular orbit** ($r = a$): $v_c = \sqrt{\mu/a}$
+- **Escape velocity** ($a \to \infty$): $v_{\text{esc}} = \sqrt{2\mu/r}$
+
+### Theorem 10.1.5 — Specific Energy in Terms of Semi-Major Axis
+
+The specific orbital energy depends only on the semi-major axis:
+
+$$
+\varepsilon = -\frac{\mu}{2a}
+$$
+
+This is independent of eccentricity — all orbits with the same $a$ have the same energy regardless of shape.
+
+### Theorem 10.1.6 — Escape Velocity
+
+The minimum speed required to escape from distance $r$ to infinity (arriving with zero residual velocity) is:
+
+$$
+v_{\text{esc}} = \sqrt{\frac{2\mu}{r}} = \sqrt{2}\,v_c
+$$
+
+where $v_c = \sqrt{\mu/r}$ is the circular orbital speed at that radius.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Vis-Viva Equation from Energy Conservation
+
+**Goal:** Derive $v^2 = \mu\left(\frac{2}{r} - \frac{1}{a}\right)$.
+
+**Step 1: Write the specific energy.**
+
+$$
+\varepsilon = \frac{v^2}{2} - \frac{\mu}{r}
+$$
+
+**Step 2: Evaluate energy at periapsis.**
+
+At periapsis: $r_p = a(1-e)$ and the velocity is purely tangential, so $v_p = h/r_p$ (since $\mathbf{v} \perp \mathbf{r}$ at apsides).
+
+$$
+\varepsilon = \frac{v_p^2}{2} - \frac{\mu}{r_p} = \frac{h^2}{2r_p^2} - \frac{\mu}{r_p}
+$$
+
+**Step 3: Express $h$ in terms of $a$ and $e$.**
+
+From the orbit equation, $p = a(1-e^2) = h^2/\mu$, so:
+
+$$
+h^2 = \mu a(1-e^2)
+$$
+
+**Step 4: Substitute into the energy expression.**
+
+$$
+\varepsilon = \frac{\mu a(1-e^2)}{2a^2(1-e)^2} - \frac{\mu}{a(1-e)}
+$$
+
+Simplify the first term using $(1-e^2) = (1-e)(1+e)$:
+
+$$
+\varepsilon = \frac{\mu(1+e)}{2a(1-e)} - \frac{\mu}{a(1-e)}
+$$
+
+$$
+= \frac{\mu}{a(1-e)}\left[\frac{1+e}{2} - 1\right]
+$$
+
+$$
+= \frac{\mu}{a(1-e)} \cdot \frac{e-1}{2}
+$$
+
+$$
+= \frac{\mu(e-1)}{2a(1-e)} = -\frac{\mu}{2a}
+$$
+
+**Step 5: Solve for $v^2$.**
+
+From $\varepsilon = \frac{v^2}{2} - \frac{\mu}{r} = -\frac{\mu}{2a}$:
+
+$$
+\frac{v^2}{2} = \frac{\mu}{r} - \frac{\mu}{2a}
+$$
+
+$$
+v^2 = \frac{2\mu}{r} - \frac{\mu}{a} = \mu\left(\frac{2}{r} - \frac{1}{a}\right)
+$$
+
+$\blacksquare$
+
+### 5.2 Derivation of Kepler's Third Law from Newton's Laws
+
+**Goal:** Derive $T^2 = \frac{4\pi^2}{\mu}a^3$.
+
+**Step 1: Total area of the ellipse.**
+
+The area of an ellipse with semi-major axis $a$ and semi-minor axis $b$ is:
+
+$$
+A_{\text{ellipse}} = \pi a b
+$$
+
+**Step 2: Relate $b$ to $a$ and $e$.**
+
+For an ellipse: $b = a\sqrt{1-e^2}$. Therefore:
+
+$$
+A_{\text{ellipse}} = \pi a^2\sqrt{1-e^2}
+$$
+
+**Step 3: Use Kepler's Second Law.**
+
+The areal velocity is constant: $\frac{dA}{dt} = \frac{h}{2}$.
+
+Over one complete orbit (period $T$), the total area swept equals the ellipse area:
+
+$$
+A_{\text{ellipse}} = \frac{h}{2} \cdot T
+$$
+
+$$
+T = \frac{2A_{\text{ellipse}}}{h} = \frac{2\pi a^2\sqrt{1-e^2}}{h}
+$$
+
+**Step 4: Substitute $h^2 = \mu a(1-e^2)$.**
+
+From $h = \sqrt{\mu a(1-e^2)}$:
+
+$$
+T = \frac{2\pi a^2\sqrt{1-e^2}}{\sqrt{\mu a(1-e^2)}} = \frac{2\pi a^2\sqrt{1-e^2}}{\sqrt{\mu a}\sqrt{1-e^2}}
+$$
+
+$$
+= \frac{2\pi a^2}{\sqrt{\mu a}} = \frac{2\pi a^{3/2}}{\sqrt{\mu}} = 2\pi\sqrt{\frac{a^3}{\mu}}
+$$
+
+**Step 5: Square both sides.**
+
+$$
+T^2 = 4\pi^2 \cdot \frac{a^3}{\mu} = \frac{4\pi^2}{\mu}a^3
+$$
+
+$\blacksquare$
+
+### 5.3 Derivation of the Orbit Equation via the Eccentricity Vector (Laplace-Runge-Lenz)
+
+**Goal:** Derive the orbit equation using the conserved eccentricity vector, providing an elegant alternative to the Binet approach.
+
+**Step 1: Define the eccentricity vector.**
+
+The **Laplace-Runge-Lenz vector** (or eccentricity vector) is:
+
+$$
+\mathbf{e} = \frac{\mathbf{v} \times \mathbf{h}}{\mu} - \hat{\mathbf{r}}
+$$
+
+**Step 2: Prove $\mathbf{e}$ is conserved.**
+
+Compute $\frac{d\mathbf{e}}{dt}$:
+
+$$
+\frac{d}{dt}\left(\frac{\mathbf{v} \times \mathbf{h}}{\mu}\right) = \frac{\dot{\mathbf{v}} \times \mathbf{h}}{\mu} + \frac{\mathbf{v} \times \dot{\mathbf{h}}}{\mu}
+$$
+
+Since $\dot{\mathbf{h}} = \mathbf{0}$ (angular momentum conserved), the second term vanishes. For the first term, use $\dot{\mathbf{v}} = -\frac{\mu}{r^3}\mathbf{r}$:
+
+$$
+\frac{\dot{\mathbf{v}} \times \mathbf{h}}{\mu} = \frac{1}{\mu}\left(-\frac{\mu}{r^3}\mathbf{r}\right) \times (\mathbf{r} \times \mathbf{v})
+$$
+
+Apply the BAC-CAB rule: $\mathbf{A} \times (\mathbf{B} \times \mathbf{C}) = \mathbf{B}(\mathbf{A}\cdot\mathbf{C}) - \mathbf{C}(\mathbf{A}\cdot\mathbf{B})$:
+
+$$
+= -\frac{1}{r^3}\left[\mathbf{r}(\mathbf{r}\cdot\mathbf{v}) - \mathbf{v}(\mathbf{r}\cdot\mathbf{r})\right] = -\frac{1}{r^3}\left[\mathbf{r}(\mathbf{r}\cdot\mathbf{v}) - r^2\mathbf{v}\right]
+$$
+
+Now compute $\frac{d\hat{\mathbf{r}}}{dt}$:
+
+$$
+\frac{d\hat{\mathbf{r}}}{dt} = \frac{d}{dt}\frac{\mathbf{r}}{r} = \frac{\mathbf{v}}{r} - \frac{\dot{r}}{r^2}\mathbf{r} = \frac{\mathbf{v}}{r} - \frac{\mathbf{r}\cdot\mathbf{v}}{r^3}\mathbf{r}
+$$
+
+Comparing: $\frac{\dot{\mathbf{v}} \times \mathbf{h}}{\mu} = \frac{d\hat{\mathbf{r}}}{dt}$, so $\frac{d\mathbf{e}}{dt} = \frac{d\hat{\mathbf{r}}}{dt} - \frac{d\hat{\mathbf{r}}}{dt} = \mathbf{0}$. $\checkmark$
+
+**Step 3: Derive the orbit equation from $\mathbf{e}$.**
+
+Take the dot product of $\mathbf{e}$ with $\mathbf{r}$:
+
+$$
+\mathbf{e} \cdot \mathbf{r} = \frac{(\mathbf{v} \times \mathbf{h}) \cdot \mathbf{r}}{\mu} - \hat{\mathbf{r}} \cdot \mathbf{r}
+$$
+
+Use the scalar triple product identity $(\mathbf{v} \times \mathbf{h}) \cdot \mathbf{r} = \mathbf{r} \cdot (\mathbf{v} \times \mathbf{h}) = \mathbf{h} \cdot (\mathbf{r} \times \mathbf{v}) = \mathbf{h} \cdot \mathbf{h} = h^2$:
+
+$$
+\mathbf{e} \cdot \mathbf{r} = \frac{h^2}{\mu} - r
+$$
+
+The left side: $\mathbf{e} \cdot \mathbf{r} = er\cos\theta$ (where $\theta$ is the angle between $\mathbf{e}$ and $\mathbf{r}$, i.e., the true anomaly since $\mathbf{e}$ points toward periapsis).
+
+$$
+er\cos\theta = \frac{h^2}{\mu} - r
+$$
+
+$$
+r(1 + e\cos\theta) = \frac{h^2}{\mu}
+$$
+
+$$
+r = \frac{h^2/\mu}{1 + e\cos\theta} = \frac{p}{1 + e\cos\theta}
+$$
+
+$\blacksquare$
+
+### 5.4 Derivation of Circular Orbital Velocity
+
+**Goal:** Derive $v_c = \sqrt{\mu/r}$ for a circular orbit.
+
+**Step 1:** For a circular orbit, the gravitational force provides the centripetal acceleration:
+
+$$
+\frac{\mu}{r^2} = \frac{v_c^2}{r}
+$$
+
+**Step 2:** Solve for $v_c$:
+
+$$
+v_c^2 = \frac{\mu}{r}
+$$
+
+$$
+v_c = \sqrt{\frac{\mu}{r}}
+$$
+
+**Verification via Vis-Viva:** For a circle, $a = r$:
+
+$$
+v^2 = \mu\left(\frac{2}{r} - \frac{1}{r}\right) = \frac{\mu}{r} \quad \checkmark
+$$
+
+$\blacksquare$
+
+### 5.5 Derivation of Escape Velocity
+
+**Goal:** Derive $v_{\text{esc}} = \sqrt{2\mu/r}$.
+
+**Step 1:** At escape, the body reaches infinity with zero velocity. Setting $\varepsilon = 0$ (parabolic trajectory, $a \to \infty$):
+
+$$
+\varepsilon = \frac{v_{\text{esc}}^2}{2} - \frac{\mu}{r} = 0
+$$
+
+**Step 2:** Solve:
+
+$$
+v_{\text{esc}}^2 = \frac{2\mu}{r}
+$$
+
+$$
+v_{\text{esc}} = \sqrt{\frac{2\mu}{r}} = \sqrt{2}\,v_c
+$$
+
+The escape velocity is always $\sqrt{2} \approx 1.414$ times the circular velocity at the same radius. $\blacksquare$
+
+### 5.6 Derivation of Orbital Period for Circular Orbit
+
+**Goal:** Derive $T = 2\pi r/v_c = 2\pi\sqrt{r^3/\mu}$ directly.
+
+**Step 1:** For a circular orbit, the circumference is $2\pi r$ and speed is constant $v_c = \sqrt{\mu/r}$:
+
+$$
+T = \frac{2\pi r}{v_c} = \frac{2\pi r}{\sqrt{\mu/r}} = 2\pi r \cdot \sqrt{\frac{r}{\mu}} = 2\pi\sqrt{\frac{r^3}{\mu}}
+$$
+
+Since $a = r$ for a circle, this confirms Kepler's Third Law: $T = 2\pi\sqrt{a^3/\mu}$. $\blacksquare$
+
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 10.1.1 — Period of the International Space Station (ISS)
+
+**Given:** The ISS orbits at a mean altitude of $h_{\text{alt}} = 408$ km above Earth's surface. Earth's radius $R_E = 6371$ km. $\mu_E = 398{,}600.4$ km³/s².
+
+**Find:** Orbital period $T$.
+
+**Solution:**
+
+Step 1: Compute the orbital radius (semi-major axis for near-circular orbit):
+
+$$
+a = R_E + h_{\text{alt}} = 6371 + 408 = 6779 \text{ km}
+$$
+
+Step 2: Apply Kepler's Third Law:
+
+$$
+T = 2\pi\sqrt{\frac{a^3}{\mu}} = 2\pi\sqrt{\frac{(6779)^3}{398600.4}}
+$$
+
+Step 3: Compute $a^3$:
+
+$$
+a^3 = 6779^3 = 3.114 \times 10^{11} \text{ km}^3
+$$
+
+Step 4: Compute the ratio:
+
+$$
+\frac{a^3}{\mu} = \frac{3.114 \times 10^{11}}{3.986 \times 10^5} = 7.813 \times 10^5 \text{ s}^2
+$$
+
+Step 5: Final answer:
+
+$$
+T = 2\pi\sqrt{7.813 \times 10^5} = 2\pi \times 883.9 = 5554 \text{ s} \approx 92.6 \text{ min}
+$$
+
+**Check:** The ISS completes approximately 15.5 orbits per day: $\frac{86400}{5554} \approx 15.6$. ✓
+
+---
+
+### Example 10.1.2 — Escape Velocity from Earth's Surface
+
+**Given:** $R_E = 6371$ km, $\mu_E = 398{,}600.4$ km³/s².
+
+**Find:** Escape velocity $v_{\text{esc}}$ at Earth's surface.
+
+**Solution:**
+
+$$
+v_{\text{esc}} = \sqrt{\frac{2\mu}{R_E}} = \sqrt{\frac{2 \times 398600.4}{6371}}
+$$
+
+$$
+= \sqrt{\frac{797200.8}{6371}} = \sqrt{125.13} = 11.19 \text{ km/s}
+$$
+
+**Physical interpretation:** A spacecraft launched at 11.19 km/s (neglecting atmospheric drag and Earth's rotation) will escape Earth's gravitational influence on a parabolic trajectory.
+
+**Comparison with circular velocity:**
+
+$$
+v_c = \sqrt{\frac{\mu}{R_E}} = \sqrt{\frac{398600.4}{6371}} = \sqrt{62.56} = 7.91 \text{ km/s}
+$$
+
+$$
+\frac{v_{\text{esc}}}{v_c} = \sqrt{2} \approx 1.414 \quad \checkmark
+$$
+
+---
+
+### Example 10.1.3 — Velocity at Apogee of a Molniya Orbit
+
+**Given:** A Molniya orbit has perigee altitude $h_p = 500$ km and apogee altitude $h_a = 39{,}873$ km. $R_E = 6371$ km, $\mu_E = 398{,}600.4$ km³/s².
+
+**Find:** Speed at apogee $v_a$.
+
+**Solution:**
+
+Step 1: Compute perigee and apogee radii:
+
+$$
+r_p = R_E + h_p = 6371 + 500 = 6871 \text{ km}
+$$
+
+$$
+r_a = R_E + h_a = 6371 + 39873 = 46244 \text{ km}
+$$
+
+Step 2: Compute semi-major axis:
+
+$$
+a = \frac{r_p + r_a}{2} = \frac{6871 + 46244}{2} = 26557.5 \text{ km}
+$$
+
+Step 3: Apply Vis-Viva at apogee:
+
+$$
+v_a^2 = \mu\left(\frac{2}{r_a} - \frac{1}{a}\right) = 398600.4\left(\frac{2}{46244} - \frac{1}{26557.5}\right)
+$$
+
+Step 4: Compute the bracket:
+
+$$
+\frac{2}{46244} = 4.325 \times 10^{-5} \text{ km}^{-1}
+$$
+
+$$
+\frac{1}{26557.5} = 3.766 \times 10^{-5} \text{ km}^{-1}
+$$
+
+$$
+\frac{2}{r_a} - \frac{1}{a} = (4.325 - 3.766) \times 10^{-5} = 0.559 \times 10^{-5} \text{ km}^{-1}
+$$
+
+Step 5: Compute velocity:
+
+$$
+v_a^2 = 398600.4 \times 0.559 \times 10^{-5} = 2.228 \text{ km}^2/\text{s}^2
+$$
+
+$$
+v_a = \sqrt{2.228} = 1.493 \text{ km/s}
+$$
+
+**Verification via angular momentum:** $h = r_p v_p = r_a v_a$. Compute $v_p$ from Vis-Viva:
+
+$$
+v_p^2 = 398600.4\left(\frac{2}{6871} - \frac{1}{26557.5}\right) = 398600.4(2.911 \times 10^{-4} - 3.766 \times 10^{-5}) = 398600.4 \times 2.534 \times 10^{-4} = 101.0
+$$
+
+$$
+v_p = 10.05 \text{ km/s}
+$$
+
+Check: $r_p v_p = 6871 \times 10.05 = 69{,}053$ km²/s. $r_a v_a = 46244 \times 1.493 = 69{,}042$ km²/s. ✓ (small rounding difference)
+
+---
+
+### Example 10.1.4 — Geostationary Orbit Radius and Velocity
+
+**Given:** A geostationary orbit has period $T = 86{,}164$ s (one sidereal day). $\mu_E = 398{,}600.4$ km³/s².
+
+**Find:** Orbital radius $r_{\text{GEO}}$ and velocity $v_{\text{GEO}}$.
+
+**Solution:**
+
+Step 1: From Kepler's Third Law, solve for $a$:
+
+$$
+T^2 = \frac{4\pi^2}{\mu}a^3 \implies a^3 = \frac{\mu T^2}{4\pi^2}
+$$
+
+$$
+a^3 = \frac{398600.4 \times (86164)^2}{4\pi^2} = \frac{398600.4 \times 7.424 \times 10^9}{39.478}
+$$
+
+$$
+= \frac{2.959 \times 10^{15}}{39.478} = 7.497 \times 10^{13} \text{ km}^3
+$$
+
+Step 2: Take cube root:
+
+$$
+a = (7.497 \times 10^{13})^{1/3} = 42{,}164 \text{ km}
+$$
+
+Step 3: Altitude above Earth's surface:
+
+$$
+h_{\text{alt}} = a - R_E = 42164 - 6371 = 35{,}793 \text{ km} \approx 35{,}786 \text{ km (standard value)}
+$$
+
+Step 4: Circular velocity:
+
+$$
+v_{\text{GEO}} = \sqrt{\frac{\mu}{a}} = \sqrt{\frac{398600.4}{42164}} = \sqrt{9.454} = 3.075 \text{ km/s}
+$$
+
+**Check:** $v = 2\pi a/T = 2\pi(42164)/86164 = 3.075$ km/s. ✓
+
+---
+
+### Example 10.1.5 — Eccentricity and Energy of a Transfer Orbit
+
+**Given:** A spacecraft is in an orbit with perigee radius $r_p = 6678$ km (300 km altitude) and apogee radius $r_a = 42{,}164$ km (GEO). $\mu_E = 398{,}600.4$ km³/s².
+
+**Find:** Eccentricity $e$, semi-major axis $a$, specific energy $\varepsilon$, and period $T$.
+
+**Solution:**
+
+Step 1: Semi-major axis:
+
+$$
+a = \frac{r_p + r_a}{2} = \frac{6678 + 42164}{2} = 24{,}421 \text{ km}
+$$
+
+Step 2: Eccentricity from $r_p = a(1-e)$:
+
+$$
+e = 1 - \frac{r_p}{a} = 1 - \frac{6678}{24421} = 1 - 0.2734 = 0.7266
+$$
+
+**Verification:** $r_a = a(1+e) = 24421 \times 1.7266 = 42{,}164$ km. ✓
+
+Step 3: Specific energy:
+
+$$
+\varepsilon = -\frac{\mu}{2a} = -\frac{398600.4}{2 \times 24421} = -\frac{398600.4}{48842} = -8.161 \text{ km}^2/\text{s}^2
+$$
+
+Step 4: Period:
+
+$$
+T = 2\pi\sqrt{\frac{a^3}{\mu}} = 2\pi\sqrt{\frac{(24421)^3}{398600.4}} = 2\pi\sqrt{\frac{1.457 \times 10^{13}}{398600.4}}
+$$
+
+$$
+= 2\pi\sqrt{3.655 \times 10^7} = 2\pi \times 6046 = 37{,}980 \text{ s} \approx 10.55 \text{ hours}
+$$
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+
+- [4.4 - Central Forces & Keplerian Orbits](4.4---Central-Forces-&-Keplerian-Orbits) — Classical mechanics derivation of central force motion
+- [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles) — Foundation for spacecraft attitude (Chapter 10.6)
+- [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space) — State-space formulation used in orbit propagation
+- [10.2 - Orbital Elements & Conic Sections](10.2---Orbital-Elements-&-Conic-Sections) — Next chapter: full parameterization of orbits
+- [10.3 - Orbital Maneuvers - Hohmann Transfers](10.3---Orbital-Maneuvers---Hohmann-Transfers) — Applying Vis-Viva to compute ΔV budgets
+
+### Authoritative External Sources
+
+| Source | Description |
+|--------|-------------|
+| Curtis, H.D. *Orbital Mechanics for Engineering Students*, 4th ed. (Elsevier, 2020) | Chapters 2–3: Two-body problem, orbit equation derivation |
+| MIT OCW 16.346 — Astrodynamics (Fall 2008) | Lecture notes on Keplerian motion and orbit determination |
+| Bate, Mueller & White, *Fundamentals of Astrodynamics* (Dover, 1971) | Classic undergraduate text, Chapters 1–2 |
+| NASA Technical Report Server (NTRS) | Historical derivations and mission design references |
+| Vallado, D.A. *Fundamentals of Astrodynamics and Applications*, 4th ed. (2013) | Industry-standard reference for practical astrodynamics |
+
+### Key Constants Reference
+
+| Constant | Symbol | Value |
+|----------|--------|-------|
+| Gravitational constant | $G$ | $6.674 \times 10^{-11}$ N·m²/kg² |
+| Earth gravitational parameter | $\mu_E$ | 398,600.4418 km³/s² |
+| Earth radius (mean) | $R_E$ | 6,371.0 km |
+| Sun gravitational parameter | $\mu_\odot$ | $1.327 \times 10^{11}$ km³/s² |
+| Speed of light | $c$ | 299,792.458 km/s |
+

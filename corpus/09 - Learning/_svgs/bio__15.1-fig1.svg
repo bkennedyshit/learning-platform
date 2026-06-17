@@ -1,0 +1,61 @@
+<svg viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="bio-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .cell-membrane { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; opacity: 0.8; }
+    .organelle { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: var(--background-secondary, #161b22); cursor: pointer; transition: all 0.2s; }
+    .organelle:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .nucleus { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: var(--background-secondary, #161b22); }
+    .mito { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; }
+  </style>
+  <text x="300" y="25" class="title" text-anchor="middle">Eukaryotic Cell — Compartmentalized Computation</text>
+  <!-- Cell membrane (ellipse) -->
+  <ellipse cx="300" cy="240" rx="260" ry="190" class="cell-membrane"/>
+  <!-- Nucleus -->
+  <ellipse cx="300" cy="230" rx="80" ry="65" class="nucleus organelle"/>
+  <ellipse cx="300" cy="230" rx="75" ry="60" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4,3" fill="none"/>
+  <circle cx="310" cy="240" r="18" fill="var(--text-muted, #8b949e)" opacity="0.3"/>
+  <text x="300" y="220" class="label" text-anchor="middle" font-weight="bold">Nucleus</text>
+  <text x="310" y="255" class="label" text-anchor="middle" font-size="9">nucleolus</text>
+  <!-- Rough ER -->
+  <path d="M 390 180 Q 420 190 410 210 Q 400 230 430 240 Q 460 250 440 270" class="organelle" fill="none" stroke-width="2"/>
+  <circle cx="395" cy="185" r="2" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="415" cy="205" r="2" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="425" cy="235" r="2" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="445" cy="255" r="2" fill="var(--text-muted, #8b949e)"/>
+  <text x="460" y="225" class="label">Rough ER</text>
+  <!-- Smooth ER -->
+  <path d="M 430 290 Q 460 300 450 320 Q 440 340 470 350" class="organelle" fill="none" stroke-width="1.5"/>
+  <text x="475" y="330" class="label">Smooth ER</text>
+  <!-- Golgi -->
+  <path d="M 150 150 Q 170 145 190 150" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="none"/>
+  <path d="M 148 160 Q 170 155 192 160" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="none"/>
+  <path d="M 146 170 Q 170 165 194 170" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="none"/>
+  <path d="M 144 180 Q 170 175 196 180" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="none"/>
+  <circle cx="200" cy="155" r="5" class="organelle"/>
+  <circle cx="205" cy="170" r="4" class="organelle"/>
+  <text x="130" y="195" class="label">Golgi</text>
+  <!-- Mitochondria -->
+  <ellipse cx="180" cy="300" rx="30" ry="15" class="organelle" stroke="var(--text-accent, #79c0ff)"/>
+  <path d="M 155 300 Q 165 290 175 300 Q 185 310 195 300 Q 205 290 210 300" class="mito"/>
+  <text x="180" y="325" class="label" text-anchor="middle">Mitochondria</text>
+  <ellipse cx="420" cy="370" rx="25" ry="12" class="organelle" stroke="var(--text-accent, #79c0ff)"/>
+  <path d="M 400 370 Q 408 362 416 370 Q 424 378 432 370 Q 440 362 445 370" class="mito"/>
+  <!-- Lysosomes -->
+  <circle cx="130" cy="260" r="12" class="organelle" fill="var(--background-secondary, #161b22)"/>
+  <text x="130" y="264" class="label" text-anchor="middle" font-size="8">pH 4.5</text>
+  <text x="130" y="282" class="label" text-anchor="middle">Lysosome</text>
+  <!-- Ribosomes -->
+  <circle cx="350" cy="150" r="3" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="360" cy="155" r="3" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="355" cy="165" r="3" fill="var(--text-muted, #8b949e)"/>
+  <text x="370" y="155" class="label">Ribosomes</text>
+  <!-- Legend -->
+  <rect x="20" y="400" width="560" height="40" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="40" y="425" class="label" font-size="10">🔋 Mitochondria = Power (ATP) | 📦 Golgi = Routing | 🗑️ Lysosome = GC | 🧬 Nucleus = Database | 🏭 ER = Build Pipeline</text>
+</svg>

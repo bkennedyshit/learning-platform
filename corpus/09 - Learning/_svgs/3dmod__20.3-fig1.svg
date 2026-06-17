@@ -1,0 +1,214 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    
+    /* CAD Grid Background */
+    .cad-grid { fill: none; stroke: #30363d; stroke-width: 0.5; }
+    .cad-axis { stroke: #8b949e; stroke-width: 1; stroke-dasharray: 4 4; }
+    
+    /* CAD Profile */
+    .cad-profile { fill: #58a6ff; fill-opacity: 0.05; stroke: #58a6ff; stroke-width: 2; }
+    .cad-construction { fill: none; stroke: #8b949e; stroke-width: 0.8; stroke-dasharray: 3 3; }
+    .cad-dimension { fill: none; stroke: #ffd93d; stroke-width: 1.2; }
+    
+    /* Constraint Icon */
+    .constraint-bg { fill: #ffd93d; rx: 1.5; }
+    .constraint-symbol { stroke: #161b22; stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <!-- Arrowhead marker for dimensions -->
+    <marker id="arrDim" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 2 L 5 5 L 0 8 Z" fill="#ffd93d"/>
+    </marker>
+    <!-- Grid Pattern -->
+    <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" class="cad-grid"/>
+    </pattern>
+  </defs>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Autodesk Fusion 360 — Parametric Constraints &amp; Sketch Solver</text>
+
+  <!-- LEFT: Interactive Sketch Canvas -->
+  <g>
+    <rect x="20" y="50" width="300" height="340" class="box"/>
+    <!-- Grid fill -->
+    <rect x="22" y="52" width="296" height="336" fill="url(#gridPattern)" />
+    <text x="170" y="75" class="label" text-anchor="middle" font-weight="bold">2D Sketch Editor (Fully-Defined)</text>
+
+    <!-- Origin indicator -->
+    <circle cx="60" cy="200" r="3" fill="#8b949e"/>
+    <line x1="60" y1="90" x2="60" y2="310" class="cad-axis" />
+    <line x1="40" y1="200" x2="280" y2="200" class="cad-axis" />
+    <text x="68" y="212" class="sublabel">(0,0)</text>
+
+    <!-- Morphing CAD Profile -->
+    <path class="cad-profile">
+      <animate attributeName="d"
+        values="M 60,120 A 20,20 0 0 1 80,100 L 220,100 A 20,20 0 0 1 240,120 L 240,280 A 20,20 0 0 1 220,300 L 80,300 A 20,20 0 0 1 60,280 Z;
+                M 60,120 A 20,20 0 0 1 80,100 L 280,100 A 20,20 0 0 1 300,120 L 300,280 A 20,20 0 0 1 280,300 L 80,300 A 20,20 0 0 1 60,280 Z;
+                M 60,120 A 20,20 0 0 1 80,100 L 160,100 A 20,20 0 0 1 180,120 L 180,280 A 20,20 0 0 1 160,300 L 80,300 A 20,20 0 0 1 60,280 Z;
+                M 60,120 A 20,20 0 0 1 80,100 L 250,100 A 20,20 0 0 1 270,120 L 270,280 A 20,20 0 0 1 250,300 L 80,300 A 20,20 0 0 1 60,280 Z;
+                M 60,120 A 20,20 0 0 1 80,100 L 220,100 A 20,20 0 0 1 240,120 L 240,280 A 20,20 0 0 1 220,300 L 80,300 A 20,20 0 0 1 60,280 Z"
+        dur="6s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Concentric Center Hole (Constrained to Midpoint of dynamic bracket width) -->
+    <circle r="22" fill="#161b22" stroke="#58a6ff" stroke-width="1.8">
+      <animate attributeName="cx" values="150; 180; 120; 165; 150" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="200; 200; 200; 200; 200" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Center Point -->
+    <circle r="1.5" fill="#58a6ff">
+      <animate attributeName="cx" values="150; 180; 120; 165; 150" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="200; 200; 200; 200; 200" dur="6s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Secondary Hole (Offset from Right edge: constant constraint) -->
+    <circle r="12" fill="#161b22" stroke="#58a6ff" stroke-width="1.5">
+      <animate attributeName="cx" values="200; 260; 140; 230; 200" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="200; 200; 200; 200; 200" dur="6s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Dimension Scaffolding & Text (d1 = width) -->
+    <!-- Left Extension -->
+    <line x1="60" y1="100" x2="60" y2="60" class="cad-construction"/>
+    <!-- Right Extension -->
+    <line y1="100" y2="60" class="cad-construction">
+      <animate attributeName="x1" values="240; 300; 180; 270; 240" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="240; 300; 180; 270; 240" dur="6s" repeatCount="indefinite"/>
+    </line>
+    <!-- Dimension Line -->
+    <line x1="60" y1="65" y2="65" class="cad-dimension" marker-start="url(#arrDim)" marker-end="url(#arrDim)">
+      <animate attributeName="x2" values="240; 300; 180; 270; 240" dur="6s" repeatCount="indefinite"/>
+    </line>
+    <!-- Label -->
+    <text y="58" font-family="Inter, sans-serif" font-size="10" fill="#ffd93d" text-anchor="middle" font-weight="bold">
+      <animate attributeName="x" values="150; 180; 120; 165; 150" dur="6s" repeatCount="indefinite"/>
+      d1 = width
+    </text>
+
+    <!-- GEOMETRIC CONSTRAINTS INDICATORS -->
+    <!-- 1. Concentric Constraint on Center Hole (◎) -->
+    <g opacity="0.9">
+      <animateTransform attributeName="transform" type="translate"
+        values="150,165; 180,165; 120,165; 165,165; 150,165"
+        dur="6s" repeatCount="indefinite"/>
+      <rect x="-6" y="-6" width="12" height="12" class="constraint-bg"/>
+      <!-- Concentric Symbol (bullseye) -->
+      <circle cx="0" cy="0" r="3.5" class="constraint-symbol" stroke-width="0.8"/>
+      <circle cx="0" cy="0" r="1" fill="#161b22" stroke="none"/>
+    </g>
+
+    <!-- 2. Horizontal Constraint on Top Edge (=) -->
+    <g opacity="0.9">
+      <animateTransform attributeName="transform" type="translate"
+        values="150,100; 180,100; 120,100; 165,100; 150,100"
+        dur="6s" repeatCount="indefinite"/>
+      <rect x="-6" y="-5" width="12" height="10" class="constraint-bg"/>
+      <line x1="-3.5" y1="-2" x2="3.5" y2="-2" class="constraint-symbol"/>
+      <line x1="-3.5" y1="1" x2="3.5" y2="1" class="constraint-symbol"/>
+    </g>
+
+    <!-- 3. Tangency Constraint on Corners (○|) -->
+    <g opacity="0.9">
+      <animateTransform attributeName="transform" type="translate"
+        values="232,108; 292,108; 172,108; 262,108; 232,108"
+        dur="6s" repeatCount="indefinite"/>
+      <rect x="-6" y="-6" width="12" height="12" class="constraint-bg"/>
+      <circle cx="-1" cy="0" r="2.5" class="constraint-symbol" stroke-width="0.8"/>
+      <line x1="2.5" y1="-3.5" x2="2.5" y2="3.5" class="constraint-symbol"/>
+    </g>
+
+    <!-- 4. Fixed / Ground Constraint on Origin (⚓) -->
+    <g transform="translate(60, 218)" opacity="0.9">
+      <rect x="-6" y="-6" width="12" height="12" class="constraint-bg"/>
+      <path d="M 0,-3.5 L 0,3.5 M -2.5,1 L 2.5,1 M -3,3.5 L 3,3.5" class="constraint-symbol" stroke-width="1"/>
+    </g>
+
+    <text x="170" y="345" class="sublabel" text-anchor="middle" fill="#58a6ff">All sketch points are constrained (lines lock black).</text>
+    <text x="170" y="360" class="sublabel" text-anchor="middle" fill="#ffd93d">Adjusting user parameters solves rules instantly.</text>
+  </g>
+
+  <!-- RIGHT: Parameters & Equations Control Panel -->
+  <g transform="translate(340, 50)">
+    <rect x="0" y="0" width="340" height="340" class="box"/>
+    <text x="170" y="25" class="label" text-anchor="middle" font-weight="bold">Parameters &amp; Equations Dialog</text>
+
+    <!-- Parameters Table Header -->
+    <rect x="15" y="45" width="310" height="24" fill="#21262d" rx="3" stroke="#30363d" stroke-width="0.8"/>
+    <text x="25" y="61" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">Parameter</text>
+    <text x="135" y="61" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">Equation</text>
+    <text x="255" y="61" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">Solved Value</text>
+
+    <!-- Row 1: width -->
+    <g transform="translate(0, 75)">
+      <text x="25" y="18" font-family="Inter, sans-serif" font-size="11" font-weight="bold" fill="#58a6ff">width</text>
+      <!-- Equation changes dynamically! -->
+      <text x="135" y="18" font-family="Inter, sans-serif" font-size="11" fill="#c9d1d9">
+        <animate attributeName="textContent" values="160.00 mm; 220.00 mm; 120.00 mm; 190.00 mm; 160.00 mm" dur="6s" repeatCount="indefinite" />
+        d1
+      </text>
+      <text x="255" y="18" font-family="Inter, sans-serif" font-size="11" font-weight="bold" fill="#ffd93d">
+        <animate attributeName="textContent" values="160.00 mm; 220.00 mm; 120.00 mm; 190.00 mm; 160.00 mm" dur="6s" repeatCount="indefinite" />
+        d1
+      </text>
+      <line x1="15" y1="28" x2="325" y2="28" stroke="#21262d" stroke-width="1"/>
+    </g>
+
+    <!-- Row 2: height -->
+    <g transform="translate(0, 110)">
+      <text x="25" y="18" font-family="Inter, sans-serif" font-size="11" fill="#8b949e">height</text>
+      <text x="135" y="18" font-family="Inter, sans-serif" font-size="11" fill="#c9d1d9">width / 2</text>
+      <text x="255" y="18" font-family="Inter, sans-serif" font-size="11" fill="#8b949e">
+        <animate attributeName="textContent" values="80.00 mm; 110.00 mm; 60.00 mm; 95.00 mm; 80.00 mm" dur="6s" repeatCount="indefinite" />
+        d2
+      </text>
+      <line x1="15" y1="28" x2="325" y2="28" stroke="#21262d" stroke-width="1"/>
+    </g>
+
+    <!-- Live Slider Visualization for User Param: 'width' -->
+    <text x="25" y="175" class="label" font-weight="bold">Live Value Slider: 'width'</text>
+    <g transform="translate(25, 190)">
+      <!-- Track -->
+      <rect x="0" y="0" width="290" height="6" fill="#30363d" rx="3"/>
+      <!-- Active track -->
+      <rect x="0" y="0" height="6" fill="#58a6ff" rx="3">
+        <animate attributeName="width" values="116; 290; 0; 203; 116" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <!-- Thumb -->
+      <circle cy="3" r="8" fill="#58a6ff" stroke="#fff" stroke-width="1.5">
+        <animate attributeName="cx" values="116; 290; 0; 203; 116" dur="6s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Scale limits -->
+      <text x="0" y="24" class="sublabel">min: 120mm</text>
+      <text x="290" y="24" class="sublabel" text-anchor="end">max: 220mm</text>
+    </g>
+
+    <!-- Schematic Feature Tree representation -->
+    <text x="25" y="260" class="label" font-weight="bold">Downstream Feature Timeline</text>
+    <g transform="translate(25, 275)">
+      <!-- Steps in CAD tree -->
+      <rect x="0" y="0" width="60" height="30" fill="#21262d" stroke="#58a6ff" stroke-width="1" rx="4"/>
+      <text x="30" y="18" font-family="Inter, sans-serif" font-size="9" fill="#58a6ff" text-anchor="middle" font-weight="bold">Sketch 1</text>
+
+      <line x1="60" y1="15" x2="75" y2="15" stroke="#8b949e" stroke-width="1"/>
+
+      <rect x="75" y="0" width="60" height="30" fill="#21262d" stroke="#ffd93d" stroke-width="1" rx="4"/>
+      <text x="105" y="18" font-family="Inter, sans-serif" font-size="9" fill="#ffd93d" text-anchor="middle" font-weight="bold">Extrude 1</text>
+
+      <line x1="135" y1="15" x2="150" y2="15" stroke="#8b949e" stroke-width="1"/>
+
+      <rect x="150" y="0" width="60" height="30" fill="#21262d" stroke="#8b949e" stroke-width="0.8" rx="4"/>
+      <text x="180" y="18" font-family="Inter, sans-serif" font-size="9" fill="#8b949e" text-anchor="middle">Fillet 1</text>
+
+      <line x1="210" y1="15" x2="225" y2="15" stroke="#8b949e" stroke-width="1"/>
+
+      <rect x="225" y="0" width="65" height="30" fill="#21262d" stroke="#8b949e" stroke-width="0.8" rx="4"/>
+      <text x="257" y="18" font-family="Inter, sans-serif" font-size="9" fill="#8b949e" text-anchor="middle">Pattern 1</text>
+    </g>
+    <text x="25" y="322" class="sublabel" fill="#ff6b6b">Editing Sketch 1 triggers automatic downstream rebuilds.</text>
+  </g>
+</svg>

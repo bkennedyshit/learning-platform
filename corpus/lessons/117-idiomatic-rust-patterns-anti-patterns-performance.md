@@ -1,0 +1,1637 @@
+---
+title: "11.7 — Idiomatic Rust: Patterns, Anti-patterns & Performance"
+subject: "Rust"
+catalog: advanced
+audience_tier: higher-education
+chapter: "11.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 11.7 — Idiomatic Rust: Patterns, Anti-patterns & Performance
+
+> *"The best Rust code doesn't fight the borrow checker — it's structured so the borrow checker is invisible."* — Esteban Kuber (Rust compiler diagnostics lead)
+
+This chapter is about writing Rust that experienced developers would recognize as "good." Not just code that compiles, but code that leverages the type system to make bugs impossible, uses zero-cost abstractions for performance, and reads clearly to other Rustaceans.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Apply the Newtype pattern to enforce type safety and bypass the orphan rule.
+2. Implement the Builder pattern for complex struct construction.
+3. Use the Typestate pattern to encode state machines in the type system.
+4. Write `From`/`Into` and `TryFrom`/`TryInto` conversions idiomatically.
+5. Use iterator combinators instead of manual loops.
+6. Apply "parse, don't validate" to push validation to the type level.
+7. Identify and fix common anti-patterns.
+
+---
+
+## 🖼️ Visual Anchor — Idiomatic Rust Pattern Catalog
+
+![rust__14.7-fig1](rust__14.7-fig1.svg)
+
+---
+
+## 📚 1. Patterns
+
+### Pattern 14.7.1 — Newtype (Type Safety Wrapper)
+
+Wrap a primitive in a single-field struct to create a distinct type:
+
+```rust
+// Problem: functions that take multiple IDs of the same underlying type
+fn transfer(from: u64, to: u64, amount: u64) { /* ... */ }
+// Easy to swap from/to/amount — all are u64!
+
+// Solution: Newtype pattern
+struct UserId(u64);
+struct AccountId(u64);
+struct Amount(u64);
+
+fn transfer(from: AccountId, to: AccountId, amount: Amount) { /* ... */ }
+// Now the compiler catches argument order mistakes!
+
+// Implement Display, Debug, etc. as needed:
+impl std::fmt::Display for UserId {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "user_{}", self.0)
+    }
+}
+
+// Bypass the orphan rule:
+struct Wrapper(Vec<String>);
+impl std::fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[{}]", self.0.join(", "))
+    }
+}
+```
+
+**Zero cost**: Newtypes are guaranteed to have the same memory layout as the inner type (`#[repr(transparent)]`).
+
+### Pattern 14.7.2 — Builder Pattern
+
+For structs with many optional fields:
+
+```rust
+#[derive(Debug)]
+struct HttpRequest {
+    method: String,
+    url: String,
+    headers: Vec<(String, String)>,
+    body: Option<Vec<u8>>,
+    timeout_ms: u64,
+    follow_redirects: bool,
+}
+
+struct HttpRequestBuilder {
+    method: String,
+    url: String,
+    headers: Vec<(String, String)>,
+    body: Option<Vec<u8>>,
+    timeout_ms: u64,
+    follow_redirects: bool,
+}
+
+impl HttpRequestBuilder {
+    fn new(method: impl Into<String>, url: impl Into<String>) -> Self {
+        Self {
+            method: method.into(),
+            url: url.into(),
+            headers: vec![],
+            body: None,
+            timeout_ms: 30_000,
+            follow_redirects: true,
+        }
+    }
+
+    fn header(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.headers.push((key.into(), value.into()));
+        self
+    }
+
+    fn body(mut self, body: impl Into<Vec<u8>>) -> Self {
+        self.body = Some(body.into());
+        self
+    }
+
+    fn timeout(mut self, ms: u64) -> Self {
+        self.timeout_ms = ms;
+        self
+    }
+
+    fn no_redirects(mut self) -> Self {
+        self.follow_redirects = false;
+        self
+    }
+
+    fn build(self) -> HttpRequest {
+        HttpRequest {
+            method: self.method,
+            url: self.url,
+            headers: self.headers,
+            body: self.body,
+            timeout_ms: self.timeout_ms,
+            follow_redirects: self.follow_redirects,
+        }
+    }
+}
+
+// Usage:
+let request = HttpRequestBuilder::new("POST", "https://api.example.com/data")
+    .header("Content-Type", "application/json")
+    .header("Authorization", "Bearer token123")
+    .body(b"{\"key\": \"value\"}".to_vec())
+    .timeout(5000)
+    .build();
+```
+
+### Pattern 14.7.3 — Typestate Pattern (Compile-Time State Machines)
+
+Encode valid state transitions in the type system so invalid transitions won't compile:
+
+```rust
+// States are zero-sized types (no runtime cost)
+struct Draft;
+struct Review;
+struct Published;
+
+struct Document<State> {
+    title: String,
+    content: String,
+    _state: std::marker::PhantomData<State>,
+}
+
+// Only Draft documents can be edited
+impl Document<Draft> {
+    fn new(title: String) -> Self {
+        Document {
+            title,
+            content: String::new(),
+            _state: std::marker::PhantomData,
+        }
+    }
+
+    fn edit(&mut self, content: String) {
+        self.content = content;
+    }
+
+    fn submit_for_review(self) -> Document<Review> {
+        Document {
+            title: self.title,
+            content: self.content,
+            _state: std::marker::PhantomData,
+        }
+    }
+}
+
+// Only Review documents can be approved or rejected
+impl Document<Review> {
+    fn approve(self) -> Document<Published> {
+        Document {
+            title: self.title,
+            content: self.content,
+            _state: std::marker::PhantomData,
+        }
+    }
+
+    fn reject(self) -> Document<Draft> {
+        Document {
+            title: self.title,
+            content: self.content,
+            _state: std::marker::PhantomData,
+        }
+    }
+}
+
+// Published documents are read-only
+impl Document<Published> {
+    fn content(&self) -> &str {
+        &self.content
+    }
+}
+
+fn main() {
+    let mut doc = Document::<Draft>::new("My Post".into());
+    doc.edit("Hello, world!".into());
+
+    let doc = doc.submit_for_review();
+    // doc.edit("change".into());  // ❌ COMPILE ERROR: no method `edit` on Document<Review>
+
+    let doc = doc.approve();
+    println!("{}", doc.content());
+    // doc.reject();  // ❌ COMPILE ERROR: no method `reject` on Document<Published>
+}
+```
+
+### Pattern 14.7.4 — From/Into Conversions
+
+```rust
+// From<T> for U means you can convert T → U
+// Into<U> for T is automatically derived from From
+
+struct Celsius(f64);
+struct Fahrenheit(f64);
+
+impl From<Celsius> for Fahrenheit {
+    fn from(c: Celsius) -> Self {
+        Fahrenheit(c.0 * 9.0 / 5.0 + 32.0)
+    }
+}
+
+impl From<Fahrenheit> for Celsius {
+    fn from(f: Fahrenheit) -> Self {
+        Celsius((f.0 - 32.0) * 5.0 / 9.0)
+    }
+}
+
+fn main() {
+    let boiling = Celsius(100.0);
+    let f: Fahrenheit = boiling.into();  // Uses From<Celsius> for Fahrenheit
+    println!("{}°F", f.0);  // 212°F
+}
+
+// TryFrom for fallible conversions:
+use std::convert::TryFrom;
+
+struct Port(u16);
+
+impl TryFrom<u32> for Port {
+    type Error = &'static str;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        if value > 65535 {
+            Err("Port number out of range")
+        } else {
+            Ok(Port(value as u16))
+        }
+    }
+}
+```
+
+### Pattern 14.7.5 — "Parse, Don't Validate"
+
+Push validation into constructors so invalid states are unrepresentable:
+
+```rust
+// BAD: validate at every use site
+fn send_email(to: &str) {
+    assert!(to.contains('@'), "invalid email");  // Runtime check, might be missed
+    // ...
+}
+
+// GOOD: parse into a validated type once
+struct Email(String);
+
+impl Email {
+    fn parse(s: &str) -> Result<Self, &'static str> {
+        if s.contains('@') && s.contains('.') && s.len() > 5 {
+            Ok(Email(s.to_string()))
+        } else {
+            Err("Invalid email format")
+        }
+    }
+
+    fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+fn send_email(to: &Email) {
+    // No validation needed — Email is guaranteed valid by construction
+    println!("Sending to {}", to.as_str());
+}
+
+fn main() -> Result<(), &'static str> {
+    let email = Email::parse("user@example.com")?;  // Validated once
+    send_email(&email);  // Can't pass invalid email — type prevents it
+    Ok(())
+}
+```
+
+---
+
+## 📐 2. Iterator Mastery
+
+### 2.1 — Iterator Combinators (Replace Manual Loops)
+
+```rust
+// BAD: manual loop with mutation
+let mut results = Vec::new();
+for item in &items {
+    if item.is_valid() {
+        results.push(item.transform());
+    }
+}
+
+// GOOD: iterator chain (often faster due to LLVM optimizations)
+let results: Vec<_> = items.iter()
+    .filter(|item| item.is_valid())
+    .map(|item| item.transform())
+    .collect();
+```
+
+### 2.2 — Essential Combinators
+
+```rust
+let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// filter + map
+let even_squares: Vec<i32> = numbers.iter()
+    .filter(|&&n| n % 2 == 0)
+    .map(|&n| n * n)
+    .collect();
+// [4, 16, 36, 64, 100]
+
+// filter_map (filter + map in one step)
+let parsed: Vec<i32> = vec!["1", "two", "3", "four", "5"]
+    .iter()
+    .filter_map(|s| s.parse::<i32>().ok())
+    .collect();
+// [1, 3, 5]
+
+// fold (reduce)
+let sum: i32 = numbers.iter().fold(0, |acc, &x| acc + x);
+
+// enumerate
+for (i, val) in numbers.iter().enumerate() {
+    println!("{i}: {val}");
+}
+
+// zip
+let names = vec!["Alice", "Bob", "Charlie"];
+let scores = vec![95, 87, 92];
+let leaderboard: Vec<_> = names.iter().zip(scores.iter())
+    .map(|(name, score)| format!("{name}: {score}"))
+    .collect();
+
+// chain (concatenate iterators)
+let all: Vec<i32> = (1..=3).chain(7..=9).collect();
+// [1, 2, 3, 7, 8, 9]
+
+// flat_map (map + flatten)
+let words: Vec<&str> = vec!["hello world", "foo bar"]
+    .iter()
+    .flat_map(|s| s.split_whitespace())
+    .collect();
+// ["hello", "world", "foo", "bar"]
+
+// take, skip, step_by
+let first_three: Vec<_> = numbers.iter().take(3).collect();
+let skip_two: Vec<_> = numbers.iter().skip(2).collect();
+let every_other: Vec<_> = numbers.iter().step_by(2).collect();
+
+// any, all, find
+let has_even = numbers.iter().any(|&n| n % 2 == 0);      // true
+let all_positive = numbers.iter().all(|&n| n > 0);        // true
+let first_even = numbers.iter().find(|&&n| n % 2 == 0);   // Some(&2)
+
+// partition
+let (evens, odds): (Vec<_>, Vec<_>) = numbers.iter()
+    .partition(|&&n| n % 2 == 0);
+
+// windows and chunks
+let windows: Vec<_> = numbers.windows(3).collect();
+// [[1,2,3], [2,3,4], [3,4,5], ...]
+let chunks: Vec<_> = numbers.chunks(3).collect();
+// [1,2,3], [4,5,6], [7,8,9], [10](1,2,3],-[4,5,6],-[7,8,9],-[10)
+```
+
+### 2.3 — Implementing Iterator for Custom Types
+
+```rust
+struct Fibonacci {
+    a: u64,
+    b: u64,
+}
+
+impl Fibonacci {
+    fn new() -> Self {
+        Fibonacci { a: 0, b: 1 }
+    }
+}
+
+impl Iterator for Fibonacci {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = self.a;
+        let new_b = self.a + self.b;
+        self.a = self.b;
+        self.b = new_b;
+        Some(result)  // Infinite iterator
+    }
+}
+
+fn main() {
+    let fibs: Vec<u64> = Fibonacci::new().take(10).collect();
+    println!("{fibs:?}");  // [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+
+    let sum_under_100: u64 = Fibonacci::new()
+        .take_while(|&n| n < 100)
+        .sum();
+    println!("Sum of fibs under 100: {sum_under_100}");
+}
+```
+
+---
+
+## 🔑 3. Performance Patterns
+
+### 3.1 — Zero-Cost Abstractions (Proof)
+
+```rust
+// Iterator chains compile to the SAME assembly as manual loops:
+
+// Version A: iterator chain
+fn sum_of_squares_iter(data: &[i32]) -> i32 {
+    data.iter()
+        .filter(|&&x| x > 0)
+        .map(|&x| x * x)
+        .sum()
+}
+
+// Version B: manual loop
+fn sum_of_squares_loop(data: &[i32]) -> i32 {
+    let mut sum = 0;
+    for &x in data {
+        if x > 0 {
+            sum += x * x;
+        }
+    }
+    sum
+}
+
+// Both produce identical optimized assembly with --release
+// The iterator version is often FASTER because LLVM can vectorize it more easily
+```
+
+### 3.2 — Avoid Unnecessary Allocations
+
+```rust
+// BAD: allocates a new String
+fn greeting_bad(name: &str) -> String {
+    let mut s = String::new();
+    s.push_str("Hello, ");
+    s.push_str(name);
+    s.push('!');
+    s
+}
+
+// GOOD: single allocation with known capacity
+fn greeting_good(name: &str) -> String {
+    let mut s = String::with_capacity(7 + name.len() + 1);
+    s.push_str("Hello, ");
+    s.push_str(name);
+    s.push('!');
+    s
+}
+
+// BEST: use format! (compiler optimizes this well)
+fn greeting_best(name: &str) -> String {
+    format!("Hello, {name}!")
+}
+
+// Pre-allocate vectors when size is known:
+let mut results = Vec::with_capacity(items.len());
+for item in &items {
+    results.push(process(item));
+}
+```
+
+### 3.3 — Use &str Over String in Parameters
+
+```rust
+// BAD: forces caller to allocate a String
+fn process_bad(text: String) { /* ... */ }
+
+// GOOD: accepts both &str and &String (via Deref coercion)
+fn process_good(text: &str) { /* ... */ }
+
+// BEST for generic: accept anything string-like
+fn process_best(text: impl AsRef<str>) {
+    let text = text.as_ref();
+    // Works with String, &str, Cow<str>, etc.
+}
+```
+
+### 3.4 — Enum Dispatch Over Trait Objects
+
+```rust
+// Dynamic dispatch (trait object): ~2-5ns overhead per call
+fn process_dynamic(items: &[Box<dyn Processor>]) {
+    for item in items {
+        item.process();  // vtable lookup
+    }
+}
+
+// Static dispatch (enum): zero overhead, but closed set
+enum AnyProcessor {
+    Fast(FastProcessor),
+    Slow(SlowProcessor),
+    Batch(BatchProcessor),
+}
+
+impl AnyProcessor {
+    fn process(&self) {
+        match self {
+            Self::Fast(p) => p.process(),
+            Self::Slow(p) => p.process(),
+            Self::Batch(p) => p.process(),
+        }
+    }
+}
+
+// Use enum dispatch when:
+// - You know all variants at compile time
+// - Performance is critical (hot loop)
+// Use trait objects when:
+// - Variants are extensible (plugins, user-defined types)
+// - The set of types isn't known at compile time
+```
+
+---
+
+## ⚠️ 4. Anti-Patterns
+
+### Anti-Pattern 14.7.1 — Stringly Typed Code
+
+```rust
+// BAD: using strings for structured data
+fn set_status(status: &str) {
+    match status {
+        "active" | "inactive" | "pending" => { /* ... */ }
+        _ => panic!("invalid status"),  // Runtime error!
+    }
+}
+
+// GOOD: use enums
+enum Status { Active, Inactive, Pending }
+
+fn set_status(status: Status) {
+    match status {
+        Status::Active => { /* ... */ }
+        Status::Inactive => { /* ... */ }
+        Status::Pending => { /* ... */ }
+    }
+    // No default case needed — exhaustive!
+}
+```
+
+### Anti-Pattern 14.7.2 — Excessive clone()
+
+```rust
+// BAD: cloning to avoid borrow checker
+fn process(data: &Vec<String>) -> Vec<String> {
+    let cloned = data.clone();  // Unnecessary full copy!
+    cloned.into_iter()
+        .filter(|s| s.len() > 3)
+        .collect()
+}
+
+// GOOD: work with references
+fn process(data: &[String]) -> Vec<&str> {
+    data.iter()
+        .filter(|s| s.len() > 3)
+        .map(|s| s.as_str())
+        .collect()
+}
+
+// Or if you need owned strings:
+fn process(data: &[String]) -> Vec<String> {
+    data.iter()
+        .filter(|s| s.len() > 3)
+        .cloned()  // Only clone the ones that pass the filter
+        .collect()
+}
+```
+
+### Anti-Pattern 14.7.3 — Boolean Parameters
+
+```rust
+// BAD: what does `true` mean here?
+render_text("Hello", true, false, true);
+
+// GOOD: use enums or builder
+enum FontWeight { Normal, Bold }
+enum FontStyle { Regular, Italic }
+enum TextWrap { Wrap, NoWrap }
+
+fn render_text(text: &str, weight: FontWeight, style: FontStyle, wrap: TextWrap) {
+    // Clear at call site
+}
+
+render_text("Hello", FontWeight::Bold, FontStyle::Regular, TextWrap::Wrap);
+```
+
+### Anti-Pattern 14.7.4 — Ignoring Clippy
+
+```bash
+# Run clippy and FIX EVERYTHING:
+cargo clippy -- -W clippy::all -W clippy::pedantic
+
+# Common clippy catches:
+# - Using .clone() when a reference would work
+# - Manual implementations of From/Into
+# - Inefficient string operations
+# - Missing #[must_use] on Result-returning functions
+# - Using .unwrap() in library code
+```
+
+---
+
+## 🔗 5. Cross-Links
+
+- **Next**: [11.8 - Production Rust - WebAssembly, FFI, Embedded & Game Dev (Bevy)](11.8---Production-Rust---WebAssembly,-FFI,-Embedded-&-Game-Dev-(Bevy))
+- **Type system**: [11.3 - Type System - Enums, Traits & Generics](11.3---Type-System---Enums,-Traits-&-Generics) — Foundation for these patterns
+- **Error handling**: [11.4 - Error Handling - Result, Option & the Question-Mark Operator](11.4---Error-Handling---Result,-Option-&-the-Question-Mark-Operator) — Builder + validation
+- **Python idioms**: [08.3 - OOP, Data Models & Pythonic Idioms](08.3---OOP,-Data-Models-&-Pythonic-Idioms) — Compare protocol-based design
+
+---
+
+## 📖 6. References
+
+- [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
+- [Rust Design Patterns (free book)](https://rust-unofficial.github.io/patterns/)
+- [Clippy Lint List](https://rust-lang.github.io/rust-clippy/master/)
+- [Jon Gjengset: "Crust of Rust: Iterators"](https://www.youtube.com/watch?v=yozQ9C69pNs)
+- [fasterthanlime: "Aiming for idiomatic Rust"](https://fasterthanli.me/articles/aiming-for-correctness-with-types)
+- [Alexis King: "Parse, don't validate"](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Newtype Pattern with Deref: Transparent Wrappers
+
+**Problem:** Create a newtype `Email` that validates on construction, implements `Deref` to `str` for ergonomic use, and demonstrates when Deref is appropriate vs when it's an anti-pattern.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+use std::ops::Deref;
+use std::fmt;
+
+// ============================================================
+// VALIDATED NEWTYPE with Deref
+// ============================================================
+
+/// A validated email address. Guaranteed to be well-formed by construction.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Email(String);
+
+#[derive(Debug, thiserror::Error)]
+#[error("Invalid email: {0}")]
+pub struct EmailError(String);
+
+impl Email {
+    /// Parse and validate an email address.
+    /// This is the ONLY way to create an Email — guarantees validity.
+    pub fn parse(s: &str) -> Result<Self, EmailError> {
+        // Basic validation (production code would use a proper RFC 5322 parser)
+        if s.len() < 3 {
+            return Err(EmailError("too short".into()));
+        }
+        let at_pos = s.find('@')
+            .ok_or_else(|| EmailError("missing @".into()))?;
+        if at_pos == 0 {
+            return Err(EmailError("empty local part".into()));
+        }
+        let domain = &s[at_pos + 1..];
+        if !domain.contains('.') || domain.len() < 3 {
+            return Err(EmailError("invalid domain".into()));
+        }
+        Ok(Email(s.to_lowercase()))
+    }
+    
+    pub fn domain(&self) -> &str {
+        &self.0[self.0.find('@').unwrap() + 1..]
+    }
+    
+    pub fn local_part(&self) -> &str {
+        &self.0[..self.0.find('@').unwrap()]
+    }
+}
+
+// Deref to str — allows using Email anywhere &str is expected
+impl Deref for Email {
+    type Target = str;
+    fn deref(&self) -> &str {
+        &self.0
+    }
+}
+
+// Display delegates to the inner string
+impl fmt::Display for Email {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+// AsRef<str> — another way to expose the inner value
+impl AsRef<str> for Email {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+// Serialize/Deserialize with validation
+impl<'de> serde::Deserialize<'de> for Email {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de>
+    {
+        let s = String::deserialize(deserializer)?;
+        Email::parse(&s).map_err(serde::de::Error::custom)
+    }
+}
+
+impl serde::Serialize for Email {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: serde::Serializer
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+fn demo_email() {
+    let email = Email::parse("User@Example.COM").unwrap();
+    
+    // Deref allows transparent use as &str:
+    println!("Length: {}", email.len());           // str::len()
+    println!("Contains: {}", email.contains('@')); // str::contains()
+    println!("Domain: {}", email.domain());
+    
+    // Can pass to any function expecting &str:
+    fn send_notification(to: &str) {
+        println!("Sending to: {to}");
+    }
+    send_notification(&email);  // Deref coercion: &Email → &str
+    
+    // But can't accidentally create an invalid Email:
+    // let bad = Email("not-an-email".into());  // ❌ Email(String) is private
+    assert!(Email::parse("invalid").is_err());
+}
+
+// ============================================================
+// WHEN DEREF IS AN ANTI-PATTERN
+// ============================================================
+
+// ❌ BAD: Deref for "inheritance" (SmartPointer pattern abuse)
+// struct Animal { name: String }
+// struct Dog { animal: Animal, breed: String }
+// impl Deref for Dog { type Target = Animal; ... }
+// This is NOT what Deref is for! Use composition + delegation instead.
+
+// ✅ GOOD uses of Deref:
+// - Smart pointers: Box<T>, Rc<T>, Arc<T> → T
+// - Transparent wrappers: String → str, Vec<T> → [T]
+// - Validated newtypes: Email → str, Url → str
+// - Single-field wrappers where the wrapper IS-A the inner type
+
+// ❌ BAD uses of Deref:
+// - Simulating inheritance (Dog → Animal)
+// - When the wrapper has different semantics than the inner type
+// - When you want to hide some methods of the inner type
+```
+
+</details>
+
+### Example 8.2 — impl Trait in Return Position and Associated Types
+
+**Problem:** Build a middleware pipeline where each middleware transforms a request/response, using `impl Trait` for ergonomic return types and associated types for the pipeline's type-level composition.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+// ============================================================
+// impl Trait in return position: opaque types
+// ============================================================
+
+// The caller knows WHAT it can do (Iterator<Item = i32>)
+// but not the exact type (Filter<Map<Range<i32>, ...>, ...>)
+fn even_squares(limit: i32) -> impl Iterator<Item = i32> {
+    (0..limit)
+        .map(|x| x * x)
+        .filter(|&x| x % 2 == 0)
+    // Return type is: Filter<Map<Range<i32>, [closure]>, [closure]>
+    // But caller just sees: impl Iterator<Item = i32>
+}
+
+// ============================================================
+// MIDDLEWARE PIPELINE with associated types
+// ============================================================
+
+/// A request flowing through the pipeline
+#[derive(Debug, Clone)]
+struct Request {
+    path: String,
+    headers: Vec<(String, String)>,
+    body: Vec<u8>,
+}
+
+/// A response produced by the pipeline
+#[derive(Debug, Clone)]
+struct Response {
+    status: u16,
+    headers: Vec<(String, String)>,
+    body: Vec<u8>,
+}
+
+/// A service that handles requests
+trait Service {
+    type Future: std::future::Future<Output = Response>;
+    
+    fn call(&self, req: Request) -> Self::Future;
+}
+
+/// A middleware that wraps a service
+trait Middleware<S: Service> {
+    type Wrapped: Service;
+    
+    fn wrap(self, inner: S) -> Self::Wrapped;
+}
+
+// --- Concrete implementations ---
+
+/// Simple handler (leaf service)
+struct HelloHandler;
+
+impl Service for HelloHandler {
+    type Future = std::future::Ready<Response>;
+    
+    fn call(&self, _req: Request) -> Self::Future {
+        std::future::ready(Response {
+            status: 200,
+            headers: vec![],
+            body: b"Hello, World!".to_vec(),
+        })
+    }
+}
+
+/// Logging middleware
+struct LoggingMiddleware;
+struct LoggingService<S> { inner: S }
+
+impl<S: Service> Middleware<S> for LoggingMiddleware {
+    type Wrapped = LoggingService<S>;
+    
+    fn wrap(self, inner: S) -> LoggingService<S> {
+        LoggingService { inner }
+    }
+}
+
+impl<S: Service> Service for LoggingService<S> {
+    type Future = LoggingFuture<S::Future>;
+    
+    fn call(&self, req: Request) -> Self::Future {
+        println!("[LOG] {} {}", "GET", req.path);
+        LoggingFuture { inner: self.inner.call(req) }
+    }
+}
+
+/// Auth middleware
+struct AuthMiddleware { token: String }
+struct AuthService<S> { inner: S, token: String }
+
+impl<S: Service> Middleware<S> for AuthMiddleware {
+    type Wrapped = AuthService<S>;
+    
+    fn wrap(self, inner: S) -> AuthService<S> {
+        AuthService { inner, token: self.token }
+    }
+}
+
+impl<S: Service> Service for AuthService<S> {
+    type Future = AuthFuture<S::Future>;
+    
+    fn call(&self, req: Request) -> Self::Future {
+        let has_auth = req.headers.iter()
+            .any(|(k, v)| k == "Authorization" && v == &self.token);
+        
+        if has_auth {
+            AuthFuture::Authorized(self.inner.call(req))
+        } else {
+            AuthFuture::Rejected
+        }
+    }
+}
+
+// Future wrappers (simplified — in production use Pin<Box<dyn Future>>)
+use std::pin::Pin;
+use std::task::{Context, Poll};
+
+struct LoggingFuture<F> { inner: F }
+impl<F: std::future::Future<Output = Response> + Unpin> std::future::Future for LoggingFuture<F> {
+    type Output = Response;
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Response> {
+        Pin::new(&mut self.inner).poll(cx)
+    }
+}
+
+enum AuthFuture<F> { Authorized(F), Rejected }
+impl<F: std::future::Future<Output = Response> + Unpin> std::future::Future for AuthFuture<F> {
+    type Output = Response;
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Response> {
+        match &mut *self {
+            AuthFuture::Authorized(f) => Pin::new(f).poll(cx),
+            AuthFuture::Rejected => Poll::Ready(Response {
+                status: 401,
+                headers: vec![],
+                body: b"Unauthorized".to_vec(),
+            }),
+        }
+    }
+}
+
+// ============================================================
+// COMPOSING THE PIPELINE (type-level composition)
+// ============================================================
+
+/// Build a service pipeline using impl Trait for the return type
+fn build_service() -> impl Service {
+    let handler = HelloHandler;
+    let with_logging = LoggingMiddleware.wrap(handler);
+    let with_auth = AuthMiddleware { token: "secret".into() }.wrap(with_logging);
+    with_auth
+    // Return type is: AuthService<LoggingService<HelloHandler>>
+    // But caller just sees: impl Service
+}
+```
+
+</details>
+
+### Example 8.3 — #[non_exhaustive] for Forward Compatibility
+
+**Problem:** You're publishing a library crate. Design your public enums and structs so that adding new variants/fields in future versions doesn't break downstream code.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+// ============================================================
+// #[non_exhaustive] on enums: prevents exhaustive matching
+// ============================================================
+
+/// Error types for the database library.
+/// New variants may be added in future versions.
+#[non_exhaustive]
+#[derive(Debug, thiserror::Error)]
+pub enum DbError {
+    #[error("Connection refused: {0}")]
+    ConnectionRefused(String),
+    
+    #[error("Query timeout after {0:?}")]
+    Timeout(std::time::Duration),
+    
+    #[error("Authentication failed")]
+    AuthFailed,
+    
+    // In v2.0, we can add:
+    // #[error("Rate limited")]
+    // RateLimited { retry_after: Duration },
+    // 
+    // Without #[non_exhaustive], this would be a BREAKING CHANGE
+    // because downstream match statements would become non-exhaustive.
+}
+
+// Downstream code MUST have a wildcard arm:
+fn handle_error(e: DbError) {
+    match e {
+        DbError::ConnectionRefused(addr) => {
+            eprintln!("Can't connect to {addr}, retrying...");
+        }
+        DbError::Timeout(duration) => {
+            eprintln!("Query timed out after {duration:?}");
+        }
+        DbError::AuthFailed => {
+            eprintln!("Check credentials");
+        }
+        _ => {
+            // REQUIRED by #[non_exhaustive]
+            // Handles any future variants gracefully
+            eprintln!("Unknown error: {e}");
+        }
+    }
+}
+
+// ============================================================
+// #[non_exhaustive] on structs: prevents construction outside crate
+// ============================================================
+
+/// Configuration for the database connection.
+/// New fields may be added in future versions.
+#[non_exhaustive]
+#[derive(Debug, Clone)]
+pub struct DbConfig {
+    pub host: String,
+    pub port: u16,
+    pub database: String,
+    pub max_connections: u32,
+    // In v2.0, we can add:
+    // pub ssl_mode: SslMode,
+    // pub connect_timeout: Duration,
+    // Without breaking downstream code!
+}
+
+impl DbConfig {
+    /// Constructor (the only way to create DbConfig from outside the crate)
+    pub fn new(host: impl Into<String>, port: u16, database: impl Into<String>) -> Self {
+        DbConfig {
+            host: host.into(),
+            port,
+            database: database.into(),
+            max_connections: 10,
+        }
+    }
+    
+    /// Builder-style setter
+    pub fn max_connections(mut self, n: u32) -> Self {
+        self.max_connections = n;
+        self
+    }
+}
+
+// Downstream code:
+fn use_config() {
+    // ✅ Use the constructor:
+    let config = DbConfig::new("localhost", 5432, "mydb")
+        .max_connections(20);
+    
+    // ❌ Can't construct directly (even though fields are pub):
+    // let config = DbConfig {
+    //     host: "localhost".into(),
+    //     port: 5432,
+    //     database: "mydb".into(),
+    //     max_connections: 10,
+    // };
+    // Error: cannot create non-exhaustive struct using struct expression
+    
+    // ✅ Can still read fields:
+    println!("Connecting to {}:{}", config.host, config.port);
+    
+    // ✅ Can destructure with ..:
+    let DbConfig { host, port, .. } = config;
+    println!("{host}:{port}");
+}
+
+// ============================================================
+// #[non_exhaustive] on enum variants: prevents construction
+// ============================================================
+
+#[non_exhaustive]
+pub enum Event {
+    #[non_exhaustive]
+    Click { x: i32, y: i32 },  // Can't construct from outside crate
+    
+    #[non_exhaustive]
+    KeyPress { key: char },
+    
+    Quit,
+}
+
+// Downstream:
+fn handle_event(event: Event) {
+    match event {
+        Event::Click { x, y, .. } => {  // `..` required for non_exhaustive variant
+            println!("Click at ({x}, {y})");
+        }
+        Event::KeyPress { key, .. } => {
+            println!("Key: {key}");
+        }
+        _ => {}  // Required for non_exhaustive enum
+    }
+}
+
+// ============================================================
+// WHEN TO USE #[non_exhaustive]
+// ============================================================
+//
+// ✅ USE for:
+// - Public enums that might gain variants (error types, events)
+// - Public structs that might gain fields (config, options)
+// - Any type in a library that you want to evolve without semver bumps
+//
+// ❌ DON'T USE for:
+// - Internal types (not part of public API)
+// - Types that are genuinely complete (bool-like enums)
+// - Performance-critical types (prevents some optimizations)
+// - Types where exhaustive matching is a feature (AST nodes)
+```
+
+</details>
+
+### Example 8.4 — const fn Evolution: Compile-Time Computation
+
+**Problem:** Demonstrate the current capabilities of `const fn` in Rust, including what can and cannot be computed at compile time, and how to use it for zero-cost initialization.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+// ============================================================
+// BASIC const fn: computed at compile time
+// ============================================================
+
+/// Compute factorial at compile time
+const fn factorial(n: u64) -> u64 {
+    match n {
+        0 | 1 => 1,
+        _ => n * factorial(n - 1),
+    }
+}
+
+// Used in a const context — computed at compile time:
+const FACT_10: u64 = factorial(10);  // 3628800 (computed at compile time)
+const FACT_20: u64 = factorial(20);  // 2432902008176640000
+
+// Can also be called at runtime (same function works both ways):
+fn runtime_factorial(n: u64) -> u64 {
+    factorial(n)  // Computed at runtime if n isn't const
+}
+
+// ============================================================
+// const fn with structs and methods
+// ============================================================
+
+#[derive(Debug)]
+struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
+}
+
+impl Color {
+    /// Construct a color at compile time
+    const fn new(r: u8, g: u8, b: u8) -> Self {
+        Color { r, g, b, a: 255 }
+    }
+    
+    const fn with_alpha(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Color { r, g, b, a }
+    }
+    
+    /// Blend two colors (compile-time capable)
+    const fn blend(self, other: Self) -> Self {
+        Color {
+            r: ((self.r as u16 + other.r as u16) / 2) as u8,
+            g: ((self.g as u16 + other.g as u16) / 2) as u8,
+            b: ((self.b as u16 + other.b as u16) / 2) as u8,
+            a: ((self.a as u16 + other.a as u16) / 2) as u8,
+        }
+    }
+}
+
+// Compile-time color palette:
+const RED: Color = Color::new(255, 0, 0);
+const BLUE: Color = Color::new(0, 0, 255);
+const PURPLE: Color = RED.blend(BLUE);  // Computed at compile time!
+
+// ============================================================
+// const fn for lookup tables (zero-cost initialization)
+// ============================================================
+
+/// Generate a CRC32 lookup table at compile time
+const fn generate_crc32_table() -> [u32; 256] {
+    let mut table = [0u32; 256];
+    let mut i = 0;
+    while i < 256 {
+        let mut crc = i as u32;
+        let mut j = 0;
+        while j < 8 {
+            if crc & 1 != 0 {
+                crc = (crc >> 1) ^ 0xEDB88320;
+            } else {
+                crc >>= 1;
+            }
+            j += 1;
+        }
+        table[i] = crc;
+        i += 1;
+    }
+    table
+}
+
+// Table is embedded in the binary — zero runtime initialization cost
+const CRC32_TABLE: [u32; 256] = generate_crc32_table();
+
+fn crc32(data: &[u8]) -> u32 {
+    let mut crc = 0xFFFFFFFF_u32;
+    for &byte in data {
+        let index = ((crc ^ byte as u32) & 0xFF) as usize;
+        crc = (crc >> 8) ^ CRC32_TABLE[index];
+    }
+    !crc
+}
+
+// ============================================================
+// CURRENT LIMITATIONS of const fn (as of Rust 1.82)
+// ============================================================
+
+// ✅ ALLOWED in const fn:
+// - Arithmetic, bitwise operations
+// - Control flow (if, match, loop, while)
+// - Struct/enum construction and field access
+// - Array indexing (with bounds check)
+// - Calling other const fns
+// - References (&T, &mut T within the const context)
+// - Trait methods (if the trait is const — limited)
+
+// ❌ NOT ALLOWED in const fn:
+// - Heap allocation (Box, Vec, String)
+// - Floating point (partially stabilized in 1.82)
+// - Trait objects (dyn Trait)
+// - Raw pointer dereferencing (unsafe in const is limited)
+// - Most std library functions (not yet marked const)
+// - Iterator methods (.map(), .filter(), etc.)
+// - Format strings (format!, println!)
+
+// ============================================================
+// WORKAROUND: const arrays without iterators
+// ============================================================
+
+/// Since we can't use iterators in const, use while loops:
+const fn generate_squares() -> [u64; 100] {
+    let mut result = [0u64; 100];
+    let mut i = 0;
+    while i < 100 {
+        result[i] = (i as u64) * (i as u64);
+        i += 1;
+    }
+    result
+}
+
+const SQUARES: [u64; 100] = generate_squares();
+
+fn main() {
+    println!("10! = {FACT_10}");
+    println!("Purple: {:?}", PURPLE);
+    println!("CRC32 of 'hello': {:08x}", crc32(b"hello"));
+    println!("50² = {}", SQUARES[50]);
+}
+```
+
+</details>
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 The Orphan Rule and Coherence: Complete Rules and Escape Hatches
+
+Trait coherence ensures that for any given type and trait, there is at most one implementation. The orphan rule is the mechanism that enforces this across crate boundaries. Here we detail the precise rules and all known workarounds.
+
+**The formal coherence rules (RFC 2451):**
+
+An implementation `impl<T1, ..., Tn> Trait<P1, ..., Pm> for Type` is allowed in crate C if:
+
+1. `Trait` is defined in C, OR
+2. At least one of `Type, P1, ..., Pm` is a **local type** (defined in C), AND
+3. The local type appears before any **uncovered** type parameters
+
+A type parameter `T` is "uncovered" if it appears outside of any local type. The "covering" requirement prevents blanket impls from conflicting.
+
+```rust
+// In crate `my_crate`:
+
+struct MyType;
+trait MyTrait {}
+
+// ✅ Rule 1: Local trait
+impl MyTrait for Vec<i32> {}
+
+// ✅ Rule 2: Local type
+impl std::fmt::Display for MyType {}
+
+// ✅ Local type covers the generic parameter:
+impl<T> std::fmt::Display for MyWrapper<T> {}  // MyWrapper is local, covers T
+
+// ❌ Uncovered type parameter:
+// impl<T> std::fmt::Display for Vec<T> {}
+// T is uncovered (not inside a local type)
+// Another crate could also impl Display for Vec<TheirType>
+
+// ❌ Foreign trait + foreign type:
+// impl std::fmt::Display for Vec<i32> {}
+// Neither Display nor Vec<i32> is local
+```
+
+**Escape hatch 1: Newtype pattern**
+
+The most common workaround. Wrap the foreign type in a local struct:
+
+```rust
+// Can't impl Display for Vec<i32> directly
+struct DisplayVec(Vec<i32>);
+
+impl std::fmt::Display for DisplayVec {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self.0)
+    }
+}
+
+// Make the wrapper transparent with Deref:
+impl std::ops::Deref for DisplayVec {
+    type Target = Vec<i32>;
+    fn deref(&self) -> &Vec<i32> { &self.0 }
+}
+
+// And From/Into for easy conversion:
+impl From<Vec<i32>> for DisplayVec {
+    fn from(v: Vec<i32>) -> Self { DisplayVec(v) }
+}
+```
+
+**Escape hatch 2: Extension traits**
+
+Define a new trait with the methods you want, then implement it for the foreign type:
+
+```rust
+/// Extension methods for iterators (local trait → can impl for foreign types)
+trait IteratorExt: Iterator {
+    fn sum_by<F, B>(self, f: F) -> B
+    where
+        Self: Sized,
+        F: FnMut(Self::Item) -> B,
+        B: std::iter::Sum,
+    {
+        self.map(f).sum()
+    }
+    
+    fn try_collect_vec(self) -> Result<Vec<Self::Item>, Self::Item>
+    where
+        Self: Sized,
+        Self::Item: std::fmt::Debug,
+    {
+        Ok(self.collect())
+    }
+}
+
+// Blanket implementation for ALL iterators:
+impl<I: Iterator> IteratorExt for I {}
+
+// Now any code that imports IteratorExt can use these methods:
+fn demo() {
+    let sum: i32 = vec![1, 2, 3].iter().sum_by(|&x| x * x);
+    assert_eq!(sum, 14);
+}
+```
+
+**Escape hatch 3: Wrapper trait with AsRef**
+
+When you need to implement a foreign trait for a foreign type that wraps something you control:
+
+```rust
+// You can't impl Serialize for HashMap<MyKey, MyValue> directly
+// But you can create a wrapper that uses AsRef:
+
+struct SerializableMap<'a>(&'a HashMap<String, MyValue>);
+
+impl<'a> serde::Serialize for SerializableMap<'a> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        // Custom serialization logic
+        use serde::ser::SerializeMap;
+        let mut map = serializer.serialize_map(Some(self.0.len()))?;
+        for (k, v) in self.0 {
+            map.serialize_entry(k, &v.to_string())?;
+        }
+        map.end()
+    }
+}
+```
+
+---
+
+### 9.2 Trait Coherence Escapes: The Fundamental Type Trick
+
+Rust designates certain types as "fundamental" — they're transparent for coherence purposes. The fundamental types are `&T`, `&mut T`, `Box<T>`, and `Pin<T>`.
+
+**What "fundamental" means:**
+
+For coherence checking, `&MyType` is treated as if `MyType` itself appeared. This allows:
+
+```rust
+struct MyType;
+
+// ✅ This works because &T is fundamental:
+impl std::fmt::Display for &MyType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "MyType ref")
+    }
+}
+
+// ✅ Box<T> is fundamental:
+impl std::fmt::Display for Box<MyType> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Boxed MyType")
+    }
+}
+```
+
+Without the fundamental designation, `&MyType` would be "foreign type `&` applied to local type `MyType`" — and the orphan rule would reject it because `&` is defined in `std`.
+
+**Blanket impls and their interaction with coherence:**
+
+```rust
+// This blanket impl in std prevents you from implementing Display for &YourType:
+// impl<T: Display> Display for &T { ... }
+// 
+// Because if you wrote:
+// impl Display for &MyType { ... }
+// It would conflict with the blanket impl (if MyType: Display).
+//
+// Solution: Don't implement Display for &MyType if MyType already implements Display.
+// The blanket impl handles it automatically.
+```
+
+---
+
+### 9.3 The Builder Pattern: Advanced Variants
+
+Beyond the basic builder shown in Section 1, there are several advanced builder patterns used in production Rust:
+
+**Variant 1: Typestate Builder (compile-time required fields)**
+
+```rust
+// Ensures required fields are set at compile time
+struct ServerBuilder<Host, Port> {
+    host: Host,
+    port: Port,
+    max_connections: u32,
+}
+
+// Marker types for unset fields
+struct Unset;
+struct Set<T>(T);
+
+impl ServerBuilder<Unset, Unset> {
+    fn new() -> Self {
+        ServerBuilder {
+            host: Unset,
+            port: Unset,
+            max_connections: 100,
+        }
+    }
+}
+
+impl<P> ServerBuilder<Unset, P> {
+    fn host(self, host: String) -> ServerBuilder<Set<String>, P> {
+        ServerBuilder {
+            host: Set(host),
+            port: self.port,
+            max_connections: self.max_connections,
+        }
+    }
+}
+
+impl<H> ServerBuilder<H, Unset> {
+    fn port(self, port: u16) -> ServerBuilder<H, Set<u16>> {
+        ServerBuilder {
+            host: self.host,
+            port: Set(port),
+            max_connections: self.max_connections,
+        }
+    }
+}
+
+// build() is ONLY available when both required fields are set:
+impl ServerBuilder<Set<String>, Set<u16>> {
+    fn build(self) -> Server {
+        Server {
+            host: self.host.0,
+            port: self.port.0,
+            max_connections: self.max_connections,
+        }
+    }
+}
+
+struct Server { host: String, port: u16, max_connections: u32 }
+
+fn demo() {
+    // ✅ Compiles: both required fields set
+    let server = ServerBuilder::new()
+        .host("localhost".into())
+        .port(8080)
+        .build();
+    
+    // ❌ COMPILE ERROR: build() not available without host
+    // let server = ServerBuilder::new()
+    //     .port(8080)
+    //     .build();  // Error: no method `build` on ServerBuilder<Unset, Set<u16>>
+}
+```
+
+**Variant 2: derive_builder (macro-generated)**
+
+```rust
+// Using the `derive_builder` crate:
+// #[derive(Builder)]
+// #[builder(setter(into))]
+// struct Server {
+//     host: String,
+//     port: u16,
+//     #[builder(default = "100")]
+//     max_connections: u32,
+// }
+// 
+// let server = ServerBuilder::default()
+//     .host("localhost")
+//     .port(8080)
+//     .build()?;
+```
+
+**Variant 3: bon crate (function-like builders)**
+
+```rust
+// Using the `bon` crate (2024+):
+// #[bon::builder]
+// fn create_server(
+//     host: String,
+//     port: u16,
+//     #[builder(default = 100)]
+//     max_connections: u32,
+// ) -> Server {
+//     Server { host, port, max_connections }
+// }
+//
+// let server = create_server()
+//     .host("localhost".into())
+//     .port(8080)
+//     .call();
+```
+
+---
+
+### 9.4 Performance Patterns: SIMD, Alignment, and Cache Optimization
+
+**Struct field ordering for cache performance:**
+
+```rust
+// ❌ BAD: Padding wastes cache space
+struct BadLayout {
+    a: u8,      // 1 byte + 7 padding
+    b: u64,     // 8 bytes
+    c: u8,      // 1 byte + 7 padding
+    d: u64,     // 8 bytes
+}
+// Total: 32 bytes (16 bytes wasted on padding)
+
+// ✅ GOOD: Group by size (Rust does this automatically with repr(Rust))
+struct GoodLayout {
+    b: u64,     // 8 bytes
+    d: u64,     // 8 bytes
+    a: u8,      // 1 byte
+    c: u8,      // 1 byte + 6 padding
+}
+// Total: 24 bytes (6 bytes padding)
+
+// Note: Rust's default repr reorders fields for optimal packing.
+// Only use #[repr(C)] when you need C-compatible layout (FFI).
+```
+
+**Data-oriented design (SoA vs AoS):**
+
+```rust
+// AoS (Array of Structs) — typical OOP layout
+struct Particle { x: f32, y: f32, z: f32, mass: f32, charge: f32 }
+let particles: Vec<Particle> = vec![/* ... */];
+// Memory: [x,y,z,m,c, x,y,z,m,c, x,y,z,m,c, ...]
+// If you only need positions, you load mass+charge into cache too (waste)
+
+// SoA (Struct of Arrays) — data-oriented layout
+struct Particles {
+    x: Vec<f32>,
+    y: Vec<f32>,
+    z: Vec<f32>,
+    mass: Vec<f32>,
+    charge: Vec<f32>,
+}
+// Memory: [x,x,x,...] [y,y,y,...] [z,z,z,...] [m,m,m,...] [c,c,c,...]
+// Position-only operations load ONLY position data — perfect cache utilization
+// Also enables SIMD: process 4/8/16 x-values simultaneously
+
+// When to use SoA:
+// - Processing one field at a time across many entities (physics, rendering)
+// - SIMD-friendly operations (same operation on many values)
+// - Large collections where cache efficiency matters
+//
+// When to use AoS:
+// - Accessing all fields of one entity together
+// - Small collections
+// - When entity identity matters more than batch processing
+```
+
+---

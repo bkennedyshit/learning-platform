@@ -1,0 +1,100 @@
+<svg viewBox="0 0 650 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .ethical { fill: var(--background-secondary, #161b22); stroke: #51cf66; stroke-width: 2; rx: 8; transition: all 0.3s ease; animation: green-breathe 4s ease-in-out infinite; }
+    .dark { fill: var(--background-secondary, #161b22); stroke: #ff6b6b; stroke-width: 2; rx: 8; transition: all 0.3s ease; animation: red-flicker 5s ease-in-out infinite; }
+    
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .col-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: bold; text-anchor: middle; }
+    .good { fill: #51cf66; }
+    .bad { fill: #ff6b6b; }
+    
+    /* Interactive Card Groups */
+    .ethical-group { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+    .ethical-group:hover { transform: translateY(-3px); }
+    .ethical-group:hover .ethical { stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(81, 207, 102, 0.6)); }
+    
+    .dark-group { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+    .dark-group:hover { transform: translateY(-3px); }
+    .dark-group:hover .dark { stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6)); }
+
+    /* Passive Animations: Calming green breath vs Warning red flicker */
+    @keyframes green-breathe {
+      0%, 100% { stroke-opacity: 0.7; }
+      50% { stroke-opacity: 1; filter: drop-shadow(0 0 3px rgba(81, 207, 102, 0.3)); }
+    }
+    
+    @keyframes red-flicker {
+      0%, 100% { stroke-opacity: 0.6; }
+      48% { stroke-opacity: 0.6; }
+      50% { stroke-opacity: 1; filter: drop-shadow(0 0 4px rgba(255, 107, 107, 0.6)); }
+      52% { stroke-opacity: 0.65; }
+      54% { stroke-opacity: 0.85; }
+      56% { stroke-opacity: 0.6; }
+    }
+  </style>
+
+  <text x="325" y="25" class="title">Monetization Spectrum: Ethical vs Dark Patterns</text>
+
+  <text x="175" y="55" class="col-title good">Ethical (Value-Aligned)</text>
+  <text x="500" y="55" class="col-title bad">Dark Patterns (Exploitative)</text>
+
+  <!-- Left: Ethical Cards -->
+  <g class="ethical-group" style="animation-delay: 0s;">
+    <rect x="60" y="70" width="230" height="40" class="ethical"/>
+    <text x="175" y="88" class="label">Cosmetics Only</text>
+    <text x="175" y="102" class="sublabel">No gameplay advantage (Fortnite skins)</text>
+  </g>
+
+  <g class="ethical-group" style="animation-delay: 0.5s;">
+    <rect x="60" y="120" width="230" height="40" class="ethical"/>
+    <text x="175" y="138" class="label">Expansion DLC</text>
+    <text x="175" y="152" class="sublabel">Substantial new content (Hollow Knight DLC)</text>
+  </g>
+
+  <g class="ethical-group" style="animation-delay: 1s;">
+    <rect x="60" y="170" width="230" height="40" class="ethical"/>
+    <text x="175" y="188" class="label">Battle Pass (Transparent)</text>
+    <text x="175" y="202" class="sublabel">Known rewards, earnable free tier</text>
+  </g>
+
+  <g class="ethical-group" style="animation-delay: 1.5s;">
+    <rect x="60" y="220" width="230" height="40" class="ethical"/>
+    <text x="175" y="238" class="label">Pay Once, Play Forever</text>
+    <text x="175" y="252" class="sublabel">Stardew Valley, Hollow Knight model</text>
+  </g>
+
+  <!-- Right: Dark Pattern Cards -->
+  <g class="dark-group" style="animation-delay: 0s;">
+    <rect x="370" y="70" width="230" height="40" class="dark"/>
+    <text x="485" y="88" class="label">Loot Boxes (Gambling)</text>
+    <text x="485" y="102" class="sublabel">Variable-ratio schedule exploitation</text>
+  </g>
+
+  <g class="dark-group" style="animation-delay: 0.5s;">
+    <rect x="370" y="120" width="230" height="40" class="dark"/>
+    <text x="485" y="138" class="label">Pay-to-Win</text>
+    <text x="485" y="152" class="sublabel">Purchased power destroys fairness</text>
+  </g>
+
+  <g class="dark-group" style="animation-delay: 1s;">
+    <rect x="370" y="170" width="230" height="40" class="dark"/>
+    <text x="485" y="188" class="label">Artificial Energy Gates</text>
+    <text x="485" y="202" class="sublabel">Wait or pay — manufactured friction</text>
+  </g>
+
+  <g class="dark-group" style="animation-delay: 1.5s;">
+    <rect x="370" y="220" width="230" height="40" class="dark"/>
+    <text x="485" y="238" class="label">FOMO + Loss Aversion</text>
+    <text x="485" y="252" class="sublabel">Limited-time pressure, sunk cost traps</text>
+  </g>
+
+  <!-- Center Divider and balancing indicator -->
+  <line x1="325" y1="55" x2="325" y2="280" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4,4"/>
+  <circle cx="325" cy="55" r="2.5" fill="var(--text-muted, #8b949e)" opacity="0.6">
+    <animate attributeName="cy" from="55" to="280" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="325" y="305" class="sublabel" fill="var(--text-accent, #79c0ff)">Design Question: Does the player feel respected after spending?</text>
+</svg>

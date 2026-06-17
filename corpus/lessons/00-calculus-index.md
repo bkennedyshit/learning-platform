@@ -1,0 +1,139 @@
+---
+title: "Calculus Index"
+subject: "Mathematical Foundations & Calculus"
+catalog: advanced
+audience_tier: higher-education
+chapter: "Chapter 1"
+type: index
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 🧮 Calculus — Core Index
+
+### 🎥 Video Lecture Overview
+![The_Geometry_of_Integral_Theorems](The_Geometry_of_Integral_Theorems.mp4)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/video/The_Geometry_of_Integral_Theorems.mp4`)*
+
+---
+
+## 📂 Files & Core Topics
+
+*   **[1.1 - Limits & Continuity](1.1---Limits-&-Continuity)** — Limits, continuity, intermediate value theorem, squeeze theorem, and mathematical rigour.
+*   **[1.2 - Single-Variable Differentiation](1.2---Single-Variable-Differentiation)** — Derivatives, chain rule, implicit differentiation, optimization, and the Mean Value Theorem.
+*   **[1.3 - Single-Variable Integration](1.3---Single-Variable-Integration)** — Indefinite and definite integrals, Riemann sums, Darboux sums, and the Fundamental Theorem of Calculus.
+*   **[1.4 - Multivariable Limits & Partial Derivatives](1.4---Multivariable-Limits-&-Partial-Derivatives)** — Multivariable functions, partial derivatives, limits in higher dimensions, and gradients.
+*   **[1.5 - Multiple Integrals & Jacobians](1.5---Multiple-Integrals-&-Jacobians)** — Double/triple integrals, coordinate transformations (spherical, cylindrical), and Jacobian determinants.
+*   **[1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl)** — Line integrals, conservative fields, path independence, divergence, curl, and physical intuitions.
+*   **[1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems)** — Circulation, flux, Green's Theorem, Stokes' Theorem, and the Gauss Divergence Theorem.
+*   **[1.8 - Exterior Algebra & Differential Forms](1.8---Exterior-Algebra-&-Differential-Forms)** — Wedge products, exterior derivatives, boundary operators, and the Unified Generalized Stokes' Theorem.
+
+---
+
+## 🧠 Interactive Study Resources
+
+> [!NOTE] NotebookLM Notebook
+> 🔗 [Open the Calculus Research Notebook](https://notebooklm.google.com/notebook/0b6e9ee9-191f-4e1b-b896-4760ef18774d)
+
+> [!TIP] Study Guides & Flashcards
+> *   📄 [Comprehensive Calculus Study Guide](https://notebooklm.google.com/notebook/0b6e9ee9-191f-4e1b-b896-4760ef18774d/artifact/b5da3f67-8f6c-4c5d-9133-8c85e19de381)
+> *   📋 [Calculus Concept Flashcards](https://notebooklm.google.com/notebook/0b6e9ee9-191f-4e1b-b896-4760ef18774d/artifact/14ef4ba3-6953-4322-8cec-66ae55877149)
+> *   📝 [Advanced Calculus Essay Prompts](https://notebooklm.google.com/notebook/0b6e9ee9-191f-4e1b-b896-4760ef18774d/artifact/ae932a24-26a9-4fb7-8828-2db0278afe13)
+> *   🎒 [Integration & Vector Calculus Review Quiz](https://notebooklm.google.com/notebook/0b6e9ee9-191f-4e1b-b896-4760ef18774d/artifact/f24605e3-394e-413a-9a58-e707280b907a)
+
+---
+
+## 📝 Part I: Short-Answer Quiz
+
+**Instructions:** Answer each of the following questions in 2–3 sentences based on the principles outlined in the source material.
+
+1.  **The Significance of the Constant of Integration:** Why is the arbitrary constant $C$ considered essential in the definition of an indefinite integral?
+2.  **Riemann Integrability Criterion:** Under what specific condition is a bounded function $f$ considered Riemann integrable on a closed interval $[a, b]$?
+3.  **Fundamental Theorem of Calculus (FTC) Overview:** How does the FTC serve as a "bridge" between differentiation and integration?
+4.  **Simply Connected Domains:** Define a simply connected domain and explain why this topological property is necessary for the application of Green’s Theorem.
+5.  **Physical Interpretation of Flux:** In the context of vector calculus, what does a surface integral (flux) physically represent?
+6.  **The Right-Hand Rule in Stokes' Theorem:** Describe the orientation convention used to relate a smooth oriented surface $S$ to its boundary curve $\partial S$.
+7.  **The "One Theorem" Concept:** How does the Generalized Stokes' Theorem unify Green's, Stokes', and the Divergence Theorem?
+8.  **Improper Integrals (Type I vs. Type II):** What is the primary difference between a Type I and a Type II improper integral?
+9.  **Exact Differential Equations:** In the study of first-order differential equations, what defines an "Exact Equation" and how is it solved?
+10. **The Role of the Divergence Theorem in Physics:** How is the Divergence Theorem utilized to derive local conservation laws, such as the continuity equation in fluid dynamics?
+
+---
+
+## 🔑 Part II: Answer Key
+
+1.  **The Significance of the Constant of Integration:** Omitting $+C$ loses an entire family of antiderivatives, which is a critical error in differential equations because every constant yields a distinct solution. The Monotonicity Theorem dictates that any two antiderivatives of a function on an interval must differ by exactly a constant.
+2.  **Riemann Integrability Criterion:** A function is Riemann integrable if its lower integral (the supremum of all lower Darboux sums) is equal to its upper integral (the infimum of all upper Darboux sums). This common value is then defined as the definite integral of the function over the interval.
+3.  **Fundamental Theorem of Calculus (FTC) Overview:** The FTC establishes that differentiation and integration are inverse processes, allowing the recovery of total accumulation from a known rate of change. It provides the mechanism to evaluate definite integrals using antiderivatives rather than limit-based Riemann sums.
+4.  **Simply Connected Domains:** A simply connected domain is a path-connected region where every simple closed curve can be continuously contracted to a point without leaving the region (i.e., it has no "holes"). This property ensures that a curl-free vector field is conservative, a guarantee that fails in multiply connected domains like a punctured plane.
+5.  **Physical Interpretation of Flux:** Flux represents the net rate at which a vector field passes through a specific oriented surface. It is calculated as the integral of the component of the vector field that is normal (perpendicular) to the surface at every point.
+6.  **The Right-Hand Rule in Stokes' Theorem:** If you curl the fingers of your right hand in the direction of the traversal along the boundary curve $\partial S$, your thumb points in the direction of the unit normal vector $\hat{n}$ for the surface $S$. This ensures that the orientation of the boundary is consistent with the orientation of the surface.
+7.  **The "One Theorem" Concept:** All three classical theorems are specific coordinate-based versions of the Generalized Stokes' Theorem: $\int_{\partial M} \omega = \int_M d\omega$. This identity states that integrating a differential form over the boundary of a manifold is equivalent to integrating its exterior derivative over the manifold itself.
+8.  **Improper Integrals (Type I vs. Type II):** Type I improper integrals involve infinite limits of integration (e.g., $\int_a^\infty$), while Type II improper integrals involve integrands with singularities (infinite discontinuities) within or at the boundaries of the interval of integration.
+9.  **Exact Differential Equations:** An exact equation is a first-order DE where the differential expression can be identified as the total differential of some function $f(x, y)$. They are identified by checking if the partial derivatives of the components satisfy the condition $\partial M/\partial y = \partial N/\partial x$.
+10. **The Role of the Divergence Theorem in Physics:** The Divergence Theorem converts a volume integral of a field's source density (divergence) into a surface integral of the field's flux. This allows scientists to relate the total amount of a substance produced or consumed within a volume to the net amount passing through its boundary, leading to fundamental laws like Gauss's Law and the continuity equation.
+
+---
+
+## 🖊️ Part III: Essay Format Questions
+
+**Instructions:** These questions require synthesizing multiple concepts from the text (answers not provided).
+
+1.  **The Interplay of Topology and Vector Calculus:** Discuss how the topological features of a domain (simply connected vs. multiply connected) impact the reliability of the "Curl-Free implies Conservative" test. Use the example of the punctured plane to illustrate your argument.
+2.  **Theoretical Foundations of Integration:** Compare and contrast the construction of the Riemann integral using tagged partitions versus the Darboux approach using upper and lower sums. Explain why the Completeness Axiom of $\mathbb{R}$ is vital to these definitions.
+3.  **From Integral to Differential Form:** Explain the derivation of the heat equation or the continuity equation using the Divergence Theorem. Focus on how the transition is made from a macroscopic "balance" (integral form) to a local "point-wise" identity (differential form).
+4.  **The Evolution of Solution Techniques in Differential Equations:** Analyze the utility of Laplace Transforms in solving Initial Value Problems. Specifically, discuss why Laplace Transforms are preferred over standard methods when dealing with discontinuous forcing functions like the Heaviside or Dirac Delta functions.
+5.  **Geometric Intuition of the Major Theorems:** Provide a geometric "story" for Green's Theorem (Circulation form), Stokes' Theorem, and the Divergence Theorem. Explain how "internal cancellations" (like those in a grid of rectangles or boxes) lead to the result being dependent only on the boundary.
+
+---
+
+## 📖 Part IV: Glossary of Key Terms
+
+| Term | Definition |
+| :--- | :--- |
+| **Antiderivative** | A function $F$ such that its derivative $F'(x)$ equals the original function $f(x)$ for all $x$ in an interval. |
+| **Boundary ($\partial M$)** | The "edge" of a mathematical object (manifold); for a volume, it is a closed surface; for a surface, it is a closed curve. |
+| **Characteristic Equation** | A polynomial equation derived from a linear differential equation used to find the roots that determine the general solution. |
+| **Curl** | A vector operator that describes the infinitesimal rotation or "spin" of a vector field at a given point. |
+| **Dirac Delta Function** | A generalized function used to model an idealized point source or impulse, where the function is zero everywhere except at one point, where it is infinite. |
+| **Divergence** | A scalar operator that measures the magnitude of a vector field's source or sink at a given point (expansion or contraction). |
+| **Exact Equation** | A first-order differential equation where the left-hand side is exactly the total differential of a scalar function. |
+| **Flux** | The net flow of a vector field through a surface, calculated as the surface integral of the field's normal component. |
+| **Fourier Series** | A way to represent a periodic function as a sum of simple sine and cosine functions. |
+| **Heaviside Function** | Also known as a step function; a discontinuous function that is zero for negative arguments and one for positive arguments. |
+| **Laplacian ($\nabla^2$)** | A differential operator (the divergence of the gradient) used to model physical phenomena like heat conduction and electric potential. |
+| **Mesh (Norm)** | The width of the widest subinterval in a partition of an interval $[a, b]$. |
+| **Partition** | A finite ordered set of points that divides a closed interval into subintervals. |
+| **Riemann Sum** | A finite approximation of the area under a curve created by summing the areas of rectangles with heights determined by sample points. |
+| **Simply Connected** | A property of a region where any closed loop can be shrunk to a point without leaving the region (having no "holes"). |
+| **Wronskian** | A determinant used to determine whether a set of solutions to a differential equation is linearly independent. |
+
+---
+
+## 🖼️ Reference Maps & Infographics
+
+### 📈 Limits & Continuity Map
+![Calculus_Limits_and_Continuity_Map](Calculus_Limits_and_Continuity_Map.png)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/imgs/Calculus_Limits_and_Continuity_Map.png`)*
+
+### 📉 Single-Variable Differentiation Infographic
+![Single-Variable_Differentiation_Infographic](Single-Variable_Differentiation_Infographic.png)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/imgs/Single-Variable_Differentiation_Infographic.png`)*
+
+### 🔍 Unified Theory of Integration Guide
+![Unified_Theory_of_Integration_Guide](Unified_Theory_of_Integration_Guide.png)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/imgs/Unified_Theory_of_Integration_Guide.png`)*
+
+### 🗺️ Integration and Vector Calculus Overview
+![Integration_and_Vector_Calculus_Overview](Integration_and_Vector_Calculus_Overview.png)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/imgs/Integration_and_Vector_Calculus_Overview.png`)*
+
+---
+
+## 🎧 Audio Lectures
+
+### 🔊 Unifying Vector Calculus
+![The_Single_Theorem_Unifying_Vector_Calculus](The_Single_Theorem_Unifying_Vector_Calculus.m4a)
+*(Absolute path: `file:///C:/Obsidian%20Vault/obsidian-files/audio/The_Single_Theorem_Unifying_Vector_Calculus.m4a`)*

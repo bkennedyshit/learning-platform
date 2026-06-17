@@ -1,0 +1,148 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.lessonTitle {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.lessonBody {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.lessonBody p {
+  margin-bottom: var(--space-md);
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--border-color);
+}
+
+.primaryButton {
+  background: var(--accent-primary);
+  color: white;
+  padding: var(--space-sm) var(--space-xl);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.primaryButton:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+}
+
+/* Modalities */
+.listenWord {
+  display: inline-block;
+  margin-right: 0.25em;
+  transition: color 0.1s, background 0.1s;
+}
+
+.listenWord.active {
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.writeArea {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+
+.problemPrompt {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-lg);
+  font-weight: 500;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 150px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.codeArea {
+  background: #1e1e1e; /* Editor bg */
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: 'Fira Code', monospace;
+  min-height: 200px;
+  border: 1px solid var(--border-color);
+  color: #d4d4d4;
+}
+
+.handwriteInstructions {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+}
+
+.handwriteIcon {
+  color: var(--accent-primary);
+  margin-bottom: var(--space-md);
+}
+
+/* Glossary Tooltip */
+.glossaryTerm {
+  position: relative;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--text-muted);
+  cursor: help;
+  color: var(--accent-primary);
+}
+
+.glossaryTerm:hover::after {
+  content: attr(data-definition);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  width: max-content;
+  max-width: 250px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  pointer-events: none;
+}

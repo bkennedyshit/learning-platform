@@ -1,0 +1,161 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;transition:all 0.3s ease;}
+    .box:hover{stroke:var(--interactive-accent,#58a6ff);fill:rgba(88,166,255,0.02);filter:drop-shadow(0 0 4px rgba(88,166,255,0.15));}
+    
+    /* Post processing pipeline sequential glow */
+    @keyframes pipeline-glow {
+      0%, 100% { stroke: var(--interactive-accent,#58a6ff); filter: brightness(0.9); }
+      50% { stroke: #51cf66; filter: brightness(1.25) drop-shadow(0 0 4px #51cf66); }
+    }
+    .p-step { transition: all 0.3s ease; cursor: pointer; }
+    .p-step:hover { filter: brightness(1.4) drop-shadow(0 0 5px var(--interactive-accent,#58a6ff)) !important; stroke-width: 1.5px !important; }
+    .step-p1 { animation: pipeline-glow 10s infinite; }
+    .step-p2 { animation: pipeline-glow 10s infinite 2s; }
+    .step-p3 { animation: pipeline-glow 10s infinite 4s; }
+    .step-p4 { animation: pipeline-glow 10s infinite 6s; }
+    .step-p5 { animation: pipeline-glow 10s infinite 8s; }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">34.5 — 3D Printing &amp; Additive Manufacturing: Process Families &amp; Slicer Decisions</text>
+  
+  <!-- FDM diagram -->
+  <rect x="20" y="35" width="160" height="185" class="box" rx="4"/>
+  <text x="100" y="52" class="label" text-anchor="middle" font-weight="bold">FDM Process</text>
+  
+  <!-- Slide animation for Hotend + Nozzle -->
+  <g>
+    <!-- Hotend -->
+    <rect x="80" y="65" width="40" height="25" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" rx="2"/>
+    <text x="100" y="81" class="sub" text-anchor="middle">Hotend</text>
+    <!-- Nozzle -->
+    <polygon points="85,90 115,90 108,105 92,105" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2"/>
+    <text x="100" y="101" class="sub" text-anchor="middle">Nozzle</text>
+    
+    <animateTransform attributeName="transform" type="translate" values="-20,0; 20,0; -20,0" dur="4s" repeatCount="indefinite" />
+  </g>
+  
+  <!-- Extruded layers with extrusion pulsing effect -->
+  <rect x="65" y="112" width="70" height="8" fill="var(--interactive-accent,#58a6ff)" rx="1">
+    <animate attributeName="opacity" values="0.2; 0.9; 0.2" dur="4s" repeatCount="indefinite" />
+  </rect>
+  <rect x="65" y="122" width="70" height="8" fill="var(--interactive-accent,#58a6ff)" opacity="0.6" rx="1"/>
+  <rect x="65" y="132" width="70" height="8" fill="var(--interactive-accent,#58a6ff)" opacity="0.4" rx="1"/>
+  <rect x="65" y="142" width="70" height="8" fill="var(--interactive-accent,#58a6ff)" opacity="0.2" rx="1"/>
+  
+  <text x="100" y="162" class="sub" text-anchor="middle">Layer height: 0.1–0.3mm</text>
+  <text x="100" y="174" class="sub" text-anchor="middle">Materials: PLA/PETG/ASA/ABS</text>
+  <text x="100" y="186" class="sub" text-anchor="middle">PA/TPU/PC/Carbon fibre</text>
+  <text x="100" y="198" class="sub" text-anchor="middle">Bed: 60°C (PLA) / 110°C (ABS)</text>
+  <text x="100" y="210" class="sub" text-anchor="middle">Anisotropic — Z weak!</text>
+  
+  <!-- Resin (SLA/MSLA) -->
+  <rect x="195" y="35" width="155" height="185" class="box" rx="4"/>
+  <text x="272" y="52" class="label" text-anchor="middle" font-weight="bold">Resin (SLA/MSLA)</text>
+  
+  <!-- Resin vat -->
+  <rect x="215" y="65" width="115" height="80" fill="#1a2a3a" stroke="var(--text-muted,#8b949e)" stroke-width="1.2" rx="2"/>
+  <text x="272" y="122" class="sub" text-anchor="middle">UV resin vat</text>
+  
+  <!-- SLA Build plate going up layer-by-layer -->
+  <g>
+    <rect x="230" y="72" width="85" height="8" fill="none" stroke="#51cf66" stroke-width="1.5" rx="1"/>
+    <text x="272" y="80" class="sub" text-anchor="middle" style="pointer-events:none;">build plate</text>
+    <animateTransform attributeName="transform" type="translate" values="0,32; 0,24; 0,16; 0,8; 0,0" dur="8s" repeatCount="indefinite" calcMode="discrete" />
+  </g>
+  
+  <!-- SLA LCD exposure showing blue/purple UV flash -->
+  <rect x="230" y="148" width="85" height="14" rx="2">
+    <animate attributeName="fill" values="#ffd93d; #8a2be2; #ffd93d" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.25; 0.9; 0.25" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <text x="272" y="160" class="sub" text-anchor="middle" style="fill:#000; font-weight:bold;">UV LCD/laser</text>
+  
+  <text x="272" y="178" class="sub" text-anchor="middle">Tol: ±0.05–0.1mm</text>
+  <text x="272" y="190" class="sub" text-anchor="middle">Surface: Ra 0.5–1.5µm</text>
+  <text x="272" y="202" class="sub" text-anchor="middle">Brittle! Use tough resins</text>
+  <text x="272" y="214" class="sub" text-anchor="middle">Wash+cure: IPA → UV box</text>
+  
+  <!-- SLS / Metal AM -->
+  <rect x="365" y="35" width="155" height="185" class="box" rx="4"/>
+  <text x="442" y="52" class="label" text-anchor="middle" font-weight="bold">SLS / Metal AM</text>
+  <text x="375" y="68" class="sub" font-weight="bold">SLS (Nylon powder):</text>
+  <text x="375" y="80" class="sub">No support needed</text>
+  <text x="375" y="92" class="sub">Functional parts, living hinges</text>
+  <text x="375" y="104" class="sub">Tol: ±0.3mm, Ra ~10µm (rough)</text>
+  <text x="375" y="118" class="sub" font-weight="bold">DMLS/SLM (metal):</text>
+  <text x="375" y="130" class="sub">316SS, Ti-6Al-4V, Inconel</text>
+  <text x="375" y="142" class="sub">Requires support structures</text>
+  <text x="375" y="154" class="sub">Post-machine critical surfaces</text>
+  <text x="375" y="166" class="sub">Residual stress → heat treat</text>
+  <text x="375" y="178" class="sub" font-weight="bold">WAAM (Wire Arc AM):</text>
+  <text x="375" y="190" class="sub">Large steel/Ti parts cheap</text>
+  <text x="375" y="202" class="sub">Rough surface → CNC finish</text>
+  <text x="375" y="214" class="sub">Near-net-shape blanks</text>
+  
+  <!-- Slicer decisions -->
+  <rect x="535" y="35" width="165" height="185" class="box" rx="4"/>
+  <text x="617" y="52" class="label" text-anchor="middle" font-weight="bold">Slicer Parameters</text>
+  <text x="545" y="68" class="sub" font-weight="bold">Layer height:</text>
+  <text x="545" y="80" class="sub">Draft 0.3mm · Standard 0.2mm</text>
+  <text x="545" y="92" class="sub">Detail 0.1mm · Micro 0.05mm</text>
+  <text x="545" y="106" class="sub" font-weight="bold">Infill pattern:</text>
+  <text x="545" y="118" class="sub">Grid/Gyroid/Honeycomb/Lightning</text>
+  <text x="545" y="130" class="sub">5–15%: cosmetic / 20–40%: functional</text>
+  <text x="545" y="144" class="sub" font-weight="bold">Wall count:</text>
+  <text x="545" y="156" class="sub">Structural: 4+ perimeters</text>
+  <text x="545" y="168" class="sub">Fatigue: vertical orientation</text>
+  <text x="545" y="182" class="sub" font-weight="bold">Support:</text>
+  <text x="545" y="194" class="sub">Tree support (PrusaSlicer)</text>
+  <text x="545" y="206" class="sub">Organic support (Bambu)</text>
+  <text x="545" y="218" class="sub">Avoid support on holes!</text>
+  
+  <!-- Bottom: orientation + post-processing flow -->
+  <rect x="20" y="235" width="680" height="165" class="box" rx="4"/>
+  <text x="360" y="253" class="label" text-anchor="middle" font-weight="bold">Print Orientation Strategy &amp; Post-Processing Pipeline</text>
+  <!-- Orientation diagram -->
+  <rect x="35" y="265" width="60" height="80" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="2" style="transition:all 0.3s ease; cursor:pointer;" onmouseover="this.setAttribute('fill','rgba(88,166,255,0.05)')" onmouseout="this.setAttribute('fill','none')"/>
+  <text x="65" y="295" class="sub" text-anchor="middle" pointer-events="none">FLAT</text>
+  <text x="65" y="307" class="sub" text-anchor="middle" pointer-events="none">Best surface</text>
+  <text x="65" y="319" class="sub" text-anchor="middle" pointer-events="none">Weak in Z</text>
+  <text x="65" y="331" class="sub" text-anchor="middle" pointer-events="none">Tall support</text>
+  <text x="65" y="343" class="sub" text-anchor="middle" pointer-events="none">needed</text>
+  
+  <rect x="115" y="275" width="40" height="70" fill="none" stroke="#51cf66" stroke-width="1.2" rx="2" style="transition:all 0.3s ease; cursor:pointer;" onmouseover="this.setAttribute('fill','rgba(81,207,102,0.05)')" onmouseout="this.setAttribute('fill','none')"/>
+  <text x="135" y="298" class="sub" text-anchor="middle" pointer-events="none">ON</text>
+  <text x="135" y="310" class="sub" text-anchor="middle" pointer-events="none">EDGE</text>
+  <text x="135" y="322" class="sub" text-anchor="middle" pointer-events="none">Strong</text>
+  <text x="135" y="334" class="sub" text-anchor="middle" pointer-events="none">Z-axis</text>
+  <text x="135" y="346" class="sub" text-anchor="middle" pointer-events="none">Long print</text>
+  
+  <!-- Post-process steps -->
+  <text x="360" y="272" class="sub" text-anchor="middle" font-weight="bold">Post-Processing Pipeline (FDM):</text>
+  <rect x="195" y="280" width="90" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="p-step step-p1"/>
+  <text x="240" y="299" class="mono" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">Print + remove</text>
+  
+  <rect x="300" y="280" width="90" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="p-step step-p2"/>
+  <text x="345" y="299" class="mono" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">Support rem.</text>
+  
+  <rect x="405" y="280" width="90" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="p-step step-p3"/>
+  <text x="450" y="299" class="mono" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">Sand 220-400</text>
+  
+  <rect x="510" y="280" width="90" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="p-step step-p4"/>
+  <text x="555" y="299" class="mono" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">Filler primer</text>
+  
+  <rect x="615" y="280" width="75" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="p-step step-p5"/>
+  <text x="652" y="299" class="mono" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">Top coat</text>
+  
+  <line x1="285" y1="295" x2="300" y2="295" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="390" y1="295" x2="405" y2="295" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="495" y1="295" x2="510" y2="295" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="600" y1="295" x2="615" y2="295" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  
+  <text x="360" y="330" class="sub" text-anchor="middle">Heat-set inserts (M3/M4): press in with soldering iron at 180–220°C → strongest thread in plastic. Far superior to printed threads.</text>
+  <text x="360" y="345" class="sub" text-anchor="middle">Acetone smoothing: ABS only. Vapor bath or brush. Dangerous — ventilate. XTC-3D epoxy coating works on any filament.</text>
+  <text x="360" y="360" class="sub" text-anchor="middle">Free slicers: PrusaSlicer (prusaslicer.org) · Bambu Studio · Cura (ultimaker.com/software/ultimaker-cura)</text>
+  <text x="360" y="375" class="sub" text-anchor="middle">Design rule: NEVER rely on 3D-printed threads for structural loads. Always use heat-set inserts, captured nuts, or machine the threads separately.</text>
+  <text x="360" y="390" class="sub" text-anchor="middle">Tolerance compensation: FDM holes print ~0.2mm undersize. Add 0.2mm to all hole diameters in CAD, or use horizontal hole compensation setting in slicer.</text>
+</svg>

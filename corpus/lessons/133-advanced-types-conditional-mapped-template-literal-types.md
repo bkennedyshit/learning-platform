@@ -1,0 +1,1418 @@
+---
+title: "13.3 — Advanced Types: Conditional, Mapped, Template Literal Types"
+subject: "TypeScript"
+catalog: advanced
+audience_tier: higher-education
+chapter: "13.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 13.3 — Advanced Types: Conditional, Mapped, Template Literal Types
+
+> *"The type system is a programming language in its own right. You're writing programs that run at compile time."* — **Matt Pocock**, Total TypeScript
+
+This is where TypeScript stops being "JavaScript with annotations" and becomes a **type-level programming language**. Conditional types are if-statements for types. Mapped types are loops. Template literal types are string manipulation. Together, they let you express constraints that would be impossible in most other languages.
+
+This chapter is hard. It's also what separates "I use TypeScript" from "I understand TypeScript." Take your time.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Write conditional types with `extends` and explain distributive behavior over unions.
+2. Use `infer` to extract types from complex structures (function params, return types, promise values).
+3. Build mapped types that transform object shapes (make optional, readonly, rename keys).
+4. Create template literal types for type-safe string manipulation.
+5. Implement recursive types for deeply nested structures (JSON, trees, paths).
+6. Use branded/opaque types to add nominal typing where structural typing is too loose.
+7. Combine these tools to build real-world utility types from scratch.
+
+---
+
+## 🖼️ Visual Anchor — Type-Level Programming Toolkit
+
+![ts__6.3-fig1](ts__6.3-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 13.3.1 — Conditional Types
+
+A conditional type selects one of two types based on a condition (like a ternary for types):
+
+```ts
+// Syntax: T extends U ? TrueType : FalseType
+type IsString<T> = T extends string ? true : false;
+
+type A = IsString<"hello">;  // true
+type B = IsString<42>;       // false
+type C = IsString<string>;   // true
+```
+
+The `extends` keyword here means "is assignable to" (is a subset of, in set theory terms).
+
+### Definition 13.3.2 — The `infer` Keyword
+
+`infer` declares a type variable inside a conditional type that TypeScript will **figure out** from context:
+
+```ts
+// Extract the return type of a function
+type MyReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+
+type A = MyReturnType<() => string>;           // string
+type B = MyReturnType<(x: number) => boolean>; // boolean
+type C = MyReturnType<string>;                 // never (not a function)
+
+// Extract element type from an array
+type ElementOf<T> = T extends (infer E)[] ? E : never;
+
+type D = ElementOf<string[]>;    // string
+type E = ElementOf<number[]>;    // number
+type F = ElementOf<[1, "a", true]>; // 1 | "a" | true
+
+// Extract the resolved type of a Promise
+type Unwrap<T> = T extends Promise<infer V> ? Unwrap<V> : T;
+
+type G = Unwrap<Promise<string>>;              // string
+type H = Unwrap<Promise<Promise<number>>>;     // number (recursive!)
+```
+
+### Definition 13.3.3 — Distributive Conditional Types
+
+When a conditional type acts on a **naked type parameter** that is a union, it **distributes** — applies separately to each member:
+
+```ts
+type ToArray<T> = T extends unknown ? T[] : never;
+
+// Distributes over the union:
+type A = ToArray<string | number>;
+// = (string extends unknown ? string[] : never) | (number extends unknown ? number[] : never)
+// = string[] | number[]
+
+// NOT the same as (string | number)[] !
+// string[] | number[] means "array of strings OR array of numbers"
+// (string | number)[] means "array of mixed strings and numbers"
+
+// Prevent distribution by wrapping in tuple:
+type ToArrayNonDist<T> = [T] extends [unknown] ? T[] : never;
+type B = ToArrayNonDist<string | number>; // (string | number)[]
+```
+
+### Definition 13.3.4 — Mapped Types
+
+Mapped types iterate over keys and transform each property:
+
+```ts
+// Syntax: { [K in Keys]: ValueType }
+type Readonly<T> = { readonly [K in keyof T]: T[K] };
+type Optional<T> = { [K in keyof T]?: T[K] };
+type Nullable<T> = { [K in keyof T]: T[K] | null };
+
+// With key remapping (as clause, TS 4.1+)
+type Getters<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];
+};
+
+interface User { name: string; age: number }
+type UserGetters = Getters<User>;
+// { getName: () => string; getAge: () => number }
+
+// Filter keys by value type
+type StringKeys<T> = {
+  [K in keyof T as T[K] extends string ? K : never]: T[K];
+};
+
+type UserStrings = StringKeys<User>;
+// { name: string }  (age filtered out because it's number)
+```
+
+### Definition 13.3.5 — Template Literal Types
+
+String manipulation at the type level:
+
+```ts
+type EventName = `${"user" | "post"}:${"created" | "updated" | "deleted"}`;
+// "user:created" | "user:updated" | "user:deleted" | "post:created" | "post:updated" | "post:deleted"
+
+// Built-in string manipulation types
+type Upper = Uppercase<"hello">;      // "HELLO"
+type Lower = Lowercase<"HELLO">;      // "hello"
+type Cap = Capitalize<"hello">;       // "Hello"
+type Uncap = Uncapitalize<"Hello">;   // "hello"
+
+// Parsing strings with infer
+type ExtractRouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? Param | ExtractRouteParams<`/${Rest}`>
+    : T extends `${string}:${infer Param}`
+      ? Param
+      : never;
+
+type Params = ExtractRouteParams<"/users/:userId/posts/:postId">;
+// "userId" | "postId"
+```
+
+### Definition 13.3.6 — Recursive Types
+
+Types that reference themselves for nested structures:
+
+```ts
+// JSON type (the classic recursive type)
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | Json[]
+  | { [key: string]: Json };
+
+// Deep partial (all nested properties optional)
+type DeepPartial<T> = T extends object
+  ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : T;
+
+// Deeply nested path type
+type Path<T, Prefix extends string = ""> = T extends object
+  ? { [K in keyof T & string]:
+      | `${Prefix}${K}`
+      | Path<T[K], `${Prefix}${K}.`>
+    }[keyof T & string]
+  : never;
+
+interface Config {
+  db: { host: string; port: number };
+  cache: { ttl: number };
+}
+type ConfigPath = Path<Config>;
+// "db" | "db.host" | "db.port" | "cache" | "cache.ttl"
+```
+
+### Definition 13.3.7 — Branded Types (Nominal Typing)
+
+TypeScript is structural — two types with the same shape are interchangeable. Branded types add a phantom property to create **nominal** distinctions:
+
+```ts
+// The brand pattern
+type Brand<T, B extends string> = T & { readonly __brand: B };
+
+type USD = Brand<number, "USD">;
+type EUR = Brand<number, "EUR">;
+type UserId = Brand<string, "UserId">;
+type PostId = Brand<string, "PostId">;
+
+// Constructor functions (the only way to create branded values)
+function usd(amount: number): USD { return amount as USD; }
+function eur(amount: number): EUR { return amount as EUR; }
+function userId(id: string): UserId { return id as UserId; }
+
+// Now the compiler prevents mixing them up:
+function transferUSD(from: UserId, to: UserId, amount: USD): void { /* ... */ }
+
+const bill = userId("user_123");
+const payment = usd(50);
+const euroPayment = eur(50);
+
+transferUSD(bill, userId("user_456"), payment);    // ✅
+// transferUSD(bill, userId("user_456"), euroPayment); // ❌ EUR not assignable to USD!
+// transferUSD("raw_string", bill, payment);           // ❌ string not assignable to UserId!
+```
+
+---
+
+## 🧩 2. Mental Models
+
+### Model 6.3.1 — Types as a Programming Language
+
+Think of the type system as a **separate programming language** that runs at compile time:
+
+| Runtime JS | Type-level TS |
+|-----------|---------------|
+| `if (x) a else b` | `T extends U ? A : B` |
+| `for (k in obj)` | `{ [K in keyof T]: ... }` |
+| `x.match(/pattern/)` | Template literal + `infer` |
+| `function f(x) { return ... }` | `type F<T> = ...` |
+| Recursion | Recursive type aliases |
+| Variables | Type parameters (`T`, `K`, `R`) |
+
+### Model 6.3.2 — `infer` as Pattern Matching
+
+`infer` is TypeScript's pattern matching — it destructures types the way regex captures groups:
+
+```ts
+// Regex:  /^Hello, (.+)!$/  → captures the name
+// Types:  `Hello, ${infer Name}!` → infers the Name type
+
+type ExtractName<T> = T extends `Hello, ${infer Name}!` ? Name : never;
+type A = ExtractName<"Hello, Bill!">; // "Bill"
+
+// Like Python's structural pattern matching (match/case in 3.10+)
+// but at the type level
+```
+
+### Model 6.3.3 — Mapped Types as Array.map() for Object Types
+
+```ts
+// Runtime: array.map(item => transform(item))
+const doubled = [1, 2, 3].map(n => n * 2); // [2, 4, 6]
+
+// Type-level: { [K in keyof T]: Transform<T[K]> }
+type Promisified<T> = { [K in keyof T]: Promise<T[K]> };
+// "maps" each property type to Promise<that type>
+```
+
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Conditional Type Patterns
+
+```ts
+// Pattern 1: Type filtering
+type ExtractStrings<T> = T extends string ? T : never;
+type A = ExtractStrings<"a" | 1 | "b" | true>; // "a" | "b"
+
+// Pattern 2: Type transformation
+type Flatten<T> = T extends Array<infer U> ? U : T;
+type B = Flatten<string[]>;  // string
+type C = Flatten<number>;    // number (not an array, returns as-is)
+
+// Pattern 3: Recursive unwrapping
+type DeepFlatten<T> = T extends Array<infer U> ? DeepFlatten<U> : T;
+type D = DeepFlatten<string[][][]>; // string
+
+// Pattern 4: Function type manipulation
+type FirstParam<T> = T extends (first: infer P, ...rest: any[]) => any ? P : never;
+type E = FirstParam<(name: string, age: number) => void>; // string
+
+// Pattern 5: Tuple manipulation
+type Last<T extends any[]> = T extends [...infer _, infer L] ? L : never;
+type F = Last<[1, 2, 3]>; // 3
+
+type Head<T extends any[]> = T extends [infer H, ...any[]] ? H : never;
+type G = Head<[1, 2, 3]>; // 1
+
+type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
+type H = Tail<[1, 2, 3]>; // [2, 3]
+```
+
+### 3.2 — Advanced Mapped Type Patterns
+
+```ts
+// Make specific keys optional (not all)
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+}
+
+type CreateUser = PartialBy<User, "id" | "age">;
+// { name: string; email: string; id?: string; age?: number }
+
+// Make specific keys required
+type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+// Mutable (remove readonly)
+type Mutable<T> = { -readonly [K in keyof T]: T[K] };
+
+// Remove optional (make all required)
+type Concrete<T> = { [K in keyof T]-?: T[K] };
+
+// Transform keys to getter/setter pairs
+type Accessors<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];
+} & {
+  [K in keyof T as `set${Capitalize<string & K>}`]: (value: T[K]) => void;
+};
+
+type UserAccessors = Accessors<{ name: string; age: number }>;
+// { getName: () => string; getAge: () => number; setName: (value: string) => void; setAge: (value: number) => void }
+
+// Filter object by value type
+type PickByType<T, V> = {
+  [K in keyof T as T[K] extends V ? K : never]: T[K];
+};
+
+type UserMethods = PickByType<{
+  name: string;
+  greet: () => void;
+  age: number;
+  save: () => Promise<void>;
+}, Function>;
+// { greet: () => void; save: () => Promise<void> }
+```
+
+### 3.3 — Template Literal Type Patterns
+
+```ts
+// Type-safe CSS units
+type CSSUnit = "px" | "rem" | "em" | "vh" | "vw" | "%";
+type CSSValue = `${number}${CSSUnit}`;
+
+const width: CSSValue = "100px";   // ✅
+const height: CSSValue = "50vh";   // ✅
+// const bad: CSSValue = "100";    // ❌ missing unit
+// const bad2: CSSValue = "wide";  // ❌ not a number prefix
+
+// Type-safe event handler names
+type DOMEvent = "click" | "focus" | "blur" | "input" | "change";
+type EventHandler = `on${Capitalize<DOMEvent>}`;
+// "onClick" | "onFocus" | "onBlur" | "onInput" | "onChange"
+
+// Parse dot-notation paths
+type Split<S extends string, D extends string> =
+  S extends `${infer Head}${D}${infer Tail}`
+    ? [Head, ...Split<Tail, D>]
+    : [S];
+
+type A = Split<"a.b.c", ".">; // ["a", "b", "c"]
+
+// Get nested type by path
+type GetByPath<T, P extends string> =
+  P extends `${infer Key}.${infer Rest}`
+    ? Key extends keyof T
+      ? GetByPath<T[Key], Rest>
+      : never
+    : P extends keyof T
+      ? T[P]
+      : never;
+
+interface Config {
+  db: { host: string; port: number; credentials: { user: string; pass: string } };
+}
+
+type A2 = GetByPath<Config, "db.host">;              // string
+type B2 = GetByPath<Config, "db.credentials.user">;  // string
+type C2 = GetByPath<Config, "db.port">;              // number
+```
+
+### 3.4 — Recursive Type Patterns
+
+```ts
+// Deep readonly
+type DeepReadonly<T> = T extends Function
+  ? T
+  : T extends object
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
+
+// Deep required
+type DeepRequired<T> = T extends object
+  ? { [K in keyof T]-?: DeepRequired<T[K]> }
+  : T;
+
+// Flatten nested object to dot-notation
+type FlattenObject<T, Prefix extends string = ""> = {
+  [K in keyof T & string]: T[K] extends object
+    ? FlattenObject<T[K], `${Prefix}${K}.`>
+    : { [P in `${Prefix}${K}`]: T[K] }
+}[keyof T & string];
+
+// Type-safe JSON path
+type JSONPath<T> = T extends object
+  ? { [K in keyof T & string]:
+      | K
+      | `${K}.${JSONPath<T[K]> & string}`
+    }[keyof T & string]
+  : never;
+
+// Tuple operations
+type Reverse<T extends any[]> =
+  T extends [infer Head, ...infer Tail]
+    ? [...Reverse<Tail>, Head]
+    : [];
+
+type Rev = Reverse<[1, 2, 3, 4]>; // [4, 3, 2, 1]
+
+type Length<T extends any[]> = T["length"];
+type Len = Length<[1, 2, 3]>; // 3
+```
+
+### 3.5 — Branded Type Patterns
+
+```ts
+// Pattern 1: Simple brand
+declare const __brand: unique symbol;
+type Brand<T, B> = T & { [__brand]: B };
+
+type Email = Brand<string, "Email">;
+type URL = Brand<string, "URL">;
+
+// Validation constructors
+function validateEmail(input: string): Email {
+  if (!input.includes("@")) throw new Error("Invalid email");
+  return input as Email;
+}
+
+function validateURL(input: string): URL {
+  new globalThis.URL(input); // throws if invalid
+  return input as URL;
+}
+
+// Pattern 2: Opaque type (completely hides the underlying type)
+declare const opaqueTag: unique symbol;
+type Opaque<T, Tag> = T & { readonly [opaqueTag]: Tag };
+
+type Seconds = Opaque<number, "Seconds">;
+type Milliseconds = Opaque<number, "Milliseconds">;
+
+function seconds(n: number): Seconds { return n as Seconds; }
+function milliseconds(n: number): Milliseconds { return n as Milliseconds; }
+
+function sleep(duration: Milliseconds): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, duration));
+}
+
+// sleep(1000);              // ❌ number not assignable to Milliseconds
+sleep(milliseconds(1000));   // ✅
+// sleep(seconds(1));        // ❌ Seconds not assignable to Milliseconds
+
+// Pattern 3: Branded with validation (Zod-style)
+import { z } from "zod";
+
+const EmailSchema = z.string().email().brand<"Email">();
+type Email2 = z.infer<typeof EmailSchema>; // string & { __brand: "Email" }
+```
+
+
+---
+
+## 💻 4. Code Patterns & Examples
+
+### Pattern 6.3.1 — Type-Safe Builder with Conditional Completion
+
+```ts
+// A builder that only allows .build() when all required fields are set
+type BuilderState = {
+  name: boolean;
+  email: boolean;
+  age: boolean;
+};
+
+type RequiredFields = { name: true; email: true };
+
+class UserBuilder<State extends Partial<BuilderState> = {}> {
+  private data: Partial<{ name: string; email: string; age: number }> = {};
+
+  setName(name: string): UserBuilder<State & { name: true }> {
+    this.data.name = name;
+    return this as any;
+  }
+
+  setEmail(email: string): UserBuilder<State & { email: true }> {
+    this.data.email = email;
+    return this as any;
+  }
+
+  setAge(age: number): UserBuilder<State & { age: true }> {
+    this.data.age = age;
+    return this as any;
+  }
+
+  // build() only available when required fields are set
+  build(this: UserBuilder<RequiredFields & State>): User {
+    return this.data as User;
+  }
+}
+
+const user = new UserBuilder()
+  .setName("Bill")
+  .setEmail("bill@example.com")
+  .setAge(35)
+  .build(); // ✅ works — name and email are set
+
+// new UserBuilder().setName("Bill").build(); // ❌ Error — email not set
+```
+
+### Pattern 6.3.2 — Exhaustive Pattern Matching
+
+```ts
+// Ensure all variants of a union are handled
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; side: number }
+  | { kind: "rectangle"; width: number; height: number }
+  | { kind: "triangle"; base: number; height: number };
+
+// Helper: ensures exhaustive matching
+function assertNever(x: never): never {
+  throw new Error(`Unexpected value: ${JSON.stringify(x)}`);
+}
+
+function area(shape: Shape): number {
+  switch (shape.kind) {
+    case "circle": return Math.PI * shape.radius ** 2;
+    case "square": return shape.side ** 2;
+    case "rectangle": return shape.width * shape.height;
+    case "triangle": return 0.5 * shape.base * shape.height;
+    default: return assertNever(shape); // Compile error if a case is missing
+  }
+}
+```
+
+### Pattern 6.3.3 — Type-Safe Route Definitions
+
+```ts
+// Define routes with typed parameters
+type Route =
+  | { path: "/"; params: {} }
+  | { path: "/users"; params: {} }
+  | { path: "/users/:id"; params: { id: string } }
+  | { path: "/users/:id/posts/:postId"; params: { id: string; postId: string } };
+
+// Extract params from path string automatically
+type ExtractParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof ExtractParams<`/${Rest}`>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [K in Param]: string }
+      : {};
+
+// Now params are inferred from the path string!
+type UserParams = ExtractParams<"/users/:id/posts/:postId">;
+// { id: string; postId: string }
+
+function navigate<P extends string>(path: P, params: ExtractParams<P>): void {
+  // Replace :param with actual values
+  let url: string = path;
+  for (const [key, value] of Object.entries(params)) {
+    url = url.replace(`:${key}`, value as string);
+  }
+  console.log(`Navigating to: ${url}`);
+}
+
+navigate("/users/:id", { id: "123" });           // ✅
+// navigate("/users/:id", {});                    // ❌ missing 'id'
+// navigate("/users/:id", { id: "123", x: "?" });// ❌ excess property
+```
+
+---
+
+## 🧮 5. Worked Examples
+
+### Example 13.3.1 — Implement `DeepPartial<T>` from Scratch
+
+**Task:** Create a type that makes all properties optional, recursively through nested objects.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+// Step 1: Handle the base case (non-objects stay as-is)
+// Step 2: For objects, make each key optional and recurse into the value
+
+type DeepPartial<T> = T extends Function
+  ? T  // Don't make function properties partial
+  : T extends Array<infer U>
+    ? Array<DeepPartial<U>>  // Handle arrays: make elements deep-partial
+    : T extends object
+      ? { [K in keyof T]?: DeepPartial<T[K]> }  // Recurse into objects
+      : T;  // Primitives stay as-is
+
+// Test it:
+interface Config {
+  server: {
+    host: string;
+    port: number;
+    ssl: {
+      cert: string;
+      key: string;
+    };
+  };
+  features: string[];
+  debug: boolean;
+}
+
+type PartialConfig = DeepPartial<Config>;
+// {
+//   server?: {
+//     host?: string;
+//     port?: number;
+//     ssl?: {
+//       cert?: string;
+//       key?: string;
+//     };
+//   };
+//   features?: Array<string | undefined>;  // Hmm, not ideal for arrays
+//   debug?: boolean;
+// }
+
+// Better version that preserves array structure:
+type DeepPartialV2<T> = T extends Function
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepPartialV2<U>>  // Keep array, just make elements deep-partial
+    : T extends object
+      ? { [K in keyof T]?: DeepPartialV2<T[K]> }
+      : T | undefined;
+```
+
+</details>
+
+### Example 13.3.2 — Build a Type-Safe `get()` Function for Nested Access
+
+**Task:** Create a function that safely accesses nested object properties by dot-notation path.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+// Step 1: Type that extracts the value at a dot-notation path
+type Get<T, P extends string> =
+  P extends `${infer Key}.${infer Rest}`
+    ? Key extends keyof T
+      ? Get<T[Key], Rest>
+      : undefined
+    : P extends keyof T
+      ? T[P]
+      : undefined;
+
+// Step 2: Type that generates all valid paths
+type Paths<T, Prefix extends string = ""> = T extends object
+  ? { [K in keyof T & string]:
+      | `${Prefix}${K}`
+      | (T[K] extends object ? Paths<T[K], `${Prefix}${K}.`> : never)
+    }[keyof T & string]
+  : never;
+
+// Step 3: The function implementation
+function get<T extends object, P extends Paths<T>>(
+  obj: T,
+  path: P
+): Get<T, P & string> {
+  const keys = (path as string).split(".");
+  let current: any = obj;
+  for (const key of keys) {
+    if (current === null || current === undefined) return undefined as any;
+    current = current[key];
+  }
+  return current;
+}
+
+// Usage:
+interface AppState {
+  user: {
+    profile: { name: string; avatar: string };
+    settings: { theme: "light" | "dark"; notifications: boolean };
+  };
+  posts: { id: string; title: string }[];
+}
+
+declare const state: AppState;
+
+const name = get(state, "user.profile.name");        // string
+const theme = get(state, "user.settings.theme");     // "light" | "dark"
+// get(state, "user.profile.nonexistent");           // ❌ not a valid path
+```
+
+</details>
+
+### Example 13.3.3 — Implement Distributive `Omit` That Works with Unions
+
+**Task:** Built-in `Omit` doesn't distribute over unions. Build one that does.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+// Problem: Built-in Omit collapses unions
+type Shape =
+  | { kind: "circle"; radius: number; color: string }
+  | { kind: "square"; side: number; color: string };
+
+type WithoutColor = Omit<Shape, "color">;
+// { kind: "circle" | "square"; radius?: number; side?: number }
+// ❌ Lost the discriminated union structure!
+
+// Solution: Distributive Omit
+type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+
+type WithoutColor2 = DistributiveOmit<Shape, "color">;
+// | { kind: "circle"; radius: number }
+// | { kind: "square"; side: number }
+// ✅ Preserves the union structure!
+
+// The trick: `T extends any` is always true, but it triggers distribution
+// over the union. Each member gets Omit applied individually.
+
+// Same pattern works for Pick:
+type DistributivePick<T, K extends keyof any> = T extends any
+  ? Pick<T, K & keyof T>
+  : never;
+```
+
+</details>
+
+### Example 13.3.4 — Build a Type-Safe SQL Query Builder Type
+
+**Task:** Create types that validate SQL-like query construction at compile time.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+// Define table schemas
+interface Tables {
+  users: { id: number; name: string; email: string; age: number };
+  posts: { id: number; title: string; body: string; authorId: number };
+  comments: { id: number; postId: number; text: string; userId: number };
+}
+
+// Type-safe SELECT
+type SelectQuery<
+  T extends keyof Tables,
+  Cols extends keyof Tables[T] = keyof Tables[T]
+> = {
+  from: T;
+  select: Cols[];
+  where?: Partial<Tables[T]>;
+  orderBy?: { column: Cols; direction: "ASC" | "DESC" };
+  limit?: number;
+};
+
+// Type-safe query result
+type QueryResult<Q extends SelectQuery<any, any>> =
+  Q extends SelectQuery<infer T, infer Cols>
+    ? Pick<Tables[T & keyof Tables], Cols & keyof Tables[T & keyof Tables]>[]
+    : never;
+
+// Usage:
+const query = {
+  from: "users",
+  select: ["name", "email"],
+  where: { age: 35 },
+  orderBy: { column: "name", direction: "ASC" },
+  limit: 10,
+} satisfies SelectQuery<"users", "name" | "email">;
+
+type Result = QueryResult<typeof query>;
+// Pick<Tables["users"], "name" | "email">[] = { name: string; email: string }[]
+```
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 6.3.1 — Distributive Conditional Types Surprise
+
+```ts
+type IsNever<T> = T extends never ? true : false;
+
+// You'd expect:
+type A = IsNever<never>; // true? NOPE — it's 'never'!
+
+// Why: never is the empty union. Distribution over empty union = never.
+// Fix: wrap in tuple to prevent distribution
+type IsNever2<T> = [T] extends [never] ? true : false;
+type B = IsNever2<never>; // true ✅
+```
+
+### Gotcha 6.3.2 — `infer` Position Matters
+
+```ts
+// infer in covariant position (return type) → union
+type ReturnTypes<T> = T extends {
+  a: () => infer R;
+  b: () => infer R;
+} ? R : never;
+
+type A = ReturnTypes<{ a: () => string; b: () => number }>; // string | number
+
+// infer in contravariant position (parameter) → intersection
+type ParamTypes<T> = T extends {
+  a: (x: infer P) => void;
+  b: (x: infer P) => void;
+} ? P : never;
+
+type B = ParamTypes<{ a: (x: string) => void; b: (x: number) => void }>; // string & number = never
+```
+
+### Gotcha 6.3.3 — Recursive Type Depth Limits
+
+```ts
+// TypeScript has a recursion depth limit (~50-100 levels)
+// This will error on deeply nested structures:
+type DeepNest = { value: DeepNest }; // OK to define
+type Unwrap<T> = T extends { value: infer V } ? Unwrap<V> : T;
+// May hit "Type instantiation is excessively deep" for deep nesting
+
+// Workaround: use tail-recursive patterns (TS 4.5+)
+type TailRecursive<T, Acc extends any[] = []> =
+  T extends [infer H, ...infer Rest]
+    ? TailRecursive<Rest, [...Acc, H]>
+    : Acc;
+```
+
+### Gotcha 6.3.4 — Mapped Type Modifiers Are Shallow
+
+```ts
+type User = {
+  name: string;
+  address: {
+    street: string;
+    city: string;
+  };
+};
+
+type ReadonlyUser = Readonly<User>;
+// { readonly name: string; readonly address: { street: string; city: string } }
+// address itself is readonly, but address.street is NOT!
+
+const user: ReadonlyUser = { name: "Bill", address: { street: "123 Main", city: "NYC" } };
+// user.name = "Bob";           // ❌ Error (readonly)
+// user.address = { ... };      // ❌ Error (readonly)
+user.address.street = "456 Oak"; // ✅ No error! (nested is mutable)
+
+// Always use DeepReadonly for true immutability
+```
+
+### Gotcha 6.3.5 — Template Literal Types and `string`
+
+```ts
+type Endpoint = `/api/${string}`;
+
+const valid: Endpoint = "/api/users";     // ✅
+const valid2: Endpoint = "/api/posts/1";  // ✅
+// const invalid: Endpoint = "/users";    // ❌
+
+// But: template literals with `string` are very wide
+type Wide = `${string}${string}`; // This is just `string`!
+
+// Be specific with your template literal unions for useful narrowing
+type Method = "GET" | "POST" | "PUT" | "DELETE";
+type Route = "/users" | "/posts" | "/comments";
+type ApiCall = `${Method} ${Route}`; // 12 specific combinations
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [13.2 - Type System - Primitives, Unions, Intersections, Generics](13.2---Type-System---Primitives,-Unions,-Intersections,-Generics)
+- **Next:** [13.4 - OOP & FP Patterns in TypeScript](13.4---OOP-&-FP-Patterns-in-TypeScript)
+- **Utility types in practice:** [TypeScript Essentials for Coding Tests](TypeScript-Essentials-for-Coding-Tests)
+- **React generics:** [13.7 - Frontend with TypeScript - React, Vue, Svelte, SolidJS](13.7---Frontend-with-TypeScript---React,-Vue,-Svelte,-SolidJS)
+
+### External Resources
+- [TypeScript Handbook — Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
+- [TypeScript Handbook — Mapped Types](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html)
+- [TypeScript Handbook — Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
+- [Total TypeScript — Type Transformations](https://www.totaltypescript.com/tutorials/type-transformations)
+- [type-challenges GitHub](https://github.com/type-challenges/type-challenges) — practice these patterns
+- [type-fest source code](https://github.com/sindresorhus/type-fest) — study real utility type implementations
+- [Type-Level TypeScript](https://type-level-typescript.com/) — interactive exercises
+
+---
+
+*Last updated: 2026-05-24*
+
+
+
+---
+
+## 🏗️ 8. Type-Level Programming: Recursion, Query Builders & HKTs
+
+### 8.1 — Type-Level Recursion and Its Limits
+
+TypeScript's type system is Turing-complete (within recursion limits). You can write recursive types that compute at compile time.
+
+#### Recursion Depth Limits
+
+TypeScript enforces a recursion depth limit (typically ~50 for instantiation depth, ~1000 for type alias expansion). Exceeding it produces: `Type instantiation is excessively deep and possibly infinite`.
+
+```ts
+// Naive recursive type: counts down from N
+type CountDown<N extends number, Acc extends any[] = []> =
+  Acc["length"] extends N
+    ? Acc
+    : CountDown<N, [...Acc, any]>;
+
+type Five = CountDown<5>; // [any, any, any, any, any]
+type FiveLength = Five["length"]; // 5
+
+// This works up to ~999, then hits the recursion limit
+// type TooBig = CountDown<1000>; // ❌ Type instantiation is excessively deep
+```
+
+#### Tail-Recursion Optimization (TS 4.5+)
+
+TypeScript 4.5 introduced tail-call optimization for conditional types. If the recursive call is in "tail position" (the last thing evaluated), TS can handle much deeper recursion:
+
+```ts
+// NON-tail-recursive (limited to ~50 depth):
+type Reverse_Bad<T extends any[]> =
+  T extends [infer Head, ...infer Tail]
+    ? [...Reverse_Bad<Tail>, Head]  // ❌ Spread AFTER recursive call = not tail position
+    : [];
+
+// TAIL-recursive (handles 1000+ depth):
+type Reverse<T extends any[], Acc extends any[] = []> =
+  T extends [infer Head, ...infer Tail]
+    ? Reverse<Tail, [Head, ...Acc]>  // ✅ Recursive call IS the result = tail position
+    : Acc;
+
+type Reversed = Reverse<[1, 2, 3, 4, 5]>; // [5, 4, 3, 2, 1]
+```
+
+#### Building a Type-Level Integer Arithmetic
+
+```ts
+// Type-level addition using tuple length
+type BuildTuple<N extends number, T extends any[] = []> =
+  T["length"] extends N ? T : BuildTuple<N, [...T, any]>;
+
+type Add<A extends number, B extends number> =
+  [...BuildTuple<A>, ...BuildTuple<B>]["length"] extends infer R extends number
+    ? R
+    : never;
+
+type Sum = Add<13, 29>; // 42
+
+// Type-level subtraction
+type Subtract<A extends number, B extends number> =
+  BuildTuple<A> extends [...BuildTuple<B>, ...infer Rest]
+    ? Rest["length"]
+    : never;
+
+type Diff = Subtract<10, 3>; // 7
+
+// Type-level comparison
+type GreaterThan<A extends number, B extends number> =
+  A extends B ? false :
+  BuildTuple<A> extends [...BuildTuple<B>, ...infer Rest]
+    ? Rest extends [] ? false : true
+    : false;
+
+type IsGreater = GreaterThan<5, 3>; // true
+```
+
+### 8.2 — Build a Type-Safe SQL Query Builder
+
+This demonstrates how advanced types create compile-time guarantees for database queries:
+
+```ts
+// Define the database schema as types
+interface DB {
+  users: {
+    id: number;
+    name: string;
+    email: string;
+    age: number;
+    created_at: Date;
+  };
+  posts: {
+    id: number;
+    title: string;
+    body: string;
+    author_id: number;
+    published: boolean;
+  };
+  comments: {
+    id: number;
+    post_id: number;
+    user_id: number;
+    text: string;
+  };
+}
+
+// Type-safe query builder
+type WhereClause<T> = {
+  [K in keyof T]?: T[K] | { $gt: T[K] } | { $lt: T[K] } | { $in: T[K][] };
+};
+
+type OrderByClause<T> = {
+  [K in keyof T]?: "asc" | "desc";
+};
+
+interface SelectQuery<
+  Table extends keyof DB,
+  Selected extends keyof DB[Table] = keyof DB[Table]
+> {
+  select<K extends keyof DB[Table]>(
+    ...columns: K[]
+  ): SelectQuery<Table, K>;
+
+  where(
+    clause: WhereClause<Pick<DB[Table], Selected>>
+  ): SelectQuery<Table, Selected>;
+
+  orderBy(
+    clause: OrderByClause<Pick<DB[Table], Selected>>
+  ): SelectQuery<Table, Selected>;
+
+  limit(n: number): SelectQuery<Table, Selected>;
+
+  execute(): Promise<Pick<DB[Table], Selected>[]>;
+}
+
+// Usage — every part is type-checked:
+declare function from<T extends keyof DB>(table: T): SelectQuery<T>;
+
+async function getActiveUsers() {
+  const users = await from("users")
+    .select("id", "name", "email")
+    .where({ age: { $gt: 18 }, name: "Bill" })
+    .orderBy({ name: "asc" })
+    .limit(10)
+    .execute();
+
+  // users: { id: number; name: string; email: string }[]
+  // users[0].age  // ❌ Error: 'age' not in selected columns
+  // .where({ nonexistent: 5 })  // ❌ Error: not a valid column
+  // .orderBy({ age: "asc" })    // ❌ Error: age not selected
+}
+```
+
+#### Type-Safe JOIN Builder
+
+```ts
+type JoinResult<
+  Left extends keyof DB,
+  Right extends keyof DB,
+  LCols extends keyof DB[Left],
+  RCols extends keyof DB[Right]
+> = Pick<DB[Left], LCols> & Pick<DB[Right], RCols>;
+
+interface JoinQuery<
+  Left extends keyof DB,
+  Right extends keyof DB
+> {
+  on<LK extends keyof DB[Left], RK extends keyof DB[Right]>(
+    leftKey: LK,
+    rightKey: RK
+  ): JoinedSelect<Left, Right>;
+}
+
+interface JoinedSelect<Left extends keyof DB, Right extends keyof DB> {
+  select<
+    LK extends keyof DB[Left],
+    RK extends keyof DB[Right]
+  >(
+    leftCols: LK[],
+    rightCols: RK[]
+  ): {
+    execute(): Promise<(Pick<DB[Left], LK> & Pick<DB[Right], RK>)[]>;
+  };
+}
+
+declare function join<L extends keyof DB, R extends keyof DB>(
+  left: L,
+  right: R
+): JoinQuery<L, R>;
+
+// Usage:
+async function getUserPosts() {
+  const results = await join("users", "posts")
+    .on("id", "author_id")
+    .select(["name", "email"], ["title", "published"])
+    .execute();
+
+  // results: { name: string; email: string; title: string; published: boolean }[]
+}
+```
+
+### 8.3 — Higher-Kinded Type (HKT) Emulation
+
+TypeScript doesn't natively support higher-kinded types (types that take type constructors as parameters). But we can emulate them:
+
+```ts
+// The problem: we want to abstract over "container types" like Array, Promise, Option
+// In Haskell: class Functor f where fmap :: (a -> b) -> f a -> f b
+// We can't write: type Functor<F<_>> = { map: <A, B>(fa: F<A>, f: (a: A) => B) => F<B> }
+
+// Solution: use a "type-level function" via interface merging
+
+// Step 1: Define a "URI" registry
+interface URItoKind<A> {
+  Array: A[];
+  Option: A | null;
+  Promise: Promise<A>;
+}
+
+type URIS = keyof URItoKind<any>;
+type Kind<F extends URIS, A> = URItoKind<A>[F];
+
+// Step 2: Define Functor using the URI
+interface Functor<F extends URIS> {
+  map: <A, B>(fa: Kind<F, A>, f: (a: A) => B) => Kind<F, B>;
+}
+
+// Step 3: Implement for specific types
+const arrayFunctor: Functor<"Array"> = {
+  map: (fa, f) => fa.map(f),
+};
+
+const optionFunctor: Functor<"Option"> = {
+  map: (fa, f) => (fa === null ? null : f(fa)),
+};
+
+// Step 4: Write generic code over any Functor
+function double<F extends URIS>(F: Functor<F>, fa: Kind<F, number>): Kind<F, number> {
+  return F.map(fa, x => x * 2);
+}
+
+double(arrayFunctor, [1, 2, 3]);     // [2, 4, 6]
+double(optionFunctor, 5);            // 10
+double(optionFunctor, null);         // null
+```
+
+### 8.4 — Tagged Template Literal Types
+
+Template literal types can parse and validate string patterns at compile time:
+
+```ts
+// Type-safe CSS units
+type CSSUnit = "px" | "rem" | "em" | "vh" | "vw" | "%";
+type CSSValue = `${number}${CSSUnit}`;
+
+function setWidth(value: CSSValue): void { /* ... */ }
+setWidth("100px");   // ✅
+setWidth("2.5rem");  // ✅
+// setWidth("100");  // ❌ Error: doesn't match pattern
+// setWidth("big");  // ❌ Error
+
+// Type-safe route patterns
+type Route = `/users/${string}` | `/posts/${string}` | `/api/v${number}/${string}`;
+
+function navigate(route: Route): void { /* ... */ }
+navigate("/users/123");      // ✅
+navigate("/api/v2/health");  // ✅
+// navigate("/unknown");     // ❌ Error
+
+// Parse route parameters from template strings
+type ExtractParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof ExtractParamsObj<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [K in Param]: string }
+      : {};
+
+type ExtractParamsObj<T extends string> = ExtractParams<T>;
+
+type UserRouteParams = ExtractParams<"/users/:userId/posts/:postId">;
+// { userId: string; postId: string }
+
+// Type-safe event names
+type DOMEventName = `${"click" | "mouse" | "key" | "focus" | "blur"}${string}`;
+type CustomEventName = `app:${string}`;
+type EventName = DOMEventName | CustomEventName;
+```
+
+#### SQL Template Tag with Type Inference
+
+```ts
+// A tagged template that infers parameter types from the SQL
+type SQLParam<T> = { value: T; __sqlParam: true };
+
+function sql<T extends Record<string, unknown>>(
+  strings: TemplateStringsArray,
+  ...values: SQLParam<unknown>[]
+): { query: string; params: unknown[] } {
+  const query = strings.reduce((acc, str, i) => {
+    return acc + str + (i < values.length ? `$${i + 1}` : "");
+  }, "");
+  return { query, params: values.map(v => v.value) };
+}
+
+function param<T>(value: T): SQLParam<T> {
+  return { value, __sqlParam: true };
+}
+
+// Usage:
+const name = "Bill";
+const age = 35;
+const query = sql`SELECT * FROM users WHERE name = ${param(name)} AND age > ${param(age)}`;
+// { query: "SELECT * FROM users WHERE name = $1 AND age > $2", params: ["Bill", 35] }
+```
+
+---
+
+## 📎 9. Appendix — Deep Dives & Theory
+
+### Appendix A — Distributive Conditional Types: The Math
+
+Distributive conditional types are one of TypeScript's most powerful (and confusing) features. They follow precise mathematical rules.
+
+#### The Distribution Rule
+
+When a conditional type `T extends U ? X : Y` is applied to a **naked type parameter** that is a union, it distributes:
+
+```ts
+// Given:
+type ToArray<T> = T extends any ? T[] : never;
+
+// Applied to a union:
+type Result = ToArray<string | number | boolean>;
+
+// Distributes as:
+// = (string extends any ? string[] : never)
+// | (number extends any ? number[] : never)
+// | (boolean extends any ? boolean[] : never)
+// = string[] | number[] | boolean[]
+```
+
+#### Preventing Distribution
+
+Wrap the type parameter in a tuple to prevent distribution:
+
+```ts
+// Distributive (default):
+type ToArray<T> = T extends any ? T[] : never;
+type A = ToArray<string | number>; // string[] | number[]
+
+// Non-distributive (wrapped in tuple):
+type ToArrayND<T> = [T] extends [any] ? T[] : never;
+type B = ToArrayND<string | number>; // (string | number)[]
+```
+
+#### Distribution with `never`
+
+`never` is the empty union. Distributing over an empty union produces `never`:
+
+```ts
+type Test<T> = T extends string ? "yes" : "no";
+type Result = Test<never>; // never (not "yes" or "no"!)
+
+// Because: distributing over zero members = zero results = never
+// This is why: type IsNever<T> = T extends never ? true : false;
+// IsNever<never> = never (not true!)
+
+// Correct never detection:
+type IsNever<T> = [T] extends [never] ? true : false;
+type Check = IsNever<never>; // true ✅
+```
+
+#### Extracting and Excluding from Unions
+
+```ts
+// Extract<T, U> = T extends U ? T : never (distributive!)
+type Strings = Extract<string | number | boolean, string | boolean>;
+// = (string extends string | boolean ? string : never)
+// | (number extends string | boolean ? number : never)  → never
+// | (boolean extends string | boolean ? boolean : never)
+// = string | boolean
+
+// Exclude<T, U> = T extends U ? never : T (distributive!)
+type NonStrings = Exclude<string | number | boolean, string>;
+// = number | boolean
+```
+
+### Appendix B — Tail-Recursion Optimization in TS 4.5+
+
+#### How It Works Internally
+
+Before TS 4.5, recursive conditional types were evaluated by building up a stack of deferred computations. Each level of recursion added a frame, and the compiler would bail out at ~50 levels.
+
+TS 4.5 detects when a conditional type's true/false branches directly return another conditional type application (tail position). In this case, it uses an iterative loop internally instead of building stack frames.
+
+#### Identifying Tail Position
+
+```ts
+// ✅ TAIL POSITION — the recursive call IS the final result
+type Length<T extends any[], Acc extends any[] = []> =
+  T extends [any, ...infer Rest]
+    ? Length<Rest, [...Acc, any]>  // Direct return of recursive call
+    : Acc["length"];
+
+// ❌ NOT TAIL POSITION — work happens AFTER the recursive call
+type Flatten<T extends any[]> =
+  T extends [infer Head, ...infer Tail]
+    ? Head extends any[]
+      ? [...Flatten<Head>, ...Flatten<Tail>]  // Spread after recursion
+      : [Head, ...Flatten<Tail>]              // Spread after recursion
+    : [];
+
+// ✅ TAIL-RECURSIVE Flatten (using accumulator):
+type FlattenTR<T extends any[], Acc extends any[] = []> =
+  T extends [infer Head, ...infer Tail]
+    ? Head extends any[]
+      ? FlattenTR<[...Head, ...Tail], Acc>
+      : FlattenTR<Tail, [...Acc, Head]>
+    : Acc;
+```
+
+#### Practical Limits After Optimization
+
+| Pattern | Pre-4.5 Limit | Post-4.5 Limit |
+|---------|---------------|----------------|
+| Tail-recursive tuple ops | ~50 | ~1000 |
+| Non-tail recursive | ~50 | ~50 (unchanged) |
+| Template literal recursion | ~50 | ~1000 (if tail) |
+| Nested conditional types | ~50 | ~50 (unchanged) |
+
+### Appendix C — Type-Level String Parsing
+
+You can build full parsers at the type level using template literal types and recursion:
+
+```ts
+// Parse a dot-separated path into a tuple
+type Split<S extends string, D extends string> =
+  S extends `${infer Head}${D}${infer Tail}`
+    ? [Head, ...Split<Tail, D>]
+    : [S];
+
+type Path = Split<"a.b.c.d", ".">; // ["a", "b", "c", "d"]
+
+// Deep property access type
+type DeepGet<T, Path extends string[]> =
+  Path extends [infer Head extends string, ...infer Rest extends string[]]
+    ? Head extends keyof T
+      ? Rest extends []
+        ? T[Head]
+        : DeepGet<T[Head], Rest>
+      : never
+    : T;
+
+interface Config {
+  server: {
+    host: string;
+    port: number;
+    ssl: { cert: string; key: string };
+  };
+  database: { url: string };
+}
+
+type SSLCert = DeepGet<Config, ["server", "ssl", "cert"]>; // string
+type Port = DeepGet<Config, ["server", "port"]>; // number
+
+// Combine: type-safe dot-notation access
+type Get<T, P extends string> = DeepGet<T, Split<P, ".">>;
+type Test1 = Get<Config, "server.ssl.cert">; // string
+type Test2 = Get<Config, "database.url">;    // string
+```
+
+### Appendix D — The Limits of TypeScript's Type System
+
+| Capability | Status | Workaround |
+|-----------|--------|------------|
+| Higher-kinded types | ❌ Not native | URI registry pattern (fp-ts, Effect) |
+| Dependent types | ❌ Not supported | Template literal types for string patterns |
+| Type-level effects | ❌ Not supported | Branded types for tracking |
+| Negative types (not X) | ❌ Not supported | Conditional types + never |
+| Exact object types | ⚠️ Only on literals | `satisfies` + excess property checking |
+| Variadic generics | ✅ TS 4.0+ | Tuple spread: `[...T, ...U]` |
+| Recursive types | ✅ TS 4.1+ | Tail-recursion optimized in 4.5+ |
+| Template literal types | ✅ TS 4.1+ | Full string pattern matching |
+| `const` type parameters | ✅ TS 5.0+ | Infer literal types without `as const` |
+| Decorator metadata | ✅ TS 5.2+ | `Symbol.metadata` |
+
+---
+
+*Last updated: 2026-05-24*

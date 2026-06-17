@@ -1,0 +1,96 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); transition: all 0.2s; cursor: pointer; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); transform: translateY(-1px); }
+    .category { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; fill: none; animation: glow 3s infinite alternate; }
+    .api-item { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    @keyframes glow { from { filter: drop-shadow(0 0 1px var(--interactive-accent, #58a6ff)); } to { filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); } }
+  </style>
+
+  <!-- Title -->
+  <text x="350" y="25" class="title" text-anchor="middle">Browser API Landscape (2026)</text>
+
+  <!-- DOM & Events -->
+  <rect x="15" y="40" width="220" height="165" class="category"/>
+  <text x="125" y="60" class="label" text-anchor="middle" font-weight="bold">🌳 DOM & Events</text>
+  <rect x="25" y="68" width="200" height="22" class="box"/>
+  <text x="35" y="83" class="api-item">querySelector / querySelectorAll</text>
+  <rect x="25" y="94" width="200" height="22" class="box"/>
+  <text x="35" y="109" class="api-item">classList / dataset</text>
+  <rect x="25" y="120" width="200" height="22" class="box"/>
+  <text x="35" y="135" class="api-item">addEventListener (delegation)</text>
+  <rect x="25" y="146" width="200" height="22" class="box"/>
+  <text x="35" y="161" class="api-item">MutationObserver</text>
+  <rect x="25" y="172" width="200" height="22" class="box"/>
+  <text x="35" y="187" class="api-item">template / DocumentFragment</text>
+
+  <!-- Network -->
+  <rect x="245" y="40" width="210" height="165" class="category"/>
+  <text x="350" y="60" class="label" text-anchor="middle" font-weight="bold">🌐 Network</text>
+  <rect x="255" y="68" width="190" height="22" class="box"/>
+  <text x="265" y="83" class="api-item">fetch() + AbortController</text>
+  <rect x="255" y="94" width="190" height="22" class="box"/>
+  <text x="265" y="109" class="api-item">WebSocket (bidirectional)</text>
+  <rect x="255" y="120" width="190" height="22" class="box"/>
+  <text x="265" y="135" class="api-item">Server-Sent Events (SSE)</text>
+  <rect x="255" y="146" width="190" height="22" class="box"/>
+  <text x="265" y="161" class="api-item">Beacon API (analytics)</text>
+  <rect x="255" y="172" width="190" height="22" class="box"/>
+  <text x="265" y="187" class="api-item">ReadableStream (streaming)</text>
+
+  <!-- Observers -->
+  <rect x="465" y="40" width="220" height="165" class="category"/>
+  <text x="575" y="60" class="label" text-anchor="middle" font-weight="bold">👁️ Observers</text>
+  <rect x="475" y="68" width="200" height="22" class="box"/>
+  <text x="485" y="83" class="api-item">IntersectionObserver</text>
+  <rect x="475" y="94" width="200" height="22" class="box"/>
+  <text x="485" y="109" class="api-item">ResizeObserver</text>
+  <rect x="475" y="120" width="200" height="22" class="box"/>
+  <text x="485" y="135" class="api-item">PerformanceObserver</text>
+  <rect x="475" y="146" width="200" height="22" class="box"/>
+  <text x="485" y="161" class="api-item">ReportingObserver</text>
+  <rect x="475" y="172" width="200" height="22" class="box"/>
+  <text x="485" y="187" class="api-item">MutationObserver</text>
+
+  <!-- Workers & Threading -->
+  <rect x="15" y="220" width="220" height="140" class="category"/>
+  <text x="125" y="240" class="label" text-anchor="middle" font-weight="bold">⚡ Workers & Threading</text>
+  <rect x="25" y="248" width="200" height="22" class="box"/>
+  <text x="35" y="263" class="api-item">Web Workers (dedicated)</text>
+  <rect x="25" y="274" width="200" height="22" class="box"/>
+  <text x="35" y="289" class="api-item">SharedWorker</text>
+  <rect x="25" y="300" width="200" height="22" class="box"/>
+  <text x="35" y="315" class="api-item">Service Worker (offline)</text>
+  <rect x="25" y="326" width="200" height="22" class="box"/>
+  <text x="35" y="341" class="api-item">SharedArrayBuffer + Atomics</text>
+
+  <!-- Storage -->
+  <rect x="245" y="220" width="210" height="140" class="category"/>
+  <text x="350" y="240" class="label" text-anchor="middle" font-weight="bold">💾 Storage</text>
+  <rect x="255" y="248" width="190" height="22" class="box"/>
+  <text x="265" y="263" class="api-item">localStorage / sessionStorage</text>
+  <rect x="255" y="274" width="190" height="22" class="box"/>
+  <text x="265" y="289" class="api-item">IndexedDB (structured)</text>
+  <rect x="255" y="300" width="190" height="22" class="box"/>
+  <text x="265" y="315" class="api-item">Cache API (SW)</text>
+  <rect x="255" y="326" width="190" height="22" class="box"/>
+  <text x="265" y="341" class="api-item">File System Access API</text>
+
+  <!-- Media & Graphics -->
+  <rect x="465" y="220" width="220" height="140" class="category"/>
+  <text x="575" y="240" class="label" text-anchor="middle" font-weight="bold">🎨 Media & Graphics</text>
+  <rect x="475" y="248" width="200" height="22" class="box"/>
+  <text x="485" y="263" class="api-item">Canvas 2D / WebGL / WebGPU</text>
+  <rect x="475" y="274" width="200" height="22" class="box"/>
+  <text x="485" y="289" class="api-item">Web Audio API</text>
+  <rect x="475" y="300" width="200" height="22" class="box"/>
+  <text x="485" y="315" class="api-item">MediaStream (camera/mic)</text>
+  <rect x="475" y="326" width="200" height="22" class="box"/>
+  <text x="485" y="341" class="api-item">Clipboard API</text>
+
+  <!-- Footer -->
+  <text x="350" y="385" class="sublabel" text-anchor="middle">All APIs available without frameworks — modern vanilla JS is powerful</text>
+</svg>

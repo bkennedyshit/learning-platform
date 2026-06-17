@@ -1,0 +1,68 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-nf" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .nf-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; transition: all 0.3s; cursor: pointer; }
+    .nf-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .nf-active { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; rx: 8; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .desc { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .progress-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#arrow-nf); }
+    .anomaly { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+  </style>
+
+  <text x="350" y="25" class="title">Normalization Progression — Eliminating Anomalies</text>
+
+  <!-- UNF -->
+  <rect x="30" y="60" width="120" height="60" class="nf-box"/>
+  <text x="90" y="85" class="label">UNF</text>
+  <text x="90" y="100" class="desc">Unnormalized</text>
+  <text x="90" y="135" class="anomaly">All anomalies</text>
+
+  <!-- 1NF -->
+  <rect x="180" y="60" width="120" height="60" class="nf-box"/>
+  <text x="240" y="85" class="label">1NF</text>
+  <text x="240" y="100" class="desc">Atomic values</text>
+  <text x="240" y="135" class="anomaly">↓ repeating groups</text>
+
+  <!-- 2NF -->
+  <rect x="330" y="60" width="120" height="60" class="nf-box"/>
+  <text x="390" y="85" class="label">2NF</text>
+  <text x="390" y="100" class="desc">Full key dependency</text>
+  <text x="390" y="135" class="anomaly">↓ partial deps</text>
+
+  <!-- 3NF -->
+  <rect x="480" y="60" width="120" height="60" class="nf-active"/>
+  <text x="540" y="85" class="label">3NF</text>
+  <text x="540" y="100" class="desc">No transitive deps</text>
+  <text x="540" y="135" class="anomaly">↓ transitive deps</text>
+
+  <!-- BCNF -->
+  <rect x="555" y="170" width="120" height="60" class="nf-box"/>
+  <text x="615" y="195" class="label">BCNF</text>
+  <text x="615" y="210" class="desc">Every det. is key</text>
+
+  <!-- Arrows -->
+  <line x1="150" y1="90" x2="180" y2="90" class="progress-arrow"/>
+  <line x1="300" y1="90" x2="330" y2="90" class="progress-arrow"/>
+  <line x1="450" y1="90" x2="480" y2="90" class="progress-arrow"/>
+  <line x1="540" y1="120" x2="615" y2="170" class="progress-arrow"/>
+
+  <!-- Denormalization path -->
+  <rect x="30" y="220" width="200" height="50" rx="8" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 5,3;"/>
+  <text x="130" y="245" class="label">Star Schema</text>
+  <text x="130" y="260" class="desc">Denormalized for OLAP</text>
+
+  <rect x="260" y="220" width="200" height="50" rx="8" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 5,3;"/>
+  <text x="360" y="245" class="label">Snowflake Schema</text>
+  <text x="360" y="260" class="desc">Partially normalized dims</text>
+
+  <!-- Trade-off labels -->
+  <text x="350" y="310" class="desc" style="font-size: 12px;">← More redundancy, faster reads     |     Less redundancy, more joins →</text>
+  <text x="130" y="330" class="anomaly">OLAP (Analytics)</text>
+  <text x="540" y="330" class="anomaly">OLTP (Transactions)</text>
+</svg>

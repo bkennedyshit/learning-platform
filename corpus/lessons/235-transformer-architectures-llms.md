@@ -1,0 +1,1065 @@
+---
+title: "Transformer Architectures Llms"
+subject: "AI & Machine Learning Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "23.5"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 23.5 — Transformer Architectures & Large Language Models
+
+> *"Attention is all you need."*
+> — **Vaswani et al.**, *NeurIPS 2017*
+
+The Transformer architecture revolutionized sequence modeling by replacing recurrence with self-attention — allowing every token to attend to every other token in parallel. This chapter derives the scaled dot-product attention mechanism from first principles, traces every matrix dimension through multi-head attention, derives positional encodings, and builds up to the full GPT/BERT architectures that power modern LLMs.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Derive scaled dot-product attention and explain the $\sqrt{d_k}$ scaling factor.
+2. Compute attention weights and outputs for toy Q, K, V matrices by hand.
+3. Explain multi-head attention: why multiple heads, how they're concatenated, dimension bookkeeping.
+4. Derive positional encoding using sinusoidal functions and explain why it encodes relative position.
+5. Trace tensor shapes through a complete Transformer encoder block (LayerNorm → MHA → FFN).
+6. Distinguish encoder-only (BERT), decoder-only (GPT), and encoder-decoder (T5) architectures.
+7. Explain causal masking in autoregressive generation.
+8. Estimate parameter counts and FLOPs for GPT-scale models.
+
+---
+
+## 🖼️ Visual Anchor — Self-Attention Mechanism
+
+![track-10__10.5-fig1](track-10__10.5-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 23.5.1 — Scaled Dot-Product Attention
+
+Given queries $Q \in \mathbb{R}^{n \times d_k}$, keys $K \in \mathbb{R}^{n \times d_k}$, values $V \in \mathbb{R}^{n \times d_v}$:
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+$$
+
+**Dimension trace:**
+- $QK^T \in \mathbb{R}^{n \times n}$ — attention score matrix
+- $\text{softmax}(\cdot) \in \mathbb{R}^{n \times n}$ — attention weights (rows sum to 1)
+- $\text{softmax}(\cdot)V \in \mathbb{R}^{n \times d_v}$ — weighted sum of values
+
+### Definition 23.5.2 — Multi-Head Attention
+
+$$
+\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O
+$$
+
+$$
+\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)
+$$
+
+where $W_i^Q \in \mathbb{R}^{d_{model} \times d_k}$, $W_i^K \in \mathbb{R}^{d_{model} \times d_k}$, $W_i^V \in \mathbb{R}^{d_{model} \times d_v}$, $W^O \in \mathbb{R}^{hd_v \times d_{model}}$.
+
+Typically: $d_k = d_v = d_{model}/h$. With $h=8$, $d_{model}=512$: $d_k = d_v = 64$.
+
+### Definition 23.5.3 — Positional Encoding (Sinusoidal)
+
+$$
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+$$
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+where $pos$ is the position index and $i$ is the dimension index. This allows the model to attend to relative positions because $PE_{pos+k}$ can be expressed as a linear function of $PE_{pos}$.
+
+### Definition 23.5.4 — Transformer Encoder Block
+
+One encoder block applies (with residual connections and layer normalization):
+
+$$
+\mathbf{z} = \text{LayerNorm}(\mathbf{x} + \text{MultiHead}(\mathbf{x}, \mathbf{x}, \mathbf{x}))
+$$
+
+$$
+\text{output} = \text{LayerNorm}(\mathbf{z} + \text{FFN}(\mathbf{z}))
+$$
+
+where $\text{FFN}(\mathbf{z}) = \max(0, \mathbf{z}W_1 + b_1)W_2 + b_2$ with $W_1 \in \mathbb{R}^{d_{model} \times d_{ff}}$, $W_2 \in \mathbb{R}^{d_{ff} \times d_{model}}$, typically $d_{ff} = 4d_{model}$.
+
+### Definition 23.5.5 — Causal (Autoregressive) Masking
+
+For decoder-only models (GPT), position $i$ can only attend to positions $j \leq i$:
+
+$$
+\text{mask}[i,j] = \begin{cases}-\infty & \text{if } j > i \\ 0 & \text{if } j \leq i\end{cases}
+$$
+
+$$
+\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + \text{mask}\right)V
+$$
+
+The $-\infty$ entries become 0 after softmax, preventing information leakage from future tokens.
+
+### Definition 23.5.6 — Layer Normalization
+
+$$
+\text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta
+$$
+
+where $\mu = \frac{1}{d}\sum_i x_i$, $\sigma^2 = \frac{1}{d}\sum_i(x_i - \mu)^2$, computed over the feature dimension (not batch). $\gamma, \beta \in \mathbb{R}^d$ are learnable.
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 10.5.P1 (Attention as Soft Dictionary Lookup):** Self-attention implements a differentiable dictionary: queries look up keys to retrieve values. The softmax produces a probability distribution over keys, and the output is the expected value under that distribution.
+
+**Postulate 10.5.P2 (Permutation Equivariance):** Without positional encoding, self-attention is permutation equivariant: reordering input tokens reorders outputs identically. Positional encoding breaks this symmetry to inject sequence order.
+
+**Postulate 10.5.P3 (Scaling Hypothesis):** Transformer performance scales predictably with model size, data size, and compute (Kaplan et al., 2020). Loss follows power laws: $L(N) \propto N^{-\alpha}$ where $N$ is parameter count.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 23.5.1 — Why Scale by $\sqrt{d_k}$
+
+For random queries and keys with entries $\sim \mathcal{N}(0, 1)$, the dot product $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$ has:
+
+$$
+\mathbb{E}[q \cdot k] = 0, \quad \text{Var}(q \cdot k) = d_k
+$$
+
+**Proof.** Each term $q_i k_i$ has mean 0 and variance $\text{Var}(q_i)\text{Var}(k_i) = 1$. Sum of $d_k$ independent terms: variance = $d_k$.
+
+Without scaling, for large $d_k$ (e.g., 64), dot products have standard deviation $\sqrt{64} = 8$. Softmax of values with magnitude ~8 produces near-one-hot distributions (saturated gradients). Dividing by $\sqrt{d_k}$ normalizes variance to 1.
+
+### Lemma 23.5.2 — Positional Encoding Encodes Relative Position
+
+For any fixed offset $k$, there exists a linear transformation $M_k$ (independent of position) such that:
+
+$$
+PE_{pos+k} = M_k \cdot PE_{pos}
+$$
+
+**Proof sketch.** The sinusoidal encoding at position $pos$ for dimension pair $(2i, 2i+1)$ is $(\sin(\omega_i \cdot pos), \cos(\omega_i \cdot pos))$ where $\omega_i = 1/10000^{2i/d}$. Using the angle addition formulas:
+
+$$
+\begin{pmatrix}\sin(\omega_i(pos+k))\\\cos(\omega_i(pos+k))\end{pmatrix} = \begin{pmatrix}\cos(\omega_i k) & \sin(\omega_i k)\\-\sin(\omega_i k) & \cos(\omega_i k)\end{pmatrix}\begin{pmatrix}\sin(\omega_i \cdot pos)\\\cos(\omega_i \cdot pos)\end{pmatrix}
+$$
+
+This rotation matrix depends only on $k$, not $pos$. $\blacksquare$
+
+### Lemma 23.5.3 — Attention Output as Weighted Average
+
+Each row of the attention output is a convex combination of value vectors:
+
+$$
+\text{out}_i = \sum_{j=1}^n \alpha_{ij} \mathbf{v}_j, \quad \alpha_{ij} \geq 0, \quad \sum_j \alpha_{ij} = 1
+$$
+
+The output for token $i$ lies in the convex hull of all value vectors.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 23.5.1 — Transformer Parameter Count
+
+For a Transformer with $L$ layers, $d_{model}$ dimensions, $h$ heads, $d_{ff} = 4d_{model}$:
+
+**Per encoder/decoder layer:**
+- Multi-head attention: $4d_{model}^2$ (Q, K, V projections + output projection)
+- FFN: $2 \cdot d_{model} \cdot d_{ff} = 8d_{model}^2$
+- LayerNorm: $4d_{model}$ (negligible)
+- **Total per layer:** $\approx 12d_{model}^2$
+
+**Full model:** $\approx 12Ld_{model}^2$ (plus embeddings: $V \cdot d_{model}$).
+
+**GPT-3 (175B):** $L=96$, $d_{model}=12288$, $h=96$: $12 \times 96 \times 12288^2 \approx 174B$ ✓.
+
+### Theorem 23.5.2 — Self-Attention Computational Complexity
+
+For sequence length $n$ and dimension $d$:
+- **Time:** $O(n^2 d)$ — dominated by the $QK^T$ matrix multiplication
+- **Memory:** $O(n^2 + nd)$ — storing the attention matrix
+
+This quadratic scaling in $n$ is the primary bottleneck for long sequences. Solutions: sparse attention, linear attention, FlashAttention (IO-aware).
+
+### Theorem 23.5.3 — Universal Approximation of Transformers
+
+Yun et al. (2020) proved that Transformers are universal approximators of sequence-to-sequence functions: for any continuous function $f: \mathbb{R}^{n \times d} \to \mathbb{R}^{n \times d}$ and $\epsilon > 0$, there exists a Transformer that approximates $f$ within $\epsilon$ (given sufficient depth and width).
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of Scaled Dot-Product Attention
+
+**Step 1. Motivation:** We want token $i$ to gather information from all other tokens, weighted by relevance.
+
+**Step 2. Compatibility function:** Define relevance of token $j$ to token $i$ as the dot product of their projections:
+
+$$
+e_{ij} = \mathbf{q}_i^T \mathbf{k}_j = (W^Q\mathbf{x}_i)^T(W^K\mathbf{x}_j)
+$$
+
+**Step 3. Normalization:** Convert scores to a probability distribution:
+
+$$
+\alpha_{ij} = \frac{\exp(e_{ij}/\sqrt{d_k})}{\sum_{m=1}^n \exp(e_{im}/\sqrt{d_k})}
+$$
+
+**Step 4. Weighted aggregation:**
+
+$$
+\text{out}_i = \sum_{j=1}^n \alpha_{ij}\mathbf{v}_j = \sum_{j=1}^n \alpha_{ij}(W^V\mathbf{x}_j)
+$$
+
+**Step 5. Matrix form:** Stack all queries, keys, values:
+
+$$
+Q = XW^Q \in \mathbb{R}^{n \times d_k}, \quad K = XW^K \in \mathbb{R}^{n \times d_k}, \quad V = XW^V \in \mathbb{R}^{n \times d_v}
+$$
+
+$$
+\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \in \mathbb{R}^{n \times d_v}
+$$
+
+### 5.2 Gradient of Attention w.r.t. Q (Full Index Derivation)
+
+Let $S = QK^T/\sqrt{d_k} \in \mathbb{R}^{n \times n}$, $A = \text{softmax}(S)$, $O = AV$.
+
+**Given:** upstream gradient $\frac{\partial\mathcal{L}}{\partial O} \in \mathbb{R}^{n \times d_v}$.
+
+**Step 1.** $\frac{\partial\mathcal{L}}{\partial A} = \frac{\partial\mathcal{L}}{\partial O} \cdot V^T \in \mathbb{R}^{n \times n}$.
+
+Dimension: $(n \times d_v)(d_v \times n) = (n \times n)$ ✓.
+
+**Step 2.** Through softmax (row-wise). For row $i$:
+
+$$
+\frac{\partial\mathcal{L}}{\partial S_{i,:}} = A_{i,:} \odot \left(\frac{\partial\mathcal{L}}{\partial A_{i,:}} - \left\langle A_{i,:}, \frac{\partial\mathcal{L}}{\partial A_{i,:}}\right\rangle\right)
+$$
+
+where $\langle\cdot,\cdot\rangle$ is the dot product. This uses the softmax Jacobian from §10.1.
+
+**Step 3.** $\frac{\partial\mathcal{L}}{\partial Q} = \frac{1}{\sqrt{d_k}}\frac{\partial\mathcal{L}}{\partial S} \cdot K \in \mathbb{R}^{n \times d_k}$.
+
+Dimension: $(n \times n)(n \times d_k) = (n \times d_k)$ ✓ (matches $Q$ shape).
+
+### 5.3 Multi-Head Attention — Dimension Bookkeeping
+
+**Input:** $X \in \mathbb{R}^{n \times d_{model}}$ (e.g., $n=512$ tokens, $d_{model}=512$).
+
+**Step 1.** Project to $h=8$ heads with $d_k = d_v = d_{model}/h = 64$:
+
+$$
+Q_i = XW_i^Q \in \mathbb{R}^{n \times 64}, \quad K_i = XW_i^K \in \mathbb{R}^{n \times 64}, \quad V_i = XW_i^V \in \mathbb{R}^{n \times 64}
+$$
+
+**Step 2.** Each head computes attention independently:
+
+$$
+\text{head}_i = \text{Attention}(Q_i, K_i, V_i) \in \mathbb{R}^{n \times 64}
+$$
+
+**Step 3.** Concatenate all heads:
+
+$$
+\text{Concat}(\text{head}_1, \ldots, \text{head}_8) \in \mathbb{R}^{n \times 512}
+$$
+
+**Step 4.** Final linear projection:
+
+$$
+\text{MultiHead} = \text{Concat} \cdot W^O \in \mathbb{R}^{n \times 512}, \quad W^O \in \mathbb{R}^{512 \times 512}
+$$
+
+**Parameter count for MHA:** $h \times 3 \times (d_{model} \times d_k) + d_{model}^2 = 8 \times 3 \times (512 \times 64) + 512^2 = 786,432 + 262,144 = 1,048,576 \approx 4d_{model}^2$.
+
+### 5.4 Feed-Forward Network Derivation
+
+The position-wise FFN applies the same 2-layer MLP to each token independently:
+
+$$
+\text{FFN}(\mathbf{z}) = \text{ReLU}(\mathbf{z}W_1 + b_1)W_2 + b_2
+$$
+
+**Shapes:** $\mathbf{z} \in \mathbb{R}^{d_{model}}$, $W_1 \in \mathbb{R}^{d_{model} \times d_{ff}}$, $W_2 \in \mathbb{R}^{d_{ff} \times d_{model}}$.
+
+With $d_{ff} = 4d_{model} = 2048$: parameters = $2 \times d_{model} \times d_{ff} = 2 \times 512 \times 2048 = 2,097,152 = 8d_{model}^2$.
+
+### 5.5 Causal Mask Implementation
+
+For autoregressive generation, the mask is a lower-triangular matrix:
+
+$$
+M = \begin{pmatrix}0 & -\infty & -\infty & \cdots \\ 0 & 0 & -\infty & \cdots \\ 0 & 0 & 0 & \cdots \\ \vdots & & & \ddots\end{pmatrix}
+$$
+
+After adding to scores: $\text{softmax}(S + M)$ — the $-\infty$ entries become $e^{-\infty} = 0$, so token $i$ only attends to tokens $1, \ldots, i$.
+
+
+
+---
+
+## 💻 6. Code Examples
+
+### Scaled Dot-Product Attention from Scratch
+
+```python
+import numpy as np
+
+def scaled_dot_product_attention(Q, K, V, mask=None):
+    """
+    Q: (n, d_k), K: (n, d_k), V: (n, d_v)
+    Returns: output (n, d_v), attention_weights (n, n)
+    """
+    d_k = Q.shape[-1]
+    
+    # Step 1: Compute attention scores
+    scores = Q @ K.T / np.sqrt(d_k)  # (n, d_k) @ (d_k, n) = (n, n)
+    
+    # Step 2: Apply causal mask (optional)
+    if mask is not None:
+        scores = scores + mask  # mask has -inf for future positions
+    
+    # Step 3: Softmax (row-wise)
+    exp_scores = np.exp(scores - scores.max(axis=-1, keepdims=True))  # numerical stability
+    attention_weights = exp_scores / exp_scores.sum(axis=-1, keepdims=True)  # (n, n)
+    
+    # Step 4: Weighted sum of values
+    output = attention_weights @ V  # (n, n) @ (n, d_v) = (n, d_v)
+    
+    return output, attention_weights
+
+def multi_head_attention(X, W_Q, W_K, W_V, W_O, n_heads):
+    """
+    X: (n, d_model)
+    W_Q, W_K, W_V: (d_model, d_model)
+    W_O: (d_model, d_model)
+    n_heads: int
+    Returns: (n, d_model)
+    """
+    n, d_model = X.shape
+    d_k = d_model // n_heads  # per-head dimension
+    
+    # Project to Q, K, V
+    Q = X @ W_Q  # (n, d_model)
+    K = X @ W_K  # (n, d_model)
+    V = X @ W_V  # (n, d_model)
+    
+    # Reshape to (n_heads, n, d_k)
+    Q = Q.reshape(n, n_heads, d_k).transpose(1, 0, 2)  # (h, n, d_k)
+    K = K.reshape(n, n_heads, d_k).transpose(1, 0, 2)  # (h, n, d_k)
+    V = V.reshape(n, n_heads, d_k).transpose(1, 0, 2)  # (h, n, d_k)
+    
+    # Attention per head
+    heads = []
+    for i in range(n_heads):
+        out_i, _ = scaled_dot_product_attention(Q[i], K[i], V[i])  # (n, d_k)
+        heads.append(out_i)
+    
+    # Concatenate heads
+    concat = np.concatenate(heads, axis=-1)  # (n, d_model)
+    
+    # Output projection
+    output = concat @ W_O  # (n, d_model) @ (d_model, d_model) = (n, d_model)
+    return output
+
+# --- Demo ---
+np.random.seed(42)
+n, d_model, n_heads = 4, 8, 2
+X = np.random.randn(n, d_model)
+
+# Toy Q, K, V (identity projections for clarity)
+Q = K = V = X
+output, weights = scaled_dot_product_attention(Q, K, V)
+print(f"Input shape:  {X.shape}")        # (4, 8)
+print(f"Output shape: {output.shape}")   # (4, 8)
+print(f"Attention weights:\n{weights.round(3)}")
+print(f"Row sums: {weights.sum(axis=1)}")  # all 1.0
+```
+
+### Causal Mask for GPT-style Generation
+
+```python
+import numpy as np
+
+def create_causal_mask(n):
+    """Create lower-triangular causal mask. Shape: (n, n)"""
+    mask = np.full((n, n), -np.inf)
+    mask = np.triu(mask, k=1)  # upper triangle = -inf, lower+diag = 0
+    return mask
+
+n = 5
+mask = create_causal_mask(n)
+print("Causal mask:")
+print(mask)
+# [[  0. -inf -inf -inf -inf]
+#  [  0.   0. -inf -inf -inf]
+#  [  0.   0.   0. -inf -inf]
+#  [  0.   0.   0.   0. -inf]
+#  [  0.   0.   0.   0.   0.]]
+```
+
+> **See also:** `_practice/scripts/10.5_attention.py` for QKV decomposition exercises.
+
+---
+
+## 🧮 7. Worked Examples
+
+### Example 23.5.E1 — Compute Attention Output for Toy QKV
+
+<details>
+<summary>🔍 Full Solution: 3 tokens, d_k=2</summary>
+
+**Given:**
+
+$$
+Q = \begin{pmatrix}1&0\\0&1\\1&1\end{pmatrix}, \quad K = \begin{pmatrix}1&0\\0&1\\0.5&0.5\end{pmatrix}, \quad V = \begin{pmatrix}1&0\\0&1\\0.5&0.5\end{pmatrix}
+$$
+
+$d_k = 2$, so $\sqrt{d_k} = \sqrt{2} \approx 1.414$.
+
+**Step 1.** Compute $QK^T$:
+
+$$
+QK^T = \begin{pmatrix}1&0&0.5\\0&1&0.5\\1&1&1\end{pmatrix}
+$$
+
+**Step 2.** Scale: $S = QK^T/\sqrt{2}$:
+
+$$
+S = \begin{pmatrix}0.707&0&0.354\\0&0.707&0.354\\0.707&0.707&0.707\end{pmatrix}
+$$
+
+**Step 3.** Softmax (row-wise). Row 1: $e^{0.707}, e^0, e^{0.354}$:
+
+$$
+= (2.028, 1.000, 1.425), \quad \text{sum} = 4.453
+$$
+
+$$
+\alpha_1 = (0.455, 0.225, 0.320)
+$$
+
+Row 2: $e^0, e^{0.707}, e^{0.354} = (1.000, 2.028, 1.425)$, sum = 4.453:
+
+$$
+\alpha_2 = (0.225, 0.455, 0.320)
+$$
+
+Row 3: $e^{0.707}, e^{0.707}, e^{0.707} = (2.028, 2.028, 2.028)$, sum = 6.084:
+
+$$
+\alpha_3 = (0.333, 0.333, 0.333)
+$$
+
+**Step 4.** Output = $A \cdot V$:
+
+$$
+\text{out}_1 = 0.455(1,0) + 0.225(0,1) + 0.320(0.5,0.5) = (0.615, 0.385)
+$$
+
+$$
+\text{out}_2 = 0.225(1,0) + 0.455(0,1) + 0.320(0.5,0.5) = (0.385, 0.615)
+$$
+
+$$
+\text{out}_3 = 0.333(1,0) + 0.333(0,1) + 0.333(0.5,0.5) = (0.500, 0.500)
+$$
+
+**Interpretation:** Token 3 (query=[1,1]) attends equally to all keys (uniform attention). Token 1 (query=[1,0]) attends most to key 1 (which matches it).
+
+</details>
+
+### Example 23.5.E2 — GPT-2 Parameter Count
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**GPT-2 (117M):** $L=12$, $d_{model}=768$, $h=12$, $d_{ff}=3072$, vocab $V=50257$.
+
+**Token embedding:** $V \times d_{model} = 50257 \times 768 = 38,597,376$.
+
+**Position embedding:** $1024 \times 768 = 786,432$.
+
+**Per layer:**
+- MHA: $4 \times 768^2 = 2,359,296$ (Q,K,V,O projections)
+- FFN: $2 \times 768 \times 3072 = 4,718,592$
+- LayerNorms: $2 \times 2 \times 768 = 3,072$
+- Per layer total: $7,080,960$
+
+**All layers:** $12 \times 7,080,960 = 84,971,520$.
+
+**Final LayerNorm + LM head (tied with embedding):** $2 \times 768 = 1,536$.
+
+**Total:** $38,597,376 + 786,432 + 84,971,520 + 1,536 \approx 124,356,864 \approx 124M$.
+
+(The commonly cited "117M" excludes position embeddings and uses slightly different counting.)
+
+</details>
+
+### Example 23.5.E3 — Positional Encoding Values
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Compute $PE$ for position 3, dimensions 0-3, with $d_{model}=512$.
+
+**Dimension 0 ($i=0$):** $\omega_0 = 1/10000^{0/512} = 1$.
+
+$$
+PE_{3,0} = \sin(3 \cdot 1) = \sin(3) = 0.1411
+$$
+
+**Dimension 1 ($i=0$):**
+
+$$
+PE_{3,1} = \cos(3 \cdot 1) = \cos(3) = -0.9900
+$$
+
+**Dimension 2 ($i=1$):** $\omega_1 = 1/10000^{2/512} = 1/10000^{0.0039} = 1/1.036 = 0.965$.
+
+$$
+PE_{3,2} = \sin(3 \times 0.965) = \sin(2.896) = 0.2392
+$$
+
+**Dimension 3 ($i=1$):**
+
+$$
+PE_{3,3} = \cos(3 \times 0.965) = \cos(2.896) = -0.9710
+$$
+
+**Key property:** Low-frequency dimensions (high $i$) change slowly with position — they encode coarse position. High-frequency dimensions (low $i$) change rapidly — they encode fine position.
+
+</details>
+
+### Example 23.5.E4 — FLOPs for One Forward Pass
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** Estimate FLOPs for GPT-2 (117M) processing a sequence of length $n=1024$.
+
+**Per layer, per token:**
+- QKV projection: $3 \times 2 \times d_{model}^2 = 6 \times 768^2 \approx 3.5M$ FLOPs
+- Attention scores: $2 \times n \times d_{model} = 2 \times 1024 \times 768 \approx 1.6M$
+- Attention × V: $2 \times n \times d_{model} \approx 1.6M$
+- Output projection: $2 \times d_{model}^2 \approx 1.2M$
+- FFN: $2 \times 2 \times d_{model} \times d_{ff} = 4 \times 768 \times 3072 \approx 9.4M$
+
+**Per token per layer:** ~17.3M FLOPs.
+
+**Total:** $12 \times 1024 \times 17.3M \approx 213$ GFLOPs per forward pass.
+
+**Rule of thumb:** FLOPs $\approx 2 \times P \times n$ where $P$ = parameters, $n$ = sequence length. $2 \times 124M \times 1024 \approx 254$ GFLOPs (close to our estimate).
+
+</details>
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Cross-links
+- Matrix multiplication and dimensions: [2.2 - Matrix Operations & Algebra](2.2---Matrix-Operations-&-Algebra)
+- Softmax and its Jacobian: [23.1 - Statistical Learning & Optimization](23.1---Statistical-Learning-&-Optimization)
+- Replaces RNN sequential processing: [23.4 - NLP & Recurrent Models - RNNs & LSTMs](23.4---NLP-&-Recurrent-Models---RNNs-&-LSTMs)
+- Vision Transformers: [23.3 - Computer Vision - CNNs & ViTs](23.3---Computer-Vision---CNNs-&-ViTs)
+- Used in generative models: [23.6 - Generative Models - GANs & Diffusion](23.6---Generative-Models---GANs-&-Diffusion)
+- RLHF for alignment: [23.7 - Reinforcement Learning & RLHF](23.7---Reinforcement-Learning-&-RLHF)
+- Eigenvalues for attention matrix analysis: [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)
+
+### External References
+- **Vaswani et al. (2017)** — *Attention Is All You Need* ([arXiv:1706.03762](https://arxiv.org/abs/1706.03762))
+- **Karpathy** — *minGPT* (clean PyTorch implementation, [github.com/karpathy/minGPT](https://github.com/karpathy/minGPT))
+- **Stanford CS224n** — Transformers and Pretraining ([cs224n.stanford.edu](https://cs224n.stanford.edu/))
+- **Radford et al. (2019)** — *Language Models are Unsupervised Multitask Learners* (GPT-2)
+- **Devlin et al. (2019)** — *BERT: Pre-training of Deep Bidirectional Transformers* ([arXiv:1810.04805](https://arxiv.org/abs/1810.04805))
+- **Kaplan et al. (2020)** — *Scaling Laws for Neural Language Models* ([arXiv:2001.08361](https://arxiv.org/abs/2001.08361))
+- **Jay Alammar** — *The Illustrated Transformer* (visual guide, [jalammar.github.io](https://jalammar.github.io/illustrated-transformer/))
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall 1 — Forgetting the $\sqrt{d_k}$ Scaling
+
+Without scaling, attention scores have variance $d_k$. For $d_k = 64$, scores have std $\approx 8$. Softmax of $[8, 0, 0, ...]$ gives $[0.9997, 0.0001, ...]$ — nearly one-hot. Gradients through saturated softmax vanish. Always scale.
+
+### Pitfall 2 — Positional Encoding vs. Learned Positions
+
+Sinusoidal encodings generalize to longer sequences than seen during training (extrapolation). Learned position embeddings (GPT-2) cannot extrapolate beyond training length. Modern solutions: RoPE (Rotary Position Embedding), ALiBi (Attention with Linear Biases).
+
+### Pitfall 3 — KV Cache in Autoregressive Generation
+
+During generation, recomputing attention over the full sequence at each token is $O(n^2)$ per token, $O(n^3)$ total. The **KV cache** stores previously computed key/value vectors, reducing per-token cost to $O(n)$. Memory cost: $2 \times L \times n \times d_{model}$ floats.
+
+### Pitfall 4 — LayerNorm Placement (Pre-Norm vs Post-Norm)
+
+Original Transformer uses Post-Norm: $\text{LN}(x + \text{Sublayer}(x))$. GPT-2+ uses Pre-Norm: $x + \text{Sublayer}(\text{LN}(x))$. Pre-Norm is more stable for deep networks (gradients flow directly through residual) but may slightly underperform Post-Norm with careful tuning.
+
+---
+
+## 📝 Architecture Comparison Table
+
+| Model | Type | Layers | $d_{model}$ | Heads | Params | Training Data |
+|-------|------|--------|-------------|-------|--------|--------------|
+| BERT-Base | Encoder | 12 | 768 | 12 | 110M | BooksCorpus + Wiki |
+| GPT-2 | Decoder | 12 | 768 | 12 | 124M | WebText (40GB) |
+| GPT-3 | Decoder | 96 | 12288 | 96 | 175B | 300B tokens |
+| T5-Base | Enc-Dec | 12+12 | 768 | 12 | 220M | C4 (750GB) |
+| LLaMA-7B | Decoder | 32 | 4096 | 32 | 7B | 1T tokens |
+| GPT-4 | Decoder | ~120 | ~12K | ~96 | ~1.8T* | ~13T tokens* |
+
+*Estimated; not officially disclosed.
+
+**Key architectural differences:**
+- **BERT:** Bidirectional (no causal mask), trained with Masked Language Modeling (MLM)
+- **GPT:** Unidirectional (causal mask), trained with next-token prediction
+- **T5:** Encoder processes input, decoder generates output (seq2seq)
+- **LLaMA:** GPT-style + RoPE + SwiGLU activation + RMSNorm (no bias terms)
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — Computing Attention Output for a 3-Token Sequence by Hand
+
+**Problem:** Given a 3-token sequence with embedding dimension $d_{model} = 4$ and single-head attention with $d_k = d_v = 4$, compute the full attention output showing every matrix multiplication explicitly.
+
+**Input embeddings:**
+
+$$
+X = \begin{bmatrix} 1 & 0 & 1 & 0 \\ 0 & 1 & 0 & 1 \\ 1 & 1 & 0 & 0 \end{bmatrix} \in \mathbb{R}^{3 \times 4}
+$$
+
+**Weight matrices:**
+
+$$
+W_Q = \begin{bmatrix} 1 & 0 & 0 & 1 \\ 0 & 1 & 1 & 0 \\ 1 & 0 & 1 & 0 \\ 0 & 1 & 0 & 1 \end{bmatrix}, \quad W_K = \begin{bmatrix} 0 & 1 & 1 & 0 \\ 1 & 0 & 0 & 1 \\ 0 & 0 & 1 & 1 \\ 1 & 1 & 0 & 0 \end{bmatrix}, \quad W_V = \begin{bmatrix} 1 & 0 & 1 & 0 \\ 0 & 1 & 0 & 1 \\ 1 & 1 & 0 & 0 \\ 0 & 0 & 1 & 1 \end{bmatrix}
+$$
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Compute Q, K, V Matrices
+
+$Q = X W_Q$:
+
+Row 1: $[1,0,1,0] \cdot W_Q = [1+0+1+0, \; 0+0+0+0, \; 0+0+1+0, \; 1+0+0+0] = [2, 0, 1, 1]$
+
+Row 2: $[0,1,0,1] \cdot W_Q = [0+0+0+0, \; 0+1+0+1, \; 0+1+0+0, \; 0+0+0+1] = [0, 2, 1, 1]$
+
+Row 3: $[1,1,0,0] \cdot W_Q = [1+0+0+0, \; 0+1+0+0, \; 0+1+0+0, \; 1+0+0+0] = [1, 1, 1, 1]$
+
+$$
+Q = \begin{bmatrix} 2 & 0 & 1 & 1 \\ 0 & 2 & 1 & 1 \\ 1 & 1 & 1 & 1 \end{bmatrix}
+$$
+
+$K = X W_K$:
+
+Row 1: $[1,0,1,0] \cdot W_K = [0+0+0+0, \; 1+0+0+0, \; 1+0+1+0, \; 0+0+1+0] = [0, 1, 2, 1]$
+
+Row 2: $[0,1,0,1] \cdot W_K = [0+1+0+1, \; 0+0+0+1, \; 0+0+0+0, \; 0+1+0+0] = [2, 1, 0, 1]$
+
+Row 3: $[1,1,0,0] \cdot W_K = [0+1+0+0, \; 1+0+0+0, \; 1+0+0+0, \; 0+1+0+0] = [1, 1, 1, 1]$
+
+$$
+K = \begin{bmatrix} 0 & 1 & 2 & 1 \\ 2 & 1 & 0 & 1 \\ 1 & 1 & 1 & 1 \end{bmatrix}
+$$
+
+$V = X W_V$:
+
+Row 1: $[1,0,1,0] \cdot W_V = [1+0+1+0, \; 0+0+1+0, \; 1+0+0+0, \; 0+0+0+0] = [2, 1, 1, 0]$
+
+Row 2: $[0,1,0,1] \cdot W_V = [0+0+0+0, \; 0+1+0+0, \; 0+0+0+1, \; 0+1+0+1] = [0, 1, 1, 2]$
+
+Row 3: $[1,1,0,0] \cdot W_V = [1+0+0+0, \; 0+1+0+0, \; 1+0+0+0, \; 0+1+0+0] = [1, 1, 1, 1]$
+
+$$
+V = \begin{bmatrix} 2 & 1 & 1 & 0 \\ 0 & 1 & 1 & 2 \\ 1 & 1 & 1 & 1 \end{bmatrix}
+$$
+
+#### Step 2: Compute Attention Scores $QK^T$
+
+$$
+QK^T = Q \cdot K^T = \begin{bmatrix} 2 & 0 & 1 & 1 \\ 0 & 2 & 1 & 1 \\ 1 & 1 & 1 & 1 \end{bmatrix} \begin{bmatrix} 0 & 2 & 1 \\ 1 & 1 & 1 \\ 2 & 0 & 1 \\ 1 & 1 & 1 \end{bmatrix}
+$$
+
+Entry $(1,1)$: $2(0) + 0(1) + 1(2) + 1(1) = 0 + 0 + 2 + 1 = 3$
+
+Entry $(1,2)$: $2(2) + 0(1) + 1(0) + 1(1) = 4 + 0 + 0 + 1 = 5$
+
+Entry $(1,3)$: $2(1) + 0(1) + 1(1) + 1(1) = 2 + 0 + 1 + 1 = 4$
+
+Entry $(2,1)$: $0(0) + 2(1) + 1(2) + 1(1) = 0 + 2 + 2 + 1 = 5$
+
+Entry $(2,2)$: $0(2) + 2(1) + 1(0) + 1(1) = 0 + 2 + 0 + 1 = 3$
+
+Entry $(2,3)$: $0(1) + 2(1) + 1(1) + 1(1) = 0 + 2 + 1 + 1 = 4$
+
+Entry $(3,1)$: $1(0) + 1(1) + 1(2) + 1(1) = 0 + 1 + 2 + 1 = 4$
+
+Entry $(3,2)$: $1(2) + 1(1) + 1(0) + 1(1) = 2 + 1 + 0 + 1 = 4$
+
+Entry $(3,3)$: $1(1) + 1(1) + 1(1) + 1(1) = 1 + 1 + 1 + 1 = 4$
+
+$$
+QK^T = \begin{bmatrix} 3 & 5 & 4 \\ 5 & 3 & 4 \\ 4 & 4 & 4 \end{bmatrix}
+$$
+
+#### Step 3: Scale by $\sqrt{d_k}$
+
+$$
+\frac{QK^T}{\sqrt{d_k}} = \frac{1}{\sqrt{4}} \begin{bmatrix} 3 & 5 & 4 \\ 5 & 3 & 4 \\ 4 & 4 & 4 \end{bmatrix} = \begin{bmatrix} 1.5 & 2.5 & 2.0 \\ 2.5 & 1.5 & 2.0 \\ 2.0 & 2.0 & 2.0 \end{bmatrix}
+$$
+
+#### Step 4: Apply Softmax (Row-wise)
+
+Row 1: $\text{softmax}([1.5, 2.5, 2.0])$
+
+$$
+e^{1.5} = 4.482, \quad e^{2.5} = 12.182, \quad e^{2.0} = 7.389
+$$
+
+$$
+\text{sum} = 4.482 + 12.182 + 7.389 = 24.053
+$$
+
+$$
+\alpha_1 = [0.186, \; 0.506, \; 0.307]
+$$
+
+Row 2: $\text{softmax}([2.5, 1.5, 2.0])$ — same values permuted:
+
+$$
+\alpha_2 = [0.506, \; 0.186, \; 0.307]
+$$
+
+Row 3: $\text{softmax}([2.0, 2.0, 2.0])$ — uniform:
+
+$$
+\alpha_3 = [0.333, \; 0.333, \; 0.333]
+$$
+
+#### Step 5: Compute Attention Output $\text{softmax} \cdot V$
+
+$$
+\text{Output} = \begin{bmatrix} 0.186 & 0.506 & 0.307 \\ 0.506 & 0.186 & 0.307 \\ 0.333 & 0.333 & 0.333 \end{bmatrix} \begin{bmatrix} 2 & 1 & 1 & 0 \\ 0 & 1 & 1 & 2 \\ 1 & 1 & 1 & 1 \end{bmatrix}
+$$
+
+Row 1: $[0.186(2)+0.506(0)+0.307(1), \; 0.186(1)+0.506(1)+0.307(1), \; 0.186(1)+0.506(1)+0.307(1), \; 0.186(0)+0.506(2)+0.307(1)]$
+
+$$
+= [0.372+0+0.307, \; 0.186+0.506+0.307, \; 0.186+0.506+0.307, \; 0+1.012+0.307] = [0.679, \; 1.0, \; 1.0, \; 1.319]
+$$
+
+Row 2: $[0.506(2)+0.186(0)+0.307(1), \; \ldots]$
+
+$$
+= [1.012+0+0.307, \; 0.506+0.186+0.307, \; 0.506+0.186+0.307, \; 0+0.372+0.307] = [1.319, \; 1.0, \; 1.0, \; 0.679]
+$$
+
+Row 3: $[0.333(2)+0.333(0)+0.333(1), \; \ldots] = [1.0, \; 1.0, \; 1.0, \; 1.0]$
+
+**Final Answer:**
+
+$$
+\text{Attention}(Q,K,V) = \begin{bmatrix} 0.679 & 1.0 & 1.0 & 1.319 \\ 1.319 & 1.0 & 1.0 & 0.679 \\ 1.0 & 1.0 & 1.0 & 1.0 \end{bmatrix}
+$$
+
+Token 1 attends most to Token 2 (weight 0.506), Token 2 attends most to Token 1 (weight 0.506), and Token 3 attends uniformly to all tokens.
+
+</details>
+
+### Example 9.2 — Why Scaling by $\sqrt{d_k}$ Prevents Softmax Saturation
+
+**Problem:** Prove that without scaling, the variance of dot-product attention scores grows linearly with $d_k$, causing softmax to saturate (produce near-one-hot distributions) and yield vanishing gradients.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Statistical Setup
+
+Assume query and key vectors have components drawn i.i.d. from a distribution with zero mean and unit variance:
+
+$$
+q_i \sim (0, 1), \quad k_i \sim (0, 1), \quad \text{independent}
+$$
+
+The dot product is:
+
+$$
+\mathbf{q}^T \mathbf{k} = \sum_{i=1}^{d_k} q_i k_i
+$$
+
+#### Step 2: Compute Variance of the Dot Product
+
+Each term $q_i k_i$ has:
+
+$$
+\mathbb{E}[q_i k_i] = \mathbb{E}[q_i]\mathbb{E}[k_i] = 0 \times 0 = 0
+$$
+
+$$
+\text{Var}(q_i k_i) = \mathbb{E}[q_i^2 k_i^2] - (\mathbb{E}[q_i k_i])^2 = \mathbb{E}[q_i^2]\mathbb{E}[k_i^2] - 0 = 1 \times 1 = 1
+$$
+
+Since the $d_k$ terms are independent:
+
+$$
+\text{Var}(\mathbf{q}^T \mathbf{k}) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = d_k
+$$
+
+So $\mathbf{q}^T \mathbf{k} \sim (0, d_k)$ — the standard deviation is $\sqrt{d_k}$.
+
+#### Step 3: Effect on Softmax
+
+For large $d_k$ (e.g., $d_k = 64$), the scores have standard deviation $\sqrt{64} = 8$. The softmax of values spread over range $\pm 16$ (2 std) produces:
+
+$$
+\text{softmax}([16, 0, -16]) \approx [1.0, \; 2 \times 10^{-7}, \; 4 \times 10^{-14}]
+$$
+
+This is essentially a one-hot vector. The gradient of softmax at saturation:
+
+$$
+\frac{\partial \text{softmax}_i}{\partial z_j} = \text{softmax}_i(\delta_{ij} - \text{softmax}_j) \approx 0
+$$
+
+when any $\text{softmax}_i \approx 1$. Gradients vanish, and the model cannot learn to adjust attention patterns.
+
+#### Step 4: Scaling Restores Healthy Gradients
+
+Dividing by $\sqrt{d_k}$:
+
+$$
+\text{Var}\left(\frac{\mathbf{q}^T \mathbf{k}}{\sqrt{d_k}}\right) = \frac{\text{Var}(\mathbf{q}^T \mathbf{k})}{d_k} = \frac{d_k}{d_k} = 1
+$$
+
+Now scores have unit variance regardless of $d_k$. The softmax operates in its sensitive regime where gradients are non-negligible.
+
+#### Step 5: Numerical Comparison
+
+With $d_k = 64$ and scores $s = [2.1, 1.8, 1.5]$ (after scaling, unit variance):
+
+$$
+\text{softmax}([2.1, 1.8, 1.5]) = \frac{[e^{2.1}, e^{1.8}, e^{1.5}]}{e^{2.1}+e^{1.8}+e^{1.5}} = \frac{[8.17, 6.05, 4.48]}{18.70} = [0.437, 0.323, 0.240]
+$$
+
+This is a soft distribution with meaningful gradients everywhere.
+
+**Final Answer:** Scaling by $\sqrt{d_k}$ normalizes the variance of attention scores to 1, preventing softmax saturation:
+
+$$
+\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V, \quad \text{where } \text{Var}\left(\frac{q^Tk}{\sqrt{d_k}}\right) = 1
+$$
+
+</details>
+
+
+### Example 9.3 — KV-Cache Memory Analysis for Autoregressive Inference
+
+**Problem:** For a GPT-3-scale model (96 layers, $d_{model} = 12288$, 96 heads, $d_k = 128$), compute the KV-cache memory required to generate a sequence of length 2048 tokens in float16. Compare with and without KV-caching in terms of total FLOPs.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: KV-Cache Size Per Layer
+
+At each layer, we cache the Key and Value matrices for all previously generated tokens. For sequence length $L$:
+
+$$
+\text{Cache per layer} = 2 \times L \times d_{model} \times \text{sizeof(dtype)}
+$$
+
+The factor of 2 accounts for both K and V. With $d_{model} = 12288$ and float16 (2 bytes):
+
+$$
+\text{Cache per layer} = 2 \times 2048 \times 12288 \times 2 \text{ bytes} = 2 \times 2048 \times 12288 \times 2
+$$
+
+$$
+= 100{,}663{,}296 \text{ bytes} = 96 \text{ MB per layer}
+$$
+
+#### Step 2: Total KV-Cache Across All Layers
+
+$$
+\text{Total KV-cache} = 96 \text{ layers} \times 96 \text{ MB} = 9{,}216 \text{ MB} \approx 9.0 \text{ GB}
+$$
+
+#### Step 3: KV-Cache Growth Rate
+
+Per new token generated, the cache grows by:
+
+$$
+\Delta \text{cache} = 96 \times 2 \times 1 \times 12288 \times 2 = 4{,}718{,}592 \text{ bytes} \approx 4.5 \text{ MB/token}
+$$
+
+For a batch of $B = 32$ sequences:
+
+$$
+\text{Total cache} = 32 \times 9.0 \text{ GB} = 288 \text{ GB}
+$$
+
+This often exceeds GPU memory, motivating techniques like PagedAttention (vLLM).
+
+#### Step 4: FLOP Savings from KV-Caching
+
+**Without KV-cache:** At generation step $t$, we recompute attention for all $t$ tokens:
+
+$$
+\text{FLOPs per step} = O(t \cdot d_{model}^2) \quad \text{(for QKV projections of all tokens)}
+$$
+
+Total for generating $L$ tokens: $O(L^2 \cdot d_{model}^2)$
+
+**With KV-cache:** At step $t$, we only compute Q for the new token and attend to cached K, V:
+
+$$
+\text{FLOPs per step} = O(d_{model}^2 + t \cdot d_{model}) \quad \text{(QKV proj for 1 token + attention over } t \text{ keys)}
+$$
+
+Total: $O(L \cdot d_{model}^2 + L^2 \cdot d_{model})$
+
+The savings ratio for the attention computation:
+
+$$
+\frac{\text{Without cache}}{\text{With cache}} \approx \frac{L}{1} = 2048\times \text{ for QKV projections}
+$$
+
+#### Step 5: Practical Memory Budget
+
+For a single A100 (80GB), serving GPT-3 175B in float16:
+- Model weights: $175\text{B} \times 2 \text{ bytes} = 350 \text{ GB}$ (needs 5× A100s for weights alone)
+- KV-cache per sequence: 9 GB at full context
+
+This is why inference serving requires model parallelism and careful memory management.
+
+**Final Answer:**
+
+$$
+\text{KV-cache} = 2 \times n_{\text{layers}} \times L \times d_{model} \times \text{bytes} = 2(96)(2048)(12288)(2) = 9.0 \text{ GB}
+$$
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 23.1 Rotary Position Encoding (RoPE) Derivation
+
+**Motivation:** Absolute positional embeddings (added to token embeddings) have a fixed maximum sequence length and don't generalize well to unseen positions. RoPE (Su et al., 2021) encodes position directly into the attention computation via rotation matrices, enabling relative position awareness.
+
+**Core idea:** Encode position $m$ by rotating the query/key vectors in 2D subspaces:
+
+$$
+f_q(\mathbf{x}_m, m) = R_{\Theta,m} W_Q \mathbf{x}_m, \quad f_k(\mathbf{x}_n, n) = R_{\Theta,n} W_K \mathbf{x}_n
+$$
+
+where $R_{\Theta,m}$ is a block-diagonal rotation matrix.
+
+**Construction:** For embedding dimension $d$, pair up dimensions $(2i, 2i+1)$ for $i = 0, \ldots, d/2 - 1$. Each pair is rotated by angle $m\theta_i$:
+
+$$
+\theta_i = 10000^{-2i/d}
+$$
+
+The rotation matrix for position $m$ in the $i$-th subspace:
+
+$$
+R_i(m) = \begin{bmatrix} \cos(m\theta_i) & -\sin(m\theta_i) \\ \sin(m\theta_i) & \cos(m\theta_i) \end{bmatrix}
+$$
+
+**Key property — relative position in dot product:**
+
+$$
+\langle R_{\Theta,m} \mathbf{q}, R_{\Theta,n} \mathbf{k} \rangle = \langle R_{\Theta,m-n} \mathbf{q}, \mathbf{k} \rangle
+$$
+
+This follows from the rotation group property $R(m)^T R(n) = R(n-m)$. The attention score between positions $m$ and $n$ depends only on the relative distance $m - n$, not absolute positions.
+
+**Efficient implementation (no explicit matrix construction):**
+
+$$
+\text{RoPE}(\mathbf{x}, m)_{2i} = x_{2i}\cos(m\theta_i) - x_{2i+1}\sin(m\theta_i)
+$$
+
+$$
+\text{RoPE}(\mathbf{x}, m)_{2i+1} = x_{2i}\sin(m\theta_i) + x_{2i+1}\cos(m\theta_i)
+$$
+
+This requires only element-wise multiplications and additions — no matrix multiply overhead.
+
+**Long-context extension:** By modifying the base frequency (e.g., from 10000 to 500000 in LLaMA-3), RoPE can extrapolate to longer sequences than seen during training, since the rotation angles change more slowly.
+
+### 23.2 Linear Attention via Kernel Methods
+
+Standard attention has $O(N^2)$ complexity due to the $N \times N$ attention matrix. Linear attention replaces the softmax with a kernel decomposition:
+
+**Standard:** $\text{Attn}(Q,K,V) = \text{softmax}(QK^T)V$
+
+**Linear:** $\text{Attn}(Q,K,V) = \phi(Q)(\phi(K)^T V)$
+
+where $\phi$ is a feature map such that $\text{sim}(q, k) \approx \phi(q)^T \phi(k)$.
+
+**Key insight — associativity of matrix multiplication:**
+
+$$
+\underbrace{(\phi(Q) \phi(K)^T)}_{N \times N} V \quad \text{vs} \quad \phi(Q) \underbrace{(\phi(K)^T V)}_{d \times d}
+$$
+
+By computing $\phi(K)^T V$ first (a $d \times d$ matrix), the total cost becomes $O(N d^2)$ instead of $O(N^2 d)$.
+
+**Common kernel choices:**
+- $\phi(x) = \text{elu}(x) + 1$ (Katharopoulos et al., 2020)
+- Random Fourier features: $\phi(x) = \frac{1}{\sqrt{m}}[\cos(\omega_1^T x), \sin(\omega_1^T x), \ldots]$ approximating the softmax kernel
+- Performer (Choromanski et al., 2021): $\phi(x) = \frac{e^{-\|x\|^2/2}}{\sqrt{m}}[e^{\omega_1^T x}, \ldots, e^{\omega_m^T x}]$
+
+**Tradeoff:** Linear attention loses the sharp, selective attention patterns that standard softmax produces. In practice, it works well for long sequences but underperforms standard attention on tasks requiring precise token-to-token matching.
+
+### 23.3 Sparse Attention Patterns (Longformer, BigBird)
+
+For sequence length $N$, full attention requires $O(N^2)$ memory and compute. Sparse attention restricts each token to attend to a subset of positions:
+
+**Longformer (Beltagy et al., 2020):**
+- **Sliding window:** Each token attends to $w$ neighbors on each side → $O(Nw)$
+- **Dilated window:** Skip every $d$ positions → receptive field of $w \times d$ with $O(Nw)$ cost
+- **Global tokens:** Selected tokens (e.g., [CLS]) attend to all positions → $O(Ng)$ where $g \ll N$
+
+Total complexity: $O(N(w + g))$ — linear in $N$.
+
+**BigBird (Zaheer et al., 2020):**
+- Sliding window + global tokens + **random attention** (each token attends to $r$ random positions)
+- Proven to be a universal approximator of sequence functions (Turing complete)
+- The random component ensures that information can flow between any two tokens in $O(\log N)$ hops with high probability
+
+**Effective receptive field after $L$ layers with window $w$:**
+
+$$
+\text{Receptive field} = 1 + L \times 2w
+$$
+
+For Longformer with $w = 256$ and $L = 12$: receptive field = $6{,}145$ tokens per layer stack, sufficient for documents up to ~6K tokens without global attention.
+
+---

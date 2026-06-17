@@ -1,0 +1,63 @@
+<svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="yield-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .yield-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .vm-ellipse { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.06; }
+    .tresca-hex { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; stroke-dasharray: 8 4; }
+    .hydro-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .safe-region { fill: var(--interactive-accent, #58a6ff); opacity: 0.04; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-tresca { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    .stress-point { fill: #e74c3c; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: r 0.2s; }
+    .stress-point:hover { r: 7; }
+    .info-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+  </style>
+
+  <!-- Axes (σ₁ horizontal, σ₂ vertical) -->
+  <line x1="50" y1="250" x2="650" y2="250" class="yield-axis" marker-end="url(#yield-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <line x1="350" y1="430" x2="350" y2="30" class="yield-axis" marker-end="url(#yield-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <text x="660" y="255" class="label">σ₁</text>
+  <text x="355" y="22" class="label">σ₂</text>
+
+  <!-- Von Mises ellipse (for plane stress: σ₁² - σ₁σ₂ + σ₂² = σ_Y²) -->
+  <!-- Approximated as rotated ellipse -->
+  <ellipse cx="350" cy="250" rx="200" ry="115" transform="rotate(45, 350, 250)" class="vm-ellipse"/>
+
+  <!-- Tresca hexagon (inscribed in Von Mises ellipse) -->
+  <polygon points="550,250 450,77 250,77 150,250 250,423 450,423" class="tresca-hex">
+    <animate attributeName="opacity" values="1; 0.4; 1" dur="2s" repeatCount="indefinite" />
+  </polygon>
+
+  <!-- Hydrostatic line (σ₁ = σ₂) -->
+  <line x1="100" y1="400" x2="600" y2="0" class="hydro-line"/>
+  <text x="580" y="30" class="label" font-size="11">σ₁ = σ₂</text>
+
+  <!-- Yield points on axes -->
+  <circle cx="550" cy="250" r="4" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="555" y="240" class="label-accent">σ_Y</text>
+  <circle cx="150" cy="250" r="4" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="120" y="240" class="label-accent">−σ_Y</text>
+  <circle cx="350" cy="50" r="4" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="360" y="48" class="label-accent">σ_Y</text>
+  <circle cx="350" cy="450" r="4" fill="var(--interactive-accent, #58a6ff)" style="display:none"/>
+
+  <!-- Example stress point (inside = safe) -->
+  <circle cx="420" cy="200" r="5" class="stress-point">
+    <animate attributeName="cx" values="350; 420; 350" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="cy" values="250; 200; 250" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <text x="430" y="195" class="label" fill="#e74c3c">Design point</text>
+
+  <!-- Legend -->
+  <rect x="20" y="360" width="200" height="75" rx="6" class="info-box"/>
+  <line x1="35" y1="380" x2="75" y2="380" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5"/>
+  <text x="85" y="384" class="label-accent">Von Mises (ellipse)</text>
+  <line x1="35" y1="405" x2="75" y2="405" stroke="var(--text-accent, #79c0ff)" stroke-width="2.5" stroke-dasharray="8 4"/>
+  <text x="85" y="409" class="label-tresca">Tresca (hexagon)</text>
+  <text x="110" y="430" class="label" font-size="11">Tresca is always conservative</text>
+</svg>

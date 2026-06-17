@@ -1,0 +1,67 @@
+<svg viewBox="0 0 650 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="sf-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .sf-box{fill:var(--background-secondary, #161b22);stroke:var(--text-normal, #c9d1d9);stroke-width:2;rx:8;transition:all 0.3s}
+    .sf-box:hover{fill:var(--background-secondary, #161b22);stroke:var(--interactive-accent, #58a6ff);filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .sf-flow{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none;stroke-dasharray:8,4;animation:sfFlow 1.5s linear infinite}
+    .sf-lbl{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-normal, #c9d1d9)}
+    .sf-acc{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .sf-noise{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none;stroke-dasharray:3,3;transform-origin: center;animation:noiseWiggle 0.15s linear infinite alternate}
+    
+    .sf-fusion-box {
+      animation: fusionPulse 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes sfFlow {
+      to { stroke-dashoffset: -12; }
+    }
+    @keyframes noiseWiggle {
+      0% { transform: translateY(-1.5px) scaleY(0.85); }
+      100% { transform: translateY(1.5px) scaleY(1.15); }
+    }
+    @keyframes fusionPulse {
+      0% { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); stroke: var(--interactive-accent, #58a6ff); }
+      100% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); stroke: var(--text-accent, #79c0ff); }
+    }
+  </style>
+  <!-- Gyroscope sensor -->
+  <rect x="30" y="50" width="120" height="60" class="sf-box"/>
+  <text x="90" y="75" class="sf-acc" text-anchor="middle">Gyroscope</text>
+  <text x="90" y="95" class="sf-lbl" text-anchor="middle">ω (rad/s) + bias</text>
+  <!-- Accelerometer sensor -->
+  <rect x="30" y="180" width="120" height="60" class="sf-box"/>
+  <text x="90" y="205" class="sf-acc" text-anchor="middle">Accelerometer</text>
+  <text x="90" y="225" class="sf-lbl" text-anchor="middle">a = g + dynamic</text>
+  <!-- Integration block -->
+  <rect x="220" y="50" width="100" height="60" class="sf-box"/>
+  <text x="270" y="75" class="sf-acc" text-anchor="middle">∫ dt</text>
+  <text x="270" y="95" class="sf-lbl" text-anchor="middle">θ_gyro (drifts)</text>
+  <!-- Tilt from accel -->
+  <rect x="220" y="180" width="100" height="60" class="sf-box"/>
+  <text x="270" y="205" class="sf-acc" text-anchor="middle">atan2</text>
+  <text x="270" y="225" class="sf-lbl" text-anchor="middle">θ_accel (noisy)</text>
+  <!-- Fusion block -->
+  <rect x="400" y="115" width="140" height="70" class="sf-box sf-fusion-box"/>
+  <text x="470" y="140" class="sf-acc" text-anchor="middle">Sensor Fusion</text>
+  <text x="470" y="160" class="sf-lbl" text-anchor="middle">Complementary / Kalman</text>
+  <text x="470" y="178" class="sf-lbl" text-anchor="middle">θ = α·θ_gyro + (1-α)·θ_accel</text>
+  <!-- Output -->
+  <rect x="500" y="280" width="120" height="50" class="sf-box"/>
+  <text x="560" y="305" class="sf-acc" text-anchor="middle">Orientation</text>
+  <text x="560" y="320" class="sf-lbl" text-anchor="middle">q = [w,x,y,z]</text>
+  <!-- Arrows -->
+  <line x1="150" y1="80" x2="218" y2="80" class="sf-flow" marker-end="url(#sf-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="150" y1="210" x2="218" y2="210" class="sf-flow" marker-end="url(#sf-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="320" y1="80" x2="398" y2="135" class="sf-flow" marker-end="url(#sf-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="320" y1="210" x2="398" y2="165" class="sf-flow" marker-end="url(#sf-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="470" y1="185" x2="540" y2="278" class="sf-flow" marker-end="url(#sf-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <!-- Noise annotations -->
+  <path d="M170 60 Q175 55 180 60 Q185 65 190 60" class="sf-noise"/>
+  <text x="185" y="50" class="sf-lbl" fill="var(--text-muted, #8b949e)">drift</text>
+  <path d="M170 200 Q175 195 180 200 Q185 205 190 200 Q195 195 200 200" class="sf-noise"/>
+  <text x="185" y="190" class="sf-lbl" fill="var(--text-muted, #8b949e)">vibration</text>
+</svg>

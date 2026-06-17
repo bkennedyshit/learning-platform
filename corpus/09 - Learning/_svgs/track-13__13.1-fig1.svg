@@ -1,0 +1,127 @@
+<svg viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="kin-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .kin-bone{stroke:var(--text-normal, #c9d1d9);stroke-width:4;stroke-linecap:round;fill:none;transition:stroke 0.3s}
+    .kin-bone:hover{stroke:var(--interactive-accent, #58a6ff);filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .kin-joint{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:2;cursor:pointer;transition:r 0.2s;animation:jointPulse 3s ease-in-out infinite alternate}
+    .kin-joint:hover{r:9;fill:var(--interactive-accent, #58a6ff);animation-play-state:paused}
+    .kin-vec{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none;stroke-dasharray:6,4;animation:vecFlow 1s linear infinite}
+    .kin-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .kin-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .kin-grid{stroke:var(--text-muted, #8b949e);stroke-width:0.5;opacity:0.3}
+    .kin-arc{stroke:var(--text-accent, #79c0ff);stroke-width:2;fill:none;stroke-dasharray:100;stroke-dashoffset:100;animation:arcDraw 2s ease-in-out infinite}
+    
+    /* Kinematic Chain Nested Animations */
+    .kin-thigh-group {
+      transform-origin: 250px 220px;
+      animation: thighSwing 5s ease-in-out infinite alternate;
+    }
+    .kin-shank-group {
+      transform-origin: 290px 310px;
+      animation: shankSwing 5s ease-in-out infinite alternate;
+    }
+    .kin-foot-group {
+      transform-origin: 270px 390px;
+      animation: footSwing 5s ease-in-out infinite alternate;
+    }
+    .kin-v2-group {
+      transform-origin: 290px 310px;
+      animation: vecPulse 2.5s ease-in-out infinite alternate;
+    }
+    .kin-a3-group {
+      transform-origin: 270px 390px;
+      animation: vecPulse2 2.5s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes arcDraw{to{stroke-dashoffset:0}}
+    @keyframes vecFlow{to{stroke-dashoffset:-10}}
+    @keyframes jointPulse {
+      0% { r: 6.5; filter: drop-shadow(0 0 2px var(--text-accent, #79c0ff)); }
+      100% { r: 8.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes thighSwing {
+      0% { transform: rotate(-6deg); }
+      100% { transform: rotate(10deg); }
+    }
+    @keyframes shankSwing {
+      0% { transform: rotate(12deg); }
+      100% { transform: rotate(-10deg); }
+    }
+    @keyframes footSwing {
+      0% { transform: rotate(-8deg); }
+      100% { transform: rotate(12deg); }
+    }
+    @keyframes vecPulse {
+      0% { transform: scale(0.9); }
+      100% { transform: scale(1.1); }
+    }
+    @keyframes vecPulse2 {
+      0% { transform: scale(0.85); }
+      100% { transform: scale(1.15); }
+    }
+  </style>
+  <!-- Grid -->
+  <path class="kin-grid" d="M50 0V450 M100 0V450 M150 0V450 M200 0V450 M250 0V450 M300 0V450 M350 0V450 M400 0V450 M450 0V450 M500 0V450 M550 0V450"/>
+  <path class="kin-grid" d="M0 50H600 M0 100H600 M0 150H600 M0 200H600 M0 250H600 M0 300H600 M0 350H600 M0 400H600"/>
+  <!-- Axes -->
+  <line x1="50" y1="400" x2="570" y2="400" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" marker-end="url(#kin-arr)" style="color:var(--text-normal, #c9d1d9)"/>
+  <line x1="50" y1="400" x2="50" y2="30" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" marker-end="url(#kin-arr)" style="color:var(--text-normal, #c9d1d9)"/>
+  <text x="580" y="405" class="kin-lbl">x (m)</text>
+  <text x="55" y="22" class="kin-lbl">y (m)</text>
+  <!-- Stick figure: Hip-Knee-Ankle-Toe chain -->
+  <!-- Torso -->
+  <line x1="250" y1="120" x2="250" y2="220" class="kin-bone"/>
+  <!-- Hip joint -->
+  <circle cx="250" cy="220" r="7" class="kin-joint"/>
+  <text x="260" y="215" class="kin-acc">Hip (θ₁)</text>
+  
+  <!-- Nested Kinematic Chain -->
+  <g class="kin-thigh-group">
+    <!-- Thigh -->
+    <line x1="250" y1="220" x2="290" y2="310" class="kin-bone"/>
+    <!-- Knee joint -->
+    <circle cx="290" cy="310" r="7" class="kin-joint"/>
+    <text x="300" y="305" class="kin-acc">Knee (θ₂)</text>
+    
+    <!-- Velocity vector at knee -->
+    <g class="kin-v2-group">
+      <line x1="290" y1="310" x2="340" y2="280" class="kin-vec" marker-end="url(#kin-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+      <text x="345" y="275" class="kin-acc">v₂</text>
+    </g>
+    
+    <g class="kin-shank-group">
+      <!-- Shank -->
+      <line x1="290" y1="310" x2="270" y2="390" class="kin-bone"/>
+      <!-- Ankle joint -->
+      <circle cx="270" cy="390" r="7" class="kin-joint"/>
+      <text x="280" y="388" class="kin-acc">Ankle (θ₃)</text>
+      
+      <!-- Acceleration vector at ankle -->
+      <g class="kin-a3-group">
+        <line x1="270" y1="390" x2="230" y2="360" class="kin-vec" marker-end="url(#kin-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+        <text x="205" y="355" class="kin-acc">a₃</text>
+      </g>
+      
+      <g class="kin-foot-group">
+        <!-- Foot -->
+        <line x1="270" y1="390" x2="310" y2="395" class="kin-bone"/>
+      </g>
+    </g>
+  </g>
+  
+  <!-- Joint angle arc at hip -->
+  <path d="M250 190 A30 30 0 0 1 265 215" class="kin-arc"/>
+  <!-- Joint angle arc at knee -->
+  <path d="M275 290 A20 20 0 0 1 295 305" class="kin-arc"/>
+  <!-- Info box -->
+  <rect x="380" y="60" width="200" height="130" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="480" y="85" class="kin-acc" text-anchor="middle">Kinematic Chain</text>
+  <text x="480" y="110" class="kin-lbl" text-anchor="middle">r(t) = position vector</text>
+  <text x="480" y="130" class="kin-lbl" text-anchor="middle">v(t) = dr/dt</text>
+  <text x="480" y="150" class="kin-lbl" text-anchor="middle">a(t) = d²r/dt²</text>
+  <text x="480" y="175" class="kin-lbl" text-anchor="middle">θᵢ = joint angle i</text>
+</svg>

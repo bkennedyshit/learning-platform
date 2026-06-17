@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <style>
+      .text { fill: var(--text-normal, #e0e0e0); font-family: sans-serif; font-size: 14px;}
+      .title { font-size: 24px; font-weight: bold; }
+      .axis { stroke: var(--text-normal, #e0e0e0); stroke-width: 2; }
+      .curve { fill: none; stroke: var(--interactive-accent, #4a90e2); stroke-width: 4; stroke-linecap: round; }
+      .curve-cat { fill: none; stroke: var(--color-green, #2ecc71); stroke-width: 4; stroke-dasharray: 8 8; }
+      .dashed { stroke: var(--text-muted, #888); stroke-width: 1.5; stroke-dasharray: 5 5; }
+      .arrow { stroke: var(--color-red, #e74c3c); stroke-width: 2; fill: var(--color-red, #e74c3c); marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-red, #e74c3c)" />
+    </marker>
+  </defs>
+
+  <text x="400" y="40" text-anchor="middle" class="text title">Reaction Energy Profile</text>
+
+  <!-- Axes -->
+  <line x1="100" y1="350" x2="700" y2="350" class="axis" />
+  <line x1="100" y1="350" x2="100" y2="80" class="axis" />
+  
+  <text x="400" y="380" text-anchor="middle" class="text">Reaction Coordinate</text>
+  <text x="70" y="215" text-anchor="middle" transform="rotate(-90 70 215)" class="text">Free Energy (G)</text>
+
+  <!-- Energy Levels -->
+  <line x1="100" y1="200" x2="250" y2="200" class="dashed" />
+  <line x1="550" y1="300" x2="700" y2="300" class="dashed" />
+  <line x1="250" y1="100" x2="550" y2="100" class="dashed" />
+  
+  <text x="175" y="190" text-anchor="middle" class="text">Reactants</text>
+  <text x="625" y="290" text-anchor="middle" class="text">Products</text>
+  <text x="400" y="90" text-anchor="middle" class="text">Transition State (‡)</text>
+
+  <!-- Uncatalyzed Curve -->
+  <path d="M 150 200 C 250 200, 300 100, 400 100 C 500 100, 500 300, 650 300" class="curve" id="mainCurve" />
+  
+  <!-- Catalyzed Curve -->
+  <path d="M 150 200 C 250 200, 300 180, 400 180 C 500 180, 500 300, 650 300" class="curve-cat" />
+  
+  <text x="500" y="160" class="text" fill="var(--color-green, #2ecc71)">Catalyzed Pathway</text>
+
+  <!-- Delta G Arrow -->
+  <line x1="680" y1="200" x2="680" y2="290" class="arrow" />
+  <text x="690" y="255" class="text" font-style="italic">ΔG &lt; 0</text>
+  
+  <!-- Activation Energy Arrow -->
+  <line x1="230" y1="200" x2="230" y2="110" class="arrow" />
+  <text x="195" y="155" class="text" font-style="italic">E<tspan baseline-shift="sub" font-size="10">a</tspan></text>
+  
+  <!-- Animated Particle -->
+  <circle r="6" fill="var(--color-yellow, #f1c40f)">
+    <animateMotion dur="4s" repeatCount="indefinite">
+      <mpath href="#mainCurve"/>
+    </animateMotion>
+  </circle>
+</svg>

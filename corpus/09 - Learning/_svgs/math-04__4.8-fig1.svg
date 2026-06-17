@@ -1,0 +1,47 @@
+<svg viewBox="0 0 560 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <style>
+    .ch-traj{stroke:var(--interactive-accent, #58a6ff);stroke-width:1.5;fill:none;stroke-dasharray:1200;stroke-dashoffset:1200;animation:chDraw 8s linear infinite}
+    .ch-traj2{stroke:var(--text-accent, #79c0ff);stroke-width:1.5;fill:none;stroke-dasharray:1200;stroke-dashoffset:1200;animation:chDraw 8s linear 0.5s infinite}
+    .ch-ax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none}
+    .ch-fp{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5;cursor:pointer;transition:all .2s}
+    .ch-fp:hover{r:7;filter:drop-shadow(0 0 5px var(--text-accent, #79c0ff))}
+    .ch-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .ch-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    @keyframes chDraw{to{stroke-dashoffset:0}}
+  </style>
+  <defs>
+    <marker id="ch-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <!-- Axes -->
+  <line x1="280" y1="320" x2="280" y2="20" class="ch-ax" marker-end="url(#ch-a)"/>
+  <line x1="30" y1="200" x2="530" y2="200" class="ch-ax" marker-end="url(#ch-a)"/>
+  <text x="535" y="205" class="ch-lbl">x</text>
+  <text x="285" y="18" class="ch-lbl">z</text>
+  <!-- Lorenz butterfly (stylized) -->
+  <path id="traj1" d="M280 180 C 320 120, 400 80, 420 120 C 440 160, 400 200, 360 180 C 320 160, 300 140, 280 180 C 260 220, 200 240, 160 200 C 120 160, 140 100, 180 120 C 220 140, 260 160, 280 180" class="ch-traj"/>
+  <path id="traj2" d="M282 182 C 322 118, 402 78, 422 118 C 442 158, 402 198, 362 178 C 322 158, 302 138, 282 178 C 262 218, 202 238, 162 198 C 122 158, 142 98, 182 118 C 222 138, 262 158, 282 182" class="ch-traj2"/>
+  <!-- Particles following trajectories -->
+  <circle r="3" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="8s" repeatCount="indefinite">
+      <mpath href="#traj1"/>
+    </animateMotion>
+  </circle>
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="8s" repeatCount="indefinite" begin="0.5s">
+      <mpath href="#traj2"/>
+    </animateMotion>
+  </circle>
+  <!-- Fixed points -->
+  <circle cx="180" cy="160" r="4" class="ch-fp"/>
+  <circle cx="380" cy="160" r="4" class="ch-fp"/>
+  <circle cx="280" cy="200" r="4" class="ch-fp"/>
+  <text x="180" y="150" class="ch-lbl" text-anchor="middle">C⁺</text>
+  <text x="380" y="150" class="ch-lbl" text-anchor="middle">C⁻</text>
+  <!-- Info -->
+  <rect x="380" y="250" width="165" height="70" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="462" y="272" class="ch-acc" text-anchor="middle">Lorenz System</text>
+  <text x="462" y="292" class="ch-lbl" text-anchor="middle">ẋ=σ(y−x)</text>
+  <text x="462" y="308" class="ch-lbl" text-anchor="middle">ẏ=rx−y−xz, ż=xy−bz</text>
+</svg>

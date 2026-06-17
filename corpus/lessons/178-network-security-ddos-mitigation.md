@@ -1,0 +1,443 @@
+---
+title: "17.8 — Network Security & DDoS Mitigation"
+subject: "Networking & Protocols"
+catalog: advanced
+audience_tier: higher-education
+chapter: "17.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 17.8 — Network Security & DDoS Mitigation
+
+> *"Security at the network layer isn't about preventing every attack. It's about making attacks expensive for the attacker and cheap for the defender — through volume distribution, stateless response, and being faster than they can be."*
+
+Network security sits at the intersection of everything you've learned in this track. DDoS attackers exploit the IP/TCP/UDP layer ([17.2](17.2---IP,-Routing-&-BGP), [17.3](17.3---TCP-&-UDP-Deep-Dive)). BGP hijacking exploits routing ([17.2](17.2---IP,-Routing-&-BGP)). TLS/mTLS defends against credential attacks ([17.4](17.4---TLS,-mTLS-&-PKI)). This chapter synthesizes them into a threat model and mitigation playbook.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Classify any DDoS attack into **volumetric, protocol, or application layer** and name the correct mitigation.
+2. Explain **SYN cookies** — the mathematical mechanism that eliminates TCP state before the handshake completes.
+3. Explain **BGP prefix hijacking** — how it works, historical examples, and **RPKI** as the cryptographic defense.
+4. Explain **Anycast** routing as a DDoS mitigation architectural pattern.
+5. Write a simple **eBPF XDP program** that drops packets at NIC speed (kernel-bypass).
+6. Explain **amplification attacks** — why DNS/NTP/memcached amplification is so effective.
+7. Describe a complete **DDoS mitigation stack** from upstream scrubbing to application WAF.
+
+---
+
+## 🖼️ Visual Anchor
+
+![net__31.8-fig1](net__31.8-fig1.svg)
+
+---
+
+## 📚 1. DDoS Attack Categories
+
+DDoS (Distributed Denial of Service) attacks are classified by the layer they target. The correct mitigation depends on the category.
+
+### 1.1 Volumetric Attacks (Layer 3/4 — Bandwidth Exhaustion)
+
+**Goal**: Consume all available bandwidth at the target or on the network path to the target.
+
+**Mechanism**: Send more bits per second than the target's uplink can handle. A target with a 10 Gbit/s internet connection is overwhelmed by a 12 Gbit/s attack.
+
+**Common types**:
+- **UDP flood**: Spoof source IPs, send massive UDP datagrams to any port. Target gets overwhelmed processing them.
+- **ICMP flood (Ping flood)**: Similar to UDP flood; target wastes CPU responding to ICMP Echo Requests.
+- **DNS amplification**: Send small DNS queries with the target's IP spoofed as source to open DNS resolvers. Resolvers send large responses (~30–50× amplification) to the target.
+  - Query: `ANY isc.org` = 40 bytes → Response = 3000 bytes. Amplification factor: 75×.
+- **NTP amplification**: NTP `monlist` command returns 100 entries → 100+ byte request becomes ~4000 bytes response. Amplification factor: 40×.
+- **memcached amplification**: memcached UDP `get` request → can amplify 50,000×. The 2018 GitHub attack (1.3 Tbit/s) used memcached.
+
+**Mitigation**:
+- **Upstream scrubbing**: Traffic is diverted to a scrubbing center (Cloudflare Magic Transit, Akamai Prolexic, AWS Shield Advanced) before reaching the origin.
+- **Black-hole routing**: Advertise a /32 route to null0 for the attacked IP (sacrifices the IP but protects the rest of the infrastructure).
+- **BCP38 filtering**: ISPs should not route packets with spoofed source IPs. Incomplete adoption is why amplification attacks still work.
+
+### 1.2 Protocol Attacks (Layer 3/4 — State Table Exhaustion)
+
+**Goal**: Exhaust the connection state tables of firewalls, load balancers, or servers, not the bandwidth.
+
+**Common types**:
+- **SYN flood**: Send thousands of TCP SYN packets with spoofed source IPs. The server creates a half-open connection entry for each. State table fills up; legitimate connections are refused.
+- **ACK flood**: Send ACK packets for connections that don't exist — wastes CPU on lookups.
+- **Fragmentation attack**: Send malformed/overlapping IP fragments — exploits reassembly buffers.
+- **Smurf attack**: Send ICMP Echo Request with target's IP as source to a broadcast address — all hosts on that network send ICMP replies to the target.
+
+**Mitigation**:
+- **SYN cookies** (see Section 2 for full detail)
+- **Rate-limit SYN packets** at the firewall/load balancer
+- **Stateless ACL rules** at border routers (drop invalid fragment combinations)
+
+### 1.3 Application Layer Attacks (Layer 7 — Resource Exhaustion)
+
+**Goal**: Exhaust application-level resources (CPU, DB connections, thread pools) using *valid* HTTP requests.
+
+**Common types**:
+- **HTTP flood (CC attack)**: Send millions of legitimate HTTP GET or POST requests. Indistinguishable from real traffic without rate-limiting.
+- **Slowloris**: Open many HTTP connections; send headers very slowly (one header per 10s). Never complete the request. Ties up web server threads for the connection lifetime.
+- **RUDY (R-U-Dead-Yet)**: Similar to Slowloris but for POST bodies — send Content-Length: 100000, then dribble 1 byte/second.
+- **Cache-busting attacks**: Request random URLs to prevent CDN caching → all requests reach origin.
+- **API abuse**: Target slow database queries (`search?q=*&page=9999`) or computationally expensive endpoints.
+
+**Mitigation**:
+- **Challenge pages** (JS proof-of-work, CAPTCHA) — separates bots from browsers
+- **IP reputation / threat intelligence** — block known botnet IPs
+- **Rate limiting** per IP, per ASN, per user agent
+- **WAF rules** (OWASP Core Rule Set, custom rules for your API)
+- **Request timeouts** — close slow-body connections quickly
+- **CDN layer** — most L7 attacks are stopped at the CDN edge
+
+---
+
+## 📚 2. SYN Cookies
+
+### 2.1 The SYN Flood Problem
+
+A SYN flood exploits the TCP handshake's state requirement. On receiving a SYN, the server must:
+1. Allocate a `struct tcp_sock` in kernel memory
+2. Choose an ISN y
+3. Send SYN-ACK
+4. Wait for ACK (half-open state; typically 30–75 seconds before timeout)
+
+With 100,000 SYN packets/second (all with spoofed source IPs), the server's half-open connection table (default 128 on old kernels; 2048 on modern kernels) fills up in milliseconds. Legitimate SYN packets are dropped.
+
+### 2.2 SYN Cookie Mechanism
+
+SYN cookies (RFC 4987) make the server **stateless** for SYN packets. Instead of storing state, the server encodes all necessary information into the ISN it returns in the SYN-ACK:
+
+```
+ISN y = hash(src_IP, src_port, dst_IP, dst_port, secret, timestamp)
+      = MSB3: timestamp (5 bits, wraps every 64s)
+      + MSB3: hash (19 bits of HMAC-SHA1 truncated)
+      + LSB: MSS-encoded (3 bits → maps to real MSS)
+```
+
+The server sends `SYN-ACK` with `seq=y` but **allocates no state**.
+
+When the client sends `ACK` with `ack=y+1`:
+- Server recomputes the expected y from the packet's 4-tuple
+- If `ack - 1 == expected_y`, the handshake was legitimate — allocate state now
+- If `ack - 1 != expected_y` — drop silently (spoofed SYN; attacker doesn't know y)
+
+**Net result**: Spoofed SYN packets consume zero server memory. Only clients with real IPs (who actually received the SYN-ACK) can complete the handshake.
+
+**Cost**: SYN cookies sacrifice TCP options (MSS, SACK, window scale can't be remembered without state). When the cookie validates, the server reconstructs only the encoded MSS. This slightly reduces performance for legitimate connections during an attack.
+
+```bash
+# Enable SYN cookies on Linux
+sysctl -w net.ipv4.tcp_syncookies=1
+
+# Verify
+cat /proc/sys/net/ipv4/tcp_syncookies
+# 1
+```
+
+---
+
+## 📚 3. BGP Hijacking and RPKI
+
+### 3.1 How BGP Hijacking Works
+
+BGP has no authentication mechanism — any AS can announce any prefix. A BGP hijack occurs when an unauthorized AS announces a victim's IP prefix, causing traffic to be routed to the attacker.
+
+**Prefix hijack (exact match)**: Attacker announces the same /24 as the victim. Some ASes see the attacker's route first; traffic splits between victim and attacker.
+
+**Subprefix hijack (more specific)**: Attacker announces a /25 that is more specific than the victim's /24. **Longest prefix match means the /25 beats the /24 everywhere**. All traffic for that /25 is diverted to the attacker.
+
+**Historical examples**:
+- **2008 Pakistan Telecom / YouTube**: Pakistan Telecom accidentally hijacked YouTube's prefix trying to block it domestically; the hijack propagated globally and took YouTube down for ~2 hours.
+- **2018 eNet BGP leak**: US ISP eNet leaked thousands of routes through a Chinese ISP; traffic for Amazon, Cloudflare, and others was briefly routed through China.
+- **2020 Russian BGP incident**: Routes for major cloud providers were briefly rerouted through Rostelecom.
+
+### 3.2 RPKI — Resource Public Key Infrastructure
+
+RPKI (RFC 6480) adds cryptographic authentication to BGP route origin:
+
+**How it works**:
+1. **IP address holders** (companies, universities) create a **ROA (Route Origin Authorization)** signed by their Regional Internet Registry (RIR: ARIN, RIPE, APNIC, LACNIC, AFRINIC)
+2. A ROA certifies: "AS 15169 is authorized to announce 8.8.8.0/24"
+3. **ISPs enforce Route Origin Validation (ROV)**: Before accepting a BGP route, check if there's a valid ROA for `{prefix, origin_ASN}`. If the check fails → reject the route.
+
+```
+RPKI Trust Chain:
+  RIR (ARIN/RIPE/etc.) → IP Holder's Resource Certificate
+                          → ROA: "8.8.8.0/24 from AS15169"
+  
+BGP UPDATE received: "8.8.8.0/24 from AS99999"
+  → ROV check: Is (8.8.8.0/24, AS99999) in RPKI?
+  → Not found → Route Origin Unknown (or Invalid if conflicting ROA exists)
+  → If ISP enforces ROV → DROP this BGP UPDATE
+```
+
+**Deployment status (2025-2026)**:
+- ~45% of Internet prefixes have valid ROAs
+- Major ISPs (Cloudflare, Comcast, AT&T, NTT, Lumen) enforce ROV
+- BGP hijacks of RPKI-protected prefixes are now largely self-correcting
+
+```bash
+# Check if your prefix has a ROA
+curl "https://rpki-validator.ripe.net/api/v1/validity/AS15169/8.8.8.0/24"
+# {"validated_route": {"validity": {"state": "Valid", ...}}}
+```
+
+### 3.3 BGPsec
+
+**BGPsec** (RFC 8205) extends RPKI to sign the entire AS_PATH, not just the origin. This prevents AS-path forging. Currently not widely deployed due to performance concerns (every BGP UPDATE requires cryptographic signing/verification).
+
+**MANRS (Mutually Agreed Norms for Routing Security)**: A community effort where ISPs commit to:
+1. Filtering BGP routes (accept only authorized prefixes from customers)
+2. Anti-spoofing (BCP38 egress filtering)
+3. Global validation (implementing ROV)
+4. Coordination with incident response teams
+
+---
+
+## 📚 4. Anycast for DDoS Mitigation
+
+### 4.1 Architecture
+
+Anycast distributes the same IP prefix from multiple global Points of Presence (PoPs). When a DDoS attack targets an anycast prefix:
+
+```
+DDoS botnet (distributed globally):
+  Bot in EU    → nearest PoP: Frankfurt  → attack traffic absorbed by Frankfurt capacity
+  Bot in US    → nearest PoP: Ashburn    → attack traffic absorbed by Ashburn capacity
+  Bot in APAC  → nearest PoP: Singapore  → attack traffic absorbed by Singapore capacity
+
+Total attack: 5 Tbit/s
+Per PoP:      < 50 Gbit/s each (100+ PoPs)
+Result:       Distributed load; no single PoP overwhelmed
+```
+
+**This is why Cloudflare can absorb 5.6 Tbit/s DDoS attacks**: The capacity is globally distributed. Any single-location provider with 1 Tbit/s uplink would be saturated.
+
+### 4.2 Anycast vs Unicast
+
+| | Unicast | Anycast |
+|---|---|---|
+| Route | Fixed single destination | Nearest of many destinations |
+| DDoS absorption | Full attack hits one location | Distributed across PoPs |
+| Latency | Depends on origin location | Optimal (routed to nearest PoP) |
+| Failover | Manual/DNS-based | Automatic (BGP withdraws failed PoP) |
+| Use cases | Internal services | DNS, CDN, DDoS scrubbing, NTP |
+
+---
+
+## 📚 5. eBPF XDP — Kernel-Bypass Packet Processing
+
+### 5.1 The Performance Problem
+
+Traditional Linux packet processing (iptables):
+```
+NIC → kernel ring buffer → softirq → netfilter → iptables → conntrack → TCP stack → socket → application
+```
+
+At 10 Gbit/s with 64-byte packets = ~14.8 million packets/second. The kernel TCP stack and conntrack can barely keep up, consuming all CPU. Attackers can overwhelm it.
+
+### 5.2 XDP — eXpress Data Path
+
+**XDP** (Linux kernel 4.8+) attaches eBPF programs directly at the NIC driver level, **before** the kernel networking stack:
+
+```
+NIC → [XDP eBPF program] → DROP / PASS / REDIRECT / TX
+                              ↓ only PASS reaches:
+               kernel ring buffer → netfilter → TCP stack
+```
+
+An XDP program can inspect and drop packets **at 10–100 million packets/second on a single CPU core** — because it runs in the NIC driver, not in the full kernel stack.
+
+### 5.3 Simple XDP DDoS Filter
+
+```c
+// drop_ip.c — XDP program to drop all packets from a specific source IP
+#include <linux/bpf.h>
+#include <linux/if_ether.h>
+#include <linux/ip.h>
+#include <bpf/bpf_helpers.h>
+
+// Map: set of blocked source IPs
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __type(key, __u32);      // source IP (network byte order)
+    __type(value, __u8);     // 1 = blocked
+    __uint(max_entries, 1024);
+} blocked_ips SEC(".maps");
+
+SEC("xdp")
+int xdp_drop_blocked(struct xdp_md *ctx) {
+    void *data_end = (void *)(long)ctx->data_end;
+    void *data     = (void *)(long)ctx->data;
+    
+    // Parse Ethernet header
+    struct ethhdr *eth = data;
+    if ((void *)(eth + 1) > data_end) return XDP_PASS;
+    if (eth->h_proto != __constant_htons(ETH_P_IP)) return XDP_PASS;
+    
+    // Parse IP header
+    struct iphdr *ip = (void *)(eth + 1);
+    if ((void *)(ip + 1) > data_end) return XDP_PASS;
+    
+    // Check if source IP is in the blocked map
+    __u32 src_ip = ip->saddr;
+    __u8 *blocked = bpf_map_lookup_elem(&blocked_ips, &src_ip);
+    if (blocked && *blocked == 1) {
+        return XDP_DROP;     // Drop at NIC speed — no TCP stack involved
+    }
+    
+    return XDP_PASS;         // Allow normal kernel processing
+}
+
+char _license[] SEC("license") = "GPL";
+```
+
+```bash
+# Compile and load the XDP program
+clang -O2 -target bpf -c drop_ip.c -o drop_ip.o
+ip link set dev eth0 xdp obj drop_ip.o sec xdp
+
+# Add a blocked IP to the map
+bpftool map update pinned /sys/fs/bpf/blocked_ips \
+    key hex c0 00 02 01 \   # 192.0.2.1 in network byte order
+    value hex 01
+
+# Monitor XDP drop statistics
+bpftool prog show
+```
+
+**Performance**: A simple XDP drop filter processes 50–100M packets/second per core on a modern Intel NIC — roughly 10–50× faster than iptables for the same match operation.
+
+---
+
+## 📚 6. Complete DDoS Mitigation Stack
+
+A production DDoS mitigation architecture has multiple layers:
+
+```
+Layer 1 — Upstream scrubbing (Cloudflare Magic Transit / Akamai Prolexic):
+  - BGP announce your prefixes through the scrubbing provider
+  - GRE/IPIP tunnel clean traffic back to your origin
+  - Handles volumetric: absorbs terabit-scale attacks before they reach your network
+
+Layer 2 — Anycast at the edge (Cloudflare, Fastly, Akamai CDN):
+  - HTTP/HTTPS traffic served from 100+ PoPs globally
+  - Each PoP can independently absorb local attack traffic
+  - HTTPS termination: application-layer attacks are easier to detect here
+
+Layer 3 — Border router filtering (BGP communities + ACLs):
+  - RTBH (Remotely Triggered Black Hole): null-route attacked /32 prefix via BGP community
+  - BCP38: filter outbound spoofed source IPs (prevents your network from being used in attacks)
+  - RPKI ROV enforcement: prevents accepting hijacked routes
+
+Layer 4 — Load balancer / ingress (AWS Shield + NLB, Cloudflare Spectrum):
+  - SYN cookie support (protect against SYN floods before reaching application)
+  - Rate limiting at TCP level (CPS per IP)
+  - eBPF XDP on NLB nodes (kernel-bypass drop for known-bad IPs)
+
+Layer 5 — Application layer (WAF + rate limiting):
+  - OWASP Core Rule Set on WAF (Cloudflare WAF, AWS WAF, ModSecurity)
+  - Request rate limiting (Redis-backed sliding window per IP/API key)
+  - Bot detection (JS challenge, CAPTCHA, behavioral analysis)
+  - API schema validation (reject malformed requests early)
+
+Layer 6 — Origin server (OS tuning):
+  - tcp_syncookies=1
+  - Connection rate limits (nginx limit_conn, limit_req)
+  - Kernel parameter tuning (backlog queues, socket buffers)
+  - Application circuit breakers (fail fast, don't queue indefinitely)
+```
+
+---
+
+## 🛠️ 7. Worked Example — Incident Response Playbook
+
+**Scenario**: Your SaaS product is under a DDoS attack. Symptoms: high latency, 503 errors, NIC saturation alerts.
+
+**Step 1 — Identify the attack type**:
+```bash
+# Check ingress packet rate
+ip -s link show eth0 | grep -A2 RX
+# Or with sar: sar -n DEV 1 5
+
+# Check if it's SYN flood
+ss -s
+# TCP: inuse 50000, orphan 0, timewait 100, close 0,
+# synrecv 45000  ← elevated = SYN flood
+
+# Check source IPs
+tcpdump -i eth0 -n 'tcp[tcpflags] & tcp-syn != 0' -c 100 | awk '{print $3}' | sort | uniq -c | sort -rn
+```
+
+**Step 2 — Immediate triage**:
+```bash
+# Enable SYN cookies (if not already)
+sysctl -w net.ipv4.tcp_syncookies=1
+
+# Black-hole top attacking IP (iptables — kernel path)
+iptables -I INPUT -s 203.0.113.0/24 -j DROP
+
+# Better: XDP drop (kernel bypass)
+bpftool map update pinned /sys/fs/bpf/blocked_ips key hex ...
+```
+
+**Step 3 — Escalate to upstream scrubbing**:
+- Contact your DDoS mitigation provider (Cloudflare, Akamai, Radware) 
+- Trigger BGP diversion to scrubbing center
+- Cloudflare Magic Transit: re-announce your prefixes via Cloudflare ASN; GRE tunnel for clean traffic
+
+**Step 4 — Monitor and tune**:
+```bash
+# Watch mitigation effectiveness
+watch -n 1 'ip -s link show eth0 | grep -A4 RX'
+# Packet rate should decrease as scrubbing takes effect
+
+# Monitor TCP connection states
+watch -n 1 'ss -s'
+```
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"Firewalls stop DDoS attacks."** Firewalls have state tables that can be exhausted by SYN floods. Stateless filtering (eBPF XDP, ACLs at the router) is more resilient. A firewall that's being overwhelmed is itself a bottleneck.
+- **"HTTPS protects against DDoS."** HTTPS protects against eavesdropping, not volumetric DDoS. An attacker can send encrypted garbage at full line rate. TLS actually makes L7 DDoS detection harder because the payload is encrypted.
+- **"RPKI solves BGP security completely."** RPKI validates route origin (prefix + originating AS). It doesn't validate the AS_PATH — an attacker can still prepend legitimate ASes. BGPsec addresses this but isn't deployed.
+- **"DDoS attacks are always huge."** Many successful attacks are small and targeted: a 10 Gbit/s attack against a single /32 from an under-provisioned ISP can be just as effective as a 1 Tbit/s attack. Anycast and upstream scrubbing defend against both.
+- **"eBPF is only for security."** eBPF/XDP is also used for load balancing (Cilium), observability (bpftrace), network monitoring (BCC tools), and performance optimization. It's the future of Linux networking.
+
+---
+
+## 🔗 9. Cross-Links & Further Reading
+
+### Internal
+- [17.2 - IP, Routing & BGP](17.2---IP,-Routing-&-BGP) — BGP mechanics underlying hijacking and Anycast
+- [17.3 - TCP & UDP Deep Dive](17.3---TCP-&-UDP-Deep-Dive) — SYN flood exploits the TCP handshake
+- [17.4 - TLS, mTLS & PKI](17.4---TLS,-mTLS-&-PKI) — TLS protects application data but doesn't prevent network-layer DDoS
+- [Subject_Plan](Subject_Plan) — broader network security, intrusion detection, incident response
+- [Subject_Plan](Subject_Plan) — DDoS response as an SRE runbook item
+- [BUILDING_AT_SCALE](BUILDING_AT_SCALE) — network resilience is a scaling property
+
+### External
+- [Cloudflare DDoS Threat Report (quarterly)](https://blog.cloudflare.com/tag/ddos-reports/)
+- [RIPE NCC — RPKI documentation](https://www.ripe.net/manage-ips-and-asns/resource-management/rpki/)
+- [MANRS — Routing security norms](https://www.manrs.org/)
+- [RFC 4987 — TCP SYN Flooding Attacks and Common Mitigations](https://www.rfc-editor.org/rfc/rfc4987)
+- [Cilium / eBPF XDP tutorial](https://docs.cilium.io/en/stable/bpf/)
+- [Linux kernel — eBPF + XDP documentation](https://www.kernel.org/doc/html/latest/networking/af_xdp.html)
+- [Cloudflare blog — eBPF XDP for DDoS mitigation](https://blog.cloudflare.com/l4drop-xdp-ebpf-based-ddos-mitigations/)
+- [BGP hijacking incidents — BGPmon](https://bgpmon.net/)
+- [NIST RPKI monitor](https://rpki-monitor.antd.nist.gov/)
+
+---
+
+*Track 17 — Networking & Protocols is complete. Return to [README](README) or [Subject_Plan](Subject_Plan) for navigation.*

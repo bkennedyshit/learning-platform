@@ -1,0 +1,88 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="bend-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .beam-rect { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .na-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; stroke-dasharray: 8 4; }
+    .stress-tension { stroke: #2ecc71; stroke-width: 2; fill: none; }
+    .stress-compress { stroke: #e74c3c; stroke-width: 2; fill: none; }
+    .stress-fill-t { fill: #2ecc71; opacity: 0.12; }
+    .stress-fill-c { fill: #e74c3c; opacity: 0.12; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-green { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #2ecc71; font-weight: bold; }
+    .label-red { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #e74c3c; font-weight: bold; }
+    .dim-line { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3 2; }
+    .info-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .moment-arc { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+  </style>
+
+  <!-- Beam cross-section (left side) -->
+  <rect x="50" y="100" width="60" height="200" rx="2" class="beam-rect"/>
+  <!-- Neutral axis -->
+  <line x1="30" y1="200" x2="130" y2="200" class="na-line"/>
+  <text x="15" y="204" class="label-accent">NA</text>
+
+  <!-- Stress distribution arrows (right of cross-section) -->
+  <!-- Compression (top, pointing left = into page) -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="-5,0; 0,0; -5,0" dur="3s" repeatCount="indefinite" />
+    <polygon points="110,110 110,195 160,195 160,200 110,200 110,110" class="stress-fill-c"/>
+    <line x1="110" y1="120" x2="155" y2="120" class="stress-compress" marker-end="url(#bend-arrow)" style="color:#e74c3c"/>
+    <line x1="110" y1="145" x2="140" y2="145" class="stress-compress" marker-end="url(#bend-arrow)" style="color:#e74c3c"/>
+    <line x1="110" y1="170" x2="125" y2="170" class="stress-compress" marker-end="url(#bend-arrow)" style="color:#e74c3c"/>
+  </g>
+  <text x="165" y="115" class="label-red">σ_max (C)</text>
+
+  <!-- Tension (bottom, pointing right) -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="5,0; 0,0; 5,0" dur="3s" repeatCount="indefinite" />
+    <polygon points="110,205 110,200 160,200 160,205 110,290 110,205" class="stress-fill-t"/>
+    <line x1="110" y1="230" x2="125" y2="230" class="stress-tension" marker-end="url(#bend-arrow)" style="color:#2ecc71"/>
+    <line x1="110" y1="255" x2="140" y2="255" class="stress-tension" marker-end="url(#bend-arrow)" style="color:#2ecc71"/>
+    <line x1="110" y1="280" x2="155" y2="280" class="stress-tension" marker-end="url(#bend-arrow)" style="color:#2ecc71"/>
+  </g>
+  <text x="165" y="285" class="label-green">σ_max (T)</text>
+
+  <!-- y-axis label -->
+  <line x1="80" y1="95" x2="80" y2="70" class="dim-line" marker-end="url(#bend-arrow)" style="color:var(--text-muted, #8b949e)"/>
+  <text x="88" y="68" class="label">y</text>
+  <text x="80" y="340" class="label" text-anchor="middle">σ = −My/I</text>
+
+  <!-- Beam side view (right side) showing deflection -->
+  <path d="M 250 200 Q 400 200 450 200 Q 500 200 550 200" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+  <!-- Deflected shape -->
+  <path d="M 250 200 Q 350 230 450 250 Q 500 258 550 260" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5" fill="none">
+    <animate attributeName="d" values="M 250 200 Q 350 200 450 200 Q 500 200 550 200; M 250 200 Q 350 230 450 250 Q 500 258 550 260; M 250 200 Q 350 200 450 200 Q 500 200 550 200" dur="3s" repeatCount="indefinite" />
+  </path>
+
+  <!-- Supports -->
+  <polygon points="250,200 240,220 260,220" fill="var(--text-accent, #79c0ff)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <polygon points="550,200 540,220 560,220" fill="none" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+  <circle cx="545" cy="223" r="4" fill="none" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <circle cx="555" cy="223" r="4" fill="none" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+
+  <!-- Load -->
+  <line x1="400" y1="140" x2="400" y2="195" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#bend-arrow)" style="color:#e74c3c">
+    <animateTransform attributeName="transform" type="translate" values="0,-15; 0,0; 0,-15" dur="3s" repeatCount="indefinite" />
+  </line>
+  <text x="410" y="138" class="label-red">P</text>
+
+  <!-- Deflection annotation -->
+  <line x1="450" y1="200" x2="450" y2="250" class="dim-line"/>
+  <text x="458" y="230" class="label-accent">v(x)</text>
+
+  <!-- Moment arc -->
+  <path d="M 370 290 A 30 30 0 0 1 430 290" class="moment-arc" marker-end="url(#bend-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="400" y="315" class="label-accent" text-anchor="middle">M</text>
+
+  <!-- Info box -->
+  <rect x="420" y="50" width="260" height="80" rx="6" class="info-box"/>
+  <text x="550" y="72" class="label" text-anchor="middle" font-weight="bold">Euler-Bernoulli Beam</text>
+  <text x="550" y="92" class="label-accent" text-anchor="middle">σ = −My/I (flexure)</text>
+  <text x="550" y="112" class="label-accent" text-anchor="middle">τ = VQ/(Ib) (shear)</text>
+  <text x="550" y="127" class="label" text-anchor="middle" font-size="11">EI v″ = M(x)</text>
+</svg>

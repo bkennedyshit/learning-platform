@@ -1,0 +1,169 @@
+---
+title: "27.5 — Maya & 3ds Max: DCC, Animation & Arch-Viz Rendering"
+subject: "3D Modelling"
+catalog: advanced
+audience_tier: higher-education
+chapter: "27.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 27.5 — Maya & 3ds Max: DCC, Animation & Arch-Viz Rendering
+
+> *Where Revit gives you constructibility and Fusion gives you precision, the DCC tools give you **expressiveness** — animation, hero renders, character rigs, and the kind of polish that wins clients.*
+
+Maya and 3ds Max are both Autodesk DCC suites with overlapping capabilities. The shorthand:
+- **Maya** ≈ film, animation, character rigging, VFX (and increasingly arch-viz via Arnold).
+- **3ds Max** ≈ traditional arch-viz, motion graphics, V-Ray + Corona render-farm pipelines.
+
+Both export FBX/USD/Alembic — so the question is workflow ergonomics, not capability.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Model a hero polygonal asset with clean **edge flow** (quad-dominant topology).
+2. Generate **UVs** suitable for texture painting and lightmap baking.
+3. Rig a simple character in Maya: skeleton → IK/FK chains → skinning.
+4. Animate using the **graph editor / curve editor** — keyframes + interpolation.
+5. Set up an arch-viz scene in 3ds Max with V-Ray (or Arnold): physical camera, sun + sky, area lights, materials, render passes.
+6. Bake a Mesh + UV + texture set ready for handoff to Unity / Unreal / glTF.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external):*
+> - 📺 [Maya Learning Channel (Autodesk)](https://www.youtube.com/@MayaHowTos)
+> - 📺 [3ds Max Learning Channel (Autodesk)](https://www.youtube.com/@3dsMaxHowTos)
+> - 📺 [The Rookies — arch-viz showcase](https://www.therookies.co/)
+> - 📺 [V-Ray Mastered (Chaos Group)](https://www.chaos.com/learn) — official V-Ray learning
+> - 📺 [Pluralsight / FlippedNormals — character rigging in Maya](https://flippednormals.com/) (mix free + paid)
+
+---
+
+## 📚 1. Polygon Modelling Discipline
+
+| Rule | Why |
+|---|---|
+| Quads everywhere | Subdivision surfaces and animation deformers want quads |
+| Even edge flow at deformation areas | Elbows, mouths, knuckles — extra loops where it bends |
+| Sub-meshes by material | One mesh per shading group keeps export clean |
+| Watertight where possible | Non-manifold edges break sim, simulation, and 3D printing |
+
+### Common ops
+- Extrude / inset / bevel / bridge
+- Connect / multi-cut for new edge loops
+- Smooth (preview SubD)
+- Boolean (use sparingly — destroys topology)
+
+---
+
+## 🗺️ 2. UVs
+
+UVs are the 2D coordinates that map textures to mesh. The skill stack:
+
+1. **Unwrap** — cut seams, project, flatten.
+2. **Pack** — fit UV islands into the 0–1 square (or use UDIMs for film-grade detail).
+3. **Verify** — checker map should appear undistorted everywhere.
+4. **Bake** — high-poly → low-poly normal/AO/curvature maps.
+
+In Maya: UV Editor + UV Toolkit. In 3ds Max: Unwrap UVW modifier.
+
+---
+
+## 🦴 3. Rigging in Maya — Minimal Bipedal Setup
+
+```
+Joints:
+  root
+  ├─ pelvis
+  │   ├─ thigh_L
+  │   │   └─ shin_L → ankle_L → ball_L → toe_L
+  │   ├─ thigh_R
+  │   │   └─ ...
+  ├─ spine_01 → spine_02 → spine_03 → neck → head
+  └─ shoulder_L → upperarm_L → lowerarm_L → hand_L → fingers...
+```
+
+- Set up **IK handles** on legs and arms (foot/hand snap targets).
+- **FK** on spine and neck (pose-by-pose feel).
+- **Pole vectors** behind elbows / knees for clean IK rotation plane.
+- **Skin cluster** with smooth weighting; verify with deformation.
+
+Modern alternative: **Advanced Skeleton** (free Maya plugin) auto-rigs a humanoid.
+
+---
+
+## 🎬 4. Animation — Graph Editor Survival
+
+- Set keyframes on transforms (translate/rotate/scale).
+- Tangents: spline (default) → flat → linear depending on motion.
+- Read the curves: position vs velocity vs acceleration.
+- Stagger keys to avoid robotic synchrony.
+- 12 principles of animation (Disney) — go look them up if you have not yet.
+
+---
+
+## 🎨 5. Arch-Viz in 3ds Max + V-Ray (or Arnold / Corona)
+
+### Scene setup
+1. **Units**: set to mm (matches Revit) before importing.
+2. **Physical camera**: focal length 35–50 mm, ISO 100, shutter 1/250.
+3. **V-Ray Sun + Sky** for daylight; HDRI for environment.
+4. **V-Ray area lights** for interior fills.
+5. **Materials**: V-Ray Mtl (base color + reflection + roughness + IOR) — physically based.
+
+### Render settings
+- GI: Brute Force + Light Cache (V-Ray) for clean exteriors.
+- Output: 1920×1080 (preview) → 3840×2160 (hero).
+- AOVs / passes: Diffuse, Reflection, Refraction, Shadow, AO, Z-depth.
+- Composite in After Effects / Photoshop / DaVinci Resolve.
+
+### Arnold (Maya) equivalent
+- aiStandardSurface material.
+- aiSkyDomeLight with HDRI.
+- aiPhotometricLight or aiAreaLight for fills.
+
+---
+
+## 🛠️ 6. Worked Example (skeleton) — Revit Interior to V-Ray Hero Shot
+
+1. Export from Revit: FBX (or via Speckle for live link).
+2. Import into 3ds Max: scale → mm; up-axis Z.
+3. Re-apply V-Ray materials (Revit materials don't map cleanly).
+4. Add V-Ray Sun + HDRI Dome + a few V-Ray area lights.
+5. Set Physical Camera at eye height + tilt-shift correction.
+6. Render hero shot → composite in Photoshop with people/foliage.
+7. Export same scene to USD for Unreal Engine / Vision Pro pipeline ([→ ch 24 VR track](Subject_Plan)).
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [27.6 - Blender - Open-Source Modelling, Geometry Nodes & Sculpting](27.6---Blender---Open-Source-Modelling,-Geometry-Nodes-&-Sculpting) — open-source DCC parallel
+- [27.8 - Pipelines, Interop & Productization - From Architecture to Business](27.8---Pipelines,-Interop-&-Productization---From-Architecture-to-Business) — selling arch-viz
+- [Subject_Plan](Subject_Plan) — turning arch-viz into immersive walkthroughs
+- [28.4 - Shader Programming - GLSL & HLSL](28.4---Shader-Programming---GLSL-&-HLSL) — what the rendering math actually does
+
+### External
+- [Maya Learning Channel](https://www.youtube.com/@MayaHowTos)
+- [3ds Max Learning Channel](https://www.youtube.com/@3dsMaxHowTos)
+- [Chaos Learn (V-Ray, Corona)](https://www.chaos.com/learn)
+- [Arnold Documentation](https://help.autodesk.com/view/ARNOL/ENU/)
+- [Disney 12 Principles of Animation](https://www.youtube.com/watch?v=uDqjIdI4bF4)
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"Render quality = render time."** Beyond the diminishing-returns point, more time is wasted. Profile before throwing samples.
+- **"V-Ray is the only arch-viz renderer."** Corona, Arnold, Cycles (Blender), and Octane all hit hero quality.
+- **"Maya is for animation, Max is for arch-viz."** Studio convention more than capability — pick the one your future studio uses.
+- **"Unreal Engine replaces all this."** Real-time has caught up for previs and motion-design, but hero stills + tight client tweaks still favor offline renderers.

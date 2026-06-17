@@ -1,0 +1,58 @@
+<svg viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="tp-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .tpax  { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .tsurf { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.8; }
+    .tplan { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: var(--text-accent, #79c0ff); fill-opacity: 0.08; opacity: 0.9; }
+    .tref  { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; }
+    .tpt   { fill: var(--interactive-accent, #58a6ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .tlbl  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .tacc  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 13px; fill: var(--interactive-accent, #58a6ff); }
+    .tmut  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 12px; fill: var(--text-muted, #8b949e); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Axes -->
+  <line x1="280" y1="380" x2="480" y2="260" class="tpax" marker-end="url(#tp-arrow)"/>
+  <line x1="280" y1="380" x2="80"  y2="260" class="tpax" marker-end="url(#tp-arrow)"/>
+  <line x1="280" y1="380" x2="280" y2="30"  class="tpax" marker-end="url(#tp-arrow)"/>
+  <text x="492" y="258" class="tlbl">x</text>
+  <text x="64"  y="258" class="tlbl">y</text>
+  <text x="284" y="24"  class="tlbl">z</text>
+  <!-- Tangent plane (quadrilateral) -->
+  <polygon points="180,200 380,200 420,130 220,130" class="tplan"/>
+  <!-- Surface cross-section (paraboloid z = x^2 + y^2) -->
+  <path d="M 170 330 Q 220 240 280 210 Q 340 240 390 330" class="tsurf"/>
+  <path d="M 200 300 Q 250 230 280 210 Q 310 230 360 300" class="tsurf" opacity="0.5"/>
+  <!-- Touch point -->
+  <circle cx="280" cy="210" r="6" class="tpt"/>
+  <!-- Reference lines -->
+  <line x1="280" y1="210" x2="280" y2="380" class="tref"/>
+  <!-- Labels -->
+  <text x="430" y="125" class="tacc">Tangent plane</text>
+  <text x="430" y="140" class="tmut">z = 2x+2y−2</text>
+  <text x="292" y="208" class="tacc">  (1,1,2)</text>
+  <text x="370" y="340" class="tacc">z = x²+y²</text>
+</svg>

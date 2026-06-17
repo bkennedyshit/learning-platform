@@ -1,0 +1,83 @@
+<svg viewBox="0 0 650 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .layer { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 10; transition: all 0.3s ease; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    
+    /* Interactive lift and glow for each stack group */
+    .layer-group { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+    .layer-group:hover { transform: translateY(-4px); }
+    .layer-group:hover .layer { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.6)); }
+    
+    /* Rising floating particles on the right (highly juicy!) */
+    .juice-particle { fill: var(--interactive-accent, #58a6ff); opacity: 0; transform-origin: center; animation: juice-float 3s infinite ease-out; }
+    
+    @keyframes juice-float {
+      0% { transform: translateY(20px) scale(0.6); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.6; }
+      100% { transform: translateY(-30px) scale(1.4); opacity: 0; }
+    }
+    
+    /* Flow arrow animation */
+    .polish-flow { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 6,4; fill: none; marker-end: url(#juice-arr); animation: flow-up 1.2s linear infinite; }
+    
+    @keyframes flow-up {
+      to { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="juice-arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+
+  <text x="325" y="25" class="title">The Juice Stack — Layers of Game Feel</text>
+
+  <!-- Group 1 (Bottom) -->
+  <g class="layer-group">
+    <rect x="100" y="280" width="450" height="45" class="layer"/>
+    <text x="325" y="300" class="label">1. Input Response (≤50ms)</text>
+    <text x="325" y="316" class="sublabel">Button press → immediate visual/audio acknowledgment</text>
+  </g>
+
+  <!-- Group 2 -->
+  <g class="layer-group">
+    <rect x="120" y="225" width="410" height="45" class="layer"/>
+    <text x="325" y="245" class="label">2. Animation and Easing</text>
+    <text x="325" y="261" class="sublabel">Squash/stretch, anticipation, follow-through</text>
+  </g>
+
+  <!-- Group 3 -->
+  <g class="layer-group">
+    <rect x="140" y="170" width="370" height="45" class="layer"/>
+    <text x="325" y="190" class="label">3. Screen Effects</text>
+    <text x="325" y="206" class="sublabel">Shake, flash, hitstop, chromatic aberration</text>
+  </g>
+
+  <!-- Group 4 -->
+  <g class="layer-group">
+    <rect x="160" y="115" width="330" height="45" class="layer"/>
+    <text x="325" y="135" class="label">4. Audio Feedback</text>
+    <text x="325" y="151" class="sublabel">Pitch variation, layered SFX, musical stingers</text>
+  </g>
+
+  <!-- Group 5 (Top) -->
+  <g class="layer-group">
+    <rect x="180" y="60" width="290" height="45" class="layer"/>
+    <text x="325" y="80" class="label">5. Particle and VFX</text>
+    <text x="325" y="96" class="sublabel">Sparks, trails, impact bursts, damage numbers</text>
+  </g>
+
+  <!-- Floating Juicy Particles (VFX demonstration) -->
+  <circle cx="520" cy="80" r="4" class="juice-particle" style="animation-delay: 0s;"/>
+  <circle cx="540" cy="100" r="3" class="juice-particle" style="animation-delay: 0.6s;"/>
+  <circle cx="555" cy="70" r="5" class="juice-particle" style="animation-delay: 1.2s;"/>
+  <circle cx="570" cy="115" r="3" class="juice-particle" style="animation-delay: 1.8s;"/>
+
+  <!-- Polish Flow upward arrow -->
+  <text x="600" y="175" class="sublabel" fill="var(--text-accent, #79c0ff)" font-weight="bold">More Polish</text>
+  <line x1="600" y1="280" x2="600" y2="188" class="polish-flow"/>
+  <text x="600" y="300" class="sublabel" fill="var(--text-accent, #79c0ff)">Foundation</text>
+</svg>

@@ -1,0 +1,62 @@
+<svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="ia" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="ib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+    <marker id="ic" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .iv1{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none;marker-end:url(#ia);}
+    .iv2{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none;marker-end:url(#ib);}
+    .iv3{stroke:var(--text-muted, #8b949e);stroke-width:2;stroke-dasharray:4 3;fill:none;marker-end:url(#ic);}
+    .iax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none;}
+    .il{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+  </style>
+  <!-- INDEPENDENT panel -->
+  <text x="30" y="18" class="il" font-weight="bold">Linearly INDEPENDENT</text>
+  <line x1="100" y1="40" x2="100" y2="200" class="iax"/>
+  <line x1="20" y1="130" x2="230" y2="130" class="iax"/>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.2s" dur="0.01s" fill="freeze" />
+    <line x1="100" y1="130" x2="180" y2="60" class="iv1">
+      <animate attributeName="x2" values="100;180" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="130;60" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="183" y="56" class="il" fill="var(--interactive-accent, #58a6ff)" opacity="0">v₁<animate attributeName="opacity" to="1" begin="0.7s" dur="0.3s" fill="freeze"/></text>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.7s" dur="0.01s" fill="freeze" />
+    <line x1="100" y1="130" x2="60" y2="60" class="iv2">
+      <animate attributeName="x2" values="100;60" begin="0.7s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="130;60" begin="0.7s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="42" y="56" class="il" fill="var(--text-accent, #79c0ff)" opacity="0">v₂<animate attributeName="opacity" to="1" begin="1.2s" dur="0.3s" fill="freeze"/></text>
+  <text x="100" y="215" class="il" text-anchor="middle" opacity="0">Span = plane (2D)<animate attributeName="opacity" to="1" begin="1.7s" dur="0.5s" fill="freeze"/></text>
+  <!-- DEPENDENT panel -->
+  <text x="280" y="18" class="il" font-weight="bold">Linearly DEPENDENT</text>
+  <line x1="360" y1="40" x2="360" y2="200" class="iax"/>
+  <line x1="280" y1="130" x2="490" y2="130" class="iax"/>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.2s" dur="0.01s" fill="freeze" />
+    <line x1="360" y1="130" x2="460" y2="90" class="iv1">
+      <animate attributeName="x2" values="360;460" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="130;90" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="464" y="86" class="il" fill="var(--interactive-accent, #58a6ff)" opacity="0">v₁<animate attributeName="opacity" to="1" begin="0.7s" dur="0.3s" fill="freeze"/></text>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.7s" dur="0.01s" fill="freeze" />
+    <line x1="360" y1="130" x2="410" y2="110" class="iv3">
+      <animate attributeName="x2" values="360;410" begin="0.7s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y2" values="130;110" begin="0.7s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="412" y="106" class="il" fill="var(--text-muted, #8b949e)" opacity="0">v₂=½v₁<animate attributeName="opacity" to="1" begin="1.2s" dur="0.3s" fill="freeze"/></text>
+  <text x="360" y="215" class="il" text-anchor="middle" opacity="0">Span = line (1D)<animate attributeName="opacity" to="1" begin="1.7s" dur="0.5s" fill="freeze"/></text>
+</svg>

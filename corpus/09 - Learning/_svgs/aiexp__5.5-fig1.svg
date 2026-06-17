@@ -1,0 +1,138 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="arrow-agent" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .agent-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; rx: 10; cursor: pointer; transition: all 0.3s ease; }
+    .agent-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.12; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .tool-box { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; rx: 6; transition: all 0.3s ease; }
+    .tool-box:hover { fill: var(--text-accent, #79c0ff); fill-opacity: 0.08; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+    .step-num { font-family: Inter, system-ui, sans-serif; font-size: 18px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+
+    /* Animated Flows */
+    .flow { 
+      stroke: var(--text-normal, #c9d1d9); 
+      stroke-dasharray: 6,4; 
+      stroke-width: 2; 
+      fill: none; 
+      animation: agent-flow-move 1.5s linear infinite; 
+    }
+    .loop-flow { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-dasharray: 5,3; 
+      stroke-width: 2.5; 
+      fill: none; 
+      animation: agent-flow-move 0.8s linear infinite; 
+    }
+    
+    @keyframes agent-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Core Units Pulse & Glow Animations */
+    .llm-active {
+      animation: llm-glow 3s ease-in-out infinite;
+    }
+    .memory-active {
+      animation: memory-glow 4s ease-in-out infinite;
+    }
+    .tool-active {
+      animation: tool-glow 2s ease-in-out infinite;
+    }
+    .final-active {
+      animation: final-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes llm-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: rgba(88, 166, 255, 0.02); }
+      50% { stroke: var(--text-accent, #79c0ff); stroke-width: 3.5; fill: rgba(121, 192, 255, 0.08); filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.5)); }
+    }
+
+    @keyframes memory-glow {
+      0%, 100% { stroke: var(--text-accent, #79c0ff); }
+      50% { stroke: #d2a8ff; fill: rgba(210, 168, 255, 0.06); filter: drop-shadow(0 0 5px rgba(210, 168, 255, 0.3)); }
+    }
+
+    @keyframes tool-glow {
+      0%, 100% { stroke: var(--text-accent, #79c0ff); }
+      50% { stroke: var(--interactive-accent, #58a6ff); fill: rgba(88, 166, 255, 0.08); }
+    }
+
+    @keyframes final-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: #3fb950; fill: rgba(63, 185, 80, 0.08); filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.5)); }
+    }
+  </style>
+
+  <text x="300" y="28" class="title" text-anchor="middle">ReAct Agent Loop: Reason → Act → Observe</text>
+
+  <!-- User Input -->
+  <rect x="220" y="45" width="160" height="40" class="agent-box"/>
+  <text x="300" y="65" class="label" text-anchor="middle" font-weight="bold">User Query</text>
+  <text x="300" y="80" class="sublabel" text-anchor="middle">"Find X and calculate Y"</text>
+
+  <!-- LLM (Reasoning) -->
+  <rect x="180" y="115" width="240" height="60" class="agent-box llm-active" stroke-width="3"/>
+  <text x="300" y="138" class="label" text-anchor="middle" font-weight="bold">LLM (Reasoning Engine)</text>
+  <text x="300" y="158" class="sublabel" text-anchor="middle">Llama-3 / GPT-4 / Qwen2.5</text>
+  <text x="300" y="170" class="sublabel" text-anchor="middle">System prompt + tools + history</text>
+  <line x1="300" y1="85" x2="300" y2="115" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Step 1: Thought -->
+  <text x="50" y="155" class="step-num">①</text>
+  <rect x="30" y="160" width="130" height="40" class="tool-box"/>
+  <text x="95" y="178" class="label" text-anchor="middle" font-weight="bold">Thought</text>
+  <text x="95" y="193" class="sublabel" text-anchor="middle">"I need to search..."</text>
+  <line x1="180" y1="150" x2="160" y2="170" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Step 2: Action -->
+  <text x="50" y="235" class="step-num">②</text>
+  <rect x="30" y="240" width="130" height="40" class="agent-box"/>
+  <text x="95" y="258" class="label" text-anchor="middle" font-weight="bold">Action</text>
+  <text x="95" y="273" class="sublabel" text-anchor="middle">tool_name(args)</text>
+  <line x1="95" y1="200" x2="95" y2="240" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Tools -->
+  <rect x="30" y="305" width="55" height="35" class="tool-box tool-active"/>
+  <text x="57" y="325" class="sublabel" text-anchor="middle">Search</text>
+  <rect x="90" y="305" width="55" height="35" class="tool-box tool-active"/>
+  <text x="117" y="325" class="sublabel" text-anchor="middle">Code</text>
+  <rect x="150" y="305" width="55" height="35" class="tool-box tool-active"/>
+  <text x="177" y="325" class="sublabel" text-anchor="middle">API</text>
+  <line x1="95" y1="280" x2="95" y2="305" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Step 3: Observation -->
+  <text x="250" y="310" class="step-num">③</text>
+  <rect x="240" y="315" width="160" height="40" class="tool-box"/>
+  <text x="320" y="333" class="label" text-anchor="middle" font-weight="bold">Observation</text>
+  <text x="320" y="348" class="sublabel" text-anchor="middle">tool result → context</text>
+  <line x1="205" y1="330" x2="240" y2="335" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Loop back to LLM -->
+  <path d="M 400 335 C 480 335, 500 250, 500 175 C 500 130, 450 130, 420 140" class="loop-flow" marker-end="url(#arrow-agent)"/>
+  <text x="510" y="240" class="sublabel" text-anchor="middle">loop until</text>
+  <text x="510" y="255" class="sublabel" text-anchor="middle">final_answer</text>
+
+  <!-- Final Answer -->
+  <text x="450" y="310" class="step-num">④</text>
+  <rect x="430" y="315" width="140" height="40" class="agent-box final-active"/>
+  <text x="500" y="333" class="label" text-anchor="middle" font-weight="bold">Final Answer</text>
+  <text x="500" y="348" class="sublabel" text-anchor="middle">return to user</text>
+
+  <!-- Memory -->
+  <rect x="440" y="55" width="130" height="50" class="tool-box memory-active" stroke-dasharray="4,2"/>
+  <text x="505" y="75" class="label" text-anchor="middle" font-weight="bold">Memory</text>
+  <text x="505" y="93" class="sublabel" text-anchor="middle">conversation history</text>
+  <text x="505" y="103" class="sublabel" text-anchor="middle">+ vector store</text>
+  <line x1="420" y1="125" x2="440" y2="90" class="flow" marker-end="url(#arrow-agent)"/>
+
+  <!-- Iteration counter -->
+  <rect x="30" y="380" width="540" height="30" rx="4" stroke="var(--text-muted, #8b949e)" stroke-width="1" fill="none"/>
+  <text x="300" y="400" class="sublabel" text-anchor="middle">Max iterations: 5-15 | Guardrails: token budget, forbidden actions, timeout</text>
+</svg>

@@ -1,0 +1,541 @@
+---
+title: "Vite Config Recipes"
+subject: "_examples"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.3"
+type: examples
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [22.3 - Vite & Modern Build Tools](22.3---Vite-&-Modern-Build-Tools) | Part of [Subject_Plan](Subject_Plan)*
+
+# 8.3 Examples — Vite Config Recipes
+
+> Production-ready Vite configurations for common project types. Each recipe is annotated with explanations of every option.
+
+---
+
+## 1. React + TypeScript + Tailwind CSS
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc'; // SWC-based: faster than Babel
+import tailwindcss from '@tailwindcss/vite';   // Vite-native Tailwind (v4+)
+import { resolve } from 'path';
+
+export default defineConfig({
+  plugins: [
+    // @vitejs/plugin-react-swc uses the Rust-based SWC compiler
+    // for JSX transformation. ~20x faster than Babel for large projects.
+    // Includes React Fast Refresh for HMR without state loss.
+    react(),
+
+    // Tailwind CSS v4 Vite plugin: processes @tailwind directives,
+    // scans template files for class usage, purges unused styles.
+    tailwindcss(),
+  ],
+
+  // Path aliases: import from '@/components/Button' instead of '../../../components/Button'
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@components': resolve(__dirname, './src/components'),
+      '@hooks': resolve(__dirname, './src/hooks'),
+      '@utils': resolve(__dirname, './src/utils'),
+    },
+  },
+
+  server: {
+    port: 3000,
+    // Strict port: fail if 3000 is taken (instead of silently using 3001)
+    strictPort: true,
+    // HMR configuration for Docker/WSL environments
+    hmr: {
+      // If running in Docker, the WebSocket needs to connect to the host
+      // host: 'localhost',
+    },
+    // API proxy: forward /api/* requests to your backend
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true, // Changes the Origin header to match target
+        // rewrite: (path) => path.replace(/^\/api/, ''), // Strip /api prefix
+      },
+    },
+  },
+
+  build: {
+    // Target modern browsers: no unnecessary polyfills
+    target: 'es2022',
+    // Source maps for production debugging (Sentry, etc.)
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        // Chunk splitting strategy for optimal caching
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        },
+      },
+    },
+  },
+
+  // CSS configuration
+  css: {
+    // Enable CSS Modules for .module.css files
+    modules: {
+      localsConvention: 'camelCase', // .my-class → styles.myClass
+    },
+    // PostCSS plugins (if not using Tailwind v4 Vite plugin)
+    // postcss: { plugins: [autoprefixer()] },
+  },
+
+  // Test configuration (if using Vitest)
+  test: {
+    globals: true,           // No need to import describe/it/expect
+    environment: 'jsdom',    // Simulate browser DOM
+    setupFiles: './src/test/setup.ts',
+    css: true,               // Process CSS in tests
+  },
+});
+```
+
+```typescript
+// tsconfig.json — matching path aliases
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@utils/*": ["./src/utils/*"]
+    }
+  },
+  "include": ["src"]
+}
+```
+
+---
+
+## 2. Library Mode Build (npm Package)
+
+```typescript
+// vite.config.ts — Building a reusable component library
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import dts from 'vite-plugin-dts';
+import { resolve } from 'path';
+import { peerDependencies } from './package.json';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    // vite-plugin-dts: generates TypeScript declaration files (.d.ts)
+    // from your source. Consumers get full type safety.
+    dts({
+      include: ['src'],
+      // Roll up declarations into a single index.d.ts
+      rollupTypes: true,
+    }),
+  ],
+
+  build: {
+    lib: {
+      // The entry file that exports your public API
+      entry: resolve(__dirname, 'src/index.ts'),
+      // Name used for UMD/IIFE global variable
+      name: 'MyUIKit',
+      // Output filenames per format
+      fileName: (format) => `my-ui-kit.${format}.js`,
+      // Generate both ESM (for modern bundlers) and CJS (for Node/legacy)
+      formats: ['es', 'cjs'],
+    },
+    rollupOptions: {
+      // CRITICAL: externalize peer dependencies.
+      // Your library should NOT bundle React — the consumer provides it.
+      // If you bundle React, the consumer ends up with two copies (bugs!).
+      external: [
+        ...Object.keys(peerDependencies || {}),
+        'react/jsx-runtime',
+      ],
+      output: {
+        // Preserve module structure for tree-shaking
+        preserveModules: true,
+        preserveModulesRoot: 'src',
+        // Global variable names for UMD builds
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+        },
+      },
+    },
+    // Don't minify library code — consumers minify their own bundles
+    minify: false,
+    // Generate source maps so consumers can debug into your library
+    sourcemap: true,
+    // Extract CSS into a separate file (consumers import it explicitly)
+    cssCodeSplit: false,
+  },
+});
+```
+
+```json
+// package.json — Proper package exports for library consumers
+{
+  "name": "@myorg/ui-kit",
+  "version": "2.0.0",
+  "type": "module",
+  "main": "./dist/my-ui-kit.cjs.js",
+  "module": "./dist/my-ui-kit.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/my-ui-kit.es.js",
+      "require": "./dist/my-ui-kit.cjs.js"
+    },
+    "./styles.css": "./dist/style.css"
+  },
+  "files": ["dist"],
+  "sideEffects": ["**/*.css"],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  }
+}
+```
+
+---
+
+## 3. Multi-Page Application Setup
+
+```typescript
+// vite.config.ts — Multiple HTML entry points
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+
+export default defineConfig({
+  // appType: 'mpa' tells Vite this is a multi-page app
+  // (affects dev server fallback behavior)
+  appType: 'mpa',
+
+  build: {
+    rollupOptions: {
+      input: {
+        // Each key becomes a chunk name; value is the HTML entry point
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'pages/admin/index.html'),
+        login: resolve(__dirname, 'pages/login/index.html'),
+        docs: resolve(__dirname, 'pages/docs/index.html'),
+      },
+      output: {
+        // Organize output files cleanly
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: 'assets/js/shared-[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          // Route CSS and images to appropriate directories
+          if (assetInfo.name?.endsWith('.css')) return 'assets/css/[name]-[hash].css';
+          if (/\.(png|jpe?g|gif|svg|webp)$/.test(assetInfo.name || '')) {
+            return 'assets/images/[name]-[hash].[ext]';
+          }
+          return 'assets/[name]-[hash].[ext]';
+        },
+      },
+    },
+  },
+
+  server: {
+    // Custom middleware to handle MPA routing in dev
+    // (Vite's default SPA fallback sends everything to index.html)
+    open: '/index.html',
+  },
+});
+```
+
+```
+# Project structure for MPA:
+├── index.html                    # Main page (/)
+├── pages/
+│   ├── admin/
+│   │   ├── index.html           # Admin page (/pages/admin/)
+│   │   └── src/admin.ts         # Admin-specific JS
+│   ├── login/
+│   │   ├── index.html           # Login page
+│   │   └── src/login.ts
+│   └── docs/
+│       ├── index.html           # Docs page
+│       └── src/docs.ts
+├── src/
+│   ├── main.ts                  # Main page JS
+│   └── shared/                  # Shared utilities (code-split automatically)
+│       ├── auth.ts
+│       └── api.ts
+└── vite.config.ts
+```
+
+---
+
+## 4. Environment Variable Handling
+
+```typescript
+// vite.config.ts — Environment-aware configuration
+import { defineConfig, loadEnv } from 'vite';
+
+// defineConfig can accept a function for dynamic configuration.
+// The function receives { mode, command } from the CLI.
+export default defineConfig(({ mode, command }) => {
+  // loadEnv reads .env files based on mode.
+  // mode = 'development' reads: .env, .env.development, .env.development.local
+  // mode = 'production' reads: .env, .env.production, .env.production.local
+  // The third arg '' means load ALL env vars (not just VITE_ prefixed)
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    // Use env vars in config (e.g., different API targets per environment)
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_TARGET || 'http://localhost:8080',
+          changeOrigin: true,
+        },
+      },
+    },
+
+    // define: statically replace expressions at build time
+    define: {
+      // Make build metadata available in code
+      __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      // For libraries that check process.env.NODE_ENV:
+      'process.env.NODE_ENV': JSON.stringify(mode),
+    },
+
+    build: {
+      // Different source map strategy per environment
+      sourcemap: mode === 'production' ? 'hidden' : true,
+      // Drop console.log in production
+      minify: 'esbuild',
+      ...(mode === 'production' && {
+        esbuild: { drop: ['console', 'debugger'] },
+      }),
+    },
+  };
+});
+```
+
+```bash
+# .env (all modes)
+VITE_APP_NAME=MyApp
+
+# .env.development
+VITE_API_TARGET=http://localhost:8080
+VITE_DEBUG=true
+
+# .env.staging (custom mode: vite build --mode staging)
+VITE_API_TARGET=https://staging-api.example.com
+VITE_DEBUG=false
+
+# .env.production
+VITE_API_TARGET=https://api.example.com
+VITE_DEBUG=false
+```
+
+```typescript
+// src/vite-env.d.ts — Type safety for env vars
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_APP_NAME: string;
+  readonly VITE_API_TARGET: string;
+  readonly VITE_DEBUG: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+// Usage in application code:
+// const apiUrl = import.meta.env.VITE_API_TARGET;
+// const isDebug = import.meta.env.VITE_DEBUG === 'true';
+```
+
+---
+
+## 5. Custom Plugin Authoring
+
+```typescript
+// plugins/markdown-loader.ts
+// A Vite plugin that imports .md files as HTML strings
+import { Plugin } from 'vite';
+import { marked } from 'marked';
+import { readFileSync } from 'fs';
+
+export function markdownPlugin(): Plugin {
+  return {
+    // name: required. Used in error messages and warnings.
+    name: 'vite-plugin-markdown',
+
+    // enforce: 'pre' means this plugin runs before Vite's internal plugins.
+    // 'post' means after. Default (no enforce) runs in the middle.
+    enforce: 'pre',
+
+    // transform: called for every module that passes through the pipeline.
+    // `code` is the file contents, `id` is the file path.
+    transform(code, id) {
+      // Only process .md files
+      if (!id.endsWith('.md')) return null;
+
+      // Parse markdown to HTML
+      const html = marked.parse(code);
+
+      // Return a JavaScript module that exports the HTML string.
+      // This is what the importing code receives.
+      return {
+        code: `export default ${JSON.stringify(html)};`,
+        // map: null means no source map (simple transform)
+        map: null,
+      };
+    },
+
+    // handleHotUpdate: Vite-specific hook for custom HMR behavior.
+    // Called when a watched file changes during dev.
+    handleHotUpdate({ file, server }) {
+      if (file.endsWith('.md')) {
+        // Notify the client that this module needs to be re-fetched
+        // The module graph tracks which components import this .md file
+        // and will trigger their HMR update.
+        console.log(`[markdown] ${file} changed, triggering HMR`);
+      }
+    },
+  };
+}
+
+// Usage:
+// import content from './README.md'; // content is an HTML string
+// <div dangerouslySetInnerHTML={{ __html: content }} />
+```
+
+```typescript
+// plugins/build-info.ts
+// Plugin that injects build metadata into the HTML
+import { Plugin } from 'vite';
+
+export function buildInfoPlugin(): Plugin {
+  return {
+    name: 'vite-plugin-build-info',
+
+    // transformIndexHtml: Vite-specific hook to modify index.html.
+    // Runs during both dev and build.
+    transformIndexHtml(html) {
+      const buildTime = new Date().toISOString();
+      const commitHash = process.env.GIT_COMMIT || 'dev';
+
+      // Inject a meta tag with build info (useful for debugging deployments)
+      return html.replace(
+        '</head>',
+        `  <meta name="build-time" content="${buildTime}" />
+  <meta name="build-commit" content="${commitHash}" />
+</head>`
+      );
+    },
+
+    // configureServer: Vite-specific hook to add dev server middleware.
+    configureServer(server) {
+      // Add a custom endpoint to the dev server
+      server.middlewares.use('/api/build-info', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          mode: 'development',
+          viteVersion: server.config.root,
+          timestamp: Date.now(),
+        }));
+      });
+    },
+  };
+}
+```
+
+---
+
+## 6. Monorepo Configuration with Workspace Dependencies
+
+```typescript
+// packages/app/vite.config.ts — App that consumes workspace packages
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    // Resolves TypeScript path aliases from tsconfig.json
+    // Essential in monorepos where packages reference each other
+    tsconfigPaths(),
+  ],
+
+  // In a monorepo, workspace packages are symlinked in node_modules.
+  // Vite needs to know to process them (they're source code, not pre-built).
+  optimizeDeps: {
+    // Force pre-bundling to include workspace packages
+    // (otherwise Vite treats them as source and transforms on every request)
+    include: ['@myorg/ui-kit', '@myorg/utils'],
+  },
+
+  // Allow Vite to resolve files outside the project root (monorepo packages)
+  server: {
+    fs: {
+      allow: [
+        // Allow serving files from the monorepo root
+        '../..',
+      ],
+    },
+  },
+
+  build: {
+    // Ensure workspace packages are bundled (not left as external imports)
+    commonjsOptions: {
+      include: [/node_modules/, /@myorg/],
+    },
+  },
+});
+```
+
+```
+# Monorepo structure:
+monorepo/
+├── package.json          # Workspace root
+├── pnpm-workspace.yaml   # Workspace definition
+├── packages/
+│   ├── app/              # Vite React app
+│   │   ├── vite.config.ts
+│   │   └── src/
+│   ├── ui-kit/           # Shared component library
+│   │   ├── vite.config.ts  # Library mode build
+│   │   └── src/
+│   └── utils/            # Shared utilities
+│       ├── package.json
+│       └── src/
+└── turbo.json            # Turborepo task configuration
+```
+
+---
+
+*See also: [22.3 - Vite & Modern Build Tools](22.3---Vite-&-Modern-Build-Tools) for the full architectural deep-dive.*
+
+---
+
+## Related Notes
+- [8.1_react_nextjs_starter](8.1_react_nextjs_starter) - Same _examples folder
+- [8.2_angular_starter](8.2_angular_starter) - Same _examples folder
+- [8.4_pyqt_minimal_apps](8.4_pyqt_minimal_apps) - Same _examples folder
+- [8.5_flutter_dart_patterns](8.5_flutter_dart_patterns) - Same _examples folder

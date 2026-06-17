@@ -1,0 +1,111 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: var(--text-normal, #c9d1d9); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .boxhi { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .ssa   { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .cfg   { fill: #51cf66; opacity: 0.18; stroke: #51cf66; stroke-width: 1; }
+    .phi   { fill: #ffd93d; opacity: 0.22; stroke: #ffd93d; stroke-width: 1.5; }
+    .llvm  { fill: #cc5de8; opacity: 0.18; stroke: #cc5de8; stroke-width: 1; }
+    .arr   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arrhi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; fill: none; }
+  </style>
+  <defs>
+    <marker id="p5-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="p5-ahi" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Intermediate Representations — Three-Address Code, SSA &amp; CFG (Chapter 29.5)</text>
+
+  <!-- TOP LEFT: 3-address code -->
+  <rect x="18" y="36" width="210" height="180" rx="5" class="box"/>
+  <text x="123" y="56" class="label" text-anchor="middle" font-weight="bold">Three-Address Code</text>
+  <text x="123" y="70" class="small" text-anchor="middle">for:  z = x + y * 2</text>
+
+  <rect x="28" y="78" width="190" height="128" rx="3" class="ssa"/>
+  <text x="36" y="96"  class="mono">t1 = y * 2</text>
+  <text x="36" y="112" class="mono">t2 = x + t1</text>
+  <text x="36" y="128" class="mono">z  = t2</text>
+  <line x1="28" y1="136" x2="218" y2="136" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="36" y="152" class="small">each instr: at most</text>
+  <text x="36" y="166" class="small">1 operator + 3 operands</text>
+  <text x="36" y="180" class="small">temp vars = virtual registers</text>
+  <text x="36" y="196" class="small">basis for SSA and LLVM IR</text>
+
+  <!-- TOP MIDDLE: SSA + phi -->
+  <rect x="242" y="36" width="220" height="180" rx="5" class="box"/>
+  <text x="352" y="56" class="label" text-anchor="middle" font-weight="bold">SSA Form (Single Static Assign)</text>
+
+  <rect x="252" y="68" width="200" height="138" rx="3" class="ssa"/>
+  <text x="352" y="86"  class="small" text-anchor="middle">each variable defined exactly once</text>
+  <line x1="252" y1="92" x2="452" y2="92" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="260" y="108" class="mono">// original</text>
+  <text x="260" y="122" class="mono">x = 1</text>
+  <text x="260" y="136" class="mono">x = x + 1   // reuse</text>
+  <line x1="252" y1="142" x2="452" y2="142" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="260" y="158" class="mono">// SSA renamed</text>
+  <text x="260" y="172" class="mono">x₁ = 1</text>
+  <text x="260" y="186" class="mono">x₂ = x₁ + 1  // new name</text>
+
+  <!-- phi node box -->
+  <rect x="252" y="186" width="200" height="28" rx="3" class="phi"/>
+  <text x="352" y="204" class="mono" text-anchor="middle">φ(x₁, x₂) — merge at join</text>
+
+  <!-- TOP RIGHT: LLVM IR snippet -->
+  <rect x="476" y="36" width="226" height="180" rx="5" class="box"/>
+  <text x="589" y="56" class="label" text-anchor="middle" font-weight="bold">LLVM IR (real output)</text>
+
+  <rect x="486" y="68" width="206" height="140" rx="3" class="llvm"/>
+  <text x="494" y="86"  class="mono">define i32 @add(i32 %x,</text>
+  <text x="494" y="100" class="mono">               i32 %y) {</text>
+  <text x="494" y="114" class="mono">entry:</text>
+  <text x="494" y="128" class="mono">  %0 = add i32 %x, %y</text>
+  <text x="494" y="142" class="mono">  ret i32 %0</text>
+  <text x="494" y="156" class="mono">}</text>
+  <line x1="486" y1="162" x2="692" y2="162" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="494" y="176" class="small">typed · SSA · infinite regs</text>
+  <text x="494" y="190" class="small">multiple targets via LLVM backend</text>
+  <text x="494" y="202" class="small">opt -O2 applies passes inline</text>
+
+  <!-- BOTTOM: CFG diagram -->
+  <rect x="18" y="232" width="684" height="172" rx="5" class="box"/>
+  <text x="360" y="252" class="label" text-anchor="middle" font-weight="bold">Control-Flow Graph (CFG) for: if x &gt; 0: y=1 else: y=2</text>
+
+  <!-- Entry block -->
+  <rect x="296" y="264" width="128" height="34" rx="4" class="cfg"/>
+  <text x="360" y="279" class="mono" text-anchor="middle">entry:</text>
+  <text x="360" y="292" class="mono" text-anchor="middle">br x&gt;0, then, else</text>
+
+  <!-- then block -->
+  <rect x="144" y="320" width="128" height="34" rx="4" class="cfg"/>
+  <text x="208" y="335" class="mono" text-anchor="middle">then:</text>
+  <text x="208" y="348" class="mono" text-anchor="middle">y₁ = 1</text>
+  <line x1="296" y1="296" x2="208" y2="320" class="arr" marker-end="url(#p5-arr)"/>
+  <text x="240" y="314" class="small">true</text>
+
+  <!-- else block -->
+  <rect x="448" y="320" width="128" height="34" rx="4" class="cfg"/>
+  <text x="512" y="335" class="mono" text-anchor="middle">else:</text>
+  <text x="512" y="348" class="mono" text-anchor="middle">y₂ = 2</text>
+  <line x1="424" y1="296" x2="512" y2="320" class="arr" marker-end="url(#p5-arr)"/>
+  <text x="478" y="314" class="small">false</text>
+
+  <!-- merge / exit block -->
+  <rect x="296" y="376" width="128" height="34" rx="4" class="phi"/>
+  <text x="360" y="391" class="mono" text-anchor="middle">exit:</text>
+  <text x="360" y="404" class="mono" text-anchor="middle">y₃ = φ(y₁, y₂)</text>
+  <line x1="208" y1="354" x2="296" y2="376" class="arr" marker-end="url(#p5-arr)"/>
+  <line x1="512" y1="354" x2="424" y2="376" class="arr" marker-end="url(#p5-arr)"/>
+
+  <text x="84"  y="388" class="small" text-anchor="middle">CFG nodes = basic blocks</text>
+  <text x="84"  y="400" class="small" text-anchor="middle">(straight-line code)</text>
+  <text x="624" y="388" class="small" text-anchor="middle">phi node selects value</text>
+  <text x="624" y="400" class="small" text-anchor="middle">based on predecessor</text>
+</svg>

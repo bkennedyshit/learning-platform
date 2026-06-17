@@ -1,0 +1,93 @@
+<svg viewBox="0 0 650 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .phase { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; rx: 10; transition: all 0.3s ease; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#pt-arrow); }
+    .loop-back { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 5,3; marker-end: url(#pt-arrow-muted); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .num { font-family: Inter, system-ui, sans-serif; font-size: 20px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    
+    /* Hover and slide effects for phase blocks */
+    .phase-group { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+    .phase-group:hover { transform: translateY(-4px); }
+    .phase-group:hover .phase { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.6)); }
+  </style>
+  <defs>
+    <marker id="pt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="pt-arrow-muted" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="325" y="25" class="title">The Playtest Iteration Cycle</text>
+
+  <!-- Step 1 -->
+  <g class="phase-group">
+    <rect x="40" y="80" width="130" height="80" class="phase"/>
+    <text x="105" y="105" class="num">1</text>
+    <text x="105" y="125" class="label">Hypothesize</text>
+    <text x="105" y="142" class="sublabel">"Players will feel X</text>
+    <text x="105" y="154" class="sublabel">when mechanic Y..."</text>
+  </g>
+
+  <!-- Step 2 -->
+  <g class="phase-group">
+    <rect x="220" y="80" width="130" height="80" class="phase"/>
+    <text x="285" y="105" class="num">2</text>
+    <text x="285" y="125" class="label">Build Prototype</text>
+    <text x="285" y="142" class="sublabel">Minimum viable</text>
+    <text x="285" y="154" class="sublabel">slice to test</text>
+  </g>
+
+  <!-- Step 3 -->
+  <g class="phase-group">
+    <rect x="400" y="80" width="130" height="80" class="phase"/>
+    <text x="465" y="105" class="num">3</text>
+    <text x="465" y="125" class="label">Observe Players</text>
+    <text x="465" y="142" class="sublabel">Watch, don't help.</text>
+    <text x="465" y="154" class="sublabel">Record everything.</text>
+  </g>
+
+  <!-- Step 4 -->
+  <g class="phase-group">
+    <rect x="220" y="220" width="130" height="80" class="phase"/>
+    <text x="285" y="245" class="num">4</text>
+    <text x="285" y="265" class="label">Analyze + Decide</text>
+    <text x="285" y="282" class="sublabel">What surprised you?</text>
+    <text x="285" y="294" class="sublabel">Pivot or persevere?</text>
+  </g>
+
+  <!-- Connection Paths -->
+  <line x1="175" y1="120" x2="215" y2="120" class="arrow"/>
+  <line x1="355" y1="120" x2="395" y2="120" class="arrow"/>
+  <path d="M 465 165 Q 465 200 355 235" class="arrow"/>
+  <path d="M 220 260 Q 80 260 80 165" class="loop-back"/>
+
+  <!-- Iteration Cycle Flow Particles -->
+  <!-- 1. Hypothesize to Build -->
+  <circle r="3.5" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="cx" from="175" to="215" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" from="120" to="120" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- 2. Build to Observe -->
+  <circle r="3.5" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="cx" from="355" to="395" dur="1.5s" repeatCount="indefinite" begin="0.38s"/>
+    <animate attributeName="cy" from="120" to="120" dur="1.5s" repeatCount="indefinite" begin="0.38s"/>
+  </circle>
+  
+  <!-- 3. Observe to Analyze -->
+  <circle r="3.5" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion path="M 465 165 Q 465 200 355 235" dur="1.5s" repeatCount="indefinite" begin="0.75s"/>
+  </circle>
+  
+  <!-- 4. Analyze to Hypothesize (Loop Back) -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.8">
+    <animateMotion path="M 220 260 Q 80 260 80 165" dur="2s" repeatCount="indefinite" begin="1.12s"/>
+  </circle>
+
+  <text x="325" y="340" class="sublabel" fill="var(--text-accent, #79c0ff)">Repeat until: hypothesis confirmed OR pivoted to new direction</text>
+</svg>

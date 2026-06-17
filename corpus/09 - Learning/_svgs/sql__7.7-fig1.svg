@@ -1,0 +1,65 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-trig" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .step-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; transition: all 0.3s; cursor: pointer; }
+    .step-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .trigger-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; stroke-dasharray: 6,3; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .desc { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .flow-arrow { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; marker-end: url(#arrow-trig); }
+    .trigger-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-trig); stroke-dasharray: 5,3; }
+    .num { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <text x="350" y="25" class="title">Trigger Execution Flow — INSERT/UPDATE/DELETE</text>
+
+  <!-- Step 1: Statement arrives -->
+  <rect x="30" y="60" width="130" height="50" class="step-box"/>
+  <text x="95" y="80" class="num">①</text>
+  <text x="95" y="95" class="label">SQL Statement</text>
+  <text x="95" y="120" class="desc">INSERT/UPDATE/DELETE</text>
+
+  <!-- Step 2: BEFORE trigger -->
+  <rect x="190" y="60" width="130" height="50" class="trigger-box"/>
+  <text x="255" y="80" class="num">②</text>
+  <text x="255" y="95" class="label">BEFORE Trigger</text>
+  <text x="255" y="120" class="desc">Can modify NEW, cancel op</text>
+
+  <!-- Step 3: Actual operation -->
+  <rect x="350" y="60" width="130" height="50" class="step-box"/>
+  <text x="415" y="80" class="num">③</text>
+  <text x="415" y="95" class="label">Execute DML</text>
+  <text x="415" y="120" class="desc">Modify table data</text>
+
+  <!-- Step 4: AFTER trigger -->
+  <rect x="510" y="60" width="130" height="50" class="trigger-box"/>
+  <text x="575" y="80" class="num">④</text>
+  <text x="575" y="95" class="label">AFTER Trigger</text>
+  <text x="575" y="120" class="desc">Audit, cascade, notify</text>
+
+  <!-- Arrows -->
+  <line x1="160" y1="85" x2="190" y2="85" class="flow-arrow"/>
+  <line x1="320" y1="85" x2="350" y2="85" class="flow-arrow"/>
+  <line x1="480" y1="85" x2="510" y2="85" class="flow-arrow"/>
+
+  <!-- Trigger actions -->
+  <rect x="170" y="170" width="180" height="40" rx="6" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1;"/>
+  <text x="260" y="190" class="label">Validate / Transform</text>
+  <text x="260" y="202" class="desc">RETURN NEW (proceed) or NULL (cancel)</text>
+  <line x1="255" y1="110" x2="255" y2="170" class="trigger-arrow"/>
+
+  <rect x="490" y="170" width="180" height="40" rx="6" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1;"/>
+  <text x="580" y="190" class="label">Audit / Side Effects</text>
+  <text x="580" y="202" class="desc">Log changes, update counters</text>
+  <line x1="575" y1="110" x2="575" y2="170" class="trigger-arrow"/>
+
+  <!-- Recursive CTE box -->
+  <rect x="50" y="240" width="600" height="55" rx="8" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1;"/>
+  <text x="350" y="260" class="label">Recursive CTE: WITH RECURSIVE tree AS (base UNION ALL recursive) SELECT * FROM tree</text>
+  <text x="350" y="280" class="desc">Traverses hierarchies (org charts, BOM, category trees) — terminates when recursive term returns 0 rows</text>
+</svg>

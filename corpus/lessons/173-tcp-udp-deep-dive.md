@@ -1,0 +1,450 @@
+---
+title: "17.3 — TCP & UDP Deep Dive"
+subject: "Networking & Protocols"
+catalog: advanced
+audience_tier: higher-education
+chapter: "17.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 17.3 — TCP & UDP Deep Dive
+
+> *"The most fundamental insight about TCP is this: it's not a protocol that sends data. It's a protocol that manages a conversation about what data has been received."* — paraphrased from networking literature
+
+TCP is the protocol that makes the unreliable IP layer seem reliable. It introduces connection state, sequencing, acknowledgment, flow control, and congestion control — all layered on top of IP datagrams that can arrive late, out of order, or not at all. This chapter goes deeper than "TCP is reliable" — it covers the *exact mechanisms* that make it work, and where those mechanisms can hurt you (latency, port exhaustion, buffer bloat).
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Draw a **TCP segment header** and explain every field including all 6 control flags.
+2. Trace the **3-way handshake** with specific sequence numbers and the **4-way FIN teardown**.
+3. Calculate **TCP throughput** from window size and RTT.
+4. Describe all four congestion control phases: Slow Start, Congestion Avoidance, Fast Retransmit, Fast Recovery.
+5. Explain the difference between **CUBIC** (loss-based) and **BBR** (model-based) congestion control.
+6. Explain **TIME_WAIT** — what it is, why it exists, and how to mitigate port exhaustion.
+7. Decide when to use **UDP** instead of TCP — and what application-layer reliability you'd need to add.
+
+---
+
+## 🖼️ Visual Anchor
+
+![net-17__fig3](net-17__fig3.svg)
+
+---
+
+## 📚 1. TCP Segment Structure
+
+### 1.1 Header Fields
+
+```
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |        Destination Port       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Sequence Number                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Acknowledgment Number                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Data |           |U|A|P|R|S|F|                               |
+| Offset| Reserved  |R|C|S|S|Y|I|           Window             |
+|       |           |G|K|H|T|N|N|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |         Urgent Pointer        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Options (0-40 bytes)                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             Data                              |
+```
+
+| Field | Bits | Description |
+|---|---|---|
+| **Source Port** | 16 | Ephemeral port (client) or well-known port (server) |
+| **Destination Port** | 16 | Target application port |
+| **Sequence Number** | 32 | Byte offset of the first byte in this segment's payload |
+| **Acknowledgment Number** | 32 | Next byte the receiver expects; all bytes before this are received |
+| **Data Offset** | 4 | Header length in 32-bit words (min 5 = 20 bytes) |
+| **URG** | 1 | Urgent pointer field valid |
+| **ACK** | 1 | Acknowledgment number field valid |
+| **PSH** | 1 | Push — flush data to application immediately (don't buffer) |
+| **RST** | 1 | Reset — abort connection abruptly |
+| **SYN** | 1 | Synchronize sequence numbers (connection establishment) |
+| **FIN** | 1 | No more data from sender (graceful close) |
+| **Window** | 16 | Receiver's available buffer (flow control, `rwnd`) |
+| **Checksum** | 16 | Covers header + payload + pseudo-header (src/dst IP, protocol, length) |
+| **Urgent Pointer** | 16 | Offset to urgent data (rare; only valid when URG=1) |
+
+### 1.2 Key Options
+
+TCP options are appended after the 20-byte base header (up to 40 bytes):
+
+| Option | Kind | Description |
+|---|---|---|
+| MSS | 2 | Maximum Segment Size — sender announces the max payload it will accept |
+| Window Scale | 3 | Multiplies the 16-bit window field (window = window × 2^scale); enables windows > 65535 bytes |
+| SACK Permitted | 4 | Declares support for Selective Acknowledgment |
+| SACK | 5 | Selective ACK — reports exactly which ranges have been received |
+| Timestamps | 8 | RTT measurement and PAWS (Protection Against Wrapped Sequence Numbers) |
+| TFO | 34 | TCP Fast Open cookie |
+
+---
+
+## 📚 2. TCP Connection Lifecycle
+
+### 2.1 Three-Way Handshake
+
+```
+Client                                    Server
+  │                                         │
+  │──── SYN (seq=x, ACK=0, SYN=1) ─────────►│  Client chooses ISN x
+  │                                         │  Server chooses ISN y
+  │◄─── SYN-ACK (seq=y, ack=x+1, SYN=1) ───│  Acknowledges client's SYN
+  │                                         │
+  │──── ACK (seq=x+1, ack=y+1, ACK=1) ─────►│  Acknowledges server's SYN
+  │                                         │
+  │       [Connection Established]          │
+  │                                         │
+  │──── DATA (seq=x+1, ack=y+1) ────────────►│  First application data
+  │◄─── ACK (seq=y+1, ack=x+1+data_len) ───│
+```
+
+**Why three messages?** Both sides need to exchange their ISNs (Initial Sequence Numbers) and confirm receipt. The handshake is:
+- Client → Server: "I start at ISN x" (SYN)
+- Server → Client: "I received x, I start at ISN y" (SYN-ACK)
+- Client → Server: "I received y" (ACK)
+
+**ISN randomization**: ISNs must be unpredictable (RFC 6528) to prevent TCP hijacking attacks.
+
+**Cost**: The 3-way handshake costs **1 RTT** before any application data is sent. This is why HTTP/2 keep-alive and QUIC 0-RTT exist — to amortize or eliminate this cost.
+
+### 2.2 Four-Way FIN Teardown
+
+TCP is full-duplex — each direction closes independently:
+
+```
+Client (initiates close)              Server
+  │── FIN (seq=m) ──────────────────────►│   Client: no more data to send
+  │◄── ACK (ack=m+1) ───────────────────│   Server: ACKs FIN
+  │                                      │   (server may still send data)
+  │◄── FIN (seq=n) ─────────────────────│   Server: done sending
+  │── ACK (ack=n+1) ─────────────────────►│
+  │                                      │
+  [Client enters TIME_WAIT for 2×MSL]
+```
+
+A **half-close** is possible: after sending FIN, the client can still receive data from the server until the server's FIN arrives.
+
+### 2.3 TCP States
+
+```
+CLOSED → LISTEN (server bind+listen)
+CLOSED → SYN_SENT (client connect)
+LISTEN → SYN_RECEIVED (server receives SYN)
+SYN_SENT → ESTABLISHED (client receives SYN-ACK)
+SYN_RECEIVED → ESTABLISHED (server receives ACK)
+ESTABLISHED → FIN_WAIT_1 (active close sends FIN)
+FIN_WAIT_1 → FIN_WAIT_2 (receives ACK of FIN)
+FIN_WAIT_2 → TIME_WAIT (receives FIN from other side)
+TIME_WAIT → CLOSED (after 2×MSL timeout)
+ESTABLISHED → CLOSE_WAIT (passive close receives FIN)
+CLOSE_WAIT → LAST_ACK (sends FIN)
+LAST_ACK → CLOSED (receives ACK of FIN)
+```
+
+---
+
+## 📚 3. Flow Control — Sliding Window
+
+### 3.1 Receiver Window (rwnd)
+
+The receiver advertises its available buffer space in the TCP **Window** field. This is the **receiver window** (`rwnd`). The sender must not have more than `rwnd` bytes of unacknowledged data in flight.
+
+If the receiver's buffer fills up, it advertises `rwnd=0` — the sender must stop. Periodically, the sender probes with a **zero-window probe** to check if the window has reopened.
+
+### 3.2 Sender Sliding Window
+
+The sender maintains:
+- **SND.UNA**: The sequence number of the oldest unacknowledged byte
+- **SND.NXT**: The sequence number of the next byte to send
+- The window: `SND.NXT - SND.UNA ≤ min(rwnd, cwnd)`
+
+As ACKs arrive, the window "slides" forward — new bytes can be sent.
+
+### 3.3 Congestion Window (cwnd)
+
+`cwnd` is the **sender's estimate** of how many bytes the network can absorb without congestion. The effective send window is:
+
+```
+Effective Window = min(rwnd, cwnd)
+```
+
+- `rwnd`: constrained by the receiver's buffer → flow control
+- `cwnd`: constrained by the network capacity → congestion control
+
+---
+
+## 📚 4. Congestion Control
+
+TCP's congestion control is a **probe-and-backoff** algorithm: increase sending rate until you detect congestion, then reduce.
+
+### 4.1 Slow Start
+
+**Initial state**: `cwnd = 1 MSS` (Maximum Segment Size; typically 1460 bytes for 1500-byte Ethernet MTU).
+
+In Slow Start, `cwnd` grows **exponentially**:
+- For each ACK received: `cwnd += 1 MSS`
+- This doubles cwnd every RTT: 1 → 2 → 4 → 8 → 16 MSS...
+
+Slow Start continues until `cwnd ≥ ssthresh` (Slow Start threshold, initially a high value).
+
+```
+RTT 0: cwnd = 1 MSS  → send 1 segment
+RTT 1: cwnd = 2 MSS  → send 2 segments
+RTT 2: cwnd = 4 MSS  → send 4 segments
+RTT 3: cwnd = 8 MSS  → approaching link capacity...
+```
+
+### 4.2 Congestion Avoidance
+
+Once `cwnd ≥ ssthresh`, switch to **Congestion Avoidance**:
+- For each ACK: `cwnd += MSS × (MSS / cwnd)` (approximately)
+- This grows cwnd **linearly** (by ~1 MSS per RTT)
+- The goal: probe for more bandwidth gradually without causing bursts
+
+### 4.3 Congestion Detection and Response
+
+**Packet loss is the signal for congestion** in loss-based TCP (CUBIC). There are two loss signals:
+
+**Signal 1: Timeout** (RTO — Retransmission Timeout):
+- No ACK received within RTO → assume packet lost
+- **Response**: `ssthresh = cwnd / 2`, `cwnd = 1 MSS`, restart Slow Start
+- Severe — throughput collapses back to 1 segment
+
+**Signal 2: Triple Duplicate ACKs** (3 dup ACKs):
+- Receiver sends duplicate ACKs for the segment it's waiting for
+- After 3 dup ACKs → likely a single segment lost (not a black hole)
+- **Fast Retransmit**: Retransmit the missing segment immediately without waiting for timeout
+
+### 4.4 Fast Recovery
+
+After Fast Retransmit (3 dup ACKs):
+- `ssthresh = cwnd / 2`
+- `cwnd = ssthresh + 3 MSS` (account for the 3 dup ACKs that triggered it)
+- Enter **Fast Recovery**: continue receiving dup ACKs → increment cwnd by 1 MSS each
+- When new ACK arrives (acknowledges the retransmitted segment): `cwnd = ssthresh`, enter Congestion Avoidance
+
+**Key insight**: Fast Recovery stays in Congestion Avoidance — no Slow Start restart — because 3 dup ACKs imply the network is still delivering packets (just not the one specific lost packet).
+
+### 4.5 CUBIC Congestion Control (Default Linux)
+
+**CUBIC** (RFC 9438) replaced the original TCP Reno as Linux's default. It uses a **cubic polynomial** to grow `cwnd` as a function of time since the last congestion event:
+
+```
+W(t) = C × (t - K)³ + W_max
+
+where:
+  W_max = cwnd at last congestion event
+  K = time to reach W_max (equilibrium point)
+  C = 0.4 (CUBIC scaling factor)
+  t = time since last congestion event
+```
+
+**Behavior**:
+- Far from W_max: grows quickly (exploring new capacity)
+- Near W_max: plateau (careful probing)
+- After W_max: grows again (the "cubic" bump)
+
+**Problem**: CUBIC fills buffers ("buffer bloat") — it grows until it sees loss, which means it's filling the bottleneck router's queue. This adds latency.
+
+### 4.6 BBR — Bottleneck Bandwidth and Round-trip propagation (Google 2016)
+
+**BBR** (RFC 9002 related; deployed in Google infrastructure 2016, Linux kernel 2016, v3 in 2023) takes a fundamentally different approach:
+
+Instead of reacting to loss, BBR **models the network path** by estimating two quantities:
+- **BtlBw** (Bottleneck Bandwidth): the maximum measured delivery rate
+- **RTprop** (Round-Trip Propagation delay): the minimum measured RTT
+
+BBR sets `cwnd ≈ 2 × BtlBw × RTprop` — filling the **BDP (Bandwidth-Delay Product)** of the path without overfilling buffers.
+
+**BBR phases**:
+- **Startup**: Like Slow Start, doubles pacing rate each RTT until BtlBw estimate stops growing
+- **Drain**: Reduces pacing rate to drain the queue filled during Startup
+- **ProbeBW**: Cycles sending rate up (+25%) and down (-25%) to track current capacity
+- **ProbeRTT**: Periodically drains the queue completely (cwnd=4) to get a clean RTprop measurement
+
+**BBR vs CUBIC**:
+| | CUBIC | BBR |
+|---|---|---|
+| Signal | Packet loss | BtlBw + RTprop estimates |
+| Buffer filling | Yes (intentional probe) | Minimal |
+| Latency under load | High (bloated buffers) | Low |
+| Fairness w/ CUBIC | Good | Sometimes aggressive |
+| Wireless (lossy) | Penalized by loss signal | Better (ignores random loss) |
+| High BDP (satellite) | Under-fills pipe | Fills correctly |
+
+---
+
+## 📚 5. Throughput Calculation
+
+### 5.1 Formula
+
+The theoretical maximum TCP throughput is:
+
+```
+Throughput = Window Size / RTT
+```
+
+### 5.2 Worked Example
+
+**Given**:
+- `rwnd` = 1 MB (1,048,576 bytes) — typical OS default
+- RTT = 100 ms = 0.1 s
+
+**Calculation**:
+```
+Throughput = 1,048,576 bytes / 0.1 s
+           = 10,485,760 bytes/s
+           = ~83.9 Mbit/s
+```
+
+So with a 100ms RTT and a 1MB window, you cannot exceed ~84 Mbit/s on a single TCP connection — even on a 10 Gbit/s link. This is why:
+- High-latency + high-bandwidth paths (satellite, intercontinental links) need window scaling (TCP option 3 multiplies the window field)
+- Multiple parallel TCP connections (HTTP/1.1 uses 6 per origin) achieve higher aggregate throughput
+- QUIC/HTTP/3 uses independent streams that don't share HOL blocking
+
+**With Window Scaling** (scale factor = 7 → multiply by 128):
+```
+Effective window = 65535 × 128 = 8,388,480 bytes
+Throughput = 8,388,480 / 0.1 = 83.9 Mbit/s × 128 = ~10.7 Gbit/s
+```
+
+Window scaling (RFC 7323) is critical for modern high-speed networks.
+
+---
+
+## 📚 6. TIME_WAIT State
+
+### 6.1 Why TIME_WAIT Exists
+
+After the active closer sends the final ACK (acknowledging the server's FIN), it enters **TIME_WAIT** and waits for **2×MSL** (Maximum Segment Lifetime; typically 60s on Linux, so 2×MSL = 120s) before closing.
+
+**Reasons**:
+1. **Absorb late segments**: Old segments from the closed connection might still be in the network. Without TIME_WAIT, a new connection on the same 4-tuple (`{src_ip, src_port, dst_ip, dst_port}`) could receive them.
+2. **Reliable last ACK**: The server might not have received the final ACK and could retransmit its FIN. TIME_WAIT allows the client to respond with ACK again.
+
+### 6.2 Port Exhaustion Under High Churn
+
+A server making many outbound connections (reverse proxy, API gateway, microservice calling dependencies) creates many short-lived TCP connections. Each one enters TIME_WAIT at the active-closer side.
+
+Ephemeral port range: `net.ipv4.ip_local_port_range` (default: 32768–60999 = 28,232 ports on Linux). At 100 new connections/second, you exhaust the ephemeral ports within 28,232 / 100 ≈ 282 seconds.
+
+**Symptoms**: `EADDRINUSE` or `ECONNREFUSED` errors; `ss -s` shows thousands of TIME_WAIT sockets.
+
+### 6.3 Mitigations
+
+| Mitigation | Mechanism |
+|---|---|
+| **`SO_REUSEADDR`** | Allows reuse of a port in TIME_WAIT for new connections with different remote address |
+| **`tcp_tw_reuse`** (Linux sysctl) | Allow reuse of TIME_WAIT sockets for new connections when safe (same 4-tuple won't receive old segments) |
+| **`tcp_fin_timeout`** | Reduce FIN_WAIT_2 timeout (doesn't reduce TIME_WAIT directly) |
+| **Connection pooling** | Keep connections alive (HTTP keep-alive, database connection pools) — avoid creating new connections at all |
+| **Increase ephemeral range** | `sysctl -w net.ipv4.ip_local_port_range="1024 65535"` |
+| **HTTP/2 or HTTP/3** | Multiplex many requests over one connection — dramatically fewer TCP connections needed |
+
+---
+
+## 📚 7. UDP — User Datagram Protocol
+
+### 7.1 UDP Header
+
+UDP (RFC 768) is the minimal alternative to TCP:
+
+```
+ 0      7 8     15 16    23 24    31
++---------+--------+--------+--------+
+|Source   |Dest    |        |        |
+|Port     |Port    |Length  |Checksum|
++---------+--------+--------+--------+
+|                Data                |
++------------------------------------+
+```
+
+Only 8 bytes of header. No connection, no sequence numbers, no ACKs, no retransmission, no congestion control.
+
+### 7.2 UDP vs TCP Decision Matrix
+
+| Property | TCP | UDP |
+|---|---|---|
+| Connection setup | 1 RTT (3-way handshake) | None |
+| Reliability | Guaranteed delivery + ordering | None (fire and forget) |
+| Congestion control | Yes (CUBIC/BBR) | None (sender must implement) |
+| Head-of-line blocking | Yes | No |
+| Overhead | 20+ bytes header + state | 8 bytes header |
+| Best for | Web, API, file transfer, DB | Real-time media, DNS, games |
+
+### 7.3 When to Use UDP
+
+Use UDP when:
+- **Latency matters more than reliability**: Multiplayer game position updates — a stale position is worse than a missing one
+- **You'll implement custom reliability**: QUIC, WebRTC DTLS, game netcode with selective ACKs
+- **Connectionless is needed**: DNS queries, SNMP
+- **Multicast/broadcast**: UDP supports it; TCP is unicast-only
+
+**Game netcode pattern**:
+```python
+# UDP pattern for game position updates:
+# - Send position every 16ms (60Hz)
+# - Include sequence number
+# - On receive: drop if sequence < last_received (out-of-order)
+# - Don't retransmit; interpolate from last known good state instead
+```
+
+### 7.4 QUIC — TCP Rewritten over UDP
+
+QUIC (see [3 (QUIC)](3-(QUIC))) is essentially TCP + TLS 1.3 implemented in user-space over UDP. It gets UDP's benefits (no kernel TCP stack, flexible control) while adding reliability and congestion control at the application level. This allows Google/Cloudflare to iterate on the protocol without OS kernel releases.
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"TCP is slow because it's reliable."** TCP is fast when latency is low. The cost is in RTT multiplied by the number of round trips (handshake, slow start). Keep-alive and QUIC 0-RTT eliminate most of this.
+- **"More TCP connections = more bandwidth."** Up to a point. HTTP/1.1's 6-connection limit is a hack. HTTP/2's single connection with multiplexing is better — one connection fills the pipe with a proper window.
+- **"Packet loss only happens on bad networks."** Every congestion control algorithm *causes* packet loss intentionally (CUBIC) or uses it as a signal. In datacenters at ~100% utilization, a small amount of loss is normal and expected.
+- **"TIME_WAIT is a bug."** It's a feature. The problem is when your architecture creates millions of short-lived connections. Fix the architecture (connection pooling, HTTP/2), not the kernel.
+- **"BBR is always better."** BBR can be unfair to CUBIC flows on bottleneck links (known issue in BBRv1; improved in v3). In mixed deployments, test before defaulting to BBR everywhere.
+- **"TCP guarantees in-order delivery."** TCP guarantees that the *application* sees bytes in order. The underlying segments may arrive out of order — TCP buffers and reorders them before delivering to the app.
+
+---
+
+## 🔗 9. Cross-Links & Further Reading
+
+### Internal
+- [17.2 - IP, Routing & BGP](17.2---IP,-Routing-&-BGP) — IP layer that carries TCP segments
+- [17.4 - TLS, mTLS & PKI](17.4---TLS,-mTLS-&-PKI) — TLS 1.3 runs directly over TCP (adds another RTT)
+- [3 (QUIC)](3-(QUIC)) — QUIC replaces TCP for HTTP/3
+- [17.6 - WebSockets, SSE & WebRTC](17.6---WebSockets,-SSE-&-WebRTC) — WebRTC uses UDP; WebSocket uses TCP
+- [27.7 - Real-Time Systems](27.7---Real-Time-Systems) — real-time patterns that depend on TCP/UDP choice
+- [BUILDING_AT_SCALE](BUILDING_AT_SCALE) — TCP tuning is a scaling lever
+
+### External
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) — practical TCP sockets in C
+- [Kurose & Ross Ch. 3 (Transport Layer)](http://gaia.cs.umass.edu/kurose_ross/)
+- [High Performance Browser Networking — TCP chapter](https://hpbn.co/transmission-control-protocol/)
+- [BBR Paper (Google 2016, ACM Queue)](https://queue.acm.org/detail.cfm?id=3022184)
+- [RFC 5681 — TCP Congestion Control](https://www.rfc-editor.org/rfc/rfc5681)
+- [RFC 9438 — CUBIC for Fast Long-Distance Networks](https://www.rfc-editor.org/rfc/rfc9438)
+- [Linux TCP sysctl tuning guide](https://www.kernel.org/doc/html/latest/networking/ip-sysctl.html)
+- [Cloudflare — Understand TCP TIME_WAIT](https://blog.cloudflare.com/everything-you-ever-wanted-to-know-about-udp-sockets-but-were-afraid-to-ask-part-1/)
+
+---
+
+*Next: [17.4 - TLS, mTLS & PKI](17.4---TLS,-mTLS-&-PKI) — The security layer that wraps TCP before any application data flows.*

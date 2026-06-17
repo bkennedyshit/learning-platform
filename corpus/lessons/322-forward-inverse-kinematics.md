@@ -1,0 +1,173 @@
+---
+title: "32.2 — Forward & Inverse Kinematics"
+subject: "Robotics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "32.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 32.2 — Forward & Inverse Kinematics
+
+> *"FK is multiplication. IK is inversion — and inversion is where the action is."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compute **forward kinematics (FK)** by composing per-joint transforms.
+2. Derive the **manipulator Jacobian** $J(q)$ that maps joint velocities to end-effector twists.
+3. Solve **inverse kinematics (IK)** analytically for canonical 2R / 3R / 6R-with-spherical-wrist arms.
+4. Solve IK numerically with **Jacobian pseudo-inverse** and **damped least squares (Levenberg-Marquardt)**.
+5. Recognize **singularities** (loss of rank in $J$) and handle them.
+6. Distinguish **redundancy** (more DOFs than task DOFs) and use the null-space projector.
+
+---
+
+## 🖼️ Visual Anchor
+
+![robo__22.2-fig1](robo__22.2-fig1.svg)
+
+> *Picture / video reference (external):*
+> - 📖 [Modern Robotics Ch. 4–6 (free)](http://hades.mech.northwestern.edu/index.php/Modern_Robotics)
+> - 📺 [Lynch's IK lectures (Coursera Course 2)](https://www.coursera.org/learn/robotics-kinematics)
+> - 📺 [Cyrill Stachniss — IK lectures](https://www.youtube.com/@CyrillStachniss)
+
+---
+
+## 📚 1. Forward Kinematics
+
+For an $n$-DOF chain:
+$$
+T^0_{ee}(q) = A_1(q_1)\,A_2(q_2)\,\cdots\,A_n(q_n)
+$$
+
+Implementation: a 5-line NumPy function takes a DH table and a joint vector $q$ and returns a 4×4 matrix.
+
+```python
+import numpy as np
+def fk_dh(dh_table, q):
+    T = np.eye(4)
+    for (a, alpha, d, theta_off), qi in zip(dh_table, q):
+        th = qi + theta_off
+        Ai = np.array([
+            [np.cos(th), -np.sin(th)*np.cos(alpha),  np.sin(th)*np.sin(alpha), a*np.cos(th)],
+            [np.sin(th),  np.cos(th)*np.cos(alpha), -np.cos(th)*np.sin(alpha), a*np.sin(th)],
+            [0,           np.sin(alpha),             np.cos(alpha),             d],
+            [0,           0,                          0,                          1],
+        ])
+        T = T @ Ai
+    return T
+```
+
+---
+
+## 📐 2. The Jacobian
+
+Differentiating FK gives the **geometric Jacobian** $J(q) \in \mathbb{R}^{6\times n}$ that maps joint velocities to end-effector twist:
+$$
+\begin{bmatrix} v_{ee} \\ \omega_{ee} \end{bmatrix} = J(q)\,\dot q
+$$
+
+Two columns per revolute joint $i$:
+- Linear part: $J_{v,i} = z_{i-1} \times (p_{ee} - p_{i-1})$
+- Angular part: $J_{\omega,i} = z_{i-1}$
+
+The Jacobian also relates joint torques to end-effector wrench (via $\tau = J^T F$) — the foundation of [torque control](32.4---Actuators-&-Motor-Control---Servos,-BLDC,-Steppers,-Torque-Control).
+
+---
+
+## 🔄 3. Inverse Kinematics
+
+### 3.1 Analytical (closed-form)
+
+For a **6-DOF arm with spherical wrist** (last 3 axes intersect):
+1. Decouple position (first 3 joints) and orientation (last 3).
+2. Solve the position problem geometrically (law of cosines).
+3. Solve wrist orientation by Euler-angle inversion.
+
+This is what industrial-arm controllers (KUKA, ABB, UR) ship.
+
+### 3.2 Numerical — Jacobian Pseudo-Inverse
+
+For target pose $T_{des}$ and current pose $T(q)$, define error $e \in \mathbb{R}^6$ (position + orientation log).
+
+Iterate:
+$$
+q_{k+1} = q_k + J^\dagger(q_k)\,e_k
+$$
+
+where $J^\dagger = J^T(JJ^T)^{-1}$ for full-row-rank $J$.
+
+### 3.3 Damped Least Squares (Levenberg-Marquardt)
+
+Robust near singularities:
+$$
+q_{k+1} = q_k + J^T(JJ^T + \lambda^2 I)^{-1} e_k
+$$
+
+The damping $\lambda$ trades convergence speed for stability.
+
+---
+
+## ⚠️ 4. Singularities
+
+A **singular configuration** $q^*$ has $\mathrm{rank}(J(q^*)) < 6$. Symptoms:
+- Some end-effector directions become unreachable.
+- Joint velocities required to track them blow up.
+- Common culprits: arm fully extended; wrist collinear; shoulder + elbow + wrist coplanar.
+
+Detection via $\det(JJ^T)$ near zero or condition number $\kappa(J) \to \infty$.
+
+---
+
+## 🌱 5. Redundancy & Null-Space
+
+When $n > 6$, the chain has redundancy. The null-space projector
+$$
+N(q) = I - J^\dagger J
+$$
+lets you optimize a secondary objective (avoid joint limits, avoid obstacles) without disturbing the primary IK.
+
+---
+
+## 🛠️ 6. Worked Example (skeleton) — 2R Planar IK
+
+For lengths $L_1, L_2$ and target $(x, y)$:
+$$
+\cos\theta_2 = \frac{x^2 + y^2 - L_1^2 - L_2^2}{2 L_1 L_2}, \quad \theta_2 = \pm\arccos(\cdot)
+$$
+$$
+\theta_1 = \mathrm{atan2}(y,x) - \mathrm{atan2}(L_2 \sin\theta_2,\ L_1 + L_2\cos\theta_2)
+$$
+The $\pm$ gives the "elbow-up / elbow-down" branch — pick the one consistent with previous configuration to avoid jumps.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [32.1 - Robotics Foundations & Kinematics](32.1---Robotics-Foundations-&-Kinematics)
+- [32.7 - Manipulation & Grasping - MoveIt, GraspNet, Whole-body Control](32.7---Manipulation-&-Grasping---MoveIt,-GraspNet,-Whole-body-Control) — uses IK every cycle
+- [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) — SVD for pseudo-inverse
+
+### External
+- [Modern Robotics Ch. 4–6](http://hades.mech.northwestern.edu/index.php/Modern_Robotics)
+- [MIT 6.4210 Robotic Manipulation — IK chapter](https://manipulation.csail.mit.edu/)
+- [pinocchio (open-source rigid body dynamics)](https://github.com/stack-of-tasks/pinocchio)
+- [TRAC-IK (better numerical IK)](https://bitbucket.org/traclabs/trac_ik)
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"IK has one solution."** It typically has 0, 1, 2, 4, 8, or infinite solutions. Branch selection matters.
+- **"Pseudo-inverse is enough."** Near singularities, $J^\dagger$ blows up. Use damped least squares.
+- **"More DOFs always help."** Redundancy is powerful but increases the planning search space — control + collision become harder.
+- **"Numerical IK is slow."** Modern solvers (TRAC-IK, ik_solver in Drake) converge in microseconds for industrial arms.

@@ -1,0 +1,69 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.5 — Free Will, Agency &amp; Causation: Determinism, Compatibilism &amp; Neural Correlates</text>
+  <!-- Free will positions -->
+  <rect x="20" y="35" width="680" height="120" class="box" rx="4"/>
+  <text x="360" y="52" class="label" text-anchor="middle" font-weight="bold">Free Will Positions on the Determinism Axis</text>
+  <!-- Timeline axis -->
+  <line x1="50" y1="100" x2="670" y2="100" stroke="var(--text-muted,#8b949e)" stroke-width="2"/>
+  <text x="50" y="120" class="sub" text-anchor="middle">Hard</text>
+  <text x="50" y="132" class="sub" text-anchor="middle">Determinism</text>
+  <text x="50" y="85" class="mono" text-anchor="middle">FW=false</text>
+  <circle cx="50" cy="100" r="5" fill="#ff6b6b"/>
+  <text x="200" y="120" class="sub" text-anchor="middle">Hard</text>
+  <text x="200" y="132" class="sub" text-anchor="middle">Incompatibilism</text>
+  <text x="200" y="85" class="mono" text-anchor="middle">FW requires</text>
+  <text x="200" y="95" class="mono" text-anchor="middle">indeterminism</text>
+  <circle cx="200" cy="100" r="5" fill="#ffd93d"/>
+  <text x="360" y="120" class="sub" text-anchor="middle">Compatibilism</text>
+  <text x="360" y="132" class="sub" text-anchor="middle">(Hume, Kant, Dennett)</text>
+  <text x="360" y="85" class="mono" text-anchor="middle">FW = acting on</text>
+  <text x="360" y="95" class="mono" text-anchor="middle">own reasons</text>
+  <circle cx="360" cy="100" r="8" fill="var(--interactive-accent,#58a6ff)"/>
+  <text x="520" y="120" class="sub" text-anchor="middle">Libertarianism</text>
+  <text x="520" y="132" class="sub" text-anchor="middle">(agent causation)</text>
+  <text x="520" y="85" class="mono" text-anchor="middle">Genuine causal</text>
+  <text x="520" y="95" class="mono" text-anchor="middle">origination</text>
+  <circle cx="520" cy="100" r="5" fill="#51cf66"/>
+  <text x="650" y="120" class="sub" text-anchor="middle">Hard</text>
+  <text x="650" y="132" class="sub" text-anchor="middle">Indeterminism</text>
+  <text x="650" y="85" class="mono" text-anchor="middle">Randomness</text>
+  <text x="650" y="95" class="mono" text-anchor="middle">not FW either</text>
+  <circle cx="650" cy="100" r="5" fill="var(--text-muted,#8b949e)"/>
+  <!-- Neuroscience of free will -->
+  <rect x="20" y="170" width="330" height="155" class="box" rx="4"/>
+  <text x="185" y="187" class="label" text-anchor="middle" font-weight="bold">Neuroscience &amp; Free Will</text>
+  <text x="30" y="203" class="sub" font-weight="bold">Libet experiment (1983):</text>
+  <text x="30" y="218" class="sub">Readiness potential (RP) in EEG starts ~550ms</text>
+  <text x="30" y="232" class="sub">before the movement. Subjects report</text>
+  <text x="30" y="246" class="sub">conscious intention only ~200ms before action.</text>
+  <text x="30" y="262" class="sub">Interpretation: brain "decides" before conscious</text>
+  <text x="30" y="276" class="sub">awareness. Suggests consciousness trails neural</text>
+  <text x="30" y="290" class="sub">process.</text>
+  <text x="30" y="306" class="sub" font-weight="bold">Critiques of Libet:</text>
+  <text x="30" y="318" class="sub">RP may reflect ongoing motor noise, not decision</text>
+  <text x="30" y="330" class="sub">Later studies: some RP predicts but participants</text>
+  <!-- Causation types -->
+  <rect x="365" y="170" width="335" height="155" class="box" rx="4"/>
+  <text x="532" y="187" class="label" text-anchor="middle" font-weight="bold">Causation &amp; Agency</text>
+  <text x="375" y="203" class="sub" font-weight="bold">Event causation (Hume):</text>
+  <text x="375" y="217" class="sub">A causes B iff A regularly precedes B (constant conjunction)</text>
+  <text x="375" y="231" class="sub">No necessary connection in objects — only in minds</text>
+  <text x="375" y="248" class="sub" font-weight="bold">Agent causation (Reid, O'Connor):</text>
+  <text x="375" y="262" class="sub">Agents are a distinct type of cause — not reducible</text>
+  <text x="375" y="276" class="sub">to event sequences. I cause actions, not prior states</text>
+  <text x="375" y="293" class="sub" font-weight="bold">Counterfactual (Lewis):</text>
+  <text x="375" y="307" class="sub">A causes B iff "if not-A, then not-B"</text>
+  <text x="375" y="319" class="sub">Closest possible world analysis</text>
+  <!-- Bottom -->
+  <rect x="20" y="340" width="680" height="68" class="box" rx="4"/>
+  <text x="360" y="357" class="label" text-anchor="middle" font-weight="bold">Compatibilism as the Working Framework</text>
+  <text x="360" y="374" class="sub" text-anchor="middle">Most philosophers and neuroscientists endorse compatibilism: free will is acting according to your own desires/reasons without external compulsion, regardless of determinism.</text>
+  <text x="360" y="390" class="sub" text-anchor="middle">AI relevance: if AI systems have reasons-sensitive agency (respond to reasons, not just causes), they may qualify as moral agents under compatibilism. — SEP plato.stanford.edu/entries/compatibilism/</text>
+</svg>

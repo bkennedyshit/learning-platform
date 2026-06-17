@@ -1,0 +1,157 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 800px; height: auto;">
+  <style>
+    .title { font-family: 'Outfit', 'Inter', system-ui, sans-serif; font-size: 22px; fill: var(--text-normal, #c9d1d9); font-weight: 800; letter-spacing: -0.5px; }
+    .subtitle { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; fill: var(--text-muted, #8b949e); }
+    .label { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .sublabel { font-family: 'Inter', system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .funnel-intro { stroke: var(--text-accent, #58a6ff); stroke-width: 1.5; fill: var(--background-secondary, #161b22); rx: 6; }
+    .funnel-thesis { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: var(--background-secondary-alt, #0d1117); rx: 6; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .peel-box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; fill: var(--background-primary, #0d1117); }
+    .peel-title { font-family: 'Outfit', sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: 800; }
+    .funnel-concl { stroke: var(--text-accent, #58a6ff); stroke-width: 1.5; fill: var(--background-secondary, #161b22); rx: 6; }
+    .flow-line { stroke: var(--text-muted, #8b949e); stroke-dasharray: 4,4; stroke-width: 1.5; fill: none; opacity: 0.5; }
+    .flow-active { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6, 6; }
+    .pulse-dot { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .hover-block { transition: all 0.3s ease; cursor: pointer; }
+    .hover-block:hover { transform: scale(1.02); filter: drop-shadow(0 0 8px var(--text-accent, #58a6ff)); }
+    .section-header { font-family: 'Outfit', sans-serif; font-size: 15px; fill: var(--text-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="thesis-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="var(--text-accent, #58a6ff)" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="conclusion-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--background-secondary, #161b22)"/>
+      <stop offset="100%" stop-color="var(--text-accent, #58a6ff)" stop-opacity="0.1"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--text-muted)" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="var(--background-primary, #0d1117)" rx="12"/>
+
+  <!-- Title -->
+  <text x="40" y="45" class="title">The Architecture of Essay Structure</text>
+  <text x="40" y="65" class="subtitle">Structural progression from Hook to Thesis and the PEEL body loop</text>
+
+  <!-- Left Labels for Sections -->
+  <text x="60" y="115" class="section-header">1. INTRODUCTION</text>
+  <text x="60" y="130" class="sublabel">(Deductive Funnel)</text>
+  <line x1="60" y1="140" x2="180" y2="140" stroke="var(--text-muted)" stroke-width="0.5"/>
+
+  <text x="60" y="255" class="section-header">2. BODY CYCLE</text>
+  <text x="60" y="270" class="sublabel">(PEEL Paragraph Loop)</text>
+  <line x1="60" y1="280" x2="180" y2="280" stroke="var(--text-muted)" stroke-width="0.5"/>
+
+  <text x="60" y="395" class="section-header">3. CONCLUSION</text>
+  <text x="60" y="410" class="sublabel">(Inductive Synthesis)</text>
+  <line x1="60" y1="420" x2="180" y2="420" stroke="var(--text-muted)" stroke-width="0.5"/>
+
+  <!-- Connective flow lines -->
+  <path d="M 400 205 L 400 220" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 400 325 L 400 340" class="flow-line" marker-end="url(#arrow)"/>
+
+  <!-- Active flow path representing the logic pulse -->
+  <path id="essayFlow" d="M 400 85 L 400 205 L 400 220 L 250 250 L 350 250 L 450 250 L 550 250 L 400 310 L 400 340 L 400 460" fill="none" stroke="transparent"/>
+  <circle r="5" class="pulse-dot">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 400 85 L 400 205 L 400 220 L 250 250 L 350 250 L 450 250 L 550 250 L 400 310 L 400 340 L 400 460" />
+  </circle>
+
+  <!-- Section 1: Introduction Funnel -->
+  <!-- Hook -->
+  <g class="hover-block">
+    <polygon points="230,85 570,85 540,120 260,120" class="funnel-intro"/>
+    <text x="400" y="102" class="label" text-anchor="middle">HOOK</text>
+    <text x="400" y="113" class="sublabel" text-anchor="middle">Engages interest (stat, anecdote, question, or bold claim)</text>
+  </g>
+
+  <!-- Context -->
+  <g class="hover-block">
+    <polygon points="260,125 540,125 510,160 290,160" class="funnel-intro"/>
+    <text x="400" y="142" class="label" text-anchor="middle">BRIDGE / CONTEXT</text>
+    <text x="400" y="153" class="sublabel" text-anchor="middle">Provides background, defines scope, bridges to topic</text>
+  </g>
+
+  <!-- Thesis Statement -->
+  <g class="hover-block">
+    <polygon points="290,165 510,165 480,205 320,205" class="funnel-thesis" fill="url(#thesis-grad)"/>
+    <text x="400" y="183" class="label" text-anchor="middle" font-weight="800" fill="var(--interactive-accent)">THESIS STATEMENT</text>
+    <text x="400" y="196" class="sublabel" text-anchor="middle" fill="var(--text-accent)">Laser focus: Specific, Arguable, Complex, Supportable claim</text>
+  </g>
+
+  <!-- Section 2: PEEL Paragraph Loop -->
+  <g transform="translate(190, 220)">
+    <!-- Loop background border -->
+    <rect x="-10" y="-5" width="440" height="105" rx="8" stroke="var(--text-accent)" stroke-width="1" fill="none" stroke-opacity="0.3" stroke-dasharray="8,6"/>
+
+    <!-- Arrows in between -->
+    <path d="M 80 40 L 95 40" class="flow-line" marker-end="url(#arrow)"/>
+    <path d="M 180 40 L 195 40" class="flow-line" marker-end="url(#arrow)"/>
+    <path d="M 280 40 L 295 40" class="flow-line" marker-end="url(#arrow)"/>
+    
+    <!-- Link loops back up/next -->
+    <path d="M 370 40 C 400 40, 410 -20, 200 -20 C 10 -20, 30 15, 30 15" class="flow-line" marker-end="url(#arrow)" stroke-dasharray="4,4"/>
+
+    <!-- Point -->
+    <g class="hover-block">
+      <rect x="0" y="15" width="80" height="50" class="peel-box"/>
+      <text x="40" y="32" class="peel-title" text-anchor="middle">P</text>
+      <text x="40" y="47" class="label" text-anchor="middle">POINT</text>
+      <text x="40" y="58" class="sublabel" text-anchor="middle">Topic Sentence</text>
+    </g>
+
+    <!-- Evidence -->
+    <g class="hover-block">
+      <rect x="100" y="15" width="80" height="50" class="peel-box"/>
+      <text x="140" y="32" class="peel-title" text-anchor="middle">E</text>
+      <text x="140" y="47" class="label" text-anchor="middle">EVIDENCE</text>
+      <text x="140" y="58" class="sublabel" text-anchor="middle">Data/Quotation</text>
+    </g>
+
+    <!-- Explanation -->
+    <g class="hover-block">
+      <rect x="200" y="15" width="80" height="50" class="peel-box"/>
+      <text x="240" y="32" class="peel-title" text-anchor="middle">E</text>
+      <text x="240" y="47" class="label" text-anchor="middle">EXPLAIN</text>
+      <text x="240" y="58" class="sublabel" text-anchor="middle">Analyze &amp; Prove</text>
+    </g>
+
+    <!-- Link -->
+    <g class="hover-block">
+      <rect x="300" y="15" width="80" height="50" class="peel-box"/>
+      <text x="340" y="32" class="peel-title" text-anchor="middle">L</text>
+      <text x="340" y="47" class="label" text-anchor="middle">LINK</text>
+      <text x="340" y="58" class="sublabel" text-anchor="middle">Connect/Transition</text>
+    </g>
+  </g>
+
+  <!-- Section 3: Conclusion Funnel (Reverse) -->
+  <!-- Restated Thesis -->
+  <g class="hover-block">
+    <polygon points="320,340 480,340 510,380 290,380" class="funnel-concl" fill="url(#thesis-grad)"/>
+    <text x="400" y="358" class="label" text-anchor="middle" font-weight="bold">RESTATED THESIS</text>
+    <text x="400" y="371" class="sublabel" text-anchor="middle">Synthesizes thesis in a new light, reflecting accumulated evidence</text>
+  </g>
+
+  <!-- Synthesis -->
+  <g class="hover-block">
+    <polygon points="290,385 510,385 540,420 260,420" class="funnel-concl"/>
+    <text x="400" y="402" class="label" text-anchor="middle">SYNTHESIS</text>
+    <text x="400" y="413" class="sublabel" text-anchor="middle">Shows how points fit together; never introduces new evidence</text>
+  </g>
+
+  <!-- Takeaway -->
+  <g class="hover-block">
+    <polygon points="260,425 540,425 570,460 230,460" class="funnel-concl" fill="url(#conclusion-grad)"/>
+    <text x="400" y="442" class="label" text-anchor="middle" font-weight="bold">SO WHAT? / TAKEAWAY</text>
+    <text x="400" y="453" class="sublabel" text-anchor="middle" fill="var(--text-accent)">Broadens out: Global implications, future questions, or lasting insight</text>
+  </g>
+
+  <!-- Side Legend -->
+  <text x="760" y="45" font-family="'Inter', sans-serif" font-size="10" fill="var(--text-muted, #8b949e)" text-anchor="end">Hover over stages to view details • Flow dot shows logical cycle</text>
+</svg>

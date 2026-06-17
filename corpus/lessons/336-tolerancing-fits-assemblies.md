@@ -1,0 +1,262 @@
+---
+title: "33.6 — Tolerancing, Fits & Assemblies"
+subject: "Mechanical Engineering & Fabrication"
+catalog: advanced
+audience_tier: higher-education
+chapter: "33.6"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 33.6 — Tolerancing, Fits & Assemblies
+
+> *"A tolerance is a promise. Stack-up analysis is checking if you can keep all your promises at once."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Explain the ISO 286 hole-basis fit system and specify clearance, transition, and interference fits.
+2. Look up and apply specific IT grades (H7, f6, k6, p6) from tolerance tables.
+3. Perform **worst-case** and **RSS** (Root Sum Squares) tolerance stack-up analysis for a 3-part chain.
+4. Specify surface finish (Ra/Rz) values for different functional surfaces.
+5. Select and specify fasteners (thread size, material, torque) for typical mechanical assemblies.
+6. Apply tolerance compensation rules for FDM, CNC, and sheet metal parts.
+
+---
+
+## 🖼️ Visual Anchor
+
+![mech__34.6-fig1](mech__34.6-fig1.svg)
+
+---
+
+## 📚 1. ISO 286 — Limits and Fits System
+
+### 1.1 The Hole-Basis System
+
+In the **hole-basis system**, the hole dimension is kept constant (designated H) and the shaft dimension is varied to achieve the desired fit type. This is preferred because holes are harder/more expensive to produce to close tolerances than shafts.
+
+**ISO notation:** H7/f6
+- **H** = fundamental deviation of hole (H = lower deviation always zero for hole-basis)
+- **7** = IT grade of hole (tolerance band width)
+- **f** = fundamental deviation of shaft (position of tolerance band above/below nominal)
+- **6** = IT grade of shaft
+
+### 1.2 IT Grades (International Tolerance Grades)
+
+IT grades specify the *width* of the tolerance band. Lower number = tighter tolerance.
+
+| IT Grade | Typical tolerance (for ~25mm nominal) | Process |
+|---------|--------------------------------------|---------|
+| IT1–IT5 | 0.001–0.009 mm | Gauge-making, precision grinding |
+| IT6–IT8 | 0.013–0.033 mm | Precision CNC turning/milling |
+| IT9–IT11 | 0.052–0.130 mm | Standard CNC, drilling |
+| IT12–IT14 | 0.210–0.520 mm | Casting, forging, rough cutting |
+| IT15–IT18 | 0.84–5.2 mm | Sheet metal forming, press work |
+
+### 1.3 Fundamental Deviations (Shaft Designators)
+
+Lowercase letters for shafts, uppercase for holes:
+
+| Letter | Shaft position | Fit type with H hole |
+|--------|---------------|---------------------|
+| a, b, c, d | Large clearance | Sliding, running |
+| e, f, g | Small clearance | Sliding, location |
+| h | Zero deviation (upper = nominal) | Transition/close clearance |
+| j, k, m | Small positive | Transition |
+| n, p | Small interference | Light press |
+| r, s, t | Medium interference | Drive/force fit |
+| u, v, x, y, z | Large interference | Shrink/heavy press |
+
+### 1.4 Common Fit Designations
+
+| Designation | Common name | Typical use | Gap at Ø25 |
+|------------|------------|------------|-----------|
+| H7/f6 | Running clearance | Lightly loaded shafts, sliding | +0.020 to +0.041mm |
+| H7/g6 | Precision sliding | Close-running, shaft in bearing housing | +0.007 to +0.028mm |
+| H7/h6 | Snug/close clearance | Close location, hand push | 0 to +0.021mm |
+| H7/k6 | Transition | Location fit, light push | -0.002 to +0.019mm |
+| H7/n6 | Transition/light press | Semi-permanent locations | -0.017 to +0.004mm |
+| H7/p6 | Interference (light press) | Pressed hubs, permanent | -0.026 to -0.005mm |
+| H7/s6 | Interference (drive fit) | Heavier press | -0.043 to -0.022mm |
+
+**Practical: H7/k6 transition fit for a bearing bore:**
+For Ø30mm H7: +0.025/0mm → hole is 30.000–30.025mm
+For Ø30mm k6: -0.002/+0.015mm → shaft is 29.998–30.015mm
+
+The fit can be slightly loose OR slightly tight — a "transition fit."
+
+---
+
+## 📚 2. Tolerance Stack-Up Analysis
+
+When multiple parts assemble together, their individual tolerances accumulate. Stack-up analysis predicts the worst case and statistical gap (or interference) in critical clearances.
+
+### 2.1 One-Dimensional Stack-Up
+
+**Part chain:**
+```
+[Bearing housing width: 20 ±0.05mm]
+[Spacer: 5 ±0.10mm]  
+[Shaft shoulder: 3 ±0.05mm]
+→ Gap G = Housing - Spacer - Shoulder
+```
+
+**Nominal gap:** G_nom = 20 - 5 - 3 = 12mm
+
+**Worst Case (WC) analysis:**
+$$G_{WC} = G_{nom} \pm \sum|t_i| = 12 \pm (0.05 + 0.10 + 0.05) = 12 \pm 0.20 \text{ mm}$$
+
+Worst case gap: 11.80mm to 12.20mm — **guaranteed** if all parts are within tolerance.
+
+**RSS (Root Sum Squares) / Statistical analysis:**
+$$G_{RSS} = G_{nom} \pm \sqrt{\sum t_i^2} = 12 \pm \sqrt{0.05^2 + 0.10^2 + 0.05^2} = 12 \pm \sqrt{0.0125} = 12 \pm 0.112 \text{ mm}$$
+
+RSS gap: 11.888mm to 12.112mm — **statistical prediction** (±3σ = 99.73% of assemblies within this range).
+
+**Choosing WC vs RSS:**
+- **WC:** Safety-critical assemblies, small production volumes, cannot accept any out-of-spec assemblies
+- **RSS:** Mass production, assemblies that can tolerate statistical defect rate, reduces over-tightening of tolerances
+
+### 2.2 How to Reduce Stack-Up
+
+1. **Shorten the chain:** Fewer parts in the critical tolerance chain = less accumulation
+2. **Tighten the highest contributor:** The term with the largest |ti| dominates RSS
+3. **Adjustable clearance:** Add a shim, adjusting screw, or slot + clamp
+4. **Datum pinning:** Locate all parts from the same datum reference surface
+5. **Selective assembly:** Measure parts and pair them (e.g. match bearing to bore)
+6. **Semi-kinematic mounts:** V-groove + flat kinematic mount provides exact location without stacking tolerances
+
+---
+
+## 📚 3. Surface Finish
+
+Surface finish is specified with a "finish mark" symbol on the drawing. **Ra** (arithmetic mean roughness) is the most common metric.
+
+### 3.1 Ra Values by Application
+
+| Surface | Ra (µm) | Process |
+|---------|---------|---------|
+| Bearing seat (rolling element) | 0.4–0.8 | Grinding |
+| Precision bore | 0.8 | Fine turning/boring |
+| Mating/sealing face | 0.8–1.6 | Fine milling/turning |
+| Standard machined surface | 1.6–3.2 | CNC milling |
+| Rough machined | 3.2–6.3 | Roughing, sawing |
+| As-cast or forged | 6.3–25 | Casting, forging |
+| FDM printed (fine layer) | 6–10 | 0.1mm layer FDM |
+| FDM printed (standard) | 15–25 | 0.2mm layer FDM |
+
+### 3.2 Ra vs Rz
+
+- **Ra:** Arithmetic mean of absolute deviations from centre line over sampling length
+- **Rz:** Average of 5 maximum peak-to-valley heights over sampling length
+- **Relationship:** Rz ≈ 4–7× Ra (depends on surface character)
+
+Both can be specified on drawings depending on application. Ra is more common in industry.
+
+---
+
+## 📚 4. Fasteners — Standard Sizes, Torques, and Rules
+
+### 4.1 ISO Metric Thread Series (Coarse)
+
+| Designation | Pitch (mm) | Thread class | Through hole drill |
+|-------------|-----------|-------------|-------------------|
+| M2 | 0.40 | 6H/6g | Ø1.6mm |
+| M3 | 0.50 | 6H/6g | Ø2.5mm |
+| M4 | 0.70 | 6H/6g | Ø3.3mm |
+| M5 | 0.80 | 6H/6g | Ø4.2mm |
+| M6 | 1.00 | 6H/6g | Ø5.0mm |
+| M8 | 1.25 | 6H/6g | Ø6.8mm |
+| M10 | 1.50 | 6H/6g | Ø8.5mm |
+| M12 | 1.75 | 6H/6g | Ø10.2mm |
+
+**Thread depth rule:** Effective thread engagement ≥ 1× diameter in steel, ≥ 1.5× in aluminium, ≥ 2× in plastic (or use insert). Beyond 2.5× diameter there is no additional benefit.
+
+### 4.2 Torque Values (Approximate, Lubricated, Grade 8.8 / A2 SS)
+
+| Fastener | Grade 8.8 (Nm) | A2 SS (Nm) | Notes |
+|---------|--------------|-----------|-------|
+| M3 | 0.9 | 0.7 | Calibrated driver or nut runner |
+| M4 | 2.0 | 1.5 | |
+| M5 | 4.1 | 3.0 | |
+| M6 | 7.0 | 5.5 | |
+| M8 | 17 | 13 | |
+| M10 | 34 | 26 | |
+| M12 | 59 | 45 | |
+
+**Reduce by 20% for dry (unlubricated) fasteners to avoid over-stressing.**
+
+### 4.3 Fastener Selection Guide
+
+| Need | Best choice |
+|------|------------|
+| Removable, high load | Socket cap screw (SHCS) A2 SS or grade 8.8 |
+| Low profile head | Button head cap screw |
+| High load, sealed | Hex socket cap screw with O-ring |
+| Thin material, no thread access | Self-clinching nut (PEM), rivet nut |
+| Plastic assembly | Heat-set insert + SHCS |
+| Structural joint | M8+ + spring washer or thread-lock |
+| Thread lock requirement | Loctite 243 (medium, removable) or 271 (high, permanent) |
+
+---
+
+## 🛠️ 5. Worked Example — Robot Joint Bearing Fit Specification
+
+**Requirement:** 6201 bearing (Ø12mm bore, Ø32mm OD) in aluminium housing, on steel shaft.
+
+**Shaft fit (inner ring on shaft):** Tight fit for rotating load (inner ring rotates with shaft)
+→ Use **k5** or **j5** (transition to light interference)
+→ Shaft: Ø12 k5 = Ø12.006/+0.012mm (slightly oversized)
+→ Specified on drawing: **12 k5** or **12 +0.012/+0.006**
+
+**Housing fit (outer ring in housing):** Outer ring stationary for light loads
+→ Use **H7** (standard sliding fit — outer ring can be pushed in by hand)
+→ Housing bore: Ø32 H7 = 32.000/+0.025mm
+→ Specified on drawing: **32 H7** or **32 +0.025/0**
+
+**Stack-up check:**
+- Bearing radial clearance: C3 = 7–20 µm (from SKF bearing catalogue)
+- Shaft oversized by 6–12 µm → compensates 6–12 µm of bearing radial clearance → remaining 0–14 µm internal clearance. Acceptable.
+
+---
+
+## ⚠️ 6. Common Misconceptions
+
+1. **"I'll just add ±0.1mm to everything and it'll be fine."** With 5 parts in a chain at ±0.1mm each, worst case is ±0.5mm. That's enough to jam a bearing or leave a 1mm gap that shouldn't exist.
+
+2. **"FDM holes print to the correct dimension."** FDM holes are consistently 0.15–0.30mm undersize. Always add compensation. Measure your printer on a calibration print and add a global offset.
+
+3. **"Surface finish doesn't affect part function."** For bearing seats, sealing faces, or any sliding contact, Ra matters enormously. A Ra 6.3 bearing seat will lead to early bearing failure through micro-pitting.
+
+4. **"Transition fits are useless — just pick clearance or interference."** Transition fits (k6, m6) are ideal when you need repeatable location (better than clearance) but need to remove/install without a press (can't use interference). They're the right fit for most indexing and locating applications.
+
+5. **"Tighter tolerance always means better quality."** Unnecessary tight tolerances increase cost without functional benefit. Part quality = fitness for purpose. H7/h6 for a bearing bore is quality. H7/h6 for a cosmetic hole in a cover panel is waste.
+
+6. **"RSS analysis is unsafe for critical applications."** RSS is based on statistical assumptions that may not hold for small production volumes. Always use WC for safety-critical assemblies and state assumptions in the design documentation.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [33.1 - Engineering Drawing & GD&T](33.1---Engineering-Drawing-&-GD&T) — GD&T symbols that specify tolerances on drawings
+- [33.7 - FreeCAD & Parametric Modelling](33.7---FreeCAD-&-Parametric-Modelling) — how to model parts with correct fit dimensions
+- [33.8 - Mechatronics & CAD-to-Fabrication Pipeline](33.8---Mechatronics-&-CAD-to-Fabrication-Pipeline) — assembly integration
+
+### External
+- [Engineers Edge ISO tolerance calculator](https://www.engineersedge.com/tolerance/ISO_tolerance_calculator.htm)
+- [AMESweb fits calculator](https://www.amesweb.info/tolerances/iso-tolerances.aspx)
+- [ISO 286-1:2010 standard](https://www.iso.org/standard/45975.html) — the governing standard
+- [Machinery's Handbook — fits and tolerances section](https://www.industrialpress.com/machineryshhandbook/)
+- [SKF bearing fitting guide](https://www.skf.com/group/products/bearings-units-housings/principles/bearing-fitting-practice) — authoritative bearing fit recommendations
+
+---
+
+*Prev: [33.5 - 3D Printing & Additive Manufacturing](33.5---3D-Printing-&-Additive-Manufacturing) | Next: [33.7 - FreeCAD & Parametric Modelling](33.7---FreeCAD-&-Parametric-Modelling)*

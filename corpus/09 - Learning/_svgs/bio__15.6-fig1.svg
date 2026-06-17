@@ -1,0 +1,50 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="sys-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .system-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; cursor: pointer; transition: all 0.2s; }
+    .system-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .connector { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; color: var(--text-muted, #8b949e); }
+  </style>
+  <text x="300" y="25" class="title" text-anchor="middle">Organ Systems Integration — Homeostatic Network</text>
+  <!-- Central: Cardiovascular -->
+  <rect x="230" y="130" width="140" height="50" class="system-box"/>
+  <text x="300" y="152" class="label" text-anchor="middle" font-weight="bold">Cardiovascular</text>
+  <text x="300" y="168" class="label" text-anchor="middle" font-size="9">Transport hub (O₂, nutrients)</text>
+  <!-- Respiratory -->
+  <rect x="50" y="60" width="130" height="45" class="system-box"/>
+  <text x="115" y="80" class="label" text-anchor="middle" font-weight="bold">Respiratory</text>
+  <text x="115" y="95" class="label" text-anchor="middle" font-size="9">O₂ in, CO₂ out</text>
+  <!-- Nervous -->
+  <rect x="420" y="60" width="130" height="45" class="system-box"/>
+  <text x="485" y="80" class="label" text-anchor="middle" font-weight="bold">Nervous</text>
+  <text x="485" y="95" class="label" text-anchor="middle" font-size="9">Rapid control → Track 11</text>
+  <!-- Muscular -->
+  <rect x="50" y="180" width="130" height="45" class="system-box"/>
+  <text x="115" y="200" class="label" text-anchor="middle" font-weight="bold">Muscular</text>
+  <text x="115" y="215" class="label" text-anchor="middle" font-size="9">Movement, heat → BMX</text>
+  <!-- Endocrine -->
+  <rect x="420" y="180" width="130" height="45" class="system-box"/>
+  <text x="485" y="200" class="label" text-anchor="middle" font-weight="bold">Endocrine</text>
+  <text x="485" y="215" class="label" text-anchor="middle" font-size="9">Hormonal regulation</text>
+  <!-- Digestive -->
+  <rect x="50" y="270" width="130" height="45" class="system-box"/>
+  <text x="115" y="290" class="label" text-anchor="middle" font-weight="bold">Digestive</text>
+  <text x="115" y="305" class="label" text-anchor="middle" font-size="9">Nutrient absorption</text>
+  <!-- Immune -->
+  <rect x="420" y="270" width="130" height="45" class="system-box"/>
+  <text x="485" y="290" class="label" text-anchor="middle" font-weight="bold">Immune</text>
+  <text x="485" y="305" class="label" text-anchor="middle" font-size="9">Defense → Ch 15.7</text>
+  <!-- Connectors to cardiovascular -->
+  <line x1="180" y1="82" x2="230" y2="140" class="connector" marker-end="url(#sys-arrow)"/>
+  <line x1="420" y1="82" x2="370" y2="140" class="connector" marker-end="url(#sys-arrow)"/>
+  <line x1="180" y1="202" x2="230" y2="165" class="connector" marker-end="url(#sys-arrow)"/>
+  <line x1="420" y1="202" x2="370" y2="165" class="connector" marker-end="url(#sys-arrow)"/>
+  <line x1="180" y1="285" x2="250" y2="180" class="connector" marker-end="url(#sys-arrow)"/>
+  <line x1="420" y1="285" x2="350" y2="180" class="connector" marker-end="url(#sys-arrow)"/>
+</svg>

@@ -1,0 +1,191 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-mm" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .mm-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; cursor: pointer; transition: all 0.3s ease; }
+    .mm-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.12; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .modal-box { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; rx: 6; transition: all 0.3s ease; }
+    .modal-box:hover { fill: var(--text-accent, #79c0ff); fill-opacity: 0.08; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+    
+    /* Animated Flows */
+    .flow { 
+      stroke: var(--text-normal, #c9d1d9); 
+      stroke-dasharray: 6,4; 
+      stroke-width: 1.5; 
+      fill: none; 
+      animation: vlm-flow-move 1.8s linear infinite; 
+    }
+    .flow-main { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-dasharray: 5,3; 
+      stroke-width: 2; 
+      fill: none; 
+      animation: vlm-flow-move 0.8s linear infinite; 
+    }
+    
+    @keyframes vlm-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Modality Coordinated Glow (ImageBind alignment) */
+    .embed-space { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-width: 2; 
+      fill: var(--interactive-accent, #58a6ff); 
+      fill-opacity: 0.02; 
+      rx: 12; 
+      animation: embed-space-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes embed-space-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); fill-opacity: 0.01; }
+      50% { stroke: #d2a8ff; fill-opacity: 0.06; filter: drop-shadow(0 0 8px rgba(210, 168, 255, 0.25)); }
+    }
+
+    /* Core Units Pulse & Glow */
+    .vit-active {
+      animation: vit-glow 3s ease-in-out infinite;
+    }
+    .proj-active {
+      animation: proj-glow 2.5s ease-in-out infinite;
+    }
+    .tokenizer-active {
+      animation: tokenizer-glow 3s ease-in-out infinite;
+    }
+    .interleave-active {
+      animation: interleave-glow 3.5s ease-in-out infinite;
+    }
+    .llm-active {
+      animation: llm-glow 4s ease-in-out infinite;
+    }
+    .output-active {
+      animation: output-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes vit-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.05); }
+    }
+
+    @keyframes proj-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: #d2a8ff; fill: rgba(210, 168, 255, 0.08); filter: drop-shadow(0 0 4px rgba(210, 168, 255, 0.3)); }
+    }
+
+    @keyframes tokenizer-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.05); }
+    }
+
+    @keyframes interleave-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(121, 192, 255, 0.08); }
+    }
+
+    @keyframes llm-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: rgba(88, 166, 255, 0.02); }
+      50% { stroke: var(--text-accent, #79c0ff); stroke-width: 3.5; fill: rgba(121, 192, 255, 0.08); filter: drop-shadow(0 0 6px rgba(88, 166, 255, 0.4)); }
+    }
+
+    @keyframes output-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: #3fb950; fill: rgba(63, 185, 80, 0.06); filter: drop-shadow(0 0 5px rgba(63, 185, 80, 0.3)); }
+    }
+  </style>
+
+  <text x="350" y="25" class="title" text-anchor="middle">Vision-Language Model Architecture</text>
+
+  <!-- Image Input -->
+  <rect x="20" y="50" width="100" height="80" class="modal-box"/>
+  <text x="70" y="75" class="label" text-anchor="middle" font-weight="bold">Image</text>
+  <text x="70" y="93" class="sublabel" text-anchor="middle">1024×1024</text>
+  <text x="70" y="108" class="sublabel" text-anchor="middle">→ patches</text>
+  <text x="70" y="123" class="sublabel" text-anchor="middle">14×14 = 576</text>
+
+  <!-- Visual Encoder -->
+  <rect x="150" y="55" width="120" height="70" class="mm-box vit-active"/>
+  <text x="210" y="78" class="label" text-anchor="middle" font-weight="bold">Visual Encoder</text>
+  <text x="210" y="95" class="sublabel" text-anchor="middle">SigLIP / CLIP ViT</text>
+  <text x="210" y="110" class="sublabel" text-anchor="middle">→ 576 visual tokens</text>
+  <line x1="120" y1="90" x2="150" y2="90" class="flow" marker-end="url(#arrow-mm)"/>
+
+  <!-- Projection -->
+  <rect x="300" y="60" width="100" height="55" class="mm-box proj-active"/>
+  <text x="350" y="82" class="label" text-anchor="middle" font-weight="bold">Projection</text>
+  <text x="350" y="98" class="sublabel" text-anchor="middle">MLP / Cross-Attn</text>
+  <text x="350" y="110" class="sublabel" text-anchor="middle">→ LLM dim</text>
+  <line x1="270" y1="90" x2="300" y2="87" class="flow-main" marker-end="url(#arrow-mm)"/>
+
+  <!-- Text Input -->
+  <rect x="20" y="170" width="100" height="60" class="modal-box"/>
+  <text x="70" y="195" class="label" text-anchor="middle" font-weight="bold">Text Prompt</text>
+  <text x="70" y="213" class="sublabel" text-anchor="middle">"Describe this..."</text>
+
+  <!-- Tokenizer -->
+  <rect x="150" y="170" width="100" height="55" class="mm-box tokenizer-active"/>
+  <text x="200" y="193" class="label" text-anchor="middle" font-weight="bold">Tokenizer</text>
+  <text x="200" y="210" class="sublabel" text-anchor="middle">→ text tokens</text>
+  <line x1="120" y1="200" x2="150" y2="197" class="flow" marker-end="url(#arrow-mm)"/>
+
+  <!-- Token Merge -->
+  <rect x="300" y="150" width="100" height="80" class="mm-box interleave-active" stroke-width="3"/>
+  <text x="350" y="172" class="label" text-anchor="middle" font-weight="bold">Interleave</text>
+  <text x="350" y="190" class="sublabel" text-anchor="middle">[visual tokens]</text>
+  <text x="350" y="205" class="sublabel" text-anchor="middle">+</text>
+  <text x="350" y="220" class="sublabel" text-anchor="middle">[text tokens]</text>
+  <line x1="250" y1="197" x2="300" y2="195" class="flow" marker-end="url(#arrow-mm)"/>
+  <line x1="350" y1="115" x2="350" y2="150" class="flow-main" marker-end="url(#arrow-mm)"/>
+
+  <!-- LLM Backbone -->
+  <rect x="430" y="120" width="150" height="110" class="mm-box llm-active" stroke-width="3"/>
+  <text x="505" y="148" class="label" text-anchor="middle" font-weight="bold">LLM Backbone</text>
+  <text x="505" y="168" class="sublabel" text-anchor="middle">Qwen2 / InternLM / Llama</text>
+  <text x="505" y="188" class="sublabel" text-anchor="middle">Causal attention over</text>
+  <text x="505" y="203" class="sublabel" text-anchor="middle">visual + text tokens</text>
+  <text x="505" y="220" class="sublabel" text-anchor="middle">7-72B parameters</text>
+  <line x1="400" y1="190" x2="430" y2="175" class="flow-main" marker-end="url(#arrow-mm)"/>
+
+  <!-- Output -->
+  <rect x="610" y="145" width="70" height="60" class="mm-box output-active"/>
+  <text x="645" y="170" class="label" text-anchor="middle" font-weight="bold">Output</text>
+  <text x="645" y="188" class="sublabel" text-anchor="middle">text tokens</text>
+  <line x1="580" y1="175" x2="610" y2="175" class="flow-main" marker-end="url(#arrow-mm)"/>
+
+  <!-- ImageBind Section -->
+  <text x="350" y="270" class="title" text-anchor="middle">ImageBind: Unified Embedding Space</text>
+
+  <rect x="50" y="285" width="600" height="75" class="embed-space"/>
+
+  <rect x="70" y="300" width="80" height="40" class="modal-box"/>
+  <text x="110" y="318" class="label" text-anchor="middle">Image</text>
+  <text x="110" y="333" class="sublabel" text-anchor="middle">ViT encoder</text>
+
+  <rect x="170" y="300" width="80" height="40" class="modal-box"/>
+  <text x="210" y="318" class="label" text-anchor="middle">Text</text>
+  <text x="210" y="333" class="sublabel" text-anchor="middle">BERT encoder</text>
+
+  <rect x="270" y="300" width="80" height="40" class="modal-box"/>
+  <text x="310" y="318" class="label" text-anchor="middle">Audio</text>
+  <text x="310" y="333" class="sublabel" text-anchor="middle">AST encoder</text>
+
+  <rect x="370" y="300" width="80" height="40" class="modal-box"/>
+  <text x="410" y="318" class="label" text-anchor="middle">Depth</text>
+  <text x="410" y="333" class="sublabel" text-anchor="middle">ViT encoder</text>
+
+  <rect x="470" y="300" width="80" height="40" class="modal-box"/>
+  <text x="510" y="318" class="label" text-anchor="middle">Thermal</text>
+  <text x="510" y="333" class="sublabel" text-anchor="middle">ViT encoder</text>
+
+  <rect x="570" y="300" width="60" height="40" class="modal-box"/>
+  <text x="600" y="318" class="label" text-anchor="middle">IMU</text>
+  <text x="600" y="333" class="sublabel" text-anchor="middle">1D conv</text>
+
+  <text x="350" y="355" class="sublabel" text-anchor="middle">All modalities → shared 1024-dim embedding space (cosine similarity for cross-modal retrieval)</text>
+</svg>

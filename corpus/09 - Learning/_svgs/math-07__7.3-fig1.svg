@@ -1,0 +1,81 @@
+<svg viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="mag-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .b-field {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 1.5;
+      fill: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      stroke-dasharray: 10, 5;
+      animation: fieldFlow 2s linear infinite;
+    }
+    @keyframes fieldFlow {
+      to { stroke-dashoffset: -15; }
+    }
+    .b-field:hover {
+      stroke-width: 2.5;
+      filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff));
+    }
+    .current-loop {
+      stroke: var(--text-accent, #79c0ff);
+      stroke-width: 3;
+      fill: none;
+    }
+    .axis { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math-label { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); }
+    .current-dot { fill: var(--text-accent, #79c0ff); }
+    @keyframes flowCurrent {
+      0% { stroke-dashoffset: 20; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .current-flow {
+      stroke: var(--text-accent, #79c0ff);
+      stroke-width: 3;
+      stroke-dasharray: 5,5;
+      fill: none;
+      animation: flowCurrent 1s linear infinite;
+    }
+  </style>
+
+  <!-- Title -->
+  <text x="300" y="22" class="label" text-anchor="middle" font-weight="bold" font-size="15">Magnetic Dipole Field (Current Loop)</text>
+
+  <!-- Axis -->
+  <line x1="300" y1="50" x2="300" y2="420" class="axis"/>
+  <text x="310" y="60" class="label">z (axis)</text>
+
+  <!-- Current loop (ellipse to show perspective) -->
+  <ellipse cx="300" cy="250" rx="80" ry="25" class="current-flow"/>
+  <text x="395" y="255" class="label" fill="var(--text-accent, #79c0ff)">I (current)</text>
+
+  <!-- B-field lines (dipole pattern) -->
+  <path d="M 300 250 C 300 200, 340 150, 340 120 C 340 90, 320 70, 300 70" class="b-field" marker-end="url(#mag-arrow)"/>
+  <path d="M 300 70 C 280 70, 260 90, 260 120 C 260 150, 300 200, 300 250" class="b-field"/>
+  
+  <path d="M 300 250 C 300 210, 370 160, 380 110 C 390 60, 340 30, 300 30" class="b-field" marker-end="url(#mag-arrow)"/>
+  <path d="M 300 30 C 260 30, 210 60, 220 110 C 230 160, 300 210, 300 250" class="b-field"/>
+
+  <path d="M 300 250 C 300 300, 340 350, 340 380 C 340 410, 320 430, 300 430" class="b-field" marker-end="url(#mag-arrow)"/>
+  <path d="M 300 430 C 280 430, 260 410, 260 380 C 260 350, 300 300, 300 250" class="b-field"/>
+
+  <path d="M 300 250 C 300 290, 370 340, 380 390 C 390 430, 340 445, 300 445" class="b-field" marker-end="url(#mag-arrow)"/>
+  <path d="M 300 445 C 260 445, 210 430, 220 390 C 230 340, 300 290, 300 250" class="b-field"/>
+
+  <!-- Outer return field lines -->
+  <path d="M 300 70 C 420 70, 500 180, 500 250 C 500 320, 420 430, 300 430" class="b-field" marker-end="url(#mag-arrow)"/>
+  <path d="M 300 70 C 180 70, 100 180, 100 250 C 100 320, 180 430, 300 430" class="b-field" marker-end="url(#mag-arrow)"/>
+
+  <!-- Dipole moment arrow -->
+  <line x1="300" y1="250" x2="300" y2="160" stroke="var(--text-normal, #c9d1d9)" stroke-width="2.5" marker-end="url(#mag-arrow)"/>
+  <text x="270" y="200" class="math-label">m = IA ẑ</text>
+
+  <!-- Labels -->
+  <text x="300" y="440" class="label" text-anchor="middle">B lines form closed loops (∇·B = 0)</text>
+</svg>

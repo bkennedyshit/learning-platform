@@ -1,0 +1,78 @@
+<svg viewBox="0 0 620 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="rl-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rl-ax { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; }
+    .rl-locus { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawLocus 4s ease-in-out infinite; }
+    @keyframes drawLocus { 0% { stroke-dashoffset: 800; } 50%, 100% { stroke-dashoffset: 0; } }
+    .rl-asym { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 6 3; }
+    .rl-real { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; }
+    .rl-pole { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .rl-zero { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .rl-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .rl-acc { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .rl-dot { fill: var(--interactive-accent, #58a6ff); cursor: pointer; transition: all 0.2s; }
+    .rl-dot:hover { r: 6; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <!-- Axes -->
+  <line x1="30" y1="210" x2="590" y2="210" class="rl-ax" marker-end="url(#rl-arr)"/>
+  <line x1="380" y1="400" x2="380" y2="20" class="rl-ax" marker-end="url(#rl-arr)"/>
+  <text x="595" y="225" class="rl-lbl">σ</text>
+  <text x="385" y="15" class="rl-lbl">jω</text>
+
+  <!-- Open-loop poles (×) at s=0, s=-1, s=-3 -->
+  <line x1="375" y1="205" x2="385" y2="215" class="rl-pole"/>
+  <line x1="385" y1="205" x2="375" y2="215" class="rl-pole"/>
+  <text x="380" y="230" class="rl-lbl" text-anchor="middle">0</text>
+
+  <line x1="315" y1="205" x2="325" y2="215" class="rl-pole"/>
+  <line x1="325" y1="205" x2="315" y2="215" class="rl-pole"/>
+  <text x="320" y="230" class="rl-lbl" text-anchor="middle">-1</text>
+
+  <line x1="195" y1="205" x2="205" y2="215" class="rl-pole"/>
+  <line x1="205" y1="205" x2="195" y2="215" class="rl-pole"/>
+  <text x="200" y="230" class="rl-lbl" text-anchor="middle">-3</text>
+
+  <!-- Real axis locus (between 0 and -1, and left of -3) -->
+  <line x1="320" y1="210" x2="380" y2="210" class="rl-real"/>
+  <line x1="30" y1="210" x2="200" y2="210" class="rl-real"/>
+
+  <!-- Branches departing from poles -->
+  <!-- From s=0 and s=-1: meet at breakaway, then go to ±j∞ -->
+  <path d="M 380 210 C 370 210 355 210 350 210" class="rl-locus"/>
+  <path d="M 320 210 C 330 210 345 210 350 210" class="rl-locus"/>
+  <!-- Breakaway at ~-0.45, then complex branches -->
+  <path d="M 350 210 C 350 180 340 140 300 80 C 260 20 220 10 180 10" class="rl-locus"/>
+  <path d="M 350 210 C 350 240 340 280 300 340 C 260 400 220 410 180 410" class="rl-locus"/>
+
+  <!-- From s=-3: goes left to -∞ -->
+  <path d="M 200 210 L 30 210" class="rl-locus"/>
+
+  <!-- Asymptotes (3 poles, 0 zeros: angles 60°, 180°, 300°) -->
+  <line x1="260" y1="210" x2="160" y2="37" class="rl-asym"/>
+  <line x1="260" y1="210" x2="160" y2="383" class="rl-asym"/>
+  <line x1="260" y1="210" x2="60" y2="210" class="rl-asym"/>
+
+  <!-- Centroid -->
+  <circle cx="260" cy="210" r="4" class="rl-dot"/>
+  <text x="260" y="250" class="rl-acc" text-anchor="middle">σ_a = -4/3</text>
+
+  <!-- Breakaway point -->
+  <circle cx="350" cy="210" r="4" class="rl-dot"/>
+  <text x="350" y="195" class="rl-acc" text-anchor="middle">breakaway</text>
+
+  <!-- jω crossing annotation -->
+  <circle cx="380" cy="90" r="4" class="rl-dot"/>
+  <text x="400" y="85" class="rl-acc">jω crossing</text>
+
+  <!-- Legend -->
+  <rect x="440" y="30" width="150" height="90" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="515" y="50" class="rl-acc" text-anchor="middle">Root Locus Rules</text>
+  <text x="515" y="70" class="rl-lbl" text-anchor="middle">× = open-loop poles</text>
+  <text x="515" y="87" class="rl-lbl" text-anchor="middle">○ = open-loop zeros</text>
+  <text x="515" y="104" class="rl-lbl" text-anchor="middle">K: 0 → ∞</text>
+</svg>

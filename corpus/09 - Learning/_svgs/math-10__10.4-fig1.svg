@@ -1,0 +1,66 @@
+<svg viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="rkt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rkt-body { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .rkt-prop { fill: var(--interactive-accent, #58a6ff); opacity: 0.3; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .rkt-struct { fill: var(--text-muted, #8b949e); opacity: 0.3; stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .rkt-payload { fill: var(--text-accent, #79c0ff); opacity: 0.4; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; }
+    .rkt-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .rkt-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .rkt-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .rkt-exhaust { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.6; }
+    .rkt-exhaust { stroke-dasharray: 20; animation: exhaustFlow 1s linear infinite; }
+    @keyframes exhaustFlow { to { stroke-dashoffset: -40; } }
+  </style>
+
+  <!-- Title -->
+  <text x="340" y="25" class="rkt-title" text-anchor="middle">Multi-Stage Rocket Mass Breakdown</text>
+
+  <!-- Stage 3 (top - payload + small stage) -->
+  <rect x="295" y="40" width="90" height="40" rx="4" class="rkt-payload"/>
+  <text x="340" y="65" class="rkt-label" text-anchor="middle">Payload mₗ</text>
+
+  <!-- Stage 2 -->
+  <rect x="270" y="85" width="140" height="30" rx="3" class="rkt-struct"/>
+  <text x="340" y="105" class="rkt-label" text-anchor="middle">Structure m_s3</text>
+  <rect x="270" y="115" width="140" height="60" rx="3" class="rkt-prop"/>
+  <text x="340" y="150" class="rkt-label" text-anchor="middle">Propellant m_p3</text>
+  <text x="420" y="135" class="rkt-accent">Stage 3</text>
+
+  <!-- Stage 2 -->
+  <rect x="245" y="180" width="190" height="30" rx="3" class="rkt-struct"/>
+  <text x="340" y="200" class="rkt-label" text-anchor="middle">Structure m_s2</text>
+  <rect x="245" y="210" width="190" height="80" rx="3" class="rkt-prop"/>
+  <text x="340" y="255" class="rkt-label" text-anchor="middle">Propellant m_p2</text>
+  <text x="445" y="240" class="rkt-accent">Stage 2</text>
+
+  <!-- Stage 1 (bottom - largest) -->
+  <rect x="220" y="295" width="240" height="30" rx="3" class="rkt-struct"/>
+  <text x="340" y="315" class="rkt-label" text-anchor="middle">Structure m_s1</text>
+  <rect x="220" y="325" width="240" height="90" rx="3" class="rkt-prop"/>
+  <text x="340" y="375" class="rkt-label" text-anchor="middle">Propellant m_p1</text>
+  <text x="470" y="365" class="rkt-accent">Stage 1</text>
+
+  <!-- Exhaust -->
+  <path d="M 300 415 Q 340 440 380 415" class="rkt-exhaust"/>
+  <path d="M 310 420 Q 340 450 370 420" class="rkt-exhaust"/>
+
+  <!-- Right side: equations -->
+  <rect x="490" y="40" width="180" height="200" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="580" y="62" class="rkt-accent" text-anchor="middle">Key Equations</text>
+  <text x="500" y="85" class="rkt-label">ΔV = vₑ ln(m₀/mf)</text>
+  <text x="500" y="108" class="rkt-label">Mass ratio: R = m₀/mf</text>
+  <text x="500" y="131" class="rkt-label">Structural coeff:</text>
+  <text x="500" y="149" class="rkt-label">  ε = mₛ/(mₛ + mₚ)</text>
+  <text x="500" y="172" class="rkt-label">Payload ratio:</text>
+  <text x="500" y="190" class="rkt-label">  λ = mₗ/(mₛ + mₚ)</text>
+  <text x="500" y="218" class="rkt-label">Isp = vₑ/g₀</text>
+
+  <!-- Mass flow arrow -->
+  <line x1="340" y1="415" x2="340" y2="400" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" marker-end="url(#rkt-arrow)" transform="rotate(180,340,407)"/>
+  <text x="340" y="435" class="rkt-accent" text-anchor="middle">ṁ·vₑ = Thrust</text>
+</svg>

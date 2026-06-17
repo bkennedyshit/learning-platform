@@ -1,0 +1,133 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="fsm-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .state-node { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; cursor: pointer; transition: all 0.2s; }
+    .state-node:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .state-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; text-anchor: middle; pointer-events: none; }
+    .trans-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; color: var(--text-muted, #8b949e); }
+    .trans-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .section-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .bt-node { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; transition: all 0.2s; }
+    .bt-selector { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; transition: all 0.2s; }
+    .bt-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; pointer-events: none; }
+    
+    /* FSM Cycle Animations */
+    @keyframes fsm-idle {
+      0%, 30%, 100% { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; filter: none; }
+      5%, 25% { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes fsm-run {
+      0%, 30%, 65%, 100% { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; filter: none; }
+      35%, 60% { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes fsm-jump {
+      0%, 65%, 100% { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; filter: none; }
+      70%, 95% { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    
+    .node-idle { animation: fsm-idle 6s infinite; }
+    .node-run { animation: fsm-run 6s infinite; }
+    .node-jump { animation: fsm-jump 6s infinite; }
+    
+    /* BT Ticking Animations */
+    @keyframes bt-root {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); filter: none; }
+      10%, 80% { stroke: #2ecc71; filter: drop-shadow(0 0 5px #2ecc71); }
+    }
+    @keyframes bt-flee {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); fill: var(--background-secondary, #161b22); filter: none; }
+      15%, 35% { stroke: #e74c3c; fill: #e74c3c; fill-opacity: 0.15; filter: drop-shadow(0 0 5px #e74c3c); }
+    }
+    @keyframes bt-attack-seq {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); fill: var(--background-secondary, #161b22); filter: none; }
+      40%, 80% { stroke: #2ecc71; fill: #2ecc71; fill-opacity: 0.15; filter: drop-shadow(0 0 5px #2ecc71); }
+    }
+    @keyframes bt-leaf {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); fill: var(--background-secondary, #161b22); filter: none; }
+      50%, 80% { stroke: #2ecc71; fill: #2ecc71; fill-opacity: 0.15; filter: drop-shadow(0 0 5px #2ecc71); }
+    }
+    
+    .bt-root-node { animation: bt-root 4s infinite; }
+    .bt-flee-node { animation: bt-flee 4s infinite; }
+    .bt-attack-node { animation: bt-attack-seq 4s infinite; }
+    .bt-inrange-node { animation: bt-leaf 4s infinite 0.1s; }
+    .bt-swing-node { animation: bt-leaf 4s infinite 0.3s; }
+  </style>
+  
+  <!-- FSM Section -->
+  <text x="150" y="25" class="section-title" text-anchor="middle">Finite State Machine</text>
+  <!-- States -->
+  <circle cx="80" cy="100" r="35" class="state-node node-idle"/>
+  <text x="80" y="105" class="state-label">Idle</text>
+  
+  <circle cx="220" cy="100" r="35" class="state-node node-run"/>
+  <text x="220" y="105" class="state-label">Run</text>
+  
+  <circle cx="150" cy="210" r="35" class="state-node node-jump"/>
+  <text x="150" y="215" class="state-label">Jump</text>
+  
+  <circle cx="280" cy="210" r="35" class="state-node"/>
+  <text x="280" y="215" class="state-label">Attack</text>
+  
+  <!-- Transitions -->
+  <line x1="115" y1="100" x2="185" y2="100" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="150" y="90" class="trans-label">input.x != 0</text>
+  <line x1="185" y1="100" x2="115" y2="100" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="150" y="115" class="trans-label">input.x == 0</text>
+  <line x1="95" y1="130" x2="135" y2="180" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="95" y="165" class="trans-label">jump</text>
+  <line x1="165" y1="180" x2="205" y2="130" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="200" y="160" class="trans-label">grounded</text>
+  <line x1="240" y1="125" x2="265" y2="185" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="270" y="155" class="trans-label">fire</text>
+  <line x1="265" y1="185" x2="240" y2="125" class="trans-line" marker-end="url(#fsm-arrow)"/>
+  <text x="235" y="165" class="trans-label">done</text>
+  
+  <!-- Behavior Tree Section -->
+  <text x="460" y="25" class="section-title" text-anchor="middle">Behavior Tree</text>
+  <!-- Root selector -->
+  <rect x="430" y="45" width="60" height="30" rx="4" class="bt-selector bt-root-node"/>
+  <text x="460" y="65" class="bt-label" fill="var(--interactive-accent, #58a6ff)">?</text>
+  <!-- Sequence nodes -->
+  <rect x="360" y="110" width="60" height="25" rx="4" class="bt-node bt-flee-node"/>
+  <text x="390" y="127" class="bt-label">→ Flee</text>
+  
+  <rect x="440" y="110" width="60" height="25" rx="4" class="bt-node bt-attack-node"/>
+  <text x="470" y="127" class="bt-label">→ Attack</text>
+  
+  <rect x="520" y="110" width="60" height="25" rx="4" class="bt-node"/>
+  <text x="550" y="127" class="bt-label">→ Patrol</text>
+  <!-- Connections -->
+  <line x1="445" y1="75" x2="390" y2="110" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <line x1="460" y1="75" x2="470" y2="110" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <line x1="475" y1="75" x2="550" y2="110" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  
+  <!-- Leaf nodes for Attack sequence -->
+  <rect x="420" y="170" width="50" height="22" rx="3" class="bt-node bt-inrange-node"/>
+  <text x="445" y="185" class="bt-label">InRange?</text>
+  
+  <rect x="480" y="170" width="50" height="22" rx="3" class="bt-node bt-swing-node"/>
+  <text x="505" y="185" class="bt-label">Swing</text>
+  
+  <line x1="460" y1="135" x2="445" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="480" y1="135" x2="505" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  
+  <!-- Legend -->
+  <rect x="350" y="220" width="230" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="365" y="240" class="bt-label" text-anchor="start" fill="var(--interactive-accent, #58a6ff)">? = Selector (try until success)</text>
+  <text x="365" y="258" class="bt-label" text-anchor="start" fill="var(--text-normal, #c9d1d9)">→ = Sequence (all must succeed)</text>
+  <text x="365" y="276" class="bt-label" text-anchor="start" fill="var(--text-normal, #c9d1d9)">Leaf = Condition or Action</text>
+  <text x="365" y="294" class="bt-label" text-anchor="start" fill="var(--text-muted, #8b949e)">Evaluated top→down, left→right</text>
+  
+  <!-- Comparison note -->
+  <rect x="40" y="280" width="260" height="100" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="55" y="300" class="bt-label" text-anchor="start" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">FSM vs Behavior Tree</text>
+  <text x="55" y="318" class="bt-label" text-anchor="start">FSM: explicit transitions, simple</text>
+  <text x="55" y="336" class="bt-label" text-anchor="start">BT: composable, scales to complex AI</text>
+  <text x="55" y="354" class="bt-label" text-anchor="start">FSM: O(1) eval | BT: O(depth) eval</text>
+  <text x="55" y="372" class="bt-label" text-anchor="start">Use FSM for player, BT for NPCs</text>
+</svg>

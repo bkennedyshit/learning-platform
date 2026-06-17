@@ -1,0 +1,53 @@
+<svg viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <style>
+    .dmn-node { fill: var(--interactive-accent, #58a6ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: r 0.2s; }
+    .dmn-node:hover { r: 18; }
+    .dmn-edge { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; opacity: 0.6; }
+    .dmn-edge-strong { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; opacity: 0.8; }
+    .dmn-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .dmn-title { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .landscape { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .landscape-high { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; stroke-dasharray: 5 3; }
+    .ball { fill: var(--text-accent, #79c0ff); animation: bounce 2s infinite ease-in-out; }
+    @keyframes bounce { 50% { transform: translateY(-5px); } }
+  </style>
+  <!-- Left panel: DMN network -->
+  <text x="150" y="18" class="dmn-title" text-anchor="middle">Default Mode Network</text>
+  <!-- Nodes -->
+  <circle cx="150" cy="70" r="14" class="dmn-node"/>
+  <text x="150" y="55" class="dmn-label" text-anchor="middle">mPFC</text>
+  <circle cx="80" cy="150" r="12" class="dmn-node"/>
+  <text x="55" y="150" class="dmn-label" text-anchor="middle">TPJ-L</text>
+  <circle cx="220" cy="150" r="12" class="dmn-node"/>
+  <text x="248" y="150" class="dmn-label" text-anchor="middle">TPJ-R</text>
+  <circle cx="150" cy="220" r="14" class="dmn-node"/>
+  <text x="150" y="245" class="dmn-label" text-anchor="middle">PCC/Precuneus</text>
+  <circle cx="70" cy="260" r="10" class="dmn-node"/>
+  <text x="45" y="275" class="dmn-label" text-anchor="middle">HPC-L</text>
+  <circle cx="230" cy="260" r="10" class="dmn-node"/>
+  <text x="258" y="275" class="dmn-label" text-anchor="middle">HPC-R</text>
+  <!-- Edges -->
+  <line x1="150" y1="84" x2="80" y2="138" class="dmn-edge-strong"/>
+  <line x1="150" y1="84" x2="220" y2="138" class="dmn-edge-strong"/>
+  <line x1="150" y1="84" x2="150" y2="206" class="dmn-edge-strong"/>
+  <line x1="80" y1="162" x2="150" y2="206" class="dmn-edge"/>
+  <line x1="220" y1="162" x2="150" y2="206" class="dmn-edge"/>
+  <line x1="70" y1="250" x2="150" y2="220" class="dmn-edge"/>
+  <line x1="230" y1="250" x2="150" y2="220" class="dmn-edge"/>
+  <line x1="80" y1="150" x2="220" y2="150" class="dmn-edge" stroke-dasharray="4 3"/>
+  <!-- Right panel: Energy landscape -->
+  <text x="450" y="18" class="dmn-title" text-anchor="middle">Energy Landscape (Entropy Effect)</text>
+  <!-- Low entropy (rigid DMN) -->
+  <path d="M 330 300 C 350 300 360 250 370 200 C 380 170 385 170 390 200 C 395 220 400 220 405 200 C 410 170 420 160 430 200 C 440 230 445 230 450 200 C 460 150 470 150 480 200 C 490 250 500 300 520 300" class="landscape"/>
+  <circle cx="390" cy="195" r="6" class="ball"/>
+  <text x="390" y="320" class="dmn-label" text-anchor="middle">Low entropy: deep attractors</text>
+  <text x="390" y="332" class="dmn-label" text-anchor="middle">(rigid beliefs, rumination)</text>
+  <!-- High entropy (flattened) -->
+  <path d="M 330 180 C 370 180 390 170 410 175 C 430 178 450 172 470 175 C 490 178 510 180 520 180" class="landscape-high"/>
+  <circle cx="440" cy="170" r="6" class="ball" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="450" y="155" class="dmn-label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">High entropy: flat landscape</text>
+  <text x="450" y="167" class="dmn-label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">(flexibility, novel states)</text>
+  <!-- Arrow showing transition -->
+  <path d="M 395 190 C 410 175 420 172 435 172" stroke="var(--text-muted, #8b949e)" stroke-width="1" fill="none" marker-end="url(#cc-arr)"/>
+  <text x="415" y="188" class="dmn-label" fill="var(--text-muted, #8b949e)">5-HT2A</text>
+</svg>

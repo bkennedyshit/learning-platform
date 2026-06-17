@@ -1,0 +1,118 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary,#161b22); stroke: var(--text-muted,#8b949e); stroke-width:1.2; }
+    .stage  { fill: var(--background-secondary,#161b22); stroke: var(--interactive-accent,#58a6ff); stroke-width:1.8; }
+    .join   { fill: #1a3a1a; stroke: #51cf66; stroke-width: 1.5; }
+    .opt    { fill: #3a2a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .arr    { stroke: var(--text-muted,#8b949e); stroke-width: 1.2; fill: none; }
+    .acc    { stroke: var(--interactive-accent,#58a6ff); stroke-width: 1.5; fill: none; }
+  </style>
+  <defs>
+    <marker id="dbs7-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="dbs7-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">Query Processing — Parse → Plan → Optimize → Execute (Volcano/Iterator Model)</text>
+
+  <!-- Pipeline stages -->
+  <rect x="18"  y="32" width="90" height="50" class="stage" rx="5"/>
+  <text x="63"  y="52" class="label" text-anchor="middle" fill="#58a6ff">Parser</text>
+  <text x="63"  y="65" class="small" text-anchor="middle">SQL text →</text>
+  <text x="63"  y="76" class="small" text-anchor="middle">Parse Tree</text>
+
+  <line x1="108" y1="57" x2="126" y2="57" class="acc" marker-end="url(#dbs7-b)"/>
+
+  <rect x="128" y="32" width="90" height="50" class="stage" rx="5"/>
+  <text x="173" y="52" class="label" text-anchor="middle" fill="#58a6ff">Analyzer</text>
+  <text x="173" y="65" class="small" text-anchor="middle">Name resolve</text>
+  <text x="173" y="76" class="small" text-anchor="middle">type check</text>
+
+  <line x1="218" y1="57" x2="236" y2="57" class="acc" marker-end="url(#dbs7-b)"/>
+
+  <rect x="238" y="32" width="90" height="50" class="stage" rx="5"/>
+  <text x="283" y="52" class="label" text-anchor="middle" fill="#58a6ff">Rewriter</text>
+  <text x="283" y="65" class="small" text-anchor="middle">Views, rules,</text>
+  <text x="283" y="76" class="small" text-anchor="middle">RLS expand</text>
+
+  <line x1="328" y1="57" x2="346" y2="57" class="acc" marker-end="url(#dbs7-b)"/>
+
+  <rect x="348" y="32" width="90" height="50" class="opt" rx="5"/>
+  <text x="393" y="52" class="label" text-anchor="middle" fill="#ffd93d">Planner/</text>
+  <text x="393" y="64" class="label" text-anchor="middle" fill="#ffd93d">Optimizer</text>
+  <text x="393" y="76" class="small" text-anchor="middle">cost model</text>
+
+  <line x1="438" y1="57" x2="456" y2="57" class="acc" marker-end="url(#dbs7-b)"/>
+
+  <rect x="458" y="32" width="90" height="50" class="stage" rx="5"/>
+  <text x="503" y="52" class="label" text-anchor="middle" fill="#58a6ff">Executor</text>
+  <text x="503" y="65" class="small" text-anchor="middle">Volcano model</text>
+  <text x="503" y="76" class="small" text-anchor="middle">next() pipeline</text>
+
+  <line x1="548" y1="57" x2="566" y2="57" class="acc" marker-end="url(#dbs7-b)"/>
+
+  <rect x="568" y="32" width="134" height="50" class="stage" rx="5"/>
+  <text x="635" y="52" class="label" text-anchor="middle" fill="#58a6ff">Storage Engine</text>
+  <text x="635" y="65" class="small" text-anchor="middle">Buffer pool, B-tree,</text>
+  <text x="635" y="76" class="small" text-anchor="middle">heap fetch, index scan</text>
+
+  <!-- Optimizer box -->
+  <rect x="18" y="100" width="350" height="130" class="box" rx="6"/>
+  <text x="193" y="118" class="label" text-anchor="middle" font-weight="bold">Planner / Optimizer Details</text>
+  <text x="28"  y="136" class="small">1. Generate candidate query plans (join ordering, index choices)</text>
+  <text x="28"  y="152" class="small">2. Estimate cost using statistics (pg_statistic, pg_class.reltuples)</text>
+  <text x="28"  y="168" class="small">   Cost = seq_page_cost × pages + cpu_tuple_cost × rows</text>
+  <text x="28"  y="184" class="small">3. Dynamic programming over join order (n≤8 exhaustive, then GEQO)</text>
+  <text x="28"  y="200" class="small">4. SELECT cheapest plan → emit PlannedStmt tree</text>
+  <text x="28"  y="218" class="small">   EXPLAIN ANALYZE shows actual cost vs estimated cost</text>
+
+  <!-- Volcano model -->
+  <rect x="380" y="100" width="322" height="130" class="box" rx="6"/>
+  <text x="541" y="118" class="label" text-anchor="middle" font-weight="bold">Volcano / Iterator Model</text>
+  <text x="390" y="136" class="small">Each operator has: init() → next() → close()</text>
+  <text x="390" y="152" class="small">next() returns one tuple at a time (pull model)</text>
+  <text x="390" y="168" class="small">Tree of iterators — parent calls child.next() lazily</text>
+
+  <rect x="544" y="172" width="148" height="50" fill="#1a2030" stroke="#58a6ff" stroke-width="1" rx="3"/>
+  <text x="618" y="186" class="mono" text-anchor="middle">Sort</text>
+  <text x="618" y="198" class="mono" text-anchor="middle"> └ HashJoin</text>
+  <text x="618" y="210" class="mono" text-anchor="middle">    ├ SeqScan A</text>
+  <text x="618" y="222" class="mono" text-anchor="middle">    └ IndexScan B</text>
+
+  <!-- Join algorithms -->
+  <rect x="18" y="244" width="684" height="164" class="box" rx="6"/>
+  <text x="360" y="262" class="label" text-anchor="middle" font-weight="bold">Join Algorithms — When PostgreSQL Chooses Each</text>
+
+  <rect x="28"  y="272" width="200" height="124" class="join" rx="4"/>
+  <text x="128" y="290" class="label" text-anchor="middle" fill="#51cf66">Nested-Loop Join</text>
+  <text x="36"  y="308" class="small">For each row in outer table:</text>
+  <text x="36"  y="322" class="small">  scan inner table (or index)</text>
+  <text x="36"  y="336" class="small">O(N × M) brute force</text>
+  <text x="36"  y="352" class="small">Best: small outer, indexed inner</text>
+  <text x="36"  y="368" class="small">Postgres: always available</text>
+
+  <rect x="240" y="272" width="200" height="124" class="join" rx="4"/>
+  <text x="340" y="290" class="label" text-anchor="middle" fill="#51cf66">Hash Join</text>
+  <text x="248" y="308" class="small">Build hash table on smaller rel.</text>
+  <text x="248" y="322" class="small">Probe hash table for each outer.</text>
+  <text x="248" y="336" class="small">O(N+M) but needs memory.</text>
+  <text x="248" y="352" class="small">Best: large relations, equality join</text>
+  <text x="248" y="368" class="small">work_mem controls spill to disk</text>
+
+  <rect x="452" y="272" width="242" height="124" class="join" rx="4"/>
+  <text x="573" y="290" class="label" text-anchor="middle" fill="#51cf66">Merge Join</text>
+  <text x="460" y="308" class="small">Sort both inputs on join key.</text>
+  <text x="460" y="322" class="small">Merge like merge-sort pass.</text>
+  <text x="460" y="336" class="small">O((N+M) log N) with sort cost.</text>
+  <text x="460" y="352" class="small">Best: inputs already sorted (index)</text>
+  <text x="460" y="368" class="small">or ORDER BY in final result needed</text>
+
+  <text x="360" y="396" class="small" text-anchor="middle">PostgreSQL EXPLAIN (ANALYZE, BUFFERS) shows cost, rows, actual time, shared/local buffers hit/read. CMU 15-445 Lec 11–15.</text>
+</svg>

@@ -1,0 +1,178 @@
+---
+title: "40.7 — The Endocrine, Urinary & Reproductive Systems"
+subject: "Anatomy"
+catalog: advanced
+audience_tier: higher-education
+chapter: "40.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 40.7 — The Endocrine, Urinary & Reproductive Systems
+
+*Back to [Subject_Plan](Subject_Plan) | [← 40.6](40.6---The-Respiratory-&-Digestive-Systems) | [40.8 →](40.8---Regional-&-Clinical-Anatomy)*
+
+> **Chapter goal:** Map the endocrine glands and their axes, trace filtration through the nephron, and understand male and female reproductive anatomy — with feedback loops, clinical syndromes, and surgical correlates.
+
+---
+
+## Part A: Endocrine System
+
+## 1. Major Endocrine Glands & Hormones
+
+### 1.1 Hypothalamus–Pituitary Axis
+
+The hypothalamus is the master controller — it integrates neural and hormonal signals and commands the pituitary gland via **releasing and inhibiting hormones** transported down the hypothalamo-hypophyseal portal system.
+
+| Hypothalamic hormone | Target (anterior pituitary) | Anterior pituitary hormone | End organ effect |
+|---------------------|-----------------------------|---------------------------|-----------------|
+| GnRH | Gonadotrophs | LH + FSH | Gonads → sex hormones, gametes |
+| TRH | Thyrotrophs | TSH | Thyroid → T3/T4 |
+| CRH | Corticotrophs | ACTH | Adrenal cortex → cortisol |
+| GHRH / Somatostatin | Somatotrophs | GH | Liver → IGF-1; growth |
+| Dopamine (inhibits) | Lactotrophs | Prolactin | Breast → milk production |
+
+**Posterior pituitary** — not a true gland; stores and releases hypothalamic hormones via axons:
+- **ADH (vasopressin)** — kidney collecting ducts → water reabsorption; vasoconstriction at high levels
+- **Oxytocin** — uterine contraction during labor; milk let-down; bonding behaviors
+
+### 1.2 Thyroid
+- Location: anterior neck, C5–T1; butterfly-shaped, 2 lobes + isthmus
+- **Follicular cells** → T3 (triiodothyronine, active) + T4 (thyroxine, prohormone) — require dietary iodine; stimulated by TSH
+- **Parafollicular (C) cells** → Calcitonin — lowers serum Ca²⁺ (opposes PTH)
+- **Clinical:** Hypothyroidism (Hashimoto's, iodine deficiency) → cold intolerance, weight gain, fatigue, myxedema. Hyperthyroidism (Graves' disease → TSH-receptor antibodies) → heat intolerance, weight loss, exophthalmos, pretibial myxedema, tachycardia.
+
+### 1.3 Parathyroid (4 glands, posterior thyroid surface)
+- **PTH (parathyroid hormone)** — raises serum Ca²⁺: ↑bone resorption (osteoclasts), ↑renal Ca²⁺ reabsorption (DCT), ↑renal phosphate excretion, ↑vitamin D activation (1-alpha-hydroxylase in kidney)
+- **Clinical:** Hypoparathyroidism (post-thyroidectomy) → hypocalcemia → Chvostek's sign, Trousseau's sign, tetany
+
+### 1.4 Adrenal Glands (suprarenal glands)
+- Location: retroperitoneal, superior poles of kidneys; right triangular, left semilunar
+- **Cortex** (outer, mesoderm-derived, 3 zones — "GFR"):
+  - **Zona Glomerulosa** → **Aldosterone** (mineralocorticoid) — stimulated by angiotensin II + ↑K⁺; promotes Na⁺ reabsorption + K⁺/H⁺ secretion in collecting duct → ↑BP
+  - **Zona Fasciculata** → **Cortisol** (glucocorticoid) — stimulated by ACTH; stress hormone; ↑gluconeogenesis, anti-inflammatory, immunosuppressive
+  - **Zona Reticularis** → **Androgens** (DHEA) — weak sex hormones; important adrenal androgen source post-menopause
+- **Medulla** (inner, neuroectoderm-derived):
+  - Chromaffin cells → **Epinephrine (80%) + Norepinephrine (20%)** — catecholamines; released in acute stress; ↑HR, ↑BP, vasodilation of skeletal muscle, glycogenolysis
+- **Clinical:** Cushing's syndrome (↑↑cortisol), Addison's disease (↓↓adrenal cortex), Conn's syndrome (↑↑aldosterone → hypertension + hypokalemia), Pheochromocytoma (adrenal medulla tumor → episodic hypertension, diaphoresis, headache, palpitations — "5 P's")
+
+### 1.5 Pancreatic Islets of Langerhans (Endocrine Pancreas)
+| Cell | Hormone | Action |
+|------|---------|--------|
+| **β cells** (most numerous) | Insulin | ↓blood glucose: ↑glucose uptake (muscle, fat), ↑glycogenesis, ↓gluconeogenesis |
+| **α cells** | Glucagon | ↑blood glucose: ↑glycogenolysis, ↑gluconeogenesis |
+| **δ cells** | Somatostatin | Inhibits both insulin and glucagon; slows GI motility |
+
+---
+
+## Part B: Urinary System
+
+## 2. Kidney Anatomy
+
+### 2.1 Macroscopic Structure
+- **Location:** retroperitoneal, T12–L3; right kidney slightly lower (displaced by liver); each ~11 × 6 × 3 cm
+- **Layers (outside in):** renal fascia (Gerota's fascia) → perirenal fat → true renal capsule
+- **Internal:** cortex (outer, granular — glomeruli + convoluted tubules) + medulla (inner, striated — renal pyramids with collecting ducts → minor calyces → major calyces → renal pelvis → ureter)
+- **Renal sinus:** central cavity containing pelvis, calyceal system, blood vessels, lymphatics, fat
+
+### 2.2 Nephron — The Functional Unit (~1 million per kidney)
+
+```
+Renal corpuscle:
+  Glomerulus (capillary tuft) → filtration across filtration membrane (3 layers)
+  Bowman's capsule → collects filtrate
+    ↓
+Proximal Convoluted Tubule (PCT)
+  → reabsorbs 65% of filtered Na⁺/H₂O, all glucose (SGLT2), amino acids, HCO₃⁻
+    ↓
+Loop of Henle
+  Descending limb → permeable to H₂O only; water leaves → filtrate concentrated
+  Thin ascending limb → permeable to ions; NaCl leaves (impermeable to H₂O)
+  Thick ascending limb → NaK2Cl cotransporter (NKCC2); creates medullary gradient; impermeable to H₂O
+    ↓
+Distal Convoluted Tubule (DCT)
+  → regulated reabsorption: Ca²⁺ (PTH-stimulated), NaCl (thiazide-sensitive NCC)
+    ↓
+Collecting Duct
+  → regulated by ADH (water reabsorption via aquaporin-2) + Aldosterone (Na⁺ reabsorption, K⁺/H⁺ secretion)
+    ↓
+Renal pelvis → ureter → bladder → urethra
+```
+
+### 2.3 Juxtaglomerular Apparatus (JGA)
+- **JG cells** (modified smooth muscle of afferent arteriole) → secrete **Renin** → activates RAAS
+- **Macula densa** (modified DCT cells) → sense ↓NaCl → stimulate renin release
+- **RAAS:** Renin → cleaves angiotensinogen → Angiotensin I → ACE (lung) → Angiotensin II → ↑aldosterone, ↑ADH, vasoconstriction, ↑Na⁺ retention → ↑BP
+
+### 2.4 Ureters, Bladder, Urethra
+- **Ureters** (~30 cm): 3 points of physiological narrowing (where stones lodge): ureteropelvic junction (UPJ), pelvic brim (crossing iliac vessels), ureterovesical junction (UVJ — most common stone impaction site)
+- **Bladder:** detrusor muscle (smooth); trigone (posterior wall, between 2 ureteral orifices + internal urethral orifice) — most common site for bladder cancer
+- **Urethra:** male (~20 cm; prostate → urogenital diaphragm → penile); female (~4 cm; far more susceptible to UTI)
+- **Micturition:** detrusor contraction (parasympathetic S2–S4) + internal sphincter relaxation (sympathetic L1–L2 in males) + external sphincter relaxation (voluntary, pudendal nerve S2–S4)
+
+---
+
+## Part C: Reproductive System
+
+## 3. Male Reproductive Anatomy
+- **Testes:** in scrotum (1–3°C below body temp — spermatogenesis requires lower temperature); seminiferous tubules (spermatogenesis) + Leydig cells (testosterone production, stimulated by LH) + Sertoli cells (support sperm, stimulated by FSH → inhibin)
+- **Ductal system:** seminiferous tubules → **rete testis** → efferent ductules → **epididymis** (maturation + storage of sperm; head → body → tail) → **vas deferens** → ejaculatory duct (at prostate) → **urethra**
+- **Accessory glands:** seminal vesicles (60% of semen volume; fructose — fuel for sperm), prostate (20–30%; citric acid, PSA, zinc; alkalinizes; surrounds urethra at bladder neck), bulbourethral glands (Cowper's glands — pre-ejaculate, lubrication)
+- **Spermatic cord contents (PVVDDTC):** Pampiniform plexus, Vas deferens, Vessels (testicular artery), Ductus deferens, lymphatics, nerves (testicular + ilioinguinal), Cremaster muscle + fascia; passes through inguinal canal
+
+## 4. Female Reproductive Anatomy
+- **Ovaries:** paired, almond-shaped; follicle development → oocyte release (ovulation) + hormone production (estrogen, progesterone)
+- **Fallopian tubes (uterine tubes):** 10–12 cm; infundibulum (fimbriae sweep oocyte) → ampulla (site of fertilization) → isthmus → intramural segment
+- **Uterus:** pear-shaped; fundus (above fallopian tube openings) + body + cervix
+  - **Layers:** endometrium (mucosa; sheds in menstruation) + myometrium (thick smooth muscle) + perimetrium (serosa/visceral peritoneum)
+  - **Position:** typically anteverted + anteflexed
+- **Vagina:** fibromuscular tube; fornices surround cervix (posterior fornix deepest — needle aspiration of cul-de-sac = culdocentesis)
+- **Menstrual cycle:**
+  - **Follicular phase** (days 1–14): FSH → follicle development → ↑estrogen → LH surge (day 14) → ovulation
+  - **Luteal phase** (days 14–28): ruptured follicle → corpus luteum → progesterone dominance → endometrial secretory transformation; if no implantation → corpus luteum regresses → ↓progesterone → menstruation
+
+---
+
+## 5. Clinical Correlates
+
+| Condition | System | Key anatomy |
+|-----------|--------|-------------|
+| **Diabetes mellitus** | Endocrine/pancreas | Type 1: β-cell autoimmune destruction. Type 2: insulin resistance → β-cell exhaustion |
+| **Renal calculi** | Urinary | Calcium oxalate (most common); lodge at 3 ureteric narrowings; colicky flank pain radiating to groin |
+| **BPH** | Male reproductive | Prostate enlargement (transitional zone) → urinary obstruction; ↑PSA |
+| **Ectopic pregnancy** | Female reproductive | Fallopian tube most common site; ampullary; risk of rupture → hemorrhage |
+| **PCOS** | Female endocrine | ↑LH:FSH, ↑androgens, insulin resistance; anovulation, hirsutism, polycystic ovaries |
+| **Addison's disease** | Adrenal cortex | Autoimmune; ↓cortisol + ↓aldosterone → hypotension, hyperkalemia, hyponatremia, hyperpigmentation |
+
+---
+
+## 🔗 Cross-links
+
+- Previous: [40.6 - The Respiratory & Digestive Systems](40.6---The-Respiratory-&-Digestive-Systems)
+- Next: [40.8 - Regional & Clinical Anatomy](40.8---Regional-&-Clinical-Anatomy)
+- [02.2 - Genetics & Inheritance](02.2---Genetics-&-Inheritance) — sex determination genetics
+- [12.4 - Polyvagal Theory & Autonomic Regulation](12.4---Polyvagal-Theory-&-Autonomic-Regulation) — ANS regulation of endocrine stress response
+
+---
+
+## 📚 Primary Sources
+
+- OpenStax *Anatomy and Physiology 2e*, Chapters 17–18, 24–28 — [free](https://openstax.org/details/books/anatomy-and-physiology-2e)
+- Armando Hasudungan — Endocrine + Renal — [YouTube](https://www.youtube.com/@armandohasudungan)
+- TeachMeAnatomy — Urinary System — [teachmeanatomy.info](https://teachmeanatomy.info/abdomen/urinary/)
+
+<details>
+<summary>🧠 Active Recall Prompts</summary>
+
+1. Trace filtration from the glomerulus to the urine in the renal pelvis. Name each segment of the nephron and the primary transport process occurring there.
+2. What are the 3 sites of ureteric narrowing? Which is the most common site for stone impaction?
+3. Draw the hypothalamic-pituitary-adrenal (HPA) axis. What feedback does cortisol exert on the hypothalamus and pituitary?
+4. Name the 3 zones of the adrenal cortex (GFR), their hormone, and one clinical syndrome from excess of each.
+5. What is RAAS? Trace the pathway from low blood pressure to increased aldosterone.
+6. Where does fertilization normally occur in the female reproductive tract? What is the most common site of ectopic pregnancy?
+7. A patient has episodic hypertension, diaphoresis, and headache. Which gland and cell type is responsible? What catecholamines does it secrete?
+
+</details>

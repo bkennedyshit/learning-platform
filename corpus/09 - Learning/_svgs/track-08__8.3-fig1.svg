@@ -1,0 +1,88 @@
+<svg viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="v-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="v-arrow-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    @keyframes flow-v { to { stroke-dashoffset: -10; } }
+    @keyframes pulse-v { 0%, 100% { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); } 50% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); } }
+    .v-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; }
+    .v-box-hi { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; animation: pulse-v 2s ease-in-out infinite; }
+    .v-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .v-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .v-link { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .v-link-hi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 4; animation: flow-v 1s linear infinite; }
+    .v-phase { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .v-zone { fill: var(--interactive-accent, #58a6ff); opacity: 0.06; rx: 8; }
+  </style>
+  <!-- Dev Mode Section -->
+  <rect x="10" y="10" width="345" height="380" class="v-zone"/>
+  <text x="182" y="30" class="v-title">Development (Native ESM)</text>
+  <!-- Source files -->
+  <rect x="30" y="45" width="80" height="28" class="v-box"/>
+  <text x="70" y="63" class="v-label">main.tsx</text>
+  <rect x="120" y="45" width="80" height="28" class="v-box"/>
+  <text x="160" y="63" class="v-label">App.tsx</text>
+  <rect x="210" y="45" width="80" height="28" class="v-box"/>
+  <text x="250" y="63" class="v-label">utils.ts</text>
+  <!-- esbuild pre-bundle -->
+  <rect x="30" y="95" width="260" height="40" class="v-box-hi"/>
+  <text x="160" y="112" class="v-title" font-size="11px">esbuild Pre-bundling</text>
+  <text x="160" y="128" class="v-phase">node_modules → single ESM file per dep</text>
+  <line x1="160" y1="73" x2="160" y2="95" class="v-link-hi" marker-end="url(#v-arrow)"/>
+  <!-- Dev server -->
+  <rect x="50" y="155" width="220" height="45" class="v-box-hi"/>
+  <text x="160" y="173" class="v-title" font-size="11px">Vite Dev Server (Koa)</text>
+  <text x="160" y="190" class="v-phase">Serves files as native ES modules</text>
+  <line x1="160" y1="135" x2="160" y2="155" class="v-link-hi" marker-end="url(#v-arrow)"/>
+  <!-- Browser -->
+  <rect x="60" y="225" width="200" height="50" class="v-box"/>
+  <text x="160" y="245" class="v-label" font-weight="bold">Browser</text>
+  <text x="160" y="262" class="v-phase">import './App.tsx' → HTTP request to dev server</text>
+  <line x1="160" y1="200" x2="160" y2="225" class="v-link-hi" marker-end="url(#v-arrow)"/>
+  <!-- HMR -->
+  <rect x="60" y="295" width="200" height="45" class="v-box-hi"/>
+  <text x="160" y="313" class="v-title" font-size="11px">HMR via WebSocket</text>
+  <text x="160" y="330" class="v-phase">File change → invalidate module → hot update</text>
+  <line x1="160" y1="275" x2="160" y2="295" class="v-link-hi" marker-end="url(#v-arrow)"/>
+  <text x="160" y="365" class="v-phase">~20ms update (only changed module)</text>
+  <!-- Production Section -->
+  <rect x="365" y="10" width="345" height="380" class="v-zone"/>
+  <text x="537" y="30" class="v-title">Production (Rollup Bundle)</text>
+  <!-- Source -->
+  <rect x="385" y="45" width="80" height="28" class="v-box"/>
+  <text x="425" y="63" class="v-label">src/**/*</text>
+  <rect x="475" y="45" width="100" height="28" class="v-box"/>
+  <text x="525" y="63" class="v-label">node_modules</text>
+  <!-- Rollup -->
+  <rect x="395" y="95" width="250" height="55" class="v-box-hi"/>
+  <text x="520" y="112" class="v-title" font-size="11px">Rollup + esbuild minifier</text>
+  <text x="520" y="128" class="v-phase">Tree shaking • Code splitting • CSS extraction</text>
+  <text x="520" y="143" class="v-phase">Asset hashing • Chunk optimization</text>
+  <line x1="520" y1="73" x2="520" y2="95" class="v-link-hi" marker-end="url(#v-arrow)"/>
+  <!-- Output chunks -->
+  <rect x="385" y="175" width="100" height="28" class="v-box"/>
+  <text x="435" y="193" class="v-label">index-[hash].js</text>
+  <rect x="495" y="175" width="100" height="28" class="v-box"/>
+  <text x="545" y="193" class="v-label">vendor-[hash].js</text>
+  <rect x="605" y="175" width="90" height="28" class="v-box"/>
+  <text x="650" y="193" class="v-label">style-[hash].css</text>
+  <line x1="520" y1="150" x2="435" y2="175" class="v-link"/>
+  <line x1="520" y1="150" x2="545" y2="175" class="v-link"/>
+  <line x1="520" y1="150" x2="650" y2="175" class="v-link"/>
+  <!-- CDN -->
+  <rect x="420" y="230" width="200" height="40" class="v-box"/>
+  <text x="520" y="248" class="v-label" font-weight="bold">CDN / Static Host</text>
+  <text x="520" y="263" class="v-phase">Immutable assets with cache-busting hashes</text>
+  <line x1="520" y1="203" x2="520" y2="230" class="v-link" marker-end="url(#v-arrow-m)"/>
+  <!-- Comparison box -->
+  <rect x="390" y="290" width="300" height="80" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="540" y="310" class="v-label" font-weight="bold">Why Two Different Tools?</text>
+  <text x="540" y="330" class="v-phase">Dev: esbuild (Go) → 10-100x faster than Webpack</text>
+  <text x="540" y="348" class="v-phase">Prod: Rollup → superior tree-shaking & chunk control</text>
+  <text x="540" y="366" class="v-phase">Minify: esbuild → faster than Terser</text>
+</svg>

@@ -1,0 +1,805 @@
+---
+title: "Interplanetary Trajectories — Patched Conics"
+subject: "Aerospace Engineering & Orbital Mechanics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "10.7"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 10.7 — Interplanetary Trajectories: Patched Conics
+
+> *"Mars is there, waiting to be reached."*
+> — **Buzz Aldrin**, *Mission to Mars* (2013)
+
+Interplanetary trajectory design extends orbital mechanics to the solar system scale. The **patched-conic method** decomposes the problem into manageable segments: departure hyperbola (planet 1's gravity), heliocentric transfer ellipse (Sun's gravity), and arrival hyperbola (planet 2's gravity). Each segment is a two-body problem "patched" together at the sphere-of-influence boundaries. This chapter develops the complete methodology for computing interplanetary transfers, launch windows, and gravity assists.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Define and compute the **sphere of influence** radius for any planet.
+2. Apply the **patched-conic method** to decompose interplanetary transfers.
+3. Compute **hyperbolic excess velocity** $v_\infty$ at departure and arrival.
+4. Determine **launch windows** using synodic periods and phase angles.
+5. Analyze **gravity-assist** (flyby) maneuvers and compute the velocity change.
+6. Design a complete Earth-to-Mars Hohmann transfer with departure and arrival conditions.
+
+---
+
+## 🖼️ Visual Anchor — Patched-Conic Interplanetary Transfer
+
+![math-10__10.7-fig1](math-10__10.7-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 10.7.1 — Sphere of Influence (SOI)
+
+The **sphere of influence** is the region around a planet where the planet's gravitational influence dominates over the Sun's for trajectory computation purposes. The Laplace SOI radius is:
+
+$$
+r_{SOI} = a_p\left(\frac{m_p}{M_\odot}\right)^{2/5}
+$$
+
+where $a_p$ is the planet's orbital semi-major axis and $m_p/M_\odot$ is the planet-to-Sun mass ratio.
+
+| Planet | $r_{SOI}$ (km) | $r_{SOI}$ (planet radii) |
+|:---:|:---:|:---:|
+| Earth | 924,000 | 145 |
+| Mars | 577,000 | 170 |
+| Jupiter | 48,200,000 | 674 |
+| Venus | 616,000 | 102 |
+
+### Definition 10.7.2 — Hyperbolic Excess Velocity
+
+The **hyperbolic excess velocity** $v_\infty$ is the speed of the spacecraft relative to a planet at the boundary of its SOI (effectively at infinity in the planet-centered two-body problem):
+
+$$
+v_\infty = \sqrt{v^2 - v_{\text{esc}}^2} = \sqrt{v^2 - \frac{2\mu_p}{r}}
+$$
+
+At the SOI boundary ($r \to \infty$ in the two-body approximation):
+
+$$
+\varepsilon_{\text{hyp}} = \frac{v_\infty^2}{2} = \frac{v_p^2}{2} - \frac{\mu_p}{r_p} > 0
+$$
+
+### Definition 10.7.3 — C3 (Characteristic Energy)
+
+The **characteristic energy** $C_3$ is twice the specific energy of the departure hyperbola:
+
+$$
+C_3 = v_\infty^2
+$$
+
+$C_3$ is the standard metric for launch vehicle capability. Units: km²/s².
+
+### Definition 10.7.4 — Synodic Period
+
+The **synodic period** $T_{\text{syn}}$ is the time between successive alignments of two planets (same relative geometry):
+
+$$
+\frac{1}{T_{\text{syn}}} = \left|\frac{1}{T_1} - \frac{1}{T_2}\right|
+$$
+
+For Earth-Mars: $T_{\text{syn}} = \frac{T_E \cdot T_M}{T_M - T_E} = \frac{1.0 \times 1.881}{0.881} = 2.135$ years.
+
+### Definition 10.7.5 — Patched-Conic Method
+
+The **patched-conic method** decomposes an interplanetary trajectory into three two-body problems:
+
+1. **Departure phase:** Spacecraft escapes planet 1 on a hyperbolic trajectory (planet 1 is the central body).
+2. **Heliocentric phase:** Spacecraft follows an elliptical (or hyperbolic) transfer orbit around the Sun.
+3. **Arrival phase:** Spacecraft enters planet 2's SOI on a hyperbolic approach (planet 2 is the central body).
+
+The solutions are "patched" at the SOI boundaries by matching velocities.
+
+### Definition 10.7.6 — Gravity Assist (Flyby)
+
+A **gravity assist** uses a planet's gravitational field to change the spacecraft's heliocentric velocity without expending propellant. The spacecraft's speed relative to the planet is unchanged ($v_\infty$ is conserved), but the direction is rotated by the **turn angle** $\delta$:
+
+$$
+\delta = 2\arcsin\frac{1}{e} = 2\arcsin\frac{1}{1 + r_p v_\infty^2/\mu_p}
+$$
+
+### Definition 10.7.7 — Departure Geometry
+
+At departure from a parking orbit of radius $r_0$ around planet 1:
+
+$$
+v_{\text{dep}} = \sqrt{v_\infty^2 + \frac{2\mu_1}{r_0}} = \sqrt{v_\infty^2 + v_{\text{esc}}^2(r_0)}
+$$
+
+The required ΔV from the parking orbit:
+
+$$
+\Delta V_{\text{dep}} = v_{\text{dep}} - v_{\text{circ}}(r_0) = \sqrt{v_\infty^2 + \frac{2\mu_1}{r_0}} - \sqrt{\frac{\mu_1}{r_0}}
+$$
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 10.7.A1 — Patched-Conic Approximation
+
+Within each SOI, only the local planet's gravity acts on the spacecraft. Outside all SOIs, only the Sun's gravity acts. The transition at SOI boundaries is instantaneous (velocity is continuous, position is at the SOI radius).
+
+### Axiom 10.7.A2 — Coplanar Planetary Orbits
+
+For first-order analysis, all planetary orbits are assumed circular and coplanar (ecliptic plane). Inclination corrections are applied as plane-change ΔV.
+
+### Axiom 10.7.A3 — Impulsive Departure/Arrival
+
+Burns to enter/exit the heliocentric transfer are impulsive (applied at the parking orbit, not during the heliocentric coast).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 10.7.1 — Heliocentric Transfer Velocities
+
+**Statement:** For a Hohmann transfer from planet 1 (radius $R_1$ from Sun) to planet 2 (radius $R_2$):
+
+Velocity at departure point (perihelion of transfer):
+
+$$
+v_{t,1} = \sqrt{\mu_\odot\left(\frac{2}{R_1} - \frac{2}{R_1+R_2}\right)} = \sqrt{\frac{2\mu_\odot R_2}{R_1(R_1+R_2)}}
+$$
+
+Velocity at arrival point (aphelion of transfer):
+
+$$
+v_{t,2} = \sqrt{\mu_\odot\left(\frac{2}{R_2} - \frac{2}{R_1+R_2}\right)} = \sqrt{\frac{2\mu_\odot R_1}{R_2(R_1+R_2)}}
+$$
+
+### Lemma 10.7.2 — Hyperbolic Excess Velocity at Departure
+
+**Statement:** The hyperbolic excess velocity at departure from planet 1 is the difference between the heliocentric transfer velocity and the planet's orbital velocity:
+
+$$
+v_{\infty,\text{dep}} = |v_{t,1} - v_{p,1}|
+$$
+
+where $v_{p,1} = \sqrt{\mu_\odot/R_1}$ is planet 1's circular orbital speed.
+
+For an outbound transfer ($R_2 > R_1$): $v_{t,1} > v_{p,1}$, so the departure is in the planet's velocity direction (prograde).
+
+### Lemma 10.7.3 — Hyperbolic Excess Velocity at Arrival
+
+**Statement:** At arrival at planet 2:
+
+$$
+v_{\infty,\text{arr}} = |v_{p,2} - v_{t,2}|
+$$
+
+where $v_{p,2} = \sqrt{\mu_\odot/R_2}$. For an outbound Hohmann: $v_{t,2} < v_{p,2}$, so the spacecraft arrives slower than the planet.
+
+### Lemma 10.7.4 — Departure ΔV from Parking Orbit
+
+**Statement:** The ΔV to depart from a circular parking orbit of radius $r_0$ around planet 1 onto the departure hyperbola:
+
+$$
+\Delta V_{\text{dep}} = \sqrt{v_{\infty,\text{dep}}^2 + \frac{2\mu_1}{r_0}} - \sqrt{\frac{\mu_1}{r_0}}
+$$
+
+<details>
+<summary>🔍 Derivation</summary>
+
+On the parking orbit: $v_{\text{circ}} = \sqrt{\mu_1/r_0}$.
+
+On the departure hyperbola at periapsis $r_0$ (Vis-Viva with $a \lt  0$, or energy conservation):
+
+$$
+\frac{v_{\text{dep}}^2}{2} - \frac{\mu_1}{r_0} = \frac{v_\infty^2}{2}
+$$
+
+$$
+v_{\text{dep}} = \sqrt{v_\infty^2 + \frac{2\mu_1}{r_0}}
+$$
+
+The ΔV is the difference (both tangential at periapsis):
+
+$$
+\Delta V = v_{\text{dep}} - v_{\text{circ}} = \sqrt{v_\infty^2 + \frac{2\mu_1}{r_0}} - \sqrt{\frac{\mu_1}{r_0}}
+$$
+
+$\blacksquare$
+
+</details>
+
+### Lemma 10.7.5 — Gravity-Assist Turn Angle
+
+**Statement:** For a hyperbolic flyby with periapsis distance $r_p$ and excess speed $v_\infty$:
+
+$$
+e = 1 + \frac{r_p v_\infty^2}{\mu_p}
+$$
+
+$$
+\delta = 2\arcsin\frac{1}{e}
+$$
+
+The heliocentric velocity change magnitude:
+
+$$
+|\Delta\mathbf{v}_\infty| = 2v_\infty\sin\frac{\delta}{2} = \frac{2v_\infty}{e}
+$$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 10.7.1 — Interplanetary Hohmann Transfer Time
+
+The transfer time from planet 1 to planet 2 via Hohmann:
+
+$$
+t_H = \pi\sqrt{\frac{a_t^3}{\mu_\odot}} = \pi\sqrt{\frac{(R_1+R_2)^3}{8\mu_\odot}}
+$$
+
+### Theorem 10.7.2 — Phase Angle at Departure
+
+For the spacecraft to arrive at planet 2's orbit when planet 2 is at the arrival point, planet 2 must be at phase angle $\phi_0$ ahead of planet 1 at departure:
+
+$$
+\phi_0 = \pi - \omega_2 t_H = \pi - \frac{2\pi}{T_2}\cdot\pi\sqrt{\frac{(R_1+R_2)^3}{8\mu_\odot}}
+$$
+
+### Theorem 10.7.3 — Launch Window Frequency
+
+Launch windows for a given interplanetary transfer repeat with the synodic period:
+
+$$
+T_{\text{syn}} = \frac{1}{|1/T_1 - 1/T_2|}
+$$
+
+### Theorem 10.7.4 — Oberth Effect
+
+A propulsive maneuver (ΔV) is most effective when performed at the point of highest velocity (deepest in a gravity well). The energy gain from a burn of magnitude $\Delta V$ at speed $v$ is:
+
+$$
+\Delta\varepsilon = v\,\Delta V + \frac{\Delta V^2}{2}
+$$
+
+This is maximized for large $v$ (periapsis of a deep gravity well), explaining why departure burns from low parking orbits are more efficient than burns at the SOI boundary.
+
+### Theorem 10.7.5 — Gravity-Assist Velocity Change (Heliocentric)
+
+In the heliocentric frame, a gravity assist changes the spacecraft velocity by rotating $\mathbf{v}_\infty$ by angle $\delta$ in the flyby plane. The maximum heliocentric speed gain occurs when the outgoing $v_\infty$ is aligned with the planet's velocity:
+
+$$
+\Delta v_{\text{helio,max}} = 2v_\infty\sin\frac{\delta}{2}
+$$
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Sphere of Influence Radius
+
+**Goal:** Derive $r_{SOI} = a_p(m_p/M_\odot)^{2/5}$.
+
+**Step 1:** Consider a spacecraft at distance $r$ from a planet and distance $\rho$ from the Sun. The planet orbits at distance $a_p$ from the Sun.
+
+**Step 2:** The perturbation ratio compares the disturbing acceleration to the primary acceleration. In the planet-centered frame, the Sun's tidal perturbation is approximately:
+
+$$
+a_{\text{Sun,tidal}} \approx \frac{\mu_\odot r}{a_p^3}
+$$
+
+The planet's gravitational acceleration:
+
+$$
+a_{\text{planet}} = \frac{\mu_p}{r^2}
+$$
+
+**Step 3:** In the Sun-centered frame, the planet's perturbation at distance $\rho \approx a_p$ from the Sun:
+
+$$
+a_{\text{planet,pert}} \approx \frac{\mu_p}{r^2}
+$$
+
+The Sun's acceleration:
+
+$$
+a_{\text{Sun}} = \frac{\mu_\odot}{a_p^2}
+$$
+
+**Step 4:** The SOI is defined where the ratio of perturbation to primary is equal in both frames:
+
+$$
+\frac{a_{\text{Sun,tidal}}}{a_{\text{planet}}} = \frac{a_{\text{planet,pert}}}{a_{\text{Sun}}}
+$$
+
+$$
+\frac{\mu_\odot r/a_p^3}{\mu_p/r^2} = \frac{\mu_p/r^2}{\mu_\odot/a_p^2}
+$$
+
+$$
+\frac{\mu_\odot r^3}{\mu_p a_p^3} = \frac{\mu_p a_p^2}{\mu_\odot r^2}
+$$
+
+$$
+\frac{\mu_\odot^2 r^5}{\mu_p^2 a_p^5} = 1
+$$
+
+$$
+r^5 = a_p^5\frac{\mu_p^2}{\mu_\odot^2} = a_p^5\left(\frac{m_p}{M_\odot}\right)^2
+$$
+
+$$
+r_{SOI} = a_p\left(\frac{m_p}{M_\odot}\right)^{2/5}
+$$
+
+$\blacksquare$
+
+### 5.2 Complete Earth-to-Mars Transfer Derivation
+
+**Goal:** Compute all velocities and ΔVs for an Earth-Mars Hohmann transfer.
+
+**Given:** $R_E = 1.0$ AU = $1.496\times10^8$ km, $R_M = 1.524$ AU = $2.279\times10^8$ km, $\mu_\odot = 1.327\times10^{11}$ km³/s².
+
+**Step 1:** Earth and Mars orbital velocities:
+
+$$
+v_E = \sqrt{\frac{\mu_\odot}{R_E}} = \sqrt{\frac{1.327\times10^{11}}{1.496\times10^8}} = \sqrt{886.8} = 29.78 \text{ km/s}
+$$
+
+$$
+v_M = \sqrt{\frac{\mu_\odot}{R_M}} = \sqrt{\frac{1.327\times10^{11}}{2.279\times10^8}} = \sqrt{582.3} = 24.13 \text{ km/s}
+$$
+
+**Step 2:** Transfer ellipse semi-major axis:
+
+$$
+a_t = \frac{R_E + R_M}{2} = \frac{1.496 + 2.279}{2}\times10^8 = 1.888\times10^8 \text{ km}
+$$
+
+**Step 3:** Heliocentric velocities on transfer orbit:
+
+At Earth (perihelion):
+
+$$
+v_{t,1} = \sqrt{\mu_\odot\left(\frac{2}{R_E} - \frac{1}{a_t}\right)} = \sqrt{1.327\times10^{11}\left(\frac{2}{1.496\times10^8} - \frac{1}{1.888\times10^8}\right)}
+$$
+
+$$
+= \sqrt{1.327\times10^{11}(1.337\times10^{-8} - 5.297\times10^{-9})} = \sqrt{1.327\times10^{11}\times8.07\times10^{-9}}
+$$
+
+$$
+= \sqrt{1071} = 32.72 \text{ km/s}
+$$
+
+At Mars (aphelion):
+
+$$
+v_{t,2} = \sqrt{1.327\times10^{11}\left(\frac{2}{2.279\times10^8} - \frac{1}{1.888\times10^8}\right)}
+$$
+
+$$
+= \sqrt{1.327\times10^{11}(8.777\times10^{-9} - 5.297\times10^{-9})} = \sqrt{1.327\times10^{11}\times3.48\times10^{-9}}
+$$
+
+$$
+= \sqrt{461.8} = 21.49 \text{ km/s}
+$$
+
+**Step 4:** Hyperbolic excess velocities:
+
+At Earth departure:
+
+$$
+v_{\infty,E} = v_{t,1} - v_E = 32.72 - 29.78 = 2.94 \text{ km/s}
+$$
+
+At Mars arrival:
+
+$$
+v_{\infty,M} = v_M - v_{t,2} = 24.13 - 21.49 = 2.64 \text{ km/s}
+$$
+
+**Step 5:** Departure ΔV from 200 km LEO ($r_0 = 6571$ km, $\mu_E = 398600.4$ km³/s²):
+
+$$
+v_{\text{dep}} = \sqrt{v_{\infty,E}^2 + \frac{2\mu_E}{r_0}} = \sqrt{2.94^2 + \frac{2\times398600.4}{6571}} = \sqrt{8.64 + 121.3} = \sqrt{129.9} = 11.40 \text{ km/s}
+$$
+
+$$
+v_{\text{circ}} = \sqrt{\frac{398600.4}{6571}} = 7.79 \text{ km/s}
+$$
+
+$$
+\Delta V_{\text{dep}} = 11.40 - 7.79 = 3.61 \text{ km/s}
+$$
+
+**Step 6:** Arrival ΔV to capture into 300 km Mars orbit ($r_0 = 3690$ km, $\mu_M = 42828.4$ km³/s²):
+
+$$
+v_{\text{arr}} = \sqrt{v_{\infty,M}^2 + \frac{2\mu_M}{r_0}} = \sqrt{2.64^2 + \frac{2\times42828.4}{3690}} = \sqrt{6.97 + 23.21} = \sqrt{30.18} = 5.49 \text{ km/s}
+$$
+
+$$
+v_{\text{circ,M}} = \sqrt{\frac{42828.4}{3690}} = 3.41 \text{ km/s}
+$$
+
+$$
+\Delta V_{\text{arr}} = 5.49 - 3.41 = 2.08 \text{ km/s}
+$$
+
+**Step 7:** Total mission ΔV:
+
+$$
+\Delta V_{\text{total}} = 3.61 + 2.08 = 5.69 \text{ km/s}
+$$
+
+**Step 8:** Transfer time:
+
+$$
+t_H = \pi\sqrt{\frac{a_t^3}{\mu_\odot}} = \pi\sqrt{\frac{(1.888\times10^8)^3}{1.327\times10^{11}}} = \pi\sqrt{\frac{6.731\times10^{24}}{1.327\times10^{11}}} = \pi\sqrt{5.072\times10^{13}}
+$$
+
+$$
+= \pi\times7.122\times10^6 = 2.238\times10^7 \text{ s} = 259 \text{ days}
+$$
+
+$\blacksquare$
+
+### 5.3 Derivation of Gravity-Assist Velocity Gain
+
+**Goal:** Show that a flyby can change heliocentric speed by up to $2v_\infty\sin(\delta/2)$.
+
+**Step 1:** In the planet-centered frame, the spacecraft enters with velocity $\mathbf{v}_{\infty,\text{in}}$ and exits with $\mathbf{v}_{\infty,\text{out}}$. The magnitudes are equal: $|v_{\infty,\text{in}}| = |v_{\infty,\text{out}}| = v_\infty$.
+
+The direction rotates by the turn angle $\delta$.
+
+**Step 2:** In the heliocentric frame, the spacecraft velocity is:
+
+$$
+\mathbf{v}_{\text{helio}} = \mathbf{v}_{\text{planet}} + \mathbf{v}_\infty
+$$
+
+Before flyby: $\mathbf{v}_1 = \mathbf{v}_p + \mathbf{v}_{\infty,\text{in}}$
+
+After flyby: $\mathbf{v}_2 = \mathbf{v}_p + \mathbf{v}_{\infty,\text{out}}$
+
+**Step 3:** The change in heliocentric velocity:
+
+$$
+\Delta\mathbf{v} = \mathbf{v}_2 - \mathbf{v}_1 = \mathbf{v}_{\infty,\text{out}} - \mathbf{v}_{\infty,\text{in}}
+$$
+
+**Step 4:** Since $|\mathbf{v}_{\infty,\text{in}}| = |\mathbf{v}_{\infty,\text{out}}| = v_\infty$ and the angle between them is $\delta$:
+
+$$
+|\Delta\mathbf{v}| = 2v_\infty\sin\frac{\delta}{2}
+$$
+
+(Isoceles triangle with two sides $v_\infty$ and included angle $\pi - \delta$, giving the third side by the law of cosines.)
+
+**Step 5:** Maximum heliocentric speed gain occurs when $\mathbf{v}_{\infty,\text{out}}$ is aligned with $\mathbf{v}_p$:
+
+$$
+v_2 = v_p + v_\infty \quad \text{(maximum)}
+$$
+
+$$
+\Delta v_{\max} = v_2 - v_1 \leq 2v_\infty\sin\frac{\delta}{2}
+$$
+
+$\blacksquare$
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 10.7.1 — Earth-Mars Hohmann Transfer (Summary)
+
+From Derivation 5.2:
+
+| Parameter | Value |
+|-----------|-------|
+| Transfer time | 259 days |
+| $v_{\infty,\text{dep}}$ | 2.94 km/s |
+| $v_{\infty,\text{arr}}$ | 2.64 km/s |
+| $C_3$ (departure) | 8.64 km²/s² |
+| $\Delta V_{\text{dep}}$ (from 200 km LEO) | 3.61 km/s |
+| $\Delta V_{\text{arr}}$ (to 300 km Mars orbit) | 2.08 km/s |
+| Total $\Delta V$ | 5.69 km/s |
+| Phase angle at departure | 44.4° |
+
+Phase angle: $\phi = \pi - \omega_M t_H = \pi - \frac{2\pi}{T_M}\times t_H = \pi - \frac{2\pi}{5.94\times10^7}\times2.238\times10^7 = \pi - 2.366 = 0.776$ rad = 44.4°.
+
+---
+
+### Example 10.7.2 — Jupiter Gravity Assist
+
+**Given:** Spacecraft approaches Jupiter with $v_\infty = 10$ km/s. Periapsis altitude $h_p = 200{,}000$ km above Jupiter's cloud tops ($R_J = 71{,}492$ km). $\mu_J = 1.267\times10^8$ km³/s².
+
+**Find:** Turn angle and maximum heliocentric velocity gain.
+
+**Solution:**
+
+Step 1: Periapsis radius: $r_p = 71492 + 200000 = 271{,}492$ km.
+
+Step 2: Eccentricity:
+
+$$
+e = 1 + \frac{r_p v_\infty^2}{\mu_J} = 1 + \frac{271492 \times 100}{1.267\times10^8} = 1 + 0.2143 = 1.214
+$$
+
+Step 3: Turn angle:
+
+$$
+\delta = 2\arcsin\frac{1}{e} = 2\arcsin\frac{1}{1.214} = 2\arcsin(0.8234) = 2\times55.4° = 110.8°
+$$
+
+Step 4: Maximum velocity change:
+
+$$
+|\Delta v| = 2v_\infty\sin\frac{\delta}{2} = 2\times10\times\sin(55.4°) = 20\times0.823 = 16.5 \text{ km/s}
+$$
+
+This is an enormous "free" velocity change — equivalent to a massive propulsive burn!
+
+---
+
+### Example 10.7.3 — Venus Flyby for Solar Probe
+
+**Given:** Spacecraft in heliocentric orbit encounters Venus ($v_p = 35.0$ km/s) with $v_\infty = 7$ km/s. Flyby periapsis $r_p = 6500$ km. $\mu_V = 324{,}859$ km³/s².
+
+**Find:** Turn angle and post-flyby heliocentric speed (assuming optimal geometry for deceleration toward Sun).
+
+**Solution:**
+
+Step 1: Eccentricity:
+
+$$
+e = 1 + \frac{6500\times49}{324859} = 1 + 0.981 = 1.981
+$$
+
+Step 2: Turn angle:
+
+$$
+\delta = 2\arcsin(1/1.981) = 2\arcsin(0.505) = 2\times30.3° = 60.6°
+$$
+
+Step 3: Velocity change magnitude:
+
+$$
+|\Delta v| = 2\times7\times\sin(30.3°) = 14\times0.505 = 7.07 \text{ km/s}
+$$
+
+Step 4: For maximum deceleration (to lower perihelion), the outgoing $v_\infty$ is directed opposite to Venus's motion. Pre-flyby heliocentric speed (assuming incoming $v_\infty$ is roughly along Venus's velocity):
+
+$$
+v_1 \approx v_p + v_\infty = 35 + 7 = 42 \text{ km/s (approaching from behind)}
+$$
+
+Post-flyby (deflected to reduce speed):
+
+$$
+v_2 \approx v_1 - |\Delta v| = 42 - 7.07 = 34.9 \text{ km/s}
+$$
+
+(Actual geometry requires vector analysis, but this illustrates the principle.)
+
+---
+
+### Example 10.7.4 — Synodic Period and Launch Windows
+
+**Given:** Earth period $T_E = 365.25$ days, Mars period $T_M = 687$ days.
+
+**Find:** Synodic period and next launch window after a missed opportunity.
+
+**Solution:**
+
+$$
+T_{\text{syn}} = \frac{T_E \times T_M}{T_M - T_E} = \frac{365.25\times687}{687-365.25} = \frac{250{,}927}{321.75} = 780 \text{ days} = 2.135 \text{ years}
+$$
+
+If a launch window is missed, the next opportunity occurs approximately 2 years and 50 days later.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+
+- [10.1 - Two-Body Problem & Kepler's Laws](10.1---Two-Body-Problem-&-Kepler's-Laws) — Vis-Viva equation for heliocentric orbits
+- [10.3 - Orbital Maneuvers - Hohmann Transfers](10.3---Orbital-Maneuvers---Hohmann-Transfers) — Hohmann transfer applied at planetary scale
+- [10.4 - Rocket Equation & Propulsion Systems](10.4---Rocket-Equation-&-Propulsion-Systems) — ΔV budget drives propellant requirements
+- [10.2 - Orbital Elements & Conic Sections](10.2---Orbital-Elements-&-Conic-Sections) — Hyperbolic orbit geometry
+- [4.4 - Central Forces & Keplerian Orbits](4.4---Central-Forces-&-Keplerian-Orbits) — Central force framework
+
+### Authoritative External Sources
+
+| Source | Description |
+|--------|-------------|
+| Curtis, H.D. *Orbital Mechanics for Engineering Students*, Ch. 8 | Interplanetary trajectories |
+| Bate, Mueller & White, Ch. 7–8 | Lunar and interplanetary flight |
+| MIT OCW 16.346, Lectures 15–18 | Patched conics and Lambert's problem |
+| Vallado, Ch. 12 | Interplanetary mission design |
+| NASA JPL Horizons System | Ephemeris data for mission planning |
+| Battin, Ch. 11 | Lambert's theorem and advanced transfers |
+
+
+
+
+---
+
+## 📎 Appendix — Extended Derivations & Additional Examples
+
+### A.1 Derivation of the Oberth Effect (Quantitative)
+
+**Goal:** Show that a burn deep in a gravity well produces more orbital energy change than the same burn at infinity.
+
+**Step 1:** Specific orbital energy after a burn of $\Delta V$ at speed $v$:
+
+$$
+\varepsilon_{\text{after}} = \frac{(v + \Delta V)^2}{2} - \frac{\mu}{r}
+$$
+
+$$
+= \frac{v^2}{2} + v\Delta V + \frac{\Delta V^2}{2} - \frac{\mu}{r}
+$$
+
+$$
+= \varepsilon_{\text{before}} + v\Delta V + \frac{\Delta V^2}{2}
+$$
+
+**Step 2:** The energy gain is:
+
+$$
+\Delta\varepsilon = v\Delta V + \frac{\Delta V^2}{2}
+$$
+
+For fixed $\Delta V$, this is maximized when $v$ is largest — i.e., at periapsis (deepest in the gravity well).
+
+**Step 3:** Comparison. Burn at periapsis of a parking orbit ($v_p = \sqrt{2\mu/r_p - \mu/a}$) vs. burn at SOI boundary ($v \approx v_\infty$):
+
+At periapsis: $\Delta\varepsilon_p = v_p\Delta V + \Delta V^2/2$
+
+At infinity: $\Delta\varepsilon_\infty = v_\infty\Delta V + \Delta V^2/2$
+
+Since $v_p \gg v_\infty$ (e.g., 11 km/s vs 3 km/s for Earth departure), the periapsis burn is far more effective.
+
+**Numerical example:** $\Delta V = 1$ km/s.
+- At LEO periapsis ($v_p = 11$ km/s): $\Delta\varepsilon = 11\times1 + 0.5 = 11.5$ km²/s²
+- At SOI ($v_\infty = 3$ km/s): $\Delta\varepsilon = 3\times1 + 0.5 = 3.5$ km²/s²
+
+The periapsis burn is 3.3× more effective! $\blacksquare$
+
+### A.2 Lambert's Problem (Overview)
+
+**Lambert's Theorem:** The transfer time between two position vectors $\mathbf{r}_1$ and $\mathbf{r}_2$ depends only on:
+- The sum of distances: $r_1 + r_2$
+- The chord length: $c = |\mathbf{r}_2 - \mathbf{r}_1|$
+- The semi-major axis: $a$
+
+$$
+\sqrt{\mu}\,\Delta t = a^{3/2}\left[(\alpha - \sin\alpha) - (\beta - \sin\beta)\right]
+$$
+
+where $\sin(\alpha/2) = \sqrt{s/(2a)}$, $\sin(\beta/2) = \sqrt{(s-c)/(2a)}$, and $s = (r_1+r_2+c)/2$.
+
+Lambert's problem is the foundation of **orbit determination** and **trajectory optimization** — given two positions and a transfer time, find the connecting orbit. It is solved iteratively (universal variable formulation).
+
+### A.3 Type I and Type II Transfers
+
+- **Type I** ($\Delta\nu < 180°$): Short-way transfer. The spacecraft travels less than half an orbit.
+- **Type II** ($\Delta\nu > 180°$): Long-way transfer. The spacecraft travels more than half an orbit.
+
+For a Hohmann transfer, $\Delta\nu = 180°$ exactly (the boundary case).
+
+### Example 10.7.5 — C3 Requirements for Various Missions
+
+| Mission | $v_\infty$ (km/s) | $C_3$ (km²/s²) | $\Delta V$ from LEO (km/s) |
+|---------|:---:|:---:|:---:|
+| Earth→Mars (Hohmann) | 2.94 | 8.65 | 3.61 |
+| Earth→Venus (Hohmann) | 2.49 | 6.20 | 3.47 |
+| Earth→Jupiter (Hohmann) | 8.79 | 77.3 | 6.31 |
+| Earth→Saturn (Hohmann) | 10.29 | 105.9 | 7.28 |
+| Solar escape | 12.34 | 152.3 | 8.75 |
+
+These values assume circular coplanar planetary orbits and departure from 200 km LEO.
+
+### Example 10.7.6 — Voyager 2 Gravity-Assist Chain
+
+Voyager 2 used a rare "Grand Tour" alignment to visit all four outer planets:
+
+1. **Jupiter flyby** (1979): $v_\infty = 10.0$ km/s, $\delta \approx 100°$, gained ~10 km/s heliocentric
+2. **Saturn flyby** (1981): $v_\infty = 7.5$ km/s, $\delta \approx 70°$, redirected toward Uranus
+3. **Uranus flyby** (1986): $v_\infty = 5.5$ km/s, $\delta \approx 50°$, redirected toward Neptune
+4. **Neptune flyby** (1989): $v_\infty = 10.0$ km/s, close flyby for science
+
+Without gravity assists, the mission would have required $\Delta V > 20$ km/s (impossible with chemical propulsion). With assists, only the initial Earth departure burn (~6 km/s from LEO) was needed.
+
+### A.4 Pork-Chop Plots
+
+A **pork-chop plot** is a contour map of $C_3$ (or total $\Delta V$) as a function of departure date and arrival date. The characteristic shape (resembling a pork chop) reveals:
+- **Optimal launch windows** (minimum $C_3$ contours)
+- **Type I vs Type II** transfer regions
+- **Sensitivity** to launch date errors
+
+Mission designers use pork-chop plots to select launch periods that minimize propellant requirements while satisfying spacecraft and launch vehicle constraints.
+
+
+
+
+### A.5 Aerobraking and Aerocapture
+
+**Aerobraking** uses repeated passes through a planet's upper atmosphere to gradually reduce orbital energy, replacing propulsive ΔV with atmospheric drag. Used by Mars Reconnaissance Orbiter and Mars Odyssey.
+
+**Aerocapture** is a single deep atmospheric pass that captures a spacecraft from a hyperbolic approach into a bound orbit. This can save 1–2 km/s of ΔV but requires a heat shield and precise guidance.
+
+ΔV savings for Mars orbit insertion:
+- Propulsive capture: $\Delta V \approx 2.1$ km/s
+- Aerocapture: $\Delta V \approx 0.1$ km/s (only for orbit adjustment after capture)
+- Savings: ~2.0 km/s → reduces propellant mass by factor of $e^{2.0/3.1} \approx 1.9$
+
+### A.6 Tisserand's Parameter and Gravity-Assist Design
+
+**Tisserand's parameter** $T_p$ is a quasi-conserved quantity during a gravity assist (conserved in the circular restricted three-body problem):
+
+$$
+T_p = \frac{a_p}{a} + 2\sqrt{\frac{a(1-e^2)}{a_p}}\cos i
+$$
+
+where $a_p$ is the planet's semi-major axis and $(a, e, i)$ are the spacecraft's heliocentric elements.
+
+Since $T_p$ is approximately conserved during a flyby, it constrains the post-flyby orbit. **Tisserand graphs** plot $r_p$ vs $r_a$ for constant $T_p$, allowing mission designers to chain multiple gravity assists.
+
+### Example 10.7.7 — Mars Arrival Options
+
+**Given:** Spacecraft arrives at Mars with $v_\infty = 2.64$ km/s. $\mu_M = 42{,}828.4$ km³/s², $R_M = 3390$ km.
+
+**Compare:** (a) Capture into 300 km circular orbit, (b) Capture into 300 km × 33,000 km ellipse, (c) Aerocapture.
+
+**Solution:**
+
+(a) Circular orbit ($r = 3690$ km):
+
+$$
+v_{\text{arr}} = \sqrt{2.64^2 + 2\times42828.4/3690} = \sqrt{6.97 + 23.21} = 5.49 \text{ km/s}
+$$
+
+$$
+v_c = \sqrt{42828.4/3690} = 3.41 \text{ km/s}
+$$
+
+$$
+\Delta V_a = 5.49 - 3.41 = 2.08 \text{ km/s}
+$$
+
+(b) Elliptical orbit ($r_p = 3690$ km, $r_a = 36390$ km, $a = 20040$ km):
+
+$$
+v_{\text{ellipse,p}} = \sqrt{42828.4(2/3690 - 1/20040)} = \sqrt{42828.4\times5.42\times10^{-4} - 2.14\times10^{-5}}
+$$
+
+$$
+= \sqrt{42828.4\times5.22\times10^{-4}} = \sqrt{22.35} = 4.73 \text{ km/s}
+$$
+
+$$
+\Delta V_b = 5.49 - 4.73 = 0.76 \text{ km/s}
+$$
+
+(c) Aerocapture: $\Delta V_c \approx 0.05$ km/s (orbit trim only)
+
+Propellant savings (b) vs (a): factor of $e^{(2.08-0.76)/3.1} = e^{0.43} = 1.53$ (35% less propellant).
+

@@ -1,0 +1,95 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .ts64-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; }
+    .ts64-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts64-accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; animation: pulseGlow 2.5s infinite alternate; }
+    .ts64-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts64-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts64-note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts64-section { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .ts64-good { stroke: #4ade80; animation: glowGreen 2s infinite alternate; }
+    .ts64-bad { stroke: #f87171; stroke-dasharray: 4,3; animation: shake 4s infinite; }
+    line { stroke-dasharray: 6 4; animation: flowDown 1s linear infinite; opacity: 0.7; }
+
+    @keyframes flowDown { to { stroke-dashoffset: -10; } }
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); }
+      to { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes glowGreen {
+      from { filter: drop-shadow(0 0 2px #4ade80); }
+      to { filter: drop-shadow(0 0 6px #4ade80); }
+    }
+    @keyframes shake {
+      0%, 90%, 100% { transform: translateX(0); }
+      92%, 96% { transform: translateX(-2px); }
+      94%, 98% { transform: translateX(2px); }
+    }
+  </style>
+
+  <text x="350" y="22" class="ts64-title">OOP vs FP Decision Tree in TypeScript</text>
+
+  <!-- Decision start -->
+  <rect x="250" y="40" width="200" height="35" class="ts64-accent"/>
+  <text x="350" y="62" class="ts64-label">Does it have state?</text>
+
+  <!-- Yes branch -->
+  <line x1="300" y1="75" x2="150" y2="105" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="210" y="88" class="ts64-note">YES</text>
+
+  <rect x="50" y="105" width="200" height="35" class="ts64-box"/>
+  <text x="150" y="127" class="ts64-label">Mutable over time?</text>
+
+  <!-- Yes-Yes: Class -->
+  <line x1="100" y1="140" x2="80" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="75" y="158" class="ts64-note">YES</text>
+  <rect x="20" y="172" width="130" height="45" class="ts64-accent ts64-good"/>
+  <text x="85" y="192" class="ts64-label">Use a Class</text>
+  <text x="85" y="208" class="ts64-note">DB conn, cache, service</text>
+
+  <!-- Yes-No: Object + as const -->
+  <line x1="200" y1="140" x2="220" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="220" y="158" class="ts64-note">NO</text>
+  <rect x="160" y="172" width="140" height="45" class="ts64-box"/>
+  <text x="230" y="192" class="ts64-label">Object + as const</text>
+  <text x="230" y="208" class="ts64-note">Config, constants</text>
+
+  <!-- No branch -->
+  <line x1="400" y1="75" x2="530" y2="105" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="480" y="88" class="ts64-note">NO</text>
+
+  <rect x="430" y="105" width="200" height="35" class="ts64-box"/>
+  <text x="530" y="127" class="ts64-label">Multiple variants?</text>
+
+  <!-- No-Yes: Discriminated Union -->
+  <line x1="480" y1="140" x2="440" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="445" y="158" class="ts64-note">YES</text>
+  <rect x="360" y="172" width="170" height="45" class="ts64-accent ts64-good"/>
+  <text x="445" y="192" class="ts64-label">Discriminated Union</text>
+  <text x="445" y="208" class="ts64-note">Shape, Event, State</text>
+
+  <!-- No-No: Pure Functions -->
+  <line x1="580" y1="140" x2="600" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="600" y="158" class="ts64-note">NO</text>
+  <rect x="540" y="172" width="140" height="45" class="ts64-accent ts64-good"/>
+  <text x="610" y="192" class="ts64-label">Pure Functions</text>
+  <text x="610" y="208" class="ts64-note">Transform, validate</text>
+
+  <!-- Anti-patterns -->
+  <text x="350" y="250" class="ts64-section">avoid these patterns</text>
+  <rect x="30" y="260" width="180" height="40" class="ts64-box ts64-bad"/>
+  <text x="120" y="278" class="ts64-label">Deep inheritance (>2)</text>
+  <text x="120" y="293" class="ts64-note">Fragile, hard to reason about</text>
+
+  <rect x="230" y="260" width="200" height="40" class="ts64-box ts64-bad"/>
+  <text x="330" y="278" class="ts64-label">Static utility classes</text>
+  <text x="330" y="293" class="ts64-note">Just use functions (no state!)</text>
+
+  <rect x="450" y="260" width="200" height="40" class="ts64-box ts64-bad"/>
+  <text x="550" y="278" class="ts64-label">God objects / managers</text>
+  <text x="550" y="293" class="ts64-note">Split into focused services</text>
+
+  <!-- Bottom recommendation -->
+  <rect x="100" y="315" width="500" height="30" class="ts64-accent"/>
+  <text x="350" y="335" class="ts64-label">Default: Functions + Discriminated Unions. Classes only for stateful services.</text>
+</svg>

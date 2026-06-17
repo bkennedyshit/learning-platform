@@ -1,0 +1,40 @@
+<svg viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="rb-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rb-body{fill:var(--background-secondary, #161b22);stroke:var(--text-normal, #c9d1d9);stroke-width:2;opacity:0.8}
+    .rb-ax{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none}
+    .rb-spin{stroke:var(--text-accent, #79c0ff);stroke-width:2;fill:none;stroke-dasharray:200;stroke-dashoffset:200;animation:rbSpin 3s linear infinite}
+    .rb-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .rb-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    @keyframes rbSpin{to{stroke-dashoffset:0}}
+  </style>
+  <!-- Body (ellipsoid) -->
+  <ellipse cx="200" cy="180" rx="100" ry="60" class="rb-body"/>
+  <!-- Principal axes -->
+  <line x1="200" y1="180" x2="340" y2="180" class="rb-ax" marker-end="url(#rb-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="345" y="175" class="rb-acc">ê₁ (I₁)</text>
+  <line x1="200" y1="180" x2="200" y2="60" class="rb-ax" marker-end="url(#rb-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="210" y="55" class="rb-acc">ê₃ (I₃)</text>
+  <line x1="200" y1="180" x2="140" y2="240" class="rb-ax" marker-end="url(#rb-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="115" y="255" class="rb-acc">ê₂ (I₂)</text>
+  <!-- Angular velocity -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 200 180; 15 200 180; 0 200 180; -5 200 180; 0 200 180" dur="4s" repeatCount="indefinite"/>
+    <line x1="200" y1="180" x2="260" y2="100" stroke="var(--text-accent, #79c0ff)" stroke-width="2.5" fill="none" marker-end="url(#rb-arr)" style="color:var(--text-accent, #79c0ff)"/>
+    <text x="265" y="95" class="rb-lbl" fill="var(--text-accent, #79c0ff)" font-weight="bold">ω</text>
+    <!-- Rotation arc -->
+    <path d="M230 140 A 40 40 0 0 1 250 170" class="rb-spin"/>
+  </g>
+  <!-- Info box -->
+  <rect x="370" y="60" width="175" height="180" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="457" y="85" class="rb-acc" text-anchor="middle">Euler's Equations</text>
+  <text x="457" y="115" class="rb-lbl" text-anchor="middle">I₁ω̇₁ = (I₂−I₃)ω₂ω₃ + τ₁</text>
+  <text x="457" y="140" class="rb-lbl" text-anchor="middle">I₂ω̇₂ = (I₃−I₁)ω₃ω₁ + τ₂</text>
+  <text x="457" y="165" class="rb-lbl" text-anchor="middle">I₃ω̇₃ = (I₁−I₂)ω₁ω₂ + τ₃</text>
+  <text x="457" y="200" class="rb-acc" text-anchor="middle">L = Iω</text>
+  <text x="457" y="225" class="rb-lbl" text-anchor="middle">(body frame)</text>
+</svg>

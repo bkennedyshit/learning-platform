@@ -1,0 +1,155 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .math   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--interactive-accent, #58a6ff); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .panel  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.3; }
+    .asr    { fill: var(--background-secondary, #161b22); stroke: #51cf66; stroke-width: 1.3; }
+    .tts    { fill: var(--background-secondary, #161b22); stroke: #ffd93d; stroke-width: 1.3; }
+    .chain  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .axis   { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+    .wave   { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; }
+  </style>
+  <defs>
+    <marker id="a7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Speech &amp; Voice Processing — ASR (Whisper) &amp; TTS Foundations</text>
+
+  <!-- ===== TOP: ASR Pipeline ===== -->
+  <rect x="16" y="36" width="688" height="46" rx="4" class="asr"/>
+  <text x="360" y="52" class="label" text-anchor="middle" font-weight="bold" fill="#51cf66">ASR Pipeline: Microphone → Text (Whisper-style)</text>
+
+  <rect x="26"  y="60" width="72" height="18" rx="3" class="chain"/>
+  <text x="62"  y="73" class="small" text-anchor="middle">Audio WAV</text>
+  <line x1="98" y1="69" x2="114" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="114" y="60" width="80" height="18" rx="3" class="chain"/>
+  <text x="154" y="73" class="small" text-anchor="middle">Resample 16 kHz</text>
+  <line x1="194" y1="69" x2="210" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="210" y="60" width="90" height="18" rx="3" class="chain"/>
+  <text x="255" y="73" class="small" text-anchor="middle">Log-Mel (80 bins)</text>
+  <line x1="300" y1="69" x2="316" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="316" y="60" width="80" height="18" rx="3" class="chain"/>
+  <text x="356" y="73" class="small" text-anchor="middle">Conv Encoder</text>
+  <line x1="396" y1="69" x2="412" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="412" y="60" width="90" height="18" rx="3" class="chain"/>
+  <text x="457" y="73" class="small" text-anchor="middle">Transformer Enc</text>
+  <line x1="502" y1="69" x2="518" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="518" y="60" width="90" height="18" rx="3" class="chain"/>
+  <text x="563" y="73" class="small" text-anchor="middle">Transformer Dec</text>
+  <line x1="608" y1="69" x2="624" y2="69" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="624" y="60" width="72" height="18" rx="3" class="chain"/>
+  <text x="660" y="73" class="small" text-anchor="middle">Text Tokens</text>
+
+  <!-- ===== TTS Pipeline ===== -->
+  <rect x="16" y="96" width="688" height="46" rx="4" class="tts"/>
+  <text x="360" y="112" class="label" text-anchor="middle" font-weight="bold" fill="#ffd93d">TTS Pipeline: Text → Speech (XTTS/VITS-style)</text>
+
+  <rect x="26"  y="120" width="72" height="18" rx="3" class="chain"/>
+  <text x="62"  y="133" class="small" text-anchor="middle">Text Input</text>
+  <line x1="98" y1="129" x2="114" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="114" y="120" width="80" height="18" rx="3" class="chain"/>
+  <text x="154" y="133" class="small" text-anchor="middle">G2P / Phonemes</text>
+  <line x1="194" y1="129" x2="210" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="210" y="120" width="90" height="18" rx="3" class="chain"/>
+  <text x="255" y="133" class="small" text-anchor="middle">Duration Model</text>
+  <line x1="300" y1="129" x2="316" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="316" y="120" width="90" height="18" rx="3" class="chain"/>
+  <text x="361" y="133" class="small" text-anchor="middle">Acoustic Model</text>
+  <line x1="406" y1="129" x2="422" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="422" y="120" width="80" height="18" rx="3" class="chain"/>
+  <text x="462" y="133" class="small" text-anchor="middle">Mel Spectrogram</text>
+  <line x1="502" y1="129" x2="518" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="518" y="120" width="80" height="18" rx="3" class="chain"/>
+  <text x="558" y="133" class="small" text-anchor="middle">Vocoder (HiFi-GAN)</text>
+  <line x1="598" y1="129" x2="614" y2="129" class="arr" marker-end="url(#a7)"/>
+
+  <rect x="614" y="120" width="82" height="18" rx="3" class="chain"/>
+  <text x="655" y="133" class="small" text-anchor="middle">Audio Waveform</text>
+
+  <!-- ===== BOTTOM LEFT: Pitch detection methods ===== -->
+  <rect x="16" y="158" width="330" height="248" rx="4" class="panel"/>
+  <text x="181" y="178" class="label" text-anchor="middle" font-weight="bold">Pitch Detection Methods</text>
+
+  <!-- Autocorrelation diagram -->
+  <text x="30" y="198" class="small" font-weight="bold">Autocorrelation (YIN / AMDF):</text>
+  <text x="30" y="212" class="math">R[τ] = Σ x[n]·x[n+τ]</text>
+  <text x="30" y="226" class="small">Peak at τ = T₀ (fundamental period)</text>
+  <text x="30" y="240" class="small">Pitch = fs / τ₀  (in Hz)</text>
+
+  <!-- Mini autocorrelation plot -->
+  <line x1="30"  y1="290" x2="330" y2="290" class="axis" marker-end="url(#a7)"/>
+  <line x1="40"  y1="295" x2="40"  y2="252" class="axis"/>
+  <text x="334" y="294" class="small">τ</text>
+  <text x="30" y="250" class="small">R[τ]</text>
+  <!-- Autocorrelation shape: peak at 0, dip, peak at T0 -->
+  <path d="M 40 255
+    C 60 255, 80 290, 100 290
+    C 110 290, 115 282, 130 270
+    C 145 258, 160 290, 180 290
+    C 200 290, 215 285, 230 275
+    C 245 265, 260 290, 285 290
+    C 300 290, 315 288, 326 290" class="wave"/>
+  <!-- T0 marker -->
+  <line x1="130" y1="270" x2="130" y2="295" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+  <text x="130" y="306" class="small" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">T₀=f₀⁻¹</text>
+
+  <text x="30" y="325" class="small" font-weight="bold">CREPE (2018): CNN on raw waveform</text>
+  <text x="30" y="339" class="small">→ state-of-art monophonic pitch tracker</text>
+  <text x="30" y="355" class="small" font-weight="bold">PYIN: probabilistic YIN with HMM</text>
+  <text x="30" y="369" class="small">→ librosa.yin() / librosa.pyin()</text>
+  <text x="30" y="387" class="small">Fundamental freq (f₀) + harmonics (2f₀, 3f₀…)</text>
+  <text x="30" y="400" class="small">Voice = f₀ + overtone series (timbre)</text>
+
+  <!-- ===== BOTTOM RIGHT: STFT spectrogram ===== -->
+  <rect x="360" y="158" width="344" height="248" rx="4" class="box"/>
+  <text x="532" y="178" class="label" text-anchor="middle" font-weight="bold">STFT &amp; Spectrogram — Time-Freq View</text>
+
+  <text x="370" y="196" class="math">STFT[m,k] = Σₙ x[n]·w[n−mH]·e^{-j2πkn/N}</text>
+  <text x="370" y="212" class="small">m: frame index,  H: hop size,  w: window</text>
+  <text x="370" y="228" class="small">Spectrogram = |STFT[m,k]|²  (power)</text>
+  <text x="370" y="244" class="small">Log-mel spec = log(Mel_fb · power_spec)</text>
+
+  <!-- Simulated spectrogram heatmap -->
+  <rect x="370" y="254" width="320" height="120" fill="#0d1117" rx="2"/>
+  <!-- Time axis bands with colour gradient (brighter = more energy) -->
+  <!-- Low freq bands (bottom, brighter) -->
+  <rect x="370" y="350" width="320" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.6"/>
+  <rect x="370" y="326" width="320" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.4"/>
+  <rect x="370" y="302" width="320" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.25"/>
+  <rect x="370" y="278" width="320" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.1"/>
+  <rect x="370" y="254" width="320" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.05"/>
+  <!-- Harmonic bright stripes -->
+  <rect x="390" y="254" width="14" height="120" fill="#51cf66" opacity="0.4"/>
+  <rect x="430" y="254" width="10" height="120" fill="#51cf66" opacity="0.3"/>
+  <rect x="470" y="254" width="8"  height="120" fill="#51cf66" opacity="0.2"/>
+  <rect x="510" y="254" width="14" height="120" fill="#ffd93d" opacity="0.35"/>
+  <rect x="550" y="254" width="10" height="120" fill="#ffd93d" opacity="0.25"/>
+  <rect x="600" y="254" width="12" height="120" fill="#51cf66" opacity="0.3"/>
+  <rect x="640" y="254" width="9"  height="120" fill="#51cf66" opacity="0.2"/>
+
+  <!-- Axes overlay -->
+  <line x1="370" y1="374" x2="690" y2="374" class="axis" marker-end="url(#a7)"/>
+  <line x1="370" y1="374" x2="370" y2="254" class="axis" marker-end="url(#a7)"/>
+  <text x="694" y="378" class="small">Time →</text>
+  <text x="372" y="252" class="small">f↑</text>
+
+  <text x="532" y="394" class="small" text-anchor="middle">Bright = high energy; horizontal = sustained tone</text>
+  <text x="532" y="406" class="small" text-anchor="middle">librosa.stft() / librosa.display.specshow()</text>
+</svg>

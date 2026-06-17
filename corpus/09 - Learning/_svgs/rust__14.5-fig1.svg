@@ -1,0 +1,68 @@
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .box-python { fill: none; stroke: #f39c12; stroke-width: 2; rx: 6; }
+    .box-rust { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .section { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); font-weight: bold; }
+    .thread-bar { rx: 3; }
+  </style>
+
+  <text x="300" y="20" class="title" text-anchor="middle">Rust Concurrency vs Python GIL</text>
+
+  <!-- Python side -->
+  <text x="150" y="45" class="label-bold" text-anchor="middle" fill="#f39c12">Python (GIL-constrained)</text>
+  <rect x="30" y="55" width="240" height="130" class="box-python"/>
+
+  <text x="40" y="75" class="section">Threading (GIL serializes):</text>
+  <rect x="40" y="82" width="100" height="12" class="thread-bar" fill="#f39c12" opacity="0.6"/>
+  <rect x="140" y="82" width="60" height="12" class="thread-bar" fill="#f39c12" opacity="0.3"/>
+  <rect x="40" y="98" width="60" height="12" class="thread-bar" fill="#f39c12" opacity="0.3"/>
+  <rect x="100" y="98" width="100" height="12" class="thread-bar" fill="#f39c12" opacity="0.6"/>
+  <text x="215" y="95" class="label">← interleaved</text>
+  <text x="215" y="108" class="label">   NOT parallel</text>
+
+  <text x="40" y="130" class="section">True parallelism requires:</text>
+  <text x="40" y="145" class="label">multiprocessing (separate memory)</text>
+  <text x="40" y="160" class="label">Serialization overhead: pickle/IPC</text>
+  <text x="40" y="175" class="label">No shared mutable state</text>
+
+  <!-- Rust side -->
+  <text x="450" y="45" class="label-bold" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">Rust (No GIL)</text>
+  <rect x="330" y="55" width="240" height="130" class="box-rust"/>
+
+  <text x="340" y="75" class="section">Threading (true parallel):</text>
+  <rect x="340" y="82" width="100" height="12" class="thread-bar" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <rect x="340" y="98" width="100" height="12" class="thread-bar" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <rect x="340" y="114" width="100" height="12" class="thread-bar" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <text x="450" y="95" class="label">← all run</text>
+  <text x="450" y="108" class="label">   simultaneously</text>
+  <text x="450" y="121" class="label">   on separate cores</text>
+
+  <text x="340" y="145" class="section">Safety guarantee:</text>
+  <text x="340" y="160" class="label">Send/Sync traits = compile-time</text>
+  <text x="340" y="175" class="label">Data races impossible by design</text>
+
+  <!-- Send/Sync explanation -->
+  <rect x="30" y="200" width="540" height="80" class="box"/>
+  <text x="300" y="220" class="label-bold" text-anchor="middle">Send &amp; Sync: The Compile-Time Race Prevention</text>
+  <text x="40" y="240" class="label">Send: type can be moved to another thread (ownership transfer is safe)</text>
+  <text x="40" y="256" class="label">Sync: type can be shared between threads via &amp;T (concurrent reads are safe)</text>
+  <text x="40" y="272" class="label" fill="var(--interactive-accent, #58a6ff)">Rc&lt;T&gt;: NOT Send (non-atomic refcount) → Arc&lt;T&gt;: Send+Sync (atomic refcount)</text>
+
+  <!-- Async comparison -->
+  <rect x="30" y="295" width="250" height="70" class="box"/>
+  <text x="155" y="315" class="label-bold" text-anchor="middle">Python asyncio</text>
+  <text x="40" y="333" class="label">Single-threaded event loop</text>
+  <text x="40" y="349" class="label">Good for I/O, useless for CPU</text>
+  <text x="40" y="362" class="label">One task at a time per thread</text>
+
+  <rect x="320" y="295" width="250" height="70" class="box-accent"/>
+  <text x="445" y="315" class="label-bold" text-anchor="middle">Rust Tokio</text>
+  <text x="330" y="333" class="label">Multi-threaded work-stealing</text>
+  <text x="330" y="349" class="label">Thousands of tasks across cores</text>
+  <text x="330" y="362" class="label">spawn_blocking for CPU work</text>
+</svg>

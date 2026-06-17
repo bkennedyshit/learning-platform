@@ -1,0 +1,47 @@
+<svg viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent, #58a6ff)" />
+    </marker>
+  </defs>
+  <style>
+    .cs-b{fill:none;stroke:var(--interactive-accent, #58a6ff);stroke-width:1.5;}
+    .ns-b{fill:none;stroke:var(--text-accent, #79c0ff);stroke-width:1.5;}
+    .cs-f{fill:var(--interactive-accent, #58a6ff);opacity:0.12;}
+    .ns-f{fill:var(--text-accent, #79c0ff);opacity:0.12;}
+    .sl{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-normal, #c9d1d9);}
+    .sla{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--interactive-accent, #58a6ff);}
+    .slb{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-accent, #79c0ff);}
+    .ax2{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none;}
+  </style>
+  <!-- Column space as plane through origin -->
+  <text x="10" y="20" class="sla" font-weight="bold">Column space C(A): plane through origin</text>
+  <ellipse cx="150" cy="90" rx="120" ry="55" class="cs-f"/>
+  <ellipse cx="150" cy="90" rx="120" ry="55" class="cs-b"/>
+  <line x1="150" y1="35" x2="150" y2="145" class="ax2"/>
+  <line x1="30" y1="90" x2="270" y2="90" class="ax2"/>
+  <text x="155" y="85" class="sl">O</text>
+  <text x="200" y="55" class="sla">span{a₁, a₂}</text>
+  <!-- Animated vector in C(A) -->
+  <line x1="150" y1="90" x2="220" y2="60" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" marker-end="url(#arrow)">
+    <animate attributeName="x2" values="150;220;150" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="90;60;90" dur="3s" repeatCount="indefinite" />
+  </line>
+  <!-- Null space geometry -->
+  <text x="290" y="20" class="slb" font-weight="bold">Null space N(A): kernel (solutions to Ax=0)</text>
+  <line x1="360" y1="15" x2="400" y2="145" class="ns-b"/>
+  <text x="410" y="90" class="slb">N(A) = line/plane</text>
+  <text x="290" y="110" class="sl">Each x in N(A) is</text>
+  <text x="290" y="126" class="sl">mapped to 0 by A.</text>
+  <!-- Animated collapse to 0 in N(A) -->
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 360 15 L 380 80" />
+    <animate attributeName="opacity" values="1;0" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 400 145 L 380 80" />
+    <animate attributeName="opacity" values="1;0" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="380" cy="80" r="4" fill="var(--text-accent, #79c0ff)" />
+  <text x="390" y="85" class="slb">0</text>
+</svg>

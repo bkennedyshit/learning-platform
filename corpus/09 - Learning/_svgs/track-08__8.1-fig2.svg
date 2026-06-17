@@ -1,0 +1,11 @@
+<svg viewBox="0 0 400 200">
+      {data.map((point, i) => (
+        <circle
+          key={i}
+          cx={point.x}
+          cy={point.y}
+          r={4}
+          onClick={() => onPointClick(point)}
+        />
+      ))}
+    </svg>

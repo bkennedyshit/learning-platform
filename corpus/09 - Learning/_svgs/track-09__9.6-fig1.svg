@@ -1,0 +1,78 @@
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="bim-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .bim-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; transition: all 0.2s; }
+    .bim-box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .bim-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .bim-sub { font-family: Inter, system-ui, sans-serif; font-size: 8px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .bim-conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 4 4; animation: bimFlow 1.5s linear infinite; }
+    @keyframes bimFlow { to { stroke-dashoffset: -16; } }
+    .bim-title { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .bim-stat { font-family: 'Courier New', monospace; font-size: 9px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+  </style>
+
+  <text x="360" y="18" class="bim-title">AEC → VR Pipeline</text>
+
+  <!-- Stage 1: BIM Authoring -->
+  <rect x="10" y="35" width="100" height="65" class="bim-box"/>
+  <text x="60" y="55" class="bim-label">BIM Authoring</text>
+  <text x="60" y="70" class="bim-sub">Revit / ArchiCAD</text>
+  <text x="60" y="82" class="bim-sub">Rhino / Tekla</text>
+  <text x="60" y="94" class="bim-stat">~50M polys</text>
+
+  <line x1="110" y1="67" x2="140" y2="67" class="bim-conn" marker-end="url(#bim-arrow)"/>
+
+  <!-- Stage 2: Export -->
+  <rect x="140" y="35" width="100" height="65" class="bim-box"/>
+  <text x="190" y="55" class="bim-label">Export</text>
+  <text x="190" y="70" class="bim-sub">IFC / FBX / glTF</text>
+  <text x="190" y="82" class="bim-sub">+ metadata JSON</text>
+  <text x="190" y="94" class="bim-stat">~20M polys</text>
+
+  <line x1="240" y1="67" x2="270" y2="67" class="bim-conn" marker-end="url(#bim-arrow)"/>
+
+  <!-- Stage 3: Optimization -->
+  <rect x="270" y="35" width="120" height="65" class="bim-box"/>
+  <text x="330" y="55" class="bim-label">Optimization</text>
+  <text x="330" y="70" class="bim-sub">Decimation / LOD</text>
+  <text x="330" y="82" class="bim-sub">Atlas / Bake / Batch</text>
+  <text x="330" y="94" class="bim-stat">~2M polys</text>
+
+  <line x1="390" y1="67" x2="420" y2="67" class="bim-conn" marker-end="url(#bim-arrow)"/>
+
+  <!-- Stage 4: Engine Import -->
+  <rect x="420" y="35" width="110" height="65" class="bim-box"/>
+  <text x="475" y="55" class="bim-label">Engine Import</text>
+  <text x="475" y="70" class="bim-sub">Unity / Unreal</text>
+  <text x="475" y="82" class="bim-sub">Datasmith / PiXYZ</text>
+  <text x="475" y="94" class="bim-stat">materials + LODs</text>
+
+  <line x1="530" y1="67" x2="560" y2="67" class="bim-conn" marker-end="url(#bim-arrow)"/>
+
+  <!-- Stage 5: VR Deploy -->
+  <rect x="560" y="35" width="140" height="65" class="bim-box"/>
+  <text x="630" y="55" class="bim-label">VR Deployment</text>
+  <text x="630" y="70" class="bim-sub">Quest / PCVR / WebXR</text>
+  <text x="630" y="82" class="bim-sub">90 FPS, metadata UI</text>
+  <text x="630" y="94" class="bim-stat">≤500K visible polys</text>
+
+  <!-- Bottom: Key metrics -->
+  <rect x="50" y="130" width="620" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="360" y="150" class="bim-label">VR Performance Budgets (Quest 2 / standalone)</text>
+  <text x="360" y="168" class="bim-sub">Draw calls: ≤100 | Triangles: ≤500K visible | Textures: ≤256MB VRAM</text>
+  <text x="360" y="183" class="bim-sub">Frame time: ≤11.1ms (90Hz) | Overdraw: ≤2x | Shader complexity: ≤128 ALU ops/frag</text>
+  <text x="360" y="198" class="bim-sub">Optimization ratio: 50M → 500K = 100:1 reduction required for standalone VR</text>
+
+  <!-- Bottom row: tools -->
+  <text x="360" y="240" class="bim-label">Common Pipeline Tools</text>
+  <text x="100" y="260" class="bim-sub">IfcOpenShell</text>
+  <text x="200" y="260" class="bim-sub">Blender</text>
+  <text x="300" y="260" class="bim-sub">Simplygon</text>
+  <text x="400" y="260" class="bim-sub">PiXYZ</text>
+  <text x="500" y="260" class="bim-sub">Datasmith</text>
+  <text x="620" y="260" class="bim-sub">Cesium/3D Tiles</text>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #1a202c; }
+      .text-title { font-family: 'Inter', sans-serif; font-weight: bold; font-size: 20px; fill: #ffffff; }
+      .text-label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; fill: #ffffff; text-anchor: middle; }
+      .box { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
+      .box-highlight { fill: #2b6cb0; stroke: #63b3ed; }
+      .line { stroke: #718096; stroke-width: 2; fill: none; stroke-dasharray: 4; }
+      .packet { fill: #48bb78; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" class="bg" rx="12"/>
+  <text x="400" y="40" text-anchor="middle" class="text-title">Cache Layer Cake &amp; Request Flow</text>
+  
+  <g transform="translate(50, 150)">
+    <!-- Nodes -->
+    <rect x="0" y="0" width="80" height="50" class="box"/>
+    <text x="40" y="30" class="text-label">Browser</text>
+    
+    <rect x="150" y="-30" width="100" height="110" class="box box-highlight"/>
+    <text x="200" y="0" class="text-label">CDN Edge</text>
+    <text x="200" y="25" class="text-label" font-size="12" fill="#a0aec0">Cloudflare</text>
+    
+    <rect x="320" y="0" width="90" height="50" class="box"/>
+    <text x="365" y="30" class="text-label">Load Bal.</text>
+    
+    <rect x="470" y="0" width="80" height="50" class="box"/>
+    <text x="510" y="30" class="text-label">App</text>
+    
+    <rect x="610" y="-50" width="80" height="50" class="box box-highlight"/>
+    <text x="650" y="-20" class="text-label">Redis</text>
+    
+    <rect x="610" y="50" width="80" height="50" class="box"/>
+    <text x="650" y="80" class="text-label">DB</text>
+    
+    <!-- Connections -->
+    <path d="M 80 25 L 150 25" class="line"/>
+    <path d="M 250 25 L 320 25" class="line"/>
+    <path d="M 410 25 L 470 25" class="line"/>
+    <path d="M 550 25 L 580 25 L 580 -25 L 610 -25" class="line"/>
+    <path d="M 550 25 L 580 25 L 580 75 L 610 75" class="line"/>
+    
+    <!-- Animated Packets -->
+    <!-- Packet Cache Miss (Full round trip) -->
+    <circle r="6" class="packet">
+      <animate attributeName="cx" values="80; 150; 250; 320; 410; 470; 550; 610; 650; 610; 550; 470; 410; 320; 250; 150; 80" keyTimes="0; 0.05; 0.1; 0.15; 0.2; 0.25; 0.3; 0.35; 0.4; 0.45; 0.5; 0.55; 0.6; 0.65; 0.7; 0.75; 1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="25; 25; 25; 25; 25; 25; 25; -25; -25; -25; 25; 25; 25; 25; 25; 25; 25" keyTimes="0; 0.05; 0.1; 0.15; 0.2; 0.25; 0.3; 0.35; 0.4; 0.45; 0.5; 0.55; 0.6; 0.65; 0.7; 0.75; 1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1; 1; 1; 1; 1; 1; 1; 1; 1; 0; 0; 0; 0; 0; 0; 0; 0" keyTimes="0; 0.05; 0.1; 0.15; 0.2; 0.25; 0.3; 0.35; 0.4; 0.45; 0.5; 0.55; 0.6; 0.65; 0.7; 0.75; 1" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Packet DB Fetch on Miss -->
+    <circle r="6" fill="#e53e3e">
+      <animate attributeName="cx" values="610; 550; 550; 610; 650; 610; 550; 470; 410; 320; 250; 150; 80" keyTimes="0; 0.1; 0.1; 0.2; 0.3; 0.4; 0.5; 0.6; 0.7; 0.8; 0.9; 0.95; 1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="-25; -25; 25; 75; 75; 75; 25; 25; 25; 25; 25; 25; 25" keyTimes="0; 0.1; 0.1; 0.2; 0.3; 0.4; 0.5; 0.6; 0.7; 0.8; 0.9; 0.95; 1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0; 0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0" keyTimes="0; 0.1; 0.1; 0.2; 0.3; 0.4; 0.5; 0.6; 0.7; 0.8; 0.9; 0.95; 1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Cache Hit (CDN) -->
+    <circle r="6" fill="#4299e1">
+      <animate attributeName="cx" values="80; 150; 200; 150; 80" keyTimes="0; 0.2; 0.4; 0.6; 1" dur="3s" begin="3s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="25; 25; 25; 25; 25" keyTimes="0; 0.2; 0.4; 0.6; 1" dur="3s" begin="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0; 1; 1; 1; 0" keyTimes="0; 0.2; 0.4; 0.6; 1" dur="3s" begin="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <text x="400" y="320" class="text-label" fill="#a0aec0" font-size="12">Red: Cache Miss (Origin DB hit)  |  Blue: Cache Hit (CDN Edge)</text>
+</svg>

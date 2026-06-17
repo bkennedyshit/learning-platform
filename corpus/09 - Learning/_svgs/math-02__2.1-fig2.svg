@@ -1,0 +1,43 @@
+<svg viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="sa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="sb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+    <marker id="sc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .sv1{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.8;fill:none;marker-end:url(#sa);}
+    .sv2{stroke:var(--text-accent, #79c0ff);stroke-width:2.2;fill:none;marker-end:url(#sb);}
+    .sv3{stroke:var(--text-muted, #8b949e);stroke-width:2;fill:none;marker-end:url(#sc);}
+    .sl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+  </style>
+  <text x="10" y="40" class="sl" font-weight="bold" opacity="0">v<animate attributeName="opacity" to="1" begin="0.2s" dur="0.3s" fill="freeze"/></text>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.2s" dur="0.01s" fill="freeze" />
+    <line x1="30" y1="35" x2="130" y2="35" class="sv1">
+      <animate attributeName="x2" values="30;130" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="140" y="40" class="sl" fill="var(--interactive-accent, #58a6ff)" opacity="0">v (base)<animate attributeName="opacity" to="1" begin="0.7s" dur="0.3s" fill="freeze"/></text>
+  <text x="10" y="80" class="sl" font-weight="bold" opacity="0">2v<animate attributeName="opacity" to="1" begin="1.2s" dur="0.3s" fill="freeze"/></text>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="1.2s" dur="0.01s" fill="freeze" />
+    <line x1="30" y1="75" x2="230" y2="75" class="sv2">
+      <animate attributeName="x2" values="30;230" begin="1.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="240" y="80" class="sl" fill="var(--text-accent, #79c0ff)" opacity="0">2v (stretched)<animate attributeName="opacity" to="1" begin="1.7s" dur="0.3s" fill="freeze"/></text>
+  <text x="10" y="120" class="sl" font-weight="bold" opacity="0">−v<animate attributeName="opacity" to="1" begin="2.2s" dur="0.3s" fill="freeze"/></text>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="2.2s" dur="0.01s" fill="freeze" />
+    <line x1="130" y1="115" x2="30" y2="115" class="sv3">
+      <animate attributeName="x2" values="130;30" begin="2.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="240" y="120" class="sl" fill="var(--text-muted, #8b949e)" opacity="0">−v (reversed)<animate attributeName="opacity" to="1" begin="2.7s" dur="0.3s" fill="freeze"/></text>
+</svg>

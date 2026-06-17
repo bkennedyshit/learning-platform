@@ -1,0 +1,44 @@
+<svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="lg-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .lg-ax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none}
+    .lg-surf{stroke:var(--interactive-accent, #58a6ff);stroke-width:2;fill:var(--interactive-accent, #58a6ff);fill-opacity:0.08}
+    .lg-path{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none;stroke-dasharray:500;stroke-dashoffset:500;animation:lgDraw 4s linear infinite}
+    .lg-vec{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.2;fill:none;cursor:pointer;transition:all .2s}
+    .lg-vec:hover{stroke-width:3.2;filter:drop-shadow(0 0 3px var(--interactive-accent, #58a6ff))}
+    .lg-dot{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5}
+    .lg-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .lg-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    @keyframes lgDraw{to{stroke-dashoffset:0}}
+  </style>
+  <!-- Constraint surface (ellipse representing config space) -->
+  <ellipse cx="200" cy="200" rx="150" ry="120" class="lg-surf"/>
+  <text x="200" y="340" class="lg-acc" text-anchor="middle">Configuration Space M</text>
+  <!-- Generalized coordinate curve on surface -->
+  <path id="q-traj" d="M80 220 Q 150 140, 250 180 Q 320 210, 300 260" class="lg-path"/>
+  <!-- Point on trajectory -->
+  <g>
+    <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
+      <mpath href="#q-traj"/>
+    </animateMotion>
+    <circle cx="0" cy="0" r="5" class="lg-dot"/>
+    <text x="10" y="-10" class="lg-lbl">q(t)</text>
+    <!-- Tangent vector (generalized velocity) -->
+    <line x1="0" y1="0" x2="60" y2="0" class="lg-vec" marker-end="url(#lg-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="65" y="0" class="lg-acc">q̇</text>
+  </g>
+  <!-- Right panel: L = T - U -->
+  <rect x="380" y="40" width="200" height="140" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="480" y="70" class="lg-acc" text-anchor="middle" font-size="15">Lagrangian</text>
+  <text x="480" y="100" class="lg-acc" text-anchor="middle" font-size="16">L = T − U</text>
+  <text x="480" y="130" class="lg-lbl" text-anchor="middle">T = ½ Σ mᵢⱼ q̇ᵢq̇ⱼ</text>
+  <text x="480" y="155" class="lg-lbl" text-anchor="middle">U = U(q₁,...,qₙ)</text>
+  <!-- Bottom box: EL equation -->
+  <rect x="380" y="200" width="200" height="80" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="480" y="225" class="lg-acc" text-anchor="middle">Euler-Lagrange</text>
+  <text x="480" y="255" class="lg-acc" text-anchor="middle" font-size="12">d/dt(∂L/∂q̇ₖ) − ∂L/∂qₖ = 0</text>
+</svg>

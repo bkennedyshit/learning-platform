@@ -1,0 +1,199 @@
+---
+title: "40.5 — The Cardiovascular & Lymphatic System"
+subject: "Anatomy"
+catalog: advanced
+audience_tier: higher-education
+chapter: "40.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 40.5 — The Cardiovascular & Lymphatic System
+
+*Back to [Subject_Plan](Subject_Plan) | [← 40.4](40.4---The-Nervous-System) | [40.6 →](40.6---The-Respiratory-&-Digestive-Systems)*
+
+> **Chapter goal:** Master heart anatomy and the conduction system, trace blood flow through the pulmonary and systemic circuits, identify major vessels by region, and understand lymphatic drainage — with clinical correlates throughout.
+
+---
+
+## 1. Heart Anatomy
+
+### 1.1 Location & Orientation
+- Located in the **mediastinum**, within the **pericardial sac**
+- **Apex** (left ventricle tip) points inferiorly, anteriorly, leftward → 5th intercostal space, midclavicular line (PMI — point of maximal impulse)
+- **Base** (posterior surface, mainly left atrium) faces posteriorly and superiorly
+- About **2/3 of the heart lies left** of the midline
+
+### 1.2 Pericardium
+- **Fibrous pericardium** — tough outer layer; anchors heart to diaphragm and great vessels
+- **Serous pericardium** — double layer:
+  - **Parietal layer** — lines fibrous pericardium
+  - **Visceral layer (epicardium)** — covers heart surface
+  - **Pericardial cavity** — between layers; ~15–50 mL serous fluid for lubrication
+- **Pericardial effusion** → tamponade: fluid compresses heart → ↓cardiac output. Beck's triad: hypotension + muffled heart sounds + JVD.
+
+### 1.3 Heart Chambers & Valves
+
+**The four chambers and their walls:**
+| Chamber | Wall thickness | Why |
+|---------|---------------|-----|
+| Right atrium | Thin | Receives low-pressure venous return |
+| Right ventricle | Moderate (crescent-shaped) | Pumps to low-resistance pulmonary circuit |
+| Left atrium | Thin | Receives low-pressure pulmonary venous return |
+| Left ventricle | Thick (≈3× RV) | Pumps against high-resistance systemic circuit |
+
+**Valves — atrioventricular (AV):**
+| Valve | Location | Leaflets | Opens when | Clinical |
+|-------|----------|---------|-----------|---------|
+| **Mitral (bicuspid)** | Left AV | 2 | Ventricular diastole (fills LV) | Mitral stenosis (MS): rheumatic fever; Mitral regurgitation (MR): prolapse, papillary muscle infarction |
+| **Tricuspid** | Right AV | 3 | Ventricular diastole (fills RV) | TR: right-sided heart failure, IV drug use (endocarditis) |
+
+**Valves — semilunar:**
+| Valve | Location | Opens when | Clinical |
+|-------|----------|-----------|---------|
+| **Aortic** | Left ventricular outflow | Systole (LV ejects) | AS: bicuspid aortic valve (congenital), senile calcification; AI: Marfan's, aortic dissection |
+| **Pulmonary** | Right ventricular outflow | Systole (RV ejects) | Pulmonary stenosis: Noonan syndrome; pulmonic regurgitation: rare |
+
+> **Surface landmarks for auscultation:**
+> - Aortic: 2nd right ICS
+> - Pulmonic: 2nd left ICS
+> - Tricuspid: 4th left ICS, left sternal border
+> - Mitral: 5th ICS, MCL (apex)
+
+### 1.4 Cardiac Conduction System
+```
+SA node (right atrium) → AV node → Bundle of His → 
+Right bundle branch + Left bundle branch (anterior + posterior fascicles) → 
+Purkinje fibers → ventricular myocardium
+```
+- **SA node** — primary pacemaker; inherent rate 60–100 bpm; located at junction of SVC and right atrium
+- **AV node** — in Koch's triangle (right atrium, base of IAS); only electrical connection between atria and ventricles; 40–60 bpm intrinsic rate; adds **delay** (0.1 sec) for ventricular filling
+- **Bundle of His / Purkinje system** — rapid conduction (70 cm/sec); ensures coordinated ventricular contraction base-to-apex
+
+### 1.5 Coronary Arteries
+- **RCA (right coronary artery)** — SA node, AV node, RV, posterior LV (in right-dominant, ~85% of people)
+- **LCA (left coronary artery)** divides into:
+  - **LAD (left anterior descending)** — anterior LV, anterior IVS, bundle branches ("widow maker")
+  - **LCx (left circumflex)** — lateral and posterior LV
+
+> **Coronary dominance** = which artery supplies the posterior descending artery (PDA). Right dominant (85%), left dominant (8%), co-dominant (7%).
+
+---
+
+## 2. Blood Flow Circuits
+
+### Pulmonary Circuit
+```
+RV → Pulmonary valve → Pulmonary trunk → L/R pulmonary arteries → 
+Pulmonary capillaries (gas exchange at alveoli) → 
+4 Pulmonary veins → Left atrium
+```
+
+### Systemic Circuit
+```
+LV → Aortic valve → Ascending aorta → Aortic arch (brachiocephalic, L. common carotid, L. subclavian) → 
+Descending thoracic aorta → Abdominal aorta (celiac, SMA, IMA, renal, gonadal, iliac) → 
+Arterioles → Capillaries (tissue gas exchange) → Venules → Veins → 
+IVC + SVC → Right atrium
+```
+
+### Portal Circulation
+```
+GI capillaries + Spleen → Portal vein → Liver sinusoids → Hepatic veins → IVC
+```
+> The liver receives blood from both the portal vein (75%, nutrient-rich, low O₂) and the hepatic artery (25%, high O₂). Portal hypertension → varices (esophageal, rectal/hemorrhoidal, caput medusae).
+
+---
+
+## 3. Major Vessels — Regional Reference
+
+### Arteries of the Upper Limb
+Subclavian → **Axillary** (at lateral border 1st rib) → **Brachial** (pulse in cubital fossa) → splits at radial neck into **Radial** (radial pulse at wrist) + **Ulnar** → **Superficial/Deep palmar arches**
+
+### Arteries of the Lower Limb
+Common iliac → **External iliac** → under inguinal ligament → **Femoral** (femoral triangle pulse) → **Popliteal** (behind knee) → **Anterior tibial** → **Dorsalis pedis** (dorsum of foot pulse) + **Posterior tibial** → **Plantar arteries**
+
+### Pulse Points (Clinical Exam)
+| Artery | Location | Use |
+|--------|----------|-----|
+| Carotid | Neck, medial to SCM | Cardiac assessment; avoid bilateral simultaneous |
+| Brachial | Antecubital fossa | BP measurement, IV cannulation |
+| Radial | Lateral wrist (between FCR tendon and radial styloid) | Standard pulse check |
+| Femoral | Femoral triangle (NAVY: Nerve, Artery, Vein, Y-fronts/lymphatics) | ACLS, femoral line |
+| Popliteal | Popliteal fossa | Aneurysm detection |
+| Dorsalis pedis | Dorsum of foot (between EHL and EDL tendons) | Peripheral vascular disease |
+| Posterior tibial | Behind medial malleolus | Peripheral vascular disease |
+
+---
+
+## 4. Lymphatic System
+
+### 4.1 Structure & Flow
+- **Lymph capillaries** (blind-ended, highly permeable) → **collecting lymphatics** → **lymph nodes** → **lymphatic trunks** → **thoracic duct** or **right lymphatic duct** → subclavian veins
+- **Thoracic duct** — drains everything **except** upper right quadrant (right side of head/neck/thorax + right arm)
+- **Right lymphatic duct** — drains upper right quadrant
+- Movement: skeletal muscle contraction, respiratory pressure changes, one-way valves
+
+### 4.2 Major Lymph Node Stations
+| Region | Nodes | Drains |
+|--------|-------|--------|
+| Cervical (anterior + posterior) | Cervical chain | Head, neck; drains to deep cervical → thoracic duct |
+| Axillary (5 groups) | Axillary | Breast (75% of breast lymph → axillary), upper limb, lateral chest wall |
+| Inguinal (superficial + deep) | Inguinal | Lower limb, perineum, gluteal region, inferior abdominal wall |
+| Mediastinal | Mediastinal/hilar | Lungs, heart, esophagus |
+| Mesenteric | Mesenteric | GI tract |
+| Paraaortic | Paraaortic/lumbar | Kidneys, gonads, posterior abdominal wall |
+
+### 4.3 Lymphoid Organs
+| Organ | Location | Function |
+|-------|----------|---------|
+| **Thymus** | Superior mediastinum (anterior) | T-cell maturation; involutes after puberty |
+| **Spleen** | Left hypochondriac region | Filters blood, removes old RBCs, immune response; largest lymphoid organ |
+| **Tonsils** | Ring at oropharynx (Waldeyer's ring) | First-line immune defense for inhaled/ingested antigens |
+| **Peyer's patches** | Ileum (GI tract) | Gut-associated lymphoid tissue (GALT); monitor intestinal bacteria |
+
+---
+
+## 5. Clinical Correlates
+
+| Condition | Anatomy | Mechanism |
+|-----------|---------|-----------|
+| **MI (Heart Attack)** | Coronary artery occlusion | LAD most common → anterior MI; RCA → inferior MI; LCx → lateral MI |
+| **Cardiac tamponade** | Pericardial effusion | ↑pericardial pressure compresses chambers; Beck's triad |
+| **Aortic dissection** | Ascending/descending aorta | Tear in tunica intima; Type A (ascending) = surgical emergency |
+| **DVT** | Deep leg veins (popliteal, femoral, iliac) | Virchow's triad: stasis + hypercoagulability + endothelial damage → PE risk |
+| **Varicose veins** | Superficial saphenous system | Incompetent venous valves → reflux → dilation |
+| **Lymphedema** | Lymphatic obstruction | Post-mastectomy (axillary nodes removed), filariasis; pitting edema |
+
+---
+
+## 🔗 Cross-links
+
+- Previous: [40.4 - The Nervous System](40.4---The-Nervous-System)
+- Next: [40.6 - The Respiratory & Digestive Systems](40.6---The-Respiratory-&-Digestive-Systems)
+- [40.8 - Regional & Clinical Anatomy](40.8---Regional-&-Clinical-Anatomy) — thorax, mediastinum, great vessels in regional context
+- [02.7 - Immunology & Disease](02.7---Immunology-&-Disease) — lymphocytes, B and T cells, immune function of lymphoid organs
+
+---
+
+## 📚 Primary Sources
+
+- OpenStax *Anatomy and Physiology 2e*, Chapters 19–21 — [free](https://openstax.org/details/books/anatomy-and-physiology-2e)
+- Armando Hasudungan — Cardiovascular System — [YouTube](https://www.youtube.com/@armandohasudungan)
+- TeachMeAnatomy — Cardiovascular — [teachmeanatomy.info](https://teachmeanatomy.info/thorax/organs/heart/)
+
+<details>
+<summary>🧠 Active Recall Prompts</summary>
+
+1. Trace a red blood cell from the IVC → right atrium → through the pulmonary circuit → back to the aorta. Name every structure it passes through, including all valves.
+2. Name the 4 auscultation areas and their surface landmark for each heart valve.
+3. Which coronary artery is the "widow maker"? What does it supply? What is the infarct pattern on ECG?
+4. What is Beck's triad? What does it indicate anatomically?
+5. A patient has left axillary lymph node enlargement. What regions drain to the axillary nodes? Why is breast cancer staging dependent on axillary node status?
+6. What is the difference between the thoracic duct and right lymphatic duct in terms of what each drains?
+7. Name the 3 structures in the femoral triangle from lateral to medial (NAVY mnemonic).
+
+</details>

@@ -1,0 +1,133 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title    { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label    { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9.5px; fill: var(--text-muted, #8b949e); }
+    .footer   { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); font-style: italic; }
+    .box      { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .stage    { fill: var(--background-modifier-border, #30363d); opacity: 0.55; stroke: var(--text-muted, #8b949e); stroke-width: 1.2; rx: 4; }
+    .accent   { fill: var(--interactive-accent, #58a6ff); opacity: 0.85; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .accent-text { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: #ffffff; font-weight: bold; }
+    .observe  { fill: #51cf66; opacity: 0.20; stroke: #51cf66; stroke-width: 1.4; rx: 4; }
+    .rollback { fill: #ff6b6b; opacity: 0.20; stroke: #ff6b6b; stroke-width: 1.4; rx: 4; }
+    .gitops   { fill: #ffd93d; opacity: 0.14; stroke: #ffd93d; stroke-width: 1.4; rx: 6; }
+    .arrow    { stroke: var(--text-muted, #8b949e); stroke-width: 1.4; fill: none; }
+    .arrow-bad { stroke: #ff6b6b; stroke-width: 1.4; fill: none; stroke-dasharray: 4 3; }
+  </style>
+  <defs>
+    <marker id="arr-do" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="arr-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ff6b6b"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Modern CI/CD Pipeline — Build, Sign, Deploy, Observe, Govern</text>
+
+  <!-- Pipeline strip -->
+  <rect x="20" y="50" width="510" height="200" class="box"/>
+  <text x="275" y="70" class="label" text-anchor="middle" font-weight="bold">Continuous Delivery Pipeline</text>
+
+  <!-- Row 1: Commit -> Lint+Test -> Build -->
+  <rect x="35"  y="85" width="86" height="42" class="stage"/>
+  <text x="78"  y="103" class="label" text-anchor="middle">1. Commit</text>
+  <text x="78"  y="118" class="sublabel" text-anchor="middle">PR / merge to main</text>
+
+  <rect x="135" y="85" width="86" height="42" class="stage"/>
+  <text x="178" y="103" class="label" text-anchor="middle">2. Lint + Test</text>
+  <text x="178" y="118" class="sublabel" text-anchor="middle">unit · integ · cov</text>
+
+  <rect x="235" y="85" width="86" height="42" class="stage"/>
+  <text x="278" y="103" class="label" text-anchor="middle">3. Build</text>
+  <text x="278" y="118" class="sublabel" text-anchor="middle">image · cache · matrix</text>
+
+  <rect x="335" y="85" width="86" height="42" class="stage"/>
+  <text x="378" y="103" class="label" text-anchor="middle">4. Scan</text>
+  <text x="378" y="118" class="sublabel" text-anchor="middle">SAST · SCA · secrets</text>
+
+  <rect x="435" y="85" width="86" height="42" class="accent"/>
+  <text x="478" y="103" class="accent-text" text-anchor="middle">5. Sign + Attest</text>
+  <text x="478" y="118" class="sublabel" text-anchor="middle" fill="#e6edf3">Cosign · SLSA · SBOM</text>
+
+  <!-- arrows row 1 -->
+  <line x1="121" y1="106" x2="135" y2="106" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="221" y1="106" x2="235" y2="106" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="321" y1="106" x2="335" y2="106" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="421" y1="106" x2="435" y2="106" class="arrow" marker-end="url(#arr-do)"/>
+
+  <!-- Row 2: Push -> Deploy canary -> Deploy full -> Observe -->
+  <rect x="35"  y="155" width="86" height="42" class="stage"/>
+  <text x="78"  y="173" class="label" text-anchor="middle">6. Push Artifact</text>
+  <text x="78"  y="188" class="sublabel" text-anchor="middle">OCI registry</text>
+
+  <rect x="135" y="155" width="86" height="42" class="stage"/>
+  <text x="178" y="173" class="label" text-anchor="middle">7. Deploy Canary</text>
+  <text x="178" y="188" class="sublabel" text-anchor="middle">5% → 25% traffic</text>
+
+  <rect x="235" y="155" width="86" height="42" class="stage"/>
+  <text x="278" y="173" class="label" text-anchor="middle">8. Deploy Full</text>
+  <text x="278" y="188" class="sublabel" text-anchor="middle">100% / blue-green</text>
+
+  <rect x="335" y="155" width="86" height="42" class="observe"/>
+  <text x="378" y="173" class="label" text-anchor="middle">9. Observe</text>
+  <text x="378" y="188" class="sublabel" text-anchor="middle">SLO · burn rate</text>
+
+  <rect x="435" y="155" width="86" height="42" class="rollback"/>
+  <text x="478" y="173" class="label" text-anchor="middle">10. Rollback</text>
+  <text x="478" y="188" class="sublabel" text-anchor="middle">if budget burns</text>
+
+  <!-- arrows row 2 -->
+  <line x1="478" y1="127" x2="478" y2="143" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="478" y1="143" x2="78"  y2="143" class="arrow"/>
+  <line x1="78"  y1="143" x2="78"  y2="155" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="121" y1="176" x2="135" y2="176" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="221" y1="176" x2="235" y2="176" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="321" y1="176" x2="335" y2="176" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="421" y1="176" x2="435" y2="176" class="arrow-bad" marker-end="url(#arr-bad)"/>
+
+  <text x="275" y="225" class="sublabel" text-anchor="middle">Stage 5 (Sign + Attest) is the supply-chain hardening step — the artifact is signed</text>
+  <text x="275" y="238" class="sublabel" text-anchor="middle">and an SBOM / SLSA provenance attestation is attached before deploy is allowed.</text>
+
+  <!-- GitOps Loop side panel -->
+  <rect x="545" y="50" width="160" height="200" class="gitops"/>
+  <text x="625" y="70" class="label" text-anchor="middle" font-weight="bold">GitOps Loop</text>
+
+  <rect x="558" y="85"  width="134" height="36" class="stage"/>
+  <text x="625" y="100" class="label" text-anchor="middle">Git = Source of Truth</text>
+  <text x="625" y="114" class="sublabel" text-anchor="middle">manifests · Helm · Kustomize</text>
+
+  <rect x="558" y="135" width="134" height="36" class="stage"/>
+  <text x="625" y="150" class="label" text-anchor="middle">Argo CD / Flux</text>
+  <text x="625" y="164" class="sublabel" text-anchor="middle">reconciles cluster ← Git</text>
+
+  <rect x="558" y="185" width="134" height="36" class="stage"/>
+  <text x="625" y="200" class="label" text-anchor="middle">Cluster Converges</text>
+  <text x="625" y="214" class="sublabel" text-anchor="middle">drift auto-corrected</text>
+
+  <line x1="625" y1="121" x2="625" y2="135" class="arrow" marker-end="url(#arr-do)"/>
+  <line x1="625" y1="171" x2="625" y2="185" class="arrow" marker-end="url(#arr-do)"/>
+  <path d="M 558 203 Q 540 160 540 110 Q 540 95 558 95" class="arrow" fill="none" marker-end="url(#arr-do)"/>
+
+  <text x="625" y="240" class="sublabel" text-anchor="middle">Both Argo CD &amp; Flux are CNCF Graduated.</text>
+
+  <!-- Bottom note -->
+  <rect x="20" y="270" width="685" height="48" class="box"/>
+  <text x="362" y="291" class="label" text-anchor="middle" font-weight="bold">Error budget burn rate gates promotion</text>
+  <text x="362" y="307" class="sublabel" text-anchor="middle">Stage 9 reads SLO compliance from observability; if the burn rate is fast,</text>
+  <text x="362" y="318" class="sublabel" text-anchor="middle">stage 10 trips automatically and the deploy is rolled back. — Google SRE Workbook</text>
+
+  <!-- Bottom legend -->
+  <text x="20"  y="345" class="sublabel">Legend:</text>
+  <rect x="65"  y="337" width="14" height="10" class="stage"/>
+  <text x="83"  y="346" class="sublabel">stage</text>
+  <rect x="120" y="337" width="14" height="10" class="accent"/>
+  <text x="138" y="346" class="sublabel">supply-chain hardening (signed + attested)</text>
+  <rect x="335" y="337" width="14" height="10" class="observe"/>
+  <text x="353" y="346" class="sublabel">SLO observation</text>
+  <rect x="445" y="337" width="14" height="10" class="rollback"/>
+  <text x="463" y="346" class="sublabel">rollback path (red dashed = budget burn triggers it)</text>
+
+  <text x="360" y="382" class="footer" text-anchor="middle">"Hope is not a strategy. Run real software in production." — Google SRE Book, paraphrased.</text>
+  <text x="360" y="400" class="footer" text-anchor="middle">CI/CD is the assembly line. Observability is QA. Error budgets are the brake.</text>
+</svg>

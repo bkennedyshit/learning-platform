@@ -1,0 +1,1573 @@
+---
+title: "09.3 — OOP: Classes, Inheritance, Polymorphism & Templates"
+subject: "C++"
+catalog: advanced
+audience_tier: higher-education
+chapter: "9.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | [LEARNING_PATH](LEARNING_PATH) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 09.3 — OOP: Classes, Inheritance, Polymorphism & Templates
+
+> *"The purpose of abstraction is not to be vague, but to create a new semantic level in which one can be absolutely precise."* — Edsger W. Dijkstra
+
+C++ OOP is fundamentally different from Python's. Where Python uses duck typing and runtime introspection, C++ uses **compile-time type checking** and **zero-cost abstractions**. A virtual function call costs exactly one pointer indirection. A template instantiation costs exactly nothing at runtime — the compiler generates specialized code for each type.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Design classes with proper constructors, destructors, and the Rule of Zero/Five.
+2. Implement RAII for deterministic resource management.
+3. Use inheritance and virtual functions for runtime polymorphism.
+4. Understand vtable layout and the cost of virtual dispatch.
+5. Write function and class templates for compile-time polymorphism.
+6. Apply CRTP (Curiously Recurring Template Pattern) for static polymorphism.
+7. Choose between inheritance, templates, and composition for a given design problem.
+
+---
+
+## 🖼️ Visual Anchor — Class Layout & Virtual Dispatch
+
+![cpp__2.3-fig1](cpp__2.3-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 09.3.1 — Class vs Struct
+
+In C++, `class` and `struct` are **identical** except for default access:
+
+```cpp
+struct Point {       // Members are public by default
+    float x, y, z;
+};
+
+class Player {      // Members are private by default
+    std::string name_;
+    int health_;
+public:
+    Player(std::string name, int hp) : name_(std::move(name)), health_(hp) {}
+    std::string_view name() const { return name_; }
+    int health() const { return health_; }
+};
+```
+
+**Convention:** Use `struct` for plain data aggregates (PODs). Use `class` for types with invariants (private state + public interface).
+
+### Definition 09.3.2 — Constructors & Destructors
+
+```cpp
+class FileHandle {
+    FILE* file_;
+public:
+    // Constructor: acquires resource
+    explicit FileHandle(const char* path)
+        : file_(std::fopen(path, "r")) {
+        if (!file_) throw std::runtime_error("Failed to open file");
+    }
+
+    // Destructor: releases resource (RAII)
+    ~FileHandle() {
+        if (file_) std::fclose(file_);
+    }
+
+    // Delete copy (file handles shouldn't be duplicated)
+    FileHandle(const FileHandle&) = delete;
+    FileHandle& operator=(const FileHandle&) = delete;
+
+    // Allow move (transfer ownership)
+    FileHandle(FileHandle&& other) noexcept : file_(other.file_) {
+        other.file_ = nullptr;
+    }
+    FileHandle& operator=(FileHandle&& other) noexcept {
+        if (this != &other) {
+            if (file_) std::fclose(file_);
+            file_ = other.file_;
+            other.file_ = nullptr;
+        }
+        return *this;
+    }
+};
+```
+
+### Definition 09.3.3 — The Rule of Zero / Five
+
+**Rule of Zero:** If your class doesn't manage a resource directly, don't declare any special member functions. Let the compiler generate them:
+
+```cpp
+struct Player {
+    std::string name;
+    int health;
+    std::vector<Item> inventory;
+    // Compiler generates: copy ctor, copy assign, move ctor, move assign, destructor
+    // All do the right thing because members handle their own resources
+};
+```
+
+**Rule of Five:** If you declare ANY of the five special members, declare ALL of them:
+1. Destructor
+2. Copy constructor
+3. Copy assignment operator
+4. Move constructor
+5. Move assignment operator
+
+### Definition 09.3.4 — RAII (Resource Acquisition Is Initialization)
+
+**RAII** ties resource lifetime to object lifetime:
+- **Acquire** in constructor
+- **Release** in destructor
+- Scope exit guarantees cleanup (even on exceptions)
+
+```cpp
+// RAII mutex lock
+{
+    std::lock_guard<std::mutex> lock(mtx);  // Acquires lock
+    // ... critical section ...
+}  // lock released here, even if exception thrown
+
+// RAII memory (smart pointer)
+{
+    auto data = std::make_unique<LargeBuffer>(1024);
+    process(*data);
+}  // memory freed here
+
+// RAII file
+{
+    std::ofstream log("game.log");
+    log << "Started\n";
+}  // file flushed and closed here
+```
+
+### Definition 09.3.5 — Virtual Functions & Polymorphism
+
+```cpp
+class Shape {
+public:
+    virtual ~Shape() = default;  // ALWAYS virtual destructor in base classes
+    virtual double area() const = 0;       // Pure virtual (abstract)
+    virtual void draw() const { /* default impl */ }
+};
+
+class Circle : public Shape {
+    double radius_;
+public:
+    explicit Circle(double r) : radius_(r) {}
+    double area() const override { return 3.14159 * radius_ * radius_; }
+    void draw() const override { fmt::print("Drawing circle r={}\n", radius_); }
+};
+
+class Rectangle : public Shape {
+    double w_, h_;
+public:
+    Rectangle(double w, double h) : w_(w), h_(h) {}
+    double area() const override { return w_ * h_; }
+};
+
+// Runtime polymorphism:
+void render(const Shape& shape) {
+    shape.draw();  // Calls the correct override via vtable lookup
+    fmt::print("Area: {}\n", shape.area());
+}
+
+Circle c(5.0);
+Rectangle r(3.0, 4.0);
+render(c);  // "Drawing circle r=5"
+render(r);  // Uses Shape::draw() default
+```
+
+### Definition 09.3.6 — Templates (Compile-Time Polymorphism)
+
+```cpp
+// Function template
+template<typename T>
+T max_of(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+// The compiler generates separate functions for each type used:
+max_of(3, 7);          // Instantiates max_of<int>
+max_of(3.14, 09.71);   // Instantiates max_of<double>
+max_of("a"s, "b"s);   // Instantiates max_of<std::string>
+
+// Class template
+template<typename T, size_t Capacity>
+class StaticVector {
+    std::array<T, Capacity> data_;
+    size_t size_ = 0;
+public:
+    void push_back(const T& value) {
+        if (size_ >= Capacity) throw std::overflow_error("Full");
+        data_[size_++] = value;
+    }
+    T& operator[](size_t i) { return data_[i]; }
+    size_t size() const { return size_; }
+};
+
+StaticVector<int, 64> scores;  // Fixed-capacity, stack-allocated vector
+```
+
+---
+
+## 🧩 2. Mental Models
+
+### Model 2.3.1 — "Virtual = Runtime Decision, Template = Compile-Time Decision"
+
+| Mechanism | When to use | Cost | Flexibility |
+|-----------|------------|------|-------------|
+| **Virtual functions** | Types determined at runtime (plugin systems, UI widgets) | 1 pointer indirection per call | Can add new types without recompiling |
+| **Templates** | Types known at compile time (containers, algorithms) | Zero runtime cost | Compiler generates optimal code per type |
+| **Concepts** (C++20) | Constrained templates | Zero runtime cost | Clear error messages |
+
+**Python comparison:** Python's duck typing is like templates (any type that has the right methods works), but checked at runtime. C++ templates check at compile time — if a type doesn't support the required operations, you get a compile error, not a runtime `AttributeError`.
+
+### Model 2.3.2 — "vtable = Dictionary of Function Pointers"
+
+When a class has virtual functions, the compiler creates a **vtable** (virtual function table) — an array of function pointers. Each object of that class contains a hidden **vptr** pointing to its class's vtable.
+
+```
+Circle object in memory:
+┌──────────────────────────┐
+│ vptr → Circle's vtable   │  (8 bytes, hidden)
+│ radius_ = 5.0            │  (8 bytes)
+└──────────────────────────┘
+
+Circle's vtable:
+┌──────────────────────────┐
+│ [0] → Circle::~Circle()  │
+│ [1] → Circle::area()     │
+│ [2] → Circle::draw()     │
+└──────────────────────────┘
+```
+
+A virtual call `shape.area()` becomes: `shape.vptr[1]()` — one pointer dereference + indirect function call. This is ~2-5ns overhead vs a direct call.
+
+### Model 2.3.3 — "Composition Over Inheritance (Especially in Games)"
+
+Deep inheritance hierarchies are fragile. Prefer composition:
+
+```cpp
+// BAD: Deep hierarchy (common in 90s game engines)
+class Entity {};
+class MovableEntity : public Entity {};
+class DamageableMovableEntity : public MovableEntity {};
+class FlyingDamageableMovableEntity : public DamageableMovableEntity {};
+
+// GOOD: Composition (modern approach)
+struct Transform { Vec3 position, rotation, scale; };
+struct Health { int current, max; };
+struct Velocity { Vec3 linear, angular; };
+
+class Entity {
+    Transform transform_;
+    std::optional<Health> health_;      // Not all entities have health
+    std::optional<Velocity> velocity_;  // Not all entities move
+};
+```
+
+This leads naturally to Entity Component Systems (Chapter 09.8).
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Member Initializer Lists
+
+```cpp
+class Player {
+    const std::string name_;  // const members MUST be initialized in init list
+    int health_;
+    std::vector<Item> inventory_;
+
+public:
+    // GOOD: Member initializer list (direct initialization, no default-then-assign)
+    Player(std::string name, int hp)
+        : name_(std::move(name))    // Move-constructs name_
+        , health_(hp)               // Direct-initializes health_
+        , inventory_()              // Default-constructs (empty vector)
+    {}
+
+    // BAD: Assignment in body (default-constructs then assigns — wasteful)
+    // Player(std::string name, int hp) {
+    //     name_ = name;  // ERROR: can't assign to const
+    //     health_ = hp;  // Default-constructed to 0, then assigned hp
+    // }
+};
+```
+
+**Rule:** Always use member initializer lists. They're not optional for `const` members and references, and they're more efficient for everything else.
+
+### 3.2 — Access Control & Friends
+
+```cpp
+class BankAccount {
+private:    // Only accessible within this class
+    double balance_ = 0.0;
+
+protected:  // Accessible in this class and derived classes
+    void log_transaction(double amount);
+
+public:     // Accessible everywhere
+    void deposit(double amount) {
+        if (amount <= 0) throw std::invalid_argument("Amount must be positive");
+        balance_ += amount;
+        log_transaction(amount);
+    }
+
+    double balance() const { return balance_; }
+
+    // Friend: grants access to private members
+    friend class Auditor;  // Auditor can read balance_ directly
+    friend std::ostream& operator<<(std::ostream& os, const BankAccount& acc);
+};
+```
+
+### 3.3 — Operator Overloading
+
+```cpp
+struct Vec3 {
+    float x, y, z;
+
+    // Arithmetic operators (return new value)
+    Vec3 operator+(const Vec3& rhs) const {
+        return {x + rhs.x, y + rhs.y, z + rhs.z};
+    }
+
+    Vec3 operator*(float scalar) const {
+        return {x * scalar, y * scalar, z * scalar};
+    }
+
+    // Compound assignment (modify in place)
+    Vec3& operator+=(const Vec3& rhs) {
+        x += rhs.x; y += rhs.y; z += rhs.z;
+        return *this;
+    }
+
+    // Comparison (C++20 spaceship operator)
+    auto operator<=>(const Vec3&) const = default;
+
+    // Subscript
+    float& operator[](size_t i) {
+        switch(i) {
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            default: throw std::out_of_range("Vec3 index");
+        }
+    }
+};
+
+// Non-member operator (allows 2.0f * vec)
+Vec3 operator*(float scalar, const Vec3& v) { return v * scalar; }
+```
+
+### 3.4 — CRTP (Curiously Recurring Template Pattern)
+
+```cpp
+// Static polymorphism — no vtable, no virtual call overhead
+template<typename Derived>
+class Drawable {
+public:
+    void draw() const {
+        // Calls the derived class's implementation at compile time
+        static_cast<const Derived*>(this)->draw_impl();
+    }
+
+    void animate(float dt) {
+        static_cast<const Derived*>(this)->animate_impl(dt);
+    }
+};
+
+class Sprite : public Drawable<Sprite> {
+    friend class Drawable<Sprite>;
+    void draw_impl() const { /* render sprite */ }
+    void animate_impl(float dt) { /* update frame */ }
+};
+
+class Particle : public Drawable<Particle> {
+    friend class Drawable<Particle>;
+    void draw_impl() const { /* render particle */ }
+    void animate_impl(float dt) { /* physics step */ }
+};
+
+// Usage: zero-overhead polymorphism
+template<typename T>
+void render(const Drawable<T>& obj) {
+    obj.draw();  // Resolved at compile time — direct call, no vtable
+}
+```
+
+### 3.5 — Template Specialization
+
+```cpp
+// Primary template
+template<typename T>
+struct Serializer {
+    static std::string serialize(const T& value) {
+        return std::to_string(value);  // Works for numeric types
+    }
+};
+
+// Full specialization for std::string
+template<>
+struct Serializer<std::string> {
+    static std::string serialize(const std::string& value) {
+        return "\"" + value + "\"";  // Wrap in quotes
+    }
+};
+
+// Partial specialization for vectors
+template<typename T>
+struct Serializer<std::vector<T>> {
+    static std::string serialize(const std::vector<T>& vec) {
+        std::string result = "[";
+        for (size_t i = 0; i < vec.size(); ++i) {
+            if (i > 0) result += ", ";
+            result += Serializer<T>::serialize(vec[i]);
+        }
+        return result + "]";
+    }
+};
+
+// Usage:
+Serializer<int>::serialize(42);              // "42"
+Serializer<std::string>::serialize("hi");    // "\"hi\""
+Serializer<std::vector<int>>::serialize({1,2,3}); // "[1, 2, 3]"
+```
+
+---
+
+## ✍️ 4. Worked Examples
+
+### Example 09.3.1 — RAII Resource Manager
+
+<details>
+<summary>Build a GPU buffer class that safely manages OpenGL resources</summary>
+
+```cpp
+#include <cstdint>
+#include <span>
+#include <stdexcept>
+#include <utility>
+
+class GPUBuffer {
+    uint32_t id_ = 0;
+    size_t size_ = 0;
+
+public:
+    explicit GPUBuffer(size_t byte_size) : size_(byte_size) {
+        glGenBuffers(1, &id_);
+        if (id_ == 0) throw std::runtime_error("Failed to create GPU buffer");
+        glBindBuffer(GL_ARRAY_BUFFER, id_);
+        glBufferData(GL_ARRAY_BUFFER, byte_size, nullptr, GL_DYNAMIC_DRAW);
+    }
+
+    ~GPUBuffer() {
+        if (id_ != 0) glDeleteBuffers(1, &id_);
+    }
+
+    // Non-copyable (GPU resources can't be duplicated trivially)
+    GPUBuffer(const GPUBuffer&) = delete;
+    GPUBuffer& operator=(const GPUBuffer&) = delete;
+
+    // Movable (transfer ownership)
+    GPUBuffer(GPUBuffer&& other) noexcept
+        : id_(std::exchange(other.id_, 0))
+        , size_(std::exchange(other.size_, 0)) {}
+
+    GPUBuffer& operator=(GPUBuffer&& other) noexcept {
+        if (this != &other) {
+            if (id_ != 0) glDeleteBuffers(1, &id_);
+            id_ = std::exchange(other.id_, 0);
+            size_ = std::exchange(other.size_, 0);
+        }
+        return *this;
+    }
+
+    void upload(std::span<const std::byte> data) {
+        if (data.size() > size_) throw std::overflow_error("Data exceeds buffer");
+        glBindBuffer(GL_ARRAY_BUFFER, id_);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, data.size(), data.data());
+    }
+
+    uint32_t id() const { return id_; }
+    size_t size() const { return size_; }
+};
+
+// Usage — resource automatically freed at scope exit:
+void render_mesh(const Mesh& mesh) {
+    GPUBuffer vbo(mesh.vertex_data_size());
+    vbo.upload(mesh.vertex_bytes());
+    // ... render ...
+}  // vbo destroyed → glDeleteBuffers called
+```
+
+</details>
+
+### Example 09.3.2 — Template-Based Event System
+
+<details>
+<summary>Design a type-safe event dispatcher using templates</summary>
+
+```cpp
+#include <functional>
+#include <unordered_map>
+#include <vector>
+#include <typeindex>
+#include <any>
+
+class EventBus {
+    using HandlerList = std::vector<std::any>;
+    std::unordered_map<std::type_index, HandlerList> handlers_;
+
+public:
+    template<typename Event>
+    void subscribe(std::function<void(const Event&)> handler) {
+        handlers_[typeid(Event)].push_back(std::move(handler));
+    }
+
+    template<typename Event>
+    void publish(const Event& event) {
+        auto it = handlers_.find(typeid(Event));
+        if (it == handlers_.end()) return;
+
+        for (auto& handler : it->second) {
+            auto& fn = std::any_cast<std::function<void(const Event&)>&>(handler);
+            fn(event);
+        }
+    }
+};
+
+// Events are just structs:
+struct PlayerDied { int player_id; std::string cause; };
+struct ScoreChanged { int player_id; int new_score; };
+
+// Usage:
+EventBus bus;
+bus.subscribe<PlayerDied>([](const PlayerDied& e) {
+    fmt::print("Player {} died: {}\n", e.player_id, e.cause);
+});
+bus.subscribe<ScoreChanged>([](const ScoreChanged& e) {
+    fmt::print("Player {} score: {}\n", e.player_id, e.new_score);
+});
+
+bus.publish(PlayerDied{1, "fell off cliff"});
+bus.publish(ScoreChanged{1, 0});
+```
+
+</details>
+
+### Example 09.3.3 — Inheritance vs Templates Decision
+
+<details>
+<summary>When to use virtual functions vs templates — a practical comparison</summary>
+
+```cpp
+// SCENARIO: You need a collection of different shapes
+
+// OPTION A: Virtual functions (runtime polymorphism)
+// Use when: types determined at runtime, plugin systems, heterogeneous collections
+class Shape {
+public:
+    virtual ~Shape() = default;
+    virtual double area() const = 0;
+    virtual void draw(Renderer& r) const = 0;
+};
+
+std::vector<std::unique_ptr<Shape>> shapes;  // Can hold any shape
+shapes.push_back(std::make_unique<Circle>(5.0));
+shapes.push_back(std::make_unique<Rect>(3.0, 4.0));
+
+for (auto& s : shapes) s->draw(renderer);  // Virtual dispatch
+
+// OPTION B: Templates (compile-time polymorphism)
+// Use when: types known at compile time, performance-critical, no heap allocation
+template<typename Shape>
+double compute_area(const Shape& s) {
+    return s.area();  // Direct call — no vtable
+}
+
+// OPTION C: std::variant (closed set of types, no heap allocation)
+// Use when: finite set of types known at compile time
+using AnyShape = std::variant<Circle, Rect, Triangle>;
+std::vector<AnyShape> shapes;  // Stack-allocated, cache-friendly
+
+double total_area(const std::vector<AnyShape>& shapes) {
+    double sum = 0;
+    for (const auto& s : shapes) {
+        sum += std::visit([](const auto& shape) { return shape.area(); }, s);
+    }
+    return sum;
+}
+```
+
+**Decision matrix:**
+
+| Criterion | Virtual | Template | Variant |
+|-----------|---------|----------|---------|
+| Open set of types | ✅ | ✅ | ❌ |
+| Heterogeneous container | ✅ | ❌ | ✅ |
+| Zero overhead | ❌ | ✅ | ✅ |
+| No heap allocation | ❌ | ✅ | ✅ |
+| Runtime type addition | ✅ | ❌ | ❌ |
+
+</details>
+
+---
+
+## 💻 5. Code Patterns & Idioms
+
+### Pattern 2.3.1 — The Pimpl Idiom (Compilation Firewall)
+
+```cpp
+// widget.h — Public header (stable ABI, fast compilation)
+#pragma once
+#include <memory>
+#include <string_view>
+
+class Widget {
+public:
+    explicit Widget(std::string_view name);
+    ~Widget();  // Must be declared (destructor needs complete Impl type)
+
+    Widget(Widget&&) noexcept;
+    Widget& operator=(Widget&&) noexcept;
+
+    void render();
+    void set_position(float x, float y);
+
+private:
+    struct Impl;  // Forward declaration only
+    std::unique_ptr<Impl> impl_;
+};
+```
+
+```cpp
+// widget.cpp — Implementation (can change without recompiling users)
+#include "widget.h"
+#include <heavy_graphics_lib.h>  // Only compiled here, not in every includer
+
+struct Widget::Impl {
+    std::string name;
+    float x = 0, y = 0;
+    HeavyGraphicsObject renderer;  // Large dependency hidden from header
+};
+
+Widget::Widget(std::string_view name)
+    : impl_(std::make_unique<Impl>()) {
+    impl_->name = name;
+}
+
+Widget::~Widget() = default;
+Widget::Widget(Widget&&) noexcept = default;
+Widget& Widget::operator=(Widget&&) noexcept = default;
+
+void Widget::render() { impl_->renderer.draw(impl_->x, impl_->y); }
+void Widget::set_position(float x, float y) { impl_->x = x; impl_->y = y; }
+```
+
+### Pattern 2.3.2 — Builder Pattern with Method Chaining
+
+```cpp
+class QueryBuilder {
+    std::string table_;
+    std::vector<std::string> conditions_;
+    std::optional<int> limit_;
+    std::vector<std::string> order_by_;
+
+public:
+    QueryBuilder& from(std::string table) {
+        table_ = std::move(table);
+        return *this;
+    }
+
+    QueryBuilder& where(std::string condition) {
+        conditions_.push_back(std::move(condition));
+        return *this;
+    }
+
+    QueryBuilder& order(std::string column) {
+        order_by_.push_back(std::move(column));
+        return *this;
+    }
+
+    QueryBuilder& limit(int n) {
+        limit_ = n;
+        return *this;
+    }
+
+    std::string build() const {
+        std::string sql = fmt::format("SELECT * FROM {}", table_);
+        if (!conditions_.empty()) {
+            sql += " WHERE " + join(conditions_, " AND ");
+        }
+        if (!order_by_.empty()) {
+            sql += " ORDER BY " + join(order_by_, ", ");
+        }
+        if (limit_) sql += fmt::format(" LIMIT {}", *limit_);
+        return sql;
+    }
+};
+
+// Usage:
+auto query = QueryBuilder{}
+    .from("players")
+    .where("score > 100")
+    .where("active = true")
+    .order("score DESC")
+    .limit(10)
+    .build();
+```
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 2.3.1 — Object Slicing
+
+```cpp
+class Base {
+public:
+    virtual void speak() { fmt::print("Base\n"); }
+    int x = 1;
+};
+
+class Derived : public Base {
+public:
+    void speak() override { fmt::print("Derived\n"); }
+    int y = 2;
+};
+
+Derived d;
+Base b = d;   // SLICING: copies only the Base part, Derived data lost!
+b.speak();    // Prints "Base" — not "Derived"!
+
+// FIX: Use references or pointers for polymorphism
+Base& ref = d;
+ref.speak();  // Prints "Derived" — correct virtual dispatch
+
+// Or smart pointers:
+std::unique_ptr<Base> ptr = std::make_unique<Derived>();
+ptr->speak(); // Prints "Derived"
+```
+
+### Gotcha 2.3.2 — Missing Virtual Destructor
+
+```cpp
+class Base {
+public:
+    // ~Base() {}  // NON-VIRTUAL destructor — BUG!
+    virtual ~Base() = default;  // ALWAYS virtual if class is inherited from
+};
+
+class Derived : public Base {
+    std::vector<int> data_;  // Has resources to clean up
+};
+
+// Without virtual destructor:
+Base* ptr = new Derived();
+delete ptr;  // Only calls Base::~Base() — Derived::~Derived() NEVER runs!
+             // Memory leak! Undefined behavior!
+```
+
+### Gotcha 2.3.3 — Template Error Messages
+
+```cpp
+// Without concepts, template errors are notoriously unreadable:
+template<typename T>
+void sort_container(T& container) {
+    std::sort(container.begin(), container.end());
+}
+
+sort_container(42);  // Error message: 50 lines of template instantiation backtrace
+
+// FIX (C++20): Use concepts for clear errors
+template<std::ranges::random_access_range R>
+void sort_container(R& container) {
+    std::ranges::sort(container);
+}
+
+sort_container(42);  // Error: "int does not satisfy random_access_range"
+```
+
+### Gotcha 2.3.4 — Forgetting `override`
+
+```cpp
+class Base {
+public:
+    virtual void update(float dt) {}
+};
+
+class Player : public Base {
+public:
+    // BUG: Different signature — this HIDES base, doesn't override!
+    void update(double dt) {}  // float vs double — silent bug
+
+    // FIX: 'override' keyword catches mismatches at compile time
+    void update(float dt) override {}  // Compiler verifies signature matches
+    // void update(double dt) override {}  // COMPILE ERROR: no matching base method
+};
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [09.2 - Core Language - Types, Memory & Pointers](09.2---Core-Language---Types,-Memory-&-Pointers)
+- **Next:** [09.4 - Modern C++ - Smart Pointers, Move Semantics, Lambdas, Concepts](09.4---Modern-C++---Smart-Pointers,-Move-Semantics,-Lambdas,-Concepts)
+- **Python OOP comparison:** [08.3 - OOP, Data Models & Pythonic Idioms](08.3---OOP,-Data-Models-&-Pythonic-Idioms)
+- **Game engine patterns:** [09.8 - Game Dev with C++ - Unreal Engine & Custom Engine Patterns](09.8---Game-Dev-with-C++---Unreal-Engine-&-Custom-Engine-Patterns)
+- **Templates + Concepts deep dive:** [09.4 - Modern C++ - Smart Pointers, Move Semantics, Lambdas, Concepts](09.4---Modern-C++---Smart-Pointers,-Move-Semantics,-Lambdas,-Concepts)
+
+### External Resources
+- [C++ Core Guidelines: Classes](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-class)
+- [cppreference: Classes](https://en.cppreference.com/w/cpp/language/classes)
+- [CppCon: "Back to Basics: Templates"](https://www.youtube.com/results?search_query=cppcon+back+to+basics+templates)
+- [Effective Modern C++, Items 7–17](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/) — Modern class design
+- [TheCherno: C++ OOP Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dudnM48yfGUldqGD0S4FFb)
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — SFINAE to Concepts Migration
+
+**Problem:** You have a legacy codebase using SFINAE (`std::enable_if`) to constrain templates. Migrate to C++20 concepts for readability while maintaining identical behavior.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <concepts>
+#include <type_traits>
+#include <string>
+#include <vector>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// BEFORE: SFINAE (C++11/14/17) — Cryptic, hard to read
+// ═══════════════════════════════════════════════════════════════
+
+// Method 1: enable_if in return type
+template<typename T>
+typename std::enable_if<std::is_arithmetic_v<T>, T>::type
+add_sfinae(T a, T b) {
+    return a + b;
+}
+
+// Method 2: enable_if as default template parameter
+template<typename Container,
+         typename = std::enable_if_t<
+             std::is_same_v<typename Container::value_type, int>>>
+void process_ints_sfinae(const Container& c) {
+    for (auto x : c) fmt::print("{} ", x);
+}
+
+// Method 3: enable_if with multiple constraints (gets ugly fast)
+template<typename T,
+         std::enable_if_t<
+             std::is_class_v<T> &&
+             std::is_default_constructible_v<T> &&
+             !std::is_abstract_v<T>, int> = 0>
+T create_sfinae() {
+    return T{};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFTER: Concepts (C++20) — Clear, composable, better errors
+// ═══════════════════════════════════════════════════════════════
+
+// Define reusable concepts
+template<typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+template<typename Container>
+concept IntContainer = requires {
+    typename Container::value_type;
+    requires std::same_as<typename Container::value_type, int>;
+};
+
+template<typename T>
+concept Creatable = std::is_class_v<T> &&
+                    std::default_initializable<T> &&
+                    !std::is_abstract_v<T>;
+
+// Method 1: Concept in requires-clause
+template<Arithmetic T>
+T add_concepts(T a, T b) {
+    return a + b;
+}
+
+// Method 2: Concept as constraint
+void process_ints_concepts(const IntContainer auto& c) {
+    for (auto x : c) fmt::print("{} ", x);
+}
+
+// Method 3: Multiple constraints (still readable!)
+template<Creatable T>
+T create_concepts() {
+    return T{};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADVANCED: Compound concepts with requires-expressions
+// ═══════════════════════════════════════════════════════════════
+
+// A "Serializable" concept: type must have serialize() and deserialize()
+template<typename T>
+concept Serializable = requires(T obj, std::vector<std::byte>& buffer) {
+    { obj.serialize() } -> std::convertible_to<std::vector<std::byte>>;
+    { T::deserialize(buffer) } -> std::same_as<T>;
+    { obj.byte_size() } -> std::convertible_to<size_t>;
+};
+
+// Subsumption: more constrained overload wins
+template<typename T>
+concept NetworkSerializable = Serializable<T> && requires(T obj) {
+    { obj.network_id() } -> std::convertible_to<uint32_t>;
+};
+
+// Less constrained: handles any Serializable
+template<Serializable T>
+void save(const T& obj) {
+    auto bytes = obj.serialize();
+    write_to_disk(bytes);
+}
+
+// More constrained: handles NetworkSerializable (wins over above for qualifying types)
+template<NetworkSerializable T>
+void save(const T& obj) {
+    auto bytes = obj.serialize();
+    send_over_network(obj.network_id(), bytes);
+}
+
+// Error messages comparison:
+// SFINAE: "no matching function for call to 'add_sfinae(std::string, std::string)'"
+//         + 50 lines of template substitution failure backtrace
+// Concepts: "constraints not satisfied: std::string does not satisfy Arithmetic"
+//           One line. Clear. Actionable.
+```
+
+</details>
+
+### Example 8.2 — CRTP for Static Polymorphism
+
+**Problem:** You need polymorphic behavior (different types sharing an interface) but can't afford virtual function overhead in a hot loop (millions of calls per frame). Use CRTP to achieve compile-time polymorphism with zero overhead.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <cmath>
+#include <vector>
+#include <chrono>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// CRTP Base: The "interface" — no vtable, no virtual calls
+// ═══════════════════════════════════════════════════════════════
+template<typename Derived>
+class ShapeBase {
+public:
+    // Static dispatch: calls Derived::area_impl() directly
+    double area() const {
+        return static_cast<const Derived*>(this)->area_impl();
+    }
+
+    double perimeter() const {
+        return static_cast<const Derived*>(this)->perimeter_impl();
+    }
+
+    // Shared functionality in base (DRY)
+    void print_info() const {
+        fmt::print("Area: {:.2f}, Perimeter: {:.2f}\n", area(), perimeter());
+    }
+
+    // Compile-time interface enforcement
+    // If Derived doesn't implement area_impl(), you get a clear error
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Derived types: implement the _impl methods
+// ═══════════════════════════════════════════════════════════════
+class Circle : public ShapeBase<Circle> {
+    double radius_;
+public:
+    explicit Circle(double r) : radius_(r) {}
+    double area_impl() const { return M_PI * radius_ * radius_; }
+    double perimeter_impl() const { return 09.0 * M_PI * radius_; }
+};
+
+class Rectangle : public ShapeBase<Rectangle> {
+    double w_, h_;
+public:
+    Rectangle(double w, double h) : w_(w), h_(h) {}
+    double area_impl() const { return w_ * h_; }
+    double perimeter_impl() const { return 09.0 * (w_ + h_); }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Usage: Templates accept any ShapeBase<T>
+// ═══════════════════════════════════════════════════════════════
+template<typename Shape>
+double total_area(const std::vector<Shape>& shapes) {
+    double sum = 0;
+    for (const auto& s : shapes) {
+        sum += s.area();  // Direct call — inlined by compiler
+    }
+    return sum;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Performance comparison: CRTP vs Virtual
+// ═══════════════════════════════════════════════════════════════
+class VirtualShape {
+public:
+    virtual ~VirtualShape() = default;
+    virtual double area() const = 0;
+};
+
+class VirtualCircle : public VirtualShape {
+    double radius_;
+public:
+    explicit VirtualCircle(double r) : radius_(r) {}
+    double area() const override { return M_PI * radius_ * radius_; }
+};
+
+void benchmark() {
+    constexpr int N = 10'000'000;
+
+    // CRTP version: homogeneous vector, no heap allocation
+    std::vector<Circle> crtp_circles(N, Circle(1.0));
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double sum1 = total_area(crtp_circles);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    // Virtual version: heterogeneous vector, heap-allocated
+    std::vector<std::unique_ptr<VirtualShape>> virtual_circles;
+    virtual_circles.reserve(N);
+    for (int i = 0; i < N; ++i)
+        virtual_circles.push_back(std::make_unique<VirtualCircle>(1.0));
+
+    auto t3 = std::chrono::high_resolution_clock::now();
+    double sum2 = 0;
+    for (const auto& s : virtual_circles) sum2 += s->area();
+    auto t4 = std::chrono::high_resolution_clock::now();
+
+    auto crtp_ms = std::chrono::duration<double, std::milli>(t2 - t1).count();
+    auto virt_ms = std::chrono::duration<double, std::milli>(t4 - t3).count();
+
+    fmt::print("CRTP:    {:.2f} ms (sum={})\n", crtp_ms, sum1);
+    fmt::print("Virtual: {:.2f} ms (sum={})\n", virt_ms, sum2);
+    fmt::print("Speedup: {:.1f}x\n", virt_ms / crtp_ms);
+    // Typical: CRTP 3ms, Virtual 45ms → 15x speedup
+    // Reasons: no vtable lookup, no pointer chasing, auto-vectorization
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Modern alternative: C++20 Concepts (deduced this, C++23)
+// ═══════════════════════════════════════════════════════════════
+// C++23 "deducing this" eliminates CRTP boilerplate:
+class ModernCircle {
+    double radius_;
+public:
+    explicit ModernCircle(double r) : radius_(r) {}
+    double area() const { return M_PI * radius_ * radius_; }
+};
+
+// No inheritance needed — just constrain with concepts:
+template<typename T>
+concept HasArea = requires(const T& t) {
+    { t.area() } -> std::convertible_to<double>;
+};
+
+template<HasArea Shape>
+double total_area_modern(const std::vector<Shape>& shapes) {
+    double sum = 0;
+    for (const auto& s : shapes) sum += s.area();
+    return sum;
+}
+```
+
+**When to use CRTP vs alternatives:**
+
+| Technique | Overhead | Heterogeneous? | Compile time | Readability |
+|-----------|----------|---------------|--------------|-------------|
+| CRTP | Zero | ❌ | Slow | Medium |
+| Virtual | vtable + indirection | ✅ | Fast | High |
+| `std::variant` + visit | Branch/jump table | ✅ (closed set) | Medium | Medium |
+| Concepts (C++20) | Zero | ❌ | Medium | High |
+| Deducing this (C++23) | Zero | ❌ | Medium | Highest |
+
+</details>
+
+### Example 8.3 — Expression Templates for Zero-Overhead Math
+
+**Problem:** Naive operator overloading for vector math creates temporaries at every step. `a + b + c` creates two temporary vectors. Expression templates eliminate all temporaries by deferring evaluation.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <array>
+#include <cstddef>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// The Problem: Naive operator overloading
+// ═══════════════════════════════════════════════════════════════
+struct NaiveVec {
+    std::array<float, 4> data;
+
+    NaiveVec operator+(const NaiveVec& other) const {
+        NaiveVec result;
+        for (int i = 0; i < 4; ++i)
+            result.data[i] = data[i] + other.data[i];
+        return result;  // TEMPORARY created here
+    }
+};
+
+// a + b + c compiles to:
+// temp1 = a + b;     ← allocate temp, loop 4 times
+// result = temp1 + c; ← allocate temp, loop 4 times
+// Total: 2 allocations, 2 loops, 8 additions
+
+// ═══════════════════════════════════════════════════════════════
+// The Solution: Expression Templates
+// ═══════════════════════════════════════════════════════════════
+
+// Forward declaration
+template<typename E>
+class VecExpr;
+
+// The actual vector (stores data)
+class Vec : public VecExpr<Vec> {
+    std::array<float, 4> data_;
+public:
+    Vec() : data_{} {}
+    Vec(float x, float y, float z, float w) : data_{x, y, z, w} {}
+
+    // Construct from any expression (this is where evaluation happens)
+    template<typename E>
+    Vec(const VecExpr<E>& expr) {
+        for (size_t i = 0; i < 4; ++i) {
+            data_[i] = expr[i];  // Evaluates the entire expression tree per element
+        }
+    }
+
+    template<typename E>
+    Vec& operator=(const VecExpr<E>& expr) {
+        for (size_t i = 0; i < 4; ++i) {
+            data_[i] = expr[i];
+        }
+        return *this;
+    }
+
+    float operator[](size_t i) const { return data_[i]; }
+    float& operator[](size_t i) { return data_[i]; }
+    static constexpr size_t size() { return 4; }
+};
+
+// CRTP base for all expressions
+template<typename E>
+class VecExpr {
+public:
+    float operator[](size_t i) const {
+        return static_cast<const E&>(*this)[i];
+    }
+    static constexpr size_t size() { return 4; }
+};
+
+// Expression node: addition of two expressions
+template<typename L, typename R>
+class VecAdd : public VecExpr<VecAdd<L, R>> {
+    const L& lhs_;
+    const R& rhs_;
+public:
+    VecAdd(const L& l, const R& r) : lhs_(l), rhs_(r) {}
+    float operator[](size_t i) const { return lhs_[i] + rhs_[i]; }
+};
+
+// Expression node: scalar multiplication
+template<typename E>
+class VecScale : public VecExpr<VecScale<E>> {
+    const E& expr_;
+    float scalar_;
+public:
+    VecScale(float s, const E& e) : expr_(e), scalar_(s) {}
+    float operator[](size_t i) const { return scalar_ * expr_[i]; }
+};
+
+// Operator overloads return expression nodes (NOT evaluated vectors)
+template<typename L, typename R>
+VecAdd<L, R> operator+(const VecExpr<L>& l, const VecExpr<R>& r) {
+    return VecAdd<L, R>(static_cast<const L&>(l), static_cast<const R&>(r));
+}
+
+template<typename E>
+VecScale<E> operator*(float s, const VecExpr<E>& e) {
+    return VecScale<E>(s, static_cast<const E&>(e));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Usage: a + b + c compiles to a SINGLE loop, ZERO temporaries
+// ═══════════════════════════════════════════════════════════════
+void example() {
+    Vec a{1, 2, 3, 4};
+    Vec b{5, 6, 7, 8};
+    Vec c{9, 10, 11, 12};
+
+    // This does NOT create temporaries!
+    // Type of (a + b + c) is VecAdd<VecAdd<Vec, Vec>, Vec>
+    // Evaluation happens only when assigned to Vec result:
+    Vec result = a + b + c;
+    // Compiles to: result[i] = a[i] + b[i] + c[i] for each i
+    // Single loop, no allocations, auto-vectorizes to SIMD
+
+    // Complex expression: 2*(a + b) + 3*c
+    Vec result2 = 2.0f * (a + b) + 3.0f * c;
+    // Compiles to: result2[i] = 2*(a[i]+b[i]) + 3*c[i]
+    // Still one loop, zero temporaries!
+}
+
+// This is exactly how Eigen, Blaze, and xtensor work internally.
+// The compiler sees through all the template layers at -O2 and
+// generates the same code as hand-written loops.
+```
+
+**Libraries using expression templates:**
+- **Eigen** — Linear algebra (matrices, vectors)
+- **Blaze** — High-performance math
+- **xtensor** — NumPy-like N-dimensional arrays
+- **Armadillo** — MATLAB-like syntax for C++
+
+</details>
+
+### Example 8.4 — Mixins with Variadic CRTP
+
+**Problem:** You want to compose behaviors (logging, serialization, cloning) into classes without deep inheritance hierarchies. Use variadic CRTP mixins.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <string>
+#include <vector>
+#include <memory>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// Mixin templates: each adds one capability
+// ═══════════════════════════════════════════════════════════════
+
+// Mixin 1: Printable (adds print() method)
+template<typename Derived>
+class Printable {
+public:
+    void print() const {
+        const auto& self = static_cast<const Derived&>(*this);
+        fmt::print("[{}] {}\n", self.type_name(), self.to_string());
+    }
+};
+
+// Mixin 2: Cloneable (adds clone() method)
+template<typename Derived>
+class Cloneable {
+public:
+    std::unique_ptr<Derived> clone() const {
+        return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+    }
+};
+
+// Mixin 3: Serializable (adds serialize/deserialize)
+template<typename Derived>
+class SerializableMixin {
+public:
+    std::vector<std::byte> serialize() const {
+        const auto& self = static_cast<const Derived&>(*this);
+        // Trivially copyable types can be memcpy'd
+        std::vector<std::byte> bytes(sizeof(Derived));
+        std::memcpy(bytes.data(), &self, sizeof(Derived));
+        return bytes;
+    }
+
+    static Derived deserialize(const std::vector<std::byte>& bytes) {
+        Derived obj;
+        std::memcpy(&obj, bytes.data(), sizeof(Derived));
+        return obj;
+    }
+};
+
+// Mixin 4: EqualityComparable (adds == and !=)
+template<typename Derived>
+class EqualityComparable {
+public:
+    friend bool operator==(const Derived& a, const Derived& b) {
+        return a.equals(b);  // Derived must implement equals()
+    }
+    friend bool operator!=(const Derived& a, const Derived& b) {
+        return !(a == b);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Compose mixins: inherit from multiple CRTP bases
+// ═══════════════════════════════════════════════════════════════
+
+class Enemy : public Printable<Enemy>,
+              public Cloneable<Enemy>,
+              public EqualityComparable<Enemy> {
+    std::string name_;
+    int health_;
+    float x_, y_;
+
+public:
+    Enemy(std::string name, int hp, float x, float y)
+        : name_(std::move(name)), health_(hp), x_(x), y_(y) {}
+
+    // Required by Printable
+    std::string type_name() const { return "Enemy"; }
+    std::string to_string() const {
+        return fmt::format("{} (HP:{}, pos:{:.1f},{:.1f})", name_, health_, x_, y_);
+    }
+
+    // Required by EqualityComparable
+    bool equals(const Enemy& other) const {
+        return name_ == other.name_ && health_ == other.health_;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Variadic CRTP: compose ALL mixins in one template parameter pack
+// ═══════════════════════════════════════════════════════════════
+
+template<typename Derived, template<typename> class... Mixins>
+class ComposedObject : public Mixins<Derived>... {
+    // Inherits from ALL mixins at once
+};
+
+class Player : public ComposedObject<Player, Printable, Cloneable, EqualityComparable> {
+    std::string name_;
+    int score_;
+
+public:
+    Player(std::string name, int score) : name_(std::move(name)), score_(score) {}
+    std::string type_name() const { return "Player"; }
+    std::string to_string() const { return fmt::format("{} (score:{})", name_, score_); }
+    bool equals(const Player& other) const { return name_ == other.name_; }
+};
+
+void demo() {
+    Enemy goblin("Goblin", 50, 3.0f, 7.0f);
+    goblin.print();  // [Enemy] Goblin (HP:50, pos:3.0,7.0)
+
+    auto clone = goblin.clone();  // Deep copy via Cloneable mixin
+    fmt::print("Equal: {}\n", goblin == *clone);  // true
+
+    Player bill("Bill", 9001);
+    bill.print();  // [Player] Bill (score:9001)
+}
+```
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Empty Base Optimization (EBO)
+
+**In C++, every object must have a unique address.** This means even an empty class (`struct Empty {};`) has `sizeof(Empty) == 1`. But when an empty class is used as a base class, the compiler can optimize away its size — this is the Empty Base Optimization.
+
+```cpp
+#include <cstddef>
+
+struct Empty {};
+static_assert(sizeof(Empty) == 1);  // Must be at least 1 byte
+
+// Without EBO: empty base wastes space
+struct WithoutEBO {
+    Empty tag;      // 1 byte
+    // 7 bytes padding (to align double)
+    double value;   // 8 bytes
+};
+static_assert(sizeof(WithoutEBO) == 16);  // 1 + 7 padding + 8
+
+// With EBO: empty base has zero size when inherited
+struct WithEBO : Empty {
+    double value;   // 8 bytes
+};
+static_assert(sizeof(WithEBO) == 8);  // Empty base contributes 0 bytes!
+```
+
+**Why this matters in practice:**
+
+The STL uses EBO extensively. `std::unique_ptr<T, Deleter>` stores the deleter as a base class (via compressed pair) so that stateless deleters (like the default `std::default_delete<T>`) add zero overhead:
+
+```cpp
+// Simplified std::unique_ptr implementation using EBO
+template<typename T, typename Deleter = std::default_delete<T>>
+class unique_ptr_impl : private Deleter {  // EBO: Deleter is empty → 0 bytes
+    T* ptr_;
+public:
+    // sizeof(unique_ptr_impl) == sizeof(T*) when Deleter is stateless!
+};
+
+static_assert(sizeof(std::unique_ptr<int>) == sizeof(int*));  // 8 bytes, not 16
+```
+
+**C++20 `[no_unique_address](no_unique_address)`** provides EBO for members (not just bases):
+
+```cpp
+struct ModernCompressedPair {
+    [no_unique_address](no_unique_address) Empty tag;  // May have zero size as member
+    double value;
+};
+static_assert(sizeof(ModernCompressedPair) == 8);  // Same as WithEBO
+```
+
+### 9.2 vtable Layout and Virtual Dispatch Internals
+
+**Every class with at least one virtual function gets a vtable (virtual function table).** Understanding the layout helps you reason about performance and ABI stability.
+
+#### Memory Layout of a Polymorphic Object
+
+```cpp
+class Base {
+public:
+    virtual void foo() { fmt::print("Base::foo\n"); }
+    virtual void bar() { fmt::print("Base::bar\n"); }
+    virtual ~Base() = default;
+    int x = 42;
+};
+
+class Derived : public Base {
+public:
+    void foo() override { fmt::print("Derived::foo\n"); }
+    virtual void baz() { fmt::print("Derived::baz\n"); }
+    int y = 99;
+};
+```
+
+**Object layout in memory (typical x86-64, Itanium ABI):**
+
+```
+Base object (24 bytes):
+┌─────────────────────────────────────┐
+│ vptr (8 bytes) → points to Base vtable │
+├─────────────────────────────────────┤
+│ x (4 bytes) = 42                    │
+├─────────────────────────────────────┤
+│ padding (4 bytes)                   │
+└─────────────────────────────────────┘
+
+Derived object (32 bytes):
+┌─────────────────────────────────────┐
+│ vptr (8 bytes) → points to Derived vtable │
+├─────────────────────────────────────┤
+│ x (4 bytes) = 42  [Base subobject]  │
+├─────────────────────────────────────┤
+│ y (4 bytes) = 99  [Derived member]  │
+├─────────────────────────────────────┤
+│ padding (8 bytes)                   │
+└─────────────────────────────────────┘
+```
+
+**vtable layout:**
+
+```
+Base::vtable:
+┌────────────────────────────────────┐
+│ [0] typeinfo pointer (for RTTI)    │
+│ [1] Base::~Base() (destructor)     │
+│ [2] Base::foo()                    │
+│ [3] Base::bar()                    │
+└────────────────────────────────────┘
+
+Derived::vtable:
+┌────────────────────────────────────┐
+│ [0] typeinfo pointer (for RTTI)    │
+│ [1] Derived::~Derived()            │
+│ [2] Derived::foo()  ← OVERRIDDEN   │
+│ [3] Base::bar()     ← INHERITED    │
+│ [4] Derived::baz()  ← NEW          │
+└────────────────────────────────────┘
+```
+
+**Virtual dispatch assembly (x86-64):**
+```
+; ptr->foo() where ptr is Base*
+mov rax, [rdi]          ; Load vptr from object (first 8 bytes)
+call [rax + 16]         ; Call vtable[2] (foo is at offset 16)
+; Two memory indirections: object → vtable → function pointer
+```
+
+**Performance implications:**
+1. **Indirect call** — CPU can't predict the target until the vtable is loaded (pipeline stall)
+2. **Cache miss on vtable** — If vtable isn't in L1, ~4ns penalty
+3. **Cache miss on object** — Pointer-chasing through `unique_ptr` vector = random access
+4. **No inlining** — Compiler can't inline through virtual dispatch (unless devirtualized)
+
+**Devirtualization:** Modern compilers (GCC, Clang) can sometimes resolve virtual calls at compile time:
+```cpp
+Derived d;
+d.foo();  // Compiler knows exact type → direct call (no vtable)
+
+// But through a pointer, usually can't devirtualize:
+Base* ptr = get_object();
+ptr->foo();  // Must use vtable (type unknown at compile time)
+```
+
+### 9.3 Multiple Inheritance and the Diamond Problem — Implementation Details
+
+**Multiple inheritance creates complex object layouts.** The "diamond problem" occurs when a class inherits from two classes that share a common base:
+
+```cpp
+class Animal { public: int age; virtual void speak() = 0; };
+class Dog : public virtual Animal { public: void speak() override { /*...*/ } };
+class Robot : public virtual Animal { public: void speak() override { /*...*/ } };
+class RoboDog : public Dog, public Robot { public: void speak() override { /*...*/ } };
+```
+
+**Without `virtual` inheritance:** RoboDog would contain TWO copies of Animal (ambiguous).
+**With `virtual` inheritance:** Only ONE shared Animal subobject exists, but the layout becomes complex:
+
+```
+RoboDog object layout:
+┌──────────────────────────────────────┐
+│ Dog vptr                             │  ← Dog's virtual functions
+│ Dog members                          │
+├──────────────────────────────────────┤
+│ Robot vptr                           │  ← Robot's virtual functions
+│ Robot members                        │
+├──────────────────────────────────────┤
+│ RoboDog members                      │
+├──────────────────────────────────────┤
+│ Animal vptr (shared)                 │  ← Virtual base, at variable offset
+│ Animal::age                          │
+└──────────────────────────────────────┘
+```
+
+The offset to the virtual base (Animal) is stored in a **virtual base table (vbtable)** or encoded in the vtable itself. Accessing `age` through a `Dog*` requires an extra indirection to find where Animal lives in the complete object.
+
+**Performance cost of virtual inheritance:**
+- Extra pointer indirection to access virtual base members
+- Larger objects (extra vptrs)
+- Constructor complexity (virtual base constructed by most-derived class)
+- Prevents many compiler optimizations
+
+**Recommendation:** Avoid virtual inheritance in performance-critical code. Use composition or concepts instead.
+
+---
+
+*Next: [09.4 - Modern C++ - Smart Pointers, Move Semantics, Lambdas, Concepts](09.4---Modern-C++---Smart-Pointers,-Move-Semantics,-Lambdas,-Concepts) →*

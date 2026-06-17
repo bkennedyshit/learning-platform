@@ -1,0 +1,97 @@
+<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="orb-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <radialGradient id="planet-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .orb-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.2; }
+    .orb-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; fill: none; }
+    .orb-ellipse { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .orb-radius { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; stroke-dasharray: 5 3; fill: none; }
+    .orb-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .orb-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .orb-focus { fill: var(--interactive-accent, #58a6ff); }
+    .orb-satellite { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .orb-velocity { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+    .orb-sweep { fill: var(--interactive-accent, #58a6ff); opacity: 0.12; }
+    .orb-satellite { cursor: pointer; transition: all 0.3s ease; }
+    .orb-satellite:hover { r: 8; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .orb-ellipse { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawOrbit 8s linear infinite; }
+    @keyframes drawOrbit { 0% { stroke-dashoffset: 1200; } 100% { stroke-dashoffset: 0; } }
+    @keyframes orbitMotion { 0% { offset-distance: 0%; } 100% { offset-distance: 100%; } }
+  </style>
+
+  <!-- Background grid -->
+  <path class="orb-grid" d="M 40 0 V 480 M 120 0 V 480 M 200 0 V 480 M 280 0 V 480 M 360 0 V 480 M 440 0 V 480 M 520 0 V 480 M 600 0 V 480"/>
+  <path class="orb-grid" d="M 0 40 H 680 M 0 120 H 680 M 0 200 H 680 M 0 280 H 680 M 0 360 H 680 M 0 440 H 680"/>
+
+  <!-- Orbital ellipse: center (340,240), a=220, b=160 (e≈0.686) -->
+  <!-- Focus at (340 - c, 240) where c = sqrt(a²-b²) = sqrt(48400-25600) = sqrt(22800) ≈ 151 -->
+  <!-- Focus F1 at (189, 240) -->
+  <ellipse cx="340" cy="240" rx="220" ry="160" class="orb-ellipse"/>
+
+  <!-- Semi-major axis line -->
+  <line x1="120" y1="240" x2="560" y2="240" class="orb-axis" stroke-dasharray="4 3"/>
+  <!-- Semi-minor axis line -->
+  <line x1="340" y1="80" x2="340" y2="400" class="orb-radius"/>
+
+  <!-- Focus F1 (primary body - planet) with glow -->
+  <circle cx="189" cy="240" r="25" fill="url(#planet-glow)"/>
+  <circle cx="189" cy="240" r="10" class="orb-focus"/>
+  <text x="189" y="270" class="orb-accent" text-anchor="middle">M (Focus)</text>
+
+  <!-- Focus F2 (empty) -->
+  <circle cx="491" cy="240" r="3" fill="var(--text-muted, #8b949e)"/>
+  <text x="491" y="260" class="orb-label" text-anchor="middle">F₂</text>
+
+  <!-- Periapsis marker -->
+  <circle cx="120" cy="240" r="4" fill="var(--text-accent, #79c0ff)"/>
+  <text x="100" y="225" class="orb-label">Periapsis</text>
+  <text x="100" y="240" class="orb-accent">rₚ = a(1−e)</text>
+
+  <!-- Apoapsis marker -->
+  <circle cx="560" cy="240" r="4" fill="var(--text-accent, #79c0ff)"/>
+  <text x="565" y="225" class="orb-label">Apoapsis</text>
+  <text x="565" y="240" class="orb-accent">rₐ = a(1+e)</text>
+
+  <!-- Semi-major axis label -->
+  <line x1="189" y1="210" x2="340" y2="210" stroke="var(--text-normal, #c9d1d9)" stroke-width="1"/>
+  <text x="265" y="205" class="orb-label" text-anchor="middle">a (semi-major)</text>
+
+  <!-- Radius vector to satellite -->
+  <line x1="189" y1="240" x2="430" y2="120" class="orb-radius" stroke-dasharray="none" stroke="var(--text-normal, #c9d1d9)"/>
+  <text x="300" y="165" class="orb-label">r</text>
+
+  <!-- True anomaly arc -->
+  <path d="M 220 240 A 31 31 0 0 0 210 220" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" fill="none"/>
+  <text x="230" y="225" class="orb-accent">θ</text>
+
+  <!-- Satellite and Velocity Vector (Animated) -->
+  <g>
+    <animateMotion dur="8s" repeatCount="indefinite" path="M 120,240 A 220,160 0 0,1 340,80 A 220,160 0 0,1 560,240 A 220,160 0 0,1 340,400 A 220,160 0 0,1 120,240" rotate="auto" />
+    <circle cx="0" cy="0" r="6" class="orb-satellite"/>
+    <!-- Velocity vector -->
+    <line x1="0" y1="0" x2="50" y2="0" class="orb-velocity" marker-end="url(#orb-arrow)"/>
+    <!-- Text has to counter-rotate if we don't want it upside down, but for simplicity we place it slightly offset -->
+    <text x="55" y="-5" class="orb-label" fill="var(--text-accent, #79c0ff)">v</text>
+  </g>
+
+  <!-- Swept area (Kepler's 2nd law illustration) -->
+  <path d="M 189 240 L 430 120 A 220 160 0 0 1 470 145 L 189 240 Z" class="orb-sweep"/>
+  <text x="350" y="195" class="orb-accent">dA/dt = h/2</text>
+
+  <!-- Info box -->
+  <rect x="10" y="380" width="280" height="90" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="150" y="400" class="orb-accent" text-anchor="middle">Vis-Viva Equation</text>
+  <text x="150" y="420" class="orb-label" text-anchor="middle" font-family="serif" font-size="15">v² = μ(2/r − 1/a)</text>
+  <text x="150" y="445" class="orb-label" text-anchor="middle">μ = GM = 3.986×10⁵ km³/s²</text>
+  <text x="150" y="462" class="orb-label" text-anchor="middle">T = 2π√(a³/μ) — Kepler's 3rd Law</text>
+
+  <!-- Orbit direction arrow -->
+  <path d="M 340 80 A 220 160 0 0 1 450 100" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" fill="none" marker-end="url(#orb-arrow)"/>
+</svg>

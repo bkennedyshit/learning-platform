@@ -1,0 +1,691 @@
+---
+title: "Limits Continuity"
+subject: "Mathematical Foundations & Calculus"
+catalog: advanced
+audience_tier: higher-education
+chapter: "1.1"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+![Calculus_Limits_and_Continuity_Map](Calculus_Limits_and_Continuity_Map.png)
+
+> [!info]+ 🎬 Companion materials (NotebookLM)
+> 🎞️ Slide deck: [The_Limit_Blueprint.pptx](The_Limit_Blueprint.pptx)
+
+# 1.1 — Limits & Continuity
+
+> *"Calculus is the art of drawing exact conclusions from approximate measurements."* — paraphrased from Augustin-Louis Cauchy.
+
+This is the gateway chapter to all of analysis. Every later concept — derivatives, integrals, infinite series, vector calculus, differential equations, and the entire machinery of theoretical physics — rests on a precise understanding of what it means for a function to **approach** a value. We treat limits both intuitively (numerical, geometric) and rigorously (the $\varepsilon$–$\delta$ definition that Karl Weierstrass canonized in the 19th century), then build continuity on top.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. State, derive, and apply the formal $(\varepsilon, \delta)$ definition of a limit.
+2. Prove or disprove a limit at a point using the $\varepsilon$–$\delta$ machinery directly.
+3. Apply the limit laws (algebraic and composition) to evaluate complicated limits.
+4. Recognize and resolve all four classical indeterminate forms.
+5. Define continuity and classify discontinuities (removable, jump, infinite, essential).
+6. State and prove the Squeeze Theorem and the Intermediate Value Theorem.
+7. Connect each result back to the geometry of the function's graph.
+
+---
+
+## 🖼️ Visual Anchor — The $\varepsilon$–$\delta$ Picture
+
+The single most important diagram in introductory analysis: the formal definition of a limit, in geometric form. *No matter how thin you make the horizontal $\varepsilon$ band around the limit value $L$, you can always find a thin enough vertical $\delta$ band around the input $a$ such that the function's graph stays inside the box.*
+
+![math-01__1.1-fig1](math-01__1.1-fig1.svg)
+
+The $\varepsilon$ (orange) horizontal slab around $L$ is the **tolerance** the inquirer demands; the $\delta$ (gold) vertical slab around $a$ is the **proximity** the prover must produce. The curve must thread the box centered at $(a, L)$ for every conceivable tolerance.
+
+---
+
+## 📚 1. Definitions
+
+### Definition 1.1.1 — Informal Limit
+
+Let $f$ be a function defined on an open interval containing $a$, except possibly at $a$ itself. We write
+
+$$
+\lim_{x \to a} f(x) = L
+$$
+
+if the values of $f(x)$ can be made **arbitrarily close** to the real number $L$ by taking $x$ **sufficiently close** to $a$ but $x \neq a$.
+
+**Critical caveat.** The value of $f(a)$ is *irrelevant* to the limit. The function may be undefined at $a$, defined and equal to $L$, or defined and equal to something completely different. The limit only inspects what happens **as $x$ approaches** $a$.
+
+### Definition 1.1.2 — Formal $(\varepsilon, \delta)$ Limit
+
+(Cauchy 1821, Weierstrass 1872.) Let $f : D \to \mathbb{R}$ with $D \subseteq \mathbb{R}$, and let $a$ be a limit point of $D$. We say $\lim_{x \to a} f(x) = L$ iff:
+
+$$
+\forall\, \varepsilon > 0,\; \exists\, \delta > 0 \;\text{ such that }\; \forall\, x \in D,\; 0 < |x - a| < \delta \;\Longrightarrow\; |f(x) - L| < \varepsilon.
+$$
+
+Read aloud: *for every positive tolerance $\varepsilon$, there exists a positive proximity $\delta$ such that whenever $x$ is within distance $\delta$ of $a$ (but not equal to $a$), $f(x)$ is within distance $\varepsilon$ of $L$.*
+
+The strict inequality $0 < |x - a|$ on the left enforces $x \neq a$.
+
+### Definition 1.1.3 — One-Sided Limits
+
+The **right-hand limit** $\lim_{x \to a^+} f(x) = L$ requires the implication only for $x$ with $0 < x - a < \delta$ (i.e., $x > a$). The **left-hand limit** $\lim_{x \to a^-} f(x) = L$ uses $0 < a - x < \delta$ (i.e., $x < a$).
+
+### Definition 1.1.4 — Limit at Infinity
+
+$\displaystyle\lim_{x \to \infty} f(x) = L$ iff $\forall \varepsilon > 0,\, \exists\, M \in \mathbb{R}$ such that $x > M \Rightarrow |f(x) - L| < \varepsilon$. The case $x \to -\infty$ uses $x < M$.
+
+### Definition 1.1.5 — Continuity at a Point
+
+A function $f$ is **continuous at $a$** iff all three of the following hold:
+
+1. $f(a)$ is defined (i.e., $a \in \operatorname{dom} f$).
+2. $\displaystyle\lim_{x \to a} f(x)$ exists.
+3. $\displaystyle\lim_{x \to a} f(x) = f(a)$.
+
+If any one of these conditions fails, $f$ has a **discontinuity** at $a$.
+
+### Definition 1.1.6 — Continuity on an Interval
+
+$f$ is **continuous on the open interval $(c, d)$** if it is continuous at every point in that interval. Continuity on $[c, d]$ additionally demands $\lim_{x \to c^+} f(x) = f(c)$ and $\lim_{x \to d^-} f(x) = f(d)$.
+
+---
+
+## 📐 2. Axioms / Postulates
+
+The following are foundational properties of $\mathbb{R}$ (the real numbers) on which every theorem in this chapter rests. They are assumed without proof at the level of calculus; their construction belongs to real analysis.
+
+### Axiom 1.1.A — Completeness of $\mathbb{R}$ (Least Upper Bound Property)
+
+Every non-empty subset $S \subset \mathbb{R}$ that is bounded above has a least upper bound (supremum) $\sup S \in \mathbb{R}$.
+
+### Axiom 1.1.B — Archimedean Property
+
+For every real $x > 0$, there exists $n \in \mathbb{N}$ such that $1/n < x$.
+
+### Axiom 1.1.C — Density of $\mathbb{Q}$ in $\mathbb{R}$
+
+Between any two distinct real numbers, there exists a rational number.
+
+These three axioms together permit the convergence of Cauchy sequences and underwrite both the existence of limits and the continuum properties used by the IVT and EVT below.
+
+---
+
+## 🛡️ 3. Lemmas (Limit Laws)
+
+Suppose $\displaystyle\lim_{x \to a} f(x) = L$ and $\displaystyle\lim_{x \to a} g(x) = M$, and let $c \in \mathbb{R}$ be a constant. Then:
+
+| #   | Law             | Statement                                                                                    |
+| --- | --------------- | -------------------------------------------------------------------------------------------- |
+| L1  | Constant        | $\lim_{x \to a} c = c$                                                                       |
+| L2  | Identity        | $\lim_{x \to a} x = a$                                                                       |
+| L3  | Sum             | $\lim_{x \to a} [f(x) + g(x)] = L + M$                                                       |
+| L4  | Difference      | $\lim_{x \to a} [f(x) - g(x)] = L - M$                                                       |
+| L5  | Scalar Multiple | $\lim_{x \to a} c \cdot f(x) = c L$                                                          |
+| L6  | Product         | $\lim_{x \to a} f(x) g(x) = L M$                                                             |
+| L7  | Quotient        | $\lim_{x \to a} \dfrac{f(x)}{g(x)} = \dfrac{L}{M}$, provided $M \neq 0$                      |
+| L8  | Power           | $\lim_{x \to a} [f(x)]^n = L^n$ for any $n \in \mathbb{N}$                                   |
+| L9  | Root            | $\lim_{x \to a} \sqrt[n]{f(x)} = \sqrt[n]{L}$, with $L \geq 0$ when $n$ is even              |
+| L10 | Composition     | If $f$ continuous at $M$ and $\lim_{x \to a} g(x) = M$, then $\lim_{x \to a} f(g(x)) = f(M)$ |
+
+A formal proof of L3 (the Sum Law) appears in §5 below; the others follow by analogous $\varepsilon$–$\delta$ chasing or by induction from the product law.
+
+### Lemma 1.1.1 — Uniqueness of Limits
+
+If $\lim_{x \to a} f(x) = L_1$ and $\lim_{x \to a} f(x) = L_2$, then $L_1 = L_2$.
+
+**Proof.** Assume for contradiction $L_1 \neq L_2$, so $|L_1 - L_2| > 0$. Set
+
+$$
+\varepsilon = \tfrac{1}{2} |L_1 - L_2| > 0.
+$$
+
+By the limit assumption, there exist $\delta_1, \delta_2 > 0$ such that
+
+$$
+0 < |x - a| < \delta_1 \;\Longrightarrow\; |f(x) - L_1| < \varepsilon,
+$$
+
+$$
+0 < |x - a| < \delta_2 \;\Longrightarrow\; |f(x) - L_2| < \varepsilon.
+$$
+
+Pick $\delta = \min(\delta_1, \delta_2) > 0$ and any $x_0$ with $0 < |x_0 - a| < \delta$ (which exists because $a$ is a limit point of $\operatorname{dom} f$). Then both bounds hold simultaneously, and the triangle inequality yields
+
+$$
+|L_1 - L_2| = |L_1 - f(x_0) + f(x_0) - L_2| \leq |L_1 - f(x_0)| + |f(x_0) - L_2| < \varepsilon + \varepsilon = 2\varepsilon = |L_1 - L_2|.
+$$
+
+We have derived $|L_1 - L_2| < |L_1 - L_2|$, a contradiction. Hence $L_1 = L_2$. $\blacksquare$
+
+---
+
+## 👑 4. Major Theorems
+
+### Theorem 1.1.1 — Squeeze Theorem (Sandwich Theorem)
+
+Let $f, g, h$ be functions defined on a punctured neighborhood of $a$ such that
+
+$$
+g(x) \leq f(x) \leq h(x) \quad \text{for all } x \neq a \text{ in some neighborhood of } a,
+$$
+
+and suppose
+
+$$
+\lim_{x \to a} g(x) = \lim_{x \to a} h(x) = L.
+$$
+
+Then $\displaystyle\lim_{x \to a} f(x) = L$.
+
+### Theorem 1.1.2 — Intermediate Value Theorem (IVT)
+
+Let $f$ be continuous on the closed interval $[a, b]$ with $f(a) \neq f(b)$. For any value $N$ strictly between $f(a)$ and $f(b)$, there exists $c \in (a, b)$ such that $f(c) = N$.
+
+### Theorem 1.1.3 — Extreme Value Theorem (EVT)
+
+If $f$ is continuous on the closed bounded interval $[a, b]$, then $f$ attains both a global maximum and a global minimum on $[a, b]$. That is, there exist $c_M, c_m \in [a, b]$ such that $f(c_m) \leq f(x) \leq f(c_M)$ for all $x \in [a, b]$.
+
+### Theorem 1.1.4 — Continuity of Polynomials and Rationals
+
+Every polynomial $p(x) = \sum_{k=0}^{n} c_k x^k$ is continuous on all of $\mathbb{R}$. Every rational function $r(x) = p(x)/q(x)$ is continuous on its domain $\{x : q(x) \neq 0\}$.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Proof of the Squeeze Theorem
+
+Let $\varepsilon > 0$. Since $\lim_{x \to a} g(x) = L$, there exists $\delta_1 > 0$ such that
+
+$$
+0 < |x - a| < \delta_1 \;\Longrightarrow\; |g(x) - L| < \varepsilon \;\Longrightarrow\; L - \varepsilon < g(x) < L + \varepsilon.
+$$
+
+Since $\lim_{x \to a} h(x) = L$, there exists $\delta_2 > 0$ such that
+
+$$
+0 < |x - a| < \delta_2 \;\Longrightarrow\; L - \varepsilon < h(x) < L + \varepsilon.
+$$
+
+Let $\delta_3 > 0$ be such that $g(x) \leq f(x) \leq h(x)$ for $0 < |x - a| < \delta_3$ (this $\delta_3$ exists by hypothesis). Set
+
+$$
+\delta = \min(\delta_1, \delta_2, \delta_3) > 0.
+$$
+
+Then for all $x$ with $0 < |x - a| < \delta$:
+
+$$
+L - \varepsilon < g(x) \leq f(x) \leq h(x) < L + \varepsilon,
+$$
+
+which gives $|f(x) - L| < \varepsilon$. Since $\varepsilon > 0$ was arbitrary, $\lim_{x \to a} f(x) = L$. $\blacksquare$
+
+### 5.2 Proof of Limit Law L3 (Sum Law)
+
+**Claim.** If $\lim_{x\to a} f(x) = L$ and $\lim_{x\to a} g(x) = M$, then $\lim_{x\to a}[f(x)+g(x)] = L + M$.
+
+Let $\varepsilon > 0$. We need to produce $\delta > 0$ such that
+
+$$
+0 < |x-a| < \delta \;\Longrightarrow\; |[f(x) + g(x)] - (L+M)| < \varepsilon.
+$$
+
+**Strategic split.** Since the desired bound is $\varepsilon$ and we have two pieces $f - L$ and $g - M$, distribute the budget evenly: target each below $\varepsilon/2$.
+
+By $\lim_{x \to a} f(x) = L$, applied with tolerance $\varepsilon/2$:
+
+$$
+\exists \delta_1 > 0 : \; 0 < |x - a| < \delta_1 \Rightarrow |f(x) - L| < \tfrac{\varepsilon}{2}.
+$$
+
+By $\lim_{x \to a} g(x) = M$, applied with tolerance $\varepsilon/2$:
+
+$$
+\exists \delta_2 > 0 : \; 0 < |x - a| < \delta_2 \Rightarrow |g(x) - M| < \tfrac{\varepsilon}{2}.
+$$
+
+Choose $\delta = \min(\delta_1, \delta_2) > 0$. Then for all $x$ with $0 < |x - a| < \delta$, **both** bounds hold simultaneously. Apply the triangle inequality:
+
+$$
+|[f(x) + g(x)] - (L + M)| = |[f(x) - L] + [g(x) - M]| \leq |f(x) - L| + |g(x) - M|.
+$$
+
+Substitute the two bounds:
+
+$$
+\leq \tfrac{\varepsilon}{2} + \tfrac{\varepsilon}{2} = \varepsilon.
+$$
+
+Since $\varepsilon > 0$ was arbitrary, the definition of the limit is satisfied with the produced $\delta$. $\blacksquare$
+
+### 5.3 Proof of the Intermediate Value Theorem (Sketch via Bisection)
+
+Assume WLOG $f(a) < N < f(b)$ (the other case is symmetric). Define the set
+
+$$
+S = \{ x \in [a, b] : f(x) < N \}.
+$$
+
+Then $a \in S$ (so $S \neq \emptyset$) and $S$ is bounded above by $b$. By the **Completeness Axiom (1.1.A)**, $c := \sup S$ exists in $[a, b]$. Three claims:
+
+**Claim 1.** $f(c) \leq N$. Suppose for contradiction $f(c) > N$. By continuity at $c$, given $\varepsilon = f(c) - N > 0$, there exists $\delta > 0$ such that $|x - c| < \delta \Rightarrow |f(x) - f(c)| < \varepsilon$, hence $f(x) > f(c) - \varepsilon = N$. So no element of $S$ lies in $(c - \delta, c]$ — but then $c - \delta$ is an upper bound for $S$, contradicting $c = \sup S$.
+
+**Claim 2.** $f(c) \geq N$. Suppose for contradiction $f(c) < N$. Then $c < b$ (since $f(b) > N$). By continuity, given $\varepsilon = N - f(c) > 0$, there exists $\delta > 0$ such that for $x \in (c, c + \delta) \cap [a,b]$, $f(x) < f(c) + \varepsilon = N$, so these $x$'s belong to $S$, contradicting $c = \sup S$.
+
+**Claim 3.** Combining, $f(c) = N$, and clearly $c \in (a, b)$ since $f(a) < N$ and $f(b) > N$. $\blacksquare$
+
+The proof relies on **completeness** — without it (e.g., in $\mathbb{Q}$), IVT fails. Consider $f(x) = x^2 - 2$ on $[0,2] \cap \mathbb{Q}$: $f(0) = -2, f(2) = 2$, but no rational $c$ satisfies $f(c) = 0$.
+
+---
+
+## 🎯 6. Worked Examples
+
+### Example 1.1.E1 — A Removable Singularity
+
+Evaluate $\displaystyle \lim_{x \to 2} \frac{x^2 - 4}{x - 2}$.
+
+**Step 1.** Direct substitution gives $\dfrac{4 - 4}{2 - 2} = \dfrac{0}{0}$, an indeterminate form.
+
+**Step 2.** Factor the numerator using the difference of squares:
+
+$$
+x^2 - 4 = (x - 2)(x + 2).
+$$
+
+**Step 3.** Substitute and cancel — valid since the limit examines $x \neq 2$, so $x - 2 \neq 0$:
+
+$$
+\frac{(x-2)(x+2)}{x - 2} = x + 2 \quad (x \neq 2).
+$$
+
+**Step 4.** Evaluate the simplified function (a polynomial, continuous everywhere) by direct substitution:
+
+$$
+\lim_{x \to 2} (x + 2) = 2 + 2 = 4.
+$$
+
+$$
+\boxed{\lim_{x \to 2} \frac{x^2 - 4}{x - 2} = 4}
+$$
+
+The original function had a **removable discontinuity** at $x = 2$: redefining $f(2) = 4$ patches the hole and produces a continuous function.
+
+### Example 1.1.E2 — Rigorous $\varepsilon$–$\delta$ Proof
+
+Prove $\displaystyle \lim_{x \to 3} (4x - 5) = 7$ directly from Definition 1.1.2.
+
+**Step 1: Scratch work (find $\delta$).** We want $|f(x) - L| = |(4x - 5) - 7| < \varepsilon$. Simplify:
+
+$$
+|(4x - 5) - 7| = |4x - 12| = 4|x - 3|.
+$$
+
+For this to be $< \varepsilon$, we require $|x - 3| < \varepsilon/4$. So **choose $\delta = \varepsilon/4$**.
+
+**Step 2: Formal proof.** Let $\varepsilon > 0$. Set $\delta = \varepsilon/4 > 0$. Suppose $0 < |x - 3| < \delta$. Then:
+
+$$
+|f(x) - 7| = |(4x - 5) - 7| = |4x - 12| = 4|x - 3| < 4 \cdot \frac{\varepsilon}{4} = \varepsilon.
+$$
+
+Since $\varepsilon > 0$ was arbitrary, by Definition 1.1.2, $\lim_{x \to 3} (4x - 5) = 7$. $\blacksquare$
+
+### Example 1.1.E3 — The Squeeze Theorem in Action
+
+Evaluate $\displaystyle \lim_{x \to 0} x^2 \sin\!\left(\frac{1}{x}\right)$.
+
+**Step 1.** Direct substitution fails: $\sin(1/x)$ oscillates wildly as $x \to 0$.
+
+**Step 2.** Use the boundedness of sine: for all $u \in \mathbb{R}$, $-1 \leq \sin u \leq 1$. In particular, for $x \neq 0$:
+
+$$
+-1 \leq \sin\!\left(\tfrac{1}{x}\right) \leq 1.
+$$
+
+**Step 3.** Multiply through by $x^2$, which is *non-negative*, so the inequality direction is preserved:
+
+$$
+-x^2 \leq x^2 \sin\!\left(\tfrac{1}{x}\right) \leq x^2 \quad \text{for } x \neq 0.
+$$
+
+**Step 4.** Evaluate the bounding limits:
+
+$$
+\lim_{x \to 0} (-x^2) = 0, \qquad \lim_{x \to 0} x^2 = 0.
+$$
+
+**Step 5.** Apply the Squeeze Theorem (1.1.1):
+
+$$
+\boxed{\lim_{x \to 0} x^2 \sin\!\left(\tfrac{1}{x}\right) = 0.}
+$$
+
+  The function oscillates infinitely often near $0$ but is forced to zero by its parabolic envelope.
+  
+  > [!NOTE] Squeeze Theorem Visualization
+  > ![math-01__1.1-fig3](math-01__1.1-fig3.svg)
+  > *Figure 1.1.E3: The parabolic envelopes shrinking toward zero, forcing the oscillating sine wave to the limit point.*
+  
+  ### Example 1.1.E4 — The Trigonometric Cornerstone
+
+Establish $\displaystyle \lim_{\theta \to 0} \frac{\sin \theta}{\theta} = 1$ (foundation of every trigonometric derivative).
+
+**Geometric setup.** Consider the unit circle ($r = 1$) and a small angle $\theta \in (0, \pi/2)$ in radians. Construct the point $P = (\cos\theta, \sin\theta)$ on the circle, the projection $Q = (\cos\theta, 0)$ on the $x$-axis, and the tangent intersection $T = (1, \tan\theta)$.
+
+> [!NOTE] Geometric Areas
+> ![math-01__1.1-fig4](math-01__1.1-fig4.svg)
+> *Figure 1.1.E4: The inner triangle, circular sector, and outer triangle area containment.*
+
+**Step 1: Three nested areas.** From the geometry of the unit circle:
+
+- Area of triangle $\triangle OPQ = \tfrac{1}{2} \cdot 1 \cdot \sin\theta = \tfrac{1}{2}\sin\theta$.
+- Area of circular sector $OAP$ (radius 1, angle $\theta$) $= \tfrac{1}{2} r^2 \theta = \tfrac{1}{2}\theta$.
+- Area of triangle $\triangle OAT = \tfrac{1}{2} \cdot 1 \cdot \tan\theta = \tfrac{1}{2}\tan\theta$.
+
+Geometric containment $\triangle OPQ \subset \text{sector } OAP \subset \triangle OAT$ gives:
+
+$$
+\tfrac{1}{2}\sin\theta \leq \tfrac{1}{2}\theta \leq \tfrac{1}{2}\tan\theta.
+$$
+
+**Step 2.** Multiply by $2$:
+
+$$
+\sin\theta \leq \theta \leq \frac{\sin\theta}{\cos\theta}.
+$$
+
+**Step 3.** Divide by $\sin\theta$ (positive for $\theta \in (0, \pi/2)$):
+
+$$
+1 \leq \frac{\theta}{\sin\theta} \leq \frac{1}{\cos\theta}.
+$$
+
+**Step 4.** Take reciprocals (which reverses inequality direction since all terms are positive):
+
+$$
+\cos\theta \leq \frac{\sin\theta}{\theta} \leq 1.
+$$
+
+**Step 5.** Take the right-hand limit ($\theta \to 0^+$). Since $\cos\theta$ is continuous at $0$, $\lim_{\theta \to 0^+} \cos\theta = 1$. By the Squeeze Theorem:
+
+$$
+\lim_{\theta \to 0^+} \frac{\sin\theta}{\theta} = 1.
+$$
+
+**Step 6.** For $\theta \in (-\pi/2, 0)$, note that $\dfrac{\sin\theta}{\theta} = \dfrac{\sin(-|\theta|)}{-|\theta|} = \dfrac{-\sin|\theta|}{-|\theta|} = \dfrac{\sin|\theta|}{|\theta|}$, which is the same expression in $|\theta| > 0$. So the left-hand limit equals the right-hand limit. The two-sided limit exists and:
+
+$$
+\boxed{\lim_{\theta \to 0} \frac{\sin\theta}{\theta} = 1.}
+$$
+
+---
+
+## 🚧 7. Classification of Discontinuities
+
+When $f$ fails to be continuous at $a$, the failure mode falls into one of four canonical types:
+
+![math-01__1.1-fig2](math-01__1.1-fig2.svg)
+
+| Type | Definition | Canonical Example |
+|---|---|---|
+| **Removable** | $\lim_{x \to a} f(x)$ exists but $\neq f(a)$ (or $f(a)$ undefined). | $\displaystyle f(x) = \frac{x^2 - 4}{x - 2}$ at $a = 2$. |
+| **Jump** | One-sided limits exist but are unequal. | $f(x) = \operatorname{sgn}(x)$ at $a = 0$. |
+| **Infinite** | At least one one-sided limit is $\pm\infty$. | $f(x) = 1/x^2$ at $a = 0$. |
+| **Essential / Oscillatory** | At least one one-sided limit fails to exist (and isn't $\pm\infty$). | $f(x) = \sin(1/x)$ at $a = 0$. |
+
+Only the **removable** case can be "fixed" by redefining the function at the offending point.
+
+---
+
+## 🌌 8. The Four Indeterminate Forms
+
+When direct substitution into algebraic limits produces one of the following, no immediate conclusion follows; further analysis (factoring, rationalization, L'Hôpital's rule — Ch. 1.2 — or series expansion) is required:
+
+$$
+\frac{0}{0}, \qquad \frac{\infty}{\infty}, \qquad 0 \cdot \infty, \qquad \infty - \infty.
+$$
+
+Three additional **exponential indeterminate forms** appear in growth analysis:
+
+$$
+0^0, \qquad \infty^0, \qquad 1^\infty.
+$$
+
+These are typically resolved via $\lim f^g = \exp(\lim g \ln f)$ to convert into one of the four base forms.
+
+---
+
+## 🛠️ 9. Pairing with `CalculusVisualizer`
+
+To deepen intuition, take any non-trivial limit $\lim_{x \to a} f(x) = L$ and:
+
+1. Plot $f$ near $a$ in the local C++ tool.
+2. Tabulate $f(a \pm 10^{-k})$ for $k = 1, 2, 3, 4, 5, 6$.
+3. Confirm convergence to $L$ matches the predicted $\varepsilon$–$\delta$ schedule (e.g., for the proof in Example E2, picking $\varepsilon = 10^{-6}$ should require $\delta = 2.5 \times 10^{-7}$).
+4. Visualize the $\varepsilon$ horizontal band and shrink $\delta$ interactively until the curve fits.
+
+This empirical sanity check forms the bridge between formal $\varepsilon$–$\delta$ logic and the geometric picture in §🖼️.
+
+---
+
+## 📝 10. Hand-Written Challenge Problems
+
+> ⚠️ Solve every problem on paper before opening the spoiler. Show every step.
+
+### Problem 1.1.P1 — Conjugate-Multiplication Limit
+
+Evaluate
+
+$$
+\lim_{x \to 0} \frac{\sqrt{1 + x} - 1}{x}.
+$$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Diagnose the form
+
+Direct substitution gives $\dfrac{\sqrt{1} - 1}{0} = \dfrac{0}{0}$ — indeterminate.
+
+#### Step 2: Multiply by the conjugate
+
+$$
+\frac{\sqrt{1 + x} - 1}{x} \cdot \frac{\sqrt{1 + x} + 1}{\sqrt{1 + x} + 1}
+= \frac{(\sqrt{1+x})^2 - 1^2}{x(\sqrt{1+x} + 1)}.
+$$
+
+#### Step 3: Simplify the numerator
+
+$$
+(\sqrt{1+x})^2 - 1 = (1 + x) - 1 = x.
+$$
+
+So the expression becomes
+
+$$
+\frac{x}{x(\sqrt{1+x} + 1)}.
+$$
+
+#### Step 4: Cancel $x$ (valid since $x \neq 0$ in the limit)
+
+$$
+\frac{1}{\sqrt{1+x} + 1}.
+$$
+
+#### Step 5: Direct substitution into the now-continuous expression
+
+$$
+\lim_{x \to 0} \frac{1}{\sqrt{1 + x} + 1} = \frac{1}{\sqrt{1 + 0} + 1} = \frac{1}{1 + 1} = \frac{1}{2}.
+$$
+
+**Final Answer:**
+
+$$
+\lim_{x \to 0} \frac{\sqrt{1 + x} - 1}{x} = \frac{1}{2}.
+$$
+
+</details>
+
+### Problem 1.1.P2 — Continuity by Parameter
+
+Find the value of $k$ that makes $f$ continuous on all of $\mathbb{R}$:
+
+$$
+f(x) = \begin{cases} \dfrac{x^2 + 5x + 6}{x + 2} & x \neq -2 \\[4pt] k & x = -2 \end{cases}
+$$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Identify the issue
+
+For $x \neq -2$, $f$ is rational and continuous; for $x = -2$, $f(-2) = k$ is just a value. Continuity at $x = -2$ requires (Definition 1.1.5):
+
+$$
+\lim_{x \to -2} f(x) = f(-2) = k.
+$$
+
+#### Step 2: Compute the limit
+
+Direct substitution gives $\dfrac{(-2)^2 + 5(-2) + 6}{-2 + 2} = \dfrac{4 - 10 + 6}{0} = \dfrac{0}{0}$ — indeterminate. Factor:
+
+$$
+x^2 + 5x + 6 = (x + 2)(x + 3).
+$$
+
+Therefore for $x \neq -2$:
+
+$$
+\frac{(x+2)(x+3)}{x + 2} = x + 3.
+$$
+
+#### Step 3: Take the limit
+
+$$
+\lim_{x \to -2} f(x) = \lim_{x \to -2} (x + 3) = -2 + 3 = 1.
+$$
+
+#### Step 4: Set $k$
+
+For continuity, $k = 1$.
+
+**Final Answer:** $\boxed{k = 1}$.
+
+</details>
+
+### Problem 1.1.P3 — IVT Existence Proof
+
+Prove that the equation $x^5 + 2x - 1 = 0$ has a real solution in $(0, 1)$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Define $f(x) = x^5 + 2x - 1$
+
+$f$ is a polynomial, hence continuous on all of $\mathbb{R}$ (Theorem 1.1.4), and in particular on $[0, 1]$.
+
+#### Step 2: Evaluate at the endpoints
+
+$$
+f(0) = 0^5 + 2(0) - 1 = -1 \lt  0.
+$$
+
+$$
+f(1) = 1^5 + 2(1) - 1 = 1 + 2 - 1 = 2 \gt  0.
+$$
+
+#### Step 3: Apply IVT (Theorem 1.1.2)
+
+Since $f$ is continuous on $[0, 1]$ and $f(0) = -1 \lt  0 \lt  2 = f(1)$, the value $N = 0$ lies strictly between $f(0)$ and $f(1)$. By the Intermediate Value Theorem, there exists $c \in (0, 1)$ with $f(c) = 0$.
+
+#### Step 4: Conclude
+
+This $c$ is a real solution to $x^5 + 2x - 1 = 0$ in $(0, 1)$. $\blacksquare$
+
+</details>
+
+### Problem 1.1.P4 — Squeeze with Sine of Reciprocal
+
+Determine
+
+$$
+\lim_{x \to 0} \sqrt{x^4 + x^2}\, \cos\!\left(\frac{1}{x}\right).
+$$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Bound the cosine
+
+For all $u \in \mathbb{R}$, $-1 \leq \cos u \leq 1$. Hence for $x \neq 0$:
+
+$$
+-1 \leq \cos\!\left(\tfrac{1}{x}\right) \leq 1.
+$$
+
+#### Step 2: Multiply by the non-negative envelope
+
+Since $\sqrt{x^4 + x^2} \geq 0$ for all real $x$, multiplying preserves direction:
+
+$$
+-\sqrt{x^4 + x^2} \leq \sqrt{x^4 + x^2}\, \cos\!\left(\tfrac{1}{x}\right) \leq \sqrt{x^4 + x^2}.
+$$
+
+#### Step 3: Compute the envelope limit
+
+$$
+\lim_{x \to 0} \sqrt{x^4 + x^2} = \sqrt{0 + 0} = 0.
+$$
+
+(The expression under the radical is continuous and non-negative.)
+
+So $\lim_{x \to 0} -\sqrt{x^4 + x^2} = 0$ as well.
+
+#### Step 4: Apply the Squeeze Theorem (1.1.1)
+
+Both bounding functions converge to $0$, so:
+
+$$
+\boxed{\lim_{x \to 0} \sqrt{x^4 + x^2}\, \cos\!\left(\tfrac{1}{x}\right) = 0.}
+$$
+
+</details>
+
+---
+
+## 🔗 11. Cross-Links to the Knowledge Web
+
+- **Forward references:** the formal $\varepsilon$–$\delta$ definition is the structural ancestor of [the derivative](1.2---Single-Variable-Differentiation) (a limit of secant slopes), [the Riemann integral](1.3---Single-Variable-Integration) (a limit of partition sums), and the **convergence of sequences and series** in real analysis.
+- **Continuity** generalizes via [multivariable continuity](1.4---Multivariable-Limits-&-Partial-Derivatives) and ultimately into **topological continuity** (preimages of open sets are open).
+- **The Squeeze Theorem** is the prototype for the **Comparison Test** in series convergence and reappears as the **Dominated Convergence Theorem** in measure theory.
+- **The IVT** is the primitive form of **fixed-point theorems** (Brouwer, Banach) and the existence half of **Picard–Lindelöf** in [3.1 - First-Order ODEs Separable & Exact](3.1---First-Order-ODEs-Separable-&-Exact).
+- **Physics:** Continuity of fields underwrites **conservation laws** (smooth $\mathbf{E}, \mathbf{B}$ in [7.1 - Electrostatics Gauss's Law & Potential](7.1---Electrostatics-Gauss's-Law-&-Potential)) and the **smoothness of spacetime manifolds** in [8.5 - Differential Geometry Manifolds & Metrics](8.5---Differential-Geometry-Manifolds-&-Metrics).
+
+---
+
+## 📚 12. Verified Open-Access Source Material
+
+| Source | Location | Why it's Authoritative |
+|---|---|---|
+| **MIT 18.01SC, Unit 1 & Unit 5** | [ocw.mit.edu/courses/18-01sc](https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/) | Core MIT undergraduate calculus, complete video + problem sets, hosted on `mit.edu`. |
+| **Strang, *Calculus* (3rd ed., free PDF)** | [Strang on OCW](https://ocw.mit.edu/ans7870/textbooks/Strang/stranginstruct.htm) | Author taught 18.01/18.06 at MIT for 50+ years; textbook in classroom use since 1991. |
+| **APEX Calculus, Ch. 1** | [apexcalculus.com](https://www.apexcalculus.com/) | Greg Hartman (VMI), CC-BY-NC; widely adopted at U.S. universities; matches the rigor expected here. |
+| **Paul Dawkins — *Limits & Continuity*** | [tutorial.math.lamar.edu/calci](https://tutorial.math.lamar.edu/classes/calci/limitsintro.aspx) | Lamar University faculty notes, the most-cited online calculus reference of the past two decades. |
+| **3Blue1Brown — *Essence of Calculus*, Chapter 7 ("Limits")** | [3blue1brown.com/lessons/essence-of-calculus](https://www.3blue1brown.com/lessons/essence-of-calculus) | Grant Sanderson; the gold standard for visual intuition. Watch *after* mastering the algebra below. |
+| **LibreTexts — *$\varepsilon$–$\delta$ Definition*** | [math.libretexts.org Apex 1.2](https://math.libretexts.org/Bookshelves/Calculus/Calculus_3e_(Apex)/01:_Limits/1.02:_Epsilon-Delta_Definition_of_a_Limit) | Mirror of Apex Ch. 1.2 with extended worked examples. |
+
+*(Resource summaries above were paraphrased for licensing compliance with each platform's terms of use.)*
+
+---
+
+*Chapter 1.1 — Limits & Continuity. Last reviewed: 2026-05-23. Next chapter: [1.2 - Single-Variable Differentiation](1.2---Single-Variable-Differentiation) →*

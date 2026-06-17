@@ -1,0 +1,1386 @@
+---
+title: "Single Variable Integration"
+subject: "Mathematical Foundations & Calculus"
+catalog: advanced
+audience_tier: higher-education
+chapter: "1.3"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+![Integration_and_Vector_Calculus_Overview](Integration_and_Vector_Calculus_Overview.png)
+
+> [!info]+ 🎬 Companion materials (NotebookLM)
+> 🎞️ Slide deck: [The_Architecture_of_Accumulation.pptx](The_Architecture_of_Accumulation.pptx)
+
+# 1.3 — Single-Variable Integration
+
+> *"The integral is the area under the curve in the same way that the derivative is the slope of the tangent — they are, astonishingly, inverses of each other."* — paraphrased from the Fundamental Theorem of Calculus.
+
+Chapter 1.2 taught you how to measure instantaneous rates of change. This chapter asks the complementary question: *given a rate, how do you recover the total accumulation?* The answer is integration — and the Fundamental Theorem of Calculus (FTC) is the bridge that makes differentiation and integration two sides of the same coin.
+
+We build from scratch: Riemann sums as finite approximations to area, the sup/inf definition of the definite integral, the full FTC (both parts, both proofs), and every technique needed to evaluate integrals in closed form. Every theorem is proved. No skipped steps.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Define the Riemann integral via upper and lower sums and state the Riemann integrability criterion.
+2. Prove that every continuous function on $[a,b]$ is Riemann integrable.
+3. State and prove the Mean Value Theorem for Integrals.
+4. State and prove FTC Part I ($F'(x) = f(x)$) and Part II ($\int_a^b f = G(b) - G(a)$).
+5. Execute u-substitution, integration by parts, trig substitution, and partial fractions — and prove each technique from first principles.
+6. Evaluate improper integrals and determine their convergence using the comparison and $p$-tests.
+7. Set up and compute arc-length integrals.
+8. Cross-link every technique to its physics counterpart (work, flux, energy).
+
+---
+
+## 🤔 Why the fuck does this matter?
+
+Differentiation told you how things *change*. Integration tells you the *total effect* of that change. Every physical law you care about that isn't written as a derivative is written as an integral:
+
+- **Work:** $W = \int_a^b F(x)\,dx$ — force integrated over displacement.
+- **Probability:** $\Pr(a \leq X \leq b) = \int_a^b p(x)\,dx$ — the density integrated over a range.
+- **Electric flux:** $\Phi_E = \iint_S \mathbf{E} \cdot d\mathbf{A}$ — the building block of Maxwell's equations (see [7.x - Maxwell's Equations](7.x---Maxwell's-Equations)).
+- **Energy stored in a field:** $U = \frac{\varepsilon_0}{2}\int E^2\,dV$.
+- **Arc length, surface area, center of mass, moment of inertia** — all integrals.
+- **Every ODE solution** (Chapter 3.x) is obtained by integration. The phrase "solve the ODE" literally means "integrate."
+- **Fourier analysis:** every signal is decomposed into $\int f(x) e^{-i\omega x}\,dx$. That's the Fourier transform.
+
+If you can't integrate with confidence, you'll hit a wall inside every downstream subject in this vault. So we build every rule from scratch, prove every technique, and drill until it's reflex. No "it follows that." No shortcuts.
+
+---
+
+
+## 🖼️ Visual Anchor 1 — Riemann Sums: Left vs Right Endpoints
+
+The fundamental picture of integration: approximate the area under $f$ on $[a,b]$ by stacking rectangles. As the partition is refined ($n \to \infty$, $\|\Delta x\| \to 0$), the approximation converges to the exact area.
+
+![math-01__1.3-fig1](math-01__1.3-fig1.svg)
+
+The **blue** rectangles use the left endpoint of each subinterval to set height; the **gold** rectangles use the right endpoint. For a decreasing function the left sum overestimates and the right sum underestimates; for an increasing function it's reversed. As $n \to \infty$ both converge to the true area — that's Riemann integrability.
+
+---
+
+## 📚 1. Definitions
+
+### Definition 1.3.1 — Antiderivative (Indefinite Integral)
+
+A function $F$ is an **antiderivative** of $f$ on an interval $I$ if $F'(x) = f(x)$ for all $x \in I$. The **indefinite integral** of $f$ is the family of all antiderivatives:
+
+$$
+\int f(x)\,dx = F(x) + C,
+$$
+
+where $C \in \mathbb{R}$ is an **arbitrary constant of integration**. The $+C$ is not decorative — every $C$ yields a distinct antiderivative, and omitting it loses an entire family of solutions (a cardinal sin in differential equations).
+
+**Why is $C$ there?** If $F'(x) = f(x)$ and $G(x) = F(x) + C$, then $G'(x) = F'(x) + 0 = f(x)$, so $G$ is also an antiderivative. The Monotonicity Theorem from Chapter 1.2 (Theorem 1.2.8) tells us the only functions with zero derivative on an interval are constants — so any two antiderivatives of $f$ differ by *exactly* a constant. No exceptions.
+
+### Definition 1.3.2 — Partition and Tagged Partition
+
+Let $[a, b]$ be a closed bounded interval. A **partition** of $[a, b]$ is a finite ordered set
+
+$$
+P = \{x_0, x_1, x_2, \dots, x_n\} \quad \text{with} \quad a = x_0 < x_1 < \cdots < x_n = b.
+$$
+
+The $k$-th subinterval is $[x_{k-1}, x_k]$ with width $\Delta x_k = x_k - x_{k-1} > 0$. The **mesh** (or **norm**) of $P$ is
+
+$$
+\|P\| = \max_{1 \leq k \leq n} \Delta x_k,
+$$
+
+the width of the widest subinterval. A **uniform** partition of $n$ subintervals has $\Delta x_k = (b-a)/n$ for all $k$.
+
+A **tagged partition** additionally assigns a **sample point** $t_k \in [x_{k-1}, x_k]$ to each subinterval.
+
+
+### Definition 1.3.3 — Riemann Sum
+
+Given a bounded function $f : [a,b] \to \mathbb{R}$ and a tagged partition $(P, \{t_k\})$, the **Riemann sum** is
+
+$$
+S(P, f, \{t_k\}) = \sum_{k=1}^{n} f(t_k)\,\Delta x_k.
+$$
+
+Geometrically: stack $n$ rectangles, each of width $\Delta x_k$ and height $f(t_k)$. The sum is the total signed area of those rectangles. Special cases:
+
+- **Left Riemann sum** $L_n$: $t_k = x_{k-1}$ (left endpoint of each subinterval).
+- **Right Riemann sum** $R_n$: $t_k = x_k$ (right endpoint).
+- **Midpoint Riemann sum** $M_n$: $t_k = (x_{k-1} + x_k)/2$ (midpoint).
+
+### Definition 1.3.4 — Upper and Lower Sums
+
+For a **bounded** function $f$ on $[a,b]$ and partition $P$, define on each subinterval $[x_{k-1}, x_k]$:
+
+$$
+M_k = \sup_{x \in [x_{k-1}, x_k]} f(x), \qquad m_k = \inf_{x \in [x_{k-1}, x_k]} f(x).
+$$
+
+(These exist because $f$ is bounded and $\mathbb{R}$ is complete — **Axiom 1.3.A** below.) The **upper Darboux sum** and **lower Darboux sum** are
+
+$$
+U(P, f) = \sum_{k=1}^{n} M_k\,\Delta x_k, \qquad L(P, f) = \sum_{k=1}^{n} m_k\,\Delta x_k.
+$$
+
+Always $L(P, f) \leq S(P, f, \{t_k\}) \leq U(P, f)$ for any choice of sample points — because $m_k \leq f(t_k) \leq M_k$.
+
+### Definition 1.3.5 — Upper and Lower Integrals; Riemann Integrability
+
+The **lower integral** and **upper integral** of $f$ on $[a,b]$ are
+
+$$
+\underline{\int_a^b} f = \sup_P L(P, f), \qquad \overline{\int_a^b} f = \inf_P U(P, f),
+$$
+
+where the sup/inf are taken over all partitions $P$ of $[a,b]$. Always $\underline{\int} f \leq \overline{\int} f$ (proved below).
+
+$f$ is **Riemann integrable** on $[a,b]$, written $f \in \mathcal{R}[a,b]$, iff the two agree:
+
+$$
+\underline{\int_a^b} f = \overline{\int_a^b} f.
+$$
+
+The common value is the **definite integral**:
+
+$$
+\int_a^b f(x)\,dx = \underline{\int_a^b} f = \overline{\int_a^b} f.
+$$
+
+### Definition 1.3.6 — Improper Integral, Type I (Infinite Limits)
+
+If $f$ is integrable on $[a, R]$ for every $R > a$, then
+
+$$
+\int_a^\infty f(x)\,dx = \lim_{R \to \infty} \int_a^R f(x)\,dx,
+$$
+
+provided the limit exists and is finite, in which case the integral **converges**; otherwise it **diverges**. Similarly for $\int_{-\infty}^b$ and $\int_{-\infty}^\infty = \int_{-\infty}^c + \int_c^\infty$ for any $c$.
+
+### Definition 1.3.7 — Improper Integral, Type II (Integrand Singularity)
+
+If $f$ is integrable on $[a + \varepsilon, b]$ for every small $\varepsilon > 0$ but $f$ has a singularity at $x = a$, then
+
+$$
+\int_a^b f(x)\,dx = \lim_{\varepsilon \to 0^+} \int_{a+\varepsilon}^b f(x)\,dx,
+$$
+
+if the limit exists and is finite. Singularities at the right endpoint or in the interior are handled analogously.
+
+---
+
+## 📐 2. Axioms
+
+### Axiom 1.3.A — Completeness of $\mathbb{R}$ (Inherited from Chapter 1.1)
+
+Every non-empty subset of $\mathbb{R}$ that is bounded above has a least upper bound (supremum) in $\mathbb{R}$, and every non-empty subset bounded below has a greatest lower bound (infimum) in $\mathbb{R}$.
+
+**Why we need it here.** Without completeness, the quantities $\sup_P L(P,f)$ and $\inf_P U(P,f)$ in Definition 1.3.5 might not exist in $\mathbb{R}$. Completeness guarantees them. It is also used in the proof of Continuous $\Rightarrow$ Integrable (Theorem 1.3.1), where the uniform continuity argument requires that the infimum of oscillations can be made small.
+
+---
+
+## 🛡️ 3. Lemmas (Properties of the Integral)
+
+Assume $f, g \in \mathcal{R}[a,b]$ and $c \in \mathbb{R}$ throughout this section.
+
+### Lemma 1.3.1 — Linearity
+
+$$
+\int_a^b [f(x) + g(x)]\,dx = \int_a^b f(x)\,dx + \int_a^b g(x)\,dx,
+$$
+
+$$
+\int_a^b c\,f(x)\,dx = c\int_a^b f(x)\,dx.
+$$
+
+These follow directly from linearity of finite sums: every Riemann sum of $f + g$ splits as the corresponding sum of $f$ plus the sum of $g$; passing to the limit (sup/inf) preserves the equality.
+
+### Lemma 1.3.2 — Additivity Over Intervals
+
+For any $c \in [a,b]$:
+
+$$
+\int_a^b f(x)\,dx = \int_a^c f(x)\,dx + \int_c^b f(x)\,dx.
+$$
+
+**Proof sketch.** Any partition of $[a,b]$ that includes $c$ as a partition point decomposes into a partition of $[a,c]$ and a partition of $[c,b]$. Suprema and infima of sums on each sub-partition combine additively. For partitions that do not include $c$, one refines the partition by inserting $c$ — refinement can only increase lower sums and decrease upper sums, so the equality passes through. $\blacksquare$
+
+### Lemma 1.3.3 — Monotonicity
+
+If $f(x) \leq g(x)$ for all $x \in [a,b]$, then
+
+$$
+\int_a^b f(x)\,dx \leq \int_a^b g(x)\,dx.
+$$
+
+### Lemma 1.3.4 — Comparison / Bound
+
+If $m \leq f(x) \leq M$ for all $x \in [a,b]$, then
+
+$$
+m(b - a) \leq \int_a^b f(x)\,dx \leq M(b - a).
+$$
+
+(Apply Lemma 1.3.3 with the constant functions $m$ and $M$, whose integrals are $m(b-a)$ and $M(b-a)$ respectively.)
+
+### Lemma 1.3.5 — Absolute Value Inequality
+
+$$
+\left|\int_a^b f(x)\,dx\right| \leq \int_a^b |f(x)|\,dx.
+$$
+
+**Proof.** Since $-|f(x)| \leq f(x) \leq |f(x)|$, Monotonicity (Lemma 1.3.3) gives
+
+$$
+-\int_a^b |f|\,dx \leq \int_a^b f\,dx \leq \int_a^b |f|\,dx.
+$$
+
+This double inequality is precisely $\left|\int_a^b f\,dx\right| \leq \int_a^b |f|\,dx$. $\blacksquare$
+
+(Note: this requires $|f| \in \mathcal{R}[a,b]$ as well; that follows from $f \in \mathcal{R}[a,b]$ via the fact that the composition of a Lipschitz function with an integrable function is integrable — $|\cdot|$ is Lipschitz with constant 1.)
+
+---
+
+
+## 👑 4. Major Theorems
+
+### Theorem 1.3.1 — Continuous $\Rightarrow$ Integrable
+
+If $f$ is continuous on $[a,b]$, then $f \in \mathcal{R}[a,b]$.
+
+### Theorem 1.3.2 — Mean Value Theorem for Integrals
+
+If $f$ is continuous on $[a,b]$, then there exists $c \in (a,b)$ such that
+
+$$
+f(c) = \frac{1}{b - a}\int_a^b f(x)\,dx.
+$$
+
+### Theorem 1.3.3 — Fundamental Theorem of Calculus, Part I
+
+Let $f$ be continuous on $[a,b]$. Define the **accumulation function**
+
+$$
+F(x) = \int_a^x f(t)\,dt, \qquad x \in [a,b].
+$$
+
+Then $F$ is differentiable on $(a,b)$ and $F'(x) = f(x)$ for all $x \in (a,b)$.
+
+### Theorem 1.3.4 — Fundamental Theorem of Calculus, Part II
+
+Let $f$ be continuous on $[a,b]$ and let $G$ be any antiderivative of $f$ on $[a,b]$ (i.e., $G' = f$). Then
+
+$$
+\int_a^b f(x)\,dx = G(b) - G(a) \equiv \Big[G(x)\Big]_a^b.
+$$
+
+### Theorem 1.3.5 — Substitution Rule (Change of Variables)
+
+Let $u = \varphi(x)$ where $\varphi$ is continuously differentiable on $[a,b]$, and let $f$ be continuous on the range of $\varphi$. Then
+
+$$
+\int_a^b f(\varphi(x))\,\varphi'(x)\,dx = \int_{\varphi(a)}^{\varphi(b)} f(u)\,du.
+$$
+
+### Theorem 1.3.6 — Integration by Parts
+
+If $u(x)$ and $v(x)$ are continuously differentiable on $[a,b]$, then
+
+$$
+\int_a^b u(x)\,v'(x)\,dx = \Big[u(x)\,v(x)\Big]_a^b - \int_a^b u'(x)\,v(x)\,dx.
+$$
+
+For indefinite integrals: $\displaystyle\int u\,dv = u\,v - \int v\,du$.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Proof of Theorem 1.3.1 — Continuous $\Rightarrow$ Integrable
+
+**Strategy.** Use the Riemann integrability criterion: $f \in \mathcal{R}[a,b]$ iff for every $\varepsilon > 0$ there exists a partition $P$ with $U(P,f) - L(P,f) < \varepsilon$. Continuity on a compact set ($[a,b]$ is closed and bounded) implies **uniform continuity** (Heine-Cantor theorem — a consequence of Completeness and the Extreme Value Theorem from Chapter 1.1). We exploit that.
+
+**Step 1 — Uniform continuity.** Let $\varepsilon > 0$. Since $f$ is continuous on the compact set $[a,b]$, it is uniformly continuous: there exists $\delta > 0$ such that
+
+$$
+|x - y| < \delta \;\Longrightarrow\; |f(x) - f(y)| < \frac{\varepsilon}{b - a}.
+$$
+
+**Step 2 — Choose a fine uniform partition.** Pick $n$ large enough so that $(b-a)/n < \delta$. Form the uniform partition $P = \{x_k = a + k(b-a)/n\}_{k=0}^n$. Every subinterval $[x_{k-1}, x_k]$ has width $\Delta x = (b-a)/n < \delta$.
+
+**Step 3 — Bound the oscillation on each subinterval.** For any two points $x, y \in [x_{k-1}, x_k]$, we have $|x - y| \leq \Delta x < \delta$, so
+
+$$
+|f(x) - f(y)| < \frac{\varepsilon}{b - a}.
+$$
+
+In particular, since $f$ is continuous on the compact subinterval $[x_{k-1}, x_k]$, it attains its supremum $M_k$ and infimum $m_k$ (Extreme Value Theorem). Therefore:
+
+$$
+M_k - m_k < \frac{\varepsilon}{b - a}.
+$$
+
+**Step 4 — Bound $U(P,f) - L(P,f)$.** Sum over all $n$ subintervals:
+
+$$
+U(P,f) - L(P,f) = \sum_{k=1}^n (M_k - m_k)\,\Delta x_k < n \cdot \frac{\varepsilon}{b - a} \cdot \frac{b - a}{n} = \varepsilon.
+$$
+
+**Step 5 — Conclude.** Since for every $\varepsilon > 0$ we found a partition $P$ with $U(P,f) - L(P,f) < \varepsilon$, we have $\overline{\int} f - \underline{\int} f = 0$ (the gap between upper and lower integrals can be made arbitrarily small). Hence $f \in \mathcal{R}[a,b]$. $\blacksquare$
+
+---
+
+### 5.2 Proof of Theorem 1.3.2 — Mean Value Theorem for Integrals
+
+**Claim.** If $f$ is continuous on $[a,b]$, there exists $c \in (a,b)$ with $f(c) = \frac{1}{b-a}\int_a^b f\,dx$.
+
+**Step 1 — Apply the Extreme Value Theorem.** Since $f$ is continuous on the compact set $[a,b]$, it attains its minimum $m = f(x_{\min})$ and maximum $M = f(x_{\max})$ on $[a,b]$.
+
+**Step 2 — Bound the integral.** By Lemma 1.3.4 (Comparison):
+
+$$
+m(b-a) \leq \int_a^b f(x)\,dx \leq M(b-a).
+$$
+
+Divide through by $(b-a) > 0$:
+
+$$
+m \leq \frac{1}{b-a}\int_a^b f\,dx \leq M.
+$$
+
+**Step 3 — Apply IVT.** Let $I = \frac{1}{b-a}\int_a^b f\,dx$. We have $f(x_{\min}) = m \leq I \leq M = f(x_{\max})$. Since $f$ is continuous on $[a,b]$ (and in particular on the interval between $x_{\min}$ and $x_{\max}$), the **Intermediate Value Theorem** (Theorem 1.1.2) guarantees there exists $c$ between $x_{\min}$ and $x_{\max}$ — hence in $(a,b)$ (or at worst on $[a,b]$) — with $f(c) = I$. $\blacksquare$
+
+**Interpretation.** The "average value" of $f$ on $[a,b]$ is $\frac{1}{b-a}\int_a^b f\,dx$. The MVT for integrals says the function actually *achieves* this average value somewhere in the interval — the average is not just a computed number, it is a genuine function value.
+
+---
+
+
+### 5.3 Proof of FTC Part I (Theorem 1.3.3)
+
+**Claim.** Let $f$ be continuous on $[a,b]$ and $F(x) = \int_a^x f(t)\,dt$. Then $F'(x) = f(x)$.
+
+**Step 1 — Set up the difference quotient.** For $x \in (a,b)$ and small $h \neq 0$ with $x + h \in [a,b]$:
+
+$$
+F(x + h) - F(x) = \int_a^{x+h} f(t)\,dt - \int_a^x f(t)\,dt.
+$$
+
+**Step 2 — Apply Additivity (Lemma 1.3.2).** Split the first integral at $x$:
+
+$$
+\int_a^{x+h} f(t)\,dt = \int_a^x f(t)\,dt + \int_x^{x+h} f(t)\,dt.
+$$
+
+Subtracting $\int_a^x f\,dt$ from both sides:
+
+$$
+F(x + h) - F(x) = \int_x^{x+h} f(t)\,dt.
+$$
+
+**Step 3 — Divide by $h$.** (Assume $h > 0$ for now; $h < 0$ is symmetric.)
+
+$$
+\frac{F(x+h) - F(x)}{h} = \frac{1}{h}\int_x^{x+h} f(t)\,dt.
+$$
+
+**Step 4 — Apply MVT for Integrals (Theorem 1.3.2) on $[x, x+h]$.** Since $f$ is continuous, there exists $c_h \in (x, x+h)$ such that
+
+$$
+\frac{1}{h}\int_x^{x+h} f(t)\,dt = f(c_h).
+$$
+
+**Step 5 — Take the limit as $h \to 0$.** The intermediate point $c_h$ satisfies $x < c_h < x + h$, so by the Squeeze Theorem $c_h \to x$ as $h \to 0^+$. By continuity of $f$ at $x$:
+
+$$
+\lim_{h \to 0^+} f(c_h) = f(x).
+$$
+
+The left-hand limit ($h \to 0^-$) is identical by an analogous argument. Hence:
+
+$$
+F'(x) = \lim_{h \to 0} \frac{F(x+h) - F(x)}{h} = f(x). \qquad \blacksquare
+$$
+
+**Why continuity of $f$ is essential.** If $f$ has a jump discontinuity at $x$, then $c_h$ may approach $x$ from one side while $f$ oscillates — the limit $f(c_h) \to f(x)$ fails. The FTC Part I holds with a weaker condition (Lebesgue integrability plus almost-everywhere continuity), but for our purposes continuity is the right assumption.
+
+---
+
+### 5.4 Proof of FTC Part II (Theorem 1.3.4)
+
+**Claim.** If $G'(x) = f(x)$ on $[a,b]$ and $f$ is continuous, then $\int_a^b f = G(b) - G(a)$.
+
+**Step 1 — Connect $G$ and the accumulation function $F$.** By FTC Part I, $F(x) = \int_a^x f(t)\,dt$ satisfies $F'(x) = f(x)$. So $F$ and $G$ are both antiderivatives of $f$.
+
+**Step 2 — Use the constant-difference theorem.** From Chapter 1.2 (Theorem 1.2.8), if two functions have the same derivative on an interval then they differ by a constant. Since $F' = G' = f$ on $(a,b)$, there exists $K \in \mathbb{R}$ with
+
+$$
+G(x) = F(x) + K \quad \text{for all } x \in [a,b].
+$$
+
+**Step 3 — Evaluate at the endpoints.**
+
+$$
+G(b) - G(a) = [F(b) + K] - [F(a) + K] = F(b) - F(a).
+$$
+
+**Step 4 — Compute $F(b) - F(a)$ from the definition.**
+
+$$
+F(b) - F(a) = \int_a^b f(t)\,dt - \int_a^a f(t)\,dt = \int_a^b f(t)\,dt - 0 = \int_a^b f(t)\,dt.
+$$
+
+(The integral from $a$ to $a$ is zero: a sum over a partition of width zero contributes nothing.)
+
+**Step 5 — Conclude.**
+
+$$
+\int_a^b f(x)\,dx = F(b) - F(a) = G(b) - G(a). \qquad \blacksquare
+$$
+
+**Significance.** FTC Part II transforms the problem of computing a definite integral (a limit of Riemann sums) into the purely algebraic task of finding an antiderivative and evaluating it at two points. This is why integration techniques (u-sub, parts, trig sub, etc.) are so valuable — they are strategies for finding $G$.
+
+---
+
+### 5.5 Proof of the Substitution Rule (Theorem 1.3.5)
+
+**Claim.** $\displaystyle\int_a^b f(\varphi(x))\,\varphi'(x)\,dx = \int_{\varphi(a)}^{\varphi(b)} f(u)\,du$.
+
+**Step 1 — Define an antiderivative of $f$.** Since $f$ is continuous, by FTC Part I it has an antiderivative $G$ with $G' = f$ on the range of $\varphi$.
+
+**Step 2 — Build the composite.** Define $H(x) = G(\varphi(x))$. By the chain rule (Lemma 1.2.7):
+
+$$
+H'(x) = G'(\varphi(x))\cdot \varphi'(x) = f(\varphi(x))\cdot \varphi'(x).
+$$
+
+So $H$ is an antiderivative of $f(\varphi(x))\,\varphi'(x)$ with respect to $x$.
+
+**Step 3 — Apply FTC Part II to both sides.**
+
+Left side (using $H$ as the antiderivative):
+
+$$
+\int_a^b f(\varphi(x))\,\varphi'(x)\,dx = H(b) - H(a) = G(\varphi(b)) - G(\varphi(a)).
+$$
+
+Right side (using $G$ as the antiderivative of $f$ with bounds $\varphi(a)$ and $\varphi(b)$):
+
+$$
+\int_{\varphi(a)}^{\varphi(b)} f(u)\,du = G(\varphi(b)) - G(\varphi(a)).
+$$
+
+Both sides equal $G(\varphi(b)) - G(\varphi(a))$. $\blacksquare$
+
+---
+
+### 5.6 Proof of Integration by Parts (Theorem 1.3.6)
+
+**Claim.** $\displaystyle\int_a^b u\,v'\,dx = \Big[u\,v\Big]_a^b - \int_a^b u'\,v\,dx$.
+
+**Derivation.** This is simply the product rule reversed. The product rule (Lemma 1.2.5) states:
+
+$$
+\frac{d}{dx}[u(x)\,v(x)] = u'(x)\,v(x) + u(x)\,v'(x).
+$$
+
+Rearrange to isolate $u\,v'$:
+
+$$
+u(x)\,v'(x) = \frac{d}{dx}[u(x)\,v(x)] - u'(x)\,v(x).
+$$
+
+Integrate both sides over $[a,b]$. Left side is what we want. Right side: integrate the derivative (FTC Part II) and the remaining term:
+
+$$
+\int_a^b u\,v'\,dx = \Big[u(x)\,v(x)\Big]_a^b - \int_a^b u'(x)\,v(x)\,dx. \qquad \blacksquare
+$$
+
+**Indefinite form.** The same manipulation without bounds gives $\int u\,dv = u\,v - \int v\,du$, where $dv = v'(x)\,dx$ and $du = u'(x)\,dx$.
+
+---
+
+
+## 🖼️ Visual Anchor 2 — FTC Accumulation Function
+
+As $x$ increases from $a$, the accumulation function $F(x) = \int_a^x f(t)\,dt$ *grows* when $f > 0$ and *decreases* when $f < 0$. Its rate of growth at each point is exactly $f(x)$ — that's FTC Part I.
+
+![math-01__1.3-fig2](math-01__1.3-fig2.svg)
+
+The orange curve is $f(t)$. The shaded area under $f$ from $a$ to $x$ is $F(x)$. The gold dashed curve traces $F(x)$ as $x$ moves rightward — it grows steeply when $f$ is tall (positive) and flattens when $f$ is near zero.
+
+---
+
+## 🔧 6. Integration Techniques
+
+### 6.1 U-Substitution (Change of Variables)
+
+**The idea.** The chain rule says $\frac{d}{dx}[G(\varphi(x))] = G'(\varphi(x))\cdot\varphi'(x)$. Running it backwards: if you see $f(\varphi(x))\cdot\varphi'(x)$, *recognize* the derivative of a composition and substitute $u = \varphi(x)$.
+
+**Procedure (indefinite).**
+
+1. Identify an inner function $u = \varphi(x)$ whose derivative $du = \varphi'(x)\,dx$ appears (possibly up to a constant) in the integrand.
+2. Substitute to obtain $\int f(u)\,du$.
+3. Integrate in $u$.
+4. Back-substitute $u = \varphi(x)$.
+
+**Procedure (definite).** Change the bounds: if $x$ goes from $a$ to $b$, then $u$ goes from $\varphi(a)$ to $\varphi(b)$. Do not back-substitute.
+
+**The geometric picture.** The substitution $u = \varphi(x)$ is a reparametrization of the $x$-axis. The factor $\varphi'(x)\,dx = du$ accounts for the *stretching or compressing* of the axis — areas are preserved precisely because we multiply by $|\varphi'(x)|$.
+
+![math-01__1.3-fig3](math-01__1.3-fig3.svg)
+
+**The LIATE mnemonic.** When doing integration by parts (§6.2), choosing $u$ and $dv$ can be guided by priority order: **L**ogarithms, **I**nverse trig, **A**lgebraic (polynomials), **T**rigonometric, **E**xponential. Choose $u$ from the highest-priority category present. This is not a theorem — it is a heuristic that works for the most common integrals. But *always verify* it by checking that $\int v\,du$ is simpler than $\int u\,dv$; if it's not, the assignment was wrong.
+
+**Why LIATE works (motivating explanation, not proof).** The purpose of integration by parts is to *differentiate* $u$ (making it simpler) and *integrate* $dv$ (also making that piece simpler). Logarithms and inverse trig become algebraic/rational upon differentiation — a dramatic simplification. Polynomials become constants or lower-degree polynomials. Exponentials and trig functions cycle back to themselves, so they should be $dv$ and let the polynomial $u$ degrade.
+
+---
+
+### 6.2 Integration by Parts — LIATE in Practice
+
+**Full worked derivation (indefinite).** Recall: $\int u\,dv = u\,v - \int v\,du$.
+
+**Tabular method.** For repeated integration by parts (e.g., $\int x^n e^x\,dx$), build a table:
+
+| Alternating sign | Differentiate $u$ | Integrate $dv$ |
+|:---:|---|---|
+| $+$ | $x^n$ | $e^x$ |
+| $-$ | $n x^{n-1}$ | $e^x$ |
+| $+$ | $n(n-1) x^{n-2}$ | $e^x$ |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| $\pm$ | $n!$ | $e^x$ |
+| $\mp$ | $0$ | $e^x$ |
+
+Read off diagonally: the answer is $x^n e^x - n x^{n-1} e^x + n(n-1) x^{n-2} e^x - \cdots \pm n! e^x + C$.
+
+---
+
+### 6.3 Trig Substitution — All Three Canonical Cases
+
+Trig substitution is the tool for integrals containing $\sqrt{a^2 - x^2}$, $\sqrt{a^2 + x^2}$, or $\sqrt{x^2 - a^2}$. It works because Pythagorean identities eliminate the square root.
+
+| Form in integrand | Substitution | Identity used | Range of $\theta$ |
+|---|---|---|---|
+| $\sqrt{a^2 - x^2}$ | $x = a\sin\theta$ | $1 - \sin^2\theta = \cos^2\theta$ | $\theta \in [-\pi/2, \pi/2]$ |
+| $\sqrt{a^2 + x^2}$ | $x = a\tan\theta$ | $1 + \tan^2\theta = \sec^2\theta$ | $\theta \in (-\pi/2, \pi/2)$ |
+| $\sqrt{x^2 - a^2}$ | $x = a\sec\theta$ | $\sec^2\theta - 1 = \tan^2\theta$ | $\theta \in [0, \pi/2) \cup (\pi/2, \pi]$ |
+
+![math-01__1.3-fig4](math-01__1.3-fig4.svg)
+
+**After substitution, convert back.** Express $\theta$ in terms of $x$ using the original substitution, then use right-triangle relationships (the diagram above) to express trig functions of $\theta$ back in terms of $x$.
+
+
+### 6.4 Partial Fractions
+
+**Setup.** Any rational function $R(x) = P(x)/Q(x)$ with $\deg P < \deg Q$ can be decomposed into a sum of simpler fractions whose denominators are factors of $Q(x)$.
+
+**Factor $Q$ over $\mathbb{R}$ into:**
+- **Linear factors** $(x - r)^m$ (for real root $r$ of multiplicity $m$),
+- **Irreducible quadratic factors** $(x^2 + px + q)^n$ where $p^2 - 4q < 0$.
+
+**Partial fraction templates:**
+
+| Factor of $Q(x)$ | Partial fraction terms |
+|---|---|
+| $(x - r)$ | $\dfrac{A}{x - r}$ |
+| $(x - r)^2$ | $\dfrac{A}{x-r} + \dfrac{B}{(x-r)^2}$ |
+| $(x - r)^m$ | $\dfrac{A_1}{x-r} + \dfrac{A_2}{(x-r)^2} + \cdots + \dfrac{A_m}{(x-r)^m}$ |
+| $(x^2 + px + q)$ | $\dfrac{Ax + B}{x^2 + px + q}$ |
+| $(x^2 + px + q)^n$ | $\dfrac{A_1 x + B_1}{x^2 + px + q} + \cdots + \dfrac{A_n x + B_n}{(x^2+px+q)^n}$ |
+
+**Solving for coefficients.** Multiply both sides by $Q(x)$ to obtain a polynomial identity, then either:
+1. **Plug in convenient $x$-values** (especially the roots of $Q$) to isolate individual constants.
+2. **Match coefficients** of like powers of $x$ on both sides.
+
+**Why does this work?** Partial fractions decomposition is the statement that the ring of rational functions over $\mathbb{R}$ has a unique factorization property — the denominator factors into irreducibles and the residue theorem (from complex analysis) guarantees the decomposition exists and is unique.
+
+---
+
+### 6.5 Reduction Formulas
+
+For $\int \sin^n x\,dx$ with $n \geq 2$, integration by parts with $u = \sin^{n-1}x$ and $dv = \sin x\,dx$ gives:
+
+$$
+\int \sin^n x\,dx = -\frac{\sin^{n-1} x\cos x}{n} + \frac{n-1}{n}\int \sin^{n-2} x\,dx.
+$$
+
+Similarly for $\int \cos^n x\,dx$:
+
+$$
+\int \cos^n x\,dx = \frac{\cos^{n-1} x\sin x}{n} + \frac{n-1}{n}\int \cos^{n-2} x\,dx.
+$$
+
+These reduce the power by 2 at each step until the integral is $\int 1\,dx$, $\int \sin x\,dx$, or $\int \cos x\,dx$ — all elementary.
+
+---
+
+### 6.6 Improper Integrals — Convergence Tests
+
+**Comparison Test.** Suppose $0 \leq f(x) \leq g(x)$ for $x \geq a$. Then:
+- If $\int_a^\infty g$ converges, so does $\int_a^\infty f$.
+- If $\int_a^\infty f$ diverges, so does $\int_a^\infty g$.
+
+**Limit Comparison Test.** If $f(x), g(x) > 0$ for $x \geq a$ and $\lim_{x \to \infty} f(x)/g(x) = L \in (0,\infty)$, then $\int_a^\infty f$ and $\int_a^\infty g$ either both converge or both diverge.
+
+**The $p$-Test** (proved in Worked Example 7 below): $\int_1^\infty x^{-p}\,dx$ converges iff $p > 1$.
+
+---
+
+## 🎯 7. Worked Examples
+
+### Example 1.3.E1 — Polynomial Integral via FTC
+
+Compute $\displaystyle\int_1^3 (3x^2 - 4x + 1)\,dx$.
+
+**Step 1 — Find an antiderivative.** Use the power rule for antiderivatives: $\int x^n\,dx = \frac{x^{n+1}}{n+1} + C$. Apply term by term:
+
+$$
+\int (3x^2 - 4x + 1)\,dx = 3 \cdot \frac{x^3}{3} - 4 \cdot \frac{x^2}{2} + x + C = x^3 - 2x^2 + x + C.
+$$
+
+Let $G(x) = x^3 - 2x^2 + x$ (drop the $+C$ for definite integrals — it cancels).
+
+**Step 2 — Apply FTC Part II.**
+
+$$
+\int_1^3 (3x^2 - 4x + 1)\,dx = G(3) - G(1).
+$$
+
+**Step 3 — Evaluate.**
+
+$$
+G(3) = 3^3 - 2(3)^2 + 3 = 27 - 18 + 3 = 12.
+$$
+
+$$
+G(1) = 1^3 - 2(1)^2 + 1 = 1 - 2 + 1 = 0.
+$$
+
+**Step 4 — Subtract.**
+
+$$
+\int_1^3 (3x^2 - 4x + 1)\,dx = 12 - 0 = 12.
+$$
+
+$$
+\boxed{\int_1^3 (3x^2 - 4x + 1)\,dx = 12.}
+$$
+
+**Cross-check.** The integrand factors as $(3x - 1)(x - 1)$, so it has roots at $x = 1$ and $x = 1/3$. On $[1, 3]$ the integrand is non-negative (both factors positive), so a positive answer makes sense. A rough midpoint estimate: $f(2) = 12 - 8 + 1 = 5$, and $5 \times (3-1) = 10$ — close to 12. ✓
+
+---
+
+### Example 1.3.E2 — Integration by Parts: $\int x e^x\,dx$
+
+**Step 1 — Choose $u$ and $dv$ using LIATE.** Algebraic ($x$) has higher priority than Exponential ($e^x$), so:
+
+$$
+u = x, \quad dv = e^x\,dx.
+$$
+
+**Step 2 — Compute $du$ and $v$.**
+
+$$
+du = dx, \quad v = e^x.
+$$
+
+(We must integrate $dv = e^x\,dx$ to get $v$: $\int e^x\,dx = e^x$.)
+
+**Step 3 — Apply the formula $\int u\,dv = uv - \int v\,du$.**
+
+$$
+\int x e^x\,dx = x \cdot e^x - \int e^x \cdot 1\,dx = x e^x - e^x + C.
+$$
+
+**Step 4 — Factor.**
+
+$$
+= e^x(x - 1) + C.
+$$
+
+**Step 5 — Verify by differentiating.** Using the product rule:
+
+$$
+\frac{d}{dx}\big[e^x(x-1)\big] = e^x(x-1) + e^x \cdot 1 = e^x(x - 1 + 1) = x e^x. \checkmark
+$$
+
+$$
+\boxed{\int x e^x\,dx = e^x(x - 1) + C.}
+$$
+
+---
+
+### Example 1.3.E3 — U-Substitution: $\int \tan x\,dx$
+
+**Step 1 — Rewrite.** $\tan x = \frac{\sin x}{\cos x}$.
+
+$$
+\int \tan x\,dx = \int \frac{\sin x}{\cos x}\,dx.
+$$
+
+**Step 2 — Identify the substitution.** Let $u = \cos x$. Then $\frac{du}{dx} = -\sin x$, so $du = -\sin x\,dx$, i.e., $\sin x\,dx = -du$.
+
+**Step 3 — Substitute.**
+
+$$
+\int \frac{\sin x}{\cos x}\,dx = \int \frac{-du}{u} = -\int \frac{du}{u} = -\ln|u| + C.
+$$
+
+**Step 4 — Back-substitute $u = \cos x$.**
+
+$$
+= -\ln|\cos x| + C.
+$$
+
+**Equivalent forms.** Using $\ln|\cos x|^{-1} = \ln|\sec x|$ and logarithm properties:
+
+$$
+-\ln|\cos x| = \ln|\cos x|^{-1} = \ln|\sec x|.
+$$
+
+Both $-\ln|\cos x| + C$ and $\ln|\sec x| + C$ are correct.
+
+$$
+\boxed{\int \tan x\,dx = -\ln|\cos x| + C = \ln|\sec x| + C.}
+$$
+
+---
+
+### Example 1.3.E4 — Deriving $\int \frac{dx}{x^2 + 1} = \arctan x + C$
+
+**Step 1 — Set up.** We want to evaluate $\int \frac{dx}{x^2 + 1}$ from scratch without simply stating the answer.
+
+**Step 2 — Recall the derivative of $\arctan$.** From Chapter 1.2, Example E9 adapted: let $y = \arctan x$, so $\tan y = x$.
+
+Differentiate implicitly: $\sec^2 y \cdot \frac{dy}{dx} = 1$, so $\frac{dy}{dx} = \frac{1}{\sec^2 y} = \frac{1}{1 + \tan^2 y} = \frac{1}{1 + x^2}$.
+
+(Used the Pythagorean identity $\sec^2 y = 1 + \tan^2 y$ and substituted $\tan y = x$.)
+
+**Step 3 — Read off the antiderivative.** Since $\frac{d}{dx}[\arctan x] = \frac{1}{1 + x^2}$, the function $\arctan x$ is an antiderivative of $\frac{1}{1 + x^2}$. By the definition of the indefinite integral:
+
+$$
+\int \frac{dx}{x^2 + 1} = \arctan x + C.
+$$
+
+**Step 4 — Verify directly.** Check: $\frac{d}{dx}[\arctan x + C] = \frac{1}{1 + x^2} + 0 = \frac{1}{x^2 + 1}$. ✓
+
+$$
+\boxed{\int \frac{dx}{x^2 + 1} = \arctan x + C.}
+$$
+
+---
+
+### Example 1.3.E5 — Trig Substitution: $\int \frac{dx}{\sqrt{1 - x^2}}$
+
+**Step 1 — Identify the form.** $\sqrt{1 - x^2} = \sqrt{a^2 - x^2}$ with $a = 1$. Use $x = \sin\theta$.
+
+**Step 2 — Substitute.** Let $x = \sin\theta$, $\theta \in [-\pi/2, \pi/2]$. Then $dx = \cos\theta\,d\theta$.
+
+$$
+\sqrt{1 - x^2} = \sqrt{1 - \sin^2\theta} = \sqrt{\cos^2\theta} = |\cos\theta| = \cos\theta,
+$$
+
+where the last equality uses $\cos\theta \geq 0$ on $\theta \in [-\pi/2, \pi/2]$. Substitute:
+
+$$
+\int \frac{dx}{\sqrt{1 - x^2}} = \int \frac{\cos\theta\,d\theta}{\cos\theta} = \int d\theta = \theta + C.
+$$
+
+**Step 3 — Back-substitute.** Since $x = \sin\theta$ and $\theta \in [-\pi/2, \pi/2]$, we have $\theta = \arcsin x$:
+
+$$
+\int \frac{dx}{\sqrt{1 - x^2}} = \arcsin x + C.
+$$
+
+**Step 4 — Verify.** $\frac{d}{dx}[\arcsin x] = \frac{1}{\sqrt{1 - x^2}}$. ✓
+
+$$
+\boxed{\int \frac{dx}{\sqrt{1 - x^2}} = \arcsin x + C.}
+$$
+
+---
+
+### Example 1.3.E6 — Partial Fractions: $\int \frac{dx}{(x-1)(x-2)}$
+
+**Step 1 — Partial fraction decomposition.** Write:
+
+$$
+\frac{1}{(x-1)(x-2)} = \frac{A}{x-1} + \frac{B}{x-2}.
+$$
+
+**Step 2 — Clear denominators.** Multiply both sides by $(x-1)(x-2)$:
+
+$$
+1 = A(x - 2) + B(x - 1).
+$$
+
+**Step 3 — Solve for $A$ and $B$.**
+
+*Plug in $x = 2$:* $1 = A(2-2) + B(2-1) = 0 + B \cdot 1 = B$. So $B = 1$.
+
+*Plug in $x = 1$:* $1 = A(1-2) + B(1-1) = -A + 0 = -A$. So $A = -1$.
+
+**Step 4 — Substitute back.**
+
+$$
+\frac{1}{(x-1)(x-2)} = \frac{-1}{x-1} + \frac{1}{x-2}.
+$$
+
+**Step 5 — Integrate term by term.**
+
+$$
+\int \frac{dx}{(x-1)(x-2)} = -\int \frac{dx}{x-1} + \int \frac{dx}{x-2} = -\ln|x-1| + \ln|x-2| + C.
+$$
+
+**Step 6 — Combine using logarithm laws.**
+
+$$
+= \ln\left|\frac{x-2}{x-1}\right| + C.
+$$
+
+**Step 7 — Verify.** Differentiate using the quotient rule and chain rule:
+
+$$
+\frac{d}{dx}\left[\ln\left|\frac{x-2}{x-1}\right|\right] = \frac{1}{\frac{x-2}{x-1}} \cdot \frac{(x-1) - (x-2)}{(x-1)^2} = \frac{x-1}{x-2} \cdot \frac{1}{(x-1)^2} = \frac{1}{(x-2)(x-1)}. \checkmark
+$$
+
+$$
+\boxed{\int \frac{dx}{(x-1)(x-2)} = \ln\left|\frac{x-2}{x-1}\right| + C.}
+$$
+
+---
+
+### Example 1.3.E7 — The $p$-Integral: $\int_1^\infty \frac{dx}{x^p}$
+
+We perform complete case analysis to determine for which $p$ this improper integral converges.
+
+**Step 1 — Compute as a limit.** For any $R > 1$:
+
+$$
+\int_1^R x^{-p}\,dx = \begin{cases} \left[\dfrac{x^{1-p}}{1-p}\right]_1^R = \dfrac{R^{1-p} - 1}{1-p} & p \neq 1 \\[8pt] [\ln x]_1^R = \ln R & p = 1 \end{cases}
+$$
+
+**Step 2 — Case $p = 1$.**
+
+$$
+\lim_{R \to \infty} \ln R = \infty.
+$$
+
+**Diverges** for $p = 1$.
+
+**Step 3 — Case $p > 1$.** Then $1 - p < 0$, so $R^{1-p} = R^{-(p-1)} \to 0$ as $R \to \infty$:
+
+$$
+\lim_{R \to \infty} \frac{R^{1-p} - 1}{1-p} = \frac{0 - 1}{1 - p} = \frac{1}{p - 1}.
+$$
+
+**Converges** to $\dfrac{1}{p-1}$.
+
+**Step 4 — Case $p < 1$.** Then $1 - p > 0$, so $R^{1-p} \to \infty$:
+
+$$
+\lim_{R \to \infty} \frac{R^{1-p} - 1}{1-p} = \infty.
+$$
+
+**Diverges** for $p < 1$.
+
+**Summary — The $p$-Test:**
+
+$$
+\boxed{\int_1^\infty \frac{dx}{x^p} \begin{cases} = \dfrac{1}{p-1} & p > 1 \text{ (converges)} \\[6pt] = \infty & p \leq 1 \text{ (diverges)} \end{cases}}
+$$
+
+**Analogous result near $0$.** $\int_0^1 x^{-p}\,dx$ converges iff $p < 1$ (the boundary is exactly flipped — thin singularities near $0$ are integrable, while slow decay at $\infty$ requires $p > 1$).
+
+---
+
+### Example 1.3.E8 — Arc Length of $y = x^2$ on $[0, 1]$
+
+**Step 1 — Arc length formula.** For a smooth curve $y = f(x)$ on $[a,b]$, the arc length is derived by integrating the "infinitesimal chord" $ds = \sqrt{(dx)^2 + (dy)^2} = \sqrt{1 + (dy/dx)^2}\,dx$:
+
+$$
+L = \int_a^b \sqrt{1 + [f'(x)]^2}\,dx.
+$$
+
+**Step 2 — Compute $f'$.** $f(x) = x^2$, so $f'(x) = 2x$, and $[f'(x)]^2 = 4x^2$.
+
+**Step 3 — Set up the integral.**
+
+$$
+L = \int_0^1 \sqrt{1 + 4x^2}\,dx.
+$$
+
+**Step 4 — Apply trig substitution.** Form $\sqrt{a^2 + x^2}$ with $a = 1/2$ (rewrite: $4x^2 = (2x)^2$, let $u = 2x$, then $\sqrt{1 + u^2}$ with $u = \tan\theta$).
+
+Let $2x = \tan\theta$, so $x = \frac{1}{2}\tan\theta$, $dx = \frac{1}{2}\sec^2\theta\,d\theta$, and $\sqrt{1 + 4x^2} = \sqrt{1 + \tan^2\theta} = \sec\theta$ (taking positive root).
+
+When $x = 0$: $\tan\theta = 0 \Rightarrow \theta = 0$.
+When $x = 1$: $\tan\theta = 2 \Rightarrow \theta = \arctan 2$.
+
+**Step 5 — Substitute and integrate.**
+
+$$
+L = \int_0^{\arctan 2} \sec\theta \cdot \frac{1}{2}\sec^2\theta\,d\theta = \frac{1}{2}\int_0^{\arctan 2} \sec^3\theta\,d\theta.
+$$
+
+**Step 6 — Evaluate $\int \sec^3\theta\,d\theta$ by parts.** This is the standard reduction:
+
+$$
+\int \sec^3\theta\,d\theta = \frac{\sec\theta\tan\theta}{2} + \frac{1}{2}\int \sec\theta\,d\theta = \frac{\sec\theta\tan\theta}{2} + \frac{1}{2}\ln|\sec\theta + \tan\theta| + C.
+$$
+
+**Step 7 — Apply the bounds.**
+
+At $\theta = \arctan 2$: $\tan\theta = 2$, $\sec\theta = \sqrt{1 + \tan^2\theta} = \sqrt{5}$.
+
+At $\theta = 0$: $\tan\theta = 0$, $\sec\theta = 1$.
+
+$$
+L = \frac{1}{2}\left[\frac{\sec\theta\tan\theta}{2} + \frac{1}{2}\ln|\sec\theta + \tan\theta|\right]_0^{\arctan 2}
+= \frac{1}{2}\left[\frac{\sqrt{5}\cdot 2}{2} + \frac{1}{2}\ln(\sqrt{5} + 2) - 0 - \frac{1}{2}\ln(1)\right].
+$$
+
+$$
+= \frac{1}{2}\left[\sqrt{5} + \frac{1}{2}\ln(\sqrt{5} + 2)\right] = \frac{\sqrt{5}}{2} + \frac{\ln(\sqrt{5} + 2)}{4}.
+$$
+
+**Numerical check:** $\sqrt{5} \approx 2.236$, $\ln(\sqrt{5} + 2) = \ln(4.236) \approx 1.444$. So $L \approx 1.118 + 0.361 = 1.479$. This is slightly more than 1 (the straight-line distance from $(0,0)$ to $(1,1)$ is $\sqrt{2} \approx 1.414$) and slightly less than the two-leg path of length $1 + 1 = 2$ — geometrically reasonable. ✓
+
+$$
+\boxed{L = \frac{\sqrt{5}}{2} + \frac{\ln(\sqrt{5} + 2)}{4} \approx 1.4789.}
+$$
+
+---
+
+
+## 🖼️ Visual Anchor 4 — U-Substitution Geometric Picture
+
+U-substitution stretches or compresses the $x$-axis by the factor $\varphi'(x)$. The area is preserved because the width $dx$ transforms to $du = \varphi'(x)\,dx$.
+
+![math-01__1.3-fig5](math-01__1.3-fig5.svg)
+
+---
+
+## 🚦 8. Common Pitfalls
+
+> These are the mistakes that actually cost points on exams and cause bugs in physics derivations. Know them cold.
+
+**Pitfall 1 — Forgetting $+C$ in indefinite integrals.**
+$\int 2x\,dx = x^2 + C$, not $x^2$. In a differential equation, the missing $C$ means you're claiming a unique solution when there's an entire family. **Every indefinite integral needs $+C$.**
+
+**Pitfall 2 — Sign errors in integration by parts.**
+The formula is $\int u\,dv = uv - \int v\,du$. A common mistake is writing $+\int v\,du$ instead of $-\int v\,du$. **Derive it from the product rule each time until it's automatic.**
+
+**Pitfall 3 — U-substitution when it's unnecessary (and missing the chain rule shortcut).**
+If you see $\int 2x\cos(x^2)\,dx$, recognize it as $\frac{d}{dx}[\sin(x^2)]$ by the chain rule — so the answer is $\sin(x^2) + C$ immediately. You don't need to write out the substitution explicitly once you've internalized the chain rule. Conversely, don't apply u-sub to $\int x^2\cos x\,dx$ — it doesn't simplify (use parts instead).
+
+**Pitfall 4 — Improper integral divergence — treating as if it converges.**
+$\int_{-1}^{1}\frac{dx}{x}$ is **not** $\ln|1| - \ln|-1| = 0$. The integrand has a non-integrable singularity at $x = 0$. You must split at the singularity: $\int_{-1}^0 + \int_0^1$, and both pieces diverge ($\to -\infty$ and $+\infty$ respectively). The "Cauchy principal value" is 0, but the Riemann integral **does not exist**.
+
+**Pitfall 5 — Forgetting to change bounds in definite u-substitution.**
+If $u = x^2$ and $x$ goes from $0$ to $3$, then $u$ goes from $0$ to $9$. **Change the limits every time.** Don't integrate in $u$ and then substitute back for definite integrals — it introduces errors.
+
+**Pitfall 6 — Trig substitution: confusing sign of $\sqrt{\cos^2\theta}$.**
+After substituting $x = a\sin\theta$, you get $\sqrt{a^2 - x^2} = a\sqrt{1 - \sin^2\theta} = a\sqrt{\cos^2\theta} = a|\cos\theta|$. If $\theta \in [-\pi/2, \pi/2]$, then $\cos\theta \geq 0$ so $|\cos\theta| = \cos\theta$. Outside that range, you must keep the absolute value. **Always state the range of $\theta$ explicitly.**
+
+---
+
+## 🛠️ 9. Pairing with `CalculusVisualizer`
+
+Use the local C++ `CalculusVisualizer` tool at `[CalculusVisualizer](CalculusVisualizer)` to:
+
+1. **Riemann sum convergence:** Input a function $f(x)$, set the interval $[a,b]$, and animate as $n$ increases from 2 to 1000. Watch left, right, and midpoint sums converge. Compare the convergence rates.
+2. **Accumulation function:** Plot $F(x) = \int_a^x f(t)\,dt$ alongside $f(x)$ on the same graph. Verify visually that $F$ is increasing exactly where $f > 0$ and decreasing where $f < 0$.
+3. **FTC check:** Compute $F(b) - F(a)$ numerically and compare against a symbolic antiderivative evaluated at $b$ and $a$. Both methods should agree to machine precision.
+4. **Arc length:** Plot the curve and overlay the accumulated arc-length function; verify the final value matches the closed-form computation.
+
+---
+
+## 📝 10. Hand-Written Challenge Problems
+
+> ⚠️ Solve every problem on paper before looking at the solution. The pain is the point.
+
+---
+
+### Problem 1.3.P1 — FTC Part I in Action
+
+Let $F(x) = \int_0^x (t^2 + 1)^{10}\,dt$. Find $F'(x)$ and $F'(2)$. Do not evaluate the integral.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** FTC Part I states: if $f$ is continuous and $F(x) = \int_a^x f(t)\,dt$, then $F'(x) = f(x)$.
+
+The integrand is $f(t) = (t^2 + 1)^{10}$, which is continuous on all of $\mathbb{R}$ (a polynomial raised to a finite power).
+
+**Step 2.** Apply FTC Part I directly:
+
+$$
+F'(x) = (x^2 + 1)^{10}.
+$$
+
+No integration required — just replace $t$ with $x$ in the integrand.
+
+**Step 3.** Evaluate at $x = 2$:
+
+$$
+F'(2) = (2^2 + 1)^{10} = 5^{10}.
+$$
+
+Compute: $5^{10} = 9{,}765{,}625$.
+
+$$
+\boxed{F'(x) = (x^2 + 1)^{10}, \quad F'(2) = 9{,}765{,}625.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P2 — Integration by Parts: $\int x^2 e^x\,dx$ (Tabular Method)
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Set up the tabular method with $u$-column differentiating and $dv$-column integrating.
+
+| Sign | Differentiate | Integrate |
+|:---:|---|---|
+| $+$ | $x^2$ | $e^x$ |
+| $-$ | $2x$ | $e^x$ |
+| $+$ | $2$ | $e^x$ |
+| $-$ | $0$ | $e^x$ |
+
+**Step 2.** Read diagonals (multiply along each diagonal and apply the sign):
+
+$$
+\int x^2 e^x\,dx = (+1) \cdot x^2 e^x + (-1) \cdot 2x \cdot e^x + (+1) \cdot 2 \cdot e^x + C.
+$$
+
+**Step 3.** Collect:
+
+$$
+= x^2 e^x - 2x e^x + 2 e^x + C = e^x(x^2 - 2x + 2) + C.
+$$
+
+**Step 4.** Verify by differentiating using the product rule:
+
+$$
+\frac{d}{dx}\big[e^x(x^2 - 2x + 2)\big] = e^x(x^2 - 2x + 2) + e^x(2x - 2) = e^x(x^2 - 2x + 2 + 2x - 2) = x^2 e^x. \checkmark
+$$
+
+$$
+\boxed{\int x^2 e^x\,dx = e^x(x^2 - 2x + 2) + C.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P3 — Trig Substitution: $\int \frac{dx}{(1 + x^2)^{3/2}}$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Form $\sqrt{1 + x^2}$: use $x = \tan\theta$, $\theta \in (-\pi/2, \pi/2)$.
+
+Then $dx = \sec^2\theta\,d\theta$ and $\sqrt{1 + x^2} = \sec\theta$, so $(1 + x^2)^{3/2} = \sec^3\theta$.
+
+**Step 2.** Substitute:
+
+$$
+\int \frac{dx}{(1 + x^2)^{3/2}} = \int \frac{\sec^2\theta\,d\theta}{\sec^3\theta} = \int \frac{d\theta}{\sec\theta} = \int \cos\theta\,d\theta = \sin\theta + C.
+$$
+
+**Step 3.** Back-substitute. From $x = \tan\theta$, the right-triangle has opposite $= x$, adjacent $= 1$, hypotenuse $= \sqrt{1 + x^2}$. So:
+
+$$
+\sin\theta = \frac{x}{\sqrt{1 + x^2}}.
+$$
+
+**Step 4.** Conclude:
+
+$$
+\int \frac{dx}{(1 + x^2)^{3/2}} = \frac{x}{\sqrt{1 + x^2}} + C.
+$$
+
+**Verify:** differentiate using the quotient rule:
+
+$$
+\frac{d}{dx}\left[\frac{x}{\sqrt{1+x^2}}\right] = \frac{\sqrt{1+x^2} - x \cdot \frac{x}{\sqrt{1+x^2}}}{1+x^2} = \frac{(1+x^2) - x^2}{(1+x^2)^{3/2}} = \frac{1}{(1+x^2)^{3/2}}. \checkmark
+$$
+
+$$
+\boxed{\int \frac{dx}{(1+x^2)^{3/2}} = \frac{x}{\sqrt{1+x^2}} + C.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P4 — Partial Fractions with Repeated Factor: $\int \frac{x}{(x-1)^2(x+2)}\,dx$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Set up partial fractions. Denominator has factors $(x-1)^2$ (repeated linear) and $(x+2)$ (simple linear):
+
+$$
+\frac{x}{(x-1)^2(x+2)} = \frac{A}{x-1} + \frac{B}{(x-1)^2} + \frac{C}{x+2}.
+$$
+
+**Step 2.** Clear denominators. Multiply both sides by $(x-1)^2(x+2)$:
+
+$$
+x = A(x-1)(x+2) + B(x+2) + C(x-1)^2.
+$$
+
+**Step 3.** Solve for constants by strategic substitution.
+
+*$x = 1$:* $1 = A(0)(3) + B(3) + C(0)^2 = 3B$. So $B = 1/3$.
+
+*$x = -2$:* $-2 = A(-3)(0) + B(0) + C(-3)^2 = 9C$. So $C = -2/9$.
+
+*$x = 0$ (to find $A$):* $0 = A(-1)(2) + (1/3)(2) + (-2/9)(1)^2 = -2A + 2/3 - 2/9 = -2A + 4/9$.
+
+Thus $-2A = -4/9 \Rightarrow A = 2/9$.
+
+**Step 4.** Integrate:
+
+$$
+\int \frac{x\,dx}{(x-1)^2(x+2)} = \int\frac{2/9}{x-1}\,dx + \int\frac{1/3}{(x-1)^2}\,dx + \int\frac{-2/9}{x+2}\,dx.
+$$
+
+$$
+= \frac{2}{9}\ln|x-1| + \frac{1/3}{-(1)} \cdot \frac{1}{x-1} - \frac{2}{9}\ln|x+2| + C.
+$$
+
+$$
+= \frac{2}{9}\ln\left|\frac{x-1}{x+2}\right| - \frac{1}{3(x-1)} + C.
+$$
+
+$$
+\boxed{\int \frac{x\,dx}{(x-1)^2(x+2)} = \frac{2}{9}\ln\left|\frac{x-1}{x+2}\right| - \frac{1}{3(x-1)} + C.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P5 — Improper Integral: $\int_0^\infty x e^{-x}\,dx$
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Write as a limit:
+
+$$
+\int_0^\infty x e^{-x}\,dx = \lim_{R \to \infty} \int_0^R x e^{-x}\,dx.
+$$
+
+**Step 2.** Evaluate $\int_0^R x e^{-x}\,dx$ by parts. Let $u = x$, $dv = e^{-x}\,dx$. Then $du = dx$, $v = -e^{-x}$.
+
+$$
+\int_0^R x e^{-x}\,dx = \big[-x e^{-x}\big]_0^R + \int_0^R e^{-x}\,dx = -Re^{-R} + 0 + \big[-e^{-x}\big]_0^R.
+$$
+
+$$
+= -Re^{-R} + (-e^{-R} + e^0) = -Re^{-R} - e^{-R} + 1 = 1 - (R+1)e^{-R}.
+$$
+
+**Step 3.** Take the limit. As $R \to \infty$, $(R+1)e^{-R} \to 0$ (exponential beats polynomial — use L'Hôpital or recognize it):
+
+$$
+\lim_{R \to \infty} \big[1 - (R+1)e^{-R}\big] = 1 - 0 = 1.
+$$
+
+$$
+\boxed{\int_0^\infty x e^{-x}\,dx = 1.}
+$$
+
+**Note.** In general $\int_0^\infty x^n e^{-x}\,dx = n!$ (the Gamma function $\Gamma(n+1) = n!$ for $n \in \mathbb{N}_0$). This is the fundamental bridge between combinatorics (factorials) and analysis (integrals).
+
+</details>
+
+---
+
+### Problem 1.3.P6 — Riemann Sum Computation
+
+Compute $\displaystyle\int_0^2 x^3\,dx$ directly from the definition using a uniform right-endpoint Riemann sum and the formula $\sum_{k=1}^n k^3 = \left(\frac{n(n+1)}{2}\right)^2$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Set up the uniform partition of $[0,2]$ with $n$ subintervals.
+
+Width of each: $\Delta x = 2/n$. Right endpoint of $k$-th subinterval: $x_k = k \cdot (2/n) = 2k/n$.
+
+**Step 2.** Write the right-endpoint Riemann sum.
+
+$$
+R_n = \sum_{k=1}^n f(x_k)\,\Delta x = \sum_{k=1}^n \left(\frac{2k}{n}\right)^3 \cdot \frac{2}{n} = \sum_{k=1}^n \frac{8k^3}{n^3} \cdot \frac{2}{n} = \frac{16}{n^4} \sum_{k=1}^n k^3.
+$$
+
+**Step 3.** Apply the cubic sum formula.
+
+$$
+\sum_{k=1}^n k^3 = \left(\frac{n(n+1)}{2}\right)^2 = \frac{n^2(n+1)^2}{4}.
+$$
+
+**Step 4.** Substitute.
+
+$$
+R_n = \frac{16}{n^4} \cdot \frac{n^2(n+1)^2}{4} = \frac{4(n+1)^2}{n^2} = 4\left(1 + \frac{1}{n}\right)^2.
+$$
+
+**Step 5.** Take the limit $n \to \infty$.
+
+$$
+\int_0^2 x^3\,dx = \lim_{n \to \infty} R_n = \lim_{n \to \infty} 4\left(1 + \frac{1}{n}\right)^2 = 4 \cdot 1^2 = 4.
+$$
+
+**Cross-check via FTC:** $\big[\frac{x^4}{4}\big]_0^2 = \frac{16}{4} - 0 = 4$. ✓
+
+$$
+\boxed{\int_0^2 x^3\,dx = 4.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P7 — Area Between Two Curves
+
+Find the area of the region enclosed by $y = x^2$ and $y = x + 2$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Find the intersection points. Set $x^2 = x + 2$:
+
+$$
+x^2 - x - 2 = 0 \Rightarrow (x-2)(x+1) = 0 \Rightarrow x = -1, \; x = 2.
+$$
+
+**Step 2.** Determine which curve is on top on $[-1, 2]$. Test $x = 0$: $y = x + 2 = 2 \gt  0 = x^2$. So $y = x + 2$ is above $y = x^2$ on $(-1, 2)$.
+
+**Step 3.** Set up the area integral.
+
+$$
+A = \int_{-1}^2 [(x + 2) - x^2]\,dx.
+$$
+
+**Step 4.** Find the antiderivative.
+
+$$
+\int [(x + 2) - x^2]\,dx = \frac{x^2}{2} + 2x - \frac{x^3}{3} + C.
+$$
+
+**Step 5.** Apply FTC Part II.
+
+$$
+A = \left[\frac{x^2}{2} + 2x - \frac{x^3}{3}\right]_{-1}^2.
+$$
+
+At $x = 2$: $\frac{4}{2} + 4 - \frac{8}{3} = 2 + 4 - \frac{8}{3} = 6 - \frac{8}{3} = \frac{10}{3}$.
+
+At $x = -1$: $\frac{1}{2} + (-2) - \frac{-1}{3} = \frac{1}{2} - 2 + \frac{1}{3} = \frac{3}{6} - \frac{12}{6} + \frac{2}{6} = -\frac{7}{6}$.
+
+$$
+A = \frac{10}{3} - \left(-\frac{7}{6}\right) = \frac{10}{3} + \frac{7}{6} = \frac{20}{6} + \frac{7}{6} = \frac{27}{6} = \frac{9}{2}.
+$$
+
+$$
+\boxed{A = \frac{9}{2}.}
+$$
+
+</details>
+
+---
+
+### Problem 1.3.P8 — Convergence by Comparison
+
+Determine whether $\displaystyle\int_1^\infty \frac{\sin^2 x}{x^2}\,dx$ converges or diverges.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1.** Observe that $\sin^2 x$ is bounded: $0 \leq \sin^2 x \leq 1$ for all $x$. Therefore for all $x \geq 1$:
+
+$$
+0 \leq \frac{\sin^2 x}{x^2} \leq \frac{1}{x^2}.
+$$
+
+**Step 2.** Apply the Comparison Test. We check whether the dominant comparison integrand converges:
+
+$$
+\int_1^\infty \frac{1}{x^2}\,dx.
+$$
+
+By the $p$-test (Example 1.3.E7) with $p = 2 \gt  1$: this integral converges to $\frac{1}{2-1} = 1$.
+
+**Step 3.** Since $0 \leq \frac{\sin^2 x}{x^2} \leq \frac{1}{x^2}$ and $\int_1^\infty \frac{1}{x^2}\,dx$ converges, the Comparison Test guarantees that $\int_1^\infty \frac{\sin^2 x}{x^2}\,dx$ **converges**.
+
+(For a tighter bound: since $\sin^2 x \geq 0$, the integral is between $0$ and $1$. One can show it equals $\frac{\pi - 2}{2} \approx 0.571$ using Parseval's theorem, but that is beyond our current toolkit.)
+
+$$
+\boxed{\int_1^\infty \frac{\sin^2 x}{x^2}\,dx \text{ converges (by comparison with } \int_1^\infty x^{-2}\,dx\text{).}}
+$$
+
+</details>
+
+---
+
+
+## 🖼️ Visual Anchor 5 — Riemann Sum Convergence as Partition Refines
+
+![math-01__1.3-fig6](math-01__1.3-fig6.svg)
+
+---
+
+## 🔗 11. Cross-Links to the Knowledge Web
+
+- **Backward:** [1.1 - Limits & Continuity](1.1---Limits-&-Continuity) — the Riemann integral is defined as a limit of Riemann sums; the sup/inf existence in Definition 1.3.5 uses Completeness (Axiom 1.1.A); the IVT powers the MVT for Integrals.
+- **Backward:** [1.2 - Single-Variable Differentiation](1.2---Single-Variable-Differentiation) — differentiation is the *inverse* of integration (FTC); every antiderivative is an "anti-derivative"; the MVT from 1.2 is the structural twin of the MVT for Integrals here.
+- **Forward:** [1.4 - Multivariable Limits & Partial Derivatives](1.4---Multivariable-Limits-&-Partial-Derivatives) — partial derivatives and the gradient are the multivariable cousins of the single-variable derivative; the limits used to define them invoke the same $\varepsilon$–$\delta$ machinery.
+- **Forward:** [1.5 - Multiple Integrals & Jacobians](1.5---Multiple-Integrals-&-Jacobians) — Fubini's theorem extends single-variable integration to iterated double/triple integrals; the Jacobian is the multivariable change-of-variables analog of the $\varphi'(x)$ factor in u-substitution.
+- **Forward:** [1.7 - Green's, Stokes' & Divergence Theorems](1.7---Green's,-Stokes'-&-Divergence-Theorems) — Green's Theorem relates a double integral over a region to a line integral around its boundary; Stokes' Theorem does the same in 3D — these are the grandchildren of FTC.
+- **Physics (work):** In [4.x - Newtonian Mechanics & Kinematics](4.x---Newtonian-Mechanics-&-Kinematics), work done by a force $F(x)$ over displacement $[a,b]$ is $W = \int_a^b F(x)\,dx$ — a direct application of FTC Part II.
+- **Physics (Maxwell):** In [7.x - Electrodynamics & Classical Field Theory](7.x---Electrodynamics-&-Classical-Field-Theory), Faraday's law $\oint_C \mathbf{E} \cdot d\boldsymbol{\ell} = -\frac{d}{dt}\iint_S \mathbf{B} \cdot d\mathbf{A}$ is a line and surface integral — both reduce to single-variable integrals in symmetric configurations.
+
+---
+
+## 📝 12. Study Tactics
+
+1. **Do the Riemann sum computation at least once by hand** (Problem P6 above). Yes, it's tedious. That's the point — you need to feel in your hands why $\sum k^3 / n^4 \to 1/4$. After that, use FTC every time.
+2. **Memorize the antiderivative table** for the standard functions (powers, $\ln$, $e^x$, $\sin$, $\cos$, $\arctan$, $\arcsin$). Everything else is built from these.
+3. **For every integral: diagnose first.** Ask: is this a pure power? A composite that looks like a chain rule? A product? A rational? Identify the type before picking a technique.
+4. **Trig substitution is a last resort** for most students but becomes second nature fast. Draw the right triangle every time — it converts back-substitution from guesswork into geometry.
+5. **Partial fractions: always factor $Q$ first.** If $Q$ doesn't factor over $\mathbb{R}$, it has irreducible quadratic factors — handle them with $Ax + B$ numerators.
+6. **Improper integrals: always write the limit explicitly** (e.g., $\lim_{R\to\infty}$) before computing. Don't shortcut until you've proved convergence.
+7. **Re-run the practice script weekly** with a new seed. 8 archetypes × 3 per archetype = 24 problems in ~10 minutes of reading; 60–90 minutes if you actually solve them.
+
+---
+
+## 📚 13. Verified Open-Access Source Material
+
+| Source | Location | Why it's Authoritative |
+|---|---|---|
+| **MIT 18.01SC, Unit 3 — Integration** | [ocw.mit.edu/courses/18-01sc](https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/) | Core MIT undergraduate calculus, full lecture videos + problem sets with solutions; hosted on `mit.edu`. |
+| **Strang, *Calculus* (3rd ed., free PDF), Ch. 5–7** | [Strang on OCW](https://ocw.mit.edu/ans7870/textbooks/Strang/stranginstruct.htm) | Author taught 18.01/18.06 at MIT for 50+ years; comprehensive treatment of integration techniques and applications. |
+| **APEX Calculus, Chapters 5 & 6** | [apexcalculus.com](https://www.apexcalculus.com/) | Greg Hartman (VMI), CC-BY-NC; Ch. 5 covers definite/indefinite integrals and FTC; Ch. 6 covers integration techniques with extensive worked examples. |
+| **Paul Dawkins — *Calculus I, Integration*** | [tutorial.math.lamar.edu/calci](https://tutorial.math.lamar.edu/Classes/CalcI/IntegralsIntro.aspx) | Lamar University faculty notes; the most-cited online calculus reference for integration techniques; covers partial fractions, trig sub, improper integrals exhaustively. |
+| **3Blue1Brown — *Essence of Calculus*, Ch. 8** | [3blue1brown.com/lessons/essence-of-calculus](https://www.3blue1brown.com/lessons/essence-of-calculus) | Grant Sanderson; Chapter 8 gives the clearest geometric intuition for why FTC is true. Watch after working through the proofs. |
+| **LibreTexts — *Integration Techniques*** | [math.libretexts.org (OpenStax Calc, Ch. 3)](https://math.libretexts.org/Bookshelves/Calculus/Calculus_(OpenStax)/03:_Integration) | Mirror of OpenStax Calculus; exhaustive coverage of u-sub, parts, trig sub, and partial fractions with step-by-step worked examples. |
+
+*(Resource summaries above were paraphrased for licensing compliance with each platform's terms of use.)*
+
+---
+
+*Chapter 1.3 — Single-Variable Integration. Last reviewed: 2026-05-23. Next chapter: [1.4 - Multivariable Limits & Partial Derivatives](1.4---Multivariable-Limits-&-Partial-Derivatives) →*

@@ -1,0 +1,41 @@
+<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <style>
+    .cp-box{fill:none;stroke:var(--text-muted, #8b949e);stroke-width:1;rx:4;}
+    .cp-h{fill:var(--background-secondary, #161b22);stroke:var(--interactive-accent, #58a6ff);stroke-width:1.5;}
+    .cp-l{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-normal, #c9d1d9);}
+    .cp-la{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--interactive-accent, #58a6ff);font-weight:bold;}
+    .cp-lb{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-accent, #79c0ff);font-weight:bold;}
+  </style>
+  <!-- Column picture -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-4; 0,0; 0,0" keyTimes="0; 0.1; 0.2; 1" dur="6s" repeatCount="indefinite"/>
+    <rect x="10" y="30" width="160" height="150" class="cp-box"/>
+    <rect x="10" y="30" width="160" height="24" class="cp-h"/>
+    <text x="90" y="47" class="cp-la" text-anchor="middle">Column Picture</text>
+    <text x="90" y="78" class="cp-l" text-anchor="middle">Ax = x₁·col₁ + x₂·col₂ + …</text>
+    <text x="90" y="100" class="cp-l" text-anchor="middle">= linear combination</text>
+    <text x="90" y="122" class="cp-l" text-anchor="middle">of A's columns</text>
+    <text x="90" y="155" class="cp-l" text-anchor="middle">→ asks "is b reachable?"</text>
+  </g>
+  <!-- Row picture -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,0; 0,-4; 0,0; 0,0" keyTimes="0; 0.2; 0.3; 0.4; 1" dur="6s" repeatCount="indefinite"/>
+    <rect x="195" y="30" width="160" height="150" class="cp-box"/>
+    <rect x="195" y="30" width="160" height="24" class="cp-h"/>
+    <text x="275" y="47" class="cp-lb" text-anchor="middle">Row Picture</text>
+    <text x="275" y="78" class="cp-l" text-anchor="middle">(Ax)ᵢ = rowᵢ · x</text>
+    <text x="275" y="100" class="cp-l" text-anchor="middle">= hyperplane constraint</text>
+    <text x="275" y="122" class="cp-l" text-anchor="middle">per equation</text>
+    <text x="275" y="155" class="cp-l" text-anchor="middle">→ intersection = solution</text>
+  </g>
+  <!-- Outer products -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,0; 0,-4; 0,0; 0,0" keyTimes="0; 0.4; 0.5; 0.6; 1" dur="6s" repeatCount="indefinite"/>
+    <rect x="380" y="30" width="165" height="150" class="cp-box"/>
+    <rect x="380" y="30" width="165" height="24" class="cp-h"/>
+    <text x="462" y="47" class="cp-l" text-anchor="middle" fill="var(--text-normal, #c9d1d9)" font-weight="bold">Outer Product</text>
+    <text x="462" y="78" class="cp-l" text-anchor="middle">Ax = Σ xⱼ (col j)</text>
+    <text x="462" y="100" class="cp-l" text-anchor="middle">Each term is rank-1</text>
+    <text x="462" y="122" class="cp-l" text-anchor="middle">→ sum of thin columns</text>
+  </g>
+</svg>

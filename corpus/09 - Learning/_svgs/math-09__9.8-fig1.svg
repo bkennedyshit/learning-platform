@@ -1,0 +1,83 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="feyn-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .feyn-fermion { stroke: var(--text-normal, #c9d1d9); stroke-width: 2.5; fill: none; marker-end: url(#feyn-arr); }
+    .feyn-photon { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .feyn-vertex { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
+    .feyn-vertex:hover { r: 8; fill: var(--interactive-accent, #58a6ff); }
+    .feyn-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .feyn-mom { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted, #8b949e); font-style: italic; }
+    .feyn-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .feyn-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <!-- Title -->
+  <text x="300" y="25" class="feyn-title" text-anchor="middle">Møller Scattering: e⁻e⁻ → e⁻e⁻ (t-channel)</text>
+
+  <!-- Time axis -->
+  <line x1="50" y1="370" x2="50" y2="50" stroke="var(--text-muted, #8b949e)" stroke-width="1" marker-end="url(#feyn-arr)"/>
+  <text x="50" y="40" class="feyn-mom" text-anchor="middle">time</text>
+  <line x1="50" y1="370" x2="180" y2="370" stroke="var(--text-muted, #8b949e)" stroke-width="1" marker-end="url(#feyn-arr)"/>
+  <text x="190" y="375" class="feyn-mom">space</text>
+
+  <!-- Incoming electrons -->
+  <line x1="100" y1="330" x2="220" y2="230" class="feyn-fermion"/>
+  <text x="80" y="345" class="feyn-label">e⁻(p₁)</text>
+  
+  <line x1="100" y1="100" x2="220" y2="170" class="feyn-fermion"/>
+  <text x="80" y="95" class="feyn-label">e⁻(p₂)</text>
+
+  <!-- Virtual photon (wavy line) -->
+  <path d="M 220 230 C 240 225, 240 215, 260 210 C 280 205, 280 195, 300 195 C 320 195, 320 185, 340 180 C 360 175, 360 170, 380 170" class="feyn-photon"/>
+  <text x="300" y="160" class="feyn-label" fill="var(--interactive-accent, #58a6ff)">γ (q)</text>
+
+  <!-- Outgoing electrons -->
+  <line x1="220" y1="230" x2="400" y2="330" class="feyn-fermion"/>
+  <text x="410" y="345" class="feyn-label">e⁻(p₃)</text>
+  
+  <line x1="380" y1="170" x2="500" y2="100" class="feyn-fermion"/>
+  <text x="510" y="95" class="feyn-label">e⁻(p₄)</text>
+
+  <!-- Vertices -->
+  <circle cx="220" cy="230" r="6" class="feyn-vertex"/>
+  <circle cx="380" cy="170" r="6" class="feyn-vertex"/>
+
+  <!-- Moving Particles -->
+  <circle r="3" fill="var(--text-normal, #c9d1d9)">
+    <animate attributeName="cx" values="100; 220; 220; 220; 220" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="330; 230; 230; 230; 230" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1; 1; 0; 0; 0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="3" fill="var(--text-normal, #c9d1d9)">
+    <animate attributeName="cx" values="100; 220; 220; 220; 220" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="100; 170; 170; 170; 170" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1; 1; 0; 0; 0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="3" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="cx" values="220; 220; 380; 380; 380" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="230; 230; 170; 170; 170" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0; 0; 1; 0; 0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="3" fill="var(--text-normal, #c9d1d9)">
+    <animate attributeName="cx" values="220; 220; 220; 400; 400" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="230; 230; 230; 330; 330" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0; 0; 0; 1; 0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="3" fill="var(--text-normal, #c9d1d9)">
+    <animate attributeName="cx" values="380; 380; 380; 500; 500" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="170; 170; 170; 100; 100" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0; 0; 0; 1; 0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Feynman rules box -->
+  <rect x="380" y="240" width="200" height="130" class="feyn-box"/>
+  <text x="480" y="265" class="feyn-title" text-anchor="middle">Feynman Rules</text>
+  <text x="480" y="290" class="feyn-mom" text-anchor="middle">Vertex: -ieγᵘ</text>
+  <text x="480" y="310" class="feyn-mom" text-anchor="middle">Photon: -igᵤᵥ/(q²+iε)</text>
+  <text x="480" y="330" class="feyn-mom" text-anchor="middle">Fermion: i(γᵘpᵤ+m)/(p²-m²+iε)</text>
+  <text x="480" y="355" class="feyn-mom" text-anchor="middle">External: u(p), ū(p)</text>
+</svg>

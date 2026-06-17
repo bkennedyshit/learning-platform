@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style="background-color: #1e1e2e; font-family: sans-serif;">
+  <style>
+    .title { fill: #cdd6f4; font-size: 24px; font-weight: bold; text-anchor: middle; }
+    .node { fill: #313244; stroke: #89b4fa; stroke-width: 2; rx: 8; }
+    .node-text { fill: #cdd6f4; font-size: 14px; text-anchor: middle; dominant-baseline: middle; font-family: monospace; }
+    .edge { stroke: #585b70; stroke-width: 2; fill: none; }
+    .edge-highlight { stroke: #a6e3a1; stroke-width: 4; fill: none; opacity: 0; }
+    .pointer { fill: #f38ba8; font-size: 12px; }
+  </style>
+
+  <text x="400" y="40" class="title">B-Tree Index Structure (Search for 42)</text>
+
+  <!-- Edges -->
+  <path d="M 400,120 L 200,220" class="edge" />
+  <path d="M 400,120 L 600,220" class="edge" />
+  
+  <path d="M 200,260 L 100,380" class="edge" />
+  <path d="M 200,260 L 300,380" class="edge" />
+  
+  <path d="M 600,260 L 500,380" class="edge" />
+  <path d="M 600,260 L 700,380" class="edge" />
+
+  <!-- Highlight Animation path -->
+  <path d="M 400,120 L 200,220" class="edge-highlight">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0; 0.1; 0.8; 1" dur="4s" repeatCount="indefinite" />
+  </path>
+  <path d="M 200,260 L 300,380" class="edge-highlight">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0; 0.2; 0.3; 0.8; 1" dur="4s" repeatCount="indefinite" />
+  </path>
+
+  <!-- Root Node -->
+  <rect x="320" y="80" width="160" height="40" class="node" />
+  <line x1="400" y1="80" x2="400" y2="120" stroke="#89b4fa" stroke-width="2" />
+  <text x="360" y="100" class="node-text">&lt; 50</text>
+  <text x="440" y="100" class="node-text">&gt;= 50</text>
+
+  <!-- Internal Nodes -->
+  <rect x="120" y="220" width="160" height="40" class="node" />
+  <line x1="200" y1="220" x2="200" y2="260" stroke="#89b4fa" stroke-width="2" />
+  <text x="160" y="240" class="node-text">&lt; 25</text>
+  <text x="240" y="240" class="node-text">25 - 49</text>
+  
+  <rect x="520" y="220" width="160" height="40" class="node" />
+  <line x1="600" y1="220" x2="600" y2="260" stroke="#89b4fa" stroke-width="2" />
+  <text x="560" y="240" class="node-text">50 - 74</text>
+  <text x="640" y="240" class="node-text">&gt;= 75</text>
+
+  <!-- Leaf Nodes -->
+  <!-- Leaf 1 -->
+  <rect x="50" y="380" width="100" height="60" class="node" />
+  <text x="100" y="400" class="node-text">10, 15, 20</text>
+  <text x="100" y="420" class="pointer">→ Heap(ctid)</text>
+  
+  <!-- Leaf 2 -->
+  <rect x="250" y="380" width="100" height="60" class="node">
+    <animate attributeName="stroke" values="#89b4fa;#a6e3a1;#89b4fa" keyTimes="0; 0.5; 1" dur="4s" repeatCount="indefinite" />
+  </rect>
+  <text x="300" y="400" class="node-text">25, 30, 42</text>
+  <text x="300" y="420" class="pointer">→ Heap(ctid)</text>
+
+  <!-- Leaf 3 -->
+  <rect x="450" y="380" width="100" height="60" class="node" />
+  <text x="500" y="400" class="node-text">50, 55, 60</text>
+  <text x="500" y="420" class="pointer">→ Heap(ctid)</text>
+
+  <!-- Leaf 4 -->
+  <rect x="650" y="380" width="100" height="60" class="node" />
+  <text x="700" y="400" class="node-text">75, 80, 99</text>
+  <text x="700" y="420" class="pointer">→ Heap(ctid)</text>
+
+  <!-- Leaf Links -->
+  <path d="M 150,410 L 250,410" class="edge" marker-end="url(#arrow)" stroke-dasharray="4" />
+  <path d="M 350,410 L 450,410" class="edge" marker-end="url(#arrow)" stroke-dasharray="4" />
+  <path d="M 550,410 L 650,410" class="edge" marker-end="url(#arrow)" stroke-dasharray="4" />
+
+  <defs>
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#585b70" />
+    </marker>
+  </defs>
+
+  <!-- Search Marker -->
+  <circle cx="400" cy="80" r="12" fill="#f9e2af">
+    <animateMotion path="M 0,0 L -200,140 L -100,300" keyTimes="0; 0.3; 0.6; 1" dur="4s" repeatCount="indefinite" calcMode="linear" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0; 0.1; 0.7; 1" dur="4s" repeatCount="indefinite" />
+  </circle>
+
+</svg>

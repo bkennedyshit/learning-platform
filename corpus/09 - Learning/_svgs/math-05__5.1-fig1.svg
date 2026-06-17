@@ -1,0 +1,75 @@
+<svg viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="tl-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .tl-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1.5; rx:8; cursor:pointer; transition:all 0.3s ease; }
+    .tl-box:hover { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; filter:drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .tl-title { font-family:Inter,system-ui,sans-serif; font-size:14px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .tl-desc { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-normal, #c9d1d9); }
+    .tl-eq { font-family:serif; font-size:13px; fill:var(--text-accent, #79c0ff); font-style:italic; }
+    .tl-conn { stroke:var(--interactive-accent, #58a6ff); stroke-width:2; fill:none; }
+    .tl-particle { fill:var(--interactive-accent, #58a6ff); }
+    @keyframes vibrate {
+      0%,100% { transform: translate(0,0); }
+      25% { transform: translate(1px,-1px); }
+      50% { transform: translate(-1px,1px); }
+      75% { transform: translate(1px,1px); }
+    }
+    .tl-vib { animation: vibrate 0.8s ease-in-out infinite; }
+    @keyframes flow-right {
+      0% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(15px); opacity: 0; }
+    }
+    .heat-arrow { stroke:#ff6b6b; stroke-width:2; fill:none; animation: flow-right 1.5s infinite; }
+    @keyframes expand-entropy {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    .entropy-ring { fill:none; stroke:var(--text-muted, #8b949e); stroke-width:1; animation: expand-entropy 2s ease-out infinite; transform-origin: center; }
+  </style>
+  <!-- Zeroth Law (foundation) -->
+  <rect x="30" y="330" width="500" height="70" class="tl-box"/>
+  <text x="280" y="355" class="tl-title" text-anchor="middle">Zeroth Law — Thermal Equilibrium & Temperature</text>
+  <text x="280" y="375" class="tl-desc" text-anchor="middle">If A~B and B~C then A~C → Temperature T exists as state function</text>
+  <text x="280" y="393" class="tl-eq" text-anchor="middle">T_A = T_B = T_C (transitivity)</text>
+  <!-- First Law -->
+  <rect x="60" y="240" width="440" height="70" class="tl-box"/>
+  <text x="280" y="265" class="tl-title" text-anchor="middle">First Law — Energy Conservation</text>
+  <text x="280" y="285" class="tl-desc" text-anchor="middle">Internal energy U is a state function; energy is conserved</text>
+  <text x="280" y="303" class="tl-eq" text-anchor="middle">dU = δQ − δW = δQ − PdV</text>
+  <!-- Second Law -->
+  <rect x="90" y="150" width="380" height="70" class="tl-box"/>
+  <text x="280" y="175" class="tl-title" text-anchor="middle">Second Law — Entropy & Irreversibility</text>
+  <text x="280" y="195" class="tl-desc" text-anchor="middle">Entropy of isolated system never decreases</text>
+  <text x="280" y="213" class="tl-eq" text-anchor="middle">dS ≥ δQ/T  (= for reversible)</text>
+  <!-- Third Law -->
+  <rect x="120" y="60" width="320" height="70" class="tl-box"/>
+  <text x="280" y="85" class="tl-title" text-anchor="middle">Third Law — Absolute Zero</text>
+  <text x="280" y="105" class="tl-desc" text-anchor="middle">Entropy → 0 as T → 0 (Nernst)</text>
+  <text x="280" y="123" class="tl-eq" text-anchor="middle">lim(T→0) S = 0, C_V → 0</text>
+  <!-- Connecting arrows -->
+  <line x1="280" y1="330" x2="280" y2="310" class="tl-conn" marker-end="url(#tl-arrow)"/>
+  <line x1="280" y1="240" x2="280" y2="220" class="tl-conn" marker-end="url(#tl-arrow)"/>
+  <line x1="280" y1="150" x2="280" y2="130" class="tl-conn" marker-end="url(#tl-arrow)"/>
+  
+  <!-- Heat Flow Arrows for First Law -->
+  <g transform="translate(420, 260)">
+    <path d="M 0 0 L 15 0 M 10 -4 L 15 0 L 10 4" class="heat-arrow" />
+    <path d="M -10 10 L 5 10 M 0 6 L 5 10 L 0 14" class="heat-arrow" style="animation-delay:0.75s" />
+  </g>
+  
+  <!-- Expanding Entropy Rings for Second Law -->
+  <g transform="translate(420, 175)">
+    <circle cx="0" cy="0" r="10" class="entropy-ring" />
+    <circle cx="0" cy="0" r="10" class="entropy-ring" style="animation-delay:1s" />
+  </g>
+
+  <!-- Animated particles representing thermal motion -->
+  <circle cx="520" cy="365" r="3" class="tl-particle tl-vib"/>
+  <circle cx="535" cy="355" r="2.5" class="tl-particle tl-vib" style="animation-delay:0.2s"/>
+  <circle cx="527" cy="375" r="2" class="tl-particle tl-vib" style="animation-delay:0.4s"/>
+  <circle cx="540" cy="370" r="3" class="tl-particle tl-vib" style="animation-delay:0.6s"/>
+</svg>

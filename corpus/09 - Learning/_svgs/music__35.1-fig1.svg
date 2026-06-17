@@ -1,0 +1,160 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .key-w{fill:#e0e0e0;stroke:var(--background-secondary,#161b22);stroke-width:1;}
+    .key-b{fill:#1a1a2e;stroke:var(--background-secondary,#161b22);stroke-width:1;}
+    .highlight{fill:var(--interactive-accent,#58a6ff);opacity:0.3;transition: opacity 0.3s;}
+    
+    @keyframes key-pulse {
+      0%, 100% { opacity: 0.2; }
+      14% { opacity: 0.95; fill: var(--interactive-accent,#58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent,#58a6ff)); }
+    }
+    .key-c { animation: key-pulse 7s infinite 0s; }
+    .key-d { animation: key-pulse 7s infinite 1s; }
+    .key-e { animation: key-pulse 7s infinite 2s; }
+    .key-f { animation: key-pulse 7s infinite 3s; }
+    .key-g { animation: key-pulse 7s infinite 4s; }
+    .key-a { animation: key-pulse 7s infinite 5s; }
+    .key-b { animation: key-pulse 7s infinite 6s; }
+
+    @keyframes playhead-sweep {
+      0% { transform: translateX(0px); }
+      100% { transform: translateX(180px); }
+    }
+    .playhead {
+      stroke: var(--interactive-accent,#58a6ff);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      opacity: 0.8;
+      animation: playhead-sweep 4s linear infinite;
+    }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">35.1 — Music Theory for Producers: Scales, Chords, Rhythm &amp; Harmonic Function</text>
+  <!-- Piano keyboard with scale highlighted -->
+  <rect x="20" y="35" width="330" height="130" class="box" rx="4"/>
+  <text x="185" y="52" class="label" text-anchor="middle" font-weight="bold">C Major Scale on Piano (Intervals)</text>
+  <!-- 2 octaves white keys -->
+  <rect x="30" y="62" width="20" height="70" class="key-w"/>
+  <rect x="52" y="62" width="20" height="70" class="key-w"/>
+  <rect x="74" y="62" width="20" height="70" class="key-w"/>
+  <rect x="96" y="62" width="20" height="70" class="key-w"/>
+  <rect x="118" y="62" width="20" height="70" class="key-w"/>
+  <rect x="140" y="62" width="20" height="70" class="key-w"/>
+  <rect x="162" y="62" width="20" height="70" class="key-w"/>
+  <rect x="184" y="62" width="20" height="70" class="key-w"/>
+  <rect x="206" y="62" width="20" height="70" class="key-w"/>
+  <rect x="228" y="62" width="20" height="70" class="key-w"/>
+  <rect x="250" y="62" width="20" height="70" class="key-w"/>
+  <rect x="272" y="62" width="20" height="70" class="key-w"/>
+  <rect x="294" y="62" width="20" height="70" class="key-w"/>
+  <rect x="316" y="62" width="20" height="70" class="key-w"/>
+  <!-- Black keys -->
+  <rect x="45" y="62" width="13" height="45" class="key-b"/>
+  <rect x="67" y="62" width="13" height="45" class="key-b"/>
+  <rect x="111" y="62" width="13" height="45" class="key-b"/>
+  <rect x="133" y="62" width="13" height="45" class="key-b"/>
+  <rect x="155" y="62" width="13" height="45" class="key-b"/>
+  <rect x="197" y="62" width="13" height="45" class="key-b"/>
+  <rect x="219" y="62" width="13" height="45" class="key-b"/>
+  <rect x="263" y="62" width="13" height="45" class="key-b"/>
+  <rect x="285" y="62" width="13" height="45" class="key-b"/>
+  <rect x="307" y="62" width="13" height="45" class="key-b"/>
+  <!-- Highlight C major scale notes -->
+  <rect x="30" y="62" width="20" height="70" class="highlight key-c" rx="1"/>
+  <rect x="74" y="62" width="20" height="70" class="highlight key-d" rx="1"/>
+  <rect x="96" y="62" width="20" height="70" class="highlight key-e" rx="1"/>
+  <rect x="118" y="62" width="20" height="70" class="highlight key-f" rx="1"/>
+  <rect x="162" y="62" width="20" height="70" class="highlight key-g" rx="1"/>
+  <rect x="184" y="62" width="20" height="70" class="highlight key-a" rx="1"/>
+  <rect x="228" y="62" width="20" height="70" class="highlight key-b" rx="1"/>
+  <!-- Note names -->
+  <text x="40" y="147" class="mono" text-anchor="middle">C</text>
+  <text x="84" y="147" class="mono" text-anchor="middle">D</text>
+  <text x="106" y="147" class="mono" text-anchor="middle">E</text>
+  <text x="128" y="147" class="mono" text-anchor="middle">F</text>
+  <text x="172" y="147" class="mono" text-anchor="middle">G</text>
+  <text x="194" y="147" class="mono" text-anchor="middle">A</text>
+  <text x="238" y="147" class="mono" text-anchor="middle">B</text>
+  <!-- Interval labels -->
+  <text x="40" y="162" class="mono" text-anchor="middle">1</text>
+  <text x="84" y="162" class="mono" text-anchor="middle">W</text>
+  <text x="106" y="162" class="mono" text-anchor="middle">W</text>
+  <text x="128" y="162" class="mono" text-anchor="middle">H</text>
+  <text x="172" y="162" class="mono" text-anchor="middle">W</text>
+  <text x="194" y="162" class="mono" text-anchor="middle">W</text>
+  <text x="238" y="162" class="mono" text-anchor="middle">W</text>
+  <text x="185" y="175" class="sub" text-anchor="middle">W=whole step (2 semitones) · H=half step (1 semitone)</text>
+  <!-- Chord types -->
+  <rect x="365" y="35" width="170" height="195" class="box" rx="4"/>
+  <text x="450" y="52" class="label" text-anchor="middle" font-weight="bold">Chord Formulas</text>
+  <text x="375" y="68" class="mono">Major:       1  3  5</text>
+  <text x="375" y="82" class="mono">Minor:       1  b3  5</text>
+  <text x="375" y="96" class="mono">Diminished:  1  b3  b5</text>
+  <text x="375" y="110" class="mono">Augmented:   1  3  #5</text>
+  <text x="375" y="124" class="mono">dom7:        1  3  5  b7</text>
+  <text x="375" y="138" class="mono">maj7:        1  3  5  7</text>
+  <text x="375" y="152" class="mono">min7:        1  b3  5  b7</text>
+  <text x="375" y="166" class="mono">sus2:        1  2  5</text>
+  <text x="375" y="180" class="mono">sus4:        1  4  5</text>
+  <text x="375" y="194" class="mono">9th:         1  3  5  b7  9</text>
+  <text x="375" y="208" class="sub">Inversions: 1st = 3 root up; 2nd = 5 root up</text>
+  <text x="375" y="220" class="sub">Voice lead: move as few notes as possible</text>
+  <!-- Diatonic chord functions -->
+  <rect x="550" y="35" width="150" height="195" class="box" rx="4"/>
+  <text x="625" y="52" class="label" text-anchor="middle" font-weight="bold">Diatonic Functions</text>
+  <text x="560" y="68" class="sub" font-weight="bold">Key of C major:</text>
+  <text x="560" y="82" class="mono">I   Cmaj  — Tonic (home)</text>
+  <text x="560" y="96" class="mono">ii  Dmin  — Predominant</text>
+  <text x="560" y="110" class="mono">iii Emin  — Tonic-like</text>
+  <text x="560" y="124" class="mono">IV  Fmaj  — Subdominant</text>
+  <text x="560" y="138" class="mono">V   Gmaj  — Dominant</text>
+  <text x="560" y="152" class="mono">vi  Amin  — Relative minor</text>
+  <text x="560" y="166" class="mono">vii°Bdim  — Leading tone</text>
+  <text x="560" y="182" class="sub">Progressions to know:</text>
+  <text x="560" y="194" class="mono">I–V–vi–IV (pop axis)</text>
+  <text x="560" y="208" class="mono">ii–V–I (jazz)</text>
+  <text x="560" y="220" class="mono">I–IV–V–I (blues)</text>
+  <!-- Bottom: rhythm, time sig, modes -->
+  <rect x="20" y="246" width="680" height="155" class="box" rx="4"/>
+  <text x="360" y="263" class="label" text-anchor="middle" font-weight="bold">Rhythm, Time Signatures &amp; Modal Scales for Producers</text>
+  <!-- Rhythm grid -->
+  <rect x="30" y="275" width="200" height="50" fill="#0d1117" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" rx="2"/>
+  <line x1="32" y1="275" x2="32" y2="325" class="playhead"/>
+  <text x="130" y="291" class="sub" text-anchor="middle" font-weight="bold">4/4 One Bar (16 subdivisions)</text>
+  <rect x="32" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.9" rx="1"/>
+  <rect x="45" y="306" width="12" height="16" fill="var(--text-muted,#8b949e)" opacity="0.4" rx="1"/>
+  <rect x="58" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.6" rx="1"/>
+  <rect x="71" y="310" width="12" height="12" fill="var(--text-muted,#8b949e)" opacity="0.3" rx="1"/>
+  <rect x="84" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.9" rx="1"/>
+  <rect x="97" y="305" width="12" height="17" fill="var(--text-muted,#8b949e)" opacity="0.4" rx="1"/>
+  <rect x="110" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.7" rx="1"/>
+  <rect x="123" y="308" width="12" height="14" fill="var(--text-muted,#8b949e)" opacity="0.3" rx="1"/>
+  <rect x="136" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.9" rx="1"/>
+  <rect x="149" y="304" width="12" height="18" fill="var(--text-muted,#8b949e)" opacity="0.5" rx="1"/>
+  <rect x="162" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.6" rx="1"/>
+  <rect x="175" y="307" width="12" height="15" fill="var(--text-muted,#8b949e)" opacity="0.3" rx="1"/>
+  <rect x="188" y="298" width="12" height="24" fill="var(--interactive-accent,#58a6ff)" opacity="0.8" rx="1"/>
+  <!-- Mode table -->
+  <text x="250" y="280" class="sub" font-weight="bold">The 7 Modes (key of C):</text>
+  <text x="250" y="294" class="mono">Ionian     C–D–E–F–G–A–B   bright/major</text>
+  <text x="250" y="308" class="mono">Dorian     D–E–F–G–A–B–C   minor+jazz</text>
+  <text x="250" y="322" class="mono">Phrygian   E–F–G–A–B–C–D   dark/flamenco</text>
+  <text x="250" y="336" class="mono">Lydian     F–G–A–B–C–D–E   dreamy/#4</text>
+  <text x="250" y="350" class="mono">Mixolydian G–A–B–C–D–E–F   bluesy/dom</text>
+  <text x="250" y="364" class="mono">Aeolian    A–B–C–D–E–F–G   natural minor</text>
+  <text x="250" y="378" class="mono">Locrian    B–C–D–E–F–G–A   unstable/dim</text>
+  <!-- MIDI note numbers -->
+  <text x="490" y="280" class="sub" font-weight="bold">MIDI + Tempo:</text>
+  <text x="490" y="294" class="mono">MIDI C4 = note 60 (middle C)</text>
+  <text x="490" y="308" class="mono">A4 = 440 Hz = MIDI note 69</text>
+  <text x="490" y="322" class="mono">BPM: Hip-hop 85-95, House 120-130</text>
+  <text x="490" y="336" class="mono">Trap 130-160 (half-time feel at 65-80)</text>
+  <text x="490" y="350" class="mono">Drum&amp;Bass 160-180, Ambient 60-90</text>
+  <text x="490" y="364" class="sub">Groove quantize: swing % = 50% (straight)</text>
+  <text x="490" y="378" class="sub">to 75% (heavy swing). MusicTheory.net free.</text>
+  <text x="490" y="392" class="sub">Circle of 5ths: each step adds/removes 1 sharp/flat</text>
+</svg>

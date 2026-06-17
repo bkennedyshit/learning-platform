@@ -1,0 +1,90 @@
+<svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-oop" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .class-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; cursor: pointer; }
+    .class-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .metaclass-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .dunder { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: start; }
+    .mro-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-oop); stroke-dasharray: 6,3; }
+    .instance-arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-oop); }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .protocol-box { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; rx: 6; }
+    .anim-pulse { animation: oopPulse 2.5s ease-in-out infinite; }
+    @keyframes oopPulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+  </style>
+
+  <text x="350" y="25" class="title">Python Data Model — MRO, Protocols &amp; Dunder Methods</text>
+
+  <!-- Metaclass level -->
+  <text x="350" y="55" class="section-label">metaclass layer</text>
+  <rect x="280" y="60" width="140" height="35" class="metaclass-box"/>
+  <text x="350" y="82" class="label">type (metaclass)</text>
+
+  <!-- Class level -->
+  <text x="120" y="115" class="section-label">class layer (MRO →)</text>
+  <rect x="50" y="125" width="130" height="80" class="class-box"/>
+  <text x="115" y="145" class="label">object</text>
+  <text x="60" y="162" class="dunder">__init__</text>
+  <text x="60" y="175" class="dunder">__repr__</text>
+  <text x="60" y="188" class="dunder">__eq__ / __hash__</text>
+
+  <rect x="220" y="125" width="130" height="80" class="class-box"/>
+  <text x="285" y="145" class="label">MyBase</text>
+  <text x="230" y="162" class="dunder">__init_subclass__</text>
+  <text x="230" y="175" class="dunder">__class_getitem__</text>
+  <text x="230" y="188" class="dunder">custom methods</text>
+
+  <rect x="390" y="125" width="140" height="80" class="class-box anim-pulse"/>
+  <text x="460" y="145" class="label">MyClass(MyBase)</text>
+  <text x="400" y="162" class="dunder">__init__</text>
+  <text x="400" y="175" class="dunder">__getattr__</text>
+  <text x="400" y="188" class="dunder">__setattr__</text>
+
+  <!-- MRO arrows -->
+  <path d="M 390 165 L 355 165" class="mro-arrow"/>
+  <path d="M 220 165 L 185 165" class="mro-arrow"/>
+  <line x1="350" y1="95" x2="350" y2="125" class="instance-arrow"/>
+
+  <!-- Instance level -->
+  <text x="460" y="235" class="section-label">instance layer</text>
+  <rect x="400" y="240" width="120" height="50" class="class-box"/>
+  <text x="460" y="260" class="label">instance</text>
+  <text x="410" y="278" class="dunder">__dict__ (attrs)</text>
+  <line x1="460" y1="205" x2="460" y2="240" class="instance-arrow"/>
+
+  <!-- Protocol boxes -->
+  <text x="120" y="250" class="section-label">protocols (duck typing)</text>
+  <rect x="30" y="260" width="130" height="70" class="protocol-box"/>
+  <text x="95" y="280" class="label">Iterable</text>
+  <text x="40" y="298" class="dunder">__iter__ → Iterator</text>
+  <text x="40" y="312" class="dunder">__next__ → value</text>
+
+  <rect x="175" y="260" width="130" height="70" class="protocol-box"/>
+  <text x="240" y="280" class="label">Sized + Container</text>
+  <text x="185" y="298" class="dunder">__len__ → int</text>
+  <text x="185" y="312" class="dunder">__contains__ → bool</text>
+
+  <rect x="30" y="345" width="130" height="70" class="protocol-box"/>
+  <text x="95" y="365" class="label">Comparable</text>
+  <text x="40" y="383" class="dunder">__lt__, __le__</text>
+  <text x="40" y="397" class="dunder">__gt__, __ge__, __eq__</text>
+
+  <rect x="175" y="345" width="130" height="70" class="protocol-box"/>
+  <text x="240" y="365" class="label">Numeric</text>
+  <text x="185" y="383" class="dunder">__add__, __mul__</text>
+  <text x="185" y="397" class="dunder">__radd__, __iadd__</text>
+
+  <!-- Descriptor protocol -->
+  <rect x="380" y="320" width="280" height="100" class="protocol-box"/>
+  <text x="520" y="340" class="label">Descriptor Protocol</text>
+  <text x="390" y="360" class="dunder">__get__(self, obj, type) → value</text>
+  <text x="390" y="378" class="dunder">__set__(self, obj, value) → None</text>
+  <text x="390" y="396" class="dunder">__delete__(self, obj) → None</text>
+  <text x="390" y="414" class="dunder">Powers: @property, classmethod, staticmethod</text>
+</svg>

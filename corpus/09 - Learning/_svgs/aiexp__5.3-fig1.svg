@@ -1,0 +1,125 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .method-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; cursor: pointer; transition: all 0.3s ease; }
+    .method-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.08; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    
+    .frozen { 
+      stroke: var(--text-muted, #8b949e); 
+      stroke-width: 1.5; 
+      fill: var(--text-muted, #8b949e); 
+      fill-opacity: 0.06; 
+      rx: 4; 
+      transition: all 0.3s;
+    }
+    
+    .trainable { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-width: 2; 
+      fill: var(--interactive-accent, #58a6ff); 
+      fill-opacity: 0.15; 
+      rx: 4; 
+      animation: train-pulse 2.5s ease-in-out infinite;
+    }
+
+    /* Adapter adapters are extra highlighted */
+    .trainable-adapter {
+      stroke: #ff7b72;
+      fill: #ff7b72;
+      fill-opacity: 0.25;
+      animation: adapter-pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes train-pulse {
+      0%, 100% { fill-opacity: 0.12; stroke-opacity: 0.8; }
+      50% { fill-opacity: 0.28; stroke-opacity: 1; filter: drop-shadow(0 0 4px rgba(88, 166, 255, 0.5)); }
+    }
+
+    @keyframes adapter-pulse {
+      0%, 100% { fill-opacity: 0.2; stroke-opacity: 0.8; }
+      50% { fill-opacity: 0.45; stroke-opacity: 1; filter: drop-shadow(0 0 6px rgba(255, 123, 114, 0.7)); }
+    }
+
+    /* Crawl animation for 4-bit Quantization bounds */
+    .quantized-base {
+      stroke: #d2a8ff;
+      stroke-dasharray: 4,3;
+      animation: quant-crawl 6s linear infinite;
+    }
+
+    @keyframes quant-crawl {
+      to { stroke-dashoffset: -20; }
+    }
+
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .header { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .stat { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+    .mem { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-accent, #79c0ff); font-weight: bold; pointer-events: none; }
+  </style>
+
+  <text x="350" y="25" class="header" text-anchor="middle">Fine-tuning Methods: Memory &amp; Parameter Comparison</text>
+
+  <!-- Full Fine-tuning -->
+  <rect x="20" y="45" width="200" height="310" class="method-box"/>
+  <text x="120" y="70" class="title" text-anchor="middle">Full Fine-tuning</text>
+
+  <rect x="40" y="85" width="160" height="30" class="trainable"/>
+  <text x="120" y="105" class="label" text-anchor="middle">Embeddings (trainable)</text>
+  <rect x="40" y="120" width="160" height="100" class="trainable"/>
+  <text x="120" y="155" class="label" text-anchor="middle">All Transformer</text>
+  <text x="120" y="175" class="label" text-anchor="middle">Layers (trainable)</text>
+  <text x="120" y="195" class="stat" text-anchor="middle">8B parameters</text>
+  <rect x="40" y="225" width="160" height="30" class="trainable"/>
+  <text x="120" y="245" class="label" text-anchor="middle">LM Head (trainable)</text>
+
+  <text x="120" y="280" class="mem" text-anchor="middle">VRAM: ~120 GB</text>
+  <text x="120" y="298" class="stat" text-anchor="middle">Trainable: 100%</text>
+  <text x="120" y="314" class="stat" text-anchor="middle">Needs: 5× A100-80GB</text>
+  <text x="120" y="340" class="stat" text-anchor="middle">Speed: 1× (baseline)</text>
+
+  <!-- LoRA -->
+  <rect x="250" y="45" width="200" height="310" class="method-box"/>
+  <text x="350" y="70" class="title" text-anchor="middle">LoRA (FP16 base)</text>
+
+  <rect x="270" y="85" width="160" height="30" class="frozen"/>
+  <text x="350" y="105" class="label" text-anchor="middle">Embeddings (frozen)</text>
+  <rect x="270" y="120" width="160" height="100" class="frozen"/>
+  <text x="350" y="150" class="label" text-anchor="middle">Transformer Layers</text>
+  <text x="350" y="168" class="label" text-anchor="middle">(frozen)</text>
+
+  <!-- LoRA adapters -->
+  <rect x="435" y="130" width="10" height="80" class="trainable trainable-adapter"/>
+  <rect x="265" y="130" width="10" height="80" class="trainable trainable-adapter"/>
+  <text x="350" y="195" class="stat" text-anchor="middle">+ LoRA: ΔW = BA (r=32)</text>
+
+  <rect x="270" y="225" width="160" height="30" class="frozen"/>
+  <text x="350" y="245" class="label" text-anchor="middle">LM Head (frozen)</text>
+
+  <text x="350" y="280" class="mem" text-anchor="middle">VRAM: ~22 GB</text>
+  <text x="350" y="298" class="stat" text-anchor="middle">Trainable: 0.25% (~20M)</text>
+  <text x="350" y="314" class="stat" text-anchor="middle">Needs: 1× RTX 4090</text>
+  <text x="350" y="340" class="stat" text-anchor="middle">Speed: 1.2× faster</text>
+
+  <!-- QLoRA -->
+  <rect x="480" y="45" width="200" height="310" class="method-box"/>
+  <text x="580" y="70" class="title" text-anchor="middle">QLoRA (4-bit base)</text>
+
+  <rect x="500" y="85" width="160" height="30" class="frozen quantized-base"/>
+  <text x="580" y="105" class="label" text-anchor="middle">Embeddings (4-bit)</text>
+  <rect x="500" y="120" width="160" height="100" class="frozen quantized-base"/>
+  <text x="580" y="150" class="label" text-anchor="middle">Transformer Layers</text>
+  <text x="580" y="168" class="label" text-anchor="middle">(NF4 quantized)</text>
+
+  <!-- QLoRA adapters -->
+  <rect x="665" y="130" width="10" height="80" class="trainable trainable-adapter"/>
+  <rect x="495" y="130" width="10" height="80" class="trainable trainable-adapter"/>
+  <text x="580" y="195" class="stat" text-anchor="middle">+ LoRA in FP16</text>
+
+  <rect x="500" y="225" width="160" height="30" class="frozen quantized-base"/>
+  <text x="580" y="245" class="label" text-anchor="middle">LM Head (4-bit)</text>
+
+  <text x="580" y="280" class="mem" text-anchor="middle">VRAM: ~10 GB</text>
+  <text x="580" y="298" class="stat" text-anchor="middle">Trainable: 0.25% (~20M)</text>
+  <text x="580" y="314" class="stat" text-anchor="middle">Needs: 1× RTX 3060 12GB</text>
+  <text x="580" y="340" class="stat" text-anchor="middle">Speed: 0.8× (dequant overhead)</text>
+</svg>

@@ -1,0 +1,916 @@
+---
+title: "Shader Programming Glsl Hlsl"
+subject: "VR & 3D Engineering"
+catalog: advanced
+audience_tier: higher-education
+chapter: "28.4"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 28.4 — Shader Programming: GLSL & HLSL
+
+> *"A shader is a small program that tells the GPU how to draw each pixel. It's where art meets math at 60 frames per second."* — Inigo Quilez
+
+Shaders are the programmable heart of the rendering pipeline. They execute massively in parallel on GPU cores, transforming vertices, computing lighting, and generating the final pixel colors that create photorealistic (or stylized) imagery. This chapter covers both GLSL (OpenGL/Vulkan) and HLSL (DirectX/Unity/Unreal), the mathematics of physically-based rendering (PBR), and compute shaders for general-purpose GPU computation.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Write complete vertex and fragment shaders in both GLSL and HLSL.
+2. Implement the **Blinn-Phong** lighting model with ambient, diffuse, and specular components.
+3. Derive and implement the **Cook-Torrance BRDF** for physically-based rendering.
+4. Explain the **microfacet theory** and the roles of the Normal Distribution Function (NDF), Geometry function, and Fresnel term.
+5. Write **compute shaders** for non-rendering GPU tasks (particle systems, image processing).
+6. Map between GLSL and HLSL syntax for cross-platform development.
+7. Implement common shader techniques: normal mapping, shadow mapping, screen-space effects.
+
+---
+
+## 🖼️ Visual Anchor — PBR Lighting Components
+
+![track-09__9.4-fig1](track-09__9.4-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 28.4.1 — BRDF (Bidirectional Reflectance Distribution Function)
+
+The **BRDF** $f_r(\omega_i, \omega_o)$ describes how light arriving from direction $\omega_i$ is reflected toward direction $\omega_o$ at a surface point:
+
+$$
+f_r(\omega_i, \omega_o) = \frac{dL_o(\omega_o)}{dE_i(\omega_i)} = \frac{dL_o(\omega_o)}{L_i(\omega_i)\cos\theta_i \, d\omega_i}
+$$
+
+Units: $\text{sr}^{-1}$ (per steradian). Must satisfy reciprocity ($f_r(\omega_i, \omega_o) = f_r(\omega_o, \omega_i)$) and energy conservation ($\int f_r \cos\theta_o \, d\omega_o \leq 1$).
+
+### Definition 28.4.2 — Lambertian Diffuse
+
+The simplest BRDF — constant in all directions (perfectly matte surface):
+
+$$
+f_{\text{Lambert}} = \frac{\rho}{\pi}
+$$
+
+where $\rho \in [0, 1]$ is the albedo (fraction of light not absorbed). The $\pi$ divisor ensures energy conservation: $\int_\Omega \frac{\rho}{\pi} \cos\theta \, d\omega = \rho \leq 1$.
+
+### Definition 28.4.3 — Cook-Torrance Specular BRDF
+
+$$
+f_{\text{spec}}(\omega_i, \omega_o) = \frac{D(\mathbf{h}) \cdot F(\omega_i, \mathbf{h}) \cdot G(\omega_i, \omega_o)}{4(\mathbf{n} \cdot \omega_i)(\mathbf{n} \cdot \omega_o)}
+$$
+
+where:
+- $D(\mathbf{h})$ = Normal Distribution Function (microfacet alignment with half-vector $\mathbf{h}$)
+- $F$ = Fresnel reflectance
+- $G$ = Geometry/shadowing-masking function
+- $\mathbf{h} = \text{normalize}(\omega_i + \omega_o)$ is the half-vector
+
+### Definition 28.4.4 — GGX (Trowbridge-Reitz) Normal Distribution
+
+$$
+D_{\text{GGX}}(\mathbf{h}) = \frac{\alpha^2}{\pi((\mathbf{n} \cdot \mathbf{h})^2(\alpha^2 - 1) + 1)^2}
+$$
+
+where $\alpha = \text{roughness}^2$. At $\alpha \to 0$: perfect mirror. At $\alpha = 1$: maximally rough.
+
+### Definition 28.4.5 — Schlick's Fresnel Approximation
+
+$$
+F_{\text{Schlick}}(\cos\theta) = F_0 + (1 - F_0)(1 - \cos\theta)^5
+$$
+
+where $F_0$ is the reflectance at normal incidence. For dielectrics: $F_0 \approx 0.04$. For metals: $F_0 =$ albedo color.
+
+### Definition 28.4.6 — Smith Geometry Function (GGX)
+
+$$
+G_{\text{Smith}}(\omega_i, \omega_o) = G_1(\omega_i) \cdot G_1(\omega_o)
+$$
+
+$$
+G_1(\omega) = \frac{2(\mathbf{n} \cdot \omega)}{(\mathbf{n} \cdot \omega) + \sqrt{\alpha^2 + (1-\alpha^2)(\mathbf{n} \cdot \omega)^2}}
+$$
+
+### Definition 28.4.7 — Uniform, Attribute, Varying (Shader I/O)
+
+| GLSL Term | HLSL Equivalent | Description |
+|-----------|----------------|-------------|
+| `uniform` | `cbuffer` constant | Per-draw-call data (matrices, time) |
+| `in` (vertex) | Semantic (`POSITION`) | Per-vertex attribute from VBO |
+| `out`/`in` (varying) | Interpolator | Rasterizer-interpolated data |
+| `out` (fragment) | `SV_Target` | Final pixel color output |
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 28.4.A1 — Energy Conservation
+
+A physically plausible BRDF must not reflect more energy than it receives:
+
+$$
+\forall \omega_o: \quad \int_\Omega f_r(\omega_i, \omega_o) \cos\theta_i \, d\omega_i \leq 1
+$$
+
+### Axiom 28.4.A2 — Helmholtz Reciprocity
+
+$$
+f_r(\omega_i, \omega_o) = f_r(\omega_o, \omega_i)
+$$
+
+Light paths are reversible: swapping viewer and light produces the same BRDF value.
+
+### Axiom 28.4.A3 — GPU SIMT Execution Model
+
+Shaders execute in **warps** (NVIDIA: 32 threads) or **wavefronts** (AMD: 64 threads). All threads in a warp execute the same instruction simultaneously. Divergent branches (if/else where threads take different paths) cause serialization and performance loss.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 28.4.1 — The Half-Vector Bisects Incident and Reflected Directions
+
+For a perfect mirror reflection, the surface normal must equal the half-vector $\mathbf{h} = \text{normalize}(\omega_i + \omega_o)$. In microfacet theory, only microfacets whose normal aligns with $\mathbf{h}$ contribute to the specular reflection from $\omega_i$ to $\omega_o$.
+
+**Proof.** The law of reflection states $\omega_o = 2(\omega_i \cdot \mathbf{n})\mathbf{n} - \omega_i$. For a microfacet with normal $\mathbf{m}$, reflection occurs when $\omega_o = 2(\omega_i \cdot \mathbf{m})\mathbf{m} - \omega_i$. Adding $\omega_i + \omega_o = 2(\omega_i \cdot \mathbf{m})\mathbf{m}$, which is parallel to $\mathbf{m}$. Therefore $\mathbf{m} = \text{normalize}(\omega_i + \omega_o) = \mathbf{h}$. $\blacksquare$
+
+### Lemma 28.4.2 — Lambertian Energy Conservation
+
+**Claim:** $f_{\text{Lambert}} = \rho/\pi$ conserves energy.
+
+**Proof.** Integrate outgoing radiance over the hemisphere:
+
+$$
+\int_\Omega \frac{\rho}{\pi} \cos\theta \, d\omega = \frac{\rho}{\pi} \int_0^{2\pi} \int_0^{\pi/2} \cos\theta \sin\theta \, d\theta \, d\phi
+$$
+
+$$
+= \frac{\rho}{\pi} \cdot 2\pi \cdot \int_0^{\pi/2} \cos\theta \sin\theta \, d\theta = \frac{\rho}{\pi} \cdot 2\pi \cdot \frac{1}{2} = \rho \leq 1
+$$
+
+$\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 28.4.1 — The Rendering Equation (Kajiya, 1986)
+
+The outgoing radiance $L_o$ at a surface point $\mathbf{x}$ in direction $\omega_o$ is:
+
+$$
+L_o(\mathbf{x}, \omega_o) = L_e(\mathbf{x}, \omega_o) + \int_\Omega f_r(\mathbf{x}, \omega_i, \omega_o) L_i(\mathbf{x}, \omega_i) (\omega_i \cdot \mathbf{n}) \, d\omega_i
+$$
+
+This integral equation is the foundation of all physically-based rendering. Real-time approximations evaluate it for a finite number of light sources (replacing the integral with a sum).
+
+### Theorem 28.4.2 — GGX Normalization
+
+The GGX NDF integrates to 1 over the projected hemisphere:
+
+$$
+\int_\Omega D_{\text{GGX}}(\mathbf{h}) (\mathbf{n} \cdot \mathbf{h}) \, d\omega_h = 1
+$$
+
+This ensures the microfacet distribution is physically valid (total microfacet area equals the macroscopic surface area).
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Blinn-Phong Specular Term
+
+**Goal:** Derive the Blinn-Phong specular highlight from the Phong model.
+
+**Phong model:** $I_s = k_s (\hat{\mathbf{R}} \cdot \hat{\mathbf{V}})^n$ where $\hat{\mathbf{R}} = 2(\hat{\mathbf{N}} \cdot \hat{\mathbf{L}})\hat{\mathbf{N}} - \hat{\mathbf{L}}$ is the reflection of the light vector.
+
+**Problem:** Computing $\hat{\mathbf{R}}$ requires a reflection operation per fragment.
+
+**Blinn's optimization:** Replace $\hat{\mathbf{R}} \cdot \hat{\mathbf{V}}$ with $\hat{\mathbf{N}} \cdot \hat{\mathbf{H}}$ where $\hat{\mathbf{H}} = \text{normalize}(\hat{\mathbf{L}} + \hat{\mathbf{V}})$.
+
+**Justification:** When $\hat{\mathbf{N}} = \hat{\mathbf{H}}$, the surface is oriented to reflect light from $\hat{\mathbf{L}}$ toward $\hat{\mathbf{V}}$ (maximum specular). The angle between $\hat{\mathbf{N}}$ and $\hat{\mathbf{H}}$ is approximately half the angle between $\hat{\mathbf{R}}$ and $\hat{\mathbf{V}}$, so the exponent is adjusted: $n_{\text{Blinn}} \approx 4 n_{\text{Phong}}$.
+
+$$
+I_{\text{Blinn-Phong}} = k_s \max(\hat{\mathbf{N}} \cdot \hat{\mathbf{H}}, 0)^{n'}
+$$
+
+### 5.2 Derivation of Schlick's Fresnel Approximation
+
+**Goal:** Approximate the full Fresnel equations with a simple polynomial.
+
+**Full Fresnel** (for unpolarized light at a dielectric interface):
+
+$$
+F(\theta_i) = \frac{1}{2}\left(\frac{n_1\cos\theta_i - n_2\cos\theta_t}{n_1\cos\theta_i + n_2\cos\theta_t}\right)^2 + \frac{1}{2}\left(\frac{n_2\cos\theta_i - n_1\cos\theta_t}{n_2\cos\theta_i + n_1\cos\theta_t}\right)^2
+$$
+
+**At normal incidence** ($\theta_i = 0$): $F_0 = \left(\frac{n_1 - n_2}{n_1 + n_2}\right)^2$
+
+**At grazing incidence** ($\theta_i \to 90°$): $F \to 1$ for all materials.
+
+**Schlick's insight:** The transition from $F_0$ to $1$ is well-approximated by a 5th-power polynomial:
+
+$$
+F(\theta) \approx F_0 + (1 - F_0)(1 - \cos\theta)^5
+$$
+
+Verification: At $\theta = 0$: $F = F_0 + 0 = F_0$. ✓ At $\theta = 90°$: $F = F_0 + (1-F_0) = 1$. ✓
+
+The exponent 5 was chosen empirically to match the Fresnel curve for common materials (glass, water, metals). $\blacksquare$
+
+
+
+---
+
+## 💻 6. Code Examples
+
+### 6.1 GLSL: Complete PBR Fragment Shader
+
+```glsl
+#version 450 core
+
+in vec3 v_WorldPos;
+in vec3 v_Normal;
+in vec2 v_UV;
+
+uniform vec3 u_CamPos;
+uniform vec3 u_LightPos;
+uniform vec3 u_LightColor;
+uniform float u_Roughness;
+uniform float u_Metallic;
+uniform sampler2D u_AlbedoMap;
+
+out vec4 FragColor;
+
+const float PI = 3.14159265359;
+
+// GGX Normal Distribution Function
+float DistributionGGX(vec3 N, vec3 H, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+    float denom = NdotH2 * (a2 - 1.0) + 1.0;
+    return a2 / (PI * denom * denom);
+}
+
+// Schlick-GGX Geometry function
+float GeometrySchlickGGX(float NdotV, float roughness) {
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;  // direct lighting remapping
+    return NdotV / (NdotV * (1.0 - k) + k);
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+    return GeometrySchlickGGX(max(dot(N, V), 0.0), roughness)
+         * GeometrySchlickGGX(max(dot(N, L), 0.0), roughness);
+}
+
+// Schlick Fresnel
+vec3 FresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+void main() {
+    vec3 albedo = texture(u_AlbedoMap, v_UV).rgb;
+    vec3 N = normalize(v_Normal);
+    vec3 V = normalize(u_CamPos - v_WorldPos);
+    vec3 L = normalize(u_LightPos - v_WorldPos);
+    vec3 H = normalize(V + L);
+
+    // F0: 0.04 for dielectrics, albedo for metals
+    vec3 F0 = mix(vec3(0.04), albedo, u_Metallic);
+
+    // Cook-Torrance specular BRDF
+    float D = DistributionGGX(N, H, u_Roughness);
+    float G = GeometrySmith(N, V, L, u_Roughness);
+    vec3  F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    vec3 numerator = D * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3 specular = numerator / denominator;
+
+    // Energy conservation: diffuse = (1 - specular) * (1 - metallic)
+    vec3 kD = (vec3(1.0) - F) * (1.0 - u_Metallic);
+    vec3 diffuse = kD * albedo / PI;
+
+    float NdotL = max(dot(N, L), 0.0);
+    vec3 Lo = (diffuse + specular) * u_LightColor * NdotL;
+
+    // Simple ambient
+    vec3 ambient = vec3(0.03) * albedo;
+    FragColor = vec4(ambient + Lo, 1.0);
+}
+```
+
+### 6.2 HLSL: Equivalent PBR Pixel Shader (Unity URP Style)
+
+```hlsl
+// Unity URP Custom Lit Shader - Pixel/Fragment function
+half4 PBRFragment(Varyings input) : SV_Target
+{
+    half3 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
+    half3 N = normalize(input.normalWS);
+    half3 V = normalize(_WorldSpaceCameraPos - input.positionWS);
+
+    Light mainLight = GetMainLight();
+    half3 L = normalize(mainLight.direction);
+    half3 H = normalize(V + L);
+
+    half3 F0 = lerp(half3(0.04, 0.04, 0.04), albedo, _Metallic);
+
+    // D - GGX
+    half a = _Roughness * _Roughness;
+    half a2 = a * a;
+    half NdotH = saturate(dot(N, H));
+    half d = NdotH * NdotH * (a2 - 1.0) + 1.0;
+    half D = a2 / (PI * d * d);
+
+    // G - Smith
+    half NdotV = saturate(dot(N, V));
+    half NdotL = saturate(dot(N, L));
+    half k = (a + 1.0) * (a + 1.0) / 8.0;
+    half G = (NdotV / (NdotV * (1-k) + k)) * (NdotL / (NdotL * (1-k) + k));
+
+    // F - Schlick
+    half3 F = F0 + (1.0 - F0) * pow(1.0 - saturate(dot(H, V)), 5.0);
+
+    half3 spec = (D * G * F) / (4.0 * NdotV * NdotL + 0.0001);
+    half3 kD = (1.0 - F) * (1.0 - _Metallic);
+    half3 diffuse = kD * albedo / PI;
+
+    half3 color = (diffuse + spec) * mainLight.color * NdotL;
+    color += albedo * 0.03; // ambient
+
+    return half4(color, 1.0);
+}
+```
+
+### 6.3 GLSL: Compute Shader (Particle Update)
+
+```glsl
+#version 450
+layout(local_size_x = 256) in;
+
+struct Particle {
+    vec4 position;  // xyz = pos, w = life
+    vec4 velocity;  // xyz = vel, w = unused
+};
+
+layout(std430, binding = 0) buffer ParticleBuffer {
+    Particle particles[];
+};
+
+uniform float u_DeltaTime;
+uniform vec3 u_Gravity;
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= particles.length()) return;
+
+    Particle p = particles[idx];
+
+    // Euler integration
+    p.velocity.xyz += u_Gravity * u_DeltaTime;
+    p.position.xyz += p.velocity.xyz * u_DeltaTime;
+    p.position.w -= u_DeltaTime; // decrease life
+
+    // Reset dead particles
+    if (p.position.w <= 0.0) {
+        p.position = vec4(0.0, 0.0, 0.0, 2.0); // respawn at origin, 2s life
+        p.velocity = vec4(0.0, 5.0, 0.0, 0.0);
+    }
+
+    particles[idx] = p;
+}
+```
+
+
+
+---
+
+## 🧮 7. Worked Examples
+
+### Example 28.4.1 — Computing Blinn-Phong Lighting
+
+**Problem:** Surface normal $\hat{N} = (0, 1, 0)$, light direction $\hat{L} = (0.577, 0.577, 0.577)$ (normalized $(1,1,1)$), view direction $\hat{V} = (0, 0.707, 0.707)$. Compute diffuse and specular (shininess $= 64$) components.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Diffuse:**
+
+$$
+I_d = \max(\hat{N} \cdot \hat{L}, 0) = \max(0 \cdot 0.577 + 1 \cdot 0.577 + 0 \cdot 0.577, 0) = 0.577
+$$
+
+**Half-vector:**
+
+$$
+\hat{H} = \text{normalize}(\hat{L} + \hat{V}) = \text{normalize}(0.577, 1.284, 1.284)
+$$
+
+$$
+|\hat{L} + \hat{V}| = \sqrt{0.577^2 + 1.284^2 + 1.284^2} = \sqrt{0.333 + 1.649 + 1.649} = \sqrt{3.631} = 1.906
+$$
+
+$$
+\hat{H} = (0.303, 0.674, 0.674)
+$$
+
+**Specular:**
+
+$$
+I_s = \max(\hat{N} \cdot \hat{H}, 0)^{64} = (0.674)^{64}
+$$
+
+$$
+\ln(0.674) = -0.394, \quad 64 \times (-0.394) = -25.24, \quad e^{-25.24} \approx 1.1 \times 10^{-11} \approx 0
+$$
+
+The specular highlight is negligible at this angle — the view is not aligned with the reflection direction.
+
+</details>
+
+### Example 28.4.2 — Fresnel at Grazing Angle
+
+**Problem:** Glass with $F_0 = 0.04$. Compute Fresnel reflectance at $\theta = 80°$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$$
+F = F_0 + (1 - F_0)(1 - \cos\theta)^5
+$$
+
+$$
+\cos 80° = 0.1736
+$$
+
+$$
+F = 0.04 + 0.96 \cdot (1 - 0.1736)^5 = 0.04 + 0.96 \cdot (0.8264)^5
+$$
+
+$$
+(0.8264)^2 = 0.6829, \quad (0.8264)^4 = 0.4664, \quad (0.8264)^5 = 0.3855
+$$
+
+$$
+F = 0.04 + 0.96 \times 0.3855 = 0.04 + 0.370 = 0.410
+$$
+
+At $80°$, glass reflects $41\%$ of light — much more than the $4\%$ at normal incidence. This is why lakes appear mirror-like at shallow viewing angles.
+
+</details>
+
+### Example 28.4.3 — GGX NDF Evaluation
+
+**Problem:** Roughness $= 0.5$ ($\alpha = 0.25$), $\hat{N} \cdot \hat{H} = 0.9$. Compute $D_{\text{GGX}}$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$$
+\alpha = 0.5^2 = 0.25, \quad \alpha^2 = 0.0625
+$$
+
+$$
+D = \frac{\alpha^2}{\pi((\hat{N} \cdot \hat{H})^2(\alpha^2 - 1) + 1)^2}
+$$
+
+$$
+= \frac{0.0625}{\pi((0.81)(0.0625 - 1) + 1)^2}
+$$
+
+$$
+= \frac{0.0625}{\pi((0.81)(-0.9375) + 1)^2}
+$$
+
+$$
+= \frac{0.0625}{\pi(-0.7594 + 1)^2} = \frac{0.0625}{\pi(0.2406)^2}
+$$
+
+$$
+= \frac{0.0625}{\pi \cdot 0.05789} = \frac{0.0625}{0.1818} = 0.3438
+$$
+
+This relatively high value indicates significant microfacet alignment at this angle for medium roughness.
+
+</details>
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [28.3 - Graphics Rendering Pipeline](28.3---Graphics-Rendering-Pipeline) — shaders execute within this pipeline
+- **Next:** [28.5 - Game Engine Architectures - Unity & Unreal](28.5---Game-Engine-Architectures---Unity-&-Unreal) — engine shader systems
+- **Dot products & vectors:** [1.4 - Vector Calculus](1.4---Vector-Calculus) — N·L, N·H computations
+- **Integration:** [1.3 - Integral Calculus](1.3---Integral-Calculus) — the rendering equation is an integral
+- **Solid angles:** [1.5 - Multiple Integrals & Jacobians](1.5---Multiple-Integrals-&-Jacobians) — hemisphere integration for energy conservation
+
+### External Resources
+- **LearnOpenGL.com: PBR Theory** — excellent free tutorial series
+- **Real-Time Rendering** (Akenine-Möller) — Chapter 9: Physically Based Shading
+- **Filament Documentation** (Google) — complete PBR implementation reference
+- **Shadertoy.com** — interactive GLSL shader playground
+- **The Book of Shaders** (Patricio Gonzalez Vivo) — creative coding with GLSL
+
+### Practice
+- [9.4_shader_examples.md](9.4_shader_examples.md) — annotated GLSL/HLSL snippet collection
+
+
+
+---
+
+## 📎 Appendix: Advanced Shader Techniques
+
+### A.1 Derivation of GGX Normalization
+
+**Goal:** Prove that $\int_\Omega D_{\text{GGX}}(\mathbf{h}) (\mathbf{n} \cdot \mathbf{h}) \, d\omega_h = 1$.
+
+**Step 1:** In spherical coordinates with $\mathbf{n}$ as the pole, $\mathbf{n} \cdot \mathbf{h} = \cos\theta$ and $d\omega = \sin\theta \, d\theta \, d\phi$:
+
+$$
+\int_0^{2\pi} \int_0^{\pi/2} \frac{\alpha^2}{\pi(\cos^2\theta(\alpha^2-1)+1)^2} \cos\theta \sin\theta \, d\theta \, d\phi
+$$
+
+**Step 2:** The $\phi$ integral gives $2\pi$:
+
+$$
+2\pi \int_0^{\pi/2} \frac{\alpha^2}{\pi(\cos^2\theta(\alpha^2-1)+1)^2} \cos\theta \sin\theta \, d\theta
+$$
+
+$$
+= 2\alpha^2 \int_0^{\pi/2} \frac{\cos\theta \sin\theta}{(\cos^2\theta(\alpha^2-1)+1)^2} \, d\theta
+$$
+
+**Step 3:** Substitute $u = \cos^2\theta$, $du = -2\cos\theta\sin\theta \, d\theta$:
+
+When $\theta = 0$: $u = 1$. When $\theta = \pi/2$: $u = 0$.
+
+$$
+= 2\alpha^2 \int_1^0 \frac{1}{(u(\alpha^2-1)+1)^2} \cdot \frac{-du}{2} = \alpha^2 \int_0^1 \frac{du}{(u(\alpha^2-1)+1)^2}
+$$
+
+**Step 4:** Let $v = u(\alpha^2-1)+1$, $dv = (\alpha^2-1)du$:
+
+When $u = 0$: $v = 1$. When $u = 1$: $v = \alpha^2$.
+
+$$
+= \alpha^2 \int_1^{\alpha^2} \frac{1}{v^2} \cdot \frac{dv}{\alpha^2-1} = \frac{\alpha^2}{\alpha^2-1} \left[-\frac{1}{v}\right]_1^{\alpha^2}
+$$
+
+$$
+= \frac{\alpha^2}{\alpha^2-1} \left(-\frac{1}{\alpha^2} + 1\right) = \frac{\alpha^2}{\alpha^2-1} \cdot \frac{\alpha^2-1}{\alpha^2} = 1
+$$
+
+$\blacksquare$
+
+### A.2 Image-Based Lighting (IBL) Split-Sum Approximation
+
+The rendering equation for environment lighting:
+
+$$
+L_o = \int_\Omega f_r(\omega_i, \omega_o) L_i(\omega_i) \cos\theta_i \, d\omega_i
+$$
+
+**Epic Games' split-sum approximation** (Karis, 2013):
+
+$$
+L_o \approx \underbrace{\left(\int_\Omega D(\omega_h) L_i(\omega_i) \, d\omega_i\right)}_{\text{Pre-filtered environment map}} \cdot \underbrace{\left(\int_\Omega f_r \cos\theta_i \, d\omega_i\right)}_{\text{BRDF LUT (2D texture)}}
+$$
+
+The pre-filtered map is computed offline at multiple roughness levels (mip chain). The BRDF integration LUT is a 2D texture indexed by $(N \cdot V, \text{roughness})$ storing scale and bias for $F_0$.
+
+### A.3 GLSL: Screen-Space Reflections (SSR)
+
+```glsl
+// Ray-march in screen space to find reflection
+vec3 SSR(vec3 viewPos, vec3 viewNormal, sampler2D depthTex, mat4 proj) {
+    vec3 reflectDir = reflect(normalize(viewPos), viewNormal);
+
+    // March in view space, project each step to screen
+    float stepSize = 0.1;
+    vec3 currentPos = viewPos;
+
+    for (int i = 0; i < 64; i++) {
+        currentPos += reflectDir * stepSize;
+
+        // Project to screen
+        vec4 clipPos = proj * vec4(currentPos, 1.0);
+        vec2 screenUV = (clipPos.xy / clipPos.w) * 0.5 + 0.5;
+
+        if (screenUV.x < 0.0 || screenUV.x > 1.0 ||
+            screenUV.y < 0.0 || screenUV.y > 1.0) break;
+
+        float sampledDepth = texture(depthTex, screenUV).r;
+        float currentDepth = clipPos.z / clipPos.w;
+
+        if (currentDepth > sampledDepth) {
+            // Hit! Return the color at this screen position
+            return texture(colorTex, screenUV).rgb;
+        }
+
+        stepSize *= 1.1; // accelerate march
+    }
+    return vec3(0.0); // no hit — fall back to cubemap
+}
+```
+
+### A.4 Shader Performance Guidelines
+
+| Technique | Cost (ALU ops) | When to Use |
+|-----------|---------------|-------------|
+| Lambert diffuse | 3 | Always (base lighting) |
+| Blinn-Phong specular | 8 | Low-end, mobile |
+| GGX specular (full PBR) | 25–40 | PC, console |
+| Normal mapping | 10 | Almost always |
+| Parallax occlusion mapping | 50–200 | PC only, close surfaces |
+| SSR | 100+ per pixel | PC, deferred only |
+| SSAO | 30–60 per pixel | PC, deferred |
+| Volumetric fog | 50+ per pixel | PC, high-end |
+
+**VR-specific constraints:**
+- Fragment shader budget: ~128 ALU ops on Quest 2
+- Avoid dependent texture reads (break parallelism)
+- Prefer half-precision (`mediump`/`half`) where possible
+- Avoid `discard`/`clip` (breaks early-Z)
+
+### A.5 Tone Mapping and Color Space
+
+```glsl
+// ACES Filmic Tone Mapping (industry standard)
+vec3 ACESFilm(vec3 x) {
+    float a = 2.51;
+    float b = 0.03;
+    float c = 2.43;
+    float d = 0.59;
+    float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+// Linear to sRGB gamma correction
+vec3 LinearToSRGB(vec3 color) {
+    return pow(color, vec3(1.0 / 2.2));
+}
+
+// Full HDR → LDR pipeline
+vec3 FinalColor(vec3 hdrColor, float exposure) {
+    vec3 exposed = hdrColor * exposure;
+    vec3 mapped = ACESFilm(exposed);
+    return LinearToSRGB(mapped);
+}
+```
+
+
+
+### A.6 Shader Debugging Techniques
+
+**Visualizing normals:**
+```glsl
+// Output world-space normals as color (debug view)
+FragColor = vec4(normalize(v_Normal) * 0.5 + 0.5, 1.0);
+// Red = +X, Green = +Y, Blue = +Z
+```
+
+**Visualizing UV coordinates:**
+```glsl
+FragColor = vec4(v_UV, 0.0, 1.0);
+// Red = U, Green = V — checkerboard pattern reveals stretching
+```
+
+**Visualizing depth buffer:**
+```glsl
+float linearDepth = (2.0 * near * far) / (far + near - (gl_FragCoord.z * 2.0 - 1.0) * (far - near));
+FragColor = vec4(vec3(linearDepth / far), 1.0);
+```
+
+**Overdraw visualization:**
+```glsl
+// Additive blending with flat color — brighter = more overdraw
+FragColor = vec4(0.1, 0.1, 0.1, 1.0); // Each layer adds 10% brightness
+```
+
+### A.7 HLSL Semantic Reference
+
+| Semantic | Stage | Description |
+|----------|-------|-------------|
+| `POSITION` | VS input | Vertex position (float3/4) |
+| `NORMAL` | VS input | Vertex normal |
+| `TEXCOORD0-7` | VS input/output | Texture coordinates / interpolators |
+| `COLOR0-1` | VS input/output | Vertex color |
+| `TANGENT` | VS input | Tangent vector (float4, w = handedness) |
+| `SV_Position` | VS output / PS input | Clip-space position (system value) |
+| `SV_Target0-7` | PS output | Render target outputs |
+| `SV_Depth` | PS output | Custom depth (disables early-Z) |
+| `SV_InstanceID` | VS input | Instance index for instancing |
+| `SV_VertexID` | VS input | Vertex index |
+| `SV_IsFrontFace` | PS input | Front/back face boolean |
+| `SV_DispatchThreadID` | CS | Global thread ID (compute) |
+| `SV_GroupThreadID` | CS | Thread ID within group |
+| `SV_GroupID` | CS | Group ID |
+
+### A.8 Texture Sampling Techniques
+
+```glsl
+// Trilinear filtering (default for mipmapped textures)
+vec4 color = texture(u_Albedo, uv); // hardware selects mip level
+
+// Manual LOD bias (sharpen or blur)
+vec4 sharp = textureLod(u_Albedo, uv, -1.0); // one mip sharper
+vec4 blurry = textureLod(u_Albedo, uv, 2.0); // two mips blurrier
+
+// Anisotropic filtering (handled by sampler state, not shader code)
+// Set via: glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
+
+// Texture array sampling (for terrain splatting)
+vec4 terrainColor = texture(u_TerrainArray, vec3(uv, layerIndex));
+
+// Cubemap sampling (environment reflections)
+vec3 reflectDir = reflect(-viewDir, normal);
+vec4 envColor = texture(u_EnvCubemap, reflectDir);
+```
+
+### A.9 Post-Processing Stack (Common Effects)
+
+| Effect | Cost | VR Suitability | Notes |
+|--------|------|----------------|-------|
+| Bloom | Low | ✓ Safe | Threshold + blur + additive |
+| Color grading | Very low | ✓ Safe | LUT lookup |
+| Vignette | Very low | ✓ Safe (comfort aid) | Darken edges |
+| FXAA | Low | ⚠️ Caution | Can blur text in VR |
+| TAA | Medium | ✓ Recommended | Reduces aliasing, slight ghosting |
+| Motion blur | Medium | ❌ Avoid in VR | Causes nausea |
+| Depth of field | Medium | ❌ Avoid in VR | Conflicts with eye accommodation |
+| Chromatic aberration | Very low | ❌ Avoid in VR | Conflicts with lens correction |
+| Film grain | Very low | ❌ Avoid in VR | Distracting in stereo |
+| SSAO | High | ⚠️ PC only | Too expensive for mobile VR |
+
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 28.1 — Complete Lambertian + Blinn-Phong Shading for a Single Fragment
+
+**Problem:** A fragment has surface normal $\mathbf{N} = (0, 0.6, 0.8)$, a point light at direction $\mathbf{L} = (0.577, 0.577, 0.577)$ (normalized), view direction $\mathbf{V} = (0, 0, 1)$, albedo $\rho = (0.8, 0.2, 0.1)$, specular color $k_s = (1, 1, 1)$, shininess $n = 64$, and light intensity $I_L = (1.0, 0.95, 0.9)$. Compute the final fragment color using Lambertian diffuse + Blinn-Phong specular.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Verify input normalization
+
+Check $\|\mathbf{N}\| = \sqrt{0^2 + 0.6^2 + 0.8^2} = \sqrt{0.36 + 0.64} = \sqrt{1.0} = 1$ ✓
+
+Check $\|\mathbf{L}\| = \sqrt{0.577^2 \times 3} = \sqrt{0.333 \times 3} = \sqrt{0.999} \approx 1$ ✓
+
+Check $\|\mathbf{V}\| = \sqrt{0 + 0 + 1} = 1$ ✓
+
+#### Step 2: Compute Lambertian diffuse term
+
+The Lambertian diffuse BRDF is $f_{\text{diffuse}} = \frac{\rho}{\pi}$. The diffuse contribution requires the cosine factor:
+
+$$
+\mathbf{N} \cdot \mathbf{L} = (0)(0.577) + (0.6)(0.577) + (0.8)(0.577) = 0 + 0.3462 + 0.4616 = 0.8078
+$$
+
+Since $\mathbf{N} \cdot \mathbf{L} \gt  0$, the surface faces the light. Computing per-channel:
+
+$$
+\frac{\rho}{\pi} \odot I_L = \left(\frac{0.8}{3.1416}, \frac{0.2}{3.1416}, \frac{0.1}{3.1416}\right) \odot (1.0, 0.95, 0.9) = (0.2546, 0.0605, 0.0286)
+$$
+
+$$
+L_{\text{diffuse}} = (0.2546, 0.0605, 0.0286) \times 0.8078 = (0.2057, 0.0489, 0.0231)
+$$
+
+#### Step 3: Compute the half-vector $\mathbf{H}$
+
+$$
+\mathbf{L} + \mathbf{V} = (0.577, 0.577, 1.577), \quad \|\mathbf{L} + \mathbf{V}\| = \sqrt{0.333 + 0.333 + 2.487} = 1.7757
+$$
+
+$$
+\mathbf{H} = \frac{(0.577, 0.577, 1.577)}{1.7757} = (0.3249, 0.3249, 0.8881)
+$$
+
+#### Step 4: Compute Blinn-Phong specular term
+
+$$
+\mathbf{N} \cdot \mathbf{H} = (0)(0.3249) + (0.6)(0.3249) + (0.8)(0.8881) = 0.1949 + 0.7105 = 0.9054
+$$
+
+The specular intensity: $\ln(0.9054) = -0.09934$, so $64 \times (-0.09934) = -6.358$, thus:
+
+$$
+(\mathbf{N} \cdot \mathbf{H})^{64} = e^{-6.358} = 0.001735
+$$
+
+$$
+L_{\text{specular}} = (1,1,1) \odot (1.0, 0.95, 0.9) \times 0.001735 = (0.001735, 0.001648, 0.001562)
+$$
+
+#### Step 5: Combine
+
+**Final Answer:**
+
+$$
+L_{\text{final}} = (0.2057 + 0.0017,\; 0.0489 + 0.0016,\; 0.0231 + 0.0016) = (0.2074, 0.0505, 0.0247)
+$$
+
+A warm reddish-orange fragment — the tight specular highlight ($n=64$) contributes minimally because we are slightly off the mirror direction.
+
+</details>
+
+### Example 28.2 — Deriving Cook-Torrance BRDF for Copper
+
+**Problem:** Given roughness $\alpha = 0.4$, metallic $= 1.0$, base color $F_0 = (0.95, 0.64, 0.54)$ (copper), $\mathbf{N} \cdot \mathbf{H} = 0.85$, $\mathbf{N} \cdot \mathbf{V} = 0.7$, $\mathbf{N} \cdot \mathbf{L} = 0.6$, $\mathbf{V} \cdot \mathbf{H} = 0.9$. Compute the full Cook-Torrance specular BRDF $f_r$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: GGX Normal Distribution Function
+
+$$
+D = \frac{\alpha^2}{\pi\left((\mathbf{N} \cdot \mathbf{H})^2(\alpha^2 - 1) + 1\right)^2}
+$$
+
+$$
+\alpha^2 = 0.16, \quad (\mathbf{N} \cdot \mathbf{H})^2 = 0.7225
+$$
+
+$$
+\text{denom inner} = 0.7225(0.16 - 1) + 1 = 0.7225(-0.84) + 1 = -0.6069 + 1 = 0.3931
+$$
+
+$$
+D = \frac{0.16}{\pi (0.3931)^2} = \frac{0.16}{3.1416 \times 0.1545} = \frac{0.16}{0.4854} = 0.3296
+$$
+
+#### Step 2: Schlick Fresnel
+
+$$
+F = F_0 + (1 - F_0)(1 - \mathbf{V} \cdot \mathbf{H})^5 = F_0 + (1 - F_0)(0.1)^5
+$$
+
+$$
+(0.1)^5 = 0.00001 \implies F \approx (0.9500, 0.6400, 0.5400)
+$$
+
+At near-normal incidence, Fresnel is essentially $F_0$.
+
+#### Step 3: Smith-GGX Geometry Function
+
+With $k = \frac{\alpha^2}{2} = 0.08$:
+
+$$
+G_1(\mathbf{N} \cdot \mathbf{V}) = \frac{0.7}{0.7(0.92) + 0.08} = \frac{0.7}{0.724} = 0.9669
+$$
+
+$$
+G_1(\mathbf{N} \cdot \mathbf{L}) = \frac{0.6}{0.6(0.92) + 0.08} = \frac{0.6}{0.632} = 0.9494
+$$
+
+$$
+G = 0.9669 \times 0.9494 = 0.9180
+$$
+
+#### Step 4: Assemble
+
+$$
+f_r = \frac{D \cdot F \cdot G}{4(\mathbf{N} \cdot \mathbf{V})(\mathbf{N} \cdot \mathbf{L})} = \frac{0.3296 \times F \times 0.9180}{4 \times 0.7 \times 0.6}
+$$
+
+Numerator scalar: $0.3296 \times 0.9180 = 0.3026$. Per-channel with $F$:
+
+$$
+(0.3026 \times 0.95,\; 0.3026 \times 0.64,\; 0.3026 \times 0.54) = (0.2874, 0.1937, 0.1634)
+$$
+
+Denominator: $4 \times 0.7 \times 0.6 = 1.68$
+
+**Final Answer:**
+
+$$
+f_r = \frac{(0.2874, 0.1937, 0.1634)}{1.68} = (0.1711, 0.1153, 0.0973)
+$$
+
+Copper-tinted specular — metals carry color in their specular because $F_0$ encodes the material's reflectance spectrum.
+
+</details>
+
+---

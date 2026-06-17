@@ -1,0 +1,211 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .axis-x { stroke: #ff6b6b; stroke-width: 1.6; fill: none; }
+    .axis-y { stroke: #51cf66; stroke-width: 1.6; fill: none; }
+    .axis-z { stroke: #4dabf7; stroke-width: 1.6; fill: none; }
+    .link { stroke: var(--text-normal, #c9d1d9); stroke-width: 4; fill: none; stroke-linecap: round; }
+    .joint { fill: var(--interactive-accent, #58a6ff); stroke: var(--interactive-accent, #58a6ff); }
+    .stack-row { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.4; fill: none; stroke-dasharray: 4, 3; animation: flow 1.5s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -7; } }
+  </style>
+  <defs>
+    <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="24" class="title" text-anchor="middle">Robotics — Frames, Kinematic Chains, and the Software Stack</text>
+
+  <!-- LEFT: Frame chain -->
+  <rect x="20" y="50" width="290" height="220" class="box"/>
+  <text x="165" y="72" class="label" text-anchor="middle" font-weight="bold">Frames Compose: T_world_ee = T₀₁ · T₁₂ · T₂₃ · T₃ee</text>
+
+  <!-- Base axes -->
+  <line x1="50" y1="240" x2="100" y2="240" class="axis-x"/>
+  <line x1="50" y1="240" x2="50"  y2="190" class="axis-y"/>
+  <line x1="50" y1="240" x2="35"  y2="255" class="axis-z"/>
+  <text x="105" y="244" class="sublabel" fill="#ff6b6b">x₀</text>
+  <text x="38"  y="186" class="sublabel" fill="#51cf66">y₀</text>
+  <text x="22"  y="262" class="sublabel" fill="#4dabf7">z₀</text>
+  <text x="50" y="265" class="sublabel" text-anchor="middle">{0} world / base</text>
+
+  <!-- Animated Kinematic Chain (Nested Groups for Forward Kinematics) -->
+  <g transform="translate(50, 240)">
+    <!-- First link rotates around Joint 0 (50, 240) -->
+    <g transform="rotate(0)">
+      <animateTransform attributeName="transform" type="rotate" values="-5; 5; -5" dur="10s" repeatCount="indefinite" additive="sum"/>
+      <line x1="0" y1="0" x2="70" y2="-70" class="link"/>
+      
+      <!-- Joint 1 at (70, -70) relative to Base -->
+      <g transform="translate(70, -70)">
+        <circle cx="0" cy="0" r="6" class="joint"/>
+        <text x="12" y="5" class="sublabel">{1}</text>
+        
+        <!-- Second link rotates around Joint 1 -->
+        <g transform="rotate(0)">
+          <animateTransform attributeName="transform" type="rotate" values="-15; 15; -15" dur="7.5s" repeatCount="indefinite" additive="sum"/>
+          <line x1="0" y1="0" x2="75" y2="-35" class="link"/>
+          
+          <!-- Joint 2 at (75, -35) relative to Joint 1 -->
+          <g transform="translate(75, -35)">
+            <circle cx="0" cy="0" r="6" class="joint"/>
+            <text x="12" y="5" class="sublabel">{2}</text>
+            
+            <!-- Third link rotates around Joint 2 -->
+            <g transform="rotate(0)">
+              <animateTransform attributeName="transform" type="rotate" values="20; -10; 20" dur="6s" repeatCount="indefinite" additive="sum"/>
+              <line x1="0" y1="0" x2="70" y2="-20" class="link"/>
+              
+              <!-- Joint 3 / EE Base at (70, -20) relative to Joint 2 -->
+              <g transform="translate(70, -20)">
+                <circle cx="0" cy="0" r="6" class="joint"/>
+                <text x="12" y="5" class="sublabel">{3}</text>
+                
+                <!-- End Effector axes rotating as well! -->
+                <g transform="rotate(0)">
+                  <animateTransform attributeName="transform" type="rotate" values="-10; 10; -10" dur="5s" repeatCount="indefinite" additive="sum"/>
+                  <line x1="0" y1="0" x2="30" y2="0" class="axis-x"/>
+                  <line x1="0" y1="0" x2="0" y2="-30" class="axis-y"/>
+                  <line x1="0" y1="0" x2="-13" y2="10" class="axis-z"/>
+                  <text x="5" y="-33" class="sublabel" fill="#51cf66">y_ee</text>
+                  <text x="32" y="4" class="sublabel" fill="#ff6b6b">x_ee</text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- MIDDLE: Joint types -->
+  <rect x="325" y="50" width="180" height="220" class="box"/>
+  <text x="415" y="72" class="label" text-anchor="middle" font-weight="bold">Joint Types</text>
+
+  <!-- Revolute -->
+  <g transform="translate(345, 105)">
+    <circle cx="0" cy="0" r="8" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+    <line x1="0" y1="8" x2="0" y2="20" class="link" stroke="#ff6b6b" stroke-width="2"/>
+    <!-- Animate rotation of a small indicator inside -->
+    <line x1="0" y1="0" x2="6" y2="0" stroke="#ff6b6b" stroke-width="1.5">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
+    </line>
+  </g>
+  <text x="365" y="108" class="sublabel">Revolute (R) — rotation</text>
+
+  <!-- Prismatic -->
+  <g transform="translate(347, 148)">
+    <rect x="-7" y="-8" width="14" height="16" fill="none" stroke="#51cf66" stroke-width="2"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,-5; 0,5; 0,-5" dur="3s" repeatCount="indefinite"/>
+      <line x1="0" y1="8" x2="0" y2="22" class="link" stroke="#51cf66" stroke-width="2"/>
+    </g>
+  </g>
+  <text x="365" y="150" class="sublabel">Prismatic (P) — slide</text>
+
+  <!-- Spherical -->
+  <g transform="translate(347, 190)">
+    <circle cx="0" cy="0" r="7" fill="none" stroke="#4dabf7" stroke-width="2"/>
+    <circle cx="0" cy="0" r="2" fill="#4dabf7"/>
+    <!-- rotating coordinate frame to show 3-DOF rotation -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="0; 360" dur="4s" repeatCount="indefinite"/>
+      <line x1="0" y1="0" x2="6" y2="0" stroke="#ff6b6b" stroke-width="1"/>
+      <line x1="0" y1="0" x2="0" y2="-6" stroke="#51cf66" stroke-width="1"/>
+      <line x1="0" y1="0" x2="-4" y2="4" stroke="#4dabf7" stroke-width="1"/>
+    </g>
+  </g>
+  <text x="365" y="193" class="sublabel">Spherical (S) — 3-DOF</text>
+
+  <!-- Floating base -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 1,-2; -1,1; 0,0" dur="3s" repeatCount="indefinite"/>
+    <rect x="338" y="220" width="20" height="14" fill="none" stroke="#ffd93d" stroke-width="2"/>
+  </g>
+  <text x="365" y="230" class="sublabel">Floating base — humanoid</text>
+
+  <!-- DH note -->
+  <text x="415" y="258" class="sublabel" text-anchor="middle">Each joint = 1 DOF · Chain = sum of DOFs</text>
+
+  <!-- RIGHT: Software stack -->
+  <rect x="520" y="50" width="180" height="220" class="box"/>
+  <text x="610" y="72" class="label" text-anchor="middle" font-weight="bold">ROS 2 Stack (2026)</text>
+
+  <rect x="535" y="85"  width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="0s"/>
+  </rect>
+  <text x="610" y="100" class="sublabel" text-anchor="middle">Application (Behavior, AI/VLA)</text>
+
+  <rect x="535" y="112" width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="0.6s"/>
+  </rect>
+  <text x="610" y="127" class="sublabel" text-anchor="middle">MoveIt 2 · Nav2 · perception</text>
+
+  <rect x="535" y="139" width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="1.2s"/>
+  </rect>
+  <text x="610" y="154" class="sublabel" text-anchor="middle">SLAM (slam_toolbox / ORB-SLAM3)</text>
+
+  <rect x="535" y="166" width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="1.8s"/>
+  </rect>
+  <text x="610" y="181" class="sublabel" text-anchor="middle">tf2 · URDF / xacro / SDF</text>
+
+  <rect x="535" y="193" width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="2.4s"/>
+  </rect>
+  <text x="610" y="208" class="sublabel" text-anchor="middle">rclpy / rclcpp · DDS</text>
+
+  <rect x="535" y="220" width="150" height="22" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.45; 0.18" dur="4s" repeatCount="indefinite" begin="3.0s"/>
+  </rect>
+  <text x="610" y="235" class="sublabel" text-anchor="middle">Drivers · micro-ROS · firmware</text>
+
+  <text x="610" y="263" class="sublabel" text-anchor="middle">Linux (Ubuntu 24.04 / 22.04)</text>
+
+  <!-- BOTTOM: Pipeline ribbon -->
+  <rect x="20" y="290" width="680" height="125" class="box"/>
+  <text x="360" y="312" class="label" text-anchor="middle" font-weight="bold">Robot Lifecycle (per control cycle, ~100–1000 Hz)</text>
+
+  <rect x="40"  y="335" width="120" height="40" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.55; 0.18" dur="3s" repeatCount="indefinite" begin="0s"/>
+  </rect>
+  <text x="100" y="358" class="label" text-anchor="middle">SENSE</text>
+  <text x="100" y="372" class="sublabel" text-anchor="middle">IMU · cam · LiDAR</text>
+
+  <rect x="180" y="335" width="120" height="40" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.55; 0.18" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+  </rect>
+  <text x="240" y="358" class="label" text-anchor="middle">PERCEIVE</text>
+  <text x="240" y="372" class="sublabel" text-anchor="middle">SLAM · object det.</text>
+
+  <rect x="320" y="335" width="120" height="40" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.55; 0.18" dur="3s" repeatCount="indefinite" begin="1.2s"/>
+  </rect>
+  <text x="380" y="358" class="label" text-anchor="middle">PLAN</text>
+  <text x="380" y="372" class="sublabel" text-anchor="middle">Nav2 · MoveIt</text>
+
+  <rect x="460" y="335" width="120" height="40" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.55; 0.18" dur="3s" repeatCount="indefinite" begin="1.8s"/>
+  </rect>
+  <text x="520" y="358" class="label" text-anchor="middle">CONTROL</text>
+  <text x="520" y="372" class="sublabel" text-anchor="middle">PID · LQR · MPC</text>
+
+  <rect x="600" y="335" width="80"  height="40" class="stack-row">
+    <animate attributeName="opacity" values="0.18; 0.55; 0.18" dur="3s" repeatCount="indefinite" begin="2.4s"/>
+  </rect>
+  <text x="640" y="358" class="label" text-anchor="middle">ACT</text>
+  <text x="640" y="372" class="sublabel" text-anchor="middle">motors</text>
+
+  <line x1="160" y1="355" x2="180" y2="355" class="arrow" marker-end="url(#arrR)"/>
+  <line x1="300" y1="355" x2="320" y2="355" class="arrow" marker-end="url(#arrR)"/>
+  <line x1="440" y1="355" x2="460" y2="355" class="arrow" marker-end="url(#arrR)"/>
+  <line x1="580" y1="355" x2="600" y2="355" class="arrow" marker-end="url(#arrR)"/>
+
+  <text x="360" y="402" class="sublabel" text-anchor="middle">Closed loop · zero perception jitter · deterministic timing — these three constraints govern every design choice.</text>
+</svg>

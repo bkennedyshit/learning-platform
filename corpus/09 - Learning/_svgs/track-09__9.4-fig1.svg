@@ -1,0 +1,67 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="sh-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L8 5 L0 8z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .sh-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .sh-accent { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .sh-formula { font-family: 'Courier New', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .sh-surface { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .sh-ray { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; stroke-dasharray: 6 4; animation: rayFlow 1s linear infinite; }
+    @keyframes rayFlow { to { stroke-dashoffset: -20; } }
+    .sh-normal { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 4 2; }
+    .sh-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+    .sh-box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <!-- Surface -->
+  <line x1="30" y1="200" x2="250" y2="200" class="sh-surface"/>
+  <text x="140" y="220" class="sh-label">Surface Point</text>
+
+  <!-- Normal -->
+  <line x1="140" y1="200" x2="140" y2="100" class="sh-normal" marker-end="url(#sh-arrow)"/>
+  <text x="150" y="95" class="sh-label">N</text>
+
+  <!-- Light vector -->
+  <line x1="60" y1="80" x2="140" y2="200" class="sh-ray" marker-end="url(#sh-arrow)"/>
+  <text x="55" y="75" class="sh-accent">L (light)</text>
+
+  <!-- View vector -->
+  <line x1="230" y1="90" x2="140" y2="200" class="sh-ray" marker-end="url(#sh-arrow)"/>
+  <text x="240" y="85" class="sh-accent">V (view)</text>
+
+  <!-- Half vector -->
+  <line x1="140" y1="200" x2="155" y2="110" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#sh-arrow)"/>
+  <text x="168" y="108" class="sh-label" fill="var(--text-accent, #79c0ff)">H</text>
+
+  <!-- PBR Components boxes -->
+  <rect x="300" y="20" width="180" height="55" class="sh-box"/>
+  <text x="390" y="40" class="sh-accent">Diffuse (Lambert)</text>
+  <text x="390" y="58" class="sh-formula">f_d = albedo / π</text>
+  <text x="390" y="72" class="sh-formula">× max(N·L, 0)</text>
+
+  <rect x="300" y="90" width="180" height="55" class="sh-box"/>
+  <text x="390" y="110" class="sh-accent">Specular (Cook-Torrance)</text>
+  <text x="390" y="128" class="sh-formula">f_s = DFG / (4(N·L)(N·V))</text>
+  <text x="390" y="142" class="sh-formula">D=GGX, F=Schlick, G=Smith</text>
+
+  <rect x="300" y="160" width="180" height="55" class="sh-box"/>
+  <text x="390" y="180" class="sh-accent">Fresnel (Schlick)</text>
+  <text x="390" y="198" class="sh-formula">F = F₀ + (1-F₀)(1-H·V)⁵</text>
+  <text x="390" y="212" class="sh-formula">F₀ = reflectance at normal</text>
+
+  <rect x="300" y="230" width="180" height="55" class="sh-box"/>
+  <text x="390" y="250" class="sh-accent">Final Color</text>
+  <text x="390" y="268" class="sh-formula">Lo = (kd·f_d + ks·f_s) × Li × N·L</text>
+  <text x="390" y="282" class="sh-formula">+ ambient (IBL / SH)</text>
+
+  <!-- Equation summary -->
+  <rect x="510" y="50" width="175" height="100" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="597" y="72" class="sh-accent" font-size="10px">Rendering Equation</text>
+  <text x="597" y="92" class="sh-formula">Lo(ω_o) = Le +</text>
+  <text x="597" y="108" class="sh-formula">∫ f_r(ω_i,ω_o) Li(ω_i)</text>
+  <text x="597" y="124" class="sh-formula">(ω_i · n) dω_i</text>
+  <text x="597" y="142" class="sh-formula" fill="var(--text-muted, #8b949e)">— Kajiya (1986)</text>
+</svg>

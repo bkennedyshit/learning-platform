@@ -1,0 +1,112 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .boxhi { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .type  { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .infer { fill: #51cf66; opacity: 0.20; stroke: #51cf66; stroke-width: 1; }
+    .err   { fill: #ff6b6b; opacity: 0.22; stroke: #ff6b6b; stroke-width: 1; }
+    .uni   { fill: #ffd93d; opacity: 0.18; stroke: #ffd93d; stroke-width: 1; }
+    .arr   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arrhi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; fill: none; }
+  </style>
+  <defs>
+    <marker id="p4-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="p4-ahi" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Type Systems &amp; Type Checking — Hindley-Milner Inference (Chapter 29.4)</text>
+
+  <!-- TOP LEFT: type system taxonomy -->
+  <rect x="18" y="36" width="220" height="175" rx="5" class="box"/>
+  <text x="128" y="56" class="label" text-anchor="middle" font-weight="bold">Type System Axes</text>
+
+  <rect x="28" y="65" width="200" height="22" rx="3" class="type"/>
+  <text x="128" y="81" class="label" text-anchor="middle">Static vs Dynamic</text>
+  <text x="128" y="95" class="small" text-anchor="middle">C/Rust/TS = static · Python/JS = dynamic</text>
+
+  <rect x="28" y="104" width="200" height="22" rx="3" class="type"/>
+  <text x="128" y="120" class="label" text-anchor="middle">Strong vs Weak</text>
+  <text x="128" y="134" class="small" text-anchor="middle">Python = strong · C = weak (void*)</text>
+
+  <rect x="28" y="143" width="200" height="22" rx="3" class="type"/>
+  <text x="128" y="159" class="label" text-anchor="middle">Nominal vs Structural</text>
+  <text x="128" y="173" class="small" text-anchor="middle">Java=nominal · TypeScript=structural</text>
+
+  <rect x="28" y="182" width="200" height="22" rx="3" class="type"/>
+  <text x="128" y="198" class="label" text-anchor="middle">Manifest vs Inferred</text>
+  <text x="128" y="212" class="small" text-anchor="middle">Rust infers · Java requires annotation</text>
+
+  <!-- TOP MIDDLE: HM type rules -->
+  <rect x="252" y="36" width="220" height="175" rx="5" class="box"/>
+  <text x="362" y="56" class="label" text-anchor="middle" font-weight="bold">Hindley-Milner — Key Rules</text>
+
+  <rect x="262" y="68" width="200" height="130" rx="3" class="uni"/>
+  <text x="362" y="86"  class="small" text-anchor="middle">Γ ⊢ x : τ     if (x:τ) ∈ Γ   [VAR]</text>
+  <line x1="262" y1="92" x2="462" y2="92" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="362" y="108" class="small" text-anchor="middle">Γ,x:τ₁ ⊢ e:τ₂</text>
+  <text x="362" y="122" class="small" text-anchor="middle">—————————————  [ABS]</text>
+  <text x="362" y="136" class="small" text-anchor="middle">Γ ⊢ (λx.e) : τ₁→τ₂</text>
+  <line x1="262" y1="142" x2="462" y2="142" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="362" y="157" class="small" text-anchor="middle">Γ ⊢ f:τ₁→τ₂   Γ ⊢ a:τ₁</text>
+  <text x="362" y="171" class="small" text-anchor="middle">————————————————  [APP]</text>
+  <text x="362" y="185" class="small" text-anchor="middle">Γ ⊢ (f a) : τ₂</text>
+
+  <!-- TOP RIGHT: unification example -->
+  <rect x="486" y="36" width="216" height="175" rx="5" class="box"/>
+  <text x="594" y="56" class="label" text-anchor="middle" font-weight="bold">Unification Example</text>
+  <text x="594" y="70" class="small" text-anchor="middle">infer type of: let f x = x + 1</text>
+
+  <rect x="496" y="78" width="196" height="122" rx="3" class="infer"/>
+  <text x="594" y="96"  class="small" text-anchor="middle">1. x gets fresh var  α</text>
+  <text x="594" y="112" class="small" text-anchor="middle">2. (+) : int→int→int</text>
+  <text x="594" y="128" class="small" text-anchor="middle">3. unify α with int</text>
+  <text x="594" y="144" class="small" text-anchor="middle">   → α = int</text>
+  <text x="594" y="160" class="small" text-anchor="middle">4. 1 : int   ✓</text>
+  <text x="594" y="176" class="small" text-anchor="middle">5. result: f : int → int</text>
+  <text x="594" y="192" class="small" text-anchor="middle">no annotation needed!</text>
+
+  <!-- BOTTOM: type error examples + subtyping -->
+  <rect x="18" y="228" width="684" height="176" rx="5" class="box"/>
+  <text x="360" y="248" class="label" text-anchor="middle" font-weight="bold">Type Errors, Subtyping &amp; Generics</text>
+
+  <!-- Type error -->
+  <rect x="30" y="258" width="200" height="130" rx="4" class="err"/>
+  <text x="130" y="275" class="label" text-anchor="middle">Type Error Examples</text>
+  <text x="38"  y="294" class="mono">// Python (runtime error)</text>
+  <text x="38"  y="308" class="mono">"hi" + 3  # TypeError</text>
+  <text x="38"  y="328" class="mono">// TypeScript (compile error)</text>
+  <text x="38"  y="342" class="mono">let x: number = "hi"</text>
+  <text x="38"  y="356" class="mono">// Rust (borrow)</text>
+  <text x="38"  y="370" class="mono">let r = &amp;v; v.push(1);</text>
+  <text x="38"  y="384" class="mono">// cannot borrow `v`</text>
+
+  <!-- Subtyping -->
+  <rect x="244" y="258" width="200" height="130" rx="4" class="type"/>
+  <text x="344" y="275" class="label" text-anchor="middle">Subtyping (Liskov)</text>
+  <text x="252" y="294" class="small">Dog &lt;: Animal means a Dog</text>
+  <text x="252" y="308" class="small">can appear where Animal expected.</text>
+  <text x="252" y="326" class="small">Covariance: IEnumerable&lt;Dog&gt;</text>
+  <text x="252" y="340" class="small">  &lt;: IEnumerable&lt;Animal&gt; ✓</text>
+  <text x="252" y="358" class="small">Contravariance: Action&lt;Animal&gt;</text>
+  <text x="252" y="372" class="small">  &lt;: Action&lt;Dog&gt; ✓</text>
+  <text x="252" y="386" class="small">Invariance: List&lt;Dog&gt; ≠ List&lt;Animal&gt;</text>
+
+  <!-- Generics / parametric -->
+  <rect x="458" y="258" width="232" height="130" rx="4" class="uni"/>
+  <text x="574" y="275" class="label" text-anchor="middle">Generics &amp; Parametric Poly</text>
+  <text x="466" y="294" class="small">// Rust generics (monomorphised)</text>
+  <text x="466" y="308" class="mono">fn id&lt;T&gt;(x: T) → T { x }</text>
+  <text x="466" y="326" class="small">// TypeScript generics</text>
+  <text x="466" y="340" class="mono">function id&lt;T&gt;(x: T): T {</text>
+  <text x="466" y="354" class="mono">  return x; }</text>
+  <text x="466" y="372" class="small">Monomorphisation = separate copy</text>
+  <text x="466" y="386" class="small">per T at compile time (Rust/C++)</text>
+</svg>

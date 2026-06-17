@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TI-84 Style Graphing Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .calculator-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .display {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            text-align: right;
+            min-height: 120px;
+            word-wrap: break-word;
+            border: 3px solid #333;
+            font-family: 'Courier New', monospace;
+        }
+
+        .display .history {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 10px;
+            min-height: 20px;
+        }
+
+        .display .current {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .function-input {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .function-input input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .function-input input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .function-list {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .function-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .function-item:nth-child(1) { border-left-color: #ff6b6b; }
+        .function-item:nth-child(2) { border-left-color: #4ecdc4; }
+        .function-item:nth-child(3) { border-left-color: #45b7d1; }
+        .function-item:nth-child(4) { border-left-color: #f9ca24; }
+        .function-item:nth-child(5) { border-left-color: #6c5ce7; }
+
+        .function-item button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .function-item button:hover {
+            background: #ff3838;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .button {
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.number {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .button.number:hover {
+            background: #d0d0d0;
+        }
+
+        .button.operator {
+            background: #ff9500;
+            color: white;
+        }
+
+        .button.operator:hover {
+            background: #ff8000;
+        }
+
+        .button.function {
+            background: #4a90e2;
+            color: white;
+            font-size: 14px;
+        }
+
+        .button.function:hover {
+            background: #357abd;
+        }
+
+        .button.special {
+            background: #34c759;
+            color: white;
+        }
+
+        .button.special:hover {
+            background: #28a745;
+        }
+
+        .button.clear {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .button.clear:hover {
+            background: #dc2626;
+        }
+
+        .button.wide {
+            grid-column: span 2;
+        }
+
+        .graph-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .graph-controls {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .control-group input {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .graph-canvas-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            border: 3px solid #ddd;
+            overflow: hidden;
+        }
+
+        #graphCanvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        .graph-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .action-button {
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #2a5298;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+        }
+
+        h2 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        h4 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #2a5298;
+            background: white;
+            color: #2a5298;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .mode-button.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .table-view {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-view table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .table-view th {
+            background: #2a5298;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .table-view td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+        }
+
+        .table-view tr:hover {
+            background: #f0f0f0;
+        }
+
+        .storage-section {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .storage-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .storage-button {
+            padding: 10px;
+            background: #34c759;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .storage-button:hover {
+            background: #28a745;
+            transform: translateY(-2px);
+        }
+
+        .storage-button.load {
+            background: #4a90e2;
+        }
+
+        .storage-button.load:hover {
+            background: #357abd;
+        }
+
+        .storage-button.export {
+            background: #ff9500;
+        }
+
+        .storage-button.export:hover {
+            background: #ff8000;
+        }
+
+        .storage-button.clear {
+            background: #ff3b30;
+        }
+
+        .storage-button.clear:hover {
+            background: #dc2626;
+        }
+
+        .trace-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+            font-family: 'Courier New', monospace;
+        }
+
+        .trace-info.active {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator-section">
+            <h2>🧮 TI-84 Graphing Calculator</h2>
+            
+            <div class="mode-toggle">
+                <button class="mode-button active" onclick="setMode('deg')">DEG</button>
+                <button class="mode-button" onclick="setMode('rad')">RAD</button>
+                <button class="mode-button" onclick="toggleTrace()">TRACE</button>
+            </div>
+
+            <div class="display">
+                <div class="history" id="history"></div>
+                <div class="current" id="display">0</div>
+            </div>
+
+            <div class="trace-info" id="traceInfo" style="display: none;">
+                📍 Trace Mode: OFF<br>
+                Use arrow keys or click graph to trace
+            </div>
+
+            <div class="function-input">
+                <input type="text" id="functionInput" placeholder="Enter function: e.g., x^2, sin(x), 2*x+1">
+                <button class="action-button" onclick="addFunction()" style="width: 100%; margin-top: 10px;">
+                    Add to Graph
+                </button>
+                <div class="function-list" id="functionList"></div>
+            </div>
+
+            <div class="buttons-grid">
+                <!-- Row 1: Functions -->
+                <button class="button function" onclick="insertFunction('sin(')">sin</button>
+                <button class="button function" onclick="insertFunction('cos(')">cos</button>
+                <button class="button function" onclick="insertFunction('tan(')">tan</button>
+                <button class="button function" onclick="insertFunction('sqrt(')">√</button>
+                <button class="button function" onclick="insertFunction('log(')">log</button>
+
+                <!-- Row 2: More Functions -->
+                <button class="button function" onclick="insertFunction('asin(')">asin</button>
+                <button class="button function" onclick="insertFunction('acos(')">acos</button>
+                <button class="button function" onclick="insertFunction('atan(')">atan</button>
+                <button class="button function" onclick="insertValue('^')">x^y</button>
+                <button class="button function" onclick="insertFunction('ln(')">ln</button>
+
+                <!-- Row 3: Constants & Special -->
+                <button class="button special" onclick="insertValue('Math.PI')">π</button>
+                <button class="button special" onclick="insertValue('Math.E')">e</button>
+                <button class="button function" onclick="insertFunction('abs(')">|x|</button>
+                <button class="button operator" onclick="insertValue('(')">(</button>
+                <button class="button operator" onclick="insertValue(')')">)</button>
+                <!-- Row 3.5: More Functions -->
+                <button class="button function" onclick="insertValue('ans')">ANS</button>
+                <button class="button function" onclick="insertValue('EE')">EE</button>
+                <button class="button special" onclick="storeToMemory()">STO→</button>
+                <button class="button function" onclick="insertFunction('^2')" title="Square">x²</button>
+                <button class="button function" onclick="insertFunction('^-1')" title="Reciprocal">x⁻¹</button>
+                <!-- Row 4: Numbers -->
+                <button class="button number" onclick="insertValue('7')">7</button>
+                <button class="button number" onclick="insertValue('8')">8</button>
+                <button class="button number" onclick="insertValue('9')">9</button>
+                <button class="button operator" onclick="insertValue('/')">÷</button>
+                <button class="button clear" onclick="clearDisplay()">AC</button>
+
+                <!-- Row 5 -->
+                <button class="button number" onclick="insertValue('4')">4</button>
+                <button class="button number" onclick="insertValue('5')">5</button>
+                <button class="button number" onclick="insertValue('6')">6</button>
+                <button class="button operator" onclick="insertValue('*')">×</button>
+                <button class="button clear" onclick="backspace()">⌫</button>
+
+                <!-- Row 6 -->
+                <button class="button number" onclick="insertValue('1')">1</button>
+                <button class="button number" onclick="insertValue('2')">2</button>
+                <button class="button number" onclick="insertValue('3')">3</button>
+                <button class="button operator" onclick="insertValue('-')">−</button>
+                <button class="button function" onclick="insertValue('x')">x</button>
+
+                <!-- Row 7 -->
+                <button class="button number wide" onclick="insertValue('0')">0</button>
+                <button class="button number" onclick="insertValue('.')">.</button>
+                <button class="button operator" onclick="insertValue('+')">+</button>
+                <button class="button special" onclick="calculate()">=</button>
+            </div>
+            <div class="storage-section">
+                <h3 style="margin-bottom: 10px; font-size: 14px; color: #2a5298;">💾 Storage & Export</h3>
+                <div class="storage-buttons">
+                    <button class="storage-button" onclick="saveToLocal()">💾 Save Session</button>
+                    <button class="storage-button load" onclick="loadFromLocal()">📂 Load Session</button>
+                    <button class="storage-button export" onclick="exportGraphImage()">📸 Export Graph</button>
+                    <button class="storage-button clear" onclick="clearStorage()">🗑️ Clear Storage</button>
+                </div>
+            </div>        </div>
+
+        <div class="graph-section">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('graph')">📊 Graph</button>
+                <button class="tab" onclick="switchTab('table')">📋 Table</button>
+                <button class="tab" onclick="switchTab('stats')">📈 Stats</button>
+            </div>
+
+            <div id="graphTab" class="tab-content active">
+                <div class="graph-controls">
+                <div class="control-group">
+                    <label>X Min</label>
+                    <input type="number" id="xMin" value="-10" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>X Max</label>
+                    <input type="number" id="xMax" value="10" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Y Min</label>
+                    <input type="number" id="yMin" value="-10" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Y Max</label>
+                    <input type="number" id="yMax" value="10" step="0.1">
+                </div>
+            </div>
+
+            <div class="graph-canvas-container">
+                <canvas id="graphCanvas" width="900" height="600"></canvas>
+                <div class="graph-info" id="graphInfo">
+                    Move mouse over graph to see coordinates
+                </div>
+            </div>
+
+                <div class="action-buttons">
+                    <button class="action-button" onclick="plotGraph()">🔄 Redraw Graph</button>
+                    <button class="action-button" onclick="resetView()">🎯 Reset View</button>
+                    <button class="action-button" onclick="zoomIn()">🔍 Zoom In</button>
+                    <button class="action-button" onclick="zoomOut()">🔎 Zoom Out</button>
+                </div>
+            </div>
+
+            <div id="tableTab" class="tab-content">
+                <h3>📋 Value Table</h3>
+                <div style="margin: 15px 0;">
+                    <label>Table Start X: </label>
+                    <input type="number" id="tableStart" value="-5" style="width: 80px; padding: 5px;">
+                    <label style="margin-left: 15px;">Step: </label>
+                    <input type="number" id="tableStep" value="1" step="0.1" style="width: 80px; padding: 5px;">
+                    <button class="action-button" onclick="generateTable()" style="margin-left: 15px;">Generate Table</button>
+                </div>
+                <div class="table-view" id="tableView"></div>
+            </div>
+
+            <div id="statsTab" class="tab-content">
+                <h3>📈 Statistics & Analysis</h3>
+                <div class="table-view">
+                    <h4 style="margin-bottom: 10px;">Function Analysis</h4>
+                    <div id="statsContent" style="font-family: 'Courier New', monospace;">
+                        <p>Select a function and click "Analyze" below:</p>
+                        <div style="margin-top: 15px;">
+                            <select id="funcSelect" style="width: 100%; padding: 10px; margin-bottom: 10px;"></select>
+                            <button class="action-button" onclick="analyzeFunction()" style="width: 100%;">🔍 Analyze Function</button>
+                        </div>
+                        <div id="analysisResult" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = '0';
+        let history = '';
+        let angleMode = 'deg'; // 'deg' or 'rad'
+        let functions = [];
+        let memory = {};
+        let answerValue = 0;
+        let traceMode = false;
+        let traceX = 0;
+        let traceFuncIndex = 0;
+        const functionColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#96f550', '#ff8787'];
+
+        function setMode(mode) {
+            angleMode = mode;
+            document.querySelectorAll('.mode-button').forEach((btn, idx) => {
+                if (idx < 2) btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function toggleTrace() {
+            traceMode = !traceMode;
+            const info = document.getElementById('traceInfo');
+            if (traceMode) {
+                info.style.display = 'block';
+                info.classList.add('active');
+                info.innerHTML = '📍 Trace Mode: ON<br>Click on graph or use arrow keys';
+                if (functions.length > 0) {
+                    traceX = parseFloat(document.getElementById('xMin').value);
+                    updateTrace();
+                }
+            } else {
+                info.style.display = 'none';
+                info.classList.remove('active');
+                plotGraph();
+            }
+        }
+
+        function updateTrace() {
+            if (!traceMode || functions.length === 0) return;
+            
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            
+            traceX = Math.max(xMin, Math.min(xMax, traceX));
+            const y = evaluateFunction(functions[traceFuncIndex], traceX);
+            
+            plotGraph();
+            
+            // Draw trace point
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+            
+            const canvasX = ((traceX - xMin) / (xMax - xMin)) * canvas.width;
+            const canvasY = canvas.height - ((y - yMin) / (yMax - yMin)) * canvas.height;
+            
+            ctx.fillStyle = functionColors[traceFuncIndex % functionColors.length];
+            ctx.beginPath();
+            ctx.arc(canvasX, canvasY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            const info = document.getElementById('traceInfo');
+            info.innerHTML = `📍 Trace Mode: ON<br>Function ${traceFuncIndex + 1}: y = ${functions[traceFuncIndex]}<br>X = ${traceX.toFixed(4)}, Y = ${y.toFixed(4)}`;
+        }
+
+        function storeToMemory() {
+            const varName = prompt('Store to variable (A-Z):', 'A');
+            if (varName && varName.length === 1) {
+                memory[varName.toUpperCase()] = parseFloat(currentInput) || 0;
+                alert(`Stored ${currentInput} to ${varName.toUpperCase()}`);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            if (tabName === 'table') generateTable();
+            if (tabName === 'stats') updateStatsSelect();
+        }
+
+        function generateTable() {
+            const tableView = document.getElementById('tableView');
+            const start = parseFloat(document.getElementById('tableStart').value);
+            const step = parseFloat(document.getElementById('tableStep').value);
+            
+            if (functions.length === 0) {
+                tableView.innerHTML = '<p>No functions to display. Add functions first.</p>';
+                return;
+            }
+            
+            let html = '<table><thead><tr><th>X</th>';
+            functions.forEach((f, i) => {
+                html += `<th style="background: ${functionColors[i % functionColors.length]}">Y${i+1}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < 20; i++) {
+                const x = start + (i * step);
+                html += `<tr><td><strong>${x.toFixed(3)}</strong></td>`;
+                functions.forEach(f => {
+                    const y = evaluateFunction(f, x);
+                    html += `<td>${isNaN(y) ? 'ERROR' : y.toFixed(4)}</td>`;
+                });
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            tableView.innerHTML = html;
+        }
+
+        function updateStatsSelect() {
+            const select = document.getElementById('funcSelect');
+            select.innerHTML = '';
+            functions.forEach((f, i) => {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Y${i+1} = ${f}`;
+                select.appendChild(option);
+            });
+        }
+
+        function analyzeFunction() {
+            const idx = parseInt(document.getElementById('funcSelect').value);
+            if (isNaN(idx) || !functions[idx]) {
+                document.getElementById('analysisResult').innerHTML = '<p>Please add functions first.</p>';
+                return;
+            }
+            
+            const func = functions[idx];
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const step = (xMax - xMin) / 100;
+            
+            let maxY = -Infinity, minY = Infinity;
+            let maxX = xMin, minX = xMin;
+            let zeros = [];
+            let prevY = evaluateFunction(func, xMin);
+            
+            // Find min, max, and zeros
+            for (let x = xMin; x <= xMax; x += step) {
+                const y = evaluateFunction(func, x);
+                if (!isNaN(y) && isFinite(y)) {
+                    if (y > maxY) { maxY = y; maxX = x; }
+                    if (y < minY) { minY = y; minX = x; }
+                    
+                    // Check for zero crossing
+                    if (prevY * y < 0) {
+                        zeros.push(x);
+                    }
+                    prevY = y;
+                }
+            }
+            
+            let html = `
+                <div style="background: white; padding: 15px; border-radius: 5px;">
+                    <h4 style="color: #2a5298; margin-bottom: 10px;">Analysis: y = ${func}</h4>
+                    <p><strong>Maximum:</strong> Y = ${maxY.toFixed(4)} at X = ${maxX.toFixed(4)}</p>
+                    <p><strong>Minimum:</strong> Y = ${minY.toFixed(4)} at X = ${minX.toFixed(4)}</p>
+                    <p><strong>Range:</strong> [${minY.toFixed(4)}, ${maxY.toFixed(4)}]</p>
+                    <p><strong>Zero Crossings:</strong> ${zeros.length} found</p>
+                    ${zeros.length > 0 ? `<p style="font-size: 12px;">Approximate zeros: ${zeros.slice(0, 5).map(z => z.toFixed(4)).join(', ')}</p>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('analysisResult').innerHTML = html;
+        }
+
+        function insertValue(value) {
+            // Handle special values
+            if (value === 'ans') {
+                value = answerValue.toString();
+            } else if (value === 'EE') {
+                value = 'e';
+            }
+            
+            // Check for stored variables
+            if (value.length === 1 && value >= 'A' && value <= 'Z') {
+                if (memory[value] !== undefined) {
+                    value = memory[value].toString();
+                }
+            }
+            
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                currentInput += value;
+            }
+            updateDisplay();
+        }
+
+        function insertFunction(func) {
+            // Handle special functions
+            if (func === '^2') {
+                if (currentInput === '0') {
+                    currentInput = 'x^2';
+                } else {
+                    currentInput += '^2';
+                }
+            } else if (func === '^-1') {
+                if (currentInput === '0') {
+                    currentInput = 'x^-1';
+                } else {
+                    currentInput += '^-1';
+                }
+            } else {
+                if (currentInput === '0') {
+                    currentInput = func;
+                } else {
+                    currentInput += func;
+                }
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = currentInput;
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            history = '';
+            document.getElementById('history').textContent = '';
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                history = currentInput;
+                let expression = currentInput;
+                
+                // Convert trigonometric functions for angle mode
+                if (angleMode === 'deg') {
+                    expression = expression.replace(/sin\(/g, 'Math.sin(degToRad(');
+                    expression = expression.replace(/cos\(/g, 'Math.cos(degToRad(');
+                    expression = expression.replace(/tan\(/g, 'Math.tan(degToRad(');
+                    expression = expression.replace(/asin\(/g, 'radToDeg(Math.asin(');
+                    expression = expression.replace(/acos\(/g, 'radToDeg(Math.acos(');
+                    expression = expression.replace(/atan\(/g, 'radToDeg(Math.atan(');
+                } else {
+                    expression = expression.replace(/sin\(/g, 'Math.sin(');
+                    expression = expression.replace(/cos\(/g, 'Math.cos(');
+                    expression = expression.replace(/tan\(/g, 'Math.tan(');
+                    expression = expression.replace(/asin\(/g, 'Math.asin(');
+                    expression = expression.replace(/acos\(/g, 'Math.acos(');
+                    expression = expression.replace(/atan\(/g, 'Math.atan(');
+                }
+                
+                expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/ln\(/g, 'Math.log(');
+                expression = expression.replace(/abs\(/g, 'Math.abs(');
+                expression = expression.replace(/\^/g, '**');
+                
+                const result = eval(expression);
+                answerValue = result;
+                currentInput = result.toString();
+                document.getElementById('history').textContent = history + ' =';
+                updateDisplay();
+            } catch (error) {
+                currentInput = 'Error';
+                updateDisplay();
+                setTimeout(() => {
+                    currentInput = '0';
+                    updateDisplay();
+                }, 2000);
+            }
+        }
+
+        function degToRad(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function radToDeg(radians) {
+            return radians * 180 / Math.PI;
+        }
+
+        function addFunction() {
+            const input = document.getElementById('functionInput').value.trim();
+            if (input) {
+                functions.push(input);
+                updateFunctionList();
+                plotGraph();
+                document.getElementById('functionInput').value = '';
+            }
+        }
+
+        function removeFunction(index) {
+            functions.splice(index, 1);
+            updateFunctionList();
+            plotGraph();
+        }
+
+        function updateFunctionList() {
+            const list = document.getElementById('functionList');
+            list.innerHTML = '';
+            functions.forEach((func, index) => {
+                const item = document.createElement('div');
+                item.className = 'function-item';
+                item.innerHTML = `
+                    <span style="font-family: 'Courier New', monospace;">y = ${func}</span>
+                    <button onclick="removeFunction(${index})">Remove</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function evaluateFunction(funcStr, x) {
+            try {
+                let expression = funcStr.replace(/x/g, `(${x})`);
+                
+                // Handle trigonometric functions
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+                expression = expression.replace(/asin\(/g, 'Math.asin(');
+                expression = expression.replace(/acos\(/g, 'Math.acos(');
+                expression = expression.replace(/atan\(/g, 'Math.atan(');
+                expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/ln\(/g, 'Math.log(');
+                expression = expression.replace(/abs\(/g, 'Math.abs(');
+                expression = expression.replace(/pi/gi, 'Math.PI');
+                expression = expression.replace(/e(?![a-z])/gi, 'Math.E');
+                expression = expression.replace(/\^/g, '**');
+                
+                return eval(expression);
+            } catch (error) {
+                return NaN;
+            }
+        }
+
+        function plotGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+
+            const xRange = xMax - xMin;
+            const yRange = yMax - yMin;
+            const xStep = xRange / 10;
+            const yStep = yRange / 10;
+
+            // Vertical grid lines
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * width;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            // Horizontal grid lines
+            for (let i = 0; i <= 10; i++) {
+                const y = (i / 10) * height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+
+            // X-axis
+            const yZero = height - ((-yMin) / yRange) * height;
+            if (yZero >= 0 && yZero <= height) {
+                ctx.beginPath();
+                ctx.moveTo(0, yZero);
+                ctx.lineTo(width, yZero);
+                ctx.stroke();
+
+                // X-axis labels
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                for (let i = 0; i <= 10; i++) {
+                    const x = (i / 10) * width;
+                    const xVal = xMin + (i / 10) * xRange;
+                    ctx.fillText(xVal.toFixed(1), x, yZero + 15);
+                }
+            }
+
+            // Y-axis
+            const xZero = ((-xMin) / xRange) * width;
+            if (xZero >= 0 && xZero <= width) {
+                ctx.beginPath();
+                ctx.moveTo(xZero, 0);
+                ctx.lineTo(xZero, height);
+                ctx.stroke();
+
+                // Y-axis labels
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                for (let i = 0; i <= 10; i++) {
+                    const y = height - (i / 10) * height;
+                    const yVal = yMin + (i / 10) * yRange;
+                    ctx.fillText(yVal.toFixed(1), xZero - 5, y + 4);
+                }
+            }
+
+            // Plot functions
+            functions.forEach((func, index) => {
+                ctx.strokeStyle = functionColors[index % functionColors.length];
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                let firstPoint = true;
+                const steps = width * 2; // Higher resolution
+
+                for (let i = 0; i < steps; i++) {
+                    const x = xMin + (i / steps) * xRange;
+                    const y = evaluateFunction(func, x);
+
+                    if (!isNaN(y) && isFinite(y)) {
+                        const canvasX = ((x - xMin) / xRange) * width;
+                        const canvasY = height - ((y - yMin) / yRange) * height;
+
+                        if (canvasY >= -1000 && canvasY <= height + 1000) {
+                            if (firstPoint) {
+                                ctx.moveTo(canvasX, canvasY);
+                                firstPoint = false;
+                            } else {
+                                ctx.lineTo(canvasX, canvasY);
+                            }
+                        } else {
+                            firstPoint = true;
+                        }
+                    } else {
+                        firstPoint = true;
+                    }
+                }
+
+                ctx.stroke();
+            });
+        }
+
+        function resetView() {
+            document.getElementById('xMin').value = -10;
+            document.getElementById('xMax').value = 10;
+            document.getElementById('yMin').value = -10;
+            document.getElementById('yMax').value = 10;
+            plotGraph();
+        }
+
+        function zoomIn() {
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+
+            const xRange = xMax - xMin;
+            const yRange = yMax - yMin;
+
+            document.getElementById('xMin').value = (xMin + xRange * 0.25).toFixed(2);
+            document.getElementById('xMax').value = (xMax - xRange * 0.25).toFixed(2);
+            document.getElementById('yMin').value = (yMin + yRange * 0.25).toFixed(2);
+            document.getElementById('yMax').value = (yMax - yRange * 0.25).toFixed(2);
+
+            plotGraph();
+        }
+
+        function zoomOut() {
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+
+            const xRange = xMax - xMin;
+            const yRange = yMax - yMin;
+
+            document.getElementById('xMin').value = (xMin - xRange * 0.25).toFixed(2);
+            document.getElementById('xMax').value = (xMax + xRange * 0.25).toFixed(2);
+            document.getElementById('yMin').value = (yMin - yRange * 0.25).toFixed(2);
+            document.getElementById('yMax').value = (yMax + yRange * 0.25).toFixed(2);
+
+            plotGraph();
+        }
+
+        function saveToLocal() {
+            const data = {
+                functions: functions,
+                xMin: document.getElementById('xMin').value,
+                xMax: document.getElementById('xMax').value,
+                yMin: document.getElementById('yMin').value,
+                yMax: document.getElementById('yMax').value,
+                angleMode: angleMode,
+                memory: memory,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('graphCalcSession', JSON.stringify(data));
+            alert('✅ Session saved to browser storage!');
+        }
+
+        function loadFromLocal() {
+            const saved = localStorage.getItem('graphCalcSession');
+            if (!saved) {
+                alert('⚠️ No saved session found.');
+                return;
+            }
+            
+            const data = JSON.parse(saved);
+            functions = data.functions || [];
+            document.getElementById('xMin').value = data.xMin || -10;
+            document.getElementById('xMax').value = data.xMax || 10;
+            document.getElementById('yMin').value = data.yMin || -10;
+            document.getElementById('yMax').value = data.yMax || 10;
+            angleMode = data.angleMode || 'deg';
+            memory = data.memory || {};
+            
+            updateFunctionList();
+            plotGraph();
+            alert('✅ Session loaded! Saved on: ' + new Date(data.timestamp).toLocaleString());
+        }
+
+        function exportGraphImage() {
+            const canvas = document.getElementById('graphCanvas');
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            link.download = `graph_${timestamp}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('✅ Graph exported as PNG image!');
+        }
+
+        function clearStorage() {
+            if (confirm('Clear all saved data from browser storage?')) {
+                localStorage.removeItem('graphCalcSession');
+                alert('✅ Storage cleared!');
+            }
+        }
+
+        // Mouse tracking on graph
+        document.getElementById('graphCanvas').addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+
+            const xVal = xMin + (x / this.width) * (xMax - xMin);
+            const yVal = yMax - (y / this.height) * (yMax - yMin);
+
+            document.getElementById('graphInfo').innerHTML = `
+                x: ${xVal.toFixed(3)}<br>
+                y: ${yVal.toFixed(3)}
+            `;
+        });
+
+        // Click on graph to set trace point
+        document.getElementById('graphCanvas').addEventListener('click', function(e) {
+            if (!traceMode) return;
+            
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            
+            traceX = xMin + (x / this.width) * (xMax - xMin);
+            updateTrace();
+        });
+
+        // Initialize with a default function
+        functions.push('x^2');
+        functions.push('sin(x)');
+        updateFunctionList();
+        plotGraph();
+        
+        // Try to auto-load saved session
+        const autoLoad = localStorage.getItem('graphCalcSession');
+        if (autoLoad) {
+            const load = confirm('💾 Found a saved session. Load it?');
+            if (load) loadFromLocal();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' && e.target.type !== 'button') return;
+            
+            if (traceMode && functions.length > 0) {
+                const xMin = parseFloat(document.getElementById('xMin').value);
+                const xMax = parseFloat(document.getElementById('xMax').value);
+                const step = (xMax - xMin) / 100;
+                
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    traceX += step;
+                    updateTrace();
+                    return;
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    traceX -= step;
+                    updateTrace();
+                    return;
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    traceFuncIndex = (traceFuncIndex + 1) % functions.length;
+                    updateTrace();
+                    return;
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    traceFuncIndex = (traceFuncIndex - 1 + functions.length) % functions.length;
+                    updateTrace();
+                    return;
+                }
+            }
+            
+            if (e.key >= '0' && e.key <= '9') insertValue(e.key);
+            else if (e.key === '.') insertValue('.');
+            else if (e.key === '+') insertValue('+');
+            else if (e.key === '-') insertValue('-');
+            else if (e.key === '*') insertValue('*');
+            else if (e.key === '/') insertValue('/');
+            else if (e.key === '(') insertValue('(');
+            else if (e.key === ')') insertValue(')');
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                calculate();
+            }
+            else if (e.key === 'Escape') clearDisplay();
+            else if (e.key === 'Backspace' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                backspace();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="nv-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .nv-axis{stroke:var(--text-muted, #8b949e);stroke-width:1.2;fill:none}
+    .nv-vec{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none;cursor:pointer;transition:all .2s}
+    .nv-vec:hover{stroke-width:3.5;filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .nv-body{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5;cursor:pointer;transition:all .2s}
+    .nv-body:hover{r:14;fill:var(--interactive-accent, #58a6ff)}
+    .nv-lbl{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--text-normal, #c9d1d9)}
+    .nv-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .nv-trail{stroke:var(--interactive-accent, #58a6ff);stroke-width:1.5;fill:none;opacity:0.4;stroke-dasharray:600;stroke-dashoffset:600;animation:drawTrail 3s linear infinite}
+    @keyframes drawTrail{to{stroke-dashoffset:0}}
+  </style>
+  <!-- Left panel: F=dp/dt -->
+  <rect x="10" y="10" width="280" height="170" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="150" y="35" class="nv-acc" text-anchor="middle" font-size="15">Newton's Second Law</text>
+  <line x1="40" y1="140" x2="260" y2="140" class="nv-axis" marker-end="url(#nv-arrow)"/>
+  <line x1="40" y1="140" x2="40" y2="50" class="nv-axis" marker-end="url(#nv-arrow)"/>
+  <text x="265" y="155" class="nv-lbl">x</text>
+  <text x="30" y="48" class="nv-lbl">F</text>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="-20 0; 40 0; -20 0" dur="3s" repeatCount="indefinite"/>
+    <circle cx="100" cy="120" r="10" class="nv-body"/>
+    <line x1="110" y1="120" x2="160" y2="120" class="nv-vec" marker-end="url(#nv-arrow)" style="color:var(--interactive-accent, #58a6ff)">
+      <animate attributeName="x2" values="160; 240; 160" dur="3s" repeatCount="indefinite"/>
+    </line>
+    <text x="155" y="110" class="nv-acc">F = dp/dt</text>
+    <text x="85" y="100" class="nv-lbl">m</text>
+  </g>
+  <!-- Right panel: Conservation -->
+  <rect x="310" y="10" width="280" height="170" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="450" y="35" class="nv-acc" text-anchor="middle" font-size="15">Conservation Laws</text>
+  <text x="330" y="65" class="nv-lbl">ΣF_ext = 0 → dp/dt = 0</text>
+  <text x="330" y="90" class="nv-lbl">Στ_ext = 0 → dL/dt = 0</text>
+  <text x="330" y="115" class="nv-lbl">∇×F = 0 → dE/dt = 0</text>
+  <text x="330" y="150" class="nv-acc">Symmetry → Conservation</text>
+  <!-- Bottom: collision diagram with momentum arrows -->
+  <rect x="10" y="195" width="580" height="175" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="218" class="nv-acc" text-anchor="middle" font-size="14">Elastic Collision: p₁+p₂ = p₁'+p₂'</text>
+  <!-- Before collision -->
+  <text x="80" y="250" class="nv-lbl">Before:</text>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="-20 0; 20 0; -20 0" dur="2s" repeatCount="indefinite"/>
+    <circle cx="160" cy="280" r="10" class="nv-body"/>
+    <line x1="170" y1="280" x2="230" y2="280" class="nv-vec" marker-end="url(#nv-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="195" y="270" class="nv-acc">p₁</text>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="20 0; -20 0; 20 0" dur="2s" repeatCount="indefinite"/>
+    <circle cx="280" cy="280" r="10" class="nv-body"/>
+    <line x1="270" y1="280" x2="240" y2="280" class="nv-vec" marker-end="url(#nv-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="250" y="270" class="nv-acc">p₂</text>
+  </g>
+  <!-- After collision -->
+  <text x="380" y="250" class="nv-lbl">After:</text>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="20 0; -20 0; 20 0" dur="2s" repeatCount="indefinite"/>
+    <circle cx="430" cy="280" r="10" class="nv-body"/>
+    <line x1="420" y1="280" x2="390" y2="280" class="nv-vec" marker-end="url(#nv-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="400" y="270" class="nv-acc">p₁'</text>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="-20 0; 20 0; -20 0" dur="2s" repeatCount="indefinite"/>
+    <circle cx="500" cy="280" r="10" class="nv-body"/>
+    <line x1="510" y1="280" x2="560" y2="280" class="nv-vec" marker-end="url(#nv-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="535" y="270" class="nv-acc">p₂'</text>
+  </g>
+  <!-- Animated trajectory -->
+  <path d="M 160 330 Q 220 350 280 330 Q 340 310 400 330 Q 460 350 530 330" class="nv-trail"/>
+</svg>

@@ -1,0 +1,175 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#30363d" opacity="0.3"/>
+    </pattern>
+
+    <!-- Fade Vignette Gradient -->
+    <radialGradient id="vignetteGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="#0d1117" stop-opacity="0"/>
+      <stop offset="85%" stop-color="#0d1117" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: #c9d1d9; font-weight: bold; }
+    .header-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: #58a6ff; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #c9d1d9; font-weight: 500; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: #8b949e; }
+    
+    .panel { fill: #161b22; stroke: #30363d; stroke-width: 1.2; rx: 8; transition: all 0.3s ease; }
+    .panel:hover { stroke: #58a6ff; fill: #1f242c; }
+
+    /* Character & FOV styling */
+    .head { fill: #21262d; stroke: #c9d1d9; stroke-width: 2; }
+    .eye { fill: #58a6ff; }
+    .fov-normal { fill: #58a6ff; fill-opacity: 0.08; stroke: #58a6ff; stroke-dasharray: 4, 3; stroke-width: 1.2; }
+    .fov-active { fill: #ff922b; fill-opacity: 0.12; stroke: #ff922b; stroke-width: 1.5; }
+
+    /* Teleport styling */
+    .teleport-arc { fill: none; stroke: #4dabf7; stroke-width: 2; stroke-dasharray: 6, 4; }
+    .ground { stroke: #30363d; stroke-width: 2; stroke-linecap: round; }
+    .reticle { fill: none; stroke: #ffd93d; stroke-width: 2; }
+    
+    /* Utility */
+    .still-text { fill: #51cf66; font-weight: bold; }
+    .moving-text { fill: #ff922b; font-weight: bold; }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)"/>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="360" y="28" class="title" text-anchor="middle">VR Locomotion Mechanics &amp; Comfort Bounds</text>
+
+  <!-- ================= LEFT PANEL: COMFORT VIGNETTE ================= -->
+  <g transform="translate(0, 0)">
+    <!-- Boundary Card -->
+    <rect x="40" y="55" width="305" height="325" class="panel"/>
+    <text x="192.5" y="80" class="header-label" text-anchor="middle">I. Dynamic FoV Vignette</text>
+    <text x="192.5" y="98" class="sublabel" text-anchor="middle">Reduces peripheral motion (vection) to stop sickness</text>
+
+    <!-- FOV Sectors (Facing Left) -->
+    <!-- Normal FOV Wedge (110 deg) -->
+    <path d="M 230 210 L 115 125 A 140 140 0 0 0 115 295 Z" class="fov-normal" />
+    <text x="100" y="120" class="sublabel" text-anchor="end">Normal FoV (~110°)</text>
+
+    <!-- Dynamic Vignette Sector (Narrowed FOV to 60 deg during motion) -->
+    <path d="M 230 210 L 109 140 A 140 140 0 0 0 109 280 Z" class="fov-active">
+      <!-- Animate visibility / overlay size of active FOV sector -->
+      <animate attributeName="fill-opacity" values="0; 0.15; 0.15; 0; 0" keyTimes="0; 0.3; 0.7; 0.9; 1" dur="5s" repeatCount="indefinite" />
+      <animate attributeName="stroke-opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.3; 0.7; 0.9; 1" dur="5s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Head representation (Looking Left) -->
+    <circle cx="230" cy="210" r="28" class="head"/>
+    <!-- Nose (pointing left) -->
+    <path d="M 202 210 L 192 210" stroke="#c9d1d9" stroke-width="3" stroke-linecap="round" />
+    <!-- Eyes -->
+    <circle cx="212" cy="199" r="3.5" class="eye"/>
+    <circle cx="212" cy="221" r="3.5" class="eye"/>
+
+    <!-- Vignette Mask Visual Overlay -->
+    <!-- This ring contracts (stroke-width increases) to black out peripheral vision during simulated movement -->
+    <circle cx="230" cy="210" r="130" fill="none" stroke="#0d1117" stroke-width="10">
+      <animate attributeName="stroke-width" values="10; 80; 80; 10; 10" keyTimes="0; 0.3; 0.7; 0.9; 1" dur="5s" repeatCount="indefinite" />
+      <animate attributeName="stroke-opacity" values="0; 0.95; 0.95; 0; 0" keyTimes="0; 0.3; 0.7; 0.9; 1" dur="5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- State Indicators -->
+    <g transform="translate(192.5, 330)">
+      <!-- Still state -->
+      <text x="0" y="0" class="still-text" text-anchor="middle">
+        STATUS: STANDING STILL
+        <animate attributeName="opacity" values="1; 0; 0; 1; 1" keyTimes="0; 0.25; 0.75; 0.85; 1" dur="5s" repeatCount="indefinite" />
+      </text>
+      <text x="0" y="15" class="sublabel" text-anchor="middle">
+        Vignette: INACTIVE (Full FoV)
+        <animate attributeName="opacity" values="1; 0; 0; 1; 1" keyTimes="0; 0.25; 0.75; 0.85; 1" dur="5s" repeatCount="indefinite" />
+      </text>
+
+      <!-- Moving state -->
+      <text x="0" y="0" class="moving-text" text-anchor="middle" opacity="0">
+        STATUS: SMOOTH MOVING
+        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.3; 0.7; 0.8; 1" dur="5s" repeatCount="indefinite" />
+      </text>
+      <text x="0" y="15" class="sublabel" text-anchor="middle" opacity="0">
+        Vignette: ACTIVE (FoV Restricted to 60°)
+        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.3; 0.7; 0.8; 1" dur="5s" repeatCount="indefinite" />
+      </text>
+    </g>
+  </g>
+
+  <!-- ================= RIGHT PANEL: TELEPORT & SNAP-FADE ================= -->
+  <g transform="translate(375, 0)">
+    <!-- Boundary Card -->
+    <rect x="0" y="55" width="305" height="325" class="panel"/>
+    <text x="152.5" y="80" class="header-label" text-anchor="middle">II. Snap-Fade Teleportation</text>
+    <text x="152.5" y="98" class="sublabel" text-anchor="middle">Instant translation paired with brief screen blackout</text>
+
+    <!-- Ground Line -->
+    <line x1="20" y1="280" x2="285" y2="280" class="ground" />
+    <text x="30" y="300" class="sublabel">Physical Floor Plane</text>
+
+    <!-- VR Controller (Stylized) -->
+    <g transform="translate(40, 200)">
+      <!-- Handle -->
+      <rect x="0" y="0" width="10" height="35" rx="3" fill="#30363d" stroke="#8b949e" stroke-width="1" transform="rotate(15)" />
+      <!-- Tracking Ring -->
+      <ellipse cx="12" cy="-4" rx="14" ry="5" fill="none" stroke="#58a6ff" stroke-width="2" transform="rotate(15)" />
+      <!-- Laser source point is around x=10, y=-5 -->
+    </g>
+
+    <!-- Teleport Parabolic Arc -->
+    <!-- Starts at controller tip (approx 50, 195) and lands on floor at (220, 280) -->
+    <path id="teleport-path" d="M 50 195 Q 135 70 220 280" class="teleport-arc" />
+
+    <!-- Landing Reticle -->
+    <ellipse cx="220" cy="280" rx="18" ry="6" class="reticle">
+      <!-- Pulsate reticle size/color when active -->
+      <animate attributeName="stroke" values="#ffd93d; #ff922b; #ffd93d" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="rx" values="16; 20; 16" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="ry" values="5; 7; 5" dur="1.5s" repeatCount="indefinite" />
+    </ellipse>
+    <line x1="220" y1="270" x2="220" y2="290" stroke="#ffd93d" stroke-width="1.5" />
+    <line x1="202" y1="280" x2="238" y2="280" stroke="#ffd93d" stroke-width="1.5" />
+
+    <!-- Travelling Teleportation Ray Dot (SMIL motion path) -->
+    <circle r="4" fill="#ffd93d">
+      <animateMotion dur="4s" repeatCount="indefinite" path="M 50 195 Q 135 70 220 280" keyPoints="0;1" keyTimes="0;0.5" calcMode="linear" />
+      <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.5;0.51;0.99;1" dur="4s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Dynamic Screen Fade Simulation Layer -->
+    <!-- Fades out to black briefly when the user teleports, then fades back in -->
+    <rect x="15" y="115" width="275" height="235" rx="6" fill="#0d1117" opacity="0">
+      <!-- Sync: Dot reaches reticle at 2s (0.5). We trigger fade to black at 2.0s-2.2s (0.5-0.55), translate user, and fade back in by 2.8s (0.7) -->
+      <animate attributeName="opacity" values="0; 0; 0.95; 0.95; 0; 0" keyTimes="0; 0.5; 0.55; 0.70; 0.75; 1" dur="4s" repeatCount="indefinite" />
+    </rect>
+
+    <!-- In-fade overlay state labels (drawn on top of the blackout layer) -->
+    <text x="152.5" y="225" fill="#ffd93d" font-weight="bold" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" opacity="0">
+      [ BLACKOUT FADE ACTIVE ]
+      <animate attributeName="opacity" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.51; 0.55; 0.69; 0.73; 1" dur="4s" repeatCount="indefinite" />
+    </text>
+    <text x="152.5" y="242" fill="#8b949e" font-family="Inter, system-ui, sans-serif" font-size="10" text-anchor="middle" opacity="0">
+      Translating Camera to Reticle Position
+      <animate attributeName="opacity" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.51; 0.55; 0.69; 0.73; 1" dur="4s" repeatCount="indefinite" />
+    </text>
+
+    <!-- Teleport Timeline Label -->
+    <text x="152.5" y="340" class="sublabel" text-anchor="middle">Timeline: Raycast → Landing Reticle → Snap-Fade (~150ms)</text>
+  </g>
+
+  <!-- Footer explanation -->
+  <text x="360" y="415" class="sublabel" text-anchor="middle">VR comfort relies on narrowing FOV during continuous motion or using snap-fade transitions to bypass vestibular conflict.</text>
+</svg>

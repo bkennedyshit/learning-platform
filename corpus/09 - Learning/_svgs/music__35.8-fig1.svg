@@ -1,0 +1,94 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .ai-box{
+      fill:var(--background-secondary,#161b22);
+      stroke:var(--interactive-accent,#58a6ff);
+      stroke-width:1.4;
+      animation: cyber-glow 3s infinite ease-in-out;
+    }
+    .ai-box-1 { animation-delay: 0s; }
+    .ai-box-2 { animation-delay: 1s; }
+    .ai-box-3 { animation-delay: 2s; }
+
+    @keyframes cyber-glow {
+      0%, 100% {
+        stroke: var(--interactive-accent,#58a6ff);
+        stroke-width: 1.4;
+      }
+      50% {
+        stroke: #ffd93d;
+        stroke-width: 1.8;
+      }
+    }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">35.8 — Generative Music &amp; AI Audio: L-Systems, Markov, MusicGen &amp; AudioCraft</text>
+  <!-- Generative techniques -->
+  <rect x="20" y="35" width="225" height="200" class="box" rx="4"/>
+  <text x="122" y="52" class="label" text-anchor="middle" font-weight="bold">Generative Techniques</text>
+  <text x="30" y="68" class="sub" font-weight="bold">Rule-based:</text>
+  <text x="30" y="82" class="sub">L-Systems: recursive rewriting rules</text>
+  <text x="30" y="94" class="sub">→ branch structures → rhythmic patterns</text>
+  <text x="30" y="106" class="sub">Cellular automata: Conway-style rhythm grids</text>
+  <text x="30" y="120" class="sub" font-weight="bold">Stochastic:</text>
+  <text x="30" y="134" class="sub">Markov chains: note transitions from corpus</text>
+  <text x="30" y="146" class="sub">State n → next note weighted by freq table</text>
+  <text x="30" y="158" class="sub">Higher-order Markov = more coherence</text>
+  <text x="30" y="170" class="sub" font-weight="bold">Physical modelling:</text>
+  <text x="30" y="182" class="sub">Karplus-Strong: plucked string synthesis</text>
+  <text x="30" y="194" class="sub">Waveguide: resonators, tubes, plates</text>
+  <text x="30" y="208" class="sub">FM (frequency modulation): DX7 style</text>
+  <text x="30" y="220" class="sub">Operator ratio = harmonic content</text>
+  <!-- AI audio models -->
+  <rect x="260" y="35" width="230" height="200" class="box" rx="4"/>
+  <text x="375" y="52" class="label" text-anchor="middle" font-weight="bold">AI Audio Models (2026)</text>
+  <rect x="268" y="60" width="214" height="30" class="ai-box ai-box-1" rx="3"/>
+  <text x="375" y="78" class="sub" text-anchor="middle" font-weight="bold">Meta AudioCraft / MusicGen</text>
+  <text x="270" y="98" class="sub">Text prompt → 30-sec stereo audio</text>
+  <text x="270" y="110" class="sub">Open weights, local GPU possible</text>
+  <rect x="268" y="122" width="214" height="30" class="ai-box ai-box-2" rx="3"/>
+  <text x="375" y="140" class="sub" text-anchor="middle" font-weight="bold">Stable Audio Open (Stability AI)</text>
+  <text x="270" y="157" class="sub">44.1kHz stereo, 3-min generation</text>
+  <text x="270" y="169" class="sub">Open weights (Apache 2.0)</text>
+  <rect x="268" y="182" width="214" height="30" class="ai-box ai-box-3" rx="3"/>
+  <text x="375" y="200" class="sub" text-anchor="middle" font-weight="bold">Suno AI / Udio</text>
+  <text x="270" y="218" class="sub">Text → full song with vocals/lyrics</text>
+  <text x="270" y="230" class="sub">API available, closed weights</text>
+  <!-- Bespoke synth / live coding -->
+  <rect x="505" y="35" width="195" height="200" class="box" rx="4"/>
+  <text x="602" y="52" class="label" text-anchor="middle" font-weight="bold">Live Coding &amp; Modular</text>
+  <text x="515" y="68" class="sub" font-weight="bold">Bespoke Synth (free, open):</text>
+  <text x="515" y="82" class="sub">Visual patch-cable modular DAW</text>
+  <text x="515" y="94" class="sub">Python scripting inside patches</text>
+  <text x="515" y="106" class="sub">bespokesynth.com — free download</text>
+  <text x="515" y="120" class="sub" font-weight="bold">TidalCycles (free, Haskell):</text>
+  <text x="515" y="134" class="sub">Algorithmic rhythm patterns as code</text>
+  <text x="515" y="146" class="sub">d1 $ sound "bd sn hh" # speed 2</text>
+  <text x="515" y="160" class="sub" font-weight="bold">SuperCollider (free, open):</text>
+  <text x="515" y="174" class="sub">Low-level audio programming language</text>
+  <text x="515" y="186" class="sub">{ SinOsc.ar(440) * 0.1 }.play</text>
+  <text x="515" y="200" class="sub" font-weight="bold">VCV Rack 2 (free, open-source):</text>
+  <text x="515" y="212" class="sub">Eurorack modular simulation</text>
+  <text x="515" y="226" class="sub">600+ free modules, CV patching</text>
+  <!-- Bottom: Python generative music + prompt engineering for audio -->
+  <rect x="20" y="248" width="680" height="155" class="box" rx="4"/>
+  <text x="360" y="265" class="label" text-anchor="middle" font-weight="bold">Python Generative Music &amp; AI Prompt Engineering for Audio</text>
+  <text x="30" y="282" class="sub" font-weight="bold">Markov melody generator (Python):</text>
+  <text x="30" y="298" class="mono">from midiutil import MIDIFile  # pip install midiutil</text>
+  <text x="30" y="312" class="mono">import random</text>
+  <text x="30" y="326" class="mono">scale = [60,62,64,65,67,69,71,72]  # C major MIDI notes</text>
+  <text x="30" y="340" class="mono">notes = [random.choice(scale) for _ in range(32)]  # Markov-0 = random</text>
+  <text x="30" y="354" class="mono">midi = MIDIFile(1); [midi.addNote(0,0,n,i*0.5,0.5,80) for i,n in enumerate(notes)]</text>
+  <text x="360" y="282" class="sub" font-weight="bold">MusicGen prompt engineering tips:</text>
+  <text x="360" y="298" class="sub">• Be specific: "lo-fi hip hop, 90bpm, vinyl crackle, mellow piano, jazzy chords"</text>
+  <text x="360" y="312" class="sub">• Include instruments + mood + tempo + style: "dark techno, 130bpm, pulsing 808, industrial"</text>
+  <text x="360" y="326" class="sub">• For continuation: provide 3-sec audio prompt → model extends it (melodic continuity)</text>
+  <text x="360" y="344" class="sub" font-weight="bold">Bridges to your tracks:</text>
+  <text x="360" y="358" class="sub">Track 32 (DSP): FFT, filters, convolution = the math under all synthesis</text>
+  <text x="360" y="372" class="sub">Track 05 (AI): fine-tune MusicGen on your style, build AI music tools</text>
+  <text x="360" y="386" class="sub">Track 04 (Game Dev): adaptive game soundtracks, procedural SFX generation</text>
+</svg>

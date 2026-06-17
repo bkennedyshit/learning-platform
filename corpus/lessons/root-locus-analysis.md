@@ -1,0 +1,1073 @@
+---
+title: "Root Locus Analysis"
+subject: "Control Theory & Systems Engineering"
+catalog: advanced
+audience_tier: higher-education
+chapter: "11.5"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 11.5 — Root Locus Analysis
+
+> *"The root locus method provides a graphical picture of how the closed-loop poles migrate through the s-plane as a single parameter — typically gain — varies from zero to infinity."*
+> — Walter R. Evans (1948)
+
+The root locus is one of the most powerful tools in classical control design. It shows the complete trajectory of every closed-loop pole as gain $K$ sweeps from $0$ to $\infty$, revealing exactly when the system transitions from stable to unstable, and how transient performance changes with gain.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Sketch the root locus for any rational open-loop transfer function using Evans' rules.
+2. Determine breakaway/break-in points on the real axis.
+3. Compute asymptote angles and centroid for branches going to infinity.
+4. Find the gain $K$ at any point on the locus using the magnitude criterion.
+5. Determine imaginary axis crossings (stability boundaries).
+6. Use root locus to design gain for specified damping ratio or settling time.
+
+---
+
+## 🖼️ Visual Anchor — Root Locus Plot
+
+![math-11__11.5-fig1](math-11__11.5-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 11.5.1 — Root Locus
+
+The **root locus** is the set of all points in the $s$-plane that satisfy the characteristic equation $1 + KG(s)H(s) = 0$ as $K$ varies from $0$ to $+\infty$.
+
+Equivalently, it is the locus of closed-loop poles as gain $K$ varies.
+
+### Definition 11.5.2 — Angle and Magnitude Conditions
+
+A point $s_0$ lies on the root locus if and only if:
+
+**Angle condition:**
+
+$$
+\angle G(s_0)H(s_0) = (2k+1) \times 180°, \quad k = 0, \pm 1, \pm 2, \ldots
+$$
+
+**Magnitude condition** (gives the value of $K$ at that point):
+
+$$
+K = \frac{1}{|G(s_0)H(s_0)|}
+$$
+
+### Definition 11.5.3 — Breakaway and Break-in Points
+
+**Breakaway point**: Where two or more locus branches depart from the real axis into the complex plane (poles coalesce then split).
+
+**Break-in point**: Where complex branches return to the real axis.
+
+Found by solving $\dfrac{dK}{ds} = 0$ where $K = -\dfrac{1}{G(s)H(s)}$ on the real axis.
+
+### Definition 11.5.4 — Asymptotes
+
+For $n$ poles and $m$ zeros ($n > m$), as $K \to \infty$, $(n-m)$ branches go to infinity along asymptotes with:
+
+**Angles:**
+
+$$
+\theta_k = \frac{(2k+1) \times 180°}{n - m}, \quad k = 0, 1, \ldots, n-m-1
+$$
+
+**Centroid** (intersection point on real axis):
+
+$$
+\sigma_a = \frac{\sum \text{poles} - \sum \text{zeros}}{n - m}
+$$
+
+### Definition 11.5.5 — Departure and Arrival Angles
+
+**Departure angle** from a complex pole $p_i$:
+
+$$
+\theta_d = 180° - \sum_{j \neq i} \angle(p_i - p_j) + \sum_k \angle(p_i - z_k)
+$$
+
+**Arrival angle** at a complex zero $z_i$:
+
+$$
+\theta_a = 180° + \sum_j \angle(z_i - p_j) - \sum_{k \neq i} \angle(z_i - z_k)
+$$
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 11.5.A1 — Starting and Ending Points
+
+The root locus **starts** ($K = 0$) at the open-loop poles and **ends** ($K \to \infty$) at the open-loop zeros. If there are more poles than zeros ($n > m$), the extra $(n-m)$ branches go to infinity along the asymptotes.
+
+### Axiom 11.5.A2 — Symmetry
+
+The root locus is symmetric about the real axis (since complex roots of polynomials with real coefficients come in conjugate pairs).
+
+### Axiom 11.5.A3 — Real Axis Segments
+
+A point on the real axis belongs to the root locus if and only if the total number of open-loop poles and zeros to its **right** is **odd**.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 11.5.1 — Number of Branches
+
+The root locus has exactly $n$ branches (one for each closed-loop pole), where $n$ is the order of the characteristic polynomial.
+
+### Lemma 11.5.2 — Breakaway Point Computation
+
+On the real axis between two adjacent poles (with no zeros between them), the breakaway point $\sigma_b$ satisfies:
+
+$$
+\frac{dK}{ds}\bigg|_{s=\sigma_b} = 0 \quad \text{where } K = -\frac{D(s)}{N(s)}
+$$
+
+Equivalently: $\sum_{i=1}^n \dfrac{1}{\sigma_b - p_i} = \sum_{j=1}^m \dfrac{1}{\sigma_b - z_j}$
+
+### Lemma 11.5.3 — Imaginary Axis Crossing
+
+The gain $K$ at which the root locus crosses the imaginary axis can be found by:
+1. Substituting $s = j\omega$ into the characteristic equation
+2. Separating real and imaginary parts
+3. Solving the two equations for $K$ and $\omega$
+
+Alternatively, use the Routh-Hurwitz criterion to find the critical $K$.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 11.5.1 — Evans' Root Locus Construction Rules (Complete Set)
+
+For $1 + K\dfrac{N(s)}{D(s)} = 0$ with $n$ poles and $m$ zeros:
+
+| Rule | Description |
+|:---:|:---|
+| 1 | $n$ branches, starting at poles ($K=0$), ending at zeros ($K=\infty$) |
+| 2 | Symmetric about real axis |
+| 3 | Real axis: to the right of an odd count of real poles+zeros |
+| 4 | Asymptotes: $(n-m)$ lines at angles $\theta_k = (2k+1)\cdot 180°/(n-m)$ |
+| 5 | Centroid: $\sigma_a = (\sum p_i - \sum z_j)/(n-m)$ |
+| 6 | Breakaway/break-in: solve $dK/ds = 0$ |
+| 7 | Departure angle from complex pole: $\theta_d = 180° - \sum\angle(\text{other poles}) + \sum\angle(\text{zeros})$ |
+| 8 | Arrival angle at complex zero: $\theta_a = 180° + \sum\angle(\text{poles}) - \sum\angle(\text{other zeros})$ |
+| 9 | $j\omega$ crossing: Routh array or substitute $s = j\omega$ |
+
+### Theorem 11.5.2 — Gain at Any Point on the Locus
+
+At any point $s_0$ on the root locus:
+
+$$
+K = \frac{\prod_{i=1}^n |s_0 - p_i|}{\prod_{j=1}^m |s_0 - z_j|}
+$$
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 — Derivation of Asymptote Angles
+
+For large $|s|$, the open-loop transfer function behaves as:
+
+$$
+G(s)H(s) \approx \frac{1}{s^{n-m}} \quad \text{(leading behavior)}
+$$
+
+The angle condition requires:
+
+$$
+\angle\frac{1}{s^{n-m}} = (2k+1) \times 180°
+$$
+
+$$
+-(n-m)\angle s = (2k+1) \times 180°
+$$
+
+$$
+\angle s = \frac{(2k+1) \times 180°}{n-m}
+$$
+
+### 5.2 — Derivation of Centroid Formula
+
+The centroid is where the asymptotes intersect the real axis. For large $|s|$ along an asymptote at angle $\theta$, write $s = \sigma_a + Re^{j\theta}$ with $R \to \infty$.
+
+The characteristic equation $D(s) + KN(s) = 0$ can be written:
+
+$$
+(s-p_1)(s-p_2)\cdots(s-p_n) + K(s-z_1)\cdots(s-z_m) = 0
+$$
+
+For large $s$: $s^n + (-\sum p_i)s^{n-1} + \cdots + K[s^m + \cdots] = 0$
+
+The $(n-m)$ asymptotic roots satisfy $s^{n-m} + K = 0$ after the substitution $s \to s - \sigma_a$. Matching the $s^{n-m-1}$ coefficient:
+
+$$
+\sigma_a = \frac{\sum_{i=1}^n p_i - \sum_{j=1}^m z_j}{n - m}
+$$
+
+### 5.3 — Breakaway Point for $G(s) = \dfrac{1}{s(s+1)(s+3)}$
+
+$K = -s(s+1)(s+3) = -(s^3 + 4s^2 + 3s)$ on the real-axis locus.
+
+$$
+\frac{dK}{ds} = -(3s^2 + 8s + 3) = 0
+$$
+
+$$
+s = \frac{-8 \pm \sqrt{64 - 36}}{6} = \frac{-8 \pm \sqrt{28}}{6} = \frac{-8 \pm 5.29}{6}
+$$
+
+$$
+s_1 = \frac{-2.71}{6} = -0.451, \quad s_2 = \frac{-13.29}{6} = -2.215
+$$
+
+Check which points lie on the real-axis locus:
+- Between $s = 0$ and $s = -1$: $s_1 = -0.451$ ✓ (breakaway point)
+- Between $s = -1$ and $s = -3$: $s_2 = -2.215$ — but this segment has an even count of poles/zeros to the right (2: at $0$ and $-1$), so it's NOT on the locus. ✗
+
+Only $s = -0.451$ is a valid breakaway point.
+
+### 5.4 — Imaginary Axis Crossing for $G(s) = \dfrac{K}{s(s+1)(s+3)}$
+
+Characteristic equation: $s^3 + 4s^2 + 3s + K = 0$
+
+Substitute $s = j\omega$:
+
+$$
+(j\omega)^3 + 4(j\omega)^2 + 3(j\omega) + K = 0
+$$
+
+$$
+-j\omega^3 - 4\omega^2 + 3j\omega + K = 0
+$$
+
+Separate real and imaginary parts:
+
+**Real:** $-4\omega^2 + K = 0 \implies K = 4\omega^2$
+
+**Imaginary:** $-\omega^3 + 3\omega = 0 \implies \omega(\omega^2 - 3) = 0$
+
+Solutions: $\omega = 0$ (trivial, $K = 0$) or $\omega = \sqrt{3}$
+
+At $\omega = \sqrt{3}$: $K = 4(3) = 12$
+
+**The root locus crosses the imaginary axis at $s = \pm j\sqrt{3}$ when $K = 12$.**
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 11.5.1 — Complete Root Locus Sketch
+
+Sketch the root locus for $G(s)H(s) = \dfrac{K}{s(s+2)(s+4)}$.
+
+**Step 1 — Poles and zeros:** Poles at $s = 0, -2, -4$. No finite zeros. $n = 3$, $m = 0$.
+
+**Step 2 — Real axis segments:** To the right of an odd number of poles/zeros:
+- Right of $s = 0$: 0 poles to right → even → NOT on locus
+- Between $0$ and $-2$: 1 pole to right ($s=0$) → odd → ON locus ✓
+- Between $-2$ and $-4$: 2 poles to right → even → NOT on locus
+- Left of $-4$: 3 poles to right → odd → ON locus ✓
+
+**Step 3 — Asymptotes:** $n - m = 3$ asymptotes.
+
+Angles: $\theta_0 = 60°$, $\theta_1 = 180°$, $\theta_2 = 300°$
+
+Centroid: $\sigma_a = \dfrac{0 + (-2) + (-4)}{3} = -2$
+
+**Step 4 — Breakaway point:** On segment $[-2, 0]$:
+
+$K = -s(s+2)(s+4)$, $\dfrac{dK}{ds} = -(3s^2 + 12s + 8) = 0$
+
+$s = \dfrac{-12 \pm \sqrt{144-96}}{6} = \dfrac{-12 \pm 6.93}{6}$
+
+$s_1 = -0.845$ (between $0$ and $-2$ ✓), $s_2 = -3.15$ (not on locus segment)
+
+**Step 5 — $j\omega$ crossing:** Char. eq.: $s^3 + 6s^2 + 8s + K = 0$
+
+Routh array $s^1$ row: $\dfrac{48 - K}{6} > 0 \implies K < 48$
+
+At $K = 48$: auxiliary polynomial $6s^2 + 48 = 0 \implies s = \pm 2j\sqrt{2}$
+
+**Summary:** Stable for $0 < K < 48$. Crosses $j\omega$ axis at $\pm 2j\sqrt{2} \approx \pm 2.83j$.
+
+---
+
+### Example 11.5.2 — Root Locus Design for Specified Damping
+
+For $G(s) = \dfrac{K}{s(s+4)}$ with unity feedback, find $K$ for $\zeta = 0.5$.
+
+**Step 1 — Desired pole angle:** $\theta = \arccos(\zeta) = \arccos(0.5) = 60°$ from negative real axis.
+
+**Step 2 — The root locus for this system:** Poles at $s = 0, -4$. Real axis locus between $0$ and $-4$. Breakaway at $s = -2$. Two branches go to $\pm j\infty$ along $\pm 90°$ asymptotes from centroid $\sigma_a = -2$.
+
+**Step 3 — Find intersection with $\zeta = 0.5$ line:**
+
+The $\zeta = 0.5$ line from origin has angle $180° - 60° = 120°$ (in upper half-plane).
+
+Points on this line: $s = -\sigma + j\sigma\tan(60°) = -\sigma + j\sigma\sqrt{3}$ where $\sigma > 0$.
+
+**Step 4 — Apply angle condition:**
+
+$$
+\angle G(s) = \angle\frac{1}{s(s+4)} = -\angle s - \angle(s+4) = -(180° - 60°) - \angle(s+4)
+$$
+
+Wait — let's use the magnitude condition directly. The characteristic equation is $s^2 + 4s + K = 0$.
+
+For $\zeta = 0.5$: comparing with $s^2 + 2\zeta\omega_n s + \omega_n^2$:
+- $2\zeta\omega_n = 4 \implies \omega_n = 4$
+- $K = \omega_n^2 = 16$
+
+**Poles at:** $s = -2 \pm j2\sqrt{3} \approx -2 \pm 3.46j$
+
+**Verify:** $\zeta = \sigma/\omega_n = 2/4 = 0.5$ ✓
+
+---
+
+### Example 11.5.3 — Root Locus with a Zero (Lead Compensation)
+
+$G(s)H(s) = \dfrac{K(s+2)}{s(s+1)(s+5)}$
+
+**Poles:** $s = 0, -1, -5$. **Zero:** $s = -2$. $n = 3$, $m = 1$.
+
+**Asymptotes:** $n - m = 2$. Angles: $90°, 270°$. Centroid: $\sigma_a = \dfrac{(0-1-5)-(-2)}{2} = \dfrac{-4}{2} = -2$
+
+**Real axis locus:**
+- Between $0$ and $-1$: 1 pole to right → ON ✓
+- Between $-1$ and $-2$: 2 poles to right → NOT on locus
+- Between $-2$ and $-5$: 2 poles + 1 zero to right = 3 → odd → ON ✓
+- Left of $-5$: 3 poles + 1 zero = 4 → even → NOT on locus
+
+**Breakaway:** Between $0$ and $-1$. Solve $\dfrac{d}{ds}\left[\dfrac{-s(s+1)(s+5)}{s+2}\right] = 0$.
+
+**Key insight:** The zero at $s = -2$ "attracts" one branch. Only 2 branches go to infinity (along $90°/270°$ from $\sigma_a = -2$). The third branch terminates at the zero $s = -2$.
+
+---
+
+### Example 11.5.4 — Departure Angle from Complex Poles
+
+$G(s)H(s) = \dfrac{K}{(s+1+j)(s+1-j)(s+3)}$
+
+Poles: $p_1 = -1+j$, $p_2 = -1-j$, $p_3 = -3$. No zeros.
+
+**Departure angle from $p_1 = -1+j$:**
+
+$$
+\theta_d = 180° - [\angle(p_1 - p_2) + \angle(p_1 - p_3)]
+$$
+
+$p_1 - p_2 = (-1+j) - (-1-j) = 2j$ → $\angle = 90°$
+
+$p_1 - p_3 = (-1+j) - (-3) = 2+j$ → $\angle = \arctan(1/2) = 26.6°$
+
+$$
+\theta_d = 180° - (90° + 26.6°) = 63.4°
+$$
+
+By symmetry, departure from $p_2$ is at $-63.4°$.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [11.4 - Stability & Routh-Hurwitz Criterion](11.4---Stability-&-Routh-Hurwitz-Criterion) — Stability boundaries match $j\omega$ crossings
+- [11.6 - Frequency Response - Bode & Nyquist](11.6---Frequency-Response---Bode-&-Nyquist) — Frequency-domain complement to root locus
+- [11.3 - Time Domain System Response](11.3---Time-Domain-System-Response) — Pole locations → transient specs
+- [11.7 - PID Controller Design](11.7---PID-Controller-Design) — Using root locus to tune PID gains
+
+### External Resources
+- **Åström & Murray**, *Feedback Systems* — Chapter 12: Frequency Domain Design
+- **MIT OCW 16.30** — Lecture 9: Root Locus
+- **Brian Douglas** — [Root Locus](https://www.youtube.com/watch?v=CRvVDoQJjYI) (YouTube)
+- **Franklin, Powell & Emami-Naeini**, *Feedback Control of Dynamic Systems* — Chapter 5
+
+---
+
+*Next: [11.6 - Frequency Response - Bode & Nyquist](11.6---Frequency-Response---Bode-&-Nyquist) →*
+
+
+
+---
+
+## 📚 Appendix — Extended Root Locus Examples
+
+### A.1 — Root Locus with Two Zeros (Lag-Lead Compensation)
+
+$G(s)H(s) = \dfrac{K(s+1)(s+3)}{s(s+2)(s+4)(s+6)}$
+
+**Parameters:** $n = 4$ poles, $m = 2$ zeros. $n - m = 2$ asymptotes.
+
+**Asymptote angles:** $\theta_0 = 90°$, $\theta_1 = 270°$
+
+**Centroid:** $\sigma_a = \dfrac{(0-2-4-6) - (-1-3)}{4-2} = \dfrac{-12+4}{2} = -4$
+
+**Real-axis segments** (odd count of poles+zeros to the right):
+- Between $0$ and $-1$: 1 pole (at 0) → ON ✓
+- Between $-1$ and $-2$: 1 pole + 1 zero = 2 → NOT on locus
+- Between $-2$ and $-3$: 2 poles + 1 zero = 3 → ON ✓
+- Between $-3$ and $-4$: 2 poles + 2 zeros = 4 → NOT on locus
+- Between $-4$ and $-6$: 3 poles + 2 zeros = 5 → ON ✓
+- Left of $-6$: 4 poles + 2 zeros = 6 → NOT on locus
+
+**Key insight:** Two branches start at poles and end at the two finite zeros. The other two branches go to infinity along the $90°/270°$ asymptotes from centroid $\sigma_a = -4$.
+
+---
+
+### A.2 — Root Locus for Non-Minimum Phase System
+
+$G(s)H(s) = \dfrac{K(s-2)}{s(s+1)(s+3)}$
+
+**RHP zero at $s = +2$** (non-minimum phase).
+
+$n = 3$, $m = 1$. Asymptotes: $n-m = 2$, angles $90°, 270°$.
+
+Centroid: $\sigma_a = \dfrac{(0-1-3) - (2)}{2} = \dfrac{-6}{2} = -3$
+
+**Real-axis segments:**
+- Right of $+2$: 0 poles + 0 zeros = 0 → NOT on locus
+- Between $+2$ and $0$: 1 zero → ON ✓ (one branch goes from pole at $0$ to zero at $+2$!)
+- Between $0$ and $-1$: 1 pole + 1 zero = 2 → NOT on locus
+- Between $-1$ and $-3$: 2 poles + 1 zero = 3 → ON ✓
+- Left of $-3$: 3 poles + 1 zero = 4 → NOT on locus
+
+**Critical observation:** One branch of the root locus goes from the pole at $s = 0$ **rightward** to the zero at $s = +2$. This means for any $K > 0$, there is always one closed-loop pole in the RHP. **The system is unstable for all positive gains!**
+
+This is characteristic of non-minimum phase systems with more RHP zeros than RHP poles.
+
+---
+
+### A.3 — Complementary Root Locus ($K < 0$)
+
+For negative gain ($K$ from $0$ to $-\infty$), the angle condition becomes:
+
+$$
+\angle G(s_0)H(s_0) = 2k \times 180° = 0°, \pm 360°, \ldots
+$$
+
+**Real-axis rule reversal:** A point is on the complementary root locus if the total number of poles and zeros to its right is **even** (including zero).
+
+**Asymptote angles:** $\theta_k = \dfrac{2k \times 180°}{n-m}$
+
+**Example:** $G(s) = \dfrac{K}{s(s+2)}$ with $K < 0$.
+
+Complementary locus: real axis segments where even count to right:
+- Right of $0$: 0 → even → ON ✓
+- Between $0$ and $-2$: 1 → odd → NOT on locus
+- Left of $-2$: 2 → even → ON ✓
+
+Branches go from poles at $0$ and $-2$ outward along the real axis (one to $+\infty$, one to $-\infty$). The system is always unstable for $K < 0$ (one pole in RHP).
+
+---
+
+### A.4 — Root Locus Design: Adding a Zero for Stability Improvement
+
+**Original system:** $G(s) = \dfrac{K}{s(s+1)(s+5)}$. Becomes unstable at $K = 30$ (from Routh).
+
+**Add a zero at $s = -2$** (lead compensator): $G_c(s) = \dfrac{K(s+2)}{s(s+1)(s+5)}$
+
+New asymptotes: $n-m = 2$, angles $90°, 270°$, centroid $\sigma_a = \dfrac{(0-1-5)-(-2)}{2} = -2$
+
+The asymptotes are now vertical lines from $\sigma_a = -2$, meaning branches go to $\pm j\infty$ from $s = -2$. The system remains stable for **all** $K > 0$ (no $j\omega$-axis crossing)!
+
+**Verification via Routh:** Char. eq.: $s^3 + 6s^2 + (5+K)s + 2K = 0$
+
+$s^1$ entry: $\dfrac{6(5+K) - 2K}{6} = \dfrac{30+4K}{6} > 0$ for all $K > 0$ ✓
+
+**Conclusion:** A single zero can dramatically improve stability margins.
+
+---
+
+### A.5 — Gain Selection from Root Locus (Magnitude Criterion)
+
+For $G(s) = \dfrac{K}{s(s+2)(s+4)}$, find $K$ that places a closed-loop pole at $s = -1 + j2$.
+
+**Magnitude criterion:**
+
+$$
+K = |s| \cdot |s+2| \cdot |s+4| \bigg|_{s=-1+j2}
+$$
+
+Compute each distance:
+- $|s| = |-1+j2| = \sqrt{1+4} = \sqrt{5}$
+- $|s+2| = |1+j2| = \sqrt{1+4} = \sqrt{5}$
+- $|s+4| = |3+j2| = \sqrt{9+4} = \sqrt{13}$
+
+$$
+K = \sqrt{5} \cdot \sqrt{5} \cdot \sqrt{13} = 5\sqrt{13} \approx 18.03
+$$
+
+**Verify angle condition:**
+
+$$
+\angle G(-1+j2) = -\angle(-1+j2) - \angle(1+j2) - \angle(3+j2)
+$$
+
+$$
+= -(180°-\arctan 2) - \arctan 2 - \arctan(2/3)
+$$
+
+$$
+= -(180°-63.4°) - 63.4° - 33.7° = -116.6° - 63.4° - 33.7° = -213.7°
+$$
+
+Hmm, that's $-213.7° = -180° - 33.7°$. Let me recompute:
+
+$\angle(-1+j2)$: point is in Q2, angle from positive real = $180° - \arctan(2/1) = 180° - 63.4° = 116.6°$
+
+$\angle(1+j2) = \arctan(2/1) = 63.4°$
+
+$\angle(3+j2) = \arctan(2/3) = 33.7°$
+
+Total: $-(116.6° + 63.4° + 33.7°) = -213.7° \equiv -213.7° + 360° = 146.3°$
+
+This doesn't equal $-180°$, so $s = -1+j2$ is NOT exactly on the locus. The actual locus point near here would need to be found by trial. This illustrates that the magnitude criterion only applies at points already verified to satisfy the angle condition.
+
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Problem 11.5.E1 — Complete Root Locus Construction for $G(s)H(s) = \dfrac{K(s+2)}{s(s+1)(s+5)}$
+
+> **Problem:** Construct the complete root locus for the open-loop transfer function:
+>
+> $$G(s)H(s) = \frac{K(s+2)}{s(s+1)(s+5)}$$
+>
+> Apply all root locus rules: real-axis segments, number of branches, asymptotes, breakaway/break-in points, $j\omega$-axis crossings, and departure/arrival angles.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Identify Poles and Zeros
+
+**Open-loop poles** ($n = 3$): $s = 0, -1, -5$
+
+**Open-loop zeros** ($m = 1$): $s = -2$
+
+**Number of branches:** $\max(n, m) = 3$
+
+**Branches ending at finite zeros:** $m = 1$ (one branch ends at $s = -2$)
+
+**Branches going to infinity:** $n - m = 2$
+
+#### Step 2: Real-Axis Segments
+
+A point on the real axis is on the root locus if the total number of real poles and zeros to its RIGHT is odd.
+
+- **Right of $s = 0$:** 0 poles + 0 zeros = 0 (even) → NOT on locus
+- **Between $s = 0$ and $s = -1$:** 1 pole (at 0) = 1 (odd) → **ON locus** ✓
+- **Between $s = -1$ and $s = -2$:** 2 poles (at 0, -1) = 2 (even) → NOT on locus
+- **Between $s = -2$ and $s = -5$:** 2 poles + 1 zero = 3 (odd) → **ON locus** ✓
+- **Left of $s = -5$:** 3 poles + 1 zero = 4 (even) → NOT on locus
+
+#### Step 3: Asymptotes
+
+Number of asymptotes: $n - m = 2$
+
+**Asymptote angles:**
+
+$$
+\theta_k = \frac{(2k+1) \times 180°}{n-m} = \frac{(2k+1) \times 180°}{2}
+$$
+
+- $k = 0$: $\theta_0 = 90°$
+- $k = 1$: $\theta_1 = 270°$
+
+**Centroid (intersection of asymptotes with real axis):**
+
+$$
+\sigma_a = \frac{\sum \text{poles} - \sum \text{zeros}}{n - m} = \frac{(0 + (-1) + (-5)) - (-2)}{3 - 1} = \frac{-6 + 2}{2} = \frac{-4}{2} = -2
+$$
+
+The two asymptotes are vertical lines at $\sigma_a = -2$, going up ($90°$) and down ($270°$).
+
+#### Step 4: Breakaway and Break-in Points
+
+Breakaway/break-in points occur where $dK/ds = 0$. From the characteristic equation:
+
+$$
+K = -\frac{s(s+1)(s+5)}{s+2} = -\frac{s^3 + 6s^2 + 5s}{s+2}
+$$
+
+Apply the quotient rule:
+
+$$
+\frac{dK}{ds} = -\frac{(3s^2+12s+5)(s+2) - (s^3+6s^2+5s)(1)}{(s+2)^2} = 0
+$$
+
+Numerator must be zero:
+
+$$
+(3s^2+12s+5)(s+2) - (s^3+6s^2+5s) = 0
+$$
+
+Expand $(3s^2+12s+5)(s+2) = 3s^3 + 6s^2 + 12s^2 + 24s + 5s + 10 = 3s^3 + 18s^2 + 29s + 10$
+
+Subtract: $3s^3 + 18s^2 + 29s + 10 - s^3 - 6s^2 - 5s = 2s^3 + 12s^2 + 24s + 10 = 0$
+
+Divide by 2: $s^3 + 6s^2 + 12s + 5 = 0$
+
+Try $s = -0.5$ (between 0 and -1, where locus exists): $-0.125 + 1.5 - 6 + 5 = 0.375 \neq 0$
+
+Try $s = -0.55$: $-0.166 + 1.815 - 6.6 + 5 = 0.049 \approx 0$
+
+More precisely, solving numerically: **breakaway at $s \approx -0.56$** (between poles at 0 and -1).
+
+Also check for break-in between $-2$ and $-5$: try $s = -3$: $-27 + 54 - 36 + 5 = -4 \neq 0$
+
+Try $s = -3.7$: $-50.65 + 82.14 - 44.4 + 5 = -7.9 \neq 0$. No break-in on this segment (the branch from $s=-5$ goes directly to the zero at $s=-2$).
+
+#### Step 5: $j\omega$-Axis Crossing
+
+Characteristic equation: $s^3 + 6s^2 + 5s + K(s+2) = s^3 + 6s^2 + (5+K)s + 2K = 0$
+
+Routh array:
+
+| $s^3$ | 1 | $5+K$ |
+| $s^2$ | 6 | $2K$ |
+| $s^1$ | $\frac{6(5+K)-2K}{6} = \frac{30+4K}{6}$ | |
+| $s^0$ | $2K$ | |
+
+For stability: $30 + 4K \gt  0$ (always for $K \gt  0$) and $2K \gt  0$.
+
+**The $s^1$ entry is always positive for $K \gt  0$!** This means the root locus **never crosses the $j\omega$-axis** — the system is stable for all $K \gt  0$.
+
+This makes sense: the asymptotes are vertical at $\sigma_a = -2$ (in the LHP), so the branches going to infinity stay in the LHP.
+
+#### Step 6: Arrival Angle at the Zero
+
+The arrival angle at the zero $s = -2$ is:
+
+$$
+\theta_a = 180° - \left[\sum \angle(\text{zero to poles}) - \sum \angle(\text{zero to other zeros})\right]
+$$
+
+Wait — the correct formula for arrival angle at a zero $z_j$ is:
+
+$$
+\theta_a = 180° + \sum_{i} \angle(z_j - p_i) - \sum_{k \neq j} \angle(z_j - z_k)
+$$
+
+From $z = -2$:
+- $\angle(z - p_1) = \angle(-2 - 0) = \angle(-2) = 180°$
+- $\angle(z - p_2) = \angle(-2 - (-1)) = \angle(-1) = 180°$
+- $\angle(z - p_3) = \angle(-2 - (-5)) = \angle(3) = 0°$
+
+No other zeros.
+
+$$
+\theta_a = 180° + (180° + 180° + 0°) = 180° + 360° = 540° \equiv 180°
+$$
+
+The branch arrives at the zero from the **left** along the real axis (from the segment between $-2$ and $-5$). This confirms our real-axis analysis.
+
+#### Step 7: Summary of Root Locus Behavior
+
+1. **Branch 1:** Starts at $s = 0$, moves left along real axis, breaks away at $s \approx -0.56$, goes upward toward $+j\infty$ along the $90°$ asymptote from $\sigma_a = -2$.
+2. **Branch 2:** Starts at $s = -1$, moves left along real axis, breaks away at $s \approx -0.56$, goes downward toward $-j\infty$ along the $270°$ asymptote from $\sigma_a = -2$.
+3. **Branch 3:** Starts at $s = -5$, moves right along real axis, arrives at the zero $s = -2$.
+
+**Key design insight:** This system is stable for ALL positive gains $K$. The zero at $s = -2$ stabilizes the system by pulling one branch away from the $j\omega$-axis and bending the asymptotes into the LHP.
+
+</details>
+
+---
+
+### Problem 11.5.E2 — Root Locus with Complex Poles: Departure Angles
+
+> **Problem:** For the system:
+>
+> $$G(s)H(s) = \frac{K}{(s+1)(s^2+2s+5)}$$
+>
+> (a) Find all open-loop poles.
+> (b) Compute the departure angles from the complex poles.
+> (c) Find the $j\omega$-axis crossing and the critical gain.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): Open-Loop Poles
+
+Real pole: $s = -1$
+
+Complex poles from $s^2 + 2s + 5 = 0$:
+
+$$
+s = \frac{-2 \pm \sqrt{4-20}}{2} = -1 \pm 2j
+$$
+
+Poles: $p_1 = -1$, $p_2 = -1+2j$, $p_3 = -1-2j$
+
+No finite zeros ($m = 0$). Three branches, all going to infinity.
+
+#### Part (b): Departure Angle from $p_2 = -1+2j$
+
+The departure angle $\theta_d$ from a complex pole $p_k$ satisfies:
+
+$$
+\theta_d = 180° - \sum_{i \neq k} \angle(p_k - p_i) + \sum_j \angle(p_k - z_j)
+$$
+
+From $p_2 = -1+2j$:
+
+**Angle to $p_1 = -1$:**
+
+$$
+p_2 - p_1 = (-1+2j) - (-1) = 2j
+$$
+
+$$
+\angle(2j) = 90°
+$$
+
+**Angle to $p_3 = -1-2j$:**
+
+$$
+p_2 - p_3 = (-1+2j) - (-1-2j) = 4j
+$$
+
+$$
+\angle(4j) = 90°
+$$
+
+No zeros, so:
+
+$$
+\theta_d = 180° - (90° + 90°) = 180° - 180° = 0°
+$$
+
+The branch departs from $p_2 = -1+2j$ **horizontally to the right** (at $0°$).
+
+By conjugate symmetry, the departure from $p_3 = -1-2j$ is at $0°$ (horizontally to the right) as well — or equivalently, at $-0° = 360°$, which is the same direction.
+
+#### Part (c): $j\omega$-Axis Crossing
+
+Characteristic equation: $(s+1)(s^2+2s+5) + K = s^3 + 3s^2 + 7s + 5 + K = 0$
+
+Routh array:
+
+| $s^3$ | 1 | 7 |
+| $s^2$ | 3 | $5+K$ |
+| $s^1$ | $\frac{3(7)-(5+K)}{3} = \frac{16-K}{3}$ | |
+| $s^0$ | $5+K$ | |
+
+Stability conditions: $16 - K \gt  0 \implies K \lt  16$ and $5 + K \gt  0 \implies K \gt  -5$.
+
+**Critical gain:** $K_{cr} = 16$
+
+**Oscillation frequency at $K = 16$:** Auxiliary polynomial from $s^2$ row:
+
+$$
+3s^2 + (5+16) = 3s^2 + 21 = 0 \implies s = \pm j\sqrt{7} \approx \pm j2.65
+$$
+
+$$
+\omega_{cr} = \sqrt{7} \approx 2.65 \text{ rad/s}
+$$
+
+#### Summary
+
+The root locus starts with branches departing horizontally to the right from the complex poles, curves toward the $j\omega$-axis, and crosses at $\pm j\sqrt{7}$ when $K = 16$. The branch from the real pole at $s = -1$ goes left to $-\infty$ along the negative real axis.
+
+</details>
+
+---
+
+### Problem 11.5.E3 — Using Root Locus for Gain Selection with Time-Domain Specs
+
+> **Problem:** For $G(s) = \dfrac{K}{s(s+4)(s+6)}$ with unity feedback, use root locus to find $K$ such that the dominant closed-loop poles have $\zeta = 0.5$ and determine the resulting $\omega_n$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Define the Desired Pole Region
+
+For $\zeta = 0.5$, the poles lie on lines from the origin at angle:
+
+$$
+\theta = \pm(180° - \arccos(0.5)) = \pm(180° - 60°) = \pm 120°
+$$
+
+from the positive real axis. Equivalently, the poles satisfy:
+
+$$
+\frac{\text{Re}(s)}{|s|} = \zeta = 0.5 \implies \text{Re}(s) = -0.5|s|
+$$
+
+Points on this line: $s = -\sigma + j\omega_d$ where $\sigma/\omega_n = 0.5$ and $\omega_d = \omega_n\sqrt{1-0.25} = \omega_n\sqrt{3}/2$.
+
+So $\omega_d/\sigma = \sqrt{3}$, meaning $s = -\sigma + j\sigma\sqrt{3}$.
+
+#### Step 2: Apply the Angle Condition
+
+A point $s_0 = -\sigma + j\sigma\sqrt{3}$ is on the root locus if:
+
+$$
+\angle G(s_0) = \pm 180°(2k+1)
+$$
+
+$$
+-\angle(s_0) - \angle(s_0+4) - \angle(s_0+6) = -180°
+$$
+
+Compute each angle for a general $\sigma$:
+
+- $s_0 = -\sigma + j\sigma\sqrt{3}$: $\angle(s_0) = 180° - \arctan(\sigma\sqrt{3}/\sigma) = 180° - 60° = 120°$
+- $s_0 + 4 = (4-\sigma) + j\sigma\sqrt{3}$: $\angle = \arctan\left(\dfrac{\sigma\sqrt{3}}{4-\sigma}\right)$ (if $4-\sigma \gt  0$)
+- $s_0 + 6 = (6-\sigma) + j\sigma\sqrt{3}$: $\angle = \arctan\left(\dfrac{\sigma\sqrt{3}}{6-\sigma}\right)$
+
+The angle condition:
+
+$$
+120° + \arctan\left(\frac{\sigma\sqrt{3}}{4-\sigma}\right) + \arctan\left(\frac{\sigma\sqrt{3}}{6-\sigma}\right) = 180°
+$$
+
+$$
+\arctan\left(\frac{\sigma\sqrt{3}}{4-\sigma}\right) + \arctan\left(\frac{\sigma\sqrt{3}}{6-\sigma}\right) = 60°
+$$
+
+#### Step 3: Solve Numerically
+
+Try $\sigma = 1$: $\arctan(\sqrt{3}/3) + \arctan(\sqrt{3}/5) = \arctan(0.577) + \arctan(0.346) = 30° + 19.1° = 49.1°$ (too small)
+
+Try $\sigma = 1.5$: $\arctan(1.5\sqrt{3}/2.5) + \arctan(1.5\sqrt{3}/4.5) = \arctan(1.039) + \arctan(0.577) = 46.1° + 30° = 76.1°$ (too large)
+
+Try $\sigma = 1.2$: $\arctan(1.2\sqrt{3}/2.8) + \arctan(1.2\sqrt{3}/4.8) = \arctan(0.742) + \arctan(0.433) = 36.6° + 23.4° = 60.0°$ ✓
+
+So $\sigma = 1.2$, and the desired pole is at:
+
+$$
+s_0 = -1.2 + j1.2\sqrt{3} = -1.2 + j2.078
+$$
+
+#### Step 4: Apply the Magnitude Condition to Find $K$
+
+$$
+K = |s_0| \cdot |s_0 + 4| \cdot |s_0 + 6|
+$$
+
+- $|s_0| = \sqrt{1.44 + 4.32} = \sqrt{5.76} = 2.4$
+- $|s_0+4| = \sqrt{(2.8)^2 + (2.078)^2} = \sqrt{7.84 + 4.32} = \sqrt{12.16} = 3.487$
+- $|s_0+6| = \sqrt{(4.8)^2 + (2.078)^2} = \sqrt{23.04 + 4.32} = \sqrt{27.36} = 5.231$
+
+$$
+K = 2.4 \times 3.487 \times 5.231 = 43.8
+$$
+
+#### Step 5: Determine $\omega_n$
+
+$$
+\omega_n = |s_0| = 2.4 \text{ rad/s}
+$$
+
+**Performance specs:**
+- $M_p = e^{-\pi(0.5)/\sqrt{0.75}} = e^{-1.814} = 16.3\%$
+- $t_s = 4/\sigma = 4/1.2 = 3.33$ s
+- $t_p = \pi/\omega_d = \pi/2.078 = 1.51$ s
+
+$$
+\boxed{K = 43.8, \quad \omega_n = 2.4 \text{ rad/s}}
+$$
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 — Derivation of the Angle and Magnitude Conditions
+
+The root locus is defined as the set of all points $s_0$ in the complex plane that satisfy the **characteristic equation** $1 + KG(s)H(s) = 0$ for some real $K > 0$.
+
+#### Starting Point
+
+$$
+1 + KG(s_0)H(s_0) = 0 \implies G(s_0)H(s_0) = -\frac{1}{K}
+$$
+
+Since $K > 0$, the right side is a negative real number: $-1/K < 0$.
+
+#### The Angle Condition
+
+A complex number is negative real if and only if its angle is an odd multiple of $180°$:
+
+$$
+\angle G(s_0)H(s_0) = \pm 180°(2k+1), \quad k = 0, 1, 2, \ldots
+$$
+
+For a rational transfer function $G(s)H(s) = \dfrac{N(s)}{D(s)} = \dfrac{\prod_j (s - z_j)}{\prod_i (s - p_i)}$:
+
+$$
+\angle G(s_0)H(s_0) = \sum_j \angle(s_0 - z_j) - \sum_i \angle(s_0 - p_i)
+$$
+
+Therefore the **angle condition** is:
+
+$$
+\boxed{\sum_j \angle(s_0 - z_j) - \sum_i \angle(s_0 - p_i) = \pm 180°(2k+1)}
+$$
+
+**Key property:** The angle condition is independent of $K$. It determines the SHAPE of the root locus — which points in the $s$-plane are candidates for closed-loop poles.
+
+#### The Magnitude Condition
+
+Once a point $s_0$ satisfies the angle condition, the corresponding gain is:
+
+$$
+K = \frac{1}{|G(s_0)H(s_0)|} = \frac{\prod_i |s_0 - p_i|}{\prod_j |s_0 - z_j|}
+$$
+
+$$
+\boxed{K = \frac{\text{product of distances from } s_0 \text{ to all poles}}{\text{product of distances from } s_0 \text{ to all zeros}}}
+$$
+
+**Key property:** The magnitude condition determines which VALUE of $K$ corresponds to each point on the locus.
+
+#### Derivation of the Real-Axis Rule
+
+For a test point $s_0$ on the real axis, consider the angle contributions:
+
+- **Real poles/zeros to the LEFT of $s_0$:** The vector from the pole/zero to $s_0$ points in the $+$ real direction → angle = $0°$. Contributes nothing to the total angle.
+
+- **Real poles/zeros to the RIGHT of $s_0$:** The vector points in the $-$ real direction → angle = $180°$. Each contributes $\pm 180°$.
+
+- **Complex conjugate pole/zero pairs:** For a pair at $a \pm jb$, the angles from $s_0$ to each member are $+\theta$ and $-\theta$ (by symmetry about the real axis). Their sum is $0°$. Complex pairs contribute nothing.
+
+Therefore, the total angle from a real-axis test point is:
+
+$$
+\text{Total angle} = (\text{number of real poles + zeros to the right}) \times 180°
+$$
+
+For this to be an odd multiple of $180°$, the count must be **odd**. $\blacksquare$
+
+---
+
+### 9.2 — Derivation of Asymptote Rules
+
+#### Why Asymptotes Exist
+
+As $K \to \infty$, $n - m$ branches of the root locus go to infinity (since only $m$ branches can terminate at finite zeros). For large $|s|$, the transfer function behaves as:
+
+$$
+G(s)H(s) \approx \frac{1}{s^{n-m}} \quad \text{(leading behavior)}
+$$
+
+The characteristic equation becomes approximately $1 + K/s^{n-m} = 0$, giving $s^{n-m} = -K$.
+
+#### Asymptote Angles
+
+$s^{n-m} = -K$ (with $K > 0$) means $|s|^{n-m} = K$ and $\angle(s^{n-m}) = 180°$.
+
+Since $\angle(s^{n-m}) = (n-m)\angle(s)$:
+
+$$
+(n-m)\theta = 180° + 360°k \implies \theta_k = \frac{(2k+1) \times 180°}{n-m}
+$$
+
+for $k = 0, 1, \ldots, n-m-1$.
+
+#### Centroid (Real-Axis Intercept)
+
+The centroid is derived from the next-order correction. Write:
+
+$$
+G(s)H(s) = \frac{s^m + (\sum z_j)s^{m-1} + \cdots}{s^n + (\sum p_i)s^{n-1} + \cdots} \approx \frac{1}{s^{n-m}} \cdot \frac{1}{1 + \frac{\sum p_i - \sum z_j}{s} + \cdots}
+$$
+
+For large $s$ on an asymptote, write $s = \sigma_a + Re^{j\theta_k}$ where $R \to \infty$. Substituting into the characteristic equation and matching the $O(1/R)$ correction:
+
+$$
+\sigma_a = \frac{\sum p_i - \sum z_j}{n - m} = \frac{\text{sum of poles} - \text{sum of zeros}}{n - m}
+$$
+
+This is the centroid formula. $\blacksquare$
+
+---
+
+### 9.3 — Breakaway and Break-in Point Computation
+
+#### The General Formula
+
+At a breakaway or break-in point, multiple branches of the root locus meet. This occurs where $K$ has a local maximum (breakaway) or local minimum (break-in) along the real-axis locus segment.
+
+From $K = -1/G(s)H(s)$ (evaluated on the real axis):
+
+$$
+\frac{dK}{ds} = 0
+$$
+
+Equivalently, if $G(s)H(s) = N(s)/D(s)$:
+
+$$
+\frac{d}{ds}\left[\frac{D(s)}{N(s)}\right] = 0 \implies N(s)D'(s) - D(s)N'(s) = 0
+$$
+
+This can also be written as:
+
+$$
+\sum_i \frac{1}{s - p_i} = \sum_j \frac{1}{s - z_j}
+$$
+
+This elegant form says: at a breakaway point, the sum of reciprocal distances to all poles equals the sum of reciprocal distances to all zeros.
+
+#### Proof of the Reciprocal-Distance Formula
+
+Take $\ln|G(s)H(s)| = \sum_j \ln|s-z_j| - \sum_i \ln|s-p_i|$
+
+Differentiate with respect to $s$ (on the real axis, $s$ is real):
+
+$$
+\frac{d}{ds}\ln|GH| = \sum_j \frac{1}{s-z_j} - \sum_i \frac{1}{s-p_i}
+$$
+
+Setting $dK/ds = 0$ is equivalent to $d(\ln|GH|)/ds = 0$ (since $K = 1/|GH|$ on the locus), giving:
+
+$$
+\sum_i \frac{1}{s-p_i} = \sum_j \frac{1}{s-z_j} \quad \blacksquare
+$$
+
+#### Departure Angle Formula — Complete Derivation
+
+For a complex pole $p_k$, consider a test point $s_0 = p_k + \epsilon e^{j\theta_d}$ (infinitesimally close to $p_k$). The angle condition requires:
+
+$$
+\sum_j \angle(s_0 - z_j) - \sum_{i \neq k} \angle(s_0 - p_i) - \angle(s_0 - p_k) = -180°
+$$
+
+As $\epsilon \to 0$: $\angle(s_0 - p_k) = \theta_d$ and all other angles approach $\angle(p_k - z_j)$ or $\angle(p_k - p_i)$.
+
+$$
+\theta_d = 180° + \sum_j \angle(p_k - z_j) - \sum_{i \neq k} \angle(p_k - p_i)
+$$
+
+Similarly, the **arrival angle** at a zero $z_k$:
+
+$$
+\theta_a = 180° - \sum_i \angle(z_k - p_i) + \sum_{j \neq k} \angle(z_k - z_j)
+$$
+
+**References:** Franklin, Powell & Emami-Naeini, *Feedback Control of Dynamic Systems*, Ch. 5; Evans, W.R. (1948), "Graphical Analysis of Control Systems," *Trans. AIEE*; Brian Douglas, "Root Locus Rules" (YouTube).

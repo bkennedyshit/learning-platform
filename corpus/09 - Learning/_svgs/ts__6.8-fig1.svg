@@ -1,0 +1,83 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .ts68-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .ts68-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts68-accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; animation: pulseGlow 2.5s infinite alternate; }
+    .ts68-hot { fill: var(--background-secondary, #161b22); stroke: #4ade80; stroke-width: 2; rx: 8; animation: glowGreen 2s infinite alternate; }
+    .ts68-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts68-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts68-note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts68-section { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); }
+      to { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); stroke-width: 2.5; }
+    }
+    @keyframes glowGreen {
+      from { filter: drop-shadow(0 0 2px #4ade80); }
+      to { filter: drop-shadow(0 0 8px #4ade80); stroke-width: 2.5; }
+    }
+  </style>
+
+  <text x="350" y="22" class="ts68-title">Backend TypeScript — Runtime &amp; Framework Landscape</text>
+
+  <!-- Runtimes row -->
+  <text x="350" y="50" class="ts68-section">runtimes</text>
+  <rect x="30" y="58" width="180" height="50" class="ts68-box"/>
+  <text x="120" y="78" class="ts68-label">Node.js</text>
+  <text x="120" y="95" class="ts68-note">Battle-tested • Largest ecosystem</text>
+
+  <rect x="230" y="58" width="180" height="50" class="ts68-hot"/>
+  <text x="320" y="78" class="ts68-label">Bun 🔥</text>
+  <text x="320" y="95" class="ts68-note">3-5x faster • Native TS • npm compat</text>
+
+  <rect x="430" y="58" width="180" height="50" class="ts68-box"/>
+  <text x="520" y="78" class="ts68-label">Deno</text>
+  <text x="520" y="95" class="ts68-note">Secure • Native TS • Permissions</text>
+
+  <!-- Frameworks row -->
+  <text x="350" y="130" class="ts68-section">frameworks</text>
+
+  <rect x="20" y="138" width="120" height="55" class="ts68-box"/>
+  <text x="80" y="155" class="ts68-label">Express</text>
+  <text x="80" y="170" class="ts68-note">Legacy • Untyped</text>
+  <text x="80" y="183" class="ts68-note">Don't start new</text>
+
+  <rect x="150" y="138" width="120" height="55" class="ts68-accent"/>
+  <text x="210" y="155" class="ts68-label">Fastify</text>
+  <text x="210" y="170" class="ts68-note">Fast • Schema-first</text>
+  <text x="210" y="183" class="ts68-note">Node.js best</text>
+
+  <rect x="280" y="138" width="120" height="55" class="ts68-hot"/>
+  <text x="340" y="155" class="ts68-label">Hono 🔥</text>
+  <text x="340" y="170" class="ts68-note">Ultralight • All runtimes</text>
+  <text x="340" y="183" class="ts68-note">Edge-ready</text>
+
+  <rect x="410" y="138" width="120" height="55" class="ts68-box"/>
+  <text x="470" y="155" class="ts68-label">Elysia</text>
+  <text x="470" y="170" class="ts68-note">Bun-native</text>
+  <text x="470" y="183" class="ts68-note">End-to-end types</text>
+
+  <rect x="540" y="138" width="140" height="55" class="ts68-accent"/>
+  <text x="610" y="155" class="ts68-label">tRPC</text>
+  <text x="610" y="170" class="ts68-note">Full-stack type safety</text>
+  <text x="610" y="183" class="ts68-note">Client ↔ Server types</text>
+
+  <!-- Data layer -->
+  <text x="350" y="215" class="ts68-section">data layer (type-safe orms)</text>
+  <rect x="80" y="225" width="150" height="40" class="ts68-accent"/>
+  <text x="155" y="243" class="ts68-label">Drizzle ORM</text>
+  <text x="155" y="258" class="ts68-note">SQL-like • Lightweight</text>
+
+  <rect x="250" y="225" width="150" height="40" class="ts68-box"/>
+  <text x="325" y="243" class="ts68-label">Prisma</text>
+  <text x="325" y="258" class="ts68-note">Schema-first • Generated</text>
+
+  <rect x="420" y="225" width="150" height="40" class="ts68-box"/>
+  <text x="495" y="243" class="ts68-label">Zod / Valibot</text>
+  <text x="495" y="258" class="ts68-note">Validation → Types</text>
+
+  <!-- Recommendation -->
+  <rect x="80" y="280" width="540" height="30" class="ts68-hot"/>
+  <text x="350" y="300" class="ts68-label">2025 Stack: Bun + Hono + Drizzle + Zod (or tRPC for full-stack Next.js)</text>
+</svg>

@@ -1,0 +1,130 @@
+---
+title: "29.5 — Mixed Reality & Passthrough Pipelines"
+subject: "VR"
+catalog: advanced
+audience_tier: higher-education
+chapter: "29.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 29.5 — Mixed Reality & Passthrough Pipelines
+
+> *"VR with passthrough is not VR — it's the cheaper, faster, more practical version of AR. In 2026 it's where the actual customer value lives."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Enable **color passthrough** on Quest 3 / Vision Pro / Pico via OpenXR.
+2. Use **scene understanding** to access semantic meshes (planes, walls, floors, ceilings, windows, doors).
+3. Place and persist **spatial anchors** across sessions.
+4. Implement **occlusion** of virtual content by real geometry (or depth-based occlusion).
+5. Use **shared spatial anchors** for multi-user co-located experiences.
+6. Apply MR for arch-viz: overlay design proposals onto an existing site.
+
+---
+
+## 🖼️ Visual Anchor
+
+![vrapp__24.4-fig1](vrapp__24.4-fig1.svg)
+
+> *Picture / video reference (external):*
+> - 📺 [Meta MR / passthrough samples (OpenXR SDK)](https://github.com/meta-quest/Meta-OpenXR-SDK)
+> - 📺 [Apple Vision Pro RoomPlan + ARKit docs](https://developer.apple.com/documentation/roomplan)
+> - 📺 [Microsoft Mesh + Mixed Reality Toolkit](https://learn.microsoft.com/en-us/mesh/)
+
+---
+
+## 📚 1. Passthrough Modes
+
+| Mode | Description | Use |
+|---|---|---|
+| **Pure VR** | No real world | Immersive games, fully synthetic scenes |
+| **Cutout passthrough** | Show real world only in selected zones (e.g., desk) | Productivity |
+| **Background passthrough** | Real world background + virtual foreground | Most MR apps |
+| **Selective virtual** | Mostly real world with sparse virtual overlays | Spatial computing |
+
+---
+
+## 🧱 2. Scene Understanding
+
+OpenXR `XR_FB_scene` / Apple ARKit Scene Reconstruction provide:
+- **Planes** — floors, walls, ceilings, tables.
+- **Meshes** — full triangulated room geometry (Vision Pro: high quality; Quest 3: lower res but decent).
+- **Semantic labels** — walls / floors / windows / doors / furniture (where supported).
+- **Bounding boxes** — for furniture / detected objects.
+
+This data lets virtual content **respect** real geometry — sit on tables, hide behind walls, bounce off floors.
+
+---
+
+## 📍 3. Spatial Anchors
+
+A **spatial anchor** is a persistent 6-DoF pose tied to the real environment:
+- Survives across sessions (Quest 3 stores anchors locally).
+- Can be **shared** with other users in the same room (Quest Cloud Anchors, Vision Pro Shared Spaces, Microsoft Mesh).
+- Tied to map IDs — invalidate if room changes substantially.
+
+---
+
+## 🌫️ 4. Occlusion
+
+Two approaches:
+- **Depth-based** — sample the runtime's depth buffer (mostly Vision Pro and Quest 3 with environment depth API).
+- **Mesh-based** — write the room mesh to depth, render virtual after (cheaper but lower fidelity).
+
+Without occlusion, virtual content **floats** unconvincingly through real walls — the dead giveaway of fake MR.
+
+---
+
+## 🤝 5. Co-located Multi-User
+
+Pattern:
+1. User A creates an anchor in the room.
+2. Anchor pose + map ID is shared via cloud anchor service.
+3. User B joins, runtime resolves the anchor → both see the same virtual object in the same physical place.
+4. Networked positions are *relative to* the shared anchor.
+
+This unlocks **co-located arch-viz reviews** (multiple stakeholders walk the same proposed design in the same physical space).
+
+---
+
+## 🛠️ 6. Worked Example (skeleton) — Place a Virtual Sofa on Real Floor
+
+1. Enable passthrough + scene query.
+2. Scan the room (one-time; ~1 minute on Quest 3, automatic on Vision Pro).
+3. Query for floor planes; pick the largest.
+4. Spawn the sofa USD asset; position on the chosen plane.
+5. Add a spatial anchor at the sofa pose so it persists across sessions.
+6. Toggle occlusion via depth buffer.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [29.4 - Hand, Eye & Body Tracking - Inputs Beyond Controllers](29.4---Hand,-Eye-&-Body-Tracking---Inputs-Beyond-Controllers)
+- [29.6 - Architectural Visualization in VR - Revit, IFC, USD to Quest & Vision Pro](29.6---Architectural-Visualization-in-VR---Revit,-IFC,-USD-to-Quest-&-Vision-Pro)
+- [22.3 - Sensors & Perception - IMU, LiDAR, Cameras, Encoders](22.3---Sensors-&-Perception---IMU,-LiDAR,-Cameras,-Encoders) — same vision algorithms power scene understanding
+- [23.5 - Light-Field Displays & Volumetric Capture - Looking Glass, NeRF, 3D Gaussian Splatting](23.5---Light-Field-Displays-&-Volumetric-Capture---Looking-Glass,-NeRF,-3D-Gaussian-Splatting) — capture parallels
+
+### External
+- [Meta OpenXR SDK Scene & MR samples](https://github.com/meta-quest/Meta-OpenXR-SDK)
+- [Apple ARKit + RoomPlan docs](https://developer.apple.com/documentation/arkit)
+- [Microsoft Mesh](https://learn.microsoft.com/en-us/mesh/)
+- [supercraft — VR/AR backends 2026](https://gsb.supercraft.host/blog/vr-ar-spatial-computing-game-backends/)
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"MR = AR."** MR runs on a VR headset with passthrough; AR usually means optical see-through (HoloLens / Magic Leap). Different tradeoffs.
+- **"Scene meshes are perfectly accurate."** They drift, miss thin objects, and lag for dynamic furniture. Treat them as approximate.
+- **"Anchors persist forever."** They depend on the runtime keeping a stable map of the room; major rearrangements invalidate them.
+- **"Just use stereo passthrough."** Cheap headsets that lack proper depth + reprojection break immersion. Test on real hardware.

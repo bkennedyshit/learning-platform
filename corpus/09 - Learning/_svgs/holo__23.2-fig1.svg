@@ -1,0 +1,236 @@
+<svg viewBox="0 0 720 540" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    @keyframes wave-propagate {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes record-glow {
+      0%, 100% { filter: drop-shadow(0 0 2px #9d4edd); opacity: 0.8; }
+      50% { filter: drop-shadow(0 0 8px #d800ff); opacity: 1; }
+    }
+    @keyframes laser-pulse {
+      0%, 100% { r: 4; filter: drop-shadow(0 0 2px #ffb000); }
+      50% { r: 6; filter: drop-shadow(0 0 6px #ffb000); }
+    }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 18px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .subtitle { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #30363d); stroke-width: 1.5; rx: 8; }
+    
+    /* Optics colors */
+    .laser-source { fill: #ffb000; animation: laser-pulse 2s ease-in-out infinite; }
+    .beam-original { stroke: #ffb000; stroke-width: 1.5; fill: none; stroke-dasharray: 5, 3; animation: wave-propagate 1s linear infinite; }
+    
+    .ref-wave { stroke: #00f0ff; stroke-width: 1.2; fill: none; stroke-dasharray: 4, 3; animation: wave-propagate 0.8s linear infinite; filter: url(#glow-cyan); }
+    .obj-wave { stroke: #ff007f; stroke-width: 1.2; fill: none; stroke-dasharray: 4, 3; animation: wave-propagate 0.8s linear infinite; filter: url(#glow-pink); }
+    .plate { stroke: #9d4edd; stroke-width: 2; fill: #240046; fill-opacity: 0.6; rx: 3; animation: record-glow 3s ease-in-out infinite; }
+    .mirror { fill: #484b6a; stroke: #c9d1d9; stroke-width: 1; }
+    .beamsplitter { stroke: #00f0ff; stroke-width: 1.5; fill: #00f0ff; fill-opacity: 0.15; }
+    
+    /* Details */
+    .fringe-line { stroke: #39ff14; stroke-width: 1; opacity: 0.4; }
+    .optics-text { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <defs>
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow-pink" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="30" class="title" text-anchor="middle">Classical Holographic Recording Geometries</text>
+  <text x="360" y="48" class="subtitle" text-anchor="middle">Three foundational wave recording geometries that defined the physical holography era</text>
+
+  <!-- PANEL 1: Gabor In-Line -->
+  <rect x="20" y="65" width="210" height="400" class="box"/>
+  <text x="125" y="90" class="label" text-anchor="middle">1. Gabor In-Line (1948)</text>
+  <text x="125" y="106" class="sublabel" text-anchor="middle">Collinear Reference &amp; Object Beams</text>
+
+  <!-- Setup Diagram: Gabor -->
+  <!-- Laser -->
+  <circle cx="50" cy="240" r="5" class="laser-source"/>
+  <text x="50" y="225" class="optics-text" text-anchor="middle">Laser</text>
+  
+  <!-- Wavefront lines -->
+  <!-- Original Beam to object -->
+  <line x1="55" y1="240" x2="110" y2="240" class="beam-original"/>
+  
+  <!-- Transparent Object -->
+  <circle cx="115" cy="240" r="12" fill="none" stroke="#ff007f" stroke-width="1.5"/>
+  <circle cx="115" cy="240" r="4" fill="#ff007f" fill-opacity="0.3"/>
+  <text x="115" y="218" class="optics-text" text-anchor="middle" fill="#ff007f">Object</text>
+  
+  <!-- Scattered Wavefronts (arcs) -->
+  <path d="M 135 230 A 15 15 0 0 1 135 250" class="obj-wave"/>
+  <path d="M 145 220 A 30 30 0 0 1 145 260" class="obj-wave"/>
+  <path d="M 155 210 A 45 45 0 0 1 155 270" class="obj-wave"/>
+  <path d="M 165 200 A 60 60 0 0 1 165 280" class="obj-wave"/>
+  <path d="M 175 190 A 75 75 0 0 1 175 290" class="obj-wave"/>
+  
+  <!-- Reference wavefronts (straight lines passing through transparent parts of object) -->
+  <line x1="130" y1="170" x2="130" y2="310" class="ref-wave"/>
+  <line x1="145" y1="170" x2="145" y2="310" class="ref-wave"/>
+  <line x1="160" y1="170" x2="160" y2="310" class="ref-wave"/>
+  <line x1="175" y1="170" x2="175" y2="310" class="ref-wave"/>
+  <line x1="190" y1="170" x2="190" y2="310" class="ref-wave"/>
+
+  <!-- Recording Plate -->
+  <rect x="195" y="180" width="8" height="120" class="plate"/>
+  <text x="199" y="315" class="optics-text" text-anchor="middle">Plate</text>
+  
+  <!-- Fringes -->
+  <line x1="199" y1="200" x2="199" y2="202" class="fringe-line"/>
+  <line x1="199" y1="210" x2="199" y2="213" class="fringe-line"/>
+  <line x1="199" y1="220" x2="199" y2="225" class="fringe-line"/>
+  <line x1="199" y1="235" x2="199" y2="242" class="fringe-line"/>
+  <line x1="199" y1="250" x2="199" y2="258" class="fringe-line"/>
+  <line x1="199" y1="268" x2="199" y2="272" class="fringe-line"/>
+  <line x1="199" y1="280" x2="199" y2="284" class="fringe-line"/>
+  <line x1="199" y1="290" x2="199" y2="292" class="fringe-line"/>
+
+  <!-- Caption -->
+  <text x="125" y="380" class="sublabel" text-anchor="middle" font-weight="bold" fill="#ff6b6b">Limitation: Twin-Image Problem</text>
+  <text x="125" y="398" class="sublabel" text-anchor="middle">Real &amp; virtual images reconstruct collinear,</text>
+  <text x="125" y="412" class="sublabel" text-anchor="middle">overlapping and blurring the view.</text>
+  <text x="125" y="426" class="sublabel" text-anchor="middle">Requires a highly transparent object.</text>
+
+
+  <!-- PANEL 2: Leith-Upatnieks Off-Axis -->
+  <rect x="250" y="65" width="220" height="400" class="box"/>
+  <text x="360" y="90" class="label" text-anchor="middle">2. Leith-Upatnieks (1962)</text>
+  <text x="360" y="106" class="sublabel" text-anchor="middle">Angular Separation of Beams</text>
+
+  <!-- Laser -->
+  <circle cx="280" cy="420" r="5" class="laser-source"/>
+  <text x="280" y="435" class="optics-text" text-anchor="middle">Laser</text>
+  
+  <!-- Original Beam to BS -->
+  <line x1="280" y1="415" x2="280" y2="360" class="beam-original"/>
+  
+  <!-- Beam Splitter -->
+  <rect x="272" y="348" width="16" height="16" class="beamsplitter" transform="rotate(45 280 356)"/>
+  <text x="255" y="360" class="optics-text" text-anchor="middle">BS</text>
+
+  <!-- Path A: Object Beam (goes right) -->
+  <line x1="288" y1="356" x2="415" y2="356" class="beam-original"/>
+  
+  <!-- Object Mirror -->
+  <rect x="410" y="350" width="16" height="12" class="mirror" transform="rotate(-45 418 356)"/>
+  <text x="440" y="365" class="optics-text" text-anchor="middle">Mirror</text>
+  <line x1="418" y1="348" x2="418" y2="280" class="beam-original"/>
+  
+  <!-- Reflective Object -->
+  <path d="M 406 250 A 12 12 0 0 1 430 250 Z" fill="#ff007f" fill-opacity="0.3" stroke="#ff007f" stroke-width="1.5"/>
+  <circle cx="418" cy="245" r="5" fill="#ff007f"/>
+  <text x="418" y="222" class="optics-text" text-anchor="middle" fill="#ff007f">Object</text>
+  
+  <!-- Object Wave (scattered to plate) -->
+  <!-- Plate is at angle or horizontal. Let's put plate at center-left and shoot reference at angle -->
+  <!-- Object waves propagating towards plate (left-upwards) -->
+  <path d="M 395 235 A 20 20 0 0 1 405 210" class="obj-wave"/>
+  <path d="M 380 225 A 35 35 0 0 1 395 190" class="obj-wave"/>
+  <path d="M 365 215 A 50 50 0 0 1 385 170" class="obj-wave"/>
+  <path d="M 350 205 A 65 65 0 0 1 375 150" class="obj-wave"/>
+
+  <!-- Path B: Reference Beam (goes up) -->
+  <line x1="280" y1="348" x2="280" y2="220" class="beam-original"/>
+  
+  <!-- Reference Mirror -->
+  <rect x="272" y="210" width="16" height="12" class="mirror" transform="rotate(45 280 216)"/>
+  <text x="255" y="210" class="optics-text" text-anchor="middle">Mirror</text>
+  
+  <!-- Ref beam directed at angle to plate -->
+  <line x1="288" y1="216" x2="340" y2="185" class="beam-original"/>
+  
+  <!-- Reference wavefronts hitting plate -->
+  <!-- Plate at x=350, y=120, tilted 30 deg -->
+  <g transform="rotate(15 360 150)">
+    <!-- Reference waves -->
+    <line x1="305" y1="110" x2="305" y2="190" class="ref-wave" />
+    <line x1="320" y1="110" x2="320" y2="190" class="ref-wave" />
+    <line x1="335" y1="110" x2="335" y2="190" class="ref-wave" />
+    <line x1="350" y1="110" x2="350" y2="190" class="ref-wave" />
+    
+    <!-- Plate -->
+    <rect x="355" y="100" width="8" height="100" class="plate"/>
+    
+    <!-- Fringes -->
+    <line x1="359" y1="120" x2="359" y2="124" class="fringe-line"/>
+    <line x1="359" y1="134" x2="359" y2="139" class="fringe-line"/>
+    <line x1="359" y1="148" x2="359" y2="155" class="fringe-line"/>
+    <line x1="359" y1="162" x2="359" y2="170" class="fringe-line"/>
+    <line x1="359" y1="178" x2="359" y2="184" class="fringe-line"/>
+  </g>
+  <text x="395" y="115" class="optics-text" text-anchor="middle">Plate</text>
+
+  <!-- Caption -->
+  <text x="360" y="380" class="sublabel" text-anchor="middle" font-weight="bold" fill="#58a6ff">Solution: Angle Separation</text>
+  <text x="360" y="398" class="sublabel" text-anchor="middle">Separates twin images angularly during</text>
+  <text x="360" y="412" class="sublabel" text-anchor="middle">reconstruction. Allows highly reflective,</text>
+  <text x="360" y="426" class="sublabel" text-anchor="middle">fully opaque 3D objects to be recorded.</text>
+
+
+  <!-- PANEL 3: Denisyuk Reflection -->
+  <rect x="490" y="65" width="210" height="400" class="box"/>
+  <text x="595" y="90" class="label" text-anchor="middle">3. Denisyuk Reflection (1962)</text>
+  <text x="595" y="106" class="sublabel" text-anchor="middle">Single-Beam Volume Holography</text>
+
+  <!-- Laser -->
+  <circle cx="595" cy="420" r="5" class="laser-source"/>
+  <text x="595" y="435" class="optics-text" text-anchor="middle">Laser</text>
+  
+  <!-- Beam going up directly through plate to object -->
+  <line x1="595" y1="415" x2="595" y2="280" class="beam-original"/>
+  
+  <!-- Reference Wave passing up through plate -->
+  <line x1="535" y1="260" x2="655" y2="260" class="ref-wave" transform="rotate(-15 595 260)"/>
+  <line x1="535" y1="245" x2="655" y2="245" class="ref-wave" transform="rotate(-15 595 260)"/>
+  <line x1="535" y1="230" x2="655" y2="230" class="ref-wave" transform="rotate(-15 595 260)"/>
+  <line x1="535" y1="215" x2="655" y2="215" class="ref-wave" transform="rotate(-15 595 260)"/>
+
+  <!-- Recording Plate (mounted horizontally/tilted above laser) -->
+  <!-- Let's tilt it at 15 degrees -->
+  <g transform="rotate(-15 595 220)">
+    <rect x="525" y="215" width="140" height="10" class="plate"/>
+    
+    <!-- Bragg Fringes inside the thickness (parallel to plate face) -->
+    <line x1="535" y1="218" x2="655" y2="218" class="fringe-line" stroke-dasharray="10, 4"/>
+    <line x1="535" y1="220" x2="655" y2="220" class="fringe-line" stroke-dasharray="8, 5"/>
+    <line x1="535" y1="222" x2="655" y2="222" class="fringe-line" stroke-dasharray="12, 3"/>
+  </g>
+  <text x="670" y="200" class="optics-text" text-anchor="middle">Plate</text>
+
+  <!-- Laser continues to object behind plate -->
+  <line x1="595" y1="210" x2="595" y2="160" class="beam-original"/>
+
+  <!-- Opaque Object behind plate -->
+  <circle cx="595" cy="145" r="14" fill="#ff007f" fill-opacity="0.3" stroke="#ff007f" stroke-width="1.5"/>
+  <polygon points="595,135 605,152 585,152" fill="#ff007f"/>
+  <text x="595" y="122" class="optics-text" text-anchor="middle" fill="#ff007f">Object</text>
+  
+  <!-- Scattered Wavefronts from Object back to Plate (propagating DOWNWARDS) -->
+  <path d="M 580 165 A 15 15 0 0 1 610 165" class="obj-wave"/>
+  <path d="M 570 175 A 30 30 0 0 1 620 175" class="obj-wave"/>
+  <path d="M 560 185 A 45 45 0 0 1 630 185" class="obj-wave"/>
+  <path d="M 550 195 A 60 60 0 0 1 640 195" class="obj-wave"/>
+
+  <!-- Caption -->
+  <text x="595" y="380" class="sublabel" text-anchor="middle" font-weight="bold" fill="#c084fc">Advantage: White Light Playback</text>
+  <text x="595" y="398" class="sublabel" text-anchor="middle">Interference plane recorded in depth</text>
+  <text x="595" y="412" class="sublabel" text-anchor="middle">(volume Bragg fringes). Reconstructs with</text>
+  <text x="595" y="426" class="sublabel" text-anchor="middle">sunlight or flashlight - no laser needed.</text>
+
+</svg>

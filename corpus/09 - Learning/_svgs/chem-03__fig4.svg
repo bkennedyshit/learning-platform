@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <style>
+      .text { fill: var(--text-normal, #e0e0e0); font-family: sans-serif; font-size: 18px;}
+      .title { font-size: 24px; font-weight: bold; }
+      .bond { stroke: var(--text-normal, #e0e0e0); stroke-width: 3; stroke-linecap: round; fill: none;}
+      .bond-wedge { fill: var(--text-normal, #e0e0e0); stroke: none; }
+      .bond-dash { stroke: var(--text-normal, #e0e0e0); stroke-width: 3; stroke-dasharray: 4 4; fill: none; stroke-linecap: round;}
+      .arrow { stroke: var(--color-red, #e74c3c); stroke-width: 3; fill: none; marker-end: url(#arrowhead); stroke-linecap: round;}
+      .nuc { fill: var(--color-blue, #3498db); font-weight: bold; font-size: 20px;}
+      .lg { fill: var(--color-green, #2ecc71); font-weight: bold; font-size: 20px;}
+      .ts-bond { stroke: var(--interactive-accent, #4a90e2); stroke-width: 3; stroke-dasharray: 4 4; fill: none; stroke-linecap: round;}
+      .bracket { font-size: 100px; fill: var(--text-normal, #e0e0e0); font-weight: lighter; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--color-red, #e74c3c)" />
+    </marker>
+  </defs>
+
+  <text x="400" y="40" text-anchor="middle" class="text title">S<tspan baseline-shift="sub" font-size="16">N</tspan>2 Mechanism: Stereochemical Inversion</text>
+
+  <!-- Step 1: Reactants -->
+  <g transform="translate(150, 220)">
+    <!-- Nu -->
+    <text x="-100" y="5" class="nuc" text-anchor="end">Nu<tspan baseline-shift="super" font-size="14">-</tspan></text>
+    <animate attributeName="opacity" values="0.5; 1; 0.5" dur="2s" repeatCount="indefinite" />
+    
+    <!-- Central C -->
+    <text x="0" y="5" class="text" text-anchor="middle">C</text>
+    
+    <!-- Bond to LG -->
+    <line x1="15" y1="0" x2="60" y2="0" class="bond" />
+    <text x="70" y="5" class="lg">LG</text>
+    
+    <!-- R1 (up) -->
+    <line x1="0" y1="-15" x2="0" y2="-60" class="bond" />
+    <text x="0" y="-70" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+    
+    <!-- R2 (wedge, down left) -->
+    <polygon points="-5,15 -40,60 -20,65" class="bond-wedge" />
+    <text x="-40" y="85" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+    
+    <!-- R3 (dash, down further left) -->
+    <line x1="-10" y1="10" x2="-50" y2="30" class="bond-dash" />
+    <text x="-65" y="45" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">3</tspan></text>
+    
+    <!-- Arrows -->
+    <path d="M -80 -15 C -50 -40, -10 -30, -5 -15" class="arrow" />
+    <path d="M 30 -5 C 45 -20, 60 -15, 75 -15" class="arrow" />
+  </g>
+
+  <!-- Step 2: Transition State -->
+  <g transform="translate(420, 220)">
+    <text x="-120" y="30" class="bracket">[</text>
+    <text x="100" y="30" class="bracket">]</text>
+    <text x="120" y="-50" class="text" font-weight="bold" font-size="24">‡</text>
+    
+    <!-- Central C -->
+    <text x="0" y="5" class="text" text-anchor="middle">C</text>
+    
+    <!-- Nu partial bond -->
+    <line x1="-70" y1="0" x2="-15" y2="0" class="ts-bond" />
+    <text x="-80" y="5" class="nuc" text-anchor="end">Nu<tspan baseline-shift="super" font-size="14">δ-</tspan></text>
+    
+    <!-- LG partial bond -->
+    <line x1="15" y1="0" x2="70" y2="0" class="ts-bond" />
+    <text x="80" y="5" class="lg">LG<tspan baseline-shift="super" font-size="14">δ-</tspan></text>
+    
+    <!-- R1 (up) -->
+    <line x1="0" y1="-15" x2="0" y2="-60" class="bond" />
+    <text x="0" y="-70" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+    
+    <!-- R2 (wedge, down) -->
+    <polygon points="-5,15 -15,50 15,50" class="bond-wedge" />
+    <text x="0" y="70" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+    
+    <!-- R3 (dash, up-right ish but below the plane) -->
+    <line x1="10" y1="10" x2="30" y2="40" class="bond-dash" />
+    <text x="40" y="55" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">3</tspan></text>
+  </g>
+
+  <!-- Step 3: Product -->
+  <g transform="translate(680, 220)">
+    <text x="0" y="5" class="text" text-anchor="middle">C</text>
+    
+    <!-- Bond to Nu -->
+    <line x1="-60" y1="0" x2="-15" y2="0" class="bond" />
+    <text x="-70" y="5" class="nuc" text-anchor="end">Nu</text>
+    
+    <!-- R1 (up) -->
+    <line x1="0" y1="-15" x2="0" y2="-60" class="bond" />
+    <text x="0" y="-70" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+    
+    <!-- R2 (wedge, down right) -->
+    <polygon points="5,15 20,65 40,60" class="bond-wedge" />
+    <text x="40" y="85" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+    
+    <!-- R3 (dash, down further right) -->
+    <line x1="10" y1="10" x2="50" y2="30" class="bond-dash" />
+    <text x="65" y="45" class="text" text-anchor="middle">R<tspan baseline-shift="sub" font-size="12">3</tspan></text>
+    
+    <!-- Leaving Group -->
+    <text x="70" y="100" class="lg">+ LG<tspan baseline-shift="super" font-size="14">-</tspan></text>
+  </g>
+</svg>

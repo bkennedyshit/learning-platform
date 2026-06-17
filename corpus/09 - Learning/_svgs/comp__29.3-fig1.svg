@@ -1,0 +1,152 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .boxhi { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; }
+    .node  { fill: var(--interactive-accent, #58a6ff); opacity: 0.22; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.2; }
+    .leaf  { fill: #51cf66; opacity: 0.22; stroke: #51cf66; stroke-width: 1; }
+    .scope { fill: #ffd93d; opacity: 0.15; stroke: #ffd93d; stroke-width: 1; }
+    .vis   { fill: #cc5de8; opacity: 0.18; stroke: #cc5de8; stroke-width: 1; }
+    .arr   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arrhi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; fill: none; }
+  </style>
+  <defs>
+    <marker id="p3-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="p3-ahi" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">AST Structure &amp; Semantic Analysis Pipeline (Chapter 29.3)</text>
+
+  <!-- LEFT: AST for function def -->
+  <rect x="18" y="36" width="300" height="280" rx="5" class="box"/>
+  <text x="168" y="56" class="label" text-anchor="middle" font-weight="bold">AST for:  def add(x, y): return x + y</text>
+
+  <!-- FuncDef root -->
+  <rect x="106" y="68" width="120" height="28" rx="4" class="boxhi"/>
+  <text x="166" y="87" class="mono" text-anchor="middle">FuncDef "add"</text>
+
+  <!-- params -->
+  <rect x="32"  y="118" width="100" height="28" rx="4" class="node"/>
+  <text x="82"  y="137" class="mono" text-anchor="middle">Params</text>
+  <line x1="130" y1="96"  x2="82"  y2="118" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- body -->
+  <rect x="198" y="118" width="100" height="28" rx="4" class="node"/>
+  <text x="248" y="137" class="mono" text-anchor="middle">Body</text>
+  <line x1="202" y1="96"  x2="248" y2="118" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- Param x -->
+  <rect x="18"  y="168" width="52" height="26" rx="3" class="leaf"/>
+  <text x="44"  y="186" class="mono" text-anchor="middle">Param</text>
+  <text x="44"  y="197" class="small" text-anchor="middle">"x"</text>
+  <line x1="60"  y1="146" x2="44"  y2="168" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- Param y -->
+  <rect x="80"  y="168" width="52" height="26" rx="3" class="leaf"/>
+  <text x="106" y="186" class="mono" text-anchor="middle">Param</text>
+  <text x="106" y="197" class="small" text-anchor="middle">"y"</text>
+  <line x1="104" y1="146" x2="106" y2="168" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- Return stmt -->
+  <rect x="174" y="168" width="80" height="26" rx="3" class="node"/>
+  <text x="214" y="186" class="mono" text-anchor="middle">Return</text>
+  <line x1="248" y1="146" x2="214" y2="168" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- BinOp + -->
+  <rect x="174" y="214" width="80" height="26" rx="3" class="node"/>
+  <text x="214" y="232" class="mono" text-anchor="middle">BinOp +</text>
+  <line x1="214" y1="194" x2="214" y2="214" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- Name x -->
+  <rect x="152" y="260" width="52" height="26" rx="3" class="leaf"/>
+  <text x="178" y="278" class="mono" text-anchor="middle">Name</text>
+  <text x="178" y="289" class="small" text-anchor="middle">"x"</text>
+  <line x1="200" y1="240" x2="178" y2="260" class="arr" marker-end="url(#p3-arr)"/>
+
+  <!-- Name y -->
+  <rect x="218" y="260" width="52" height="26" rx="3" class="leaf"/>
+  <text x="244" y="278" class="mono" text-anchor="middle">Name</text>
+  <text x="244" y="289" class="small" text-anchor="middle">"y"</text>
+  <line x1="228" y1="240" x2="244" y2="260" class="arr" marker-end="url(#p3-arr)"/>
+
+  <text x="168" y="310" class="small" text-anchor="middle">Each node = Python dataclass / Rust enum variant</text>
+
+  <!-- MIDDLE: Symbol table -->
+  <rect x="332" y="36" width="180" height="280" rx="5" class="box"/>
+  <text x="422" y="56" class="label" text-anchor="middle" font-weight="bold">Symbol Table</text>
+  <text x="422" y="70" class="small" text-anchor="middle">(scope stack)</text>
+
+  <rect x="344" y="80"  width="156" height="50" rx="3" class="scope"/>
+  <text x="422" y="98"  class="small" text-anchor="middle">Global Scope</text>
+  <text x="422" y="112" class="mono" text-anchor="middle">add → FuncDef</text>
+  <text x="422" y="124" class="small" text-anchor="middle">level 0</text>
+
+  <line x1="422" y1="130" x2="422" y2="148" class="arr" marker-end="url(#p3-arr)"/>
+
+  <rect x="354" y="148" width="136" height="65" rx="3" class="scope"/>
+  <text x="422" y="165" class="small" text-anchor="middle">Function Scope "add"</text>
+  <text x="422" y="180" class="mono" text-anchor="middle">x → Param(int?)</text>
+  <text x="422" y="194" class="mono" text-anchor="middle">y → Param(int?)</text>
+  <text x="422" y="208" class="small" text-anchor="middle">level 1 · parent → Global</text>
+
+  <text x="422" y="240" class="small" text-anchor="middle">Lookup: inner → outer</text>
+  <text x="422" y="254" class="small" text-anchor="middle">Shadow: inner hides outer</text>
+  <text x="422" y="268" class="small" text-anchor="middle">Error: use-before-define</text>
+
+  <!-- RIGHT: Semantic pass pipeline -->
+  <rect x="526" y="36" width="176" height="280" rx="5" class="box"/>
+  <text x="614" y="56" class="label" text-anchor="middle" font-weight="bold">Semantic Passes</text>
+
+  <!-- Pass boxes -->
+  <rect x="538" y="70"  width="152" height="34" rx="3" class="vis"/>
+  <text x="614" y="85"  class="label" text-anchor="middle">1. Name Resolution</text>
+  <text x="614" y="98"  class="small" text-anchor="middle">every Name → symbol entry</text>
+
+  <line x1="614" y1="104" x2="614" y2="120" class="arr" marker-end="url(#p3-arr)"/>
+
+  <rect x="538" y="120" width="152" height="34" rx="3" class="vis"/>
+  <text x="614" y="135" class="label" text-anchor="middle">2. Type Checking</text>
+  <text x="614" y="148" class="small" text-anchor="middle">infer &amp; verify types</text>
+
+  <line x1="614" y1="154" x2="614" y2="170" class="arr" marker-end="url(#p3-arr)"/>
+
+  <rect x="538" y="170" width="152" height="34" rx="3" class="vis"/>
+  <text x="614" y="185" class="label" text-anchor="middle">3. Flow Analysis</text>
+  <text x="614" y="198" class="small" text-anchor="middle">reachability · definite assign</text>
+
+  <line x1="614" y1="204" x2="614" y2="220" class="arr" marker-end="url(#p3-arr)"/>
+
+  <rect x="538" y="220" width="152" height="34" rx="3" class="vis"/>
+  <text x="614" y="235" class="label" text-anchor="middle">4. Borrow Checking</text>
+  <text x="614" y="248" class="small" text-anchor="middle">(Rust) lifetime constraints</text>
+
+  <line x1="614" y1="254" x2="614" y2="270" class="arr" marker-end="url(#p3-arr)"/>
+
+  <rect x="538" y="270" width="152" height="34" rx="3" class="node"/>
+  <text x="614" y="285" class="label" text-anchor="middle">5. Annotated AST</text>
+  <text x="614" y="298" class="small" text-anchor="middle">→ feeds IR lowering</text>
+
+  <!-- BOTTOM: visitor pattern -->
+  <rect x="18" y="332" width="684" height="76" rx="5" class="box"/>
+  <text x="360" y="352" class="label" text-anchor="middle" font-weight="bold">Visitor Pattern — traversing the AST without modifying node classes</text>
+
+  <text x="36"  y="370" class="mono">class TypeCheckVisitor:</text>
+  <text x="36"  y="384" class="mono">    def visit_BinOp(self, node): ...</text>
+  <text x="36"  y="398" class="mono">    def visit_FuncDef(self, node): ...</text>
+
+  <text x="320" y="368" class="small" text-anchor="middle">Each pass = one visitor.</text>
+  <text x="320" y="382" class="small" text-anchor="middle">Node.accept(visitor)</text>
+  <text x="320" y="396" class="small" text-anchor="middle">dispatches to visit_NodeType.</text>
+
+  <rect x="480" y="344" width="210" height="58" rx="3" class="node"/>
+  <text x="585" y="362" class="small" text-anchor="middle">Alternatives: pattern matching</text>
+  <text x="585" y="376" class="small" text-anchor="middle">(Rust match), recursive functions,</text>
+  <text x="585" y="390" class="small" text-anchor="middle">tree-sitter queries (for tooling).</text>
+</svg>

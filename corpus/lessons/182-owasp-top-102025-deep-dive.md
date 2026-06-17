@@ -1,0 +1,267 @@
+---
+title: "18.2 — OWASP Top 10:2025 Deep Dive"
+subject: "Cybersecurity"
+catalog: advanced
+audience_tier: higher-education
+chapter: "18.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 18.2 — OWASP Top 10:2025 Deep Dive
+
+> *"The Top 10 is not a checklist. It is a calibration tool that says: at minimum, the most boring failure modes should not be your problem."*
+
+The OWASP Top 10:2025 release is the first major revision since 2021. It is backed by 589 CWEs and roughly 175,000 CVE records, and introduces two brand-new categories. (paraphrased from [owasp.org/Top10](https://owasp.org/Top10/) · [reflectiz.com Top 10 2025](https://www.reflectiz.com/blog/owasp-top-ten-2025/) · [invicti.com](https://invicti.com/blog/web-security/owasp-top-10) · [context7.com/owasp/top10](https://context7.com/owasp/top10))
+
+> Source rephrased for compliance: [owasp.org/Top10](https://owasp.org/Top10/) · [reflectiz.com](https://www.reflectiz.com/blog/owasp-top-ten-2025/) · [invicti.com](https://invicti.com/blog/web-security/owasp-top-10).
+
+The two notable structural changes in the 2025 edition:
+
+- **A03 — Software Supply Chain Failures** is a full first-class category (was a sub-bullet under A06 Vulnerable & Outdated Components in 2021).
+- **A10 — Mishandling of Exceptional Conditions** is brand-new (catches the failure-mode "the system swallows an error and silently fails open").
+- **SSRF** is folded into **A01 Broken Access Control** rather than a stand-alone category.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Recite all 10 categories of OWASP Top 10:2025 and explain what changed from 2021.
+2. Demonstrate at least one working exploit and one working remediation per category.
+3. Map each category to the relevant **OWASP ASVS** verification requirement.
+4. Decide which categories matter most for your specific architecture.
+5. Build a baseline checklist that catches 80% of these issues automatically in CI.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external):*
+> - 📺 [OWASP Top 10:2025 Overview (OWASP)](https://owasp.org/Top10/)
+> - 📺 [PortSwigger Web Security Academy — labs by category](https://portswigger.net/web-security)
+> - 📺 [Reflectiz — OWASP Top Ten 2025 changes](https://www.reflectiz.com/blog/owasp-top-ten-2025/)
+> - 📺 [Invicti — what's new in OWASP Top 10:2025](https://invicti.com/blog/web-security/owasp-top-10)
+
+![sec-18__fig3](sec-18__fig3.svg)
+*Fig 3: Buffer Overflow on the Stack*
+
+---
+
+## 📚 1. The Categories at a Glance
+
+| ID | Name | What it really means |
+|---|---|---|
+| **A01** | Broken Access Control (now incl. SSRF) | A user can perform an action they should not — including making the server fetch URLs they should not |
+| **A02** | Cryptographic Failures | Weak / missing crypto, hard-coded secrets, predictable randomness |
+| **A03** | **Software Supply Chain Failures** *(new)* | Compromised package, dependency confusion, unsigned build, no SBOM |
+| **A04** | Insecure Design | A flaw in the model itself — no authz boundary, no rate limit by design |
+| **A05** | Security Misconfiguration | Default creds, verbose errors, S3 buckets public, unnecessary features on |
+| **A06** | Vulnerable & Outdated Components | Unpatched libraries with known CVEs |
+| **A07** | Identification & Authentication Failures | Weak passwords, broken session handling, missing MFA, JWT footguns |
+| **A08** | Software & Data Integrity Failures | Unsigned releases, plugin auto-update from untrusted source, deserialization on attacker data |
+| **A09** | Security Logging & Monitoring Failures | No audit trail, missing alerts, redaction of useful info, log injection |
+| **A10** | **Mishandling of Exceptional Conditions** *(new)* | Errors swallowed, fail-open paths, partial failure leaves system in unsafe state |
+
+> Source rephrased for compliance: [owasp.org/Top10](https://owasp.org/Top10/) · [reflectiz](https://www.reflectiz.com/blog/owasp-top-ten-2025/).
+
+---
+
+## 🔓 2. A01 — Broken Access Control (incl. SSRF)
+
+**Exploit (IDOR):** An endpoint `GET /api/v1/invoices/12345` returns the invoice without checking that the requesting user owns it.
+```http
+GET /api/v1/invoices/12345  Authorization: Bearer <userA-token>   → 200 OK   (returns userB's invoice)
+```
+
+**Remediation:** Authorize on the *resource*, not the *route*.
+```python
+def get_invoice(invoice_id: str, user: User) -> Invoice:
+    invoice = repo.get(invoice_id)
+    if invoice.tenant_id != user.tenant_id:
+        raise NotFound()           # do not leak existence
+    if not user.can_read(invoice):
+        raise Forbidden()
+    return invoice
+```
+
+**SSRF flavor:** an endpoint that accepts a URL parameter (`?image_url=…`) is asked to fetch `http://169.254.169.254/latest/meta-data/iam/security-credentials/` (cloud metadata service). Defend by allow-listing schemes/hosts and using IMDSv2 on AWS.
+
+ASVS hooks: V4.1 Access Control, V4.2 Authorization decisions are server-side, V13.2 SSRF.
+
+---
+
+## 💉 3. A02 — Cryptographic Failures
+
+**Exploit:** AES-ECB on a profile image because "ECB sounds safe." Attacker decrypts patterns trivially.
+
+**Remediation:** Use `AES-GCM` or `ChaCha20-Poly1305` from a vetted library; never roll your own. Hash passwords with **Argon2id**, never MD5/SHA-1. Detail in [18.4 - Cryptography for Developers](18.4---Cryptography-for-Developers).
+
+---
+
+## 📦 4. A03 — Software Supply Chain Failures *(new in 2025)*
+
+**Exploit:** A typosquatted PyPI package (`reqeusts` instead of `requests`) ships a post-install script that exfiltrates `~/.aws/credentials`. Or a maintainer takeover injects a backdoor into a dependency at version `4.7.1`. Or a public npm package with the same name as your private internal package wins resolution and runs in CI.
+
+**Remediation:**
+- Pin versions with **lockfile + checksum** (`requirements.txt --hash=`, `package-lock.json` integrity, `go.sum`).
+- Generate an **SBOM** per build (CycloneDX or SPDX).
+- Sign artifacts with **Cosign** (Sigstore); verify on deploy.
+- Adopt **SLSA** L2/L3 build provenance (paraphrased from [slsa.dev](https://slsa.dev/) · [docs.sigstore.dev](https://docs.sigstore.dev/) · [liquibase.com](https://www.liquibase.com/blog/docker-supply-chain-security)).
+- Configure your private registry to **block public-fallback** (kills dependency confusion).
+
+> Source rephrased for compliance: [slsa.dev](https://slsa.dev/) · [docs.sigstore.dev](https://docs.sigstore.dev/).
+
+Full coverage in [18.5 - Secure SDLC & Supply Chain](18.5---Secure-SDLC-&-Supply-Chain).
+
+---
+
+## 🏗️ 5. A04 — Insecure Design
+
+**Exploit:** A "forgot password" flow that emails a 4-digit code that never expires, has no rate limit, and is single-channel. The flaw is in the design — no amount of code review fixes it.
+
+**Remediation:** Threat-model **before** building. Pair user stories with abuse cases (see [18.1 - Threat Modeling Fundamentals](18.1---Threat-Modeling-Fundamentals)). Bake rate limits, MFA, and abuse channels into the model.
+
+---
+
+## ⚙️ 6. A05 — Security Misconfiguration
+
+**Exploit:** A default-installed admin console at `/actuator` with a default password. Or a `Cache-Control: public` on a sensitive API. Or a `debug: true` in production leaking stack traces.
+
+**Remediation:** Harden via **policy-as-code** (Kyverno, OPA Gatekeeper, AWS Config rules). Bake `helmet`, security-headers middleware, and CSP into every web app by default.
+
+---
+
+## 🩹 7. A06 — Vulnerable & Outdated Components
+
+**Exploit:** `log4shell` (Log4j) sat in JVM apps for years. The team didn't even know they shipped it (transitive dependency).
+
+**Remediation:** **SCA** in CI (Snyk, Trivy, Dependabot, Renovate). Auto-PR weekly. Track time-to-patch as a metric.
+
+---
+
+## 🔑 8. A07 — Identification & Authentication Failures
+
+**Exploit:** A JWT validator that accepts `"alg": "none"`. Or a session ID exposed in URL. Or a "remember me" cookie that lives forever.
+
+**Remediation:** Use a battle-tested library. Detail in [18.3 - Authentication, Authorization & Identity](18.3---Authentication,-Authorization-&-Identity) — including passkeys / WebAuthn, which the FIDO Alliance reports cross **5 billion in active use** in 2026 with consumer awareness near 90%. (paraphrased from [fidoalliance.org State of Passkeys 2026](https://fidoalliance.org/the-state-of-passkeys-2026-global-consumer-and-workforce-report/))
+
+> Source rephrased for compliance: [fidoalliance.org](https://fidoalliance.org/the-state-of-passkeys-2026-global-consumer-and-workforce-report/).
+
+---
+
+## ✍️ 9. A08 — Software & Data Integrity Failures
+
+**Exploit:** Application auto-updates plugins from a CDN with no signature check; attacker compromises CDN; remote code execution everywhere. (This is essentially the SolarWinds class.)
+
+**Remediation:** Sign every artifact and verify before execution. Use Sigstore + SLSA + SBOM as a compound control. Disallow Java/Python `pickle`/`ObjectInputStream` over attacker-controlled data.
+
+---
+
+## 📜 10. A09 — Security Logging & Monitoring Failures
+
+**Exploit:** A breach takes 287 days to detect because nobody alerts on `5xx`s, failed-login spikes, or first-time geographic logins.
+
+**Remediation:** Centralize logs; redact secrets; alert on signal. Track CIS-aligned events (auth, authz failures, data exports, config changes). The detection vs. dwell-time trade is a business metric.
+
+---
+
+## 💥 11. A10 — Mishandling of Exceptional Conditions *(new in 2025)*
+
+**Exploit:** A payment service swallows a database timeout in a retry loop and "succeeds" — without persisting the order. The user is charged but receives nothing. Or an authn service returns "valid" when its key-fetch fails (fail-open).
+
+**Remediation:** Define behavior **for every error path** in design. Default to *fail-closed* for security decisions; default to *fail-loud* for data writes. Alert on swallowed exceptions. (paraphrased from [owasp.org/Top10](https://owasp.org/Top10/) · [invicti.com](https://invicti.com/blog/web-security/owasp-top-10) · [reflectiz.com](https://www.reflectiz.com/blog/owasp-top-ten-2025/))
+
+> Source rephrased for compliance: [owasp.org/Top10](https://owasp.org/Top10/) · [invicti.com](https://invicti.com/blog/web-security/owasp-top-10).
+
+```python
+# WRONG — fail-open authentication
+try:
+    pubkey = fetch_signing_key()
+    verify(token, pubkey)
+except Exception:
+    return True   # 💀 attacker wins when the JWKS endpoint is unreachable
+
+# RIGHT — fail-closed
+try:
+    pubkey = fetch_signing_key()
+    return verify(token, pubkey)
+except KeyFetchError:
+    log.error("JWKS unreachable; refusing token", exc_info=True)
+    metrics.increment("auth.fail_closed")
+    raise AuthDenied()
+```
+
+---
+
+## 📐 12. ASVS — From Top 10 to Acceptance Criteria
+
+The **OWASP Application Security Verification Standard** turns categories into testable requirements at three assurance levels (L1 quick / L2 most apps / L3 high-assurance). Each chapter category in the Top 10 maps to a chapter in ASVS:
+
+| Top 10 | Maps to ASVS chapters |
+|---|---|
+| A01 | V4 Access Control, V13 API |
+| A02 | V6 Cryptography, V9 Communications |
+| A03 | V14 Configuration, V10 Malicious Code |
+| A05 | V14 Configuration |
+| A07 | V2 Authentication, V3 Sessions |
+| A08 | V10 Malicious Code, V11 Business Logic |
+| A09 | V7 Logging |
+| A10 | V8 Data Protection, V11 Business Logic |
+
+In practice: pick L2 for production SaaS, encode ASVS items as automated tests, and track coverage as a security KPI.
+
+---
+
+## 🛠️ 13. Worked Example — A "Thirty-Minute Audit"
+
+For any service you ship, run this drill:
+
+1. Run a **dependency scan** (Trivy or Snyk) and record top 10 critical CVEs (A06).
+2. Run **Semgrep** with the `p/owasp-top-ten` rule pack (covers A01, A03, A07).
+3. Hit your own endpoints with **OWASP ZAP** in baseline mode (A05, A09).
+4. Inspect TLS with **testssl.sh** (A02).
+5. List every `try / except: pass` in the codebase (A10) and decide if each is intentional.
+6. Verify your container image is **Cosign-signed** (A03/A08).
+7. Confirm every endpoint has an authz check at the resource level (A01).
+
+This is 30 minutes of focused work that defends against the 70% of issues that actually break real companies.
+
+---
+
+## 🔗 14. Cross-links & Further Reading
+
+### Internal
+- [18.1 - Threat Modeling Fundamentals](18.1---Threat-Modeling-Fundamentals) — the questions that produce these answers
+- [18.3 - Authentication, Authorization & Identity](18.3---Authentication,-Authorization-&-Identity) — A07 deep dive
+- [18.4 - Cryptography for Developers](18.4---Cryptography-for-Developers) — A02 deep dive
+- [18.5 - Secure SDLC & Supply Chain](18.5---Secure-SDLC-&-Supply-Chain) — A03, A06, A08 deep dive
+- [18.7 - Cloud & Container Security](18.7---Cloud-&-Container-Security) — A05 deep dive in cloud
+- [Subject_Plan](Subject_Plan) — parameterized queries (Injection)
+
+### External
+- [OWASP Top 10:2025](https://owasp.org/Top10/) — the reference
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) — verification standard
+- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/) — one-page references
+- [PortSwigger Web Security Academy](https://portswigger.net/web-security) — free hands-on labs
+- [Reflectiz — OWASP Top Ten 2025](https://www.reflectiz.com/blog/owasp-top-ten-2025/) — change summary
+- [Invicti — OWASP Top 10:2025 walkthrough](https://invicti.com/blog/web-security/owasp-top-10)
+- [context7.com/owasp/top10](https://context7.com/owasp/top10) — searchable mirror
+
+---
+
+## ⚠️ 15. Common Misconceptions
+
+- **"It's just a Top 10."** It is the *priors*. If your codebase fails on A01 you do not get to argue about LLM Top 10.
+- **"SSRF is gone."** SSRF is now *part of* A01, not gone. The defenses are the same.
+- **"Supply chain is a vendor problem."** A03's promotion to a top-level category in 2025 says the opposite — your build pipeline is your responsibility.
+- **"A10 is about catching exceptions everywhere."** It is about choosing the *correct* failure mode (fail-closed for security, fail-loud for integrity) and asserting on it.
+- **"The Top 10 covers everything."** It is the floor, not the ceiling. ASVS, LLM Top 10, and your own threat model continue from here.
+
+---
+
+*Next: [18.3 - Authentication, Authorization & Identity](18.3---Authentication,-Authorization-&-Identity) — A07 in depth, plus passkeys, OAuth 2.1, and OIDC.*

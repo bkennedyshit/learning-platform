@@ -1,0 +1,39 @@
+<svg viewBox="0 0 560 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <style>
+    .box5 { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1.2; rx:6; }
+    .arr5 { stroke:var(--interactive-accent, #58a6ff); stroke-width:2; fill:none; }
+    .lab5 { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); text-anchor:middle; }
+    .lacc5{ font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); text-anchor:middle; font-weight:bold; }
+  </style>
+  <defs>
+    <marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <!-- Boxes for U, V, W -->
+  <rect x="20"  y="55" width="80" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1.2"/>
+  <text x="60"  y="85" class="lab5">U</text>
+  <rect x="230" y="55" width="80" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1.2"/>
+  <text x="270" y="85" class="lab5">V</text>
+  <rect x="440" y="55" width="80" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1.2"/>
+  <text x="480" y="85" class="lab5">W</text>
+  <!-- Arrows T and S -->
+  <line x1="100" y1="80" x2="230" y2="80" class="arr5" marker-end="url(#a5)"/>
+  <text x="165" y="70" class="lacc5">T  [matrix B]</text>
+  <line x1="310" y1="80" x2="440" y2="80" class="arr5" marker-end="url(#a5)"/>
+  <text x="375" y="70" class="lacc5">S  [matrix A]</text>
+  <!-- Curved arrow for S∘T -->
+  <path d="M 60 55 Q 270 10 480 55" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#a5)"/>
+  <text x="270" y="28" class="lacc5">S∘T  [matrix AB]</text>
+  <!-- Moving dots to show transformation flow -->
+  <!-- Step-by-step dot -->
+  <circle cx="60" cy="80" r="5" fill="var(--text-normal, #c9d1d9)">
+    <animate attributeName="cx" values="60; 270; 270; 480; 480" keyTimes="0; 0.3; 0.5; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1; 1; 1; 1; 0" keyTimes="0; 0.3; 0.5; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Direct composition dot -->
+  <circle r="5" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion path="M 60 55 Q 270 10 480 55" calcMode="linear" keyPoints="0; 1; 1" keyTimes="0; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1; 1; 0" keyTimes="0; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

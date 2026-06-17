@@ -1,0 +1,96 @@
+<svg viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="ss-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ss-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.8; fill: none; }
+    .ss-curve { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    .ss-elastic { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    .ss-plastic { stroke: #e74c3c; stroke-width: 3; fill: none; }
+    .ss-necking { stroke: #e74c3c; stroke-width: 3; fill: none; stroke-dasharray: 6 3; }
+    .ss-region { fill: var(--interactive-accent, #58a6ff); opacity: 0.06; }
+    .ss-region-plastic { fill: #e74c3c; opacity: 0.06; }
+    .ss-point { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: r 0.2s; }
+    .ss-point:hover { r: 7; }
+    .ss-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .ss-label-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .ss-label-red { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #e74c3c; font-weight: bold; }
+    .ss-dashed { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .ss-modulus { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+  </style>
+
+  <!-- Axes -->
+  <line x1="80" y1="360" x2="640" y2="360" class="ss-axis" marker-end="url(#ss-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <line x1="80" y1="360" x2="80" y2="30" class="ss-axis" marker-end="url(#ss-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <text x="650" y="365" class="ss-label">ε (Strain)</text>
+  <text x="80" y="20" class="ss-label" text-anchor="middle">σ (Stress)</text>
+
+  <!-- Elastic region shading -->
+  <path d="M 80 360 L 80 360 L 200 160 L 200 360 Z" class="ss-region"/>
+  <!-- Plastic region shading -->
+  <path d="M 200 360 L 200 160 Q 280 140 380 120 L 380 360 Z" class="ss-region-plastic"/>
+
+  <!-- Stress-strain curve -->
+  <!-- Linear elastic portion -->
+  <line x1="80" y1="360" x2="200" y2="160" class="ss-elastic"/>
+  <!-- Yield plateau / strain hardening -->
+  <path d="M 200 160 Q 220 155 240 152 Q 280 140 340 125 Q 400 110 450 95" class="ss-plastic"/>
+  <!-- Necking and fracture -->
+  <path d="M 450 95 Q 500 100 540 120 Q 570 140 580 170" class="ss-necking"/>
+  
+  <path id="full-curve" d="M 80 360 L 200 160 Q 220 155 240 152 Q 280 140 340 125 Q 400 110 450 95 Q 500 100 540 120 Q 570 140 580 170" fill="none" stroke="none"/>
+  <circle r="6" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="4s" repeatCount="indefinite">
+      <mpath href="#full-curve"/>
+    </animateMotion>
+  </circle>
+
+  <!-- Key points -->
+  <!-- Proportional limit -->
+  <circle cx="185" cy="175" r="5" class="ss-point"/>
+  <text x="145" y="170" class="ss-label">Proportional</text>
+  <text x="155" y="183" class="ss-label">Limit</text>
+
+  <!-- Yield point -->
+  <circle cx="200" cy="160" r="5" class="ss-point"/>
+  <text x="205" y="148" class="ss-label-accent">σ_y (Yield)</text>
+
+  <!-- Ultimate strength -->
+  <circle cx="450" cy="95" r="5" class="ss-point"/>
+  <text x="430" y="80" class="ss-label-red">σ_u (Ultimate)</text>
+
+  <!-- Fracture -->
+  <circle cx="580" cy="170" r="5" class="ss-point"/>
+  <text x="555" y="190" class="ss-label-red">Fracture</text>
+  <text x="585" y="175" class="ss-label">✕</text>
+
+  <!-- Young's modulus slope indicator -->
+  <line x1="100" y1="340" x2="180" y2="180" class="ss-modulus" stroke-dasharray="none"/>
+  <text x="105" y="260" class="ss-label-accent" transform="rotate(-63, 105, 260)">E = Δσ/Δε</text>
+
+  <!-- Dashed lines to axes -->
+  <line x1="80" y1="160" x2="200" y2="160" class="ss-dashed"/>
+  <text x="60" y="163" class="ss-label-accent" text-anchor="end">σ_y</text>
+  <line x1="80" y1="95" x2="450" y2="95" class="ss-dashed"/>
+  <text x="60" y="98" class="ss-label-red" text-anchor="end">σ_u</text>
+
+  <!-- Region labels -->
+  <text x="140" y="330" class="ss-label-accent" text-anchor="middle">Elastic</text>
+  <text x="140" y="345" class="ss-label-accent" text-anchor="middle">Region</text>
+  <text x="300" y="330" class="ss-label-red" text-anchor="middle">Strain</text>
+  <text x="300" y="345" class="ss-label-red" text-anchor="middle">Hardening</text>
+  <text x="520" y="330" class="ss-label-red" text-anchor="middle">Necking</text>
+
+  <!-- 0.2% offset line for yield -->
+  <line x1="120" y1="360" x2="240" y2="160" class="ss-dashed"/>
+  <text x="120" y="375" class="ss-label">0.2%</text>
+
+  <!-- Info box -->
+  <rect x="430" y="250" width="210" height="90" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="535" y="272" class="ss-label" text-anchor="middle" font-weight="bold">Hooke's Law (1D)</text>
+  <text x="535" y="295" class="ss-label-accent" text-anchor="middle" font-size="15">σ = Eε</text>
+  <text x="535" y="318" class="ss-label" text-anchor="middle">E = Young's Modulus</text>
+  <text x="535" y="335" class="ss-label" text-anchor="middle">Valid only in elastic region</text>
+</svg>

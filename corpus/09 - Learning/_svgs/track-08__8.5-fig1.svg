@@ -1,0 +1,93 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="f-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="f-arrow-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    @keyframes flow-f { to { stroke-dashoffset: -10; } }
+    @keyframes pulse-f { 0%, 100% { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); } 50% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); } }
+    .f-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; }
+    .f-box-hi { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; animation: pulse-f 2s ease-in-out infinite; }
+    .f-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .f-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .f-link { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .f-link-hi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 4; animation: flow-f 1s linear infinite; }
+    .f-phase { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .f-tree { fill: var(--interactive-accent, #58a6ff); opacity: 0.06; rx: 8; }
+  </style>
+  <!-- Three Trees -->
+  <rect x="10" y="40" width="220" height="300" class="f-tree"/>
+  <text x="120" y="30" class="f-title">Widget Tree</text>
+  <text x="120" y="58" class="f-phase">(Configuration / Blueprint)</text>
+  <rect x="250" y="40" width="220" height="300" class="f-tree"/>
+  <text x="360" y="30" class="f-title">Element Tree</text>
+  <text x="360" y="58" class="f-phase">(Lifecycle / Identity)</text>
+  <rect x="490" y="40" width="220" height="300" class="f-tree"/>
+  <text x="600" y="30" class="f-title">RenderObject Tree</text>
+  <text x="600" y="58" class="f-phase">(Layout / Paint)</text>
+  <!-- Widget Tree nodes -->
+  <rect x="60" y="75" width="120" height="28" class="f-box-hi"/>
+  <text x="120" y="93" class="f-label">MaterialApp</text>
+  <rect x="60" y="120" width="120" height="28" class="f-box"/>
+  <text x="120" y="138" class="f-label">Scaffold</text>
+  <rect x="30" y="165" width="90" height="28" class="f-box"/>
+  <text x="75" y="183" class="f-label">AppBar</text>
+  <rect x="130" y="165" width="90" height="28" class="f-box-hi"/>
+  <text x="175" y="183" class="f-label">Column</text>
+  <rect x="110" y="210" width="80" height="28" class="f-box"/>
+  <text x="150" y="228" class="f-label">Text</text>
+  <rect x="110" y="255" width="100" height="28" class="f-box-hi"/>
+  <text x="160" y="273" class="f-label">ElevatedButton</text>
+  <line x1="120" y1="103" x2="120" y2="120" class="f-link"/>
+  <line x1="100" y1="148" x2="75" y2="165" class="f-link"/>
+  <line x1="140" y1="148" x2="175" y2="165" class="f-link-hi"/>
+  <line x1="160" y1="193" x2="150" y2="210" class="f-link"/>
+  <line x1="175" y1="193" x2="160" y2="255" class="f-link-hi"/>
+  <!-- Element Tree nodes -->
+  <rect x="300" y="75" width="120" height="28" class="f-box"/>
+  <text x="360" y="93" class="f-label">ComponentElement</text>
+  <rect x="300" y="120" width="120" height="28" class="f-box"/>
+  <text x="360" y="138" class="f-label">ComponentElement</text>
+  <rect x="270" y="165" width="100" height="28" class="f-box"/>
+  <text x="320" y="183" class="f-label">RenderElement</text>
+  <rect x="380" y="165" width="100" height="28" class="f-box-hi"/>
+  <text x="430" y="183" class="f-label">RenderElement</text>
+  <rect x="360" y="210" width="100" height="28" class="f-box"/>
+  <text x="410" y="228" class="f-label">RenderElement</text>
+  <rect x="360" y="255" width="100" height="28" class="f-box-hi"/>
+  <text x="410" y="273" class="f-label">StatefulElement</text>
+  <line x1="360" y1="103" x2="360" y2="120" class="f-link"/>
+  <line x1="340" y1="148" x2="320" y2="165" class="f-link"/>
+  <line x1="380" y1="148" x2="430" y2="165" class="f-link-hi"/>
+  <line x1="420" y1="193" x2="410" y2="210" class="f-link"/>
+  <line x1="430" y1="193" x2="410" y2="255" class="f-link-hi"/>
+  <!-- RenderObject Tree nodes -->
+  <rect x="540" y="120" width="130" height="28" class="f-box"/>
+  <text x="605" y="138" class="f-label">RenderView</text>
+  <rect x="520" y="165" width="100" height="28" class="f-box"/>
+  <text x="570" y="183" class="f-label">RenderFlex</text>
+  <rect x="630" y="165" width="80" height="28" class="f-box-hi"/>
+  <text x="670" y="183" class="f-label">RenderFlex</text>
+  <rect x="610" y="210" width="100" height="28" class="f-box"/>
+  <text x="660" y="228" class="f-label">RenderParagraph</text>
+  <rect x="610" y="255" width="100" height="28" class="f-box-hi"/>
+  <text x="660" y="273" class="f-label">RenderBox</text>
+  <line x1="605" y1="148" x2="570" y2="165" class="f-link"/>
+  <line x1="605" y1="148" x2="670" y2="165" class="f-link-hi"/>
+  <line x1="670" y1="193" x2="660" y2="210" class="f-link"/>
+  <line x1="670" y1="193" x2="660" y2="255" class="f-link-hi"/>
+  <!-- Arrows between trees -->
+  <line x1="230" y1="200" x2="250" y2="200" class="f-link-hi" marker-end="url(#f-arrow)"/>
+  <line x1="470" y1="200" x2="490" y2="200" class="f-link-hi" marker-end="url(#f-arrow)"/>
+  <!-- Bottom: Engine layer -->
+  <rect x="10" y="365" width="700" height="60" class="f-box"/>
+  <text x="360" y="385" class="f-title">Impeller / Skia Rendering Engine</text>
+  <text x="200" y="410" class="f-label">Layout (constraints down, sizes up)</text>
+  <text x="520" y="410" class="f-label">Paint (Canvas commands → GPU)</text>
+  <line x1="600" y1="283" x2="600" y2="365" class="f-link-hi" marker-end="url(#f-arrow)"/>
+  <text x="640" y="330" class="f-phase">paint()</text>
+</svg>

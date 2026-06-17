@@ -1,0 +1,95 @@
+<svg viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="ns-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .wall { stroke: var(--text-normal, #c9d1d9); stroke-width: 3; fill: none; }
+    .wall-hatch { stroke: var(--text-muted, #8b949e); stroke-width: 1; opacity: 0.5; }
+    .profile-curve { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.08; }
+    .vel-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; marker-end: url(#ns-arrow); color: var(--interactive-accent, #58a6ff); transition: all 0.2s; cursor: pointer; }
+    .vel-arrow:hover { stroke-width: 3; filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .pressure-arrow { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; marker-end: url(#ns-arrow); color: var(--text-accent, #79c0ff); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .centerline { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 5 3; }
+    .particle { fill: var(--interactive-accent, #58a6ff); }
+    @keyframes moveParticle { 0% { cx: 100; } 100% { cx: 460; } }
+    .particle-anim { animation: moveParticle 4s linear infinite; }
+  </style>
+
+  <!-- Walls -->
+  <line x1="80" y1="80" x2="480" y2="80" class="wall"/>
+  <line x1="80" y1="300" x2="480" y2="300" class="wall"/>
+  <!-- Wall hatching -->
+  <g class="wall-hatch">
+    <line x1="100" y1="75" x2="90" y2="65"/><line x1="130" y1="75" x2="120" y2="65"/>
+    <line x1="160" y1="75" x2="150" y2="65"/><line x1="190" y1="75" x2="180" y2="65"/>
+    <line x1="220" y1="75" x2="210" y2="65"/><line x1="250" y1="75" x2="240" y2="65"/>
+    <line x1="280" y1="75" x2="270" y2="65"/><line x1="310" y1="75" x2="300" y2="65"/>
+    <line x1="340" y1="75" x2="330" y2="65"/><line x1="370" y1="75" x2="360" y2="65"/>
+    <line x1="400" y1="75" x2="390" y2="65"/><line x1="430" y1="75" x2="420" y2="65"/>
+    <line x1="460" y1="75" x2="450" y2="65"/>
+    <line x1="100" y1="305" x2="90" y2="315"/><line x1="130" y1="305" x2="120" y2="315"/>
+    <line x1="160" y1="305" x2="150" y2="315"/><line x1="190" y1="305" x2="180" y2="315"/>
+    <line x1="220" y1="305" x2="210" y2="315"/><line x1="250" y1="305" x2="240" y2="315"/>
+    <line x1="280" y1="305" x2="270" y2="315"/><line x1="310" y1="305" x2="300" y2="315"/>
+    <line x1="340" y1="305" x2="330" y2="315"/><line x1="370" y1="305" x2="360" y2="315"/>
+    <line x1="400" y1="305" x2="390" y2="315"/><line x1="430" y1="305" x2="420" y2="315"/>
+    <line x1="460" y1="305" x2="450" y2="315"/>
+  </g>
+
+  <!-- Centerline -->
+  <line x1="80" y1="190" x2="480" y2="190" class="centerline"/>
+  <text x="490" y="194" class="label" style="fill: var(--text-muted, #8b949e);">y=h/2</text>
+
+  <!-- Parabolic velocity profile -->
+  <path d="M 120 80 Q 120 190 120 300 L 120 300 Q 230 300 230 190 Q 230 80 120 80 Z" class="profile-curve" transform="rotate(0)"/>
+  <!-- Actually draw the parabola correctly: at x=120, show profile from y=80 to y=300 -->
+  <path d="M 120 80 C 120 130 230 150 230 190 C 230 230 120 250 120 300" class="profile-curve" style="fill: none;"/>
+
+  <!-- Velocity arrows at different heights -->
+  <line x1="120" y1="100" x2="135" y2="100" class="vel-arrow">
+    <animate attributeName="x2" values="135; 140; 135" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="120" x2="155" y2="120" class="vel-arrow">
+    <animate attributeName="x2" values="155; 165; 155" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="140" x2="180" y2="140" class="vel-arrow">
+    <animate attributeName="x2" values="180; 195; 180" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="160" x2="210" y2="160" class="vel-arrow">
+    <animate attributeName="x2" values="210; 230; 210" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="190" x2="230" y2="190" class="vel-arrow">
+    <animate attributeName="x2" values="230; 255; 230" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="220" x2="210" y2="220" class="vel-arrow">
+    <animate attributeName="x2" values="210; 230; 210" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="240" x2="180" y2="240" class="vel-arrow">
+    <animate attributeName="x2" values="180; 195; 180" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="260" x2="155" y2="260" class="vel-arrow">
+    <animate attributeName="x2" values="155; 165; 155" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="120" y1="280" x2="135" y2="280" class="vel-arrow">
+    <animate attributeName="x2" values="135; 140; 135" dur="2s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Pressure gradient arrow -->
+  <line x1="350" y1="340" x2="250" y2="340" class="pressure-arrow"/>
+  <text x="300" y="360" class="label" style="fill: var(--text-accent, #79c0ff);" text-anchor="middle">-dP/dx = G</text>
+
+  <!-- Animated particle at centerline -->
+  <circle cy="190" r="4" class="particle particle-anim"/>
+
+  <!-- Labels -->
+  <text x="55" y="84" class="label">y = h</text>
+  <text x="55" y="304" class="label">y = 0</text>
+  <text x="235" y="185" class="label-accent">u_max</text>
+  <text x="280" y="50" class="title-label" text-anchor="middle">u(y) = (G/2μ)y(h−y)</text>
+</svg>

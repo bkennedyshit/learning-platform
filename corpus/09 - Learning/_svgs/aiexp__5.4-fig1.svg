@@ -1,0 +1,164 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-rag" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rag-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; cursor: pointer; transition: all 0.3s ease; }
+    .rag-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.1; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .db-box { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; rx: 12; transition: all 0.3s ease; }
+    .db-box:hover { fill: var(--text-accent, #79c0ff); fill-opacity: 0.08; filter: drop-shadow(0 0 6px var(--text-accent, #79c0ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+
+    /* Animated Flows */
+    .flow { 
+      stroke: var(--text-normal, #c9d1d9); 
+      stroke-dasharray: 6,4; 
+      stroke-width: 1.5; 
+      fill: none; 
+      animation: rag-flow-move 1.8s linear infinite; 
+    }
+    .flow-alt { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-dasharray: 5,3; 
+      stroke-width: 2; 
+      fill: none; 
+      animation: rag-flow-move 0.8s linear infinite; 
+    }
+    
+    @keyframes rag-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Interactive Element Glowing Animations */
+    .vectordb-active {
+      animation: db-glow 3.5s ease-in-out infinite;
+    }
+    .embed-active {
+      animation: embed-glow 4s ease-in-out infinite;
+    }
+    .llm-active {
+      animation: llm-glow 3s ease-in-out infinite;
+    }
+    .response-active {
+      animation: response-glow 3s ease-in-out infinite;
+    }
+    .reranker-active {
+      stroke: #ff7b72;
+      animation: reranker-glow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes db-glow {
+      0%, 100% { stroke: var(--text-accent, #79c0ff); fill: rgba(121, 192, 255, 0.01); }
+      50% { stroke: #d2a8ff; fill: rgba(210, 168, 255, 0.08); filter: drop-shadow(0 0 8px rgba(121, 192, 255, 0.5)); }
+    }
+
+    @keyframes embed-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.04); }
+    }
+
+    @keyframes llm-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: rgba(88, 166, 255, 0.02); }
+      50% { stroke: var(--text-accent, #79c0ff); stroke-width: 3.5; fill: rgba(121, 192, 255, 0.08); filter: drop-shadow(0 0 6px rgba(88, 166, 255, 0.4)); }
+    }
+
+    @keyframes response-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: #3fb950; fill: rgba(63, 185, 80, 0.06); filter: drop-shadow(0 0 5px rgba(63, 185, 80, 0.3)); }
+    }
+
+    @keyframes reranker-glow {
+      0%, 100% { stroke: #ff7b72; fill: rgba(255, 123, 114, 0.01); }
+      50% { stroke: #ff9e96; fill: rgba(255, 123, 114, 0.06); filter: drop-shadow(0 0 4px rgba(255, 123, 114, 0.3)); }
+    }
+  </style>
+
+  <text x="350" y="25" class="title" text-anchor="middle">RAG Pipeline Architecture</text>
+
+  <!-- Ingestion Phase (top) -->
+  <text x="100" y="55" class="label" text-anchor="middle" font-weight="bold">INGESTION</text>
+
+  <rect x="20" y="65" width="90" height="40" class="rag-box"/>
+  <text x="65" y="85" class="label" text-anchor="middle">Documents</text>
+  <text x="65" y="98" class="sublabel" text-anchor="middle">PDF, MD, TXT</text>
+
+  <rect x="130" y="65" width="90" height="40" class="rag-box"/>
+  <text x="175" y="85" class="label" text-anchor="middle">Chunker</text>
+  <text x="175" y="98" class="sublabel" text-anchor="middle">512 tok, 50 overlap</text>
+  <line x1="110" y1="85" x2="130" y2="85" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <rect x="240" y="65" width="100" height="40" class="rag-box embed-active"/>
+  <text x="290" y="85" class="label" text-anchor="middle">Embed Model</text>
+  <text x="290" y="98" class="sublabel" text-anchor="middle">bge-large (1024d)</text>
+  <line x1="220" y1="85" x2="240" y2="85" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Vector DB -->
+  <rect x="380" y="55" width="130" height="60" class="db-box vectordb-active"/>
+  <text x="445" y="80" class="label" text-anchor="middle" font-weight="bold">Vector DB</text>
+  <text x="445" y="98" class="sublabel" text-anchor="middle">Qdrant / Chroma / FAISS</text>
+  <line x1="340" y1="85" x2="380" y2="85" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Query Phase (bottom) -->
+  <text x="100" y="160" class="label" text-anchor="middle" font-weight="bold">RETRIEVAL &amp; GENERATION</text>
+
+  <!-- User Query -->
+  <rect x="20" y="175" width="90" height="40" class="rag-box"/>
+  <text x="65" y="195" class="label" text-anchor="middle">User Query</text>
+  <text x="65" y="208" class="sublabel" text-anchor="middle">"How does X?"</text>
+
+  <!-- Query Embedding -->
+  <rect x="130" y="175" width="100" height="40" class="rag-box embed-active"/>
+  <text x="180" y="195" class="label" text-anchor="middle">Query Embed</text>
+  <text x="180" y="208" class="sublabel" text-anchor="middle">same model</text>
+  <line x1="110" y1="195" x2="130" y2="195" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Similarity Search -->
+  <line x1="230" y1="195" x2="380" y2="195" class="flow-alt" marker-end="url(#arrow-rag)"/>
+  <text x="305" y="188" class="sublabel" text-anchor="middle">cosine similarity</text>
+
+  <!-- Retrieved chunks -->
+  <rect x="380" y="175" width="130" height="40" class="rag-box"/>
+  <text x="445" y="192" class="label" text-anchor="middle">Top-K Chunks</text>
+  <text x="445" y="208" class="sublabel" text-anchor="middle">k=5, score > 0.7</text>
+
+  <!-- Connection from DB -->
+  <line x1="445" y1="115" x2="445" y2="175" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Reranker (optional) -->
+  <rect x="380" y="235" width="130" height="35" class="rag-box reranker-active" stroke-dasharray="4,2"/>
+  <text x="445" y="255" class="label" text-anchor="middle">Reranker (optional)</text>
+  <text x="445" y="265" class="sublabel" text-anchor="middle">cross-encoder</text>
+  <line x1="445" y1="215" x2="445" y2="235" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Context Assembly -->
+  <rect x="250" y="280" width="140" height="50" class="rag-box"/>
+  <text x="320" y="300" class="label" text-anchor="middle" font-weight="bold">Prompt Assembly</text>
+  <text x="320" y="318" class="sublabel" text-anchor="middle">System + Context + Query</text>
+  <line x1="380" y1="260" x2="320" y2="280" class="flow" marker-end="url(#arrow-rag)"/>
+  <line x1="65" y1="215" x2="65" y2="305" class="flow"/>
+  <line x1="65" y1="305" x2="250" y2="305" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- LLM -->
+  <rect x="430" y="280" width="120" height="50" class="rag-box llm-active" stroke-width="3"/>
+  <text x="490" y="300" class="label" text-anchor="middle" font-weight="bold">LLM</text>
+  <text x="490" y="318" class="sublabel" text-anchor="middle">Llama-3 / Qwen2.5</text>
+  <line x1="390" y1="305" x2="430" y2="305" class="flow" marker-end="url(#arrow-rag)"/>
+
+  <!-- Response -->
+  <rect x="580" y="280" width="100" height="50" class="rag-box response-active"/>
+  <text x="630" y="300" class="label" text-anchor="middle" font-weight="bold">Response</text>
+  <text x="630" y="318" class="sublabel" text-anchor="middle">grounded answer</text>
+  <line x1="550" y1="305" x2="580" y2="305" class="flow-alt" marker-end="url(#arrow-rag)"/>
+
+  <!-- BM25 hybrid -->
+  <rect x="540" y="65" width="100" height="50" class="rag-box" stroke-dasharray="4,2"/>
+  <text x="590" y="85" class="label" text-anchor="middle" font-weight="bold">BM25</text>
+  <text x="590" y="100" class="sublabel" text-anchor="middle">sparse retrieval</text>
+  <line x1="510" y1="90" x2="540" y2="90" class="flow" marker-end="url(#arrow-rag)"/>
+  <text x="590" y="55" class="sublabel" text-anchor="middle">HYBRID SEARCH</text>
+</svg>

@@ -1,0 +1,232 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .axis-x { stroke: #ff6b6b; }
+    .axis-y { stroke: #51cf66; }
+    .axis-z { stroke: #4dabf7; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .pipeline { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .brep { fill: #ff6b6b; opacity: 0.15; stroke: #ff6b6b; stroke-width: 1.5; rx: 4; }
+    .mesh { fill: #51cf66; opacity: 0.15; stroke: #51cf66; stroke-width: 1.5; rx: 4; }
+    .nurbs { fill: #ffd93d; opacity: 0.18; stroke: #ffd93d; stroke-width: 1.5; rx: 4; }
+    .sdf  { fill: #c084fc; opacity: 0.18; stroke: #c084fc; stroke-width: 1.5; rx: 4; }
+    
+    @keyframes pulse-rect {
+      0%, 100% { filter: drop-shadow(0 0 1px currentColor); opacity: 0.15; }
+      50% { filter: drop-shadow(0 0 8px currentColor); opacity: 0.3; }
+    }
+    .brep-glow { animation: pulse-rect 6s infinite ease-in-out; }
+    .mesh-glow { animation: pulse-rect 6s infinite ease-in-out 1.5s; }
+    .nurbs-glow { animation: pulse-rect 6s infinite ease-in-out 3s; }
+    .sdf-glow { animation: pulse-rect 6s infinite ease-in-out 4.5s; }
+  </style>
+  <defs>
+    <marker id="arr3d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="350" y="24" class="title" text-anchor="middle">3D Modelling Foundations — Spaces, Representations, Pipeline</text>
+
+  <!-- LEFT: Coordinate spaces -->
+  <rect x="20" y="50" width="220" height="170" class="box"/>
+  <text x="130" y="72" class="label" text-anchor="middle" font-weight="bold">Coordinate Spaces (TRS chain)</text>
+
+  <!-- Axes diagram -->
+  <line x1="80" y1="170" x2="160" y2="170" class="axis axis-x" marker-end="url(#arr3d)"/>
+  <line x1="80" y1="170" x2="80"  y2="100" class="axis axis-y" marker-end="url(#arr3d)"/>
+  <line x1="80" y1="170" x2="50"  y2="200" class="axis axis-z" marker-end="url(#arr3d)"/>
+  <text x="165" y="173" class="sublabel" fill="#ff6b6b">X</text>
+  <text x="68"  y="98"  class="sublabel" fill="#51cf66">Y</text>
+  <text x="35"  y="207" class="sublabel" fill="#4dabf7">Z</text>
+
+  <!-- TRS Object Animation (Composite Translation, Rotation, and Scale) -->
+  <g>
+    <!-- Translation path -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+        values="80,170; 110,140; 140,120; 110,150; 80,170"
+        keyTimes="0; 0.25; 0.5; 0.75; 1"
+        dur="8s" repeatCount="indefinite" />
+      <!-- Rotation -->
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+          values="0; 360"
+          dur="6s" repeatCount="indefinite" />
+        <!-- Scale -->
+        <g>
+          <animateTransform attributeName="transform" type="scale"
+            values="0.6; 1.2; 0.6"
+            dur="4s" repeatCount="indefinite" />
+          <!-- The local coordinate indicator shape -->
+          <polygon points="0,-12 12,0 0,12 -12,0" fill="none" stroke="#ffd93d" stroke-width="1.5" />
+          <line x1="-12" y1="0" x2="12" y2="0" stroke="#ffd93d" stroke-dasharray="2 2" stroke-width="0.8" />
+          <line x1="0" y1="-12" x2="0" y2="12" stroke="#ffd93d" stroke-dasharray="2 2" stroke-width="0.8" />
+          <circle r="3" fill="#ffd93d" />
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <text x="35" y="200" class="sublabel">Object → World → View → Clip</text>
+  <text x="35" y="213" class="sublabel">M_world = T · R · S</text>
+
+  <!-- MIDDLE-TOP: Representations -->
+  <rect x="260" y="50" width="420" height="170" class="box"/>
+  <text x="470" y="72" class="label" text-anchor="middle" font-weight="bold">Geometry Representations</text>
+
+  <!-- B-Rep box with tracing contour -->
+  <g>
+    <rect x="275" y="90" width="92" height="60" class="brep brep-glow"/>
+    <!-- Boundary Tracing Animation -->
+    <rect x="280" y="95" width="82" height="50" fill="none" stroke="#ff6b6b" stroke-width="1.5" rx="3" stroke-dasharray="264" opacity="0.8">
+      <animate attributeName="stroke-dashoffset" values="264; 0" dur="4s" repeatCount="indefinite" />
+    </rect>
+    <text x="321" y="112" class="label" text-anchor="middle">B-rep</text>
+    <text x="321" y="128" class="sublabel" text-anchor="middle">Parasolid · ACIS</text>
+    <text x="321" y="142" class="sublabel" text-anchor="middle">Revit · SolidWorks</text>
+  </g>
+
+  <!-- Mesh box with animated vertex graph -->
+  <g>
+    <rect x="377" y="90" width="92" height="60" class="mesh mesh-glow"/>
+    <g stroke="#51cf66" stroke-width="0.8" fill="none" opacity="0.7">
+      <path d="M392,105 L415,98 L438,107 L455,125 L430,143 L400,135 Z M392,105 L425,120 M415,98 L425,120 M438,107 L425,120 M455,125 L425,120 M430,143 L425,120 M400,135 L425,120"/>
+      <circle cx="425" cy="120" r="2.5" fill="#51cf66" stroke="none">
+        <animate attributeName="opacity" values="0.3; 1; 0.3" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="415" cy="98" r="1.5" fill="#51cf66" stroke="none"/>
+      <circle cx="438" cy="107" r="1.5" fill="#51cf66" stroke="none"/>
+    </g>
+    <text x="423" y="112" class="label" text-anchor="middle">Mesh</text>
+    <text x="423" y="128" class="sublabel" text-anchor="middle">Triangles / quads</text>
+    <text x="423" y="142" class="sublabel" text-anchor="middle">Maya · Blender</text>
+  </g>
+
+  <!-- NURBS box with dynamic control curve morphing -->
+  <g>
+    <rect x="479" y="90" width="92" height="60" class="nurbs nurbs-glow"/>
+    <g opacity="0.8">
+      <path fill="none" stroke="#ffd93d" stroke-width="1.5">
+        <animate attributeName="d" 
+          values="M 489,130 Q 510,95 525,125 T 561,110;
+                  M 489,120 Q 505,135 525,105 T 561,130;
+                  M 489,130 Q 510,95 525,125 T 561,110" 
+          dur="6s" repeatCount="indefinite" />
+      </path>
+      <path fill="none" stroke="#ffd93d" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.3">
+        <animate attributeName="d" 
+          values="M 489,130 L 510,95 L 540,155 L 561,110;
+                  M 489,120 L 505,135 L 545,75 L 561,130;
+                  M 489,130 L 510,95 L 540,155 L 561,110" 
+          dur="6s" repeatCount="indefinite" />
+      </path>
+      <circle r="2" fill="#ffd93d">
+        <animate attributeName="cx" values="510; 505; 510" dur="6s" repeatCount="indefinite" />
+        <animate attributeName="cy" values="95; 135; 95" dur="6s" repeatCount="indefinite" />
+      </circle>
+      <circle r="2" fill="#ffd93d">
+        <animate attributeName="cx" values="540; 545; 540" dur="6s" repeatCount="indefinite" />
+        <animate attributeName="cy" values="155; 75; 155" dur="6s" repeatCount="indefinite" />
+      </circle>
+    </g>
+    <text x="525" y="112" class="label" text-anchor="middle">NURBS</text>
+    <text x="525" y="128" class="sublabel" text-anchor="middle">Smooth surfaces</text>
+    <text x="525" y="142" class="sublabel" text-anchor="middle">Rhino · Alias</text>
+  </g>
+
+  <!-- SDF box with level-set contours -->
+  <g>
+    <rect x="581" y="90" width="92" height="60" class="sdf sdf-glow"/>
+    <g stroke="#c084fc" stroke-width="0.8" fill="none" opacity="0.6" stroke-dasharray="2 2">
+      <circle cx="627" cy="120" r="10">
+        <animate attributeName="r" values="5; 15; 5" dur="4s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.8; 0.2; 0.8" dur="4s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="627" cy="120" r="20">
+        <animate attributeName="r" values="15; 25; 15" dur="4s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.6; 0.1; 0.6" dur="4s" repeatCount="indefinite" />
+      </circle>
+      <path fill="#c084fc" stroke="none" opacity="0.25">
+        <animate attributeName="d" 
+          values="M 617,120 Q 627,110 637,120 T 617,120;
+                  M 612,120 Q 627,95 642,120 T 612,120;
+                  M 617,120 Q 627,110 637,120 T 617,120"
+          dur="4s" repeatCount="indefinite" />
+      </path>
+    </g>
+    <text x="627" y="112" class="label" text-anchor="middle">SDF / Implicit</text>
+    <text x="627" y="128" class="sublabel" text-anchor="middle">Signed distance</text>
+    <text x="627" y="142" class="sublabel" text-anchor="middle">nTopology · ZBrush</text>
+  </g>
+
+  <text x="470" y="180" class="sublabel" text-anchor="middle">Each tool natively prefers ONE representation;</text>
+  <text x="470" y="194" class="sublabel" text-anchor="middle">interop = lossy translation between them.</text>
+  <text x="470" y="210" class="sublabel" text-anchor="middle">Up-axis: Y-up (Maya/Unity/glTF) · Z-up (Revit/Blender/USD/Unreal).</text>
+
+  <!-- BOTTOM: Pipeline strip -->
+  <rect x="20" y="245" width="660" height="155" class="box"/>
+  <text x="350" y="267" class="label" text-anchor="middle" font-weight="bold">From Author Tool → Productized Asset</text>
+
+  <g>
+    <rect x="35"  y="290" width="100" height="45" class="pipeline"/>
+    <text x="85"  y="312" class="label" text-anchor="middle">Author</text>
+    <text x="85"  y="326" class="sublabel" text-anchor="middle">Revit · Fusion · Maya</text>
+  </g>
+
+  <g>
+    <rect x="155" y="290" width="100" height="45" class="pipeline"/>
+    <text x="205" y="312" class="label" text-anchor="middle">Interop</text>
+    <text x="205" y="326" class="sublabel" text-anchor="middle">IFC · STEP · USD</text>
+  </g>
+
+  <g>
+    <rect x="275" y="290" width="100" height="45" class="pipeline"/>
+    <text x="325" y="312" class="label" text-anchor="middle">DCC</text>
+    <text x="325" y="326" class="sublabel" text-anchor="middle">Blender · 3ds Max</text>
+  </g>
+
+  <g>
+    <rect x="395" y="290" width="100" height="45" class="pipeline"/>
+    <text x="445" y="312" class="label" text-anchor="middle">Real-Time</text>
+    <text x="445" y="326" class="sublabel" text-anchor="middle">glTF · USD → Unity/Unreal</text>
+  </g>
+
+  <g>
+    <rect x="515" y="290" width="150" height="45" class="pipeline"/>
+    <text x="590" y="312" class="label" text-anchor="middle">Productize</text>
+    <text x="590" y="326" class="sublabel" text-anchor="middle">VR · Web · Add-in · Library</text>
+  </g>
+
+  <!-- Connective Arrows & Flowing Energy Pulses -->
+  <line x1="135" y1="312" x2="155" y2="312" class="arrow" marker-end="url(#arr3d)"/>
+  <circle cx="135" cy="312" r="2.5" fill="#58a6ff">
+    <animate attributeName="cx" values="135; 155" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0; 1; 0" dur="2s" repeatCount="indefinite" />
+  </circle>
+
+  <line x1="255" y1="312" x2="275" y2="312" class="arrow" marker-end="url(#arr3d)"/>
+  <circle cx="255" cy="312" r="2.5" fill="#58a6ff">
+    <animate attributeName="cx" values="255; 275" dur="2s" repeatCount="indefinite" begin="0.4s" />
+    <animate attributeName="opacity" values="0; 1; 0" dur="2s" repeatCount="indefinite" begin="0.4s" />
+  </circle>
+
+  <line x1="375" y1="312" x2="395" y2="312" class="arrow" marker-end="url(#arr3d)"/>
+  <circle cx="375" cy="312" r="2.5" fill="#58a6ff">
+    <animate attributeName="cx" values="375; 395" dur="2s" repeatCount="indefinite" begin="0.8s" />
+    <animate attributeName="opacity" values="0; 1; 0" dur="2s" repeatCount="indefinite" begin="0.8s" />
+  </circle>
+
+  <line x1="495" y1="312" x2="515" y2="312" class="arrow" marker-end="url(#arr3d)"/>
+  <circle cx="495" cy="312" r="2.5" fill="#58a6ff">
+    <animate attributeName="cx" values="495; 515" dur="2s" repeatCount="indefinite" begin="1.2s" />
+    <animate attributeName="opacity" values="0; 1; 0" dur="2s" repeatCount="indefinite" begin="1.2s" />
+  </circle>
+
+  <text x="350" y="365" class="sublabel" text-anchor="middle">Speckle / OpenUSD increasingly bridge every step — the open data layer for 2026 AEC + spatial-computing pipelines.</text>
+  <text x="350" y="385" class="sublabel" text-anchor="middle">"The model is the message. The pipeline is the product."</text>
+</svg>

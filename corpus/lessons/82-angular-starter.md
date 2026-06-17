@@ -1,0 +1,502 @@
+---
+title: "Angular Starter"
+subject: "_examples"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.2"
+type: examples
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [22.2 - Angular - Class-based Architecture & RxJS](22.2---Angular---Class-based-Architecture-&-RxJS) | Part of [Subject_Plan](Subject_Plan)*
+
+# 8.2 Examples — Angular Starter Patterns
+
+> Annotated minimal implementations demonstrating modern Angular (v17+) patterns: standalone components, signals, RxJS with proper cleanup, DI, and route guards.
+
+---
+
+## 1. Standalone Component with Signal State
+
+```typescript
+// components/todo-list.component.ts
+import { Component, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+// Interface defining the shape of a todo item
+interface Todo {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+@Component({
+  // selector: the CSS selector used to place this component in templates
+  selector: 'app-todo-list',
+  // standalone: true means this component doesn't need an NgModule
+  standalone: true,
+  // imports: declare what this component's template needs (directives, pipes, other components)
+  imports: [FormsModule], // FormsModule provides [(ngModel)] two-way binding
+  template: `
+    <div class="todo-app">
+      <h2>Todos ({{ remaining() }} remaining)</h2>
+
+      <!-- Two-way binding: input value syncs with newTodoText signal -->
+      <form (ngSubmit)="addTodo()">
+        <input
+          [(ngModel)]="newTodoText"
+          name="newTodo"
+          placeholder="What needs to be done?"
+          autocomplete="off"
+        />
+        <button type="submit" [disabled]="!newTodoText().trim()">Add</button>
+      </form>
+
+      <!-- Angular 17 control flow syntax (@for, @if, @empty) -->
+      @for (todo of todos(); track todo.id) {
+        <div class="todo-item" [class.completed]="todo.completed">
+          <input
+            type="checkbox"
+            [checked]="todo.completed"
+            (change)="toggleTodo(todo.id)"
+          />
+          <span>{{ todo.text }}</span>
+          <button (click)="removeTodo(todo.id)">×</button>
+        </div>
+      } @empty {
+        <p class="empty-state">No todos yet. Add one above!</p>
+      }
+    </div>
+  `,
+  styles: [`
+    .completed span { text-decoration: line-through; opacity: 0.6; }
+    .todo-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  `],
+})
+export class TodoListComponent {
+  // signal<string>: reactive primitive. Call as function to read: newTodoText()
+  // Two-way binding with [(ngModel)] works with signals in Angular 17+
+  newTodoText = signal('');
+
+  // signal<Todo[]>: reactive array state
+  todos = signal<Todo[]>([
+    { id: 1, text: 'Learn Angular Signals', completed: false },
+    { id: 2, text: 'Build a standalone component', completed: true },
+  ]);
+
+  // computed: derived value that auto-updates when todos() changes
+  // Only recalculates when the todos signal actually changes
+  remaining = computed(() =>
+    this.todos().filter(t => !t.completed).length
+  );
+
+  private nextId = 3;
+
+  addTodo(): void {
+    const text = this.newTodoText().trim();
+    if (!text) return;
+
+    // update(): receives current value, returns new value (immutable pattern)
+    this.todos.update(current => [
+      ...current,
+      { id: this.nextId++, text, completed: false },
+    ]);
+    this.newTodoText.set(''); // Reset input
+  }
+
+  toggleTodo(id: number): void {
+    this.todos.update(current =>
+      current.map(t => t.id === id ? { ...t, completed: !t.completed } : t)
+    );
+  }
+
+  removeTodo(id: number): void {
+    this.todos.update(current => current.filter(t => t.id !== id));
+  }
+}
+```
+
+---
+
+## 2. RxJS Observable with takeUntilDestroyed
+
+```typescript
+// components/live-feed.component.ts
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DestroyRef } from '@angular/core';
+import { interval, switchMap, retry, catchError, of, tap } from 'rxjs';
+
+interface FeedItem {
+  id: string;
+  message: string;
+  timestamp: string;
+}
+
+@Component({
+  selector: 'app-live-feed',
+  standalone: true,
+  template: `
+    <div class="feed">
+      <h3>Live Feed <span class="status" [class.active]="connected()">●</span></h3>
+      @for (item of items(); track item.id) {
+        <div class="feed-item">
+          <time>{{ item.timestamp }}</time>
+          <p>{{ item.message }}</p>
+        </div>
+      }
+    </div>
+  `,
+})
+export class LiveFeedComponent implements OnInit {
+  // inject() is the functional alternative to constructor injection
+  private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
+
+  // Component state as signals
+  items = signal<FeedItem[]>([]);
+  connected = signal(false);
+
+  ngOnInit(): void {
+    // Poll the API every 5 seconds for new feed items
+    interval(5000).pipe(
+      // switchMap: cancel previous HTTP request if still pending when next interval fires
+      switchMap(() => this.http.get<FeedItem[]>('/api/feed/latest')),
+      // retry: if a request fails, retry up to 3 times before erroring
+      retry({ count: 3, delay: 1000 }),
+      // tap: side effect without modifying the stream (update connection status)
+      tap(() => this.connected.set(true)),
+      // catchError: if all retries fail, emit empty array and continue the stream
+      catchError(err => {
+        console.error('Feed error:', err);
+        this.connected.set(false);
+        return of([] as FeedItem[]);
+      }),
+      // takeUntilDestroyed: AUTOMATICALLY unsubscribes when component is destroyed.
+      // This is the modern replacement for manual ngOnDestroy + Subject pattern.
+      // It reads DestroyRef from the injection context.
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(newItems => {
+      // Prepend new items to existing feed
+      if (newItems.length > 0) {
+        this.items.update(current => [...newItems, ...current].slice(0, 50));
+      }
+    });
+  }
+}
+```
+
+---
+
+## 3. Dependency Injection Provider Pattern
+
+```typescript
+// services/api-config.token.ts
+import { InjectionToken } from '@angular/core';
+
+// InjectionToken: type-safe DI token for non-class values (configs, constants)
+export interface ApiConfig {
+  baseUrl: string;
+  timeout: number;
+  retryCount: number;
+}
+
+// The token acts as a unique key in the DI container
+export const API_CONFIG = new InjectionToken<ApiConfig>('API_CONFIG');
+
+// ---
+
+// services/data.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { API_CONFIG, ApiConfig } from './api-config.token';
+import { timeout, retry } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class DataService {
+  private http = inject(HttpClient);
+  // inject() resolves the token from the DI hierarchy
+  private config = inject(API_CONFIG);
+
+  getItems() {
+    return this.http.get<Item[]>(`${this.config.baseUrl}/items`).pipe(
+      timeout(this.config.timeout),
+      retry(this.config.retryCount),
+    );
+  }
+}
+
+// ---
+
+// main.ts — Provide the config value at application level
+import { bootstrapApplication } from '@angular/platform-browser';
+import { API_CONFIG } from './services/api-config.token';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    // useValue: provide a concrete value for the token
+    {
+      provide: API_CONFIG,
+      useValue: {
+        baseUrl: 'https://api.example.com/v2',
+        timeout: 10000,
+        retryCount: 3,
+      } satisfies ApiConfig,
+    },
+    // For testing, you can swap this with a different value:
+    // { provide: API_CONFIG, useValue: { baseUrl: 'http://localhost:3000', ... } }
+  ],
+});
+```
+
+---
+
+## 4. Route Guard with Observable-based Auth Check
+
+```typescript
+// guards/auth.guard.ts
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { map, take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
+// Functional guard: returns boolean, UrlTree, or Observable/Promise of either
+export const authGuard: CanActivateFn = (route, state): Observable<boolean | UrlTree> => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  // auth.isAuthenticated$ is an Observable<boolean> that emits the current auth state.
+  // We use take(1) to complete after one emission (guards must complete to resolve).
+  return auth.isAuthenticated$.pipe(
+    take(1),
+    map(isAuth => {
+      if (isAuth) return true;
+      // Return a UrlTree to redirect (better than router.navigate in guards)
+      return router.createUrlTree(['/login'], {
+        queryParams: { returnUrl: state.url },
+      });
+    }),
+  );
+};
+
+// Permission-based guard factory
+export function requirePermission(permission: string): CanActivateFn {
+  return () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    return auth.currentUser$.pipe(
+      take(1),
+      map(user => {
+        if (user?.permissions.includes(permission)) return true;
+        return router.createUrlTree(['/forbidden']);
+      }),
+    );
+  };
+}
+
+// ---
+
+// app.routes.ts — Using the guards
+export const routes: Routes = [
+  { path: '', loadComponent: () => import('./home.component') },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard.component'),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'admin/users',
+    loadComponent: () => import('./admin-users.component'),
+    canActivate: [authGuard, requirePermission('manage_users')],
+  },
+];
+```
+
+---
+
+## 5. Reactive Form with Custom Async Validator
+
+```typescript
+// components/registration-form.component.ts
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, timer } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-registration',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div>
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" type="email" />
+        <!-- Show validation errors -->
+        @if (form.controls.email.errors?.['required'] && form.controls.email.touched) {
+          <span class="error">Email is required</span>
+        }
+        @if (form.controls.email.errors?.['email']) {
+          <span class="error">Invalid email format</span>
+        }
+        @if (form.controls.email.errors?.['emailTaken']) {
+          <span class="error">This email is already registered</span>
+        }
+        @if (form.controls.email.pending) {
+          <span class="checking">Checking availability...</span>
+        }
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input id="password" formControlName="password" type="password" />
+        @if (form.controls.password.errors?.['minlength']) {
+          <span class="error">Minimum 8 characters</span>
+        }
+      </div>
+
+      <button type="submit" [disabled]="form.invalid || form.pending">
+        Register
+      </button>
+    </form>
+  `,
+})
+export class RegistrationFormComponent {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+
+  // FormBuilder creates a FormGroup with typed controls
+  form = this.fb.nonNullable.group({
+    email: ['', {
+      validators: [Validators.required, Validators.email],
+      // Async validators: run AFTER sync validators pass
+      asyncValidators: [this.emailAvailableValidator()],
+      // updateOn: 'blur' means async validator only fires when field loses focus
+      // (prevents API call on every keystroke)
+      updateOn: 'blur' as const,
+    }],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  // Factory method returning an async validator function
+  private emailAvailableValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) return of(null);
+
+      // Debounce: wait 300ms before checking (in case of rapid blur/focus)
+      return timer(300).pipe(
+        switchMap(() =>
+          this.http.get<{ available: boolean }>(`/api/auth/check-email?email=${control.value}`)
+        ),
+        map(response => response.available ? null : { emailTaken: true }),
+        catchError(() => of(null)), // On error, don't block registration
+      );
+    };
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      const { email, password } = this.form.getRawValue();
+      // Submit registration...
+    }
+  }
+}
+```
+
+---
+
+## 6. Signal-based Component Communication (Parent ↔ Child)
+
+```typescript
+// Angular 17+ signal-based inputs and outputs (replacing @Input/@Output decorators)
+
+// child: components/color-picker.component.ts
+import { Component, input, output, signal, computed } from '@angular/core';
+
+@Component({
+  selector: 'app-color-picker',
+  standalone: true,
+  template: `
+    <div class="picker">
+      <label>{{ label() }}</label>
+      <input
+        type="color"
+        [value]="color()"
+        (input)="onColorChange($event)"
+      />
+      <span class="preview" [style.background-color]="color()">
+        {{ color() }}
+      </span>
+    </div>
+  `,
+})
+export class ColorPickerComponent {
+  // input(): signal-based input. Parent passes value via [color]="value"
+  // required<string>() means parent MUST provide this input
+  color = input.required<string>();
+
+  // input() with default value (optional input)
+  label = input<string>('Pick a color');
+
+  // output(): replaces @Output() EventEmitter
+  // Parent listens via (colorChange)="handler($event)"
+  colorChange = output<string>();
+
+  onColorChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    // Emit the new color to the parent
+    this.colorChange.emit(value);
+  }
+}
+
+// parent: components/theme-editor.component.ts
+@Component({
+  selector: 'app-theme-editor',
+  standalone: true,
+  imports: [ColorPickerComponent],
+  template: `
+    <h2>Theme Editor</h2>
+    <app-color-picker
+      [color]="primaryColor()"
+      [label]="'Primary Color'"
+      (colorChange)="primaryColor.set($event)"
+    />
+    <app-color-picker
+      [color]="secondaryColor()"
+      [label]="'Secondary Color'"
+      (colorChange)="secondaryColor.set($event)"
+    />
+    <div class="preview" [style.background]="gradient()">
+      Preview
+    </div>
+  `,
+})
+export class ThemeEditorComponent {
+  primaryColor = signal('#3b82f6');
+  secondaryColor = signal('#8b5cf6');
+
+  // computed: auto-updates when either color signal changes
+  gradient = computed(() =>
+    `linear-gradient(135deg, ${this.primaryColor()}, ${this.secondaryColor()})`
+  );
+}
+```
+
+---
+
+*See also: [22.2 - Angular - Class-based Architecture & RxJS](22.2---Angular---Class-based-Architecture-&-RxJS) for the full architectural deep-dive.*
+
+---
+
+## Related Notes
+- [8.1_react_nextjs_starter](8.1_react_nextjs_starter) - Same _examples folder
+- [8.4_pyqt_minimal_apps](8.4_pyqt_minimal_apps) - Same _examples folder
+- [8.5_flutter_dart_patterns](8.5_flutter_dart_patterns) - Same _examples folder
+- [8.3_vite_config_recipes](8.3_vite_config_recipes) - Same _examples folder

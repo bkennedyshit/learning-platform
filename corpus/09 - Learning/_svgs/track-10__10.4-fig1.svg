@@ -1,0 +1,51 @@
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="rnn-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="rnn-arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .rnn-cell { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .rnn-cell:hover { filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .rnn-conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 5; animation: rnnFlow 1s linear infinite; }
+    .rnn-io { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; stroke-dasharray: 4; animation: rnnFlow 1s linear infinite; }
+    @keyframes rnnFlow { to { stroke-dashoffset: -10; } }
+    .rnn-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .rnn-acc { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+  </style>
+  <!-- Time step cells -->
+  <rect x="60" y="100" width="80" height="60" class="rnn-cell"/>
+  <text x="100" y="135" class="rnn-acc">h_{t-1}</text>
+  <rect x="220" y="100" width="80" height="60" class="rnn-cell"/>
+  <text x="260" y="135" class="rnn-acc">h_t</text>
+  <rect x="380" y="100" width="80" height="60" class="rnn-cell"/>
+  <text x="420" y="135" class="rnn-acc">h_{t+1}</text>
+  <!-- Recurrent connections -->
+  <line x1="140" y1="130" x2="220" y2="130" class="rnn-conn" marker-end="url(#rnn-arr)"/>
+  <line x1="300" y1="130" x2="380" y2="130" class="rnn-conn" marker-end="url(#rnn-arr)"/>
+  <text x="180" y="120" class="rnn-acc">W_hh</text>
+  <text x="340" y="120" class="rnn-acc">W_hh</text>
+  <!-- Inputs -->
+  <line x1="100" y1="220" x2="100" y2="160" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <line x1="260" y1="220" x2="260" y2="160" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <line x1="420" y1="220" x2="420" y2="160" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <text x="100" y="240" class="rnn-lbl">x_{t-1}</text>
+  <text x="260" y="240" class="rnn-lbl">x_t</text>
+  <text x="420" y="240" class="rnn-lbl">x_{t+1}</text>
+  <!-- Outputs -->
+  <line x1="100" y1="100" x2="100" y2="50" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <line x1="260" y1="100" x2="260" y2="50" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <line x1="420" y1="100" x2="420" y2="50" class="rnn-io" marker-end="url(#rnn-arr2)"/>
+  <text x="100" y="40" class="rnn-lbl">y_{t-1}</text>
+  <text x="260" y="40" class="rnn-lbl">y_t</text>
+  <text x="420" y="40" class="rnn-lbl">y_{t+1}</text>
+  <!-- Dots for continuation -->
+  <text x="20" y="135" class="rnn-lbl">...</text>
+  <text x="500" y="135" class="rnn-lbl">...</text>
+  <!-- Formula box -->
+  <rect x="140" y="250" width="320" height="25" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="267" class="rnn-acc">h_t = tanh(W_hh · h_{t-1} + W_xh · x_t + b)</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 500px; height: auto;">
+  <style>
+    .placeholder-rect { fill: var(--background-secondary); stroke: var(--text-muted); stroke-width: 2; stroke-dasharray: 6,6; }
+    .placeholder-text { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal); font-weight: bold; }
+    .placeholder-icon { fill: var(--interactive-accent); }
+  </style>
+  <rect x="10" y="10" width="480" height="180" rx="8" class="placeholder-rect"/>
+  <circle cx="250" cy="80" r="30" class="placeholder-icon"/>
+  <!-- Decorative visual icon -->
+  <path d="M 235 80 L 245 90 L 265 70" stroke="var(--background-secondary)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="250" y="140" class="placeholder-text" text-anchor="middle">Visual Anchor: Chapter 05.3 Schematic</text>
+</svg>

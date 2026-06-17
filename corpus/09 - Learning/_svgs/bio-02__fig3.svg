@@ -1,0 +1,57 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arrow head -->
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="var(--text-accent, #4a90e2)" />
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="transparent"/>
+
+  <!-- DNA Block -->
+  <rect x="100" y="250" width="150" height="100" rx="15" fill="var(--background-secondary, #222)" stroke="var(--interactive-accent, #f39c12)" stroke-width="4"/>
+  <text x="175" y="300" font-family="sans-serif" font-size="24" font-weight="bold" fill="var(--text-normal, #fff)" text-anchor="middle" dominant-baseline="middle">DNA</text>
+  
+  <!-- Replication Arrow (Loop) -->
+  <path d="M 150 250 C 100 150, 250 150, 200 250" fill="none" stroke="var(--interactive-accent, #f39c12)" stroke-width="4" marker-end="url(#arrow)">
+    <animate attributeName="stroke-dasharray" values="0,200; 200,0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  <text x="175" y="190" font-family="sans-serif" font-size="14" fill="var(--interactive-accent, #f39c12)" text-anchor="middle">Replication</text>
+
+  <!-- RNA Block -->
+  <rect x="350" y="250" width="150" height="100" rx="15" fill="var(--background-secondary, #222)" stroke="var(--text-accent, #4a90e2)" stroke-width="4"/>
+  <text x="425" y="300" font-family="sans-serif" font-size="24" font-weight="bold" fill="var(--text-normal, #fff)" text-anchor="middle" dominant-baseline="middle">RNA</text>
+
+  <!-- Transcription Arrow -->
+  <path d="M 250 300 L 330 300" fill="none" stroke="var(--text-accent, #4a90e2)" stroke-width="6" marker-end="url(#arrow)"/>
+  <!-- Moving particle for transcription -->
+  <circle cx="250" cy="300" r="6" fill="var(--interactive-success, #2ecc71)">
+    <animate attributeName="cx" values="250; 340; 250" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="300" y="280" font-family="sans-serif" font-size="14" fill="var(--text-accent, #4a90e2)" text-anchor="middle">Transcription</text>
+
+  <!-- Protein Block -->
+  <rect x="600" y="250" width="150" height="100" rx="15" fill="var(--background-secondary, #222)" stroke="var(--interactive-success, #2ecc71)" stroke-width="4"/>
+  <text x="675" y="300" font-family="sans-serif" font-size="24" font-weight="bold" fill="var(--text-normal, #fff)" text-anchor="middle" dominant-baseline="middle">Protein</text>
+
+  <!-- Translation Arrow -->
+  <path d="M 500 300 L 580 300" fill="none" stroke="var(--interactive-success, #2ecc71)" stroke-width="6" marker-end="url(#arrow)"/>
+  <!-- Moving particle for translation -->
+  <circle cx="500" cy="300" r="6" fill="var(--interactive-accent, #f39c12)">
+    <animate attributeName="cx" values="500; 590; 500" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <text x="550" y="280" font-family="sans-serif" font-size="14" fill="var(--interactive-success, #2ecc71)" text-anchor="middle">Translation</text>
+  
+  <!-- DNA Helix simple drawing -->
+  <g transform="translate(130, 360)">
+    <path d="M 0 0 Q 20 20 40 0 T 80 0" fill="none" stroke="var(--text-normal, #ddd)" stroke-width="2"/>
+    <path d="M 0 0 Q 20 -20 40 0 T 80 0" fill="none" stroke="var(--text-normal, #ddd)" stroke-width="2"/>
+  </g>
+  
+  <!-- Protein folding simple drawing -->
+  <g transform="translate(630, 360)">
+    <path d="M 0 10 Q 10 -10 20 10 T 40 10 T 60 10" fill="none" stroke="var(--interactive-success, #2ecc71)" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="d" values="M 0 10 Q 10 -10 20 10 T 40 10 T 60 10; M 0 10 Q 20 30 20 10 T 30 -10 T 60 10; M 0 10 Q 10 -10 20 10 T 40 10 T 60 10" dur="3s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

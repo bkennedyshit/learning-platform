@@ -1,0 +1,104 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mem    { fill: #1a3a2a; stroke: #51cf66; stroke-width: 1.8; }
+    .sst    { fill: var(--background-secondary,#161b22); stroke: var(--interactive-accent,#58a6ff); stroke-width: 1.5; }
+    .bloom  { fill: #3a2a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .compacted{ fill: #2a1a3a; stroke: #a855f7; stroke-width: 1.5; }
+    .arr    { stroke: var(--text-muted,#8b949e); stroke-width: 1.2; fill: none; }
+    .acc    { stroke: var(--interactive-accent,#58a6ff); stroke-width: 1.5; fill: none; }
+    .write  { stroke: #51cf66; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="dbs3-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="dbs3-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="#51cf66"/>
+    </marker>
+    <marker id="dbs3-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">LSM-Tree — MemTable → L0 SSTables → Compaction → Bloom Filters</text>
+
+  <!-- WRITE PATH (top) -->
+  <text x="30" y="44" class="label" font-weight="bold">Write path (append-only, fast)</text>
+
+  <!-- WAL -->
+  <rect x="18"  y="54" width="90" height="40" fill="var(--background-secondary,#161b22)" stroke="#ff6b6b" stroke-width="1.5" rx="4"/>
+  <text x="63"  y="70" class="label" text-anchor="middle" fill="#ff6b6b">WAL</text>
+  <text x="63"  y="86" class="small" text-anchor="middle">crash safety</text>
+
+  <line x1="108" y1="74" x2="128" y2="74" class="write" marker-end="url(#dbs3-g)"/>
+
+  <!-- MemTable -->
+  <rect x="130" y="54" width="110" height="40" class="mem" rx="4"/>
+  <text x="185" y="70" class="label" text-anchor="middle" fill="#51cf66">MemTable</text>
+  <text x="185" y="86" class="small" text-anchor="middle">sorted, in-RAM</text>
+
+  <!-- flush arrow -->
+  <line x1="240" y1="74" x2="262" y2="74" class="write" marker-end="url(#dbs3-g)"/>
+  <text x="251" y="68" class="small" text-anchor="middle">flush</text>
+
+  <!-- L0 SSTables -->
+  <rect x="264" y="54" width="90" height="40" class="sst" rx="4"/>
+  <text x="309" y="70" class="label" text-anchor="middle" fill="#58a6ff">L0</text>
+  <text x="309" y="86" class="small" text-anchor="middle">SSTable</text>
+
+  <rect x="360" y="54" width="90" height="40" class="sst" rx="4"/>
+  <text x="405" y="70" class="label" text-anchor="middle" fill="#58a6ff">L0</text>
+  <text x="405" y="86" class="small" text-anchor="middle">SSTable</text>
+
+  <rect x="456" y="54" width="90" height="40" class="sst" rx="4"/>
+  <text x="501" y="70" class="label" text-anchor="middle" fill="#58a6ff">L0</text>
+  <text x="501" y="86" class="small" text-anchor="middle">SSTable</text>
+
+  <text x="590" y="70" class="label" fill="#ffd93d">overlapping ranges</text>
+  <text x="590" y="84" class="small">L0 allows key overlap</text>
+
+  <!-- COMPACTION section -->
+  <rect x="18" y="116" width="684" height="108" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1" rx="6"/>
+  <text x="360" y="134" class="label" text-anchor="middle" font-weight="bold">Compaction — Leveled (RocksDB default)</text>
+
+  <!-- L1 -->
+  <rect x="28"  y="142" width="300" height="30" class="sst" rx="4"/>
+  <text x="178" y="157" class="label" text-anchor="middle" fill="#58a6ff">L1 (10 MB cap)  non-overlapping sorted run</text>
+  <text x="178" y="168" class="small" text-anchor="middle">[ a-m ] one file covers one key range</text>
+
+  <rect x="334" y="142" width="358" height="30" class="sst" rx="4"/>
+  <text x="513" y="157" class="label" text-anchor="middle" fill="#58a6ff">L1 (10 MB cap)  non-overlapping sorted run</text>
+  <text x="513" y="168" class="small" text-anchor="middle">[ n-z ] adjacent file — together they span the full key space</text>
+
+  <!-- L2 -->
+  <rect x="28"  y="180" width="664" height="30" class="compacted" rx="4"/>
+  <text x="360" y="195" class="label" text-anchor="middle" fill="#a855f7">L2 (100 MB cap)  — L0→L1→L2 each 10× larger — amortised compaction cost</text>
+  <text x="360" y="208" class="small" text-anchor="middle">read-amplification reduced: read only 1 file per level vs all L0 files</text>
+
+  <!-- READ PATH + BLOOM FILTER -->
+  <rect x="18" y="238" width="430" height="100" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1" rx="6"/>
+  <text x="233" y="256" class="label" text-anchor="middle" font-weight="bold">Read Path — Bloom Filter Guards</text>
+  <text x="28"  y="274" class="small">1. Check MemTable (O(log n) skiplist lookup)</text>
+  <text x="28"  y="290" class="small">2. For each SSTable from newest to oldest:</text>
+  <text x="28"  y="306" class="small">   a. Query Bloom filter — if "definitely not here" → skip entire file</text>
+  <text x="28"  y="320" class="small">   b. If "maybe here" → open index, binary search, read block</text>
+  <text x="28"  y="332" class="small">Bloom false-positive rate ≈ 1% at 10 bits/key saves ~99% of L2+ reads</text>
+
+  <!-- BLOOM FILTER BOX -->
+  <rect x="460" y="238" width="242" height="100" class="bloom" rx="6"/>
+  <text x="581" y="256" class="label" text-anchor="middle" fill="#ffd93d">Bloom Filter</text>
+  <text x="460" y="274" class="small">m = bit-array, k = hash functions</text>
+  <text x="460" y="290" class="small">Insert: set bits h₁(x), h₂(x) … hₖ(x)</text>
+  <text x="460" y="306" class="small">Query: if any bit = 0 → "not present"</text>
+  <text x="460" y="320" class="small">        all bits = 1 → "probably present"</text>
+  <text x="460" y="334" class="small">False negatives: impossible. FP rate tunable.</text>
+
+  <!-- Write-amp / Read-amp labels -->
+  <text x="360" y="356" class="small" text-anchor="middle">Leveled compaction: write-amp ≈ 10–30×, read-amp ≈ 1 file/level | Tiered: write-amp ≈ 4×, read-amp higher</text>
+  <text x="360" y="372" class="small" text-anchor="middle">LevelDB (Google 2011) → RocksDB (Meta 2012) → MyRocks, TiKV, PebblesDB all built on this foundation</text>
+  <text x="360" y="390" class="small" text-anchor="middle">DDIA Ch. 3 "SSTables and LSM-Trees" · github.com/google/leveldb · github.com/facebook/rocksdb/wiki</text>
+</svg>

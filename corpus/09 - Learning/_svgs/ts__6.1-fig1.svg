@@ -1,0 +1,96 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-ts61" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ts-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; transition: all 0.3s ease; }
+    .ts-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts-subtitle { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-ts61); stroke-dasharray: 8 4; animation: flow 1s linear infinite; }
+    .ts-phase { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .ts-highlight { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; animation: pulseGlow 2s infinite alternate; }
+    .ts-emit { stroke-dasharray: 5,3; animation: flowSlow 2s linear infinite; stroke: #f87171; }
+    
+    @keyframes flow { to { stroke-dashoffset: -12; } }
+    @keyframes flowSlow { to { stroke-dashoffset: -8; } }
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); }
+      to { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); stroke-width: 3; }
+    }
+  </style>
+
+  <text x="350" y="25" class="ts-title">TypeScript Compilation Pipeline</text>
+
+  <!-- Source -->
+  <text x="80" y="60" class="ts-phase">source</text>
+  <rect x="20" y="70" width="120" height="50" class="ts-box"/>
+  <text x="80" y="92" class="ts-label">.ts / .tsx</text>
+  <text x="80" y="107" class="ts-subtitle">Your code</text>
+
+  <!-- Arrow to Parser -->
+  <path d="M 140 95 L 175 95" class="ts-arrow"/>
+
+  <!-- Parser -->
+  <text x="235" y="60" class="ts-phase">parse</text>
+  <rect x="175" y="70" width="120" height="50" class="ts-box"/>
+  <text x="235" y="92" class="ts-label">Scanner + Parser</text>
+  <text x="235" y="107" class="ts-subtitle">→ AST</text>
+
+  <!-- Arrow to Type Checker -->
+  <path d="M 295 95 L 330 95" class="ts-arrow"/>
+
+  <!-- Type Checker -->
+  <text x="395" y="60" class="ts-phase">check</text>
+  <rect x="330" y="70" width="130" height="50" class="ts-highlight"/>
+  <text x="395" y="92" class="ts-label">Type Checker</text>
+  <text x="395" y="107" class="ts-subtitle">Errors reported here</text>
+
+  <!-- Arrow to Emitter -->
+  <path d="M 460 95 L 495 95" class="ts-arrow"/>
+
+  <!-- Emitter -->
+  <text x="570" y="60" class="ts-phase">emit</text>
+  <rect x="495" y="70" width="140" height="50" class="ts-box"/>
+  <text x="565" y="92" class="ts-label">Emitter</text>
+  <text x="565" y="107" class="ts-subtitle">Types erased → .js</text>
+
+  <!-- Output files -->
+  <path d="M 565 120 L 565 155" class="ts-arrow"/>
+  <rect x="490" y="160" width="70" height="35" class="ts-box"/>
+  <text x="525" y="182" class="ts-label">.js</text>
+
+  <rect x="570" y="160" width="70" height="35" class="ts-box"/>
+  <text x="605" y="182" class="ts-label">.d.ts</text>
+
+  <!-- Bundler path -->
+  <text x="350" y="170" class="ts-phase">alternative: bundler path</text>
+  <rect x="20" y="185" width="120" height="50" class="ts-box"/>
+  <text x="80" y="207" class="ts-label">.ts / .tsx</text>
+  <text x="80" y="222" class="ts-subtitle">Same source</text>
+
+  <path d="M 140 210 L 175 210" class="ts-arrow"/>
+
+  <rect x="175" y="185" width="140" height="50" class="ts-highlight"/>
+  <text x="245" y="207" class="ts-label">Vite / esbuild</text>
+  <text x="245" y="222" class="ts-subtitle">Strips types (no check)</text>
+
+  <path d="M 315 210 L 350 210" class="ts-arrow"/>
+
+  <rect x="350" y="185" width="120" height="50" class="ts-box"/>
+  <text x="410" y="207" class="ts-label">Bundle.js</text>
+  <text x="410" y="222" class="ts-subtitle">Optimized output</text>
+
+  <!-- tsc --noEmit annotation -->
+  <path d="M 395 120 L 395 175 L 175 175 L 175 185" class="ts-arrow ts-emit"/>
+  <text x="285" y="148" class="ts-subtitle">tsc --noEmit (CI check only)</text>
+
+  <!-- Legend -->
+  <text x="50" y="290" class="ts-phase">key insight</text>
+  <text x="50" y="310" class="ts-subtitle">• tsc = type-checking (catches errors)</text>
+  <text x="50" y="325" class="ts-subtitle">• Bundler = building (fast, no type check)</text>
+  <text x="50" y="340" class="ts-subtitle">• Use BOTH: bundler for speed, tsc for safety</text>
+</svg>

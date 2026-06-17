@@ -1,0 +1,86 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); stroke-dasharray: 6; animation: flow 2s linear infinite; }
+    .connector { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; animation: flow 2s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -12; } }
+  </style>
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="300" y="25" class="title" text-anchor="middle">Rust Toolchain Architecture</text>
+
+  <!-- rustup layer -->
+  <rect x="30" y="40" width="540" height="60" class="box-accent"/>
+  <text x="300" y="65" class="label-accent" text-anchor="middle">rustup (Toolchain Manager)</text>
+  <text x="300" y="85" class="label" text-anchor="middle">Manages: stable | nightly | beta + cross-compilation targets</text>
+
+  <!-- Compiler -->
+  <rect x="50" y="120" width="140" height="50" class="box"/>
+  <text x="120" y="142" class="label-bold" text-anchor="middle">rustc</text>
+  <text x="120" y="158" class="label" text-anchor="middle">Compiler</text>
+
+  <!-- Cargo -->
+  <rect x="230" y="120" width="140" height="50" class="box-accent"/>
+  <text x="300" y="142" class="label-bold" text-anchor="middle">cargo</text>
+  <text x="300" y="158" class="label" text-anchor="middle">Build + Package Mgr</text>
+
+  <!-- rust-analyzer -->
+  <rect x="410" y="120" width="140" height="50" class="box"/>
+  <text x="480" y="142" class="label-bold" text-anchor="middle">rust-analyzer</text>
+  <text x="480" y="158" class="label" text-anchor="middle">LSP Server</text>
+
+  <!-- Arrows from rustup -->
+  <line x1="120" y1="100" x2="120" y2="120" class="arrow"/>
+  <line x1="300" y1="100" x2="300" y2="120" class="arrow"/>
+  <line x1="480" y1="100" x2="480" y2="120" class="arrow"/>
+
+  <!-- Cargo subtools -->
+  <rect x="60" y="200" width="110" height="40" class="box"/>
+  <text x="115" y="224" class="label" text-anchor="middle">clippy (lint)</text>
+
+  <rect x="185" y="200" width="110" height="40" class="box"/>
+  <text x="240" y="224" class="label" text-anchor="middle">rustfmt (fmt)</text>
+
+  <rect x="310" y="200" width="110" height="40" class="box"/>
+  <text x="365" y="224" class="label" text-anchor="middle">cargo test</text>
+
+  <rect x="435" y="200" width="110" height="40" class="box"/>
+  <text x="490" y="224" class="label" text-anchor="middle">cargo doc</text>
+
+  <line x1="300" y1="170" x2="115" y2="200" class="arrow"/>
+  <line x1="300" y1="170" x2="240" y2="200" class="arrow"/>
+  <line x1="300" y1="170" x2="365" y2="200" class="arrow"/>
+  <line x1="300" y1="170" x2="490" y2="200" class="arrow"/>
+
+  <!-- Output targets -->
+  <text x="300" y="270" class="label-bold" text-anchor="middle">Compilation Targets</text>
+
+  <rect x="30" y="285" width="120" height="45" class="box"/>
+  <text x="90" y="305" class="label-bold" text-anchor="middle">Native</text>
+  <text x="90" y="320" class="label" text-anchor="middle">x86_64, aarch64</text>
+
+  <rect x="165" y="285" width="120" height="45" class="box"/>
+  <text x="225" y="305" class="label-bold" text-anchor="middle">WASM</text>
+  <text x="225" y="320" class="label" text-anchor="middle">wasm32</text>
+
+  <rect x="300" y="285" width="120" height="45" class="box"/>
+  <text x="360" y="305" class="label-bold" text-anchor="middle">Embedded</text>
+  <text x="360" y="320" class="label" text-anchor="middle">thumbv7em</text>
+
+  <rect x="435" y="285" width="130" height="45" class="box"/>
+  <text x="500" y="305" class="label-bold" text-anchor="middle">Cross-compile</text>
+  <text x="500" y="320" class="label" text-anchor="middle">any LLVM target</text>
+
+  <!-- Project structure -->
+  <rect x="50" y="350" width="500" height="40" class="box"/>
+  <text x="300" y="375" class="label" text-anchor="middle">Cargo.toml → src/main.rs | src/lib.rs → target/debug/ | target/release/</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <style>
+    .sax { stroke:var(--text-muted, #8b949e); stroke-width:1; fill:none; }
+    .sv1 { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; }
+    .slab{ font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); text-anchor:middle; }
+    .slac{ font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; text-anchor:middle; }
+  </style>
+  <defs>
+    <marker id="sa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="sb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+  <!-- Panel 1: λ > 1 (stretch) -->
+  <text x="90" y="20" class="slac">λ = 2 (stretch)</text>
+  <line x1="20" y1="100" x2="160" y2="100" class="sax"/>
+  <line x1="40" y1="30"  x2="40"  y2="160" class="sax"/>
+  <line x1="40" y1="100" x2="100" y2="100" class="sv1" marker-end="url(#sa)"/>
+  <text x="105" y="97" class="slac">v</text>
+  <line x1="40" y1="80"  x2="160" y2="80"  stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5" fill="none" marker-end="url(#sa)" stroke-dasharray="none">
+    <animate attributeName="x2" values="100;160;160;100;100" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+  </line>
+  <text x="162" y="77" class="slac">
+    <animate attributeName="x" values="102;162;162;102;102" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    2v
+  </text>
+  <!-- Panel 2: 0 < λ < 1 (shrink) -->
+  <text x="290" y="20" class="slac">λ = 0.5 (shrink)</text>
+  <line x1="220" y1="100" x2="360" y2="100" class="sax"/>
+  <line x1="240" y1="30"  x2="240" y2="160" class="sax"/>
+  <line x1="240" y1="100" x2="340" y2="100" class="sv1" marker-end="url(#sa)"/>
+  <text x="345" y="97" class="slac">v</text>
+  <line x1="240" y1="80"  x2="290" y2="80"  stroke="var(--text-accent, #79c0ff)" stroke-width="2.5" fill="none" marker-end="url(#sb)">
+    <animate attributeName="x2" values="340;290;290;340;340" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+  </line>
+  <text x="292" y="77" fill="var(--text-accent, #79c0ff)" class="slab">
+    <animate attributeName="x" values="342;292;292;342;342" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    0.5v
+  </text>
+  <!-- Panel 3: λ < 0 (flip) -->
+  <text x="460" y="20" class="slac">λ = −1 (flip)</text>
+  <line x1="400" y1="100" x2="520" y2="100" class="sax"/>
+  <line x1="460" y1="30"  x2="460" y2="160" class="sax"/>
+  <line x1="460" y1="100" x2="520" y2="100" class="sv1" marker-end="url(#sa)"/>
+  <text x="524" y="97" class="slac">v</text>
+  <line x1="460" y1="120" x2="400" y2="120" stroke="var(--text-accent, #79c0ff)" stroke-width="2.5" fill="none" marker-end="url(#sb)">
+    <animate attributeName="x2" values="520;400;400;520;520" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+  </line>
+  <text x="397" y="135" fill="var(--text-accent, #79c0ff)" class="slab">
+    <animate attributeName="x" values="524;397;397;524;524" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.3;0.7;0.9;1" dur="5s" repeatCount="indefinite" />
+    −v
+  </text>
+</svg>

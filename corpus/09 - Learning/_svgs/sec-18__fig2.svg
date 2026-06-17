@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .text { font-family: sans-serif; font-size: 14px; fill: #333; }
+      .bold { font-weight: bold; }
+      .box { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 2; rx: 8; }
+      .malbox { fill: #fff3cd; stroke: #ffc107; stroke-width: 2; rx: 8; }
+      .key { font-size: 24px; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6c757d" />
+    </marker>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="#ffffff" />
+  
+  <!-- Alice -->
+  <rect x="50" y="125" width="120" height="150" class="box" />
+  <text x="110" y="155" text-anchor="middle" class="text bold">Alice</text>
+  
+  <!-- Mallory -->
+  <rect x="340" y="125" width="120" height="150" class="malbox" />
+  <text x="400" y="155" text-anchor="middle" class="text bold" fill="#856404">Mallory (MitM)</text>
+  
+  <!-- Bob -->
+  <rect x="630" y="125" width="120" height="150" class="box" />
+  <text x="690" y="155" text-anchor="middle" class="text bold">Bob</text>
+  
+  <!-- Paths -->
+  <path d="M 170 180 L 330 180" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 460 180 L 620 180" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 620 220 L 460 220" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 330 220 L 170 220" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow)" />
+  
+  <text x="250" y="170" text-anchor="middle" class="text" font-size="12px">Alice's Msg</text>
+  <text x="540" y="170" text-anchor="middle" class="text" font-size="12px">Mallory's Msg</text>
+  <text x="540" y="240" text-anchor="middle" class="text" font-size="12px">Bob's Key</text>
+  <text x="250" y="240" text-anchor="middle" class="text" font-size="12px">Mallory's Key</text>
+
+  <!-- Key Animation (Mallory sending his key to Alice) -->
+  <g>
+    <text x="310" y="225" class="key">🟠🔑</text>
+    <animateTransform attributeName="transform" type="translate" from="0 0" to="-150 0" begin="0s" dur="4s" repeatCount="indefinite" />
+  </g>
+  
+  <!-- Message Animation (Alice sending msg to Mallory) -->
+  <g>
+    <rect x="180" y="170" width="20" height="15" fill="#17a2b8" rx="2" />
+    <animateTransform attributeName="transform" type="translate" from="0 0" to="140 0" begin="1s" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="1;0" keyTimes="0;1" begin="1s" dur="4s" repeatCount="indefinite" />
+  </g>
+  
+  <!-- Mallory sending msg to Bob -->
+  <g>
+    <rect x="470" y="170" width="20" height="15" fill="#dc3545" rx="2" />
+    <animateTransform attributeName="transform" type="translate" from="0 0" to="140 0" begin="3s" dur="4s" repeatCount="indefinite" />
+  </g>
+
+</svg>

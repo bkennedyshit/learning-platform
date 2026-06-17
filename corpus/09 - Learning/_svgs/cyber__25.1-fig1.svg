@@ -1,0 +1,118 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .panel { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .step { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; }
+    .mit { fill: var(--interactive-accent, #58a6ff); opacity: 0.22; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.4; fill: none; }
+    .strideRow { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 0.75; rx: 3; }
+    .strideKey { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .strideText { font-family: Inter, system-ui, sans-serif; font-size: 10.5px; fill: var(--text-normal, #c9d1d9); }
+    .footer { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; rx: 4; opacity: 0.85; }
+  </style>
+  <defs>
+    <marker id="arrCyber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="26" class="title" text-anchor="middle">Threat Modeling Lifecycle — STRIDE / DREAD / Mitigations</text>
+
+  <!-- LEFT: Lifecycle flow -->
+  <rect x="20" y="50" width="430" height="290" class="panel"/>
+  <text x="235" y="72" class="label" text-anchor="middle" font-weight="bold">Iterative Pipeline</text>
+
+  <!-- Step 1 -->
+  <rect x="40" y="90" width="170" height="42" class="step"/>
+  <text x="125" y="108" class="label" text-anchor="middle">1. Identify Assets</text>
+  <text x="125" y="123" class="sublabel" text-anchor="middle">data, secrets, trust boundaries</text>
+
+  <!-- Step 2 -->
+  <rect x="240" y="90" width="190" height="42" class="step"/>
+  <text x="335" y="108" class="label" text-anchor="middle">2. Decompose System</text>
+  <text x="335" y="123" class="sublabel" text-anchor="middle">DFDs · entry points · actors</text>
+
+  <line x1="210" y1="111" x2="240" y2="111" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- Step 3 -->
+  <rect x="240" y="150" width="190" height="42" class="step"/>
+  <text x="335" y="168" class="label" text-anchor="middle">3. STRIDE / Attack Trees</text>
+  <text x="335" y="183" class="sublabel" text-anchor="middle">enumerate threats per asset</text>
+
+  <line x1="335" y1="132" x2="335" y2="150" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- Step 4 -->
+  <rect x="40" y="150" width="170" height="42" class="step"/>
+  <text x="125" y="168" class="label" text-anchor="middle">4. Score (DREAD / RRA)</text>
+  <text x="125" y="183" class="sublabel" text-anchor="middle">rank · prioritize · risk</text>
+
+  <line x1="240" y1="171" x2="210" y2="171" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- Step 5: Mitigation (highlighted) -->
+  <rect x="40" y="210" width="170" height="50" class="mit"/>
+  <text x="125" y="232" class="label" text-anchor="middle" font-weight="bold">5. Mitigations</text>
+  <text x="125" y="248" class="sublabel" text-anchor="middle">controls map to ASVS / Top 10</text>
+
+  <line x1="125" y1="192" x2="125" y2="210" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- Step 6 -->
+  <rect x="240" y="210" width="190" height="50" class="step"/>
+  <text x="335" y="232" class="label" text-anchor="middle">6. Validate</text>
+  <text x="335" y="248" class="sublabel" text-anchor="middle">SAST · DAST · pen-tests · abuse cases</text>
+
+  <line x1="210" y1="235" x2="240" y2="235" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- Step 7 -->
+  <rect x="135" y="280" width="200" height="42" class="step"/>
+  <text x="235" y="298" class="label" text-anchor="middle">7. Iterate (every change)</text>
+  <text x="235" y="313" class="sublabel" text-anchor="middle">threat models live with the code</text>
+
+  <line x1="335" y1="260" x2="335" y2="280" class="arrow"/>
+  <line x1="335" y1="280" x2="335" y2="280" class="arrow"/>
+  <path d="M 335 260 Q 335 280 285 280" class="arrow" marker-end="url(#arrCyber)"/>
+  <path d="M 185 280 Q 125 280 125 260" class="arrow" marker-end="url(#arrCyber)"/>
+
+  <!-- RIGHT: STRIDE side panel -->
+  <rect x="465" y="50" width="240" height="290" class="panel"/>
+  <text x="585" y="72" class="label" text-anchor="middle" font-weight="bold">STRIDE Threat Categories</text>
+
+  <rect x="478" y="86"  width="214" height="34" class="strideRow"/>
+  <text x="486" y="105" class="strideKey">S</text>
+  <text x="500" y="103" class="strideText">Spoofing</text>
+  <text x="500" y="116" class="sublabel">forged identity / fake tokens</text>
+
+  <rect x="478" y="124" width="214" height="34" class="strideRow"/>
+  <text x="486" y="143" class="strideKey">T</text>
+  <text x="500" y="141" class="strideText">Tampering</text>
+  <text x="500" y="154" class="sublabel">data/code/state modification</text>
+
+  <rect x="478" y="162" width="214" height="34" class="strideRow"/>
+  <text x="486" y="181" class="strideKey">R</text>
+  <text x="500" y="179" class="strideText">Repudiation</text>
+  <text x="500" y="192" class="sublabel">denied actions, missing audit log</text>
+
+  <rect x="478" y="200" width="214" height="34" class="strideRow"/>
+  <text x="486" y="219" class="strideKey">I</text>
+  <text x="500" y="217" class="strideText">Information Disclosure</text>
+  <text x="500" y="230" class="sublabel">leak of secrets / PII / IP</text>
+
+  <rect x="478" y="238" width="214" height="34" class="strideRow"/>
+  <text x="486" y="257" class="strideKey">D</text>
+  <text x="500" y="255" class="strideText">Denial of Service</text>
+  <text x="500" y="268" class="sublabel">availability / quota / cost attack</text>
+
+  <rect x="478" y="276" width="214" height="34" class="strideRow"/>
+  <text x="486" y="295" class="strideKey">E</text>
+  <text x="500" y="293" class="strideText">Elevation of Privilege</text>
+  <text x="500" y="306" class="sublabel">become an admin you should not be</text>
+
+  <text x="585" y="328" class="sublabel" text-anchor="middle">DREAD scores each: Damage / Reproducibility /</text>
+  <text x="585" y="338" class="sublabel" text-anchor="middle">Exploitability / Affected users / Discoverability</text>
+
+  <!-- BOTTOM: Strip note -->
+  <rect x="20" y="358" width="685" height="50" class="footer"/>
+  <text x="362" y="380" class="label" text-anchor="middle" font-weight="bold">OWASP Top 10:2025 + ASVS map controls back to threats</text>
+  <text x="362" y="397" class="sublabel" text-anchor="middle">A03 Software Supply Chain · A10 Mishandling Exceptional Conditions · SSRF folded into A01 Broken Access Control</text>
+</svg>

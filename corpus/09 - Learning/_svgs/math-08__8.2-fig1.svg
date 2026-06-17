@@ -1,0 +1,99 @@
+<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <defs>
+    <marker id="mink-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .mink-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 8; }
+    .mink-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .mink-math { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-style: italic; text-anchor: middle; }
+    .mink-arrow-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#mink-arrow); }
+    .mink-accent { fill: var(--text-accent, #79c0ff); }
+    .mink-matrix { font-family: 'Latin Modern Math', serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .mink-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .mink-sub { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .mink-highlight { fill: var(--interactive-accent, #58a6ff); opacity: 0.1; }
+    .mink-node { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+    .mink-node:hover { fill: var(--interactive-accent, #58a6ff); r: 8; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    
+    /* Animations */
+    .mink-arrow-line { stroke-dasharray: 6 4; animation: flowLines 1s linear infinite; }
+    @keyframes flowLines { to { stroke-dashoffset: -10; } }
+    .mink-node { animation: nodePulse 2s infinite alternate ease-in-out; }
+    @keyframes nodePulse { 
+      0% { filter: drop-shadow(0 0 1px var(--interactive-accent, #58a6ff)); } 
+      100% { filter: drop-shadow(0 0 6px var(--text-accent, #79c0ff)); } 
+    }
+  </style>
+
+  <!-- Title -->
+  <text x="325" y="25" class="mink-title" font-size="16">Index Raising & Lowering with η_μν</text>
+
+  <!-- Contravariant vector box -->
+  <rect x="20" y="50" width="180" height="100" class="mink-box"/>
+  <text x="110" y="75" class="mink-title">Contravariant</text>
+  <text x="110" y="100" class="mink-math">V^μ = (V⁰, V¹, V², V³)</text>
+  <text x="110" y="120" class="mink-sub">"Upper index"</text>
+  <text x="110" y="138" class="mink-sub">transforms with Λ^μ_ν</text>
+
+  <!-- Arrow down: lower index -->
+  <line x1="110" y1="150" x2="110" y2="190" class="mink-arrow-line"/>
+  <text x="145" y="175" class="mink-label">V_μ = η_μν V^ν</text>
+
+  <!-- Covariant vector box -->
+  <rect x="20" y="195" width="180" height="100" class="mink-box"/>
+  <text x="110" y="220" class="mink-title">Covariant</text>
+  <text x="110" y="245" class="mink-math">V_μ = (−V⁰, V¹, V², V³)</text>
+  <text x="110" y="265" class="mink-sub">"Lower index"</text>
+  <text x="110" y="283" class="mink-sub">transforms with (Λ⁻¹)^ν_μ</text>
+
+  <!-- Arrow up: raise index -->
+  <line x1="30" y1="195" x2="30" y2="155" class="mink-arrow-line"/>
+  <text x="8" y="175" class="mink-label" text-anchor="start">η^μν V_ν</text>
+
+  <!-- Metric tensor display -->
+  <rect x="250" y="60" width="180" height="130" class="mink-box"/>
+  <text x="340" y="85" class="mink-title">Minkowski Metric</text>
+  <text x="340" y="110" class="mink-matrix">η_μν = diag(−1, +1, +1, +1)</text>
+  <text x="290" y="135" class="mink-matrix">⎛−1  0  0  0⎞</text>
+  <text x="290" y="150" class="mink-matrix">⎜ 0 +1  0  0⎟</text>
+  <text x="290" y="165" class="mink-matrix">⎜ 0  0 +1  0⎟</text>
+  <text x="290" y="180" class="mink-matrix">⎝ 0  0  0 +1⎠</text>
+
+  <!-- Inner product box -->
+  <rect x="460" y="60" width="170" height="100" class="mink-box"/>
+  <text x="545" y="85" class="mink-title">Inner Product</text>
+  <text x="545" y="110" class="mink-math">A·B = η_μν A^μ B^ν</text>
+  <text x="545" y="130" class="mink-math">= A_μ B^μ</text>
+  <text x="545" y="150" class="mink-sub">= −A⁰B⁰ + A¹B¹ + A²B² + A³B³</text>
+
+  <!-- 4-vectors showcase -->
+  <rect x="250" y="220" width="380" height="180" class="mink-box"/>
+  <text x="440" y="245" class="mink-title">Key 4-Vectors</text>
+  
+  <!-- 4-position -->
+  <circle cx="280" cy="270" r="5" class="mink-node"/>
+  <text x="300" y="275" class="mink-label" text-anchor="start">x^μ = (ct, x, y, z)</text>
+  
+  <!-- 4-velocity -->
+  <circle cx="280" cy="300" r="5" class="mink-node"/>
+  <text x="300" y="305" class="mink-label" text-anchor="start">U^μ = γ(c, v_x, v_y, v_z),  U_μU^μ = −c²</text>
+  
+  <!-- 4-momentum -->
+  <circle cx="280" cy="330" r="5" class="mink-node"/>
+  <text x="300" y="335" class="mink-label" text-anchor="start">p^μ = (E/c, p_x, p_y, p_z),  p_μp^μ = −m²c²</text>
+  
+  <!-- 4-wavevector -->
+  <circle cx="280" cy="360" r="5" class="mink-node"/>
+  <text x="300" y="365" class="mink-label" text-anchor="start">k^μ = (ω/c, k_x, k_y, k_z),  k_μk^μ = 0 (light)</text>
+  
+  <!-- 4-current -->
+  <circle cx="280" cy="390" r="5" class="mink-node"/>
+  <text x="300" y="395" class="mink-label" text-anchor="start">J^μ = (ρc, J_x, J_y, J_z),  ∂_μJ^μ = 0 (continuity)</text>
+
+  <!-- Connection arrows -->
+  <line x1="200" y1="100" x2="250" y2="100" class="mink-arrow-line"/>
+  <line x1="430" y1="125" x2="460" y2="110" class="mink-arrow-line"/>
+</svg>

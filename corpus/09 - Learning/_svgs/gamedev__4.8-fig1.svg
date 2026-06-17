@@ -1,0 +1,96 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="build-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; cursor: pointer; transition: all 0.2s; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .launcher { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .flow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; color: var(--text-muted, #8b949e); }
+    .note { font-family: monospace; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    
+    /* Code and Asset Pipeline Sequential Animations */
+    @keyframes pulse-source {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      5%, 15% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-cook {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      35%, 45% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-packaged {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      70%, 80% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-launcher {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      92%, 98% { stroke: #2ecc71; filter: drop-shadow(0 0 10px #2ecc71); }
+    }
+    
+    .box-source { animation: pulse-source 4s infinite ease-in-out; }
+    .box-cook { animation: pulse-cook 4s infinite ease-in-out; }
+    .box-packaged { animation: pulse-packaged 4s infinite ease-in-out; }
+    .box-launcher { animation: pulse-launcher 4s infinite ease-in-out; }
+    
+    .particle-code { filter: drop-shadow(0 0 3px var(--text-accent, #79c0ff)); }
+    .particle-asset { filter: drop-shadow(0 0 3px #f0883b); }
+  </style>
+  
+  <text x="300" y="25" class="title">Build &amp; Distribution Pipeline</text>
+  
+  <!-- Code Pipeline -->
+  <rect x="30" y="50" width="100" height="40" class="box box-source"/>
+  <text x="80" y="74" class="label">Source Code</text>
+  
+  <rect x="170" y="50" width="100" height="40" class="box box-cook"/>
+  <text x="220" y="74" class="label">Compiler</text>
+  
+  <rect x="300" y="50" width="100" height="40" class="box box-packaged"/>
+  <text x="350" y="74" class="label">Executable</text>
+  
+  <!-- Asset Pipeline -->
+  <rect x="30" y="110" width="100" height="40" class="box box-source"/>
+  <text x="80" y="134" class="label">Raw Assets</text>
+  
+  <rect x="170" y="110" width="100" height="40" class="box box-cook"/>
+  <text x="220" y="134" class="label">Asset Cooker</text>
+  
+  <rect x="300" y="110" width="100" height="40" class="box box-packaged"/>
+  <text x="350" y="134" class="label">Pak / VPK</text>
+  
+  <!-- Launcher / Target -->
+  <rect x="440" y="80" width="130" height="40" class="box box-launcher launcher"/>
+  <text x="505" y="104" class="label" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">Launcher (Steam)</text>
+  
+  <!-- Flows -->
+  <line x1="130" y1="70" x2="170" y2="70" class="flow" marker-end="url(#build-arrow)"/>
+  <line x1="270" y1="70" x2="300" y2="70" class="flow" marker-end="url(#build-arrow)"/>
+  <path d="M 400 70 L 420 70 Q 430 70 435 77 L 440 85" class="flow" fill="none" marker-end="url(#build-arrow)"/>
+  
+  <line x1="130" y1="130" x2="170" y2="130" class="flow" marker-end="url(#build-arrow)"/>
+  <line x1="270" y1="130" x2="300" y2="130" class="flow" marker-end="url(#build-arrow)"/>
+  <path d="M 400 130 L 420 130 Q 430 130 435 123 L 440 115" class="flow" fill="none" marker-end="url(#build-arrow)"/>
+  
+  <!-- Flow particles moving along paths -->
+  <circle r="4" fill="var(--text-accent, #79c0ff)" class="particle-code">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 80 70 L 220 70 L 350 70 C 370 70 410 70 440 85 L 505 100" />
+  </circle>
+  
+  <circle r="4.5" fill="#f0883b" class="particle-asset">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 80 130 L 220 130 L 350 130 C 370 130 410 130 440 115 L 505 100" />
+  </circle>
+
+  <!-- CI/CD and Optimization detail -->
+  <rect x="30" y="170" width="540" height="150" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="190" class="title">Production pipeline optimization</text>
+  <text x="300" y="210" class="note" text-anchor="middle">1. Build Caching: cache compiler artifacts (.obj) via CCache / FastBuild</text>
+  <text x="300" y="228" class="note" text-anchor="middle">2. Asset Compression: GPU-friendly formats (BC7 for textures, ASTC for mobile)</text>
+  <text x="300" y="246" class="note" text-anchor="middle">3. Incremental Cook: only process changed assets (crucial for quick iterations)</text>
+  <text x="300" y="264" class="note" text-anchor="middle">4. Automated QA: run headless smoke tests on continuous integration (CI) machines</text>
+  <text x="300" y="282" class="note" text-anchor="middle">5. Delta Patching: steam distributes small patch files using chunk-based difference algorithms</text>
+  <text x="300" y="305" class="label" text-anchor="middle" fill="var(--text-accent, #79c0ff)" font-size="10">Jenkins | GitHub Actions | TeamCity | Perforce Helix | Plastic SCM</text>
+</svg>

@@ -1,0 +1,771 @@
+---
+title: "34.2 — Rotational Dynamics in Extreme Sports"
+subject: "Biomechanics & HCI"
+catalog: advanced
+audience_tier: higher-education
+chapter: "34.2"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [34 - Biomechanics & HCI](34---Biomechanics-&-HCI)*
+
+# 34.2 — Rotational Dynamics in Extreme Sports
+
+> *"The angular momentum of a system remains constant unless acted upon by an external torque."* — Euler's generalization of Newton's Second Law for rotation, 1758
+
+A BMX rider performing a 360 backflip must generate, control, and arrest rotational motion entirely through body configuration changes once airborne. This chapter develops the physics of angular momentum conservation, moment of inertia manipulation, and the parallel-axis theorem — the mathematical foundation for understanding how athletes "create rotation from nothing" in mid-air.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compute the **moment of inertia** of the human body in various configurations (tucked, extended, piked).
+2. Apply the **conservation of angular momentum** to aerial maneuvers.
+3. Use the **parallel-axis theorem** to shift inertia calculations between axes.
+4. Derive the **angular impulse-momentum relationship** for takeoff torque generation.
+5. Analyze a **360 backflip** using Euler's equations in the body frame.
+6. Model the rider-bike system as a composite rigid body with variable configuration.
+7. Implement angular momentum simulations in Python.
+
+---
+
+## 🖼️ Visual Anchor — BMX Rider Mid-Rotation
+
+![track-13__13.2-fig1](track-13__13.2-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 34.2.1 — Moment of Inertia (Scalar, Single Axis)
+
+The **moment of inertia** about a fixed axis $\hat{n}$ is:
+
+$$
+I = \int_{\text{body}} r_\perp^2 \, dm = \sum_i m_i r_{\perp,i}^2
+$$
+
+where $r_\perp$ is the perpendicular distance from each mass element to the rotation axis. Units: kg·m².
+
+### Definition 34.2.2 — Angular Momentum
+
+$$
+\mathbf{L} = I\boldsymbol{\omega} \quad \text{(rigid body about principal axis)}
+$$
+
+For a general body: $\mathbf{L} = \mathbf{I}\boldsymbol{\omega}$ where $\mathbf{I}$ is the inertia tensor (see [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles)).
+
+### Definition 34.2.3 — Torque (Moment of Force)
+
+$$
+\boldsymbol{\tau} = \mathbf{r} \times \mathbf{F} = \frac{d\mathbf{L}}{dt}
+$$
+
+For rotation about a fixed axis: $\tau = I\alpha$ where $\alpha = \dot\omega$ is angular acceleration.
+
+### Definition 34.2.4 — Angular Impulse
+
+$$
+\mathbf{J}_{\text{ang}} = \int_{t_1}^{t_2} \boldsymbol{\tau}\,dt = \Delta\mathbf{L} = \mathbf{L}_f - \mathbf{L}_i
+$$
+
+The angular impulse during takeoff determines the total angular momentum available for the entire aerial phase.
+
+### Definition 34.2.5 — Radius of Gyration
+
+$$
+k = \sqrt{\frac{I}{m}}, \quad \text{so } I = mk^2
+$$
+
+The radius of gyration $k$ is the distance from the axis at which the entire mass could be concentrated to give the same moment of inertia.
+
+### Definition 34.2.6 — Body Configuration States (BMX)
+
+| Configuration | Description | Typical $I$ (about transverse axis) |
+|:---|:---|:---|
+| **Extended** (layout) | Body straight, arms extended | 12–15 kg·m² |
+| **Piked** | Hips flexed 90°, legs straight | 7–9 kg·m² |
+| **Tucked** | Knees to chest, compact | 3–5 kg·m² |
+| **On-bike extended** | Rider + bike, standing | 16–20 kg·m² |
+| **On-bike tucked** | Rider + bike, compressed | 6–8 kg·m² |
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 34.2.A1 — Conservation of Angular Momentum
+
+In the absence of external torques, the total angular momentum of a system is conserved:
+
+$$
+\boldsymbol{\tau}_{\text{ext}} = 0 \implies \mathbf{L} = I\boldsymbol{\omega} = \text{constant}
+$$
+
+**Critical implication for BMX:** Once airborne, no external torque acts (ignoring air resistance). The angular momentum set at takeoff is ALL the rider has. Rotation speed can only be changed by changing $I$.
+
+### Axiom 34.2.A2 — Superposition of Angular Momenta
+
+For a multi-body system (rider + bike):
+
+$$
+\mathbf{L}_{\text{total}} = \mathbf{L}_{\text{rider}} + \mathbf{L}_{\text{bike}} = I_{\text{rider}}\boldsymbol{\omega}_{\text{rider}} + I_{\text{bike}}\boldsymbol{\omega}_{\text{bike}}
+$$
+
+### Axiom 34.2.A3 — Rigid Body During Each Phase
+
+Within each configuration phase (tucked, extended), the body is approximated as rigid. Configuration changes are modeled as instantaneous transitions between rigid states.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 34.2.1 — Parallel Axis Theorem
+
+$$
+I_{\text{axis}} = I_{\text{cm}} + Md^2
+$$
+
+where $d$ is the distance from the center of mass to the new parallel axis.
+
+**Derivation:**
+
+$$
+I_{\text{axis}} = \int (r_\perp')^2\,dm = \int |\mathbf{r}_{\text{cm}} + \mathbf{d}|_\perp^2\,dm
+$$
+
+$$
+= \int (r_{\perp,\text{cm}}^2 + 2\mathbf{r}_{\perp,\text{cm}}\cdot\mathbf{d} + d^2)\,dm
+$$
+
+$$
+= I_{\text{cm}} + 2\mathbf{d}\cdot\underbrace{\int \mathbf{r}_{\perp,\text{cm}}\,dm}_{= 0 \text{ (CM definition)}} + Md^2 = I_{\text{cm}} + Md^2
+$$
+
+$\blacksquare$
+
+### Lemma 34.2.2 — Composite Body Moment of Inertia
+
+For a system of $n$ rigid segments, each with mass $m_i$, CM moment of inertia $I_{\text{cm},i}$, and CM distance $d_i$ from the system rotation axis:
+
+$$
+I_{\text{total}} = \sum_{i=1}^{n} (I_{\text{cm},i} + m_i d_i^2)
+$$
+
+### Lemma 34.2.3 — Angular Velocity Ratio Under Configuration Change
+
+If angular momentum is conserved ($L = I_1\omega_1 = I_2\omega_2$):
+
+$$
+\frac{\omega_2}{\omega_1} = \frac{I_1}{I_2}
+$$
+
+Tucking from $I_{\text{ext}} = 14$ kg·m² to $I_{\text{tuck}} = 3.5$ kg·m² gives:
+
+$$
+\frac{\omega_{\text{tuck}}}{\omega_{\text{ext}}} = \frac{14}{3.5} = 4
+$$
+
+The rider spins **4× faster** when tucked.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 34.2.1 — Euler's Rotation Equations (Body Frame)
+
+In the principal axis body frame (see [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles)):
+
+$$
+I_1\dot\omega_1 - (I_2 - I_3)\omega_2\omega_3 = \tau_1
+$$
+
+$$
+I_2\dot\omega_2 - (I_3 - I_1)\omega_3\omega_1 = \tau_2
+$$
+
+$$
+I_3\dot\omega_3 - (I_1 - I_2)\omega_1\omega_2 = \tau_3
+$$
+
+For a BMX backflip (rotation primarily about the transverse axis $\hat{e}_2$): $\omega_1 \approx 0$, $\omega_3 \approx 0$ initially, so $I_2\dot\omega_2 \approx \tau_2$.
+
+### Theorem 34.2.2 — Angular Impulse-Momentum Theorem
+
+$$
+\int_{t_0}^{t_f} \tau\,dt = I_f\omega_f - I_i\omega_i
+$$
+
+For takeoff ($I$ constant during ground contact):
+
+$$
+\bar\tau \cdot \Delta t_{\text{contact}} = I\omega_{\text{takeoff}}
+$$
+
+$$
+\omega_{\text{takeoff}} = \frac{\bar\tau \cdot \Delta t_{\text{contact}}}{I}
+$$
+
+### Theorem 34.2.3 — Minimum Takeoff Angular Momentum for n Rotations
+
+To complete $n$ full rotations in airtime $T$:
+
+$$
+L_{\min} = I_{\text{tuck}} \cdot \frac{2\pi n}{T}
+$$
+
+But since $L$ is set at takeoff (in extended position):
+
+$$
+\omega_{\text{takeoff}} = \frac{L_{\min}}{I_{\text{ext}}} = \frac{I_{\text{tuck}}}{I_{\text{ext}}} \cdot \frac{2\pi n}{T}
+$$
+
+### Theorem 34.2.4 — Rotational Kinetic Energy Partition
+
+$$
+T_{\text{rot}} = \frac{1}{2}I\omega^2 = \frac{L^2}{2I}
+$$
+
+When the rider tucks ($I$ decreases), $T_{\text{rot}}$ **increases** (energy comes from muscular work done during the tuck):
+
+$$
+\Delta T_{\text{rot}} = \frac{L^2}{2I_{\text{tuck}}} - \frac{L^2}{2I_{\text{ext}}} = \frac{L^2}{2}\left(\frac{1}{I_{\text{tuck}}} - \frac{1}{I_{\text{ext}}}\right)
+$$
+
+---
+
+
+## ✍️ 5. Physics & Math Derivations
+
+### 5.1 Derivation — Moment of Inertia of a BMX Rider (Segmental Method)
+
+**The Hanavan Model:** Approximate the human body as 15 geometric solids (cylinders, ellipsoids, frustums). For a 75 kg rider:
+
+| Segment | Mass (kg) | $I_{\text{cm}}$ (kg·m²) | $d$ from hip (m) | $I_{\text{cm}} + md^2$ |
+|:---|:---|:---|:---|:---|
+| Head+Neck | 5.4 | 0.03 | 0.60 | 1.97 |
+| Trunk | 35.3 | 1.20 | 0.05 | 1.29 |
+| Upper Arms (×2) | 4.4 | 0.02 | 0.45 | 0.91 |
+| Forearms+Hands (×2) | 3.2 | 0.01 | 0.70 | 1.58 |
+| Thighs (×2) | 15.0 | 0.25 | 0.20 | 0.85 |
+| Shanks (×2) | 7.0 | 0.10 | 0.55 | 2.22 |
+| Feet (×2) | 2.1 | 0.01 | 0.80 | 1.35 |
+| Bike | 10.0 | 0.50 | 0.10 | 0.60 |
+
+**Step 1:** Sum for extended configuration (about transverse axis through combined CM):
+
+$$
+I_{\text{ext}} = \sum_i (I_{\text{cm},i} + m_i d_i^2) = 1.97 + 1.29 + 0.91 + 1.58 + 0.85 + 2.22 + 1.35 + 0.60
+$$
+
+$$
+I_{\text{ext}} = 10.77 \text{ kg·m}^2
+$$
+
+**Step 2:** For tucked configuration (all segments pulled toward CM, $d_i$ reduced by ~60%):
+
+$$
+I_{\text{tuck}} \approx \sum_i (I_{\text{cm},i} + m_i (0.4 d_i)^2) = \sum_i I_{\text{cm},i} + 0.16\sum_i m_i d_i^2
+$$
+
+$$
+I_{\text{tuck}} \approx 2.12 + 0.16 \times 8.65 = 2.12 + 1.38 = 3.50 \text{ kg·m}^2
+$$
+
+**Step 3:** Ratio:
+
+$$
+\frac{I_{\text{ext}}}{I_{\text{tuck}}} = \frac{10.77}{3.50} = 3.08
+$$
+
+A tucked rider spins approximately **3× faster** than an extended rider with the same angular momentum.
+
+---
+
+### 5.2 Derivation — Takeoff Requirements for a 360 Backflip
+
+**Given:**
+- Airtime: $T = 0.8$ s (typical quarter-pipe launch)
+- Required rotation: $\Delta\theta = 2\pi$ rad (one full backflip) + $2\pi$ rad (360° horizontal) — but these are about different axes. Focus on the backflip axis.
+- $I_{\text{tuck}} = 3.5$ kg·m², $I_{\text{ext}} = 10.77$ kg·m²
+
+**Step 1:** Average angular velocity needed (assuming rider tucks for 70% of airtime):
+
+Time tucked: $t_{\text{tuck}} = 0.7 \times 0.8 = 0.56$ s
+Time extended (takeoff/landing): $t_{\text{ext}} = 0.24$ s
+
+$$
+\Delta\theta = \omega_{\text{tuck}} \cdot t_{\text{tuck}} + \omega_{\text{ext}} \cdot t_{\text{ext}} = 2\pi
+$$
+
+**Step 2:** Using $L = I_{\text{tuck}}\omega_{\text{tuck}} = I_{\text{ext}}\omega_{\text{ext}}$:
+
+$$
+\omega_{\text{ext}} = \frac{I_{\text{tuck}}}{I_{\text{ext}}}\omega_{\text{tuck}} = \frac{3.5}{10.77}\omega_{\text{tuck}} = 0.325\omega_{\text{tuck}}
+$$
+
+**Step 3:** Substitute:
+
+$$
+\omega_{\text{tuck}}(0.56) + 0.325\omega_{\text{tuck}}(0.24) = 2\pi
+$$
+
+$$
+\omega_{\text{tuck}}(0.56 + 0.078) = 6.283
+$$
+
+$$
+\omega_{\text{tuck}} = \frac{6.283}{0.638} = 9.85 \text{ rad/s} = 564°/\text{s}
+$$
+
+**Step 4:** Required angular momentum:
+
+$$
+L = I_{\text{tuck}} \times \omega_{\text{tuck}} = 3.5 \times 9.85 = 34.5 \text{ kg·m}^2/\text{s}
+$$
+
+**Step 5:** Required takeoff angular velocity (in extended position):
+
+$$
+\omega_{\text{takeoff}} = \frac{L}{I_{\text{ext}}} = \frac{34.5}{10.77} = 3.20 \text{ rad/s} = 183°/\text{s}
+$$
+
+**Step 6:** Required torque during takeoff (contact time ~0.15 s):
+
+$$
+\bar\tau = \frac{L}{\Delta t} = \frac{34.5}{0.15} = 230 \text{ N·m}
+$$
+
+This is achievable — the hip extensors alone can generate 200+ N·m during explosive jumping.
+
+---
+
+### 5.3 Derivation — Energy Cost of Tucking
+
+**Step 1:** Rotational KE in extended position at takeoff:
+
+$$
+T_{\text{ext}} = \frac{L^2}{2I_{\text{ext}}} = \frac{34.5^2}{2 \times 10.77} = \frac{1190.25}{21.54} = 55.3 \text{ J}
+$$
+
+**Step 2:** Rotational KE after tucking:
+
+$$
+T_{\text{tuck}} = \frac{L^2}{2I_{\text{tuck}}} = \frac{34.5^2}{2 \times 3.5} = \frac{1190.25}{7.0} = 170.0 \text{ J}
+$$
+
+**Step 3:** Work done by muscles to tuck:
+
+$$
+W_{\text{tuck}} = T_{\text{tuck}} - T_{\text{ext}} = 170.0 - 55.3 = 114.7 \text{ J}
+$$
+
+The rider must do **114.7 J of muscular work** to pull into the tuck — this energy comes from the hip flexors and abdominals contracting concentrically against centrifugal loading.
+
+---
+
+### 5.4 Derivation — Coupled Rotation (Backflip + 360)
+
+For simultaneous rotation about two axes (somersault axis $\hat{e}_2$ and twist axis $\hat{e}_3$):
+
+$$
+\mathbf{L} = I_2\omega_2\hat{e}_2 + I_3\omega_3\hat{e}_3
+$$
+
+The total angular momentum magnitude:
+
+$$
+|\mathbf{L}| = \sqrt{(I_2\omega_2)^2 + (I_3\omega_3)^2}
+$$
+
+For a 360 backflip: $\omega_2$ (backflip) and $\omega_3$ (twist) are both non-zero. The tilt angle of $\mathbf{L}$ from the somersault axis:
+
+$$
+\phi_L = \tan^{-1}\left(\frac{I_3\omega_3}{I_2\omega_2}\right)
+$$
+
+Since $I_3 < I_2$ (twist axis has smaller MOI), the twist contributes less to total $L$ per unit $\omega$.
+
+---
+
+## 🧬 6. Biological Impact
+
+### Muscle Activation Sequence for Backflip Takeoff
+
+The generation of angular momentum at takeoff requires a precisely timed **proximal-to-distal** muscle firing sequence:
+
+| Time (ms) | Action | Muscles | Force (N) |
+|:---|:---|:---|:---|
+| -200 to -100 | Countermovement (hip/knee flexion) | Eccentric quads, glutes | 800–1200 |
+| -100 to 0 | Explosive extension begins | Gluteus maximus, Vastus lateralis | 2000–3000 |
+| 0 to +50 | Hip extension + backward lean | Erector spinae, Hamstrings | 1500–2000 |
+| +50 to +100 | Knee extension (final push) | Quadriceps (concentric) | 2500–3500 |
+| +100 to +150 | Ankle plantarflexion (toe-off) | Gastrocnemius, Soleus | 1000–1500 |
+| +150 (airborne) | Tuck initiation | Rectus abdominis, Iliopsoas | 500–800 |
+
+### Vestibular System During Rotation
+
+- **Semicircular canals** detect angular acceleration (sensitive to 0.1°/s²)
+- At 564°/s rotation, the canals saturate — the rider relies on **visual spotting** (brief fixation on a reference point each revolution)
+- The **otolith organs** (utricle, saccule) detect linear acceleration and head tilt relative to gravity
+- **Vestibulo-ocular reflex (VOR)** attempts to stabilize gaze but is suppressed during rapid rotation
+
+### Hormonal Response
+
+- **Adrenaline (epinephrine):** Released 2–5 seconds before the trick attempt (anticipatory response)
+- **Cortisol:** Elevated during high-consequence attempts (competition, new tricks)
+- **Endorphins:** Released post-landing, contributing to the "flow state" sensation
+- **Norepinephrine:** Enhances focus and reaction time during the aerial phase
+
+### Injury Biomechanics
+
+Under-rotation (landing at 270° instead of 360°) creates:
+- Cervical spine compression: up to 8,000 N (fracture threshold: ~3,400 N)
+- Wrist hyperextension: >90° (scaphoid fracture risk)
+- The difference between safe and catastrophic is often <50 ms of rotation time
+
+---
+
+## 💻 7. Software Implementation
+
+### 7.1 Angular Momentum Conservation Simulator
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+class BMXRotationSimulator:
+    """Simulate a BMX rider's rotation during aerial phase."""
+    
+    def __init__(self, L: float, I_extended: float, I_tucked: float, airtime: float):
+        """
+        Args:
+            L: Angular momentum (kg·m²/s), set at takeoff
+            I_extended: Moment of inertia in extended position (kg·m²)
+            I_tucked: Moment of inertia in tucked position (kg·m²)
+            airtime: Total time in air (s)
+        """
+        self.L = L
+        self.I_ext = I_extended
+        self.I_tuck = I_tucked
+        self.airtime = airtime
+    
+    def simulate(self, tuck_start: float = 0.1, tuck_end: float = 0.7, dt: float = 0.001):
+        """Run simulation with specified tuck timing (fractions of airtime).
+        
+        Returns:
+            dict with time, omega, theta, I arrays
+        """
+        t = np.arange(0, self.airtime, dt)
+        N = len(t)
+        I = np.full(N, self.I_ext)
+        
+        # Tuck phase
+        i_start = int(tuck_start * N)
+        i_end = int(tuck_end * N)
+        I[i_start:i_end] = self.I_tuck
+        
+        # Smooth transitions (50ms ramp)
+        ramp_samples = int(0.05 / dt)
+        for i in range(ramp_samples):
+            frac = i / ramp_samples
+            if i_start + i < N:
+                I[i_start + i] = self.I_ext + frac * (self.I_tuck - self.I_ext)
+            if i_end + i < N:
+                I[i_end + i] = self.I_tuck + frac * (self.I_ext - self.I_tuck)
+        
+        # omega = L / I (conservation)
+        omega = self.L / I
+        
+        # Integrate for angle
+        theta = np.cumsum(omega) * dt
+        
+        return {'time': t, 'omega': omega, 'theta': theta, 'I': I}
+    
+    def total_rotations(self, result: dict) -> float:
+        """Return total rotations completed."""
+        return result['theta'][-1] / (2 * np.pi)
+
+
+# Example usage
+if __name__ == "__main__":
+    sim = BMXRotationSimulator(L=34.5, I_extended=10.77, I_tucked=3.5, airtime=0.8)
+    result = sim.simulate(tuck_start=0.12, tuck_end=0.75)
+    
+    print(f"Total rotations: {sim.total_rotations(result):.2f}")
+    print(f"Peak omega: {np.max(result['omega']):.1f} rad/s ({np.degrees(np.max(result['omega'])):.0f} deg/s)")
+    
+    fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
+    axes[0].plot(result['time'], result['I'], 'b-')
+    axes[0].set_ylabel('I (kg·m²)')
+    axes[1].plot(result['time'], np.degrees(result['omega']), 'r-')
+    axes[1].set_ylabel('ω (°/s)')
+    axes[2].plot(result['time'], np.degrees(result['theta']), 'g-')
+    axes[2].axhline(360, color='k', linestyle='--', alpha=0.5)
+    axes[2].set_ylabel('θ (°)')
+    axes[2].set_xlabel('Time (s)')
+    plt.tight_layout()
+    plt.savefig('bmx_rotation.png', dpi=150)
+```
+
+### 7.2 Moment of Inertia Calculator (Segmental Method)
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class BodySegment:
+    name: str
+    mass: float          # kg
+    I_cm: float          # kg·m² (about segment's own CM)
+    d_from_axis: float   # m (distance from rotation axis to segment CM)
+
+    @property
+    def I_total(self) -> float:
+        """Parallel axis theorem: I = I_cm + m*d²"""
+        return self.I_cm + self.mass * self.d_from_axis**2
+
+
+def compute_system_moi(segments: list[BodySegment]) -> float:
+    """Compute total moment of inertia for a composite body."""
+    return sum(seg.I_total for seg in segments)
+
+
+# BMX rider (75 kg) + bike (10 kg) in extended position
+rider_extended = [
+    BodySegment("Head+Neck", 5.4, 0.03, 0.60),
+    BodySegment("Trunk", 35.3, 1.20, 0.05),
+    BodySegment("Upper Arms", 4.4, 0.02, 0.45),
+    BodySegment("Forearms+Hands", 3.2, 0.01, 0.70),
+    BodySegment("Thighs", 15.0, 0.25, 0.20),
+    BodySegment("Shanks", 7.0, 0.10, 0.55),
+    BodySegment("Feet", 2.1, 0.01, 0.80),
+    BodySegment("Bike", 10.0, 0.50, 0.10),
+]
+
+I_ext = compute_system_moi(rider_extended)
+print(f"I_extended = {I_ext:.2f} kg·m²")
+```
+
+---
+
+## 🧮 8. Worked Examples
+
+<details>
+<summary>Example 1: How Fast Must a Rider Spin for a Double Backflip?</summary>
+
+**Problem:** A BMX rider has airtime $T = 1.2$ s, $I_{\text{ext}} = 11$ kg·m², $I_{\text{tuck}} = 3.8$ kg·m². They tuck for 80% of the flight. What angular momentum is needed for a double backflip ($4\pi$ rad)?
+
+**Solution:**
+
+**Step 1:** Time in each phase:
+
+$$
+t_{\text{tuck}} = 0.8 \times 1.2 = 0.96 \text{ s}, \quad t_{\text{ext}} = 0.24 \text{ s}
+$$
+
+**Step 2:** Angular velocity relationship:
+
+$$
+\omega_{\text{ext}} = \frac{I_{\text{tuck}}}{I_{\text{ext}}}\omega_{\text{tuck}} = \frac{3.8}{11}\omega_{\text{tuck}} = 0.345\omega_{\text{tuck}}
+$$
+
+**Step 3:** Total rotation equation:
+
+$$
+\omega_{\text{tuck}}(0.96) + 0.345\omega_{\text{tuck}}(0.24) = 4\pi
+$$
+
+$$
+\omega_{\text{tuck}}(0.96 + 0.0829) = 12.566
+$$
+
+$$
+\omega_{\text{tuck}} = \frac{12.566}{1.043} = 12.05 \text{ rad/s} = 691°/\text{s}
+$$
+
+**Step 4:** Required angular momentum:
+
+$$
+L = I_{\text{tuck}} \times \omega_{\text{tuck}} = 3.8 \times 12.05 = 45.8 \text{ kg·m}^2/\text{s}
+$$
+
+**Step 5:** Takeoff angular velocity:
+
+$$
+\omega_{\text{takeoff}} = \frac{45.8}{11} = 4.16 \text{ rad/s} = 239°/\text{s}
+$$
+
+**Step 6:** Required average torque (contact time 0.15 s):
+
+$$
+\bar\tau = \frac{45.8}{0.15} = 305 \text{ N·m}
+$$
+
+This is near the limit of human hip extensor capacity — explaining why double backflips require massive ramps.
+
+</details>
+
+<details>
+<summary>Example 2: Energy Budget of a Tuck</summary>
+
+**Problem:** A rider with $L = 40$ kg·m²/s transitions from $I = 12$ kg·m² to $I = 4$ kg·m². Calculate: (a) angular velocities before/after, (b) kinetic energies, (c) work done by muscles.
+
+**Solution:**
+
+**(a) Angular velocities:**
+
+$$
+\omega_{\text{ext}} = \frac{L}{I_{\text{ext}}} = \frac{40}{12} = 3.33 \text{ rad/s}
+$$
+
+$$
+\omega_{\text{tuck}} = \frac{L}{I_{\text{tuck}}} = \frac{40}{4} = 10.0 \text{ rad/s}
+$$
+
+**(b) Kinetic energies:**
+
+$$
+T_{\text{ext}} = \frac{1}{2}I_{\text{ext}}\omega_{\text{ext}}^2 = \frac{1}{2}(12)(3.33)^2 = 66.7 \text{ J}
+$$
+
+$$
+T_{\text{tuck}} = \frac{1}{2}I_{\text{tuck}}\omega_{\text{tuck}}^2 = \frac{1}{2}(4)(10)^2 = 200 \text{ J}
+$$
+
+**(c) Muscular work:**
+
+$$
+W = T_{\text{tuck}} - T_{\text{ext}} = 200 - 66.7 = 133.3 \text{ J}
+$$
+
+The muscles must supply 133.3 J to pull the limbs inward against centrifugal loading. This is equivalent to lifting 34.6 kg through 1 meter.
+
+</details>
+
+<details>
+<summary>Example 3: Parallel Axis Theorem — Bike Wheel Contribution</summary>
+
+**Problem:** A BMX wheel has mass 1.8 kg, radius 0.254 m (20" wheel), and can be modeled as a thin hoop ($I_{\text{cm}} = mr^2$). The wheel's center is 0.35 m from the rider's rotation axis. Find the wheel's contribution to total MOI.
+
+**Solution:**
+
+**Step 1:** CM moment of inertia (thin hoop):
+
+$$
+I_{\text{cm}} = mr^2 = 1.8 \times 0.254^2 = 1.8 \times 0.0645 = 0.116 \text{ kg·m}^2
+$$
+
+**Step 2:** Parallel axis theorem:
+
+$$
+I_{\text{wheel}} = I_{\text{cm}} + md^2 = 0.116 + 1.8 \times 0.35^2 = 0.116 + 0.221 = 0.337 \text{ kg·m}^2
+$$
+
+**Step 3:** Both wheels:
+
+$$
+I_{\text{both wheels}} = 2 \times 0.337 = 0.674 \text{ kg·m}^2
+$$
+
+This represents about 6% of the total system MOI in extended position — significant enough that wheel mass matters for trick difficulty.
+
+</details>
+
+<details>
+<summary>Example 4: Twist Initiation via Asymmetric Arm Movement</summary>
+
+**Problem:** A rider in a backflip ($\omega_{\text{flip}} = 8$ rad/s, $I_{\text{flip}} = 4$ kg·m²) throws their right arm across their body. The arm (mass 3.5 kg, length 0.6 m) moves from 0.3 m to 0.05 m from the twist axis. What twist rate is generated?
+
+**Solution:**
+
+**Step 1:** The arm's MOI about the twist axis changes:
+
+$$
+\Delta I_{\text{arm,twist}} = m(r_1^2 - r_2^2) = 3.5(0.3^2 - 0.05^2) = 3.5(0.09 - 0.0025) = 0.306 \text{ kg·m}^2
+$$
+
+**Step 2:** By conservation of angular momentum about the twist axis (initially zero twist):
+
+The asymmetric arm movement creates a **tilt** of the angular momentum vector. The twist rate generated is approximately:
+
+$$
+\omega_{\text{twist}} \approx \frac{I_{\text{arm}} \cdot \omega_{\text{arm,relative}}}{I_{\text{body,twist}}}
+$$
+
+For the arm sweeping at $\omega_{\text{arm}} = 10$ rad/s across the body, with $I_{\text{body,twist}} = 1.2$ kg·m²:
+
+$$
+\omega_{\text{twist}} = \frac{0.306 \times 10}{1.2} = 2.55 \text{ rad/s} = 146°/\text{s}
+$$
+
+This is sufficient to add a 180° twist to a backflip in ~0.35 s.
+
+</details>
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal Cross-links
+- [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles) — Full mathematical treatment of Euler's equations and inertia tensors
+- [4.1 - Newtonian Dynamics & Conservation Laws](4.1---Newtonian-Dynamics-&-Conservation-Laws) — Newton's laws and conservation principles
+- [34.1 - Kinematics of Human Movement](34.1---Kinematics-of-Human-Movement) — Prerequisite: position/velocity/acceleration
+- [34.3 - Cardiovascular Bioenergetics & VO2 Max](34.3---Cardiovascular-Bioenergetics-&-VO2-Max) — Energy systems powering the takeoff
+- [34.5 - Sensor Fusion - Accelerometers & Gyroscopes](34.5---Sensor-Fusion---Accelerometers-&-Gyroscopes) — Measuring rotation with IMUs
+
+### Additional Derivations
+
+#### Angular Momentum Vector Tilt (Cat Twist Phenomenon)
+
+A rider can initiate twist without initial twist angular momentum by tilting the somersault angular momentum vector. This is the "cat twist" mechanism:
+
+**Step 1:** Initial state: $\mathbf{L} = L\hat{e}_2$ (pure somersault, no twist).
+
+**Step 2:** The rider asymmetrically moves arms/legs, creating a temporary product of inertia $I_{23} \neq 0$.
+
+**Step 3:** In the body frame, the angular velocity develops a twist component:
+
+$$
+\omega_3 = -\frac{I_{23}}{I_3}\omega_2
+$$
+
+**Step 4:** The twist rate depends on how much asymmetry the rider creates. For arms spread asymmetrically creating $I_{23} = 0.5$ kg·m², with $I_3 = 1.2$ kg·m² and $\omega_2 = 8$ rad/s:
+
+$$
+\omega_3 = -\frac{0.5}{1.2} \times 8 = -3.33 \text{ rad/s} = 191°/\text{s}
+$$
+
+This generates a full 360° twist in $360/191 = 1.88$ seconds — achievable within a single backflip.
+
+#### Gyroscopic Precession of Spinning Wheels
+
+The BMX wheels act as gyroscopes. When the rider tilts the bike, the spinning wheels resist:
+
+**Step 1:** Wheel angular momentum: $L_w = I_w \omega_w$ where $I_w = mr^2 = 1.8 \times 0.254^2 = 0.116$ kg·m² and $\omega_w = v/r = 8/0.254 = 31.5$ rad/s.
+
+$$
+L_w = 0.116 \times 31.5 = 3.65 \text{ kg·m}^2/\text{s per wheel}
+$$
+
+**Step 2:** Total wheel angular momentum (both wheels): $L_{\text{wheels}} = 7.3$ kg·m²/s.
+
+**Step 3:** Precession rate when tilting at $\Omega_{\text{tilt}} = 2$ rad/s:
+
+$$
+\tau_{\text{gyro}} = L_{\text{wheels}} \times \Omega_{\text{tilt}} = 7.3 \times 2 = 14.6 \text{ N·m}
+$$
+
+This gyroscopic torque helps stabilize the bike during barspins and tailwhips — the spinning wheels resist changes in orientation.
+
+### Authoritative Sources
+- **Yeadon, M.R.** (1990). "The simulation of aerial movement." *Journal of Biomechanics*, 23(1), 85–89. — Seminal paper on aerial twist mechanics.
+- **McGinnis, P.M.** (2013). *Biomechanics of Sport and Exercise*. Chapter 7: Angular Kinetics.
+- **MIT 2.183** — Biomechanics and Neural Control of Movement.
+- **Hiley, M.J. & Yeadon, M.R.** (2003). "Optimum technique for generating angular momentum in accelerated backward giant circles." *Journal of Applied Biomechanics*.
+- **Frohlich, C.** (1979). "Do springboard divers violate angular momentum conservation?" *American Journal of Physics*, 47(7), 583–592.
+
+---

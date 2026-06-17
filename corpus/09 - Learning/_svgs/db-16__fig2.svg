@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#1a1a24" rx="8"/>
+  <text x="400" y="40" fill="#ffffff" font-family="sans-serif" font-size="24" font-weight="bold" text-anchor="middle">ACID Properties &amp; Transaction Lifecycle</text>
+
+  <!-- Four Quadrants for ACID -->
+  <g transform="translate(100, 80)">
+    <!-- Atomicity -->
+    <rect x="0" y="0" width="280" height="120" fill="#3a2525" stroke="#e74c3c" stroke-width="2" rx="6"/>
+    <text x="140" y="30" fill="#e74c3c" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Atomicity</text>
+    <text x="140" y="55" fill="#f5b7b1" font-family="sans-serif" font-size="13" text-anchor="middle">All or nothing execution</text>
+    <text x="140" y="75" fill="#f5b7b1" font-family="sans-serif" font-size="13" text-anchor="middle">Enforced by: Undo Log / WAL</text>
+    <text x="140" y="95" fill="#f5b7b1" font-family="sans-serif" font-size="13" text-anchor="middle">Rollback on any failure</text>
+
+    <!-- Consistency -->
+    <rect x="320" y="0" width="280" height="120" fill="#203628" stroke="#2ecc71" stroke-width="2" rx="6"/>
+    <text x="460" y="30" fill="#2ecc71" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Consistency</text>
+    <text x="460" y="55" fill="#a9dfbf" font-family="sans-serif" font-size="13" text-anchor="middle">Valid state to valid state</text>
+    <text x="460" y="75" fill="#a9dfbf" font-family="sans-serif" font-size="13" text-anchor="middle">Enforced by: Constraints, Triggers</text>
+    <text x="460" y="95" fill="#a9dfbf" font-family="sans-serif" font-size="13" text-anchor="middle">Foreign Keys, Unique checks</text>
+
+    <!-- Isolation -->
+    <rect x="0" y="140" width="280" height="120" fill="#243342" stroke="#3498db" stroke-width="2" rx="6"/>
+    <text x="140" y="170" fill="#3498db" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Isolation</text>
+    <text x="140" y="195" fill="#a9cce3" font-family="sans-serif" font-size="13" text-anchor="middle">Hides concurrent effects</text>
+    <text x="140" y="215" fill="#a9cce3" font-family="sans-serif" font-size="13" text-anchor="middle">Enforced by: MVCC, 2PL</text>
+    <text x="140" y="235" fill="#a9cce3" font-family="sans-serif" font-size="13" text-anchor="middle">Levels: RC, RR, Serializable</text>
+
+    <!-- Durability -->
+    <rect x="320" y="140" width="280" height="120" fill="#3d3420" stroke="#f1c40f" stroke-width="2" rx="6"/>
+    <text x="460" y="170" fill="#f1c40f" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Durability</text>
+    <text x="460" y="195" fill="#f9e79f" font-family="sans-serif" font-size="13" text-anchor="middle">Committed data survives crash</text>
+    <text x="460" y="215" fill="#f9e79f" font-family="sans-serif" font-size="13" text-anchor="middle">Enforced by: WAL fsync</text>
+    <text x="460" y="235" fill="#f9e79f" font-family="sans-serif" font-size="13" text-anchor="middle">Non-volatile storage guarantee</text>
+  </g>
+
+  <!-- Transaction Lifecycle -->
+  <g transform="translate(100, 370)">
+    <!-- Background track -->
+    <path d="M 30 30 L 570 30" stroke="#3a3a4a" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Nodes -->
+    <circle cx="30" cy="30" r="15" fill="#9b59b6"/>
+    <text x="30" y="10" fill="#d2b4de" font-family="sans-serif" font-size="12" text-anchor="middle">BEGIN</text>
+
+    <circle cx="200" cy="30" r="15" fill="#3498db"/>
+    <text x="200" y="10" fill="#a9cce3" font-family="sans-serif" font-size="12" text-anchor="middle">OPERATIONS</text>
+
+    <circle cx="370" cy="30" r="15" fill="#f39c12"/>
+    <text x="370" y="10" fill="#f9e79f" font-family="sans-serif" font-size="12" text-anchor="middle">VALIDATION</text>
+
+    <circle cx="570" cy="30" r="15" fill="#2ecc71"/>
+    <text x="570" y="10" fill="#a9dfbf" font-family="sans-serif" font-size="12" text-anchor="middle">COMMIT / WAL</text>
+    
+    <circle cx="370" cy="80" r="15" fill="#e74c3c"/>
+    <path d="M 370 45 L 370 65" stroke="#e74c3c" stroke-width="4" marker-end="url(#arrowhead-red)"/>
+    <text x="400" y="84" fill="#f5b7b1" font-family="sans-serif" font-size="12" text-anchor="start">ABORT / ROLLBACK</text>
+
+    <!-- Animated Token -->
+    <circle r="8" fill="#ffffff">
+      <animateMotion dur="4s" repeatCount="indefinite" path="M 30 30 L 200 30 L 370 30 L 570 30" keyTimes="0; 0.3; 0.6; 1"/>
+      <animate attributeName="opacity" values="1; 1; 1; 0" dur="4s" repeatCount="indefinite" keyTimes="0; 0.8; 0.95; 1"/>
+    </circle>
+  </g>
+
+  <defs>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c" />
+    </marker>
+  </defs>
+
+</svg>

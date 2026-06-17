@@ -1,0 +1,71 @@
+<svg viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="ap-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .ap-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .ap-trace { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 4s ease-in-out infinite; }
+    .ap-threshold { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 6 3; }
+    .ap-rest { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 2; }
+    .ap-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .ap-phase { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .ap-ion { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-accent, #79c0ff); }
+    .ap-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .na-trace { stroke: #e74c3c; stroke-width: 1.8; fill: none; stroke-dasharray: 4 2; stroke-dasharray: 200; stroke-dashoffset: 200; animation: draw 4s ease-in-out infinite; }
+    .k-trace { stroke: #3498db; stroke-width: 1.8; fill: none; stroke-dasharray: 4 2; stroke-dasharray: 200; stroke-dashoffset: 200; animation: draw 4s ease-in-out infinite; }
+    @keyframes draw { 40%, 100% { stroke-dashoffset: 0; } }
+  </style>
+  <!-- Title -->
+  <text x="310" y="20" class="ap-title" text-anchor="middle">Action Potential: Voltage Trace with Ion Channel Dynamics</text>
+  <!-- Axes -->
+  <line x1="60" y1="340" x2="590" y2="340" class="ap-axis" marker-end="url(#ap-arrow)"/>
+  <line x1="60" y1="340" x2="60" y2="30" class="ap-axis" marker-end="url(#ap-arrow)"/>
+  <text x="595" y="355" class="ap-label">Time (ms)</text>
+  <text x="25" y="30" class="ap-label">V (mV)</text>
+  <!-- Y-axis labels -->
+  <text x="50" y="78" class="ap-label" text-anchor="end">+40</text>
+  <text x="50" y="148" class="ap-label" text-anchor="end">0</text>
+  <text x="50" y="238" class="ap-label" text-anchor="end">-55</text>
+  <text x="50" y="278" class="ap-label" text-anchor="end">-70</text>
+  <text x="50" y="318" class="ap-label" text-anchor="end">-90</text>
+  <!-- X-axis labels -->
+  <text x="100" y="355" class="ap-label" text-anchor="middle">0</text>
+  <text x="200" y="355" class="ap-label" text-anchor="middle">1</text>
+  <text x="300" y="355" class="ap-label" text-anchor="middle">2</text>
+  <text x="400" y="355" class="ap-label" text-anchor="middle">3</text>
+  <text x="500" y="355" class="ap-label" text-anchor="middle">4</text>
+  <!-- Reference lines -->
+  <line x1="60" y1="278" x2="590" y2="278" class="ap-rest"/>
+  <text x="595" y="282" class="ap-label" fill="var(--text-muted, #8b949e)">V_rest = -70</text>
+  <line x1="60" y1="238" x2="590" y2="238" class="ap-threshold"/>
+  <text x="595" y="242" class="ap-label" fill="var(--text-muted, #8b949e)">Threshold = -55</text>
+  <!-- Action potential trace -->
+  <path d="M 80 278 L 140 278 C 150 278 155 270 160 238 C 170 180 180 100 190 75 C 195 65 200 70 205 85 C 215 120 225 180 235 240 C 245 280 255 310 265 318 C 275 320 285 315 300 305 C 320 295 350 285 380 280 L 590 278" class="ap-trace"/>
+  <!-- Phase labels -->
+  <text x="120" y="268" class="ap-phase">Resting</text>
+  <text x="165" y="200" class="ap-phase" transform="rotate(-70,165,200)">Depolarization</text>
+  <text x="195" y="58" class="ap-phase">Peak (+40mV)</text>
+  <text x="225" y="200" class="ap-phase" transform="rotate(70,225,200)">Repolarization</text>
+  <text x="270" y="335" class="ap-phase">Hyperpolarization</text>
+  <text x="380" y="268" class="ap-phase">Recovery</text>
+  <!-- Ion annotations -->
+  <text x="170" y="155" class="ap-ion">Na⁺ influx ↑↑</text>
+  <text x="240" y="260" class="ap-ion">K⁺ efflux ↑↑</text>
+  <text x="290" y="330" class="ap-ion">K⁺ channels slow to close</text>
+  <!-- Conductance traces (small, bottom-right inset) -->
+  <rect x="420" y="40" width="170" height="110" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="505" y="55" class="ap-label" text-anchor="middle" font-weight="bold">Conductances</text>
+  <!-- gNa trace -->
+  <path d="M 435 130 L 460 130 C 470 130 475 90 480 70 C 485 65 490 75 495 100 C 500 120 505 130 520 130 L 575 130" class="na-trace"/>
+  <text x="480" y="62" class="ap-label" fill="#e74c3c" font-size="9px">g_Na</text>
+  <!-- gK trace -->
+  <path d="M 435 130 L 470 130 C 480 130 490 120 500 100 C 510 85 515 80 520 80 C 530 82 540 100 550 115 C 560 125 565 130 575 130" class="k-trace"/>
+  <text x="525" y="73" class="ap-label" fill="#3498db" font-size="9px">g_K</text>
+  <!-- Refractory period bracket -->
+  <line x1="190" y1="365" x2="380" y2="365" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <line x1="190" y1="360" x2="190" y2="370" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <line x1="380" y1="360" x2="380" y2="370" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="285" y="377" class="ap-label" text-anchor="middle">Refractory period (~2 ms)</text>
+</svg>

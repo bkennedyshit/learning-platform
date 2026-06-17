@@ -1,0 +1,70 @@
+<svg viewBox="0 0 560 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="arr27" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ax27   { stroke: var(--text-normal, #c9d1d9); stroke-width:1.4; fill:none; }
+    .sub27  { fill: var(--interactive-accent, #58a6ff); opacity:0.12; }
+    .vec27  { stroke: var(--interactive-accent, #58a6ff); stroke-width:2.6; fill:none;
+               marker-end: url(#arr27); }
+    .proj27 { stroke: var(--text-accent, #79c0ff); stroke-width:2.6; fill:none;
+               marker-end: url(#arr27); }
+    .perp27 { stroke: var(--text-muted, #8b949e); stroke-width:1.8; stroke-dasharray:5 3;
+               fill:none; marker-end: url(#arr27); }
+
+    .rtick27{ stroke: var(--text-muted, #8b949e); stroke-width:1.4; fill:none; }
+    .lbl27  { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); }
+    .lbl27a { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+               fill:var(--interactive-accent, #58a6ff); }
+    .lbl27b { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+               fill:var(--text-accent, #79c0ff); }
+    .lbl27m { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+               fill:var(--text-muted, #8b949e); }
+  </style>
+  <!-- subspace W (a line through origin) -->
+  <line x1="30" y1="290" x2="520" y2="90" class="ax27"/>
+  <text x="530" y="88" class="lbl27">W</text>
+  <!-- shaded region around W -->
+  <polygon points="30,270 520,70 520,110 30,310" class="sub27"/>
+  <!-- origin -->
+  <circle cx="160" cy="240" r="4" fill="var(--text-normal, #c9d1d9)"/>
+  <text x="148" y="258" class="lbl27">O</text>
+  <!-- vector b -->
+  <line x1="160" y1="240" x2="160" y2="240" class="vec27" opacity="0">
+    <animate attributeName="opacity" to="1" begin="0.5s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="300" begin="0.5s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="80" begin="0.5s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="308" y="76" class="lbl27a" opacity="0">b
+    <animate attributeName="opacity" to="1" begin="1.1s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- projection p = proj_W(b) -->
+  <line x1="160" y1="240" x2="160" y2="240" class="proj27" opacity="0">
+    <animate attributeName="opacity" to="1" begin="1.6s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="390" begin="1.6s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="168" begin="1.6s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="398" y="165" class="lbl27b" opacity="0">p = proj_W(b)
+    <animate attributeName="opacity" to="1" begin="2.2s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- error e = b - p (dashed) -->
+  <line x1="300" y1="80" x2="300" y2="80" class="perp27" opacity="0">
+    <animate attributeName="opacity" to="1" begin="2.7s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x1" to="390" begin="2.7s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y1" to="168" begin="2.7s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="310" y="125" class="lbl27m" opacity="0">e = b − p
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- right-angle tick at foot of perpendicular -->
+  <polyline points="382,176 374,163 387,156" class="rtick27" opacity="0">
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </polyline>
+  <!-- label: e ⊥ W -->
+  <text x="240" y="178" class="lbl27" font-style="italic" opacity="0">e ⊥ W means ⟨e, w⟩ = 0 for all w ∈ W
+    <animate attributeName="opacity" to="1" begin="3.8s" dur="0.4s" fill="freeze" />
+  </text>
+</svg>

@@ -1,0 +1,80 @@
+<svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-tool" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .layer-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; transition: all 0.3s ease; cursor: pointer; }
+    .layer-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .layer-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .tool-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .title-text { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .flow-arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-tool); }
+    .flow-arrow:hover { stroke: var(--interactive-accent, #58a6ff); }
+    .accent-box { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; opacity: 0.7; }
+    .phase-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .core-node { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 6; }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.3; } }
+  </style>
+
+  <!-- Title -->
+  <text x="350" y="30" class="title-text" text-anchor="middle">Python Development Ecosystem — Layer Architecture</text>
+
+  <!-- Layer 1: Hardware/OS -->
+  <rect x="40" y="420" width="620" height="60" class="layer-box"/>
+  <text x="350" y="445" class="layer-label" text-anchor="middle">Hardware / Operating System</text>
+  <text x="350" y="465" class="tool-label" text-anchor="middle">CPU • RAM • Disk • GPU • Network Stack • Syscalls</text>
+
+  <!-- Layer 2: Python Runtime -->
+  <rect x="40" y="340" width="620" height="60" class="layer-box"/>
+  <text x="350" y="365" class="layer-label" text-anchor="middle">Python Runtime (CPython 3.12+)</text>
+  <text x="350" y="385" class="tool-label" text-anchor="middle">Interpreter • GIL • GC (refcount + generational) • importlib • ast • dis</text>
+
+  <!-- Layer 3: Package Management -->
+  <rect x="40" y="260" width="300" height="60" class="layer-box"/>
+  <text x="190" y="285" class="layer-label" text-anchor="middle">Package Management</text>
+  <text x="190" y="305" class="tool-label" text-anchor="middle">pip • uv • poetry • pyproject.toml • venv</text>
+
+  <rect x="360" y="260" width="300" height="60" class="layer-box"/>
+  <text x="510" y="285" class="layer-label" text-anchor="middle">Quality & CI</text>
+  <text x="510" y="305" class="tool-label" text-anchor="middle">ruff • mypy • pytest • pre-commit • GitHub Actions</text>
+
+  <!-- Layer 4: Project Structure -->
+  <rect x="40" y="170" width="200" height="70" class="layer-box"/>
+  <text x="140" y="195" class="layer-label" text-anchor="middle">Project Layout</text>
+  <text x="140" y="215" class="tool-label" text-anchor="middle">src/ layout</text>
+  <text x="140" y="230" class="tool-label" text-anchor="middle">tests/ • docs/ • scripts/</text>
+
+  <rect x="260" y="170" width="200" height="70" class="layer-box"/>
+  <rect x="260" y="170" width="200" height="70" class="core-node pulse"/>
+  <text x="360" y="195" class="layer-label" text-anchor="middle">YOUR CODE</text>
+  <text x="360" y="215" class="tool-label" text-anchor="middle">Modules • Packages</text>
+  <text x="360" y="230" class="tool-label" text-anchor="middle">Classes • Functions</text>
+
+  <rect x="480" y="170" width="180" height="70" class="layer-box"/>
+  <text x="570" y="195" class="layer-label" text-anchor="middle">Editor / IDE</text>
+  <text x="570" y="215" class="tool-label" text-anchor="middle">VS Code + Pylance</text>
+  <text x="570" y="230" class="tool-label" text-anchor="middle">debugpy • Jupyter</text>
+
+  <!-- Layer 5: Deployment -->
+  <rect x="40" y="60" width="300" height="60" class="accent-box"/>
+  <text x="50" y="55" class="phase-label">deployment targets</text>
+  <text x="190" y="85" class="layer-label" text-anchor="middle">Containers & Cloud</text>
+  <text x="190" y="105" class="tool-label" text-anchor="middle">Docker • K8s • AWS Lambda • GCP Cloud Run</text>
+
+  <rect x="360" y="60" width="300" height="60" class="accent-box"/>
+  <text x="370" y="55" class="phase-label">output artifacts</text>
+  <text x="510" y="85" class="layer-label" text-anchor="middle">Distributable Packages</text>
+  <text x="510" y="105" class="tool-label" text-anchor="middle">wheel • sdist • PyPI • Docker image • .exe (PyInstaller)</text>
+
+  <!-- Flow arrows -->
+  <line x1="350" y1="420" x2="350" y2="405" class="flow-arrow"/>
+  <line x1="350" y1="340" x2="350" y2="325" class="flow-arrow"/>
+  <line x1="190" y1="260" x2="190" y2="245" class="flow-arrow"/>
+  <line x1="510" y1="260" x2="510" y2="245" class="flow-arrow"/>
+  <line x1="190" y1="170" x2="190" y2="125" class="flow-arrow"/>
+  <line x1="510" y1="170" x2="510" y2="125" class="flow-arrow"/>
+  <line x1="360" y1="170" x2="360" y2="125" class="flow-arrow"/>
+</svg>

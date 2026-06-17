@@ -1,0 +1,78 @@
+<svg viewBox="0 0 650 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="pv-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L7 5 L0 8z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pv-title { font-family:Inter,system-ui,sans-serif; font-size:14px; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .pv-label { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-normal, #c9d1d9); }
+    .pv-accent { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .pv-ventral { fill:#2ecc71; opacity:0.15; stroke:#2ecc71; stroke-width:2; transition: opacity 0.5s; }
+    .pv-symp { fill:#f39c12; opacity:0.15; stroke:#f39c12; stroke-width:2; transition: opacity 0.5s; }
+    .pv-dorsal { fill:#e74c3c; opacity:0.15; stroke:#e74c3c; stroke-width:2; transition: opacity 0.5s; }
+    .pv-ventral:hover, .pv-symp:hover, .pv-dorsal:hover { opacity: 0.3; }
+    .pv-arrow-up { stroke:#2ecc71; stroke-width:2.5; fill:none; stroke-dasharray: 8; animation: dashUp 1s linear infinite; }
+    .pv-arrow-down { stroke:#e74c3c; stroke-width:2.5; fill:none; stroke-dasharray: 8; animation: dashDown 1s linear infinite; }
+    .pv-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:6; }
+    @keyframes dashUp { to { stroke-dashoffset: -16; } }
+    @keyframes dashDown { to { stroke-dashoffset: 16; } }
+  </style>
+  <!-- Hierarchy Ladder -->
+  <!-- Ventral Vagal (top) -->
+  <rect x="30" y="20" width="280" height="120" rx="8" class="pv-ventral"/>
+  <text x="170" y="45" class="pv-title" text-anchor="middle" fill="#2ecc71">VENTRAL VAGAL</text>
+  <text x="170" y="63" class="pv-label" text-anchor="middle">(Social Engagement System)</text>
+  <text x="45" y="85" class="pv-label">• Safe, connected, calm</text>
+  <text x="45" y="100" class="pv-label">• Prosodic voice, eye contact</text>
+  <text x="45" y="115" class="pv-label">• High HRV (RMSSD > 40ms)</text>
+  <text x="45" y="130" class="pv-label">• HR: 60-80 bpm, flexible</text>
+  <!-- Sympathetic (middle) -->
+  <rect x="30" y="160" width="280" height="120" rx="8" class="pv-symp"/>
+  <text x="170" y="185" class="pv-title" text-anchor="middle" fill="#f39c12">SYMPATHETIC</text>
+  <text x="170" y="203" class="pv-label" text-anchor="middle">(Fight / Flight)</text>
+  <text x="45" y="225" class="pv-label">• Mobilized, anxious, angry</text>
+  <text x="45" y="240" class="pv-label">• Scanning for threat</text>
+  <text x="45" y="255" class="pv-label">• Low HRV (RMSSD 15-30ms)</text>
+  <text x="45" y="270" class="pv-label">• HR: 90-140+ bpm, rigid</text>
+  <!-- Dorsal Vagal (bottom) -->
+  <rect x="30" y="300" width="280" height="120" rx="8" class="pv-dorsal"/>
+  <text x="170" y="325" class="pv-title" text-anchor="middle" fill="#e74c3c">DORSAL VAGAL</text>
+  <text x="170" y="343" class="pv-label" text-anchor="middle">(Freeze / Shutdown / Collapse)</text>
+  <text x="45" y="365" class="pv-label">• Immobilized, dissociated, numb</text>
+  <text x="45" y="380" class="pv-label">• Flat affect, monotone voice</text>
+  <text x="45" y="395" class="pv-label">• Very low HRV (RMSSD < 15ms)</text>
+  <text x="45" y="410" class="pv-label">• HR: 40-55 bpm (bradycardia)</text>
+  <!-- Transition arrows -->
+  <line x1="315" y1="140" x2="315" y2="165" class="pv-arrow-down" marker-end="url(#pv-arr)"/>
+  <text x="325" y="155" class="pv-label" fill="#e74c3c">threat↓</text>
+  <line x1="335" y1="160" x2="335" y2="140" class="pv-arrow-up" marker-end="url(#pv-arr)"/>
+  <text x="355" y="148" class="pv-label" fill="#2ecc71">safety↑</text>
+  <line x1="315" y1="280" x2="315" y2="305" class="pv-arrow-down" marker-end="url(#pv-arr)"/>
+  <text x="325" y="295" class="pv-label" fill="#e74c3c">overwhelm↓</text>
+  <line x1="335" y1="300" x2="335" y2="280" class="pv-arrow-up" marker-end="url(#pv-arr)"/>
+  <text x="355" y="288" class="pv-label" fill="#2ecc71">mobilize↑</text>
+  <!-- Right panel: State Machine -->
+  <rect x="380" y="20" width="260" height="400" class="pv-box"/>
+  <text x="510" y="45" class="pv-title" text-anchor="middle">State Machine Model</text>
+  <text x="510" y="70" class="pv-accent" text-anchor="middle">Transition Probabilities</text>
+  <text x="395" y="100" class="pv-label">P(VV→VV | safety) = 0.95</text>
+  <text x="395" y="118" class="pv-label">P(VV→Symp | threat) = 0.70</text>
+  <text x="395" y="136" class="pv-label">P(Symp→VV | co-reg) = 0.40</text>
+  <text x="395" y="154" class="pv-label">P(Symp→DV | overwhelm) = 0.30</text>
+  <text x="395" y="172" class="pv-label">P(DV→Symp | mobilize) = 0.20</text>
+  <text x="395" y="190" class="pv-label">P(DV→DV | isolation) = 0.85</text>
+  <text x="510" y="225" class="pv-accent" text-anchor="middle">HRV Signatures</text>
+  <text x="395" y="250" class="pv-label">VV: RMSSD=45ms, HF=800ms²</text>
+  <text x="395" y="268" class="pv-label">Symp: RMSSD=20ms, LF/HF=4.0</text>
+  <text x="395" y="286" class="pv-label">DV: RMSSD=12ms, HR=48bpm</text>
+  <text x="510" y="320" class="pv-accent" text-anchor="middle">RL Interpretation</text>
+  <text x="395" y="345" class="pv-label">State = autonomic mode</text>
+  <text x="395" y="363" class="pv-label">Action space changes per state:</text>
+  <text x="395" y="381" class="pv-label">  VV: {connect, play, create}</text>
+  <text x="395" y="399" class="pv-label">  Symp: {fight, flee, scan}</text>
+  <text x="395" y="417" class="pv-label">  DV: {freeze, dissociate, submit}</text>
+  <!-- Phylogenetic timeline -->
+  <text x="170" y="455" class="pv-title" text-anchor="middle">Phylogenetic Order (newest → oldest):</text>
+  <text x="170" y="475" class="pv-label" text-anchor="middle">Ventral Vagal (mammals) → Sympathetic (reptiles) → Dorsal Vagal (fish)</text>
+</svg>

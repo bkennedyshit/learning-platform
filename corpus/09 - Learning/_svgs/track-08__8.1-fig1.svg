@@ -1,0 +1,91 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="r-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="r-arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    @keyframes pulse-box { 0%, 100% { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); } 50% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); } }
+    @keyframes flow { to { stroke-dashoffset: -10; } }
+    .r-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; }
+    .r-box-active { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; animation: pulse-box 2s ease-in-out infinite; }
+    .r-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .r-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .r-link { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .r-link-accent { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 4; animation: flow 1s linear infinite; }
+    .r-phase { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .r-fiber { fill: var(--interactive-accent, #58a6ff); opacity: 0.1; }
+    .r-node { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1; r: 5; cursor: pointer; transition: all 0.2s; }
+    .r-node:hover { fill: var(--interactive-accent, #58a6ff); r: 7; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+  </style>
+  <!-- Phase Labels -->
+  <text x="175" y="20" class="r-title">Render Phase (Pure)</text>
+  <text x="525" y="20" class="r-title">Commit Phase (Side Effects)</text>
+  <line x1="350" y1="30" x2="350" y2="400" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 3"/>
+  <!-- Render Phase: VDOM Tree -->
+  <rect x="30" y="40" width="120" height="35" class="r-box-active"/>
+  <text x="90" y="62" class="r-label" font-weight="bold">&lt;App/&gt;</text>
+  <rect x="30" y="100" width="100" height="30" class="r-box"/>
+  <text x="80" y="119" class="r-label">&lt;Header/&gt;</text>
+  <rect x="160" y="100" width="100" height="30" class="r-box-active"/>
+  <text x="210" y="119" class="r-label">&lt;Counter/&gt;</text>
+  <rect x="160" y="155" width="90" height="28" class="r-box"/>
+  <text x="205" y="173" class="r-label">&lt;button/&gt;</text>
+  <rect x="260" y="155" width="70" height="28" class="r-box-active"/>
+  <text x="295" y="173" class="r-label">&lt;span/&gt;</text>
+  <!-- Tree links -->
+  <line x1="90" y1="75" x2="80" y2="100" class="r-link"/>
+  <line x1="90" y1="75" x2="210" y2="100" class="r-link-accent"/>
+  <line x1="210" y1="130" x2="205" y2="155" class="r-link"/>
+  <line x1="210" y1="130" x2="295" y2="155" class="r-link-accent"/>
+  <!-- Diff annotation -->
+  <rect x="50" y="210" width="260" height="60" rx="5" class="r-fiber"/>
+  <text x="180" y="232" class="r-phase">Reconciler compares prev tree ↔ next tree</text>
+  <text x="180" y="250" class="r-phase">Marks dirty fibers (blue border = needs update)</text>
+  <text x="180" y="268" class="r-phase">Builds "work-in-progress" fiber tree</text>
+  <!-- Arrow to commit phase -->
+  <line x1="320" y1="240" x2="380" y2="240" class="r-link-accent" marker-end="url(#r-arrow)"/>
+  <text x="350" y="225" class="r-phase">Patch Set</text>
+  <!-- Commit Phase: Real DOM -->
+  <rect x="390" y="60" width="130" height="35" class="r-box"/>
+  <text x="455" y="82" class="r-label">document.body</text>
+  <rect x="390" y="120" width="110" height="30" class="r-box"/>
+  <text x="445" y="139" class="r-label">&lt;header&gt;</text>
+  <rect x="520" y="120" width="110" height="30" class="r-box-active"/>
+  <text x="575" y="139" class="r-label">&lt;div#counter&gt;</text>
+  <rect x="520" y="175" width="80" height="28" class="r-box"/>
+  <text x="560" y="193" class="r-label">&lt;button&gt;</text>
+  <rect x="610" y="175" width="70" height="28" class="r-box-active"/>
+  <text x="645" y="193" class="r-label">&lt;span&gt;</text>
+  <line x1="455" y1="95" x2="445" y2="120" class="r-link"/>
+  <line x1="455" y1="95" x2="575" y2="120" class="r-link-accent"/>
+  <line x1="575" y1="150" x2="560" y2="175" class="r-link"/>
+  <line x1="575" y1="150" x2="645" y2="175" class="r-link-accent"/>
+  <!-- DOM mutation annotation -->
+  <rect x="400" y="230" width="250" height="55" rx="5" class="r-fiber"/>
+  <text x="525" y="250" class="r-phase">Commit: apply mutations to real DOM</text>
+  <text x="525" y="268" class="r-phase">Run useLayoutEffect → paint → useEffect</text>
+  <!-- Hooks linked list at bottom -->
+  <text x="175" y="310" class="r-title">Fiber Hook Linked List</text>
+  <rect x="30" y="325" width="85" height="40" class="r-box-active"/>
+  <text x="72" y="342" class="r-label">useState</text>
+  <text x="72" y="358" class="r-phase">count: 5</text>
+  <line x1="115" y1="345" x2="140" y2="345" class="r-link-accent" marker-end="url(#r-arrow)"/>
+  <rect x="140" y="325" width="85" height="40" class="r-box"/>
+  <text x="182" y="342" class="r-label">useEffect</text>
+  <text x="182" y="358" class="r-phase">deps: [count]</text>
+  <line x1="225" y1="345" x2="250" y2="345" class="r-link-accent" marker-end="url(#r-arrow)"/>
+  <rect x="250" y="325" width="85" height="40" class="r-box"/>
+  <text x="292" y="342" class="r-label">useMemo</text>
+  <text x="292" y="358" class="r-phase">deps: [items]</text>
+  <!-- Legend -->
+  <rect x="400" y="320" width="250" height="70" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="525" y="340" class="r-label" font-weight="bold">Legend</text>
+  <rect x="415" y="350" width="12" height="12" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" rx="2"/>
+  <text x="435" y="361" class="r-phase" text-anchor="start">Dirty / needs update</text>
+  <rect x="415" y="370" width="12" height="12" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" rx="2"/>
+  <text x="435" y="381" class="r-phase" text-anchor="start">Clean / unchanged</text>
+</svg>

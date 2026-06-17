@@ -1,0 +1,81 @@
+<svg viewBox="0 0 580 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="bl-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .plate { stroke: var(--text-normal, #c9d1d9); stroke-width: 3; fill: none; }
+    .plate-hatch { stroke: var(--text-muted, #8b949e); stroke-width: 1; opacity: 0.5; }
+    .bl-curve { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.08; }
+    .bl-profile { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; transition: all 0.2s; cursor: pointer; }
+    .bl-profile:hover { stroke-width: 3.5; filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .freestream { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; stroke-dasharray: 200; stroke-dashoffset: 200; animation: blFlow 3s linear infinite; }
+    @keyframes blFlow { to { stroke-dashoffset: 0; } }
+    .delta-line { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+  </style>
+
+  <!-- Flat plate -->
+  <line x1="100" y1="250" x2="540" y2="250" class="plate"/>
+  <g class="plate-hatch">
+    <line x1="110" y1="255" x2="100" y2="265"/><line x1="130" y1="255" x2="120" y2="265"/>
+    <line x1="150" y1="255" x2="140" y2="265"/><line x1="170" y1="255" x2="160" y2="265"/>
+    <line x1="190" y1="255" x2="180" y2="265"/><line x1="210" y1="255" x2="200" y2="265"/>
+    <line x1="230" y1="255" x2="220" y2="265"/><line x1="250" y1="255" x2="240" y2="265"/>
+    <line x1="270" y1="255" x2="260" y2="265"/><line x1="290" y1="255" x2="280" y2="265"/>
+    <line x1="310" y1="255" x2="300" y2="265"/><line x1="330" y1="255" x2="320" y2="265"/>
+    <line x1="350" y1="255" x2="340" y2="265"/><line x1="370" y1="255" x2="360" y2="265"/>
+    <line x1="390" y1="255" x2="380" y2="265"/><line x1="410" y1="255" x2="400" y2="265"/>
+    <line x1="430" y1="255" x2="420" y2="265"/><line x1="450" y1="255" x2="440" y2="265"/>
+    <line x1="470" y1="255" x2="460" y2="265"/><line x1="490" y1="255" x2="480" y2="265"/>
+    <line x1="510" y1="255" x2="500" y2="265"/><line x1="530" y1="255" x2="520" y2="265"/>
+  </g>
+
+  <!-- Boundary layer edge (growing curve) -->
+  <path d="M 100 250 Q 200 245 250 235 Q 350 215 450 195 Q 520 180 540 175" class="bl-curve" style="fill: none;"/>
+  <path d="M 100 250 Q 200 245 250 235 Q 350 215 450 195 Q 520 180 540 175 L 540 250 Z" class="bl-curve" style="stroke: none;"/>
+
+  <!-- δ(x) label -->
+  <line x1="400" y1="250" x2="400" y2="205" class="delta-line"/>
+  <text x="410" y="230" class="label" style="fill: var(--text-accent, #79c0ff);">δ(x)</text>
+
+  <!-- Velocity profiles at different x-stations -->
+  <path d="M 150 250 Q 150 245 155 240 Q 160 235 165 250" class="bl-profile" transform="rotate(-90, 155, 245) translate(-95, 95)">
+    <animateTransform attributeName="transform" type="translate" values="-2,0; 2,0; -2,0" dur="2s" repeatCount="indefinite" additive="sum"/>
+  </path>
+  <!-- Simplified: draw profiles as curves from wall to freestream -->
+  <path d="M 180 250 C 180 245 185 242 190 240" class="bl-profile">
+    <animate attributeName="d" values="M 180 250 C 180 245 185 242 190 240; M 180 250 C 180 245 187 242 192 240; M 180 250 C 180 245 185 242 190 240" dur="2s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 280 250 C 280 238 290 228 300 225" class="bl-profile">
+    <animate attributeName="d" values="M 280 250 C 280 238 290 228 300 225; M 280 250 C 280 238 295 228 305 225; M 280 250 C 280 238 290 228 300 225" dur="2s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 400 250 C 400 230 415 210 430 205" class="bl-profile">
+    <animate attributeName="d" values="M 400 250 C 400 230 415 210 430 205; M 400 250 C 400 230 425 210 440 205; M 400 250 C 400 230 415 210 430 205" dur="2s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Freestream arrows -->
+  <line x1="40" y1="150" x2="95" y2="150" class="freestream" style="stroke: var(--text-normal, #c9d1d9); stroke-dasharray: none; animation: none; marker-end: url(#bl-arrow); color: var(--text-normal, #c9d1d9);">
+    <animate attributeName="x1" values="40; 45; 40" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="95; 100; 95" dur="2s" repeatCount="indefinite"/>
+  </line>
+  <text x="50" y="140" class="label">U∞</text>
+
+  <!-- Animated freestream particles -->
+  <path d="M 40 160 L 540 160" class="freestream"/>
+  <path d="M 40 170 L 540 170" class="freestream" style="animation-delay: 0.3s;"/>
+  <path d="M 40 180 L 540 180" class="freestream" style="animation-delay: 0.6s;"/>
+
+  <!-- Labels -->
+  <text x="100" y="280" class="label">Leading edge</text>
+  <text x="300" y="300" class="label-accent">δ ~ √(νx/U)</text>
+  <text x="300" y="320" class="title-label" text-anchor="middle">Laminar Boundary Layer (Blasius, 1908)</text>
+
+  <!-- Transition indicator -->
+  <line x1="450" y1="175" x2="450" y2="260" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="460" y="170" class="label" style="fill: var(--text-muted, #8b949e);">Transition</text>
+</svg>

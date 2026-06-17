@@ -1,0 +1,54 @@
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="fs-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .fs-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1; }
+    .fs-target { stroke: var(--text-muted, #8b949e); stroke-width: 2; stroke-dasharray: 4 2; fill: none; }
+    .fs-n1 { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; opacity: 0.5; }
+    .fs-n3 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.7; }
+    .fs-n9 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .fs-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .fs-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .fs-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+    .fs-gibbs { fill: var(--interactive-accent, #58a6ff); opacity: 0.6; }
+  </style>
+  <!-- Axes -->
+  <line x1="40" y1="150" x2="560" y2="150" class="fs-axis" marker-end="url(#fs-arr)"/>
+  <line x1="300" y1="280" x2="300" y2="20" class="fs-axis" marker-end="url(#fs-arr)"/>
+  <text x="565" y="155" class="fs-label">x</text>
+  <text x="305" y="18" class="fs-label">f(x)</text>
+  <!-- Target: square wave -->
+  <path d="M 40 80 H 170 V 220 H 300 V 80 H 430 V 220 H 560" class="fs-target"/>
+  <!-- n=1: sin(x) fundamental -->
+  <path d="M 40 150 Q 105 60 170 150 Q 235 240 300 150 Q 365 60 430 150 Q 495 240 560 150" class="fs-n1" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- n=1+3: better approximation -->
+  <path d="M 40 150 Q 80 55 120 75 Q 145 85 170 150 Q 195 215 220 225 Q 260 245 300 150 Q 340 55 380 75 Q 405 85 430 150 Q 455 215 480 225 Q 520 245 560 150" class="fs-n3" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- n=1+3+5+7+9: good approximation with Gibbs -->
+  <path d="M 40 150 Q 55 40 70 72 Q 85 78 105 80 Q 130 80 155 80 Q 165 82 170 150 Q 175 218 185 220 Q 210 222 235 220 Q 260 220 285 220 Q 295 218 300 150 Q 305 40 315 72 Q 330 78 350 80 Q 375 80 400 80 Q 420 80 430 150 Q 435 218 445 220 Q 460 222 480 220 Q 510 220 540 220 Q 555 218 560 150" class="fs-n9" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- Gibbs overshoot indicator -->
+  <circle cx="55" cy="40" r="4" class="fs-gibbs"/>
+  <text x="65" y="35" class="fs-label" fill="var(--interactive-accent, #58a6ff)">Gibbs</text>
+  <!-- Animated particle along n=9 curve -->
+  <circle r="3" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 40 150 Q 55 40 70 72 Q 85 78 105 80 Q 130 80 155 80 Q 165 82 170 150 Q 175 218 185 220 Q 210 222 235 220 Q 260 220 285 220 Q 295 218 300 150"/>
+  </circle>
+  <!-- Legend -->
+  <rect x="420" y="20" width="160" height="80" class="fs-box"/>
+  <line x1="430" y1="38" x2="460" y2="38" class="fs-target"/>
+  <text x="465" y="42" class="fs-label">Target f(x)</text>
+  <line x1="430" y1="55" x2="460" y2="55" class="fs-n1"/>
+  <text x="465" y="59" class="fs-label">N=1 (fundamental)</text>
+  <line x1="430" y1="72" x2="460" y2="72" class="fs-n3"/>
+  <text x="465" y="76" class="fs-label">N=3 harmonics</text>
+  <line x1="430" y1="89" x2="460" y2="89" class="fs-n9"/>
+  <text x="465" y="93" class="fs-accent">N=9 harmonics</text>
+</svg>

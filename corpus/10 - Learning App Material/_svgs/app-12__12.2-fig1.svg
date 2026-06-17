@@ -1,0 +1,82 @@
+<svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="toulmin-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <style>
+    .toulmin-box { fill: var(--background-secondary); stroke: var(--text-normal); stroke-width: 2; transition: all 0.2s ease; cursor: pointer; }
+    .toulmin-box:hover { fill: var(--background-modifier-hover); stroke: var(--interactive-accent); }
+    .toulmin-line { stroke: var(--text-normal); stroke-width: 1.8; fill: none; }
+    .toulmin-arrow-line { stroke: var(--text-normal); stroke-width: 2; fill: none; color: var(--text-normal); }
+    .toulmin-arrow-line:hover { color: var(--interactive-accent); }
+    .title-main { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent); font-weight: bold; }
+    .label-header { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal); font-weight: bold; }
+    .label-desc { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted); font-weight: 600; }
+  </style>
+
+  <!-- ================= TOULMIN METHOD FLOW ================= -->
+  <!-- Box 1: Data / Evidence (Left) -->
+  <g transform="translate(10, 80)">
+    <rect width="130" height="70" rx="6" class="toulmin-box"/>
+    <text x="65" y="25" class="label-header" text-anchor="middle">Data (Evidence)</text>
+    <text x="65" y="45" class="label-desc" text-anchor="middle">Foundational facts</text>
+    <text x="65" y="58" class="label-desc" text-anchor="middle">and direct observations</text>
+  </g>
+
+  <!-- Box 2: Qualifier (Middle Arrow Helper) -->
+  <g transform="translate(160, 40)">
+    <rect width="100" height="40" rx="4" class="toulmin-box"/>
+    <text x="50" y="20" class="label-header" font-size="11" text-anchor="middle">Qualifier</text>
+    <text x="50" y="32" class="label-desc" font-size="9" text-anchor="middle">Degree of certainty</text>
+  </g>
+
+  <!-- Box 3: Claim (Right) -->
+  <g transform="translate(450, 80)">
+    <rect width="130" height="70" rx="6" class="toulmin-box" stroke-width="2.5" stroke="var(--interactive-accent)"/>
+    <text x="65" y="25" class="label-header" fill="var(--interactive-accent)" text-anchor="middle">Claim (Thesis)</text>
+    <text x="65" y="45" class="label-desc" text-anchor="middle">The primary assertion</text>
+    <text x="65" y="58" class="label-desc" text-anchor="middle">you seek to prove</text>
+  </g>
+
+  <!-- Box 4: Warrant (Center Down) -->
+  <g transform="translate(220, 150)">
+    <rect width="150" height="60" rx="6" class="toulmin-box"/>
+    <text x="75" y="22" class="label-header" text-anchor="middle">Warrant</text>
+    <text x="75" y="40" class="label-desc" text-anchor="middle">Logical bridge connecting</text>
+    <text x="75" y="51" class="label-desc" text-anchor="middle">Data to Claim</text>
+  </g>
+
+  <!-- Box 5: Backing (Left Down) -->
+  <g transform="translate(50, 160)">
+    <rect width="110" height="50" rx="4" class="toulmin-box"/>
+    <text x="55" y="20" class="label-header" font-size="11" text-anchor="middle">Backing</text>
+    <text x="55" y="35" class="label-desc" font-size="9" text-anchor="middle">Supports the Warrant's</text>
+    <text x="55" y="45" class="label-desc" font-size="9" text-anchor="middle">underlying logic</text>
+  </g>
+
+  <!-- Box 6: Rebuttal (Right Up) -->
+  <g transform="translate(320, 40)">
+    <rect width="110" height="50" rx="4" class="toulmin-box"/>
+    <text x="55" y="20" class="label-header" font-size="11" text-anchor="middle">Rebuttal</text>
+    <text x="55" y="35" class="label-desc" font-size="9" text-anchor="middle">Acknowledges counter-</text>
+    <text x="55" y="45" class="label-desc" font-size="9" text-anchor="middle">arguments/exceptions</text>
+  </g>
+
+  <!-- Flow Lines & Arrows -->
+  <!-- Data to Claim main bridge -->
+  <line x1="140" y1="115" x2="442" y2="115" class="toulmin-arrow-line" stroke-width="2" marker-end="url(#toulmin-arrow)"/>
+  
+  <!-- Warrant connecting upward to the main bridge -->
+  <line x1="295" y1="150" x2="295" y2="115" class="toulmin-line"/>
+  
+  <!-- Backing to Warrant -->
+  <line x1="160" y1="185" x2="212" y2="185" class="toulmin-arrow-line" marker-end="url(#toulmin-arrow)"/>
+  
+  <!-- Rebuttal to Main Bridge -->
+  <line x1="375" y1="90" x2="375" y2="110" class="toulmin-line"/>
+
+  <!-- Qualifier helper line -->
+  <line x1="210" y1="80" x2="210" y2="110" class="toulmin-line"/>
+</svg>

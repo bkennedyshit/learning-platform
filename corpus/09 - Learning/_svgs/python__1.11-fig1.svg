@@ -1,0 +1,41 @@
+<svg viewBox="0 0 650 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .net-layer { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 5; transition: all 0.2s; cursor: pointer; }
+    .net-layer:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .proto { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+  </style>
+
+  <text x="325" y="20" class="title">TCP/IP Network Stack — OSI Layers for Python Developers</text>
+
+  <!-- Application Layer -->
+  <rect x="50" y="40" width="550" height="50" class="net-layer"/>
+  <text x="325" y="60" class="label">Layer 7: Application</text>
+  <text x="325" y="78" class="proto">HTTP/HTTPS • WebSocket • gRPC • DNS • SMTP</text>
+
+  <!-- Transport Layer -->
+  <rect x="50" y="100" width="270" height="50" class="net-layer"/>
+  <text x="185" y="120" class="label">Layer 4: TCP</text>
+  <text x="185" y="138" class="detail">Reliable, ordered, connection-oriented</text>
+
+  <rect x="330" y="100" width="270" height="50" class="net-layer"/>
+  <text x="465" y="120" class="label">Layer 4: UDP</text>
+  <text x="465" y="138" class="detail">Fast, unreliable, connectionless</text>
+
+  <!-- Network Layer -->
+  <rect x="50" y="160" width="550" height="50" class="net-layer"/>
+  <text x="325" y="180" class="label">Layer 3: IP (Internet Protocol)</text>
+  <text x="325" y="198" class="proto">IPv4 (32-bit) • IPv6 (128-bit) • Routing • ICMP (ping)</text>
+
+  <!-- Data Link -->
+  <rect x="50" y="220" width="550" height="50" class="net-layer"/>
+  <text x="325" y="240" class="label">Layer 2: Data Link (Ethernet / WiFi)</text>
+  <text x="325" y="258" class="detail">MAC addresses • Frames • ARP • Switches</text>
+
+  <!-- Physical -->
+  <rect x="50" y="280" width="550" height="45" class="net-layer"/>
+  <text x="325" y="300" class="label">Layer 1: Physical</text>
+  <text x="325" y="315" class="detail">Copper • Fiber • Radio waves • Electrical signals</text>
+</svg>

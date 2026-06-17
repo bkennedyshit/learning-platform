@@ -1,0 +1,65 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="cond-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .cond-title { font-family:Inter,system-ui,sans-serif; font-size:15px; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .cond-label { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .cond-accent { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .cond-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:6; }
+    .cond-flow { stroke:var(--interactive-accent, #58a6ff); stroke-width:2; fill:none; stroke-dasharray: 100; stroke-dashoffset: 100; animation: flowDraw 2s ease-in-out infinite alternate; }
+    .cond-flow-dim { stroke:var(--text-muted, #8b949e); stroke-width:1.5; fill:none; stroke-dasharray:4 3; animation: flowDash 1s linear infinite; }
+    .cond-node { fill:var(--interactive-accent, #58a6ff); opacity:0.15; stroke:var(--interactive-accent, #58a6ff); stroke-width:1.5; transition: all 0.3s ease; }
+    .cond-node:hover { opacity:0.3; }
+    @keyframes flowDraw { to { stroke-dashoffset: 0; } }
+    @keyframes flowDash { to { stroke-dashoffset: -14; } }
+  </style>
+  <!-- Classical Conditioning Panel -->
+  <rect x="10" y="10" width="330" height="360" class="cond-box"/>
+  <text x="175" y="38" class="cond-title" text-anchor="middle">Classical Conditioning (Pavlov)</text>
+  <!-- Before conditioning -->
+  <text x="30" y="70" class="cond-label" font-weight="bold">Before:</text>
+  <rect x="30" y="80" width="60" height="30" rx="4" class="cond-node"/><text x="60" y="100" class="cond-label" text-anchor="middle">Bell</text>
+  <line x1="95" y1="95" x2="140" y2="95" class="cond-flow-dim" marker-end="url(#cond-arrow)"/>
+  <text x="160" y="100" class="cond-label">No response</text>
+  <rect x="30" y="120" width="60" height="30" rx="4" class="cond-node"/><text x="60" y="140" class="cond-label" text-anchor="middle">Food</text>
+  <line x1="95" y1="135" x2="140" y2="135" class="cond-flow" marker-end="url(#cond-arrow)"/>
+  <text x="160" y="140" class="cond-accent">Salivation (UR)</text>
+  <!-- During conditioning -->
+  <text x="30" y="175" class="cond-label" font-weight="bold">During (pairing):</text>
+  <rect x="30" y="185" width="60" height="30" rx="4" class="cond-node"/><text x="60" y="205" class="cond-label" text-anchor="middle">Bell</text>
+  <text x="100" y="205" class="cond-label">+</text>
+  <rect x="110" y="185" width="60" height="30" rx="4" class="cond-node"/><text x="140" y="205" class="cond-label" text-anchor="middle">Food</text>
+  <line x1="175" y1="200" x2="220" y2="200" class="cond-flow" marker-end="url(#cond-arrow)"/>
+  <text x="240" y="205" class="cond-accent">Salivation</text>
+  <!-- After conditioning -->
+  <text x="30" y="250" class="cond-label" font-weight="bold">After:</text>
+  <rect x="30" y="260" width="60" height="30" rx="4" class="cond-node"/><text x="60" y="280" class="cond-label" text-anchor="middle">Bell (CS)</text>
+  <line x1="95" y1="275" x2="140" y2="275" class="cond-flow" marker-end="url(#cond-arrow)"/>
+  <text x="160" y="280" class="cond-accent">Salivation (CR)</text>
+  <!-- ΔV formula -->
+  <text x="175" y="330" class="cond-accent" text-anchor="middle" font-size="13px">ΔV = αβ(λ − V)</text>
+  <text x="175" y="350" class="cond-label" text-anchor="middle">Rescorla-Wagner Update</text>
+  <!-- Operant Conditioning Panel -->
+  <rect x="360" y="10" width="330" height="360" class="cond-box"/>
+  <text x="525" y="38" class="cond-title" text-anchor="middle">Operant Conditioning (Skinner)</text>
+  <!-- Action → Consequence loop -->
+  <rect x="440" y="70" width="80" height="35" rx="4" class="cond-node"/><text x="480" y="92" class="cond-label" text-anchor="middle">Action (a)</text>
+  <line x1="525" y1="87" x2="580" y2="87" class="cond-flow" marker-end="url(#cond-arrow)"/>
+  <rect x="585" y="70" width="90" height="35" rx="4" class="cond-node"/><text x="630" y="92" class="cond-label" text-anchor="middle">Consequence</text>
+  <!-- Reinforcement types -->
+  <text x="380" y="135" class="cond-label" font-weight="bold">Reinforcement Schedules:</text>
+  <text x="395" y="160" class="cond-accent">R+ (Positive Reinforcement)</text>
+  <text x="395" y="178" class="cond-label">Add pleasant → ↑ behavior</text>
+  <text x="395" y="203" class="cond-accent">R− (Negative Reinforcement)</text>
+  <text x="395" y="221" class="cond-label">Remove aversive → ↑ behavior</text>
+  <text x="395" y="246" class="cond-accent">P+ (Positive Punishment)</text>
+  <text x="395" y="264" class="cond-label">Add aversive → ↓ behavior</text>
+  <text x="395" y="289" class="cond-accent">P− (Negative Punishment)</text>
+  <text x="395" y="307" class="cond-label">Remove pleasant → ↓ behavior</text>
+  <!-- RL formula -->
+  <text x="525" y="345" class="cond-accent" text-anchor="middle" font-size="13px">Q(s,a) ← Q(s,a) + α[r − Q(s,a)]</text>
+  <text x="525" y="363" class="cond-label" text-anchor="middle">Bandit Update (simplified)</text>
+</svg>

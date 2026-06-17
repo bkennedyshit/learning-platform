@@ -1,0 +1,83 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box-own { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .box-borrow { fill: none; stroke: var(--text-accent, #79c0ff); stroke-width: 2; rx: 6; stroke-dasharray: 6,3; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .section-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-muted, #8b949e); font-weight: bold; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arr-own); stroke-dasharray: 50; stroke-dashoffset: 50; animation: transfer 3s ease-in-out infinite; }
+    .arrow-borrow { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; marker-end: url(#arr-borrow); stroke-dasharray: 5,3; animation: flow 2s linear infinite; }
+    .cross { stroke: #e74c3c; stroke-width: 2.5; opacity: 0; animation: appear 3s step-end infinite; }
+    .check { stroke: #2ecc71; stroke-width: 2.5; fill: none; stroke-dasharray: 50; stroke-dashoffset: 50; animation: transfer 3s ease-out forwards; }
+    @keyframes transfer { 30%, 100% { stroke-dashoffset: 0; } }
+    @keyframes flow { to { stroke-dashoffset: -16; } }
+    @keyframes appear { 30%, 100% { opacity: 1; } }
+  </style>
+  <defs>
+    <marker id="arr-own" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="arr-borrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+
+  <text x="300" y="20" class="title" text-anchor="middle">Ownership, Move & Borrowing</text>
+
+  <!-- MOVE section -->
+  <text x="150" y="50" class="section-title" text-anchor="middle">MOVE (Ownership Transfer)</text>
+  <rect x="40" y="60" width="80" height="35" class="box-own"/>
+  <text x="80" y="82" class="label-bold" text-anchor="middle">s1</text>
+  <line x1="125" y1="77" x2="175" y2="77" class="arrow"/>
+  <rect x="180" y="60" width="80" height="35" class="box-own"/>
+  <text x="220" y="82" class="label-bold" text-anchor="middle">s2</text>
+  <!-- X over s1 -->
+  <line x1="55" y1="100" x2="105" y2="100" class="cross"/>
+  <text x="80" y="115" class="label" text-anchor="middle" fill="#e74c3c">invalid</text>
+  <text x="220" y="115" class="label-accent" text-anchor="middle">owner</text>
+
+  <!-- BORROW section -->
+  <text x="450" y="50" class="section-title" text-anchor="middle">BORROW (Reference)</text>
+  <rect x="390" y="60" width="80" height="35" class="box-own"/>
+  <text x="430" y="82" class="label-bold" text-anchor="middle">s1</text>
+  <line x1="475" y1="77" x2="505" y2="77" class="arrow-borrow"/>
+  <rect x="510" y="60" width="60" height="35" class="box-borrow"/>
+  <text x="540" y="82" class="label-bold" text-anchor="middle">&s1</text>
+  <text x="430" y="115" class="label-accent" text-anchor="middle">owner</text>
+  <text x="540" y="115" class="label" text-anchor="middle">borrow</text>
+
+  <!-- Rules box -->
+  <rect x="30" y="135" width="540" height="90" class="box" rx="10"/>
+  <text x="300" y="158" class="label-bold" text-anchor="middle">The Borrowing Rules (Compile-Time Enforcement)</text>
+  <text x="50" y="180" class="label">Rule 1: ONE mutable reference (&amp;mut T)  — exclusive write access</text>
+  <text x="50" y="200" class="label">Rule 2: ANY number of immutable references (&amp;T)  — shared read access</text>
+  <text x="50" y="218" class="label" fill="var(--interactive-accent, #58a6ff)">Rule 3: NEVER both simultaneously  — prevents data races at compile time</text>
+
+  <!-- Valid/Invalid examples -->
+  <text x="150" y="250" class="section-title" text-anchor="middle">✅ VALID</text>
+  <rect x="40" y="260" width="220" height="70" class="box"/>
+  <text x="50" y="280" class="label">let r1 = &amp;data;    // shared</text>
+  <text x="50" y="296" class="label">let r2 = &amp;data;    // shared</text>
+  <text x="50" y="312" class="label">println!("{r1} {r2}"); // OK</text>
+  <path d="M 245 290 L 252 300 L 268 275" class="check"/>
+
+  <text x="450" y="250" class="section-title" text-anchor="middle">❌ INVALID</text>
+  <rect x="340" y="260" width="230" height="70" class="box"/>
+  <text x="350" y="280" class="label">let r1 = &amp;data;      // shared</text>
+  <text x="350" y="296" class="label">let w = &amp;mut data;   // exclusive</text>
+  <text x="350" y="312" class="label" fill="#e74c3c">// COMPILE ERROR: conflict!</text>
+  <line x1="555" y1="278" x2="565" y2="288" class="cross"/>
+  <line x1="565" y1="278" x2="555" y2="288" class="cross"/>
+
+  <!-- Lifetime visualization -->
+  <text x="300" y="360" class="section-title" text-anchor="middle">LIFETIMES (Scope Regions)</text>
+  <rect x="60" y="370" width="300" height="12" rx="3" fill="var(--interactive-accent, #58a6ff)" opacity="0.3"/>
+  <text x="55" y="380" class="label" text-anchor="end">s</text>
+  <rect x="100" y="388" width="180" height="12" rx="3" fill="var(--text-accent, #79c0ff)" opacity="0.3"/>
+  <text x="55" y="398" class="label" text-anchor="end">&amp;s</text>
+  <text x="380" y="380" class="label">← owner lives longer than borrow ✅</text>
+  <text x="380" y="398" class="label" fill="var(--text-muted, #8b949e)">← reference ends before owner</text>
+</svg>

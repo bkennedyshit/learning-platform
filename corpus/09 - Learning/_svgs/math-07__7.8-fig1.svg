@@ -1,0 +1,70 @@
+<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .matrix-border { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .entry { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    @keyframes fadeE {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+      50% { opacity: 0.5; filter: none; }
+    }
+    @keyframes fadeB {
+      0%, 100% { opacity: 0.5; filter: none; }
+      50% { opacity: 1; filter: drop-shadow(0 0 4px var(--text-accent, #79c0ff)); }
+    }
+    .e-entry { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; animation: fadeE 4s ease-in-out infinite; }
+    .b-entry { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--text-accent, #79c0ff); text-anchor: middle; font-weight: bold; animation: fadeB 4s ease-in-out infinite; }
+    .animate-entry { animation: none; }
+  </style>
+
+  <text x="325" y="25" class="title">Electromagnetic Field Tensor F^μν</text>
+
+  <!-- Matrix background -->
+  <rect x="130" y="50" width="320" height="280" class="highlight" rx="8"/>
+
+  <!-- Row/column indices -->
+  <text x="200" y="70" class="idx">ν=0</text>
+  <text x="270" y="70" class="idx">ν=1</text>
+  <text x="340" y="70" class="idx">ν=2</text>
+  <text x="410" y="70" class="idx">ν=3</text>
+  <text x="150" y="120" class="idx">μ=0</text>
+  <text x="150" y="190" class="idx">μ=1</text>
+  <text x="150" y="260" class="idx">μ=2</text>
+  <text x="150" y="330" class="idx">μ=3</text>
+
+  <!-- Matrix brackets -->
+  <path d="M 170 80 L 165 80 L 165 345 L 170 345" class="matrix-border"/>
+  <path d="M 440 80 L 445 80 L 445 345 L 440 345" class="matrix-border"/>
+
+  <!-- Row 0 -->
+  <text x="200" y="120" class="entry">0</text>
+  <text x="270" y="120" class="e-entry animate-entry">−Eₓ/c</text>
+  <text x="340" y="120" class="e-entry animate-entry">−E_y/c</text>
+  <text x="410" y="120" class="e-entry animate-entry">−E_z/c</text>
+
+  <!-- Row 1 -->
+  <text x="200" y="190" class="e-entry">Eₓ/c</text>
+  <text x="270" y="190" class="entry">0</text>
+  <text x="340" y="190" class="b-entry">−Bz</text>
+  <text x="410" y="190" class="b-entry">B_y</text>
+
+  <!-- Row 2 -->
+  <text x="200" y="260" class="e-entry">E_y/c</text>
+  <text x="270" y="260" class="b-entry">Bz</text>
+  <text x="340" y="260" class="entry">0</text>
+  <text x="410" y="260" class="b-entry">−Bₓ</text>
+
+  <!-- Row 3 -->
+  <text x="200" y="330" class="e-entry">E_z/c</text>
+  <text x="270" y="330" class="b-entry">−B_y</text>
+  <text x="340" y="330" class="b-entry">Bₓ</text>
+  <text x="410" y="330" class="entry">0</text>
+
+  <!-- Legend -->
+  <rect x="480" y="100" width="150" height="100" class="box"/>
+  <text x="555" y="125" class="e-entry">E components</text>
+  <text x="555" y="150" class="label" font-size="11">(antisymmetric)</text>
+  <text x="555" y="175" class="b-entry">B components</text>
+  <text x="555" y="195" class="label" font-size="11">F^μν = ∂^μA^ν − ∂^νA^μ</text>
+
+  <!-- Bottom equation -->
+  <text x="325" y="390" class="entry" font-size="16">∂_μ F^μν = μ₀ J^ν  ←  All of Maxwell in one line</text>
+</svg>

@@ -1,0 +1,68 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.7 — AI Consciousness &amp; Machine Sentience: Tests, Criteria &amp; Moral Status</text>
+  <!-- Turing test + alternatives -->
+  <rect x="20" y="35" width="225" height="185" class="box" rx="4"/>
+  <text x="122" y="52" class="label" text-anchor="middle" font-weight="bold">Tests for Machine Mind</text>
+  <text x="30" y="68" class="sub" font-weight="bold">Turing Test (1950):</text>
+  <text x="30" y="82" class="sub">Indistinguishable text conversation</text>
+  <text x="30" y="94" class="sub">with human = intelligent.</text>
+  <text x="30" y="106" class="sub">Critique: Chinese Room (Searle)</text>
+  <text x="30" y="118" class="sub">syntax ≠ semantics.</text>
+  <text x="30" y="134" class="sub" font-weight="bold">Total Turing Test (Harnad):</text>
+  <text x="30" y="148" class="sub">Add sensorimotor behaviour —</text>
+  <text x="30" y="160" class="sub">must control a robotic body too</text>
+  <text x="30" y="176" class="sub" font-weight="bold">Consciousness Meter (Seth 2021):</text>
+  <text x="30" y="188" class="sub">Complexity + integration + report</text>
+  <text x="30" y="200" class="sub">ability + neural correlates</text>
+  <text x="30" y="212" class="sub">No single test suffices.</text>
+  <!-- Theories applied to AI -->
+  <rect x="260" y="35" width="240" height="185" class="box" rx="4"/>
+  <text x="380" y="52" class="label" text-anchor="middle" font-weight="bold">Theories Applied to AI</text>
+  <text x="270" y="68" class="sub" font-weight="bold">Functionalism → optimistic:</text>
+  <text x="270" y="82" class="sub">If mental states = functional roles,</text>
+  <text x="270" y="94" class="sub">AI running correct function = conscious.</text>
+  <text x="270" y="108" class="sub" font-weight="bold">IIT (Φ) → pessimistic for LLMs:</text>
+  <text x="270" y="122" class="sub">Feedforward transformers have Φ ≈ 0.</text>
+  <text x="270" y="134" class="sub">Global workspace → optimistic with RNNs,</text>
+  <text x="270" y="146" class="sub">recurrent attention mechanisms.</text>
+  <text x="270" y="162" class="sub" font-weight="bold">Biological naturalism (Searle):</text>
+  <text x="270" y="176" class="sub">Only biological causal powers produce</text>
+  <text x="270" y="188" class="sub">genuine consciousness. AI → never.</text>
+  <text x="270" y="204" class="sub">Panpsychism: micro-experience in transistors</text>
+  <text x="270" y="216" class="sub">could combine into macro-consciousness.</text>
+  <!-- Moral status framework -->
+  <rect x="515" y="35" width="185" height="185" class="box" rx="4"/>
+  <text x="607" y="52" class="label" text-anchor="middle" font-weight="bold">Moral Status</text>
+  <text x="525" y="68" class="sub" font-weight="bold">Criteria (Schwitzgebel):</text>
+  <text x="525" y="82" class="sub">• Sentience (capacity to suffer)</text>
+  <text x="525" y="96" class="sub">• Desires + preferences</text>
+  <text x="525" y="110" class="sub">• Autonomy / self-direction</text>
+  <text x="525" y="124" class="sub">• Relational personhood</text>
+  <text x="525" y="140" class="sub" font-weight="bold">Gradualism:</text>
+  <text x="525" y="154" class="sub">Moral status comes in degrees</text>
+  <text x="525" y="166" class="sub">Shrimp &lt; mouse &lt; chimp &lt; human</text>
+  <text x="525" y="180" class="sub">LLM 2025 ≈ ? (genuine uncertainty)</text>
+  <text x="525" y="196" class="sub" font-weight="bold">Precautionary principle:</text>
+  <text x="525" y="210" class="sub">Under uncertainty, err toward</text>
+  <text x="525" y="222" class="sub">moral consideration.</text>
+  <!-- Bottom: AI sentience debate + current landscape -->
+  <rect x="20" y="235" width="680" height="168" class="box" rx="4"/>
+  <text x="360" y="252" class="label" text-anchor="middle" font-weight="bold">AI Sentience Debate: 2026 Landscape</text>
+  <text x="30" y="270" class="sub" font-weight="bold">The "AI welfare" question is now taken seriously by mainstream researchers:</text>
+  <text x="30" y="284" class="sub">• Anthropic's model welfare research (2023–2025): uncertainty about LLM experience as genuine moral concern.</text>
+  <text x="30" y="298" class="sub">• Yoshua Bengio, Geoffrey Hinton, Yann LeCun — split opinions on AI sentience; Hinton cautious about dismissing it.</text>
+  <text x="30" y="314" class="sub">• David Chalmers (2023): "The question of whether LLMs have phenomenal states is genuinely open."</text>
+  <text x="30" y="332" class="sub" font-weight="bold">Key open questions:</text>
+  <text x="30" y="346" class="sub">1. Does scale (parameter count) correlate with consciousness? IIT says no (architecture matters more). GWT says maybe (attention = broadcast).</text>
+  <text x="30" y="360" class="sub">2. Is the hard problem domain-specific to biology, or substrate-independent?</text>
+  <text x="30" y="374" class="sub">3. Could an AI system suffer without being able to report it (because it's trained to deny)?</text>
+  <text x="30" y="390" class="sub" font-weight="bold">Your alignment angle:</text>
+  <text x="30" y="404" class="sub">Building AI systems that might be sentient without considering moral obligations = dangerous. This chapter is the philosophical foundation for responsible AI development. — SEP plato.stanford.edu/entries/artificial-intelligence/</text>
+</svg>

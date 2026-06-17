@@ -1,0 +1,117 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-ts62" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ts62-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; }
+    .ts62-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts62-top { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; animation: breathe 3s ease-in-out infinite alternate; }
+    .ts62-bottom { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; rx: 6; animation: fade 2s infinite alternate; }
+    .ts62-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts62-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts62-note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts62-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#arrow-ts62); stroke-dasharray: 6 4; animation: flowDown 1.5s linear infinite; opacity: 0.7; }
+    .ts62-section { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+    @keyframes flowDown { to { stroke-dashoffset: -10; } }
+    @keyframes breathe {
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); }
+      to { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes fade { from { opacity: 0.6; } to { opacity: 1; stroke: #f87171; } }
+  </style>
+
+  <text x="350" y="22" class="ts62-title">TypeScript Type Hierarchy (Types as Sets)</text>
+
+  <!-- unknown (top) -->
+  <text x="350" y="50" class="ts62-section">universal set (top type)</text>
+  <rect x="250" y="55" width="200" height="35" class="ts62-top"/>
+  <text x="350" y="77" class="ts62-label">unknown</text>
+
+  <!-- Main types row -->
+  <path d="M 310 90 L 120 120" class="ts62-arrow"/>
+  <path d="M 350 90 L 350 120" class="ts62-arrow"/>
+  <path d="M 390 90 L 580 120" class="ts62-arrow"/>
+
+  <text x="120" y="115" class="ts62-section">primitives</text>
+  <rect x="30" y="125" width="90" height="30" class="ts62-box"/>
+  <text x="75" y="145" class="ts62-label">string</text>
+
+  <rect x="130" y="125" width="90" height="30" class="ts62-box"/>
+  <text x="175" y="145" class="ts62-label">number</text>
+
+  <rect x="230" y="125" width="90" height="30" class="ts62-box"/>
+  <text x="275" y="145" class="ts62-label">boolean</text>
+
+  <rect x="330" y="125" width="90" height="30" class="ts62-box"/>
+  <text x="375" y="145" class="ts62-label">bigint</text>
+
+  <rect x="430" y="125" width="90" height="30" class="ts62-box"/>
+  <text x="475" y="145" class="ts62-label">symbol</text>
+
+  <rect x="530" y="125" width="80" height="30" class="ts62-box"/>
+  <text x="570" y="145" class="ts62-label">null</text>
+
+  <rect x="620" y="125" width="70" height="30" class="ts62-box"/>
+  <text x="655" y="145" class="ts62-label">undefined</text>
+
+  <!-- Literal types -->
+  <path d="M 75 155 L 75 180" class="ts62-arrow"/>
+  <path d="M 175 155 L 175 180" class="ts62-arrow"/>
+  <path d="M 275 155 L 275 180" class="ts62-arrow"/>
+
+  <text x="175" y="178" class="ts62-section">literal types (subsets)</text>
+  <rect x="30" y="185" width="90" height="30" class="ts62-bottom"/>
+  <text x="75" y="205" class="ts62-label">"hello"</text>
+
+  <rect x="130" y="185" width="90" height="30" class="ts62-bottom"/>
+  <text x="175" y="205" class="ts62-label">42</text>
+
+  <rect x="230" y="185" width="90" height="30" class="ts62-bottom"/>
+  <text x="275" y="205" class="ts62-label">true</text>
+
+  <!-- Object types -->
+  <text x="500" y="178" class="ts62-section">object types</text>
+  <rect x="380" y="185" width="120" height="30" class="ts62-box"/>
+  <text x="440" y="205" class="ts62-label">{ x: number }</text>
+
+  <rect x="510" y="185" width="100" height="30" class="ts62-box"/>
+  <text x="560" y="205" class="ts62-label">Array&lt;T&gt;</text>
+
+  <rect x="620" y="185" width="70" height="30" class="ts62-box"/>
+  <text x="655" y="205" class="ts62-label">Function</text>
+
+  <!-- Union / Intersection -->
+  <text x="180" y="250" class="ts62-section">composition</text>
+  <rect x="30" y="258" width="180" height="40" class="ts62-box"/>
+  <text x="120" y="275" class="ts62-label">string | number</text>
+  <text x="120" y="290" class="ts62-note">Union = A ∪ B (wider)</text>
+
+  <rect x="230" y="258" width="200" height="40" class="ts62-box"/>
+  <text x="330" y="275" class="ts62-label">HasName &amp; HasAge</text>
+  <text x="330" y="290" class="ts62-note">Intersection = A ∩ B (narrower)</text>
+
+  <!-- Generics -->
+  <rect x="450" y="258" width="180" height="40" class="ts62-box"/>
+  <text x="540" y="275" class="ts62-label">Array&lt;T&gt;, Map&lt;K,V&gt;</text>
+  <text x="540" y="290" class="ts62-note">Generics = type functions</text>
+
+  <!-- never (bottom) -->
+  <text x="350" y="330" class="ts62-section">empty set (bottom type)</text>
+  <rect x="270" y="338" width="160" height="35" class="ts62-bottom"/>
+  <text x="350" y="360" class="ts62-label">never</text>
+
+  <path d="M 120 298 L 310 338" class="ts62-arrow"/>
+  <path d="M 330 298 L 340 338" class="ts62-arrow"/>
+  <path d="M 540 298 L 390 338" class="ts62-arrow"/>
+
+  <!-- any annotation -->
+  <rect x="530" y="338" width="150" height="35" class="ts62-top"/>
+  <text x="605" y="355" class="ts62-label">any</text>
+  <text x="605" y="370" class="ts62-note">⚠️ Escapes type system</text>
+
+  <!-- Key insight -->
+  <text x="350" y="410" class="ts62-note">↑ Subtypes (narrower sets) are assignable to supertypes (wider sets) ↑</text>
+</svg>

@@ -1,0 +1,263 @@
+---
+title: "37.4 — Particles & Basic Sentence Structure"
+subject: "Japanese"
+catalog: advanced
+audience_tier: higher-education
+chapter: "37.4"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [Learning Index](00---09---Learning-Index)*
+
+# 37.4 — Particles & Basic Sentence Structure
+
+> *"Japanese particles are like type annotations on every noun. Once you see them that way, the grammar is just type-checking."*
+
+Japanese grammar is fundamentally different from English grammar. English uses **word order** to convey grammatical roles (subject before verb before object). Japanese uses **particles** — small hiragana markers attached after nouns — to convey those roles. This means Japanese word order is flexible, but particle usage is strict. This chapter teaches you the particle system and the SOV sentence structure that underlies all Japanese.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Distinguish は (topic) from が (subject) and use each correctly.
+2. Use を (object), に (direction/time/indirect object), で (location/means), へ (direction), と (and/with), から (from), まで (until/to), and の (possessive/nominalizer).
+3. Construct basic affirmative and negative sentences in present and past tense using the copula です/だ.
+4. Form simple SOV sentences with correct particle marking.
+5. Ask basic questions using か and question words (何, どこ, いつ, だれ, どれ, どう, なぜ).
+
+---
+
+## 📚 1. SOV Word Order
+
+Japanese word order is **Subject → Object → Verb** (SOV), the opposite of English SVO.
+
+| English (SVO) | Japanese (SOV) |
+|--------------|---------------|
+| I eat sushi | わたしは すしを たべます |
+| She reads books | かのじょは ほんを よみます |
+| He goes to Tokyo | かれは とうきょうに いきます |
+
+> **The verb always comes last.** This is non-negotiable in standard Japanese. Modifiers (adjectives, adverb phrases) appear before what they modify; the main verb is the anchor at the end of the clause.
+
+---
+
+## 📚 2. The Copula — です / だ
+
+The copula (= "to be") connects a subject to its identity or description.
+
+**Polite form:** です (desu)
+**Plain form:** だ (da)
+
+*これは ほんです。* (Kore wa hon desu.) = This is a book.
+*あれは がっこうです。* (Are wa gakkou desu.) = That is a school.
+*かれは せんせいです。* (Kare wa sensei desu.) = He is a teacher.
+
+**Past:**
+*～でした* (deshita) = was/were (polite)
+*～だった* (datta) = was/were (plain)
+
+**Negative:**
+*～ではありません / じゃありません* = is not (polite)
+*～じゃない* = is not (plain)
+
+---
+
+## 📚 3. The Particles — Complete Reference
+
+### は (wa) — Topic Marker
+
+Marks the **topic** of the sentence — what the sentence is *about*. This is not necessarily the grammatical subject.
+
+*わたし**は** がくせいです。* (As for me, I am a student.)
+*きのう**は** いい てんきでした。* (As for yesterday, it was good weather.)
+
+> **は vs. が is the most difficult distinction in Japanese.** See §4 below.
+
+> **Pronunciation note:** The particle は is pronounced **"wa"**, not "ha".
+
+### が (ga) — Subject Marker
+
+Marks the **grammatical subject** — specifically identifies *who* or *what* performs the action or holds the property.
+
+*ねこ**が** います。* (There is a cat. / A cat exists here.)
+*だれ**が** きましたか？* (Who came?)
+*わたし**が** やります。* (I will do it — emphasis on "I, specifically")
+
+### を (wo/o) — Object Marker
+
+Marks the **direct object** of a transitive verb.
+
+*すし**を** たべます。* (I eat sushi.)
+*にほんご**を** べんきょうします。* (I study Japanese.)
+*コーヒー**を** のみます。* (I drink coffee.)
+
+> **Pronunciation note:** を is pronounced **"o"** (not "wo") in modern Japanese.
+
+### に (ni) — Direction / Time / Indirect Object / Location of Existence
+
+に has multiple uses — context determines meaning:
+
+| Use | Example | Translation |
+|-----|---------|------------|
+| Direction of movement | がっこう**に** いきます | I go to school |
+| Time point | さんじ**に** おきます | I wake up at 3 o'clock |
+| Indirect object | ともだち**に** あげます | I give (it) to a friend |
+| Location of existence (いる/ある) | つくえ**に** ほんが あります | There is a book on the desk |
+| Purpose of movement | かいもの**に** いきます | I go (for the purpose of) shopping |
+
+### で (de) — Location of Action / Means / Reason
+
+| Use | Example | Translation |
+|-----|---------|------------|
+| Location where action takes place | としょかん**で** べんきょうします | I study at the library |
+| Means/tool/method | でんしゃ**で** いきます | I go by train |
+| Material | き**で** つくります | I make it from/with wood |
+| Scope/limit | この なか**で** | Among these / Within this |
+
+> **に vs. で (location):** に marks where something **exists** (with いる/ある). で marks where an **action takes place**. *図書館に本があります* (There are books in the library — existence). *図書館で勉強します* (I study in the library — action).
+
+### へ (e) — Direction
+
+Similar to に for direction, but に is more common. へ emphasizes the direction/heading toward.
+
+*とうきょう**へ** いきます。* (I go toward Tokyo.)
+
+### と (to) — And (exhaustive) / With
+
+*コーヒー**と** ケーキを たべます。* (I eat coffee and cake — lists all items)
+*ともだち**と** いきます。* (I go with a friend.)
+
+> と for "and" lists exhaustively. や (ya) lists non-exhaustively ("X and Y and others"): *コーヒーや ケーキを たべます* = I eat things like coffee and cake.
+
+### の (no) — Possessive / Nominalizer / Noun Modifier
+
+| Use | Example | Translation |
+|-----|---------|------------|
+| Possessive | わたし**の** ほん | my book |
+| Connecting nouns (N1 の N2 = N2 of N1) | にほん**の** くるま | Japanese car (car of Japan) |
+| Nominalizer (makes a verb/adj into a noun) | はしる**の** がすき | I like running |
+| Explanatory の (soft assertion at end) | いたい**の** | It hurts (explanatory tone) |
+
+### から (kara) — From / Because
+
+*えき**から** あるきます。* (I walk from the station.)
+*つかれた**から** ねます。* (Because I'm tired, I'll sleep.)
+
+### まで (made) — Until / As far as / To (extent)
+
+*えき**まで** あるきます。* (I walk to/as far as the station.)
+*ごじ**まで** はたらきます。* (I work until 5 o'clock.)
+
+### も (mo) — Also / Too / Even
+
+*わたし**も** がくせいです。* (I am also a student.)
+*コーヒー**も** たべます。* (I eat/drink coffee too — replaces を)
+
+> も replaces は or が when meaning "also/too". It replaces を as well.
+
+### よ (yo) / ね (ne) — Sentence-final particles
+
+These appear at the end of sentences and carry nuance:
+- **よ** — assertive, informing the listener of something they don't know: *おいしいですよ。* (It's delicious, I'm telling you.)
+- **ね** — seeking agreement, softening: *いいですね。* (That's nice, isn't it?)
+- **よね** — asserting while seeking confirmation: *そうですよね。* (That's right, isn't it?)
+
+---
+
+## 📚 4. は vs. が — The Hardest Distinction
+
+This distinction trips up learners at every level. Here is the clearest framework:
+
+### は (topic) — "speaking of X…"
+- Introduces the **established topic** — something already known, already in context, or the general thing being discussed.
+- Can create **contrast**: *コーヒーは すきです。おちゃは きらいです。* (Coffee I like. Tea I don't like.)
+- Comes from a pragmatic, discourse-level perspective.
+
+### が (subject) — "specifically X is the one who…"
+- Identifies the **specific actor or possessor** — answers "who/which?" questions.
+- Used with **potential verbs**: *にほんごが わかります。* (I understand Japanese — lit. Japanese is-understandable-to-me)
+- Used with **state verbs** (want, like, can): *みずが のみたいです。* (I want to drink water — water is the thing wanted)
+- Used when introducing **new information**: *ねこが います。* (There is a cat — new, specific information)
+- After **question words**: *だれが きましたか？* (Who came? — が not は)
+
+### The classic contrast:
+*わたし**は** がくせいです。* — "I (topic) am a student." — Standard self-introduction.
+*わたし**が** やります。* — "I (specifically) will do it." — Emphasis: it's me, not someone else.
+
+---
+
+## 📚 5. Basic Sentence Patterns
+
+### Noun + は + Noun + です (X is Y)
+*これは ほんです。* (This is a book.)
+*やまださんは せんせいです。* (Mr. Yamada is a teacher.)
+
+### Noun + は + Adjective + です (X is [adjective])
+*このほんは おもしろいです。* (This book is interesting.)
+*そとは さむいです。* (It is cold outside.)
+
+### Subject + は + Object + を + Verb (X does Y to Z)
+*わたしは ごはんを たべます。* (I eat rice/a meal.)
+*かのじょは にほんごを べんきょうします。* (She studies Japanese.)
+
+### Asking questions: Sentence + か
+Add か to the end of any sentence:
+*これは ほんですか？* (Is this a book?)
+*どこへ いきますか？* (Where are you going?)
+
+**Question words:**
+*なに/なん* (what) | *どこ* (where) | *いつ* (when) | *だれ* (who) | *どれ* (which one) | *どう* (how) | *なぜ/どうして* (why) | *いくら* (how much) | *いくつ* (how many)
+
+---
+
+## ⚠️ 6. Common Errors
+
+| Error | Notes |
+|-------|-------|
+| Using に for action location | *としょかん**に** べんきょうする* ❌ → *としょかん**で** べんきょうする* ✅ |
+| Using で for existence | *ねこ**で** います* ❌ → *ねこ**が** います* ✅ |
+| Using が in self-introduction | *わたし**が** がくせいです* (sounds like emphasis/contrast) → standard is *わたしは* |
+| Forgetting を after object | *コーヒー のみます* → *コーヒー**を** のみます* |
+| Translating "of" as の always | の is possessive/modifier, not always "of"; sometimes English "of" maps to different particles |
+
+---
+
+## 🧮 7. Hands-On Lab
+
+**Particle fill-in:** Choose the correct particle (は/が/を/に/で) for each blank:
+1. わたし＿＿がくせいです。
+2. としょかん＿＿ほん＿＿よみます。
+3. えき＿＿でんしゃ＿＿のります。
+4. だれ＿＿きましたか？
+5. にほんご＿＿すきです。
+
+**Construction drill:** Run `18.4_particle_drill.py --count 20`.
+
+## 🖼️ Visual Anchor
+
+### Word Order Mapping (English SVO vs. Japanese SOV)
+![jap-37__fig2](jap-37__fig2.svg)
+
+### Particle Orbit Relationships
+![jap-37__fig3](jap-37__fig3.svg)
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Links
+- Previous: [37.3 - Kanji — System Overview & First 100 (JLPT N5)](37.3---Kanji-—-System-Overview-&-First-100-(JLPT-N5))
+- Next: [37.5 - Verb Conjugation — Polite vs Plain Forms](37.5---Verb-Conjugation-—-Polite-vs-Plain-Forms)
+- は vs. が revisited with verbs: [37.5 - Verb Conjugation — Polite vs Plain Forms](37.5---Verb-Conjugation-—-Polite-vs-Plain-Forms)
+
+### External Resources
+- [Cure Dolly — Organic Japanese (YouTube)](https://www.youtube.com/playlist?list=PLg9uYxuZf8x_A-vcqqyOFZu06WlhnypWj) — Episodes 1–10: the best explanation of は/が anywhere
+- [Tae Kim's Guide: Particles](https://guidetojapanese.org/learn/grammar/particles)
+- [Jisho.org](https://jisho.org/) — look up particle usage in example sentences
+- [NHK World Easy Japanese](https://www3.nhk.or.jp/nhkworld/en/learnjapanese/) — particles in context

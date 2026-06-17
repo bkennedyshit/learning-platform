@@ -1,0 +1,1089 @@
+---
+title: "14.1 — Relational Theory & Set Logic"
+subject: "SQL"
+catalog: advanced
+audience_tier: higher-education
+chapter: "14.1"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 14.1 — Relational Theory & Set Logic
+
+> *"Future users of large data banks must be protected from having to know how the data is organized in the machine."* — E.F. Codd, "A Relational Model of Data for Large Shared Data Banks" (1970)
+
+SQL didn't emerge from a vacuum. It's the practical realization of a mathematical theory — Codd's relational model — which itself rests on set theory and first-order predicate logic. Understanding this lineage transforms SQL from a "query language you memorize" into a logical system you can reason about. Every SELECT statement is a composition of algebraic operators. Every WHERE clause is a predicate. Every JOIN is a restricted Cartesian product.
+
+This chapter builds SQL from the ground up: sets → relations → relational algebra → SQL syntax.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Define relations, tuples, attributes, and domains in formal terms.
+2. Express the five primitive relational algebra operators and their SQL equivalents.
+3. Translate between relational algebra expressions and SQL queries bidirectionally.
+4. Explain why SQL is based on **multisets** (bags) rather than pure sets, and the implications.
+5. Use set operations (UNION, INTERSECT, EXCEPT) with correct semantics.
+6. Understand the theoretical completeness of relational algebra and what it means for SQL.
+
+---
+
+## 🖼️ Visual Anchor — Relational Algebra → SQL Mapping
+
+![sql__7.1-fig1](sql__7.1-fig1.svg)
+
+---
+
+## 📚 1. Definitions & Foundations
+
+### Definition 14.1.1 — Domain (Type)
+
+A **domain** $D$ is a named set of atomic values. In database terms, this is a data type:
+
+- $D_{\text{name}} = \{\text{all possible strings of length} \leq 100\}$
+- $D_{\text{age}} = \{x \in \mathbb{Z} \mid 0 \leq x \leq 150\}$
+- $D_{\text{salary}} = \{x \in \mathbb{R} \mid x \geq 0\}$
+
+SQL types (`INTEGER`, `VARCHAR(100)`, `NUMERIC(10,2)`) are domain declarations.
+
+### Definition 14.1.2 — Relation (Table)
+
+A **relation** $R$ over domains $D_1, D_2, \ldots, D_n$ is a subset of the Cartesian product:
+
+$$
+R \subseteq D_1 \times D_2 \times \cdots \times D_n
+$$
+
+Each element of $R$ is a **tuple** (row). The **degree** (arity) of $R$ is $n$ (number of columns). The **cardinality** of $R$ is $|R|$ (number of rows).
+
+**Critical distinction:** In pure relational theory, a relation is a **set** — no duplicate tuples, no ordering. SQL tables are **multisets** (bags) by default. You must explicitly request set semantics with `DISTINCT`.
+
+### Definition 14.1.3 — Attribute (Column)
+
+An **attribute** is a named reference to a domain within a relation schema:
+
+$$
+\text{Schema}(R) = \{A_1: D_1, A_2: D_2, \ldots, A_n: D_n\}
+$$
+
+```sql
+-- This CREATE TABLE is a schema declaration:
+CREATE TABLE employees (
+    emp_id    INTEGER,       -- attribute emp_id over domain INTEGER
+    name      VARCHAR(100),  -- attribute name over domain VARCHAR(100)
+    dept_id   INTEGER,       -- attribute dept_id over domain INTEGER
+    salary    NUMERIC(10,2)  -- attribute salary over domain NUMERIC(10,2)
+);
+```
+
+### Definition 14.1.4 — Tuple (Row)
+
+A **tuple** $t$ is an element of a relation — a mapping from attribute names to domain values:
+
+$$
+t = (a_1, a_2, \ldots, a_n) \in R
+$$
+
+We write $t[A_i]$ or $t.A_i$ to denote the value of attribute $A_i$ in tuple $t$.
+
+### Definition 14.1.5 — Superkey, Candidate Key, Primary Key
+
+- **Superkey:** A set of attributes $K \subseteq \text{Schema}(R)$ such that no two distinct tuples agree on all attributes in $K$.
+- **Candidate key:** A minimal superkey (removing any attribute breaks uniqueness).
+- **Primary key:** The chosen candidate key for identification. SQL enforces this with `PRIMARY KEY`.
+
+---
+
+## 📐 2. The Five Primitive Relational Algebra Operators
+
+Codd defined five operators that form a **relationally complete** algebra — any query expressible in first-order logic over relations can be expressed as a composition of these five:
+
+### Operator 7.1.1 — Selection (σ) → SQL `WHERE`
+
+**Selection** filters tuples by a predicate $\theta$:
+
+$$
+\sigma_\theta(R) = \{t \in R \mid \theta(t) = \text{true}\}
+$$
+
+The predicate $\theta$ is a Boolean expression over attributes using $=, \neq, <, >, \leq, \geq$ and logical connectives $\land, \lor, \lnot$.
+
+```sql
+-- Relational algebra: σ_{salary > 80000}(employees)
+SELECT * FROM employees WHERE salary > 80000;
+```
+
+**Properties:**
+- Selection is **commutative:** $\sigma_{\theta_1}(\sigma_{\theta_2}(R)) = \sigma_{\theta_2}(\sigma_{\theta_1}(R))$
+- Selection is **idempotent:** $\sigma_\theta(\sigma_\theta(R)) = \sigma_\theta(R)$
+- Conjunctive predicates decompose: $\sigma_{\theta_1 \land \theta_2}(R) = \sigma_{\theta_1}(\sigma_{\theta_2}(R))$
+
+### Operator 7.1.2 — Projection (π) → SQL `SELECT` (column list)
+
+**Projection** extracts a subset of attributes:
+
+$$
+\pi_{A_1, A_2, \ldots, A_k}(R) = \{(t[A_1], t[A_2], \ldots, t[A_k]) \mid t \in R\}
+$$
+
+In pure relational algebra, projection eliminates duplicates (set semantics). SQL does **not** eliminate duplicates unless you write `DISTINCT`.
+
+```sql
+-- Relational algebra: π_{name, salary}(employees)
+SELECT DISTINCT name, salary FROM employees;
+
+-- SQL default (bag semantics, may have duplicates):
+SELECT name, salary FROM employees;
+```
+
+**Properties:**
+- Projection is **not** commutative in general
+- Cascading projections collapse: $\pi_X(\pi_Y(R)) = \pi_X(R)$ if $X \subseteq Y$
+
+### Operator 7.1.3 — Cartesian Product (×) → SQL `CROSS JOIN`
+
+The **Cartesian product** combines every tuple from $R$ with every tuple from $S$:
+
+$$
+R \times S = \{(t_r, t_s) \mid t_r \in R \land t_s \in S\}
+$$
+
+If $|R| = m$ and $|S| = n$, then $|R \times S| = m \cdot n$.
+
+```sql
+-- Relational algebra: employees × departments
+SELECT * FROM employees CROSS JOIN departments;
+
+-- Equivalent older syntax:
+SELECT * FROM employees, departments;
+```
+
+**Warning:** Cartesian products are expensive and rarely useful alone. They become meaningful when combined with selection (which gives us joins).
+
+### Operator 7.1.4 — Union (∪) → SQL `UNION`
+
+The **union** of two union-compatible relations (same schema):
+
+$$
+R \cup S = \{t \mid t \in R \lor t \in S\}
+$$
+
+Union-compatibility requires: same number of attributes, corresponding domains are compatible.
+
+```sql
+-- Relational algebra: π_{name}(employees) ∪ π_{name}(contractors)
+SELECT name FROM employees
+UNION
+SELECT name FROM contractors;
+```
+
+`UNION` in SQL performs set union (eliminates duplicates). `UNION ALL` preserves bag semantics.
+
+### Operator 7.1.5 — Set Difference (−) → SQL `EXCEPT`
+
+The **difference** returns tuples in $R$ but not in $S$:
+
+$$
+R - S = \{t \mid t \in R \land t \notin S\}
+$$
+
+```sql
+-- Relational algebra: π_{name}(employees) − π_{name}(managers)
+SELECT name FROM employees
+EXCEPT
+SELECT name FROM managers;
+```
+
+**Note:** Set difference is **not** commutative: $R - S \neq S - R$ in general.
+
+---
+
+## 📐 3. Derived Operators
+
+These operators can be expressed in terms of the five primitives but are so common they get their own notation:
+
+### Operator 7.1.6 — Intersection (∩) → SQL `INTERSECT`
+
+$$
+R \cap S = R - (R - S)
+$$
+
+```sql
+SELECT name FROM employees
+INTERSECT
+SELECT name FROM managers;
+```
+
+### Operator 7.1.7 — Natural Join (⋈) → SQL `NATURAL JOIN`
+
+The **natural join** is a Cartesian product followed by selection on equality of common attributes, then projection to remove duplicate columns:
+
+$$
+R \bowtie S = \pi_{\text{all unique attrs}}(\sigma_{R.A_1 = S.A_1 \land \cdots \land R.A_k = S.A_k}(R \times S))
+$$
+
+where $A_1, \ldots, A_k$ are the attributes common to both $R$ and $S$.
+
+```sql
+-- Natural join (matches on all shared column names):
+SELECT * FROM employees NATURAL JOIN departments;
+
+-- Explicit equivalent (preferred in production — explicit is better than implicit):
+SELECT e.*, d.dept_name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id;
+```
+
+### Operator 7.1.8 — Theta Join (⋈_θ)
+
+A generalized join with an arbitrary predicate:
+
+$$
+R \bowtie_\theta S = \sigma_\theta(R \times S)
+$$
+
+When $\theta$ uses only equality ($=$), it's called an **equijoin**.
+
+```sql
+-- Theta join (non-equi): find employees earning more than their manager
+SELECT e.name, e.salary, m.name AS manager_name, m.salary AS mgr_salary
+FROM employees e
+INNER JOIN employees m ON e.manager_id = m.emp_id AND e.salary > m.salary;
+```
+
+### Operator 7.1.9 — Division (÷)
+
+Division answers "which tuples in $R$ are associated with **all** tuples in $S$?" — the relational algebra equivalent of the universal quantifier $\forall$.
+
+$$
+R \div S = \{t \mid \forall s \in S, (t, s) \in R\}
+$$
+
+```sql
+-- "Find students enrolled in ALL required courses"
+-- No direct SQL operator — use double negation (NOT EXISTS ... NOT EXISTS):
+SELECT s.student_id
+FROM students s
+WHERE NOT EXISTS (
+    SELECT c.course_id FROM required_courses c
+    WHERE NOT EXISTS (
+        SELECT 1 FROM enrollments e
+        WHERE e.student_id = s.student_id
+          AND e.course_id = c.course_id
+    )
+);
+```
+
+This double-negation pattern is the standard SQL encoding of $\forall$ via $\lnot \exists \lnot$.
+
+---
+
+## 📐 4. First-Order Logic & SQL Predicates
+
+### The WHERE Clause as Predicate Logic
+
+Every `WHERE` clause is a first-order formula over the tuple variables bound by `FROM`:
+
+| Logic | SQL |
+|-------|-----|
+| $\land$ (and) | `AND` |
+| $\lor$ (or) | `OR` |
+| $\lnot$ (not) | `NOT` |
+| $\exists$ (exists) | `EXISTS (subquery)` |
+| $\forall$ (for all) | `NOT EXISTS (... NOT EXISTS ...)` |
+| $=, \neq, <, >, \leq, \geq$ | `=, <>, <, >, <=, >=` |
+| $\in$ (membership) | `IN (subquery)` |
+
+### Tuple Relational Calculus
+
+The **tuple relational calculus** (TRC) is a non-procedural query language based on first-order logic:
+
+$$
+\{t \mid \text{formula}(t)\}
+$$
+
+Example: "Find names of employees in department 5 earning over 70k":
+
+$$
+\{t[\text{name}] \mid t \in \text{employees} \land t[\text{dept\_id}] = 5 \land t[\text{salary}] > 70000\}
+$$
+
+SQL equivalent:
+
+```sql
+SELECT name FROM employees WHERE dept_id = 5 AND salary > 70000;
+```
+
+### Codd's Theorem
+
+**Codd's Theorem** (1972): The expressive power of relational algebra equals that of the tuple relational calculus (restricted to safe expressions). This means:
+- Any query you can write in relational algebra, you can write in SQL
+- Any query you can express in first-order logic over relations, you can write in SQL
+- SQL is **relationally complete**
+
+---
+
+## 📐 5. Set Semantics vs. Bag Semantics
+
+### Why SQL Uses Bags
+
+Pure relational algebra operates on **sets** (no duplicates). SQL operates on **multisets** (bags) by default. Why?
+
+1. **Performance:** Duplicate elimination requires sorting or hashing — expensive on large datasets.
+2. **Aggregation correctness:** `SUM(salary)` must count duplicate values. If we eliminated duplicates, the sum would be wrong.
+3. **Practical reality:** Real data has legitimate duplicates in projections.
+
+### The DISTINCT Keyword
+
+`DISTINCT` converts bag semantics to set semantics:
+
+```sql
+-- Bag semantics (default): may return duplicate department names
+SELECT dept_name FROM employees JOIN departments USING (dept_id);
+
+-- Set semantics: each dept_name appears at most once
+SELECT DISTINCT dept_name FROM employees JOIN departments USING (dept_id);
+```
+
+### Set Operations in SQL
+
+| Operation | Set Semantics | Bag Semantics |
+|-----------|---------------|---------------|
+| Union | `UNION` | `UNION ALL` |
+| Intersection | `INTERSECT` | `INTERSECT ALL` |
+| Difference | `EXCEPT` | `EXCEPT ALL` |
+
+For `UNION ALL` with bags: if tuple $t$ appears $m$ times in $R$ and $n$ times in $S$, it appears $m + n$ times in $R \cup_{\text{all}} S$.
+
+For `INTERSECT ALL`: $\min(m, n)$ times.
+
+For `EXCEPT ALL`: $\max(0, m - n)$ times.
+
+---
+
+## 📐 6. The Logical Query Processing Order
+
+SQL's syntax order differs from its logical evaluation order. Understanding the logical order is essential for reasoning about query correctness:
+
+```
+Logical evaluation order:        Syntax order:
+─────────────────────────        ─────────────
+1. FROM + JOINs                  SELECT
+2. WHERE                         FROM
+3. GROUP BY                      WHERE
+4. HAVING                        GROUP BY
+5. SELECT (projection)           HAVING
+6. DISTINCT                      ORDER BY
+7. ORDER BY                      LIMIT/OFFSET
+8. LIMIT/OFFSET
+```
+
+This is why you **cannot** reference a column alias from `SELECT` in the `WHERE` clause — `WHERE` is evaluated before `SELECT`:
+
+```sql
+-- WRONG: column alias not yet defined during WHERE evaluation
+SELECT salary * 1.1 AS raised_salary
+FROM employees
+WHERE raised_salary > 100000;  -- ERROR!
+
+-- CORRECT: repeat the expression or use a subquery/CTE
+SELECT salary * 1.1 AS raised_salary
+FROM employees
+WHERE salary * 1.1 > 100000;
+```
+
+---
+
+## 📐 7. NULL and Three-Valued Logic
+
+### Definition 14.1.6 — NULL
+
+`NULL` represents an **unknown** or **missing** value. It is not zero, not an empty string, not false — it is the absence of a value.
+
+### Three-Valued Logic (3VL)
+
+With NULL, SQL uses three truth values: `TRUE`, `FALSE`, `UNKNOWN`.
+
+| $p$ | $q$ | $p$ AND $q$ | $p$ OR $q$ | NOT $p$ |
+|-----|-----|-------------|------------|---------|
+| T | T | T | T | F |
+| T | F | F | T | F |
+| T | U | U | T | U |
+| F | F | F | F | T |
+| F | U | F | U | T |
+| U | U | U | U | U |
+
+**Critical rule:** `WHERE` only passes tuples where the predicate evaluates to `TRUE` — not `UNKNOWN`. This means:
+
+```sql
+-- This does NOT return rows where salary IS NULL:
+SELECT * FROM employees WHERE salary > 50000;
+
+-- To find NULLs, you must use IS NULL:
+SELECT * FROM employees WHERE salary IS NULL;
+
+-- NOT IN with NULLs is a classic trap:
+-- If subquery returns any NULL, NOT IN returns empty!
+SELECT * FROM employees
+WHERE dept_id NOT IN (SELECT dept_id FROM closed_departments);
+-- If closed_departments has a NULL dept_id, this returns NOTHING.
+
+-- Safe alternative:
+SELECT * FROM employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM closed_departments cd
+    WHERE cd.dept_id = e.dept_id
+);
+```
+
+---
+
+## 📐 8. Relational Algebra Expression Trees
+
+Complex queries compose operators into expression trees. The query optimizer's job is to find the most efficient tree that produces the same result.
+
+**Example:** "Find names of employees in the 'Engineering' department earning over 100k"
+
+Relational algebra:
+
+$$
+\pi_{\text{name}}(\sigma_{\text{salary} > 100000 \land \text{dept\_name} = \text{'Engineering'}}(\text{employees} \bowtie \text{departments}))
+$$
+
+Equivalent optimized form (push selection down):
+
+$$
+\pi_{\text{name}}(\sigma_{\text{salary} > 100000}(\text{employees}) \bowtie \sigma_{\text{dept\_name} = \text{'Engineering'}}(\text{departments}))
+$$
+
+```sql
+-- The optimizer will likely push predicates down automatically:
+SELECT e.name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.salary > 100000
+  AND d.dept_name = 'Engineering';
+```
+
+The optimizer transforms the logical plan into a physical plan by choosing:
+- Join algorithms (nested loop, hash join, merge join)
+- Access methods (sequential scan, index scan)
+- Predicate push-down order
+
+---
+
+## 🧪 9. Worked Examples
+
+### Example 14.1.1 — Translating Algebra to SQL
+
+**Relational algebra:**
+
+$$
+\pi_{\text{name, dept\_name}}(\sigma_{\text{hire\_date} > \text{'2020-01-01'}}(\text{employees} \bowtie_{\text{emp.dept\_id} = \text{dept.dept\_id}} \text{departments}))
+$$
+
+**SQL translation:**
+
+```sql
+SELECT DISTINCT e.name, d.dept_name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.hire_date > '2020-01-01';
+```
+
+Note: `DISTINCT` because projection in relational algebra eliminates duplicates.
+
+### Example 14.1.2 — Division (Universal Quantification)
+
+**Problem:** "Find suppliers who supply ALL parts that supplier 'S1' supplies."
+
+```sql
+-- Step 1: What parts does S1 supply?
+-- Step 2: For each supplier, check they supply ALL of those parts
+
+SELECT sp.supplier_id
+FROM supply sp
+WHERE NOT EXISTS (
+    -- Parts supplied by S1 that this supplier does NOT supply
+    SELECT 1
+    FROM supply s1_parts
+    WHERE s1_parts.supplier_id = 'S1'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM supply sp2
+          WHERE sp2.supplier_id = sp.supplier_id
+            AND sp2.part_id = s1_parts.part_id
+      )
+)
+GROUP BY sp.supplier_id;
+```
+
+### Example 14.1.3 — Set Operations
+
+```sql
+-- Employees who are in BOTH the engineering AND the research departments
+-- (employees can belong to multiple departments via a junction table)
+SELECT e.emp_id, e.name
+FROM employees e
+JOIN emp_departments ed ON e.emp_id = ed.emp_id
+JOIN departments d ON ed.dept_id = d.dept_id
+WHERE d.dept_name = 'Engineering'
+
+INTERSECT
+
+SELECT e.emp_id, e.name
+FROM employees e
+JOIN emp_departments ed ON e.emp_id = ed.emp_id
+JOIN departments d ON ed.dept_id = d.dept_id
+WHERE d.dept_name = 'Research';
+```
+
+---
+
+## 🧪 10. Common Pitfalls
+
+### Pitfall 1: Confusing WHERE with HAVING
+
+```sql
+-- WRONG: aggregate in WHERE
+SELECT dept_id, AVG(salary)
+FROM employees
+WHERE AVG(salary) > 60000  -- ERROR! WHERE runs before GROUP BY
+GROUP BY dept_id;
+
+-- CORRECT: aggregate in HAVING
+SELECT dept_id, AVG(salary)
+FROM employees
+GROUP BY dept_id
+HAVING AVG(salary) > 60000;
+```
+
+### Pitfall 2: NULL in NOT IN
+
+```sql
+-- Dangerous if subquery can return NULL:
+SELECT * FROM t1 WHERE x NOT IN (SELECT y FROM t2);
+
+-- Safe:
+SELECT * FROM t1 WHERE x NOT IN (SELECT y FROM t2 WHERE y IS NOT NULL);
+-- Or use NOT EXISTS (handles NULLs correctly)
+```
+
+### Pitfall 3: Implicit Cross Join
+
+```sql
+-- Forgetting the JOIN condition creates a Cartesian product:
+SELECT e.name, d.dept_name
+FROM employees e, departments d;  -- |employees| × |departments| rows!
+
+-- Always use explicit JOIN syntax:
+SELECT e.name, d.dept_name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id;
+```
+
+---
+
+## 🏋️ 11. Exercises
+
+1. **Translate to SQL:** $\pi_{\text{title}}(\sigma_{\text{year} > 2020 \land \text{genre} = \text{'sci-fi'}}(\text{movies}))$
+
+2. **Translate to relational algebra:** `SELECT DISTINCT author FROM books WHERE pages > 500 AND publisher = 'OReilly';`
+
+3. **Division problem:** Given tables `students(sid, name)`, `courses(cid, title)`, and `enrollments(sid, cid)`, write SQL to find students enrolled in ALL courses.
+
+4. **Three-valued logic:** What does `SELECT * FROM t WHERE x = NULL` return? Why? What should you write instead?
+
+5. **Set operations:** Write a query using EXCEPT to find customers who have never placed an order.
+
+---
+
+## 🔗 Cross-References
+
+- **Next:** [14.2 - SELECT Mastery - Joins, Subqueries, CTEs](14.2---SELECT-Mastery---Joins,-Subqueries,-CTEs) — putting these operators to work
+- **Related:** [SQL Essentials for Coding Tests](SQL-Essentials-for-Coding-Tests) — quick-reference patterns
+- **Math foundation:** Set theory basics from [1.1 - Limits & Continuity](1.1---Limits-&-Continuity) (set notation)
+
+---
+
+## 📖 Key Sources
+
+- Codd, E.F. (1970). "A Relational Model of Data for Large Shared Data Banks." *Communications of the ACM*.
+- Date, C.J. (2003). *An Introduction to Database Systems*. 8th ed.
+- Chamberlin, D. & Boyce, R. (1974). "SEQUEL: A Structured English Query Language." *ACM SIGFIDET Workshop*.
+- PostgreSQL Documentation: https://www.postgresql.org/docs/current/
+
+
+
+---
+
+## 📚 12. Deep Dive — Codd's 12 Rules & Relational Calculus
+
+### 12.1 Codd's 12 Rules (Actually 13: Rules 0–12)
+
+In 1985, E.F. Codd published twelve rules (numbered 0–12) that a database management system must satisfy to be considered fully relational. No commercial DBMS satisfies all of them perfectly, but they remain the gold standard for evaluating relational fidelity.
+
+| Rule # | Name | Requirement |
+|--------|------|-------------|
+| 0 | Foundation Rule | The system must manage data entirely through its relational capabilities |
+| 1 | Information Rule | All information is represented as values in tables (relations) |
+| 2 | Guaranteed Access | Every datum is accessible via table name + primary key + column name |
+| 3 | Systematic NULL Treatment | NULLs are supported for representing missing/inapplicable data, distinct from empty string or zero |
+| 4 | Active Online Catalog | The database description (metadata) is stored in relations and queryable with the same language |
+| 5 | Comprehensive Data Sublanguage | At least one supported language must have a well-defined syntax, support DDL, DML, integrity constraints, authorization, and transaction boundaries |
+| 6 | View Updating Rule | All views that are theoretically updatable must be updatable by the system |
+| 7 | High-Level Insert/Update/Delete | The system must support set-at-a-time operations (not just row-at-a-time) |
+| 8 | Physical Data Independence | Application programs are unaffected by changes to storage or access methods |
+| 9 | Logical Data Independence | Application programs are unaffected by information-preserving schema changes |
+| 10 | Integrity Independence | Integrity constraints are stored in the catalog, not in application programs |
+| 11 | Distribution Independence | The system works identically whether data is centralized or distributed |
+| 12 | Nonsubversion Rule | If the system provides a low-level (row-at-a-time) interface, it cannot be used to bypass relational security or integrity constraints |
+
+**How PostgreSQL measures up:**
+
+```sql
+-- Rule 4: Active Online Catalog — PostgreSQL stores metadata in pg_catalog
+SELECT table_name, column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public'
+ORDER BY table_name, ordinal_position;
+
+-- Rule 10: Integrity Independence — constraints in the catalog
+SELECT conname, contype, pg_get_constraintdef(oid)
+FROM pg_constraint
+WHERE conrelid = 'employees'::regclass;
+
+-- Rule 7: Set-at-a-time operations
+UPDATE employees SET salary = salary * 1.05
+WHERE dept_id IN (SELECT dept_id FROM departments WHERE region = 'West');
+```
+
+**Where PostgreSQL falls short:**
+- **Rule 6 (View Updating):** Complex views with joins, aggregates, or DISTINCT are not automatically updatable. You must write `INSTEAD OF` triggers.
+- **Rule 11 (Distribution Independence):** PostgreSQL is single-node by default. Extensions like Citus add distribution but with caveats.
+
+### 12.2 Tuple Relational Calculus (TRC)
+
+Tuple Relational Calculus is a **non-procedural** (declarative) query language based on first-order predicate logic. Unlike relational algebra (which specifies *how* to compute), TRC specifies *what* to retrieve.
+
+**Syntax:** $\{t \mid P(t)\}$ — "the set of all tuples $t$ such that predicate $P(t)$ is true."
+
+**Example 1:** Find all employees earning more than 100k:
+
+$$
+\{t \mid t \in \text{employees} \land t[\text{salary}] > 100000\}
+$$
+
+**Example 2:** Find names of employees in the Engineering department:
+
+$$
+\{t[\text{name}] \mid t \in \text{employees} \land \exists d \in \text{departments}(d[\text{dept\_id}] = t[\text{dept\_id}] \land d[\text{dept\_name}] = \text{'Engineering'})\}
+$$
+
+**Example 3:** Find employees who work in ALL departments (division):
+
+$$
+\{t \mid t \in \text{employees} \land \forall d \in \text{departments}(\exists a \in \text{assignments}(a[\text{emp\_id}] = t[\text{emp\_id}] \land a[\text{dept\_id}] = d[\text{dept\_id}]))\}
+$$
+
+**SQL equivalent of Example 3:**
+
+```sql
+SELECT e.emp_id, e.name
+FROM employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM departments d
+    WHERE NOT EXISTS (
+        SELECT 1 FROM assignments a
+        WHERE a.emp_id = e.emp_id AND a.dept_id = d.dept_id
+    )
+);
+```
+
+The double-NOT-EXISTS pattern is the SQL encoding of universal quantification ($\forall x P(x) \equiv \neg \exists x \neg P(x)$).
+
+### 12.3 Domain Relational Calculus (DRC)
+
+Domain Relational Calculus uses **domain variables** (individual attribute values) rather than tuple variables.
+
+**Syntax:** $\{x_1, x_2, \ldots, x_n \mid P(x_1, x_2, \ldots, x_n)\}$
+
+**Example:** Find names and salaries of employees in department 5:
+
+$$
+\{n, s \mid \exists i \exists d (\text{employees}(i, n, s, d) \land d = 5)\}
+$$
+
+**QBE (Query-By-Example)** is a practical implementation of DRC — the user fills in example values in a grid, and the system translates to SQL.
+
+### 12.4 Equivalence: Algebra = TRC = DRC = SQL
+
+**Codd's Theorem (1972):** Relational algebra, safe tuple relational calculus, and safe domain relational calculus are equivalent in expressive power. They define exactly the same class of queries — the **relationally complete** queries.
+
+A calculus expression is **safe** if it guarantees a finite result. Unsafe example: $\{t \mid \neg(t \in \text{employees})\}$ — this would return all tuples in the universe that are NOT employees (infinite).
+
+SQL is relationally complete (it can express everything relational algebra can) and goes beyond it with:
+- Aggregation (SUM, COUNT, AVG) — not in basic relational algebra
+- Recursion (WITH RECURSIVE) — not in basic relational algebra
+- Ordering (ORDER BY) — relations are unordered sets
+- Bag semantics (duplicates) — relations are sets
+
+### 12.5 Functional Dependencies & Closure
+
+A **functional dependency** (FD) $X \to Y$ means: if two tuples agree on attributes $X$, they must agree on attributes $Y$.
+
+**Example:** In a table `students(sid, name, major, advisor)`:
+- `sid → name, major, advisor` (student ID determines everything)
+- `major → advisor` (each major has one advisor)
+
+**Closure of a set of attributes $X^+$:** The set of all attributes functionally determined by $X$ under a given set of FDs $F$.
+
+**Algorithm — Computing $X^+$:**
+
+```python
+def compute_closure(X: set, FDs: list[tuple[set, set]]) -> set:
+    """
+    Compute the closure X+ under functional dependencies FDs.
+    Each FD is (lhs: set, rhs: set).
+    """
+    closure = set(X)
+    changed = True
+    while changed:
+        changed = False
+        for lhs, rhs in FDs:
+            if lhs.issubset(closure) and not rhs.issubset(closure):
+                closure.update(rhs)
+                changed = True
+    return closure
+
+# Example: R(A, B, C, D, E), FDs: {AB→C, C→D, D→E, E→A}
+FDs = [
+    ({'A', 'B'}, {'C'}),
+    ({'C'}, {'D'}),
+    ({'D'}, {'E'}),
+    ({'E'}, {'A'}),
+]
+
+# Compute {A,B}+
+result = compute_closure({'A', 'B'}, FDs)
+print(result)  # {A, B, C, D, E} — AB is a superkey!
+```
+
+### 12.6 BCNF vs 3NF Tradeoffs
+
+| Property | 3NF | BCNF |
+|----------|-----|------|
+| Eliminates all redundancy from FDs | No (some transitive deps remain) | Yes |
+| Dependency-preserving decomposition always exists | Yes | **No** |
+| Lossless-join decomposition always exists | Yes | Yes |
+| Every BCNF schema is in 3NF | Yes | — |
+| Every 3NF schema is in BCNF | **No** | — |
+
+**When 3NF is preferred over BCNF:**
+
+Consider relation $R(A, B, C)$ with FDs: $\{AB \to C, C \to B\}$.
+
+- Candidate keys: $\{AB, AC\}$
+- The FD $C \to B$ violates BCNF (C is not a superkey)
+- BCNF decomposition: $R_1(C, B)$ and $R_2(A, C)$
+- But now we **cannot enforce** $AB \to C$ without joining $R_1$ and $R_2$!
+
+In this case, 3NF preserves the dependency $AB \to C$ directly. The tradeoff: accept minor redundancy to maintain enforceable constraints.
+
+```sql
+-- 3NF schema (keeps AB→C enforceable):
+CREATE TABLE r (
+    a INTEGER,
+    b INTEGER,
+    c INTEGER,
+    PRIMARY KEY (a, b),
+    UNIQUE (a, c)  -- enforces AC as candidate key
+);
+
+-- BCNF decomposition (loses AB→C enforcement):
+CREATE TABLE r1 (c INTEGER PRIMARY KEY, b INTEGER NOT NULL);
+CREATE TABLE r2 (a INTEGER, c INTEGER REFERENCES r1(c), PRIMARY KEY (a, c));
+-- Cannot directly enforce that (a, r1.b) → c without a trigger or application logic
+```
+
+---
+
+## 📚 13. Appendix — Armstrong's Axioms & Minimal Cover Algorithm
+
+### 13.1 Armstrong's Axioms
+
+Armstrong's axioms are a **sound and complete** set of inference rules for functional dependencies. From a given set of FDs $F$, these three rules can derive ALL FDs that $F$ logically implies (the closure $F^+$).
+
+**Axiom 1 — Reflexivity:** If $Y \subseteq X$, then $X \to Y$.
+
+$$
+\{A, B, C\} \to \{A, B\} \quad \text{(trivial dependency)}
+$$
+
+**Axiom 2 — Augmentation:** If $X \to Y$, then $XZ \to YZ$ for any $Z$.
+
+$$
+A \to B \implies AC \to BC
+$$
+
+**Axiom 3 — Transitivity:** If $X \to Y$ and $Y \to Z$, then $X \to Z$.
+
+$$
+A \to B \text{ and } B \to C \implies A \to C
+$$
+
+**Derived rules (provable from the three axioms):**
+
+- **Union:** If $X \to Y$ and $X \to Z$, then $X \to YZ$.
+- **Decomposition:** If $X \to YZ$, then $X \to Y$ and $X \to Z$.
+- **Pseudotransitivity:** If $X \to Y$ and $WY \to Z$, then $WX \to Z$.
+
+**Proof of Union Rule:**
+
+1. $X \to Y$ (given)
+2. $X \to Z$ (given)
+3. $X \to XY$ (augment step 1 with $X$: $XX \to XY$, and $XX = X$)
+4. Wait — more carefully: augment $X \to Y$ with $X$: $XX \to XY$, i.e., $X \to XY$
+5. Augment $X \to Z$ with $Y$: $XY \to ZY$
+6. By transitivity on (4) and (5): $X \to YZ$ $\blacksquare$
+
+**Proof of Decomposition Rule:**
+
+1. $X \to YZ$ (given)
+2. $YZ \to Y$ (reflexivity, since $Y \subseteq YZ$)
+3. $X \to Y$ (transitivity on 1 and 2) $\blacksquare$
+
+### 13.2 Soundness and Completeness
+
+- **Soundness:** Every FD derivable using Armstrong's axioms is logically implied by $F$. (No false FDs are generated.)
+- **Completeness:** Every FD logically implied by $F$ can be derived using Armstrong's axioms. (Nothing is missed.)
+
+The proof of completeness uses the closure algorithm: if $X \to Y$ cannot be derived, then there exists a two-tuple relation that satisfies $F$ but violates $X \to Y$.
+
+### 13.3 Algorithm for Minimal Cover (Canonical Cover)
+
+A **minimal cover** $F_c$ of a set of FDs $F$ satisfies:
+1. $F_c$ is equivalent to $F$ (same closure)
+2. Every FD in $F_c$ has a single attribute on the right-hand side
+3. No FD in $F_c$ can be removed without changing the closure
+4. No attribute can be removed from any left-hand side without changing the closure
+
+**Algorithm:**
+
+```python
+def minimal_cover(FDs: list[tuple[set, set]]) -> list[tuple[set, set]]:
+    """
+    Compute the minimal cover of a set of functional dependencies.
+    Input: list of (lhs: set, rhs: set)
+    Output: minimal equivalent set of FDs with singleton RHS
+    """
+    # Step 1: Decompose — make all RHS singletons
+    decomposed = []
+    for lhs, rhs in FDs:
+        for attr in rhs:
+            decomposed.append((set(lhs), {attr}))
+
+    # Step 2: Reduce LHS — remove extraneous attributes from each LHS
+    reduced = []
+    for lhs, rhs in decomposed:
+        new_lhs = set(lhs)
+        for attr in list(lhs):
+            # Try removing attr from LHS
+            test_lhs = new_lhs - {attr}
+            if len(test_lhs) == 0:
+                continue
+            # Check if test_lhs → rhs still holds under current FD set
+            # (compute closure of test_lhs under all FDs)
+            closure = compute_closure(test_lhs, decomposed)
+            if rhs.issubset(closure):
+                new_lhs = test_lhs  # attr was extraneous
+        reduced.append((new_lhs, rhs))
+
+    # Step 3: Remove redundant FDs
+    minimal = list(reduced)
+    for fd in list(reduced):
+        # Temporarily remove this FD
+        test_set = [f for f in minimal if f != fd]
+        # Check if fd is still implied by the remaining FDs
+        closure = compute_closure(fd[0], test_set)
+        if fd[1].issubset(closure):
+            minimal.remove(fd)  # fd is redundant
+
+    return minimal
+
+# Example: F = {A→BC, B→C, AB→D, D→A}
+FDs = [
+    ({'A'}, {'B', 'C'}),
+    ({'B'}, {'C'}),
+    ({'A', 'B'}, {'D'}),
+    ({'D'}, {'A'}),
+]
+
+result = minimal_cover(FDs)
+# After decomposition: A→B, A→C, B→C, AB→D, D→A
+# After LHS reduction: A→B, A→C, B→C, A→D (B removed from AB since A→B), D→A
+# After redundancy removal: A→B, B→C, A→D, D→A (A→C removed since A→B→C)
+for lhs, rhs in result:
+    print(f"{lhs} → {rhs}")
+```
+
+### 13.4 Finding All Candidate Keys
+
+A **candidate key** is a minimal superkey — a set of attributes whose closure is all attributes, with no proper subset having that property.
+
+```python
+from itertools import combinations
+
+def find_candidate_keys(attrs: set, FDs: list[tuple[set, set]]) -> list[set]:
+    """Find all candidate keys of a relation."""
+    all_attrs = attrs
+    keys = []
+
+    # Start with single attributes, then pairs, triples, etc.
+    for size in range(1, len(all_attrs) + 1):
+        for combo in combinations(sorted(all_attrs), size):
+            candidate = set(combo)
+            # Skip if a subset is already a key
+            if any(k.issubset(candidate) and k != candidate for k in keys):
+                continue
+            closure = compute_closure(candidate, FDs)
+            if closure == all_attrs:
+                keys.append(candidate)
+
+    return keys
+
+# Example: R(A,B,C,D), FDs: {A→B, BC→D, D→A}
+attrs = {'A', 'B', 'C', 'D'}
+FDs = [({'A'}, {'B'}), ({'B', 'C'}, {'D'}), ({'D'}, {'A'})]
+keys = find_candidate_keys(attrs, FDs)
+# Result: {A,C}, {B,C}, {D,C} — all candidate keys
+```
+
+### 13.5 Testing for BCNF and 3NF Violations
+
+```python
+def check_bcnf(attrs: set, FDs: list[tuple[set, set]]) -> list[tuple[set, set]]:
+    """Return FDs that violate BCNF."""
+    violations = []
+    for lhs, rhs in FDs:
+        if rhs.issubset(lhs):
+            continue  # trivial
+        closure = compute_closure(lhs, FDs)
+        if closure != attrs:  # lhs is not a superkey
+            violations.append((lhs, rhs))
+    return violations
+
+def check_3nf(attrs: set, FDs: list[tuple[set, set]], 
+              candidate_keys: list[set]) -> list[tuple[set, set]]:
+    """Return FDs that violate 3NF."""
+    # Prime attributes: attributes that appear in any candidate key
+    prime = set()
+    for key in candidate_keys:
+        prime.update(key)
+
+    violations = []
+    for lhs, rhs in FDs:
+        if rhs.issubset(lhs):
+            continue  # trivial
+        closure = compute_closure(lhs, FDs)
+        if closure == attrs:
+            continue  # lhs is a superkey — OK
+        # Check if every attribute in rhs is prime
+        for attr in rhs:
+            if attr not in prime:
+                violations.append((lhs, rhs))
+                break
+    return violations
+```
+
+### 13.6 Lossless-Join Decomposition Algorithm (BCNF)
+
+```python
+def bcnf_decompose(attrs: set, FDs: list[tuple[set, set]]) -> list[set]:
+    """
+    Decompose a relation into BCNF using the standard algorithm.
+    Returns list of attribute sets (one per resulting relation).
+    """
+    result = [set(attrs)]
+
+    changed = True
+    while changed:
+        changed = False
+        for i, rel in enumerate(result):
+            # Find FDs applicable to this sub-relation
+            local_fds = [(lhs, rhs) for lhs, rhs in FDs
+                         if lhs.issubset(rel) and rhs.issubset(rel)]
+            # Check for BCNF violation
+            for lhs, rhs in local_fds:
+                if rhs.issubset(lhs):
+                    continue
+                closure = compute_closure(lhs, local_fds)
+                if closure != rel:  # violation found
+                    # Decompose: R1 = lhs ∪ rhs, R2 = rel - (rhs - lhs)
+                    r1 = lhs | rhs
+                    r2 = rel - (rhs - lhs)
+                    result[i] = r1
+                    result.append(r2)
+                    changed = True
+                    break
+            if changed:
+                break
+
+    return result
+```
+
+### 13.7 The Synthesis Algorithm (3NF, Dependency-Preserving)
+
+```python
+def synthesize_3nf(attrs: set, FDs: list[tuple[set, set]]) -> list[set]:
+    """
+    Decompose into 3NF using the synthesis algorithm.
+    Guarantees: lossless-join AND dependency-preserving.
+    """
+    # Step 1: Compute minimal cover
+    Fc = minimal_cover(FDs)
+
+    # Step 2: Group FDs by LHS
+    from collections import defaultdict
+    groups = defaultdict(set)
+    for lhs, rhs in Fc:
+        key = frozenset(lhs)
+        groups[key].update(rhs)
+        groups[key].update(lhs)
+
+    # Step 3: Create a relation for each group
+    relations = [attrs_set for attrs_set in groups.values()]
+
+    # Step 4: Ensure lossless join — if no relation contains a candidate key,
+    # add a relation consisting of a candidate key
+    keys = find_candidate_keys(attrs, FDs)
+    has_key = any(k.issubset(rel) for rel in relations for k in keys)
+    if not has_key:
+        relations.append(keys[0])
+
+    # Step 5: Remove redundant relations (subsets of others)
+    final = []
+    for rel in relations:
+        if not any(rel < other for other in relations):
+            final.append(rel)
+
+    return final
+```
+
+---
+
+## 📖 Additional Sources (Sections 12–13)
+
+- Codd, E.F. (1985). "Is Your DBMS Really Relational?" *Computerworld*.
+- Codd, E.F. (1972). "Relational Completeness of Data Base Sublanguages." *IBM Research Report RJ987*.
+- Ullman, J.D. (1988). *Principles of Database and Knowledge-Base Systems*. Vol. 1, Chapter 7.
+- Maier, D. (1983). *The Theory of Relational Databases*. Chapter 4 (Armstrong's Axioms).
+- Bernstein, P.A. (1976). "Synthesizing Third Normal Form Relations from Functional Dependencies." *ACM TODS*.

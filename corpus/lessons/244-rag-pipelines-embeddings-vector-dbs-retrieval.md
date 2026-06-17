@@ -1,0 +1,1329 @@
+---
+title: "24.4 — RAG Pipelines: Embeddings, Vector DBs & Retrieval"
+subject: "AI Experiments"
+catalog: advanced
+audience_tier: higher-education
+chapter: "24.4"
+type: experiment-chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 24.4 — RAG Pipelines: Embeddings, Vector DBs & Retrieval
+
+> *"Retrieval-augmented generation lets you give a language model a long-term memory without retraining it."*
+> — **Patrick Lewis**, Meta AI (RAG paper lead author, 2020)
+
+RAG is the most practical way to ground LLM outputs in your own data without fine-tuning. This chapter builds a complete RAG pipeline: chunking documents, generating embeddings, storing in vector databases, implementing hybrid search, and evaluating retrieval quality.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Chunk documents with overlap using recursive character splitting.
+2. Generate embeddings with sentence-transformers and OpenAI-compatible APIs.
+3. Deploy and query Chroma, Qdrant, and FAISS vector stores.
+4. Implement hybrid search (dense vectors + BM25 sparse retrieval).
+5. Build a complete RAG pipeline with LlamaIndex or LangChain.
+6. Evaluate retrieval quality: precision@k, recall@k, MRR, NDCG.
+7. Optimize chunk size, overlap, and embedding model selection.
+
+---
+
+## 🖼️ Visual Anchor — RAG Pipeline Architecture
+
+![aiexp__5.4-fig1](aiexp__5.4-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+| Concept | Definition |
+|---------|-----------|
+| **RAG** | Retrieval-Augmented Generation — retrieve relevant context before generating |
+| **Embedding** | Dense vector representation of text (768-3072 dims) |
+| **Vector Database** | Specialized DB for approximate nearest neighbor (ANN) search |
+| **Chunking** | Splitting documents into retrieval-sized pieces (256-1024 tokens) |
+| **Hybrid Search** | Combining dense (semantic) + sparse (keyword/BM25) retrieval |
+| **Reranking** | Second-stage scoring of retrieved candidates for precision |
+| **Context Window Stuffing** | Filling the LLM's context with retrieved chunks |
+
+### Embedding Model Landscape
+
+| Model | Dims | MTEB Score | Speed | License |
+|-------|------|-----------|-------|---------|
+| `all-MiniLM-L6-v2` | 384 | 56.3 | Very fast | Apache 2.0 |
+| `bge-large-en-v1.5` | 1024 | 64.2 | Medium | MIT |
+| `e5-mistral-7b-instruct` | 4096 | 66.6 | Slow | MIT |
+| `nomic-embed-text-v1.5` | 768 | 62.3 | Fast | Apache 2.0 |
+| `text-embedding-3-large` (OpenAI) | 3072 | 64.6 | API | Proprietary |
+| `mxbai-embed-large-v1` | 1024 | 64.7 | Medium | Apache 2.0 |
+
+### Vector Database Comparison
+
+| DB | Type | Persistence | Filtering | Scale | Best For |
+|----|------|-------------|-----------|-------|----------|
+| **FAISS** | Library | File-based | Limited | Billions | Research, batch |
+| **Chroma** | Embedded | SQLite | Metadata | Millions | Prototyping |
+| **Qdrant** | Server | Disk/RAM | Rich | Billions | Production |
+| **Weaviate** | Server | Disk | GraphQL | Billions | Multi-modal |
+| **Pinecone** | Cloud | Managed | Metadata | Billions | Serverless |
+
+---
+
+## 🔬 2. Theory Briefing
+
+> For embedding theory and attention mechanisms, see [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs).
+
+### How Embeddings Work
+
+Text embeddings map variable-length text to fixed-size vectors where semantic similarity corresponds to cosine similarity:
+
+$$
+\text{sim}(a, b) = \frac{\mathbf{e}_a \cdot \mathbf{e}_b}{\|\mathbf{e}_a\| \|\mathbf{e}_b\|}
+$$
+
+Modern embedding models are trained with contrastive learning:
+- **Positive pairs:** (query, relevant document) → high similarity
+- **Negative pairs:** (query, irrelevant document) → low similarity
+- **Loss:** InfoNCE / Multiple Negatives Ranking Loss
+
+### Approximate Nearest Neighbor (ANN) Algorithms
+
+Exact k-NN is $O(n \cdot d)$ per query — too slow for millions of vectors. ANN trades accuracy for speed:
+
+| Algorithm | Approach | Recall@10 | QPS |
+|-----------|----------|-----------|-----|
+| **HNSW** | Hierarchical graph | 99%+ | 10K+ |
+| **IVF-PQ** | Clustering + quantization | 95% | 50K+ |
+| **ScaNN** | Anisotropic quantization | 98% | 30K+ |
+
+HNSW (Hierarchical Navigable Small World) is the default for most vector DBs — excellent recall with reasonable memory.
+
+### Chunking Strategies
+
+```
+Fixed-size:     Split every N tokens (simple but breaks sentences)
+Recursive:      Split by paragraph → sentence → word (preserves structure)
+Semantic:       Split at topic boundaries using embeddings
+Document:       One chunk per logical document (for short docs)
+```
+
+**Optimal chunk size** depends on:
+- Embedding model's training context (most trained on 256-512 tokens)
+- Query granularity (specific questions → smaller chunks)
+- LLM context window (more chunks = more context used)
+
+---
+
+## 🔧 3. Setup & Prerequisites
+
+```bash
+conda activate aiexp
+
+# Embedding models
+pip install sentence-transformers>=2.6.0
+
+# Vector databases
+pip install chromadb>=0.4.24
+pip install qdrant-client>=1.8.0
+pip install faiss-gpu>=1.7.4  # or faiss-cpu
+
+# RAG frameworks
+pip install llama-index>=0.10.0
+pip install langchain>=0.1.0 langchain-community
+
+# Document processing
+pip install pypdf unstructured python-docx tiktoken
+
+# Reranking
+pip install flashrank  # lightweight reranker
+
+# BM25 for hybrid search
+pip install rank-bm25
+```
+
+---
+
+## 🧪 4. Experiment Walkthrough
+
+### Experiment 4.1 — Embedding Generation & Similarity
+
+```python
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Load embedding model
+model = SentenceTransformer("BAAI/bge-large-en-v1.5", device="cuda")
+
+# Encode texts
+documents = [
+    "PyTorch is a machine learning framework based on the Torch library.",
+    "TensorFlow is an open-source machine learning platform by Google.",
+    "The Eiffel Tower is a wrought-iron lattice tower in Paris, France.",
+    "CUDA is a parallel computing platform by NVIDIA for GPU programming.",
+    "The Great Wall of China is a series of fortifications along the northern borders.",
+]
+
+query = "What frameworks are used for deep learning?"
+
+# Generate embeddings
+doc_embeddings = model.encode(documents, normalize_embeddings=True)
+query_embedding = model.encode([query], normalize_embeddings=True)
+
+# Compute cosine similarity (embeddings are normalized, so dot product = cosine)
+similarities = query_embedding @ doc_embeddings.T
+ranked_indices = np.argsort(similarities[0])[::-1]
+
+print(f"Query: {query}\n")
+print("Ranked results:")
+for i, idx in enumerate(ranked_indices):
+    print(f"  {i+1}. [{similarities[0][idx]:.4f}] {documents[idx]}")
+```
+
+### Experiment 4.2 — Document Chunking Pipeline
+
+```python
+from typing import List
+import tiktoken
+
+class RecursiveChunker:
+    """Chunk documents recursively by paragraph, sentence, then character."""
+    
+    def __init__(self, chunk_size=512, chunk_overlap=50, tokenizer_name="cl100k_base"):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.tokenizer = tiktoken.get_encoding(tokenizer_name)
+        self.separators = ["\n\n", "\n", ". ", " ", ""]
+    
+    def count_tokens(self, text: str) -> int:
+        return len(self.tokenizer.encode(text))
+    
+    def chunk(self, text: str) -> List[dict]:
+        """Split text into chunks with metadata."""
+        chunks = self._recursive_split(text, self.separators)
+        
+        # Add overlap
+        result = []
+        for i, chunk_text in enumerate(chunks):
+            result.append({
+                "text": chunk_text,
+                "index": i,
+                "tokens": self.count_tokens(chunk_text),
+            })
+        return result
+    
+    def _recursive_split(self, text: str, separators: List[str]) -> List[str]:
+        if not separators:
+            return [text]
+        
+        sep = separators[0]
+        splits = text.split(sep) if sep else list(text)
+        
+        chunks = []
+        current = ""
+        
+        for split in splits:
+            candidate = current + sep + split if current else split
+            if self.count_tokens(candidate) <= self.chunk_size:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current)
+                if self.count_tokens(split) > self.chunk_size:
+                    # Recursively split with next separator
+                    chunks.extend(self._recursive_split(split, separators[1:]))
+                    current = ""
+                else:
+                    current = split
+        
+        if current:
+            chunks.append(current)
+        
+        return chunks
+
+# Usage
+chunker = RecursiveChunker(chunk_size=256, chunk_overlap=30)
+
+with open("large_document.txt", "r") as f:
+    text = f.read()
+
+chunks = chunker.chunk(text)
+print(f"Document: {len(text)} chars → {len(chunks)} chunks")
+for c in chunks[:3]:
+    print(f"  Chunk {c['index']}: {c['tokens']} tokens")
+```
+
+### Experiment 4.3 — Chroma Vector Store
+
+```python
+import chromadb
+from sentence_transformers import SentenceTransformer
+
+# Initialize Chroma with persistence
+client = chromadb.PersistentClient(path="./chroma_db")
+
+# Create collection
+collection = client.get_or_create_collection(
+    name="documents",
+    metadata={"hnsw:space": "cosine"},  # cosine similarity
+)
+
+# Embedding function
+embed_model = SentenceTransformer("BAAI/bge-large-en-v1.5", device="cuda")
+
+# Add documents
+documents = ["doc text 1...", "doc text 2...", "doc text 3..."]
+embeddings = embed_model.encode(documents, normalize_embeddings=True).tolist()
+
+collection.add(
+    ids=[f"doc_{i}" for i in range(len(documents))],
+    embeddings=embeddings,
+    documents=documents,
+    metadatas=[{"source": "file.pdf", "page": i} for i in range(len(documents))],
+)
+
+# Query
+query = "How does attention work in transformers?"
+query_embedding = embed_model.encode([query], normalize_embeddings=True).tolist()
+
+results = collection.query(
+    query_embeddings=query_embedding,
+    n_results=5,
+    include=["documents", "distances", "metadatas"],
+)
+
+for doc, dist, meta in zip(results["documents"][0], results["distances"][0], results["metadatas"][0]):
+    print(f"[{1-dist:.4f}] ({meta['source']} p.{meta['page']}): {doc[:80]}...")
+```
+
+### Experiment 4.4 — Qdrant (Production Vector DB)
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
+
+# Start Qdrant: docker run -p 6333:6333 qdrant/qdrant
+client = QdrantClient(host="localhost", port=6333)
+
+# Create collection
+client.create_collection(
+    collection_name="knowledge_base",
+    vectors_config=VectorParams(size=1024, distance=Distance.COSINE),
+)
+
+# Upsert vectors
+points = [
+    PointStruct(
+        id=i,
+        vector=embedding.tolist(),
+        payload={"text": text, "source": source, "category": cat}
+    )
+    for i, (embedding, text, source, cat) in enumerate(zip(embeddings, texts, sources, categories))
+]
+client.upsert(collection_name="knowledge_base", points=points)
+
+# Search with metadata filtering
+results = client.search(
+    collection_name="knowledge_base",
+    query_vector=query_embedding.tolist(),
+    limit=10,
+    query_filter=Filter(
+        must=[FieldCondition(key="category", match=MatchValue(value="technical"))]
+    ),
+)
+
+for hit in results:
+    print(f"[{hit.score:.4f}] {hit.payload['text'][:80]}...")
+```
+
+### Experiment 4.5 — Hybrid Search (Dense + BM25)
+
+```python
+import numpy as np
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+
+class HybridSearcher:
+    """Combine dense vector search with BM25 sparse retrieval."""
+    
+    def __init__(self, documents: list[str], embed_model_name="BAAI/bge-large-en-v1.5"):
+        self.documents = documents
+        self.embed_model = SentenceTransformer(embed_model_name, device="cuda")
+        
+        # Dense index
+        self.embeddings = self.embed_model.encode(documents, normalize_embeddings=True)
+        
+        # Sparse index (BM25)
+        tokenized = [doc.lower().split() for doc in documents]
+        self.bm25 = BM25Okapi(tokenized)
+    
+    def search(self, query: str, k=10, alpha=0.7):
+        """
+        Hybrid search with reciprocal rank fusion.
+        alpha: weight for dense search (1-alpha for BM25)
+        """
+        # Dense search
+        query_emb = self.embed_model.encode([query], normalize_embeddings=True)
+        dense_scores = (query_emb @ self.embeddings.T)[0]
+        dense_ranks = np.argsort(-dense_scores)
+        
+        # BM25 search
+        bm25_scores = self.bm25.get_scores(query.lower().split())
+        bm25_ranks = np.argsort(-bm25_scores)
+        
+        # Reciprocal Rank Fusion (RRF)
+        rrf_scores = np.zeros(len(self.documents))
+        rrf_k = 60  # RRF constant
+        
+        for rank, idx in enumerate(dense_ranks):
+            rrf_scores[idx] += alpha / (rrf_k + rank + 1)
+        for rank, idx in enumerate(bm25_ranks):
+            rrf_scores[idx] += (1 - alpha) / (rrf_k + rank + 1)
+        
+        # Return top-k
+        top_indices = np.argsort(-rrf_scores)[:k]
+        return [(self.documents[i], rrf_scores[i]) for i in top_indices]
+
+# Usage
+searcher = HybridSearcher(all_documents)
+results = searcher.search("CUDA memory management for large models", k=5, alpha=0.6)
+for doc, score in results:
+    print(f"[{score:.4f}] {doc[:100]}...")
+```
+
+### Experiment 4.6 — Complete RAG Pipeline with LlamaIndex
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.huggingface import HuggingFaceLLM
+from llama_index.core.node_parser import SentenceSplitter
+import torch
+
+# Configure embedding model
+Settings.embed_model = HuggingFaceEmbedding(
+    model_name="BAAI/bge-large-en-v1.5",
+    device="cuda",
+)
+
+# Configure LLM (local)
+Settings.llm = HuggingFaceLLM(
+    model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+    tokenizer_name="meta-llama/Meta-Llama-3-8B-Instruct",
+    device_map="auto",
+    model_kwargs={"torch_dtype": torch.float16, "load_in_4bit": True},
+    generate_kwargs={"temperature": 0.1, "top_p": 0.9, "max_new_tokens": 512},
+)
+
+# Configure chunking
+Settings.node_parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+
+# Load documents
+documents = SimpleDirectoryReader("./knowledge_base/").load_data()
+print(f"Loaded {len(documents)} documents")
+
+# Build index
+index = VectorStoreIndex.from_documents(documents, show_progress=True)
+
+# Persist to disk
+index.storage_context.persist(persist_dir="./rag_index")
+
+# Query
+query_engine = index.as_query_engine(similarity_top_k=5)
+response = query_engine.query("How do I set up multi-GPU training with PyTorch?")
+
+print(f"Answer: {response}")
+print(f"\nSources:")
+for node in response.source_nodes:
+    print(f"  [{node.score:.3f}] {node.metadata.get('file_name', 'unknown')}")
+```
+
+---
+
+## 📈 5. Expected Results & Evaluation
+
+### Retrieval Metrics
+
+```python
+def evaluate_retrieval(queries, ground_truth, retriever, k=10):
+    """Compute retrieval metrics."""
+    precisions, recalls, mrrs = [], [], []
+    
+    for query, relevant_ids in zip(queries, ground_truth):
+        retrieved = retriever.search(query, k=k)
+        retrieved_ids = [r.id for r in retrieved]
+        
+        # Precision@k
+        hits = len(set(retrieved_ids) & set(relevant_ids))
+        precisions.append(hits / k)
+        
+        # Recall@k
+        recalls.append(hits / len(relevant_ids))
+        
+        # MRR (Mean Reciprocal Rank)
+        for rank, rid in enumerate(retrieved_ids, 1):
+            if rid in relevant_ids:
+                mrrs.append(1.0 / rank)
+                break
+        else:
+            mrrs.append(0.0)
+    
+    return {
+        "precision@k": np.mean(precisions),
+        "recall@k": np.mean(recalls),
+        "mrr": np.mean(mrrs),
+    }
+```
+
+### Target Metrics
+
+| Metric | Good | Excellent |
+|--------|------|-----------|
+| Precision@5 | > 0.6 | > 0.8 |
+| Recall@10 | > 0.7 | > 0.9 |
+| MRR | > 0.5 | > 0.7 |
+| Answer correctness | > 70% | > 85% |
+| Latency (retrieval) | < 100ms | < 50ms |
+| Latency (end-to-end) | < 5s | < 2s |
+
+---
+
+## ⚠️ 6. Gotchas & Debugging
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Poor retrieval quality | Wrong embedding model or chunk size | Try `bge-large`, reduce chunk to 256 tokens |
+| Hallucinated answers | Retrieved context irrelevant | Add reranking step, increase top_k |
+| Slow embedding | CPU inference | Move to GPU, batch encode |
+| Chroma OOM | Too many docs in memory | Use persistent client, batch inserts |
+| Duplicate results | Overlapping chunks | Deduplicate by content hash |
+| Lost context | Chunks too small | Increase chunk size, add parent-child retrieval |
+
+### Chunk Size Optimization
+
+```
+Too small (< 128 tokens):
+  ✗ Loses context, fragments sentences
+  ✓ More precise retrieval
+
+Too large (> 1024 tokens):
+  ✗ Dilutes relevant info, wastes context window
+  ✓ Preserves document structure
+
+Sweet spot: 256-512 tokens with 10-20% overlap
+```
+
+---
+
+## 🔬 7. Variations & Extensions
+
+1. **Reranking with Cross-Encoders:** After initial retrieval, rerank top-50 with a cross-encoder (e.g., `BAAI/bge-reranker-v2-m3`) for much higher precision.
+
+2. **Parent-Child Retrieval:** Embed small chunks but retrieve their parent (larger) chunks for more context.
+
+3. **Multi-Vector Retrieval (ColBERT):** Instead of one vector per chunk, use one vector per token. Late interaction gives better matching.
+
+4. **Agentic RAG:** Let the LLM decide when to retrieve, what query to use, and whether to retrieve again (self-RAG pattern).
+
+5. **Graph RAG:** Build a knowledge graph from documents, then traverse relationships during retrieval for multi-hop reasoning.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Cross-links
+- Embedding theory: [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs)
+- LLM for generation: [24.3 - LLM Fine-tuning - LoRA, QLoRA & Full Fine-tuning](24.3---LLM-Fine-tuning---LoRA,-QLoRA-&-Full-Fine-tuning)
+- Agent-driven RAG: [24.5 - Agentic AI - ReAct, Tool Calling & Multi-Agent Orchestration](24.5---Agentic-AI---ReAct,-Tool-Calling-&-Multi-Agent-Orchestration)
+- GPU for embedding: [24.1 - Local AI Infrastructure - CUDA, PyTorch & Multi-GPU Setup](24.1---Local-AI-Infrastructure---CUDA,-PyTorch-&-Multi-GPU-Setup)
+
+### External References
+- **RAG Paper** — Lewis et al. (2020) [arXiv:2005.11401](https://arxiv.org/abs/2005.11401)
+- **MTEB Benchmark** — [huggingface.co/spaces/mteb/leaderboard](https://huggingface.co/spaces/mteb/leaderboard)
+- **LlamaIndex** — [docs.llamaindex.ai](https://docs.llamaindex.ai/)
+- **Qdrant** — [qdrant.tech/documentation](https://qdrant.tech/documentation/)
+- **ChromaDB** — [docs.trychroma.com](https://docs.trychroma.com/)
+- **FAISS** — [github.com/facebookresearch/faiss](https://github.com/facebookresearch/faiss)
+- **ColBERT** — Khattab & Zaharia (2020) [arXiv:2004.12832](https://arxiv.org/abs/2004.12832)
+
+
+
+---
+
+## 🧠 9. Extended Experiments & Variations
+
+### Experiment 9.1 — Hybrid Retrieval: BM25 + Dense Embeddings with Reciprocal Rank Fusion
+
+Combine lexical search (BM25) with semantic search (dense embeddings) using Reciprocal Rank Fusion (RRF). This consistently outperforms either method alone by 10-20% on retrieval benchmarks.
+
+```python
+import numpy as np
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+import faiss
+import time
+from dataclasses import dataclass
+
+@dataclass
+class RetrievalResult:
+    text: str
+    score: float
+    source: str  # "bm25", "dense", or "hybrid"
+    metadata: dict = None
+
+class HybridRetriever:
+    """Production-grade hybrid retriever with BM25 + dense + RRF."""
+    
+    def __init__(self, embedding_model="BAAI/bge-large-en-v1.5", device="cuda"):
+        self.encoder = SentenceTransformer(embedding_model, device=device)
+        self.documents = []
+        self.bm25 = None
+        self.faiss_index = None
+        self.embeddings = None
+    
+    def index(self, documents: list[str], batch_size=64):
+        """Index documents for both BM25 and dense retrieval."""
+        self.documents = documents
+        
+        # BM25 index
+        tokenized = [doc.lower().split() for doc in documents]
+        self.bm25 = BM25Okapi(tokenized)
+        
+        # Dense embeddings
+        print(f"Encoding {len(documents)} documents...")
+        self.embeddings = self.encoder.encode(
+            documents, batch_size=batch_size, show_progress_bar=True,
+            normalize_embeddings=True,
+        )
+        
+        # FAISS index (Inner Product for normalized vectors = cosine similarity)
+        dim = self.embeddings.shape[1]
+        self.faiss_index = faiss.IndexFlatIP(dim)
+        self.faiss_index.add(self.embeddings.astype(np.float32))
+        
+        print(f"Indexed {len(documents)} docs. Embedding dim: {dim}")
+    
+    def search_bm25(self, query: str, k: int = 20) -> list[tuple[int, float]]:
+        """BM25 lexical search."""
+        tokenized_query = query.lower().split()
+        scores = self.bm25.get_scores(tokenized_query)
+        top_k = np.argsort(scores)[::-1][:k]
+        return [(idx, scores[idx]) for idx in top_k if scores[idx] > 0]
+    
+    def search_dense(self, query: str, k: int = 20) -> list[tuple[int, float]]:
+        """Dense semantic search."""
+        query_embedding = self.encoder.encode(
+            [query], normalize_embeddings=True
+        ).astype(np.float32)
+        scores, indices = self.faiss_index.search(query_embedding, k)
+        return [(int(idx), float(score)) for idx, score in zip(indices[0], scores[0])]
+    
+    def search_hybrid(self, query: str, k: int = 10, 
+                      alpha: float = 0.5, rrf_k: int = 60) -> list[RetrievalResult]:
+        """
+        Hybrid search with Reciprocal Rank Fusion.
+        
+        RRF score = sum over rankers: 1 / (rrf_k + rank)
+        alpha controls weight: alpha * dense_rrf + (1-alpha) * bm25_rrf
+        """
+        # Get results from both retrievers
+        bm25_results = self.search_bm25(query, k=50)
+        dense_results = self.search_dense(query, k=50)
+        
+        # Compute RRF scores
+        rrf_scores = {}
+        
+        for rank, (idx, _) in enumerate(dense_results):
+            rrf_scores[idx] = rrf_scores.get(idx, 0) + alpha / (rrf_k + rank + 1)
+        
+        for rank, (idx, _) in enumerate(bm25_results):
+            rrf_scores[idx] = rrf_scores.get(idx, 0) + (1 - alpha) / (rrf_k + rank + 1)
+        
+        # Sort by RRF score
+        sorted_results = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)[:k]
+        
+        return [
+            RetrievalResult(
+                text=self.documents[idx],
+                score=score,
+                source="hybrid",
+            )
+            for idx, score in sorted_results
+        ]
+    
+    def evaluate(self, queries: list[str], ground_truth: list[list[int]], k: int = 10):
+        """Evaluate retrieval quality across all methods."""
+        methods = {
+            "BM25": lambda q: [(idx, s) for idx, s in self.search_bm25(q, k)],
+            "Dense": lambda q: [(idx, s) for idx, s in self.search_dense(q, k)],
+            "Hybrid (α=0.3)": lambda q: [(r.text, r.score) for r in self.search_hybrid(q, k, alpha=0.3)],
+            "Hybrid (α=0.5)": lambda q: [(r.text, r.score) for r in self.search_hybrid(q, k, alpha=0.5)],
+            "Hybrid (α=0.7)": lambda q: [(r.text, r.score) for r in self.search_hybrid(q, k, alpha=0.7)],
+        }
+        
+        results = {}
+        for method_name, search_fn in methods.items():
+            recalls = []
+            mrrs = []
+            
+            for query, relevant_ids in zip(queries, ground_truth):
+                retrieved = search_fn(query)
+                retrieved_ids = [r[0] if isinstance(r[0], int) else self.documents.index(r[0]) 
+                                for r in retrieved[:k]]
+                
+                # Recall@k
+                hits = len(set(retrieved_ids) & set(relevant_ids))
+                recalls.append(hits / len(relevant_ids))
+                
+                # MRR
+                for rank, rid in enumerate(retrieved_ids, 1):
+                    if rid in relevant_ids:
+                        mrrs.append(1.0 / rank)
+                        break
+                else:
+                    mrrs.append(0.0)
+            
+            results[method_name] = {
+                "recall@10": np.mean(recalls),
+                "mrr": np.mean(mrrs),
+            }
+        
+        # Print comparison
+        print(f"\n{'Method':<25} {'Recall@10':<12} {'MRR':<10}")
+        print("-" * 47)
+        for method, metrics in results.items():
+            print(f"{method:<25} {metrics['recall@10']:.4f}      {metrics['mrr']:.4f}")
+        
+        return results
+
+# Usage example
+retriever = HybridRetriever()
+
+# Index your knowledge base
+documents = [
+    "PyTorch uses dynamic computational graphs for automatic differentiation.",
+    "CUDA cores execute parallel floating-point operations on NVIDIA GPUs.",
+    "Gradient checkpointing trades compute for memory by recomputing activations.",
+    # ... add your actual documents
+]
+retriever.index(documents)
+
+# Search
+results = retriever.search_hybrid("How to reduce GPU memory usage during training?", k=5)
+for r in results:
+    print(f"[{r.score:.4f}] {r.text[:100]}...")
+```
+
+**Expected output:**
+
+| Method | Recall@10 | MRR | Latency |
+|--------|-----------|-----|---------|
+| BM25 only | 0.62 | 0.48 | 2ms |
+| Dense only | 0.71 | 0.55 | 15ms |
+| Hybrid (α=0.5) | 0.82 | 0.67 | 18ms |
+| Hybrid (α=0.7, dense-heavy) | 0.79 | 0.64 | 18ms |
+
+**Gotchas:**
+- BM25 excels at exact keyword matching (error codes, function names); dense excels at semantic similarity.
+- The optimal `alpha` depends on your corpus: technical docs favor BM25 (α=0.4); conversational content favors dense (α=0.7).
+- RRF's `k` parameter (default 60) controls how much rank position matters vs just being retrieved at all.
+- For production, pre-compute BM25 scores with Elasticsearch/Meilisearch rather than in-memory rank_bm25.
+
+### Experiment 9.2 — Cross-Encoder Reranking Pipeline
+
+Initial retrieval (BM25 or dense) is fast but imprecise. Cross-encoders jointly encode query+document for much higher accuracy but are too slow for full corpus search. The two-stage pipeline: fast retrieval → precise reranking.
+
+```python
+import torch
+from sentence_transformers import CrossEncoder, SentenceTransformer
+import numpy as np
+import time
+
+class RerankedRetriever:
+    """Two-stage retrieval: fast bi-encoder → precise cross-encoder reranking."""
+    
+    def __init__(self, 
+                 bi_encoder_model="BAAI/bge-large-en-v1.5",
+                 cross_encoder_model="BAAI/bge-reranker-v2-m3",
+                 device="cuda"):
+        self.bi_encoder = SentenceTransformer(bi_encoder_model, device=device)
+        self.cross_encoder = CrossEncoder(cross_encoder_model, device=device)
+        self.documents = []
+        self.embeddings = None
+    
+    def index(self, documents: list[str], batch_size=64):
+        """Encode documents with bi-encoder."""
+        self.documents = documents
+        self.embeddings = self.bi_encoder.encode(
+            documents, batch_size=batch_size, 
+            normalize_embeddings=True, show_progress_bar=True,
+        )
+    
+    def retrieve_and_rerank(self, query: str, 
+                            initial_k: int = 50, 
+                            final_k: int = 5) -> list[dict]:
+        """
+        Stage 1: Bi-encoder retrieves top-50 candidates (fast, ~15ms)
+        Stage 2: Cross-encoder reranks to top-5 (precise, ~200ms)
+        """
+        # Stage 1: Fast retrieval
+        t0 = time.perf_counter()
+        query_emb = self.bi_encoder.encode([query], normalize_embeddings=True)
+        scores = np.dot(self.embeddings, query_emb.T).squeeze()
+        top_indices = np.argsort(scores)[::-1][:initial_k]
+        t1 = time.perf_counter()
+        
+        # Stage 2: Cross-encoder reranking
+        candidates = [self.documents[i] for i in top_indices]
+        pairs = [[query, doc] for doc in candidates]
+        
+        rerank_scores = self.cross_encoder.predict(pairs, batch_size=16)
+        t2 = time.perf_counter()
+        
+        # Sort by reranker score
+        reranked = sorted(
+            zip(top_indices, candidates, rerank_scores),
+            key=lambda x: x[2], reverse=True
+        )[:final_k]
+        
+        results = []
+        for idx, text, score in reranked:
+            results.append({
+                "index": int(idx),
+                "text": text,
+                "rerank_score": float(score),
+                "bi_encoder_score": float(scores[idx]),
+            })
+        
+        latency = {
+            "retrieval_ms": (t1 - t0) * 1000,
+            "reranking_ms": (t2 - t1) * 1000,
+            "total_ms": (t2 - t0) * 1000,
+        }
+        
+        return results, latency
+    
+    def compare_with_without_reranking(self, queries, ground_truth, k=5):
+        """Compare retrieval quality with and without reranking."""
+        bi_only_recalls = []
+        reranked_recalls = []
+        
+        for query, relevant_ids in zip(queries, ground_truth):
+            # Bi-encoder only
+            query_emb = self.bi_encoder.encode([query], normalize_embeddings=True)
+            scores = np.dot(self.embeddings, query_emb.T).squeeze()
+            bi_top_k = np.argsort(scores)[::-1][:k]
+            bi_hits = len(set(bi_top_k) & set(relevant_ids))
+            bi_only_recalls.append(bi_hits / min(k, len(relevant_ids)))
+            
+            # With reranking
+            results, _ = self.retrieve_and_rerank(query, initial_k=50, final_k=k)
+            rerank_top_k = [r["index"] for r in results]
+            rerank_hits = len(set(rerank_top_k) & set(relevant_ids))
+            reranked_recalls.append(rerank_hits / min(k, len(relevant_ids)))
+        
+        print(f"Bi-encoder Recall@{k}: {np.mean(bi_only_recalls):.4f}")
+        print(f"Reranked Recall@{k}:   {np.mean(reranked_recalls):.4f}")
+        print(f"Improvement:           +{(np.mean(reranked_recalls) - np.mean(bi_only_recalls))*100:.1f}%")
+
+# Example usage
+retriever = RerankedRetriever()
+retriever.index(documents)  # your document corpus
+
+results, latency = retriever.retrieve_and_rerank(
+    "What causes out of memory errors in PyTorch training?"
+)
+print(f"\nLatency: retrieval={latency['retrieval_ms']:.0f}ms, "
+      f"reranking={latency['reranking_ms']:.0f}ms")
+for r in results:
+    print(f"  [{r['rerank_score']:.3f}] {r['text'][:80]}...")
+```
+
+**Expected output:**
+
+| Stage | Recall@5 | Latency | Model Size |
+|-------|----------|---------|-----------|
+| Bi-encoder only | 0.65 | 15ms | 1.3 GB |
+| + Cross-encoder rerank (top-50→5) | 0.82 | 215ms | +1.5 GB |
+| + Cross-encoder rerank (top-100→5) | 0.85 | 380ms | +1.5 GB |
+
+**Gotchas:**
+- Cross-encoders are O(n) in candidates — reranking 1000 docs takes ~4 seconds. Keep initial_k ≤ 100.
+- `bge-reranker-v2-m3` is multilingual; for English-only, `ms-marco-MiniLM-L-12-v2` is faster.
+- Cross-encoder scores are not probabilities — they're logits. Don't threshold them; use relative ranking.
+- Batch the cross-encoder calls (batch_size=16-32) for GPU efficiency.
+
+### Experiment 9.3 — HyDE (Hypothetical Document Embeddings) Query Expansion
+
+When the user's query is short or uses different vocabulary than the documents, retrieval fails. HyDE generates a hypothetical answer, embeds it, and uses that embedding for retrieval — bridging the vocabulary gap.
+
+```python
+import torch
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import numpy as np
+
+class HyDERetriever:
+    """Hypothetical Document Embeddings for improved retrieval."""
+    
+    def __init__(self, 
+                 embedding_model="BAAI/bge-large-en-v1.5",
+                 llm_model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+                 device="cuda"):
+        self.encoder = SentenceTransformer(embedding_model, device=device)
+        
+        # Load LLM for hypothesis generation
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_model)
+        self.llm = AutoModelForCausalLM.from_pretrained(
+            llm_model, torch_dtype=torch.float16,
+            device_map="auto", load_in_4bit=True,
+        )
+        
+        self.documents = []
+        self.embeddings = None
+    
+    def index(self, documents: list[str]):
+        """Index documents."""
+        self.documents = documents
+        self.embeddings = self.encoder.encode(
+            documents, normalize_embeddings=True, show_progress_bar=True,
+        )
+    
+    def generate_hypothesis(self, query: str, n_hypotheses: int = 3) -> list[str]:
+        """Generate hypothetical documents that would answer the query."""
+        prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are a technical writer. Given a question, write a short paragraph (3-5 sentences) 
+that would be the ideal passage answering this question. Write as if it's from a 
+technical document. Do not include the question itself.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Question: {query}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>"""
+        
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.llm.device)
+        
+        hypotheses = []
+        for i in range(n_hypotheses):
+            with torch.no_grad():
+                outputs = self.llm.generate(
+                    **inputs, max_new_tokens=150, temperature=0.7,
+                    do_sample=True, top_p=0.9,
+                )
+            hypothesis = self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], 
+                                               skip_special_tokens=True)
+            hypotheses.append(hypothesis.strip())
+        
+        return hypotheses
+    
+    def search_hyde(self, query: str, k: int = 5, n_hypotheses: int = 3) -> list[dict]:
+        """
+        HyDE retrieval:
+        1. Generate hypothetical documents
+        2. Embed hypotheses
+        3. Average embeddings
+        4. Search with averaged embedding
+        """
+        # Generate hypothetical answers
+        hypotheses = self.generate_hypothesis(query, n_hypotheses)
+        
+        # Embed hypotheses + original query
+        all_texts = [query] + hypotheses
+        all_embeddings = self.encoder.encode(all_texts, normalize_embeddings=True)
+        
+        # Average embeddings (query + hypotheses)
+        hyde_embedding = np.mean(all_embeddings, axis=0, keepdims=True)
+        hyde_embedding = hyde_embedding / np.linalg.norm(hyde_embedding)  # re-normalize
+        
+        # Search
+        scores = np.dot(self.embeddings, hyde_embedding.T).squeeze()
+        top_indices = np.argsort(scores)[::-1][:k]
+        
+        results = []
+        for idx in top_indices:
+            results.append({
+                "text": self.documents[idx],
+                "score": float(scores[idx]),
+                "index": int(idx),
+            })
+        
+        return results, hypotheses
+    
+    def compare_standard_vs_hyde(self, queries, ground_truth, k=5):
+        """Compare standard retrieval vs HyDE."""
+        standard_recalls = []
+        hyde_recalls = []
+        
+        for query, relevant_ids in zip(queries, ground_truth):
+            # Standard retrieval
+            query_emb = self.encoder.encode([query], normalize_embeddings=True)
+            scores = np.dot(self.embeddings, query_emb.T).squeeze()
+            standard_top = np.argsort(scores)[::-1][:k]
+            standard_recalls.append(
+                len(set(standard_top) & set(relevant_ids)) / min(k, len(relevant_ids))
+            )
+            
+            # HyDE retrieval
+            hyde_results, _ = self.search_hyde(query, k=k)
+            hyde_top = [r["index"] for r in hyde_results]
+            hyde_recalls.append(
+                len(set(hyde_top) & set(relevant_ids)) / min(k, len(relevant_ids))
+            )
+        
+        print(f"Standard Recall@{k}: {np.mean(standard_recalls):.4f}")
+        print(f"HyDE Recall@{k}:     {np.mean(hyde_recalls):.4f}")
+        print(f"Improvement:         +{(np.mean(hyde_recalls)-np.mean(standard_recalls))*100:.1f}%")
+
+# Usage
+hyde_retriever = HyDERetriever()
+hyde_retriever.index(documents)
+
+results, hypotheses = hyde_retriever.search_hyde(
+    "How do I fix CUDA OOM?", k=5, n_hypotheses=3
+)
+print("Generated hypotheses:")
+for i, h in enumerate(hypotheses):
+    print(f"  {i+1}. {h[:100]}...")
+print("\nRetrieved documents:")
+for r in results:
+    print(f"  [{r['score']:.3f}] {r['text'][:80]}...")
+```
+
+**Expected output:**
+- HyDE improves recall by 8-15% on queries with vocabulary mismatch
+- Latency: +500-1000ms (LLM generation time) — not suitable for real-time, but great for batch processing
+- Works best for: short queries, questions using different terminology than documents
+
+**Gotchas:**
+- HyDE can hurt performance if the LLM generates incorrect hypotheses (hallucinations get embedded and match wrong docs).
+- Use multiple hypotheses (3-5) and average — single hypothesis is too noisy.
+- For real-time applications, pre-generate hypotheses for common query patterns and cache them.
+- HyDE adds significant latency; combine with caching or use only for queries where standard retrieval returns low-confidence results.
+
+### Experiment 9.4 — Agentic RAG with Self-Correction Loops
+
+Build a RAG system where the LLM evaluates its own retrieval quality and iteratively refines queries until it has sufficient context to answer accurately.
+
+```python
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from sentence_transformers import SentenceTransformer
+import numpy as np
+import json
+from dataclasses import dataclass, field
+
+@dataclass
+class RAGState:
+    original_query: str
+    refined_queries: list[str] = field(default_factory=list)
+    retrieved_contexts: list[str] = field(default_factory=list)
+    confidence: float = 0.0
+    iterations: int = 0
+    final_answer: str = ""
+
+class AgenticRAG:
+    """Self-correcting RAG with query refinement and confidence estimation."""
+    
+    def __init__(self, documents, 
+                 llm_model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+                 embedding_model="BAAI/bge-large-en-v1.5",
+                 max_iterations=3, confidence_threshold=0.7):
+        self.max_iterations = max_iterations
+        self.confidence_threshold = confidence_threshold
+        
+        # Setup retriever
+        self.encoder = SentenceTransformer(embedding_model, device="cuda")
+        self.documents = documents
+        self.embeddings = self.encoder.encode(documents, normalize_embeddings=True)
+        
+        # Setup LLM
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_model)
+        self.llm = AutoModelForCausalLM.from_pretrained(
+            llm_model, torch_dtype=torch.float16,
+            device_map="auto", load_in_4bit=True,
+        )
+    
+    def retrieve(self, query: str, k: int = 5) -> list[str]:
+        """Retrieve top-k documents."""
+        query_emb = self.encoder.encode([query], normalize_embeddings=True)
+        scores = np.dot(self.embeddings, query_emb.T).squeeze()
+        top_k = np.argsort(scores)[::-1][:k]
+        return [self.documents[i] for i in top_k]
+    
+    def generate(self, prompt: str, max_tokens: int = 500) -> str:
+        """Generate text with LLM."""
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.llm.device)
+        with torch.no_grad():
+            outputs = self.llm.generate(
+                **inputs, max_new_tokens=max_tokens,
+                temperature=0.3, do_sample=True,
+            )
+        return self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], 
+                                     skip_special_tokens=True)
+    
+    def assess_retrieval_quality(self, query: str, contexts: list[str]) -> dict:
+        """LLM self-assesses whether retrieved context is sufficient."""
+        context_text = "\n---\n".join(contexts[:5])
+        prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are a retrieval quality assessor. Given a question and retrieved contexts, 
+assess whether the contexts contain enough information to answer the question.
+Respond with JSON: {{"sufficient": true/false, "confidence": 0.0-1.0, "missing": "what info is missing", "refined_query": "better search query if needed"}}<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Question: {query}
+
+Retrieved contexts:
+{context_text}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>"""
+        
+        response = self.generate(prompt, max_tokens=200)
+        
+        try:
+            # Parse JSON response
+            json_str = response[response.find("{"):response.rfind("}")+1]
+            assessment = json.loads(json_str)
+        except (json.JSONDecodeError, ValueError):
+            assessment = {"sufficient": False, "confidence": 0.3, 
+                         "missing": "unclear", "refined_query": query}
+        
+        return assessment
+    
+    def answer_with_context(self, query: str, contexts: list[str]) -> str:
+        """Generate final answer using retrieved context."""
+        context_text = "\n---\n".join(contexts)
+        prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+Answer the question using ONLY the provided context. If the context doesn't contain 
+the answer, say so. Be precise and cite specific details from the context.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Context:
+{context_text}
+
+Question: {query}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>"""
+        
+        return self.generate(prompt, max_tokens=500)
+    
+    def run(self, query: str) -> RAGState:
+        """Execute agentic RAG with self-correction loop."""
+        state = RAGState(original_query=query)
+        current_query = query
+        all_contexts = []
+        
+        for iteration in range(self.max_iterations):
+            state.iterations = iteration + 1
+            
+            # Retrieve
+            contexts = self.retrieve(current_query, k=5)
+            all_contexts.extend(contexts)
+            # Deduplicate
+            all_contexts = list(dict.fromkeys(all_contexts))
+            state.retrieved_contexts = all_contexts
+            
+            # Assess quality
+            assessment = self.assess_retrieval_quality(query, all_contexts[:10])
+            state.confidence = assessment.get("confidence", 0.5)
+            
+            print(f"  Iteration {iteration+1}: confidence={state.confidence:.2f}, "
+                  f"contexts={len(all_contexts)}")
+            
+            # Check if sufficient
+            if assessment.get("sufficient", False) or state.confidence >= self.confidence_threshold:
+                break
+            
+            # Refine query
+            refined = assessment.get("refined_query", current_query)
+            if refined != current_query:
+                current_query = refined
+                state.refined_queries.append(refined)
+                print(f"    Refined query: {refined}")
+        
+        # Generate final answer
+        state.final_answer = self.answer_with_context(query, all_contexts[:10])
+        return state
+
+# Usage
+rag = AgenticRAG(documents, max_iterations=3, confidence_threshold=0.7)
+state = rag.run("How do I optimize memory usage for training large models on a single GPU?")
+
+print(f"\nFinal answer ({state.iterations} iterations, confidence={state.confidence:.2f}):")
+print(state.final_answer)
+if state.refined_queries:
+    print(f"\nQuery refinements: {state.refined_queries}")
+```
+
+**Expected output:**
+- Average iterations: 1.5 (most queries resolve in 1-2 rounds)
+- Answer quality improvement: +15-25% accuracy vs single-shot RAG
+- Latency: 2-8 seconds (depends on iterations)
+
+**Gotchas:**
+- The self-assessment LLM can be overconfident — calibrate the confidence threshold on a validation set.
+- Infinite loops: always cap iterations (max_iterations=3) and detect repeated queries.
+- Context window overflow: with 3 iterations × 5 docs × 512 tokens = 7680 tokens of context. Summarize or truncate.
+- The refined query should be different from the original — add a check to avoid wasted iterations.
+
+
+---
+
+## 📘 10. Appendix: Production Considerations & Theory Bridges
+
+### 10.1 Chunking Strategies — Semantic, Hierarchical & Propositional
+
+The choice of chunking strategy has more impact on RAG quality than the choice of embedding model. Here's a systematic comparison:
+
+**Fixed-size chunking (baseline):**
+```python
+def fixed_chunk(text, chunk_size=512, overlap=50):
+    words = text.split()
+    chunks = []
+    for i in range(0, len(words), chunk_size - overlap):
+        chunks.append(" ".join(words[i:i + chunk_size]))
+    return chunks
+```
+- Pros: Simple, predictable token counts
+- Cons: Splits mid-sentence, loses context boundaries
+
+**Semantic chunking (embedding-based):**
+```python
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+def semantic_chunk(text, model, threshold=0.5):
+    """Split at points where semantic similarity drops."""
+    sentences = text.split(". ")
+    embeddings = model.encode(sentences, normalize_embeddings=True)
+    
+    chunks = []
+    current_chunk = [sentences[0]]
+    
+    for i in range(1, len(sentences)):
+        similarity = np.dot(embeddings[i], embeddings[i-1])
+        if similarity < threshold:
+            chunks.append(". ".join(current_chunk))
+            current_chunk = [sentences[i]]
+        else:
+            current_chunk.append(sentences[i])
+    
+    chunks.append(". ".join(current_chunk))
+    return chunks
+```
+- Pros: Respects topic boundaries, coherent chunks
+- Cons: Variable sizes, requires embedding computation at index time
+
+**Hierarchical chunking (parent-child):**
+```python
+def hierarchical_chunk(text, small_size=128, large_size=512):
+    """Create small chunks for retrieval, large chunks for context."""
+    words = text.split()
+    
+    # Large (parent) chunks
+    parents = []
+    for i in range(0, len(words), large_size):
+        parents.append(" ".join(words[i:i + large_size]))
+    
+    # Small (child) chunks with parent reference
+    children = []
+    for parent_idx, parent in enumerate(parents):
+        parent_words = parent.split()
+        for j in range(0, len(parent_words), small_size):
+            child = " ".join(parent_words[j:j + small_size])
+            children.append({"text": child, "parent_idx": parent_idx})
+    
+    return parents, children
+    # Retrieve on children, return parent for context
+```
+- Pros: Precise retrieval + rich context
+- Cons: More complex indexing, 2× storage
+
+**Propositional chunking (LLM-based):**
+```python
+def propositional_chunk(text, llm_fn):
+    """Use LLM to decompose text into atomic propositions."""
+    prompt = f"""Decompose the following text into independent, atomic propositions.
+Each proposition should be self-contained and understandable without context.
+
+Text: {text}
+
+Propositions (one per line):"""
+    
+    response = llm_fn(prompt)
+    propositions = [p.strip("- ").strip() for p in response.split("\n") if p.strip()]
+    return propositions
+```
+- Pros: Each chunk is a complete, searchable fact
+- Cons: Expensive (LLM call per document), may lose nuance
+
+**Comparison on retrieval benchmarks:**
+
+| Strategy | Recall@5 | Precision@5 | Avg Chunk Size | Index Time |
+|----------|----------|-------------|----------------|-----------|
+| Fixed (512 tokens) | 0.62 | 0.45 | 512 | Fast |
+| Fixed (256 tokens) | 0.68 | 0.52 | 256 | Fast |
+| Semantic | 0.74 | 0.58 | 180-400 | Medium |
+| Hierarchical | 0.78 | 0.61 | 128 (retrieve) | Medium |
+| Propositional | 0.81 | 0.65 | 20-50 | Slow (LLM) |
+
+### 10.2 Embedding Model Benchmarks (MTEB) — Theory Bridge
+
+> **Cross-reference:** [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs) §1 (Definition 10.5.1) for the attention mechanism that powers embedding models.
+
+**How embedding models work:** A text embedding model is typically a Transformer encoder (like BERT) trained with contrastive learning:
+
+$$
+\mathcal{L} = -\log \frac{\exp(\text{sim}(q, d^+) / \tau)}{\exp(\text{sim}(q, d^+) / \tau) + \sum_{d^-} \exp(\text{sim}(q, d^-) / \tau)}
+$$
+
+where $\text{sim}(a, b) = \frac{a \cdot b}{\|a\| \|b\|}$ (cosine similarity), $d^+$ is a relevant document, $d^-$ are negatives, and $\tau$ is temperature.
+
+**MTEB Leaderboard (Retrieval subset, as of 2025):**
+
+| Model | Dim | Params | NDCG@10 | Speed (docs/s) | VRAM |
+|-------|-----|--------|---------|----------------|------|
+| bge-large-en-v1.5 | 1024 | 335M | 54.3 | 800 | 1.3 GB |
+| e5-large-v2 | 1024 | 335M | 53.8 | 800 | 1.3 GB |
+| gte-large-en-v1.5 | 1024 | 434M | 55.1 | 600 | 1.7 GB |
+| nomic-embed-text-v1.5 | 768 | 137M | 52.1 | 1500 | 0.5 GB |
+| mxbai-embed-large-v1 | 1024 | 335M | 54.4 | 800 | 1.3 GB |
+| voyage-3 (API) | 1024 | — | 56.8 | API | — |
+| text-embedding-3-large (API) | 3072 | — | 55.4 | API | — |
+
+**Choosing an embedding model:**
+- **Budget/speed priority:** nomic-embed-text-v1.5 (137M params, 768-dim, fast)
+- **Quality priority (local):** gte-large-en-v1.5 or bge-large-en-v1.5
+- **Quality priority (API):** voyage-3 or Cohere embed-v3
+- **Multilingual:** bge-m3 (supports 100+ languages, 1024-dim)
+
+**Dimensionality vs quality tradeoff:** Matryoshka Representation Learning (MRL) trains models where the first $d$ dimensions of a larger embedding are themselves a valid embedding:
+
+```python
+# Use first 256 dims of a 1024-dim model (4× less storage, ~2% quality drop)
+embeddings = model.encode(texts, normalize_embeddings=True)
+compressed = embeddings[:, :256]
+compressed = compressed / np.linalg.norm(compressed, axis=1, keepdims=True)
+```
+
+This enables progressive retrieval: fast search on 256-dim, then rerank with full 1024-dim.
+
+### 10.3 Vector Database Selection Guide
+
+| Database | Type | Max Vectors | Latency (1M docs) | Filtering | Best For |
+|----------|------|-------------|-------------------|-----------|----------|
+| FAISS | Library | 1B+ | <1ms | Post-filter | Research, batch |
+| ChromaDB | Embedded | 10M | 5-10ms | Metadata | Prototyping |
+| Qdrant | Server | 100M+ | 2-5ms | Rich filters | Production |
+| Weaviate | Server | 100M+ | 5-10ms | GraphQL | Multi-modal |
+| Pinecone | Cloud | Unlimited | 10-20ms | Metadata | Serverless |
+| pgvector | Extension | 10M | 10-50ms | Full SQL | Existing Postgres |
+| Milvus | Server | 1B+ | 2-5ms | Expressions | Large scale |
+
+**Index types and tradeoffs:**
+- **Flat (brute force):** Exact results, O(n) search. Use for <100K vectors.
+- **IVF (Inverted File):** Clusters vectors, searches nearest clusters. 10-50× faster, ~95% recall.
+- **HNSW (Hierarchical Navigable Small World):** Graph-based, best recall/speed tradeoff. 100× faster, ~99% recall. Higher memory (1.5× vectors).
+- **PQ (Product Quantization):** Compresses vectors 4-8×. Lossy but enables billion-scale search in RAM.
+
+---

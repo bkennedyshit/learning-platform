@@ -1,0 +1,43 @@
+<svg viewBox="0 0 650 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .mem-level { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; transition: all 0.2s; cursor: pointer; }
+    .mem-level:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .speed { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    .size { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+  </style>
+
+  <text x="325" y="20" class="title">Memory Hierarchy — Speed vs Capacity Tradeoff</text>
+
+  <!-- Pyramid of memory levels -->
+  <polygon points="325,40 200,100 450,100" class="mem-level" fill="var(--interactive-accent, #58a6ff)" opacity="0.2"/>
+  <text x="325" y="70" class="label">Registers</text>
+  <text x="325" y="85" class="speed">~0.3ns</text>
+  <text x="325" y="97" class="size">~1KB</text>
+
+  <polygon points="325,40 150,140 500,140 450,100 200,100" class="mem-level"/>
+  <text x="325" y="118" class="label">L1 Cache</text>
+  <text x="250" y="133" class="speed">~1ns</text>
+  <text x="400" y="133" class="size">64KB per core</text>
+
+  <polygon points="150,140 100,185 550,185 500,140" class="mem-level"/>
+  <text x="325" y="160" class="label">L2 Cache</text>
+  <text x="220" y="178" class="speed">~4ns</text>
+  <text x="430" y="178" class="size">256KB-1MB</text>
+
+  <polygon points="100,185 60,230 590,230 550,185" class="mem-level"/>
+  <text x="325" y="205" class="label">L3 Cache (shared)</text>
+  <text x="200" y="223" class="speed">~12ns</text>
+  <text x="450" y="223" class="size">8-64MB</text>
+
+  <rect x="40" y="240" width="570" height="35" class="mem-level"/>
+  <text x="325" y="258" class="label">Main Memory (DRAM)</text>
+  <text x="180" y="270" class="speed">~100ns</text>
+  <text x="470" y="270" class="size">16-128GB</text>
+
+  <rect x="40" y="285" width="570" height="30" class="mem-level"/>
+  <text x="325" y="303" class="label">Storage (NVMe SSD → HDD)</text>
+  <text x="180" y="312" class="speed">~10μs-10ms</text>
+  <text x="470" y="312" class="size">TB scale</text>
+</svg>

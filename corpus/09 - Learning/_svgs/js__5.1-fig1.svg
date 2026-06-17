@@ -1,0 +1,95 @@
+<svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 18px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; fill: var(--background-secondary, #161b22); transition: all 0.2s; cursor: pointer; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .engine-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; fill: none; }
+    .connector { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 4,3; animation: flowDash 1s linear infinite; }
+    .accent { fill: var(--interactive-accent, #58a6ff); }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    @keyframes flowDash { to { stroke-dashoffset: -14; } }
+  </style>
+
+  <!-- Title -->
+  <text x="350" y="30" class="title" text-anchor="middle">JavaScript Runtime Landscape (2026)</text>
+
+  <!-- Engines Row -->
+  <text x="350" y="65" class="section-label" text-anchor="middle">⚙️ Engines (ECMAScript Implementations)</text>
+  <rect x="80" y="75" width="150" height="45" class="engine-box"/>
+  <text x="155" y="100" class="label" text-anchor="middle" font-weight="bold">V8</text>
+  <text x="155" y="115" class="sublabel" text-anchor="middle">Google · C++</text>
+
+  <rect x="275" y="75" width="150" height="45" class="engine-box"/>
+  <text x="350" y="100" class="label" text-anchor="middle" font-weight="bold">JavaScriptCore</text>
+  <text x="350" y="115" class="sublabel" text-anchor="middle">Apple · C++</text>
+
+  <rect x="470" y="75" width="150" height="45" class="engine-box"/>
+  <text x="545" y="100" class="label" text-anchor="middle" font-weight="bold">SpiderMonkey</text>
+  <text x="545" y="115" class="sublabel" text-anchor="middle">Mozilla · C++/Rust</text>
+
+  <!-- Connectors from engines to runtimes -->
+  <path d="M 155 120 L 155 170" class="connector"/>
+  <path d="M 155 120 L 400 170" class="connector"/>
+  <path d="M 350 120 L 500 170" class="connector"/>
+  <path d="M 545 120 L 620 170" class="connector"/>
+
+  <!-- Runtimes Row -->
+  <text x="350" y="160" class="section-label" text-anchor="middle">🖥️ Runtimes</text>
+
+  <!-- Node.js -->
+  <rect x="60" y="170" width="190" height="80" class="box"/>
+  <text x="155" y="195" class="label" text-anchor="middle" font-weight="bold">Node.js</text>
+  <text x="155" y="212" class="sublabel" text-anchor="middle">Engine: V8</text>
+  <text x="155" y="227" class="sublabel" text-anchor="middle">Event Loop: libuv</text>
+  <text x="155" y="242" class="sublabel" text-anchor="middle">Since 2009 · LTS v22</text>
+
+  <!-- Deno -->
+  <rect x="270" y="170" width="160" height="80" class="box"/>
+  <text x="350" y="195" class="label" text-anchor="middle" font-weight="bold">Deno</text>
+  <text x="350" y="212" class="sublabel" text-anchor="middle">Engine: V8</text>
+  <text x="350" y="227" class="sublabel" text-anchor="middle">Secure by default</text>
+  <text x="350" y="242" class="sublabel" text-anchor="middle">Since 2020 · Built-in TS</text>
+
+  <!-- Bun -->
+  <rect x="450" y="170" width="160" height="80" class="box"/>
+  <text x="530" y="195" class="label" text-anchor="middle" font-weight="bold">Bun</text>
+  <text x="530" y="212" class="sublabel" text-anchor="middle">Engine: JSC</text>
+  <text x="530" y="227" class="sublabel" text-anchor="middle">All-in-one toolkit</text>
+  <text x="530" y="242" class="sublabel" text-anchor="middle">Since 2022 · Zig/C++</text>
+
+  <!-- Browser -->
+  <rect x="540" y="270" width="140" height="60" class="box"/>
+  <text x="610" y="295" class="label" text-anchor="middle" font-weight="bold">Browser</text>
+  <text x="610" y="312" class="sublabel" text-anchor="middle">V8/JSC/SpiderMonkey</text>
+  <text x="610" y="325" class="sublabel" text-anchor="middle">DOM + Web APIs</text>
+
+  <!-- Package Managers -->
+  <text x="155" y="280" class="section-label" text-anchor="middle">📦 Package Managers</text>
+  <rect x="40" y="290" width="80" height="35" class="box"/>
+  <text x="80" y="312" class="label" text-anchor="middle">npm</text>
+  <rect x="130" y="290" width="80" height="35" class="box"/>
+  <text x="170" y="312" class="label" text-anchor="middle">pnpm</text>
+  <rect x="220" y="290" width="80" height="35" class="box"/>
+  <text x="260" y="312" class="label" text-anchor="middle">yarn</text>
+
+  <!-- Build Tools -->
+  <text x="400" y="350" class="section-label" text-anchor="middle">🔨 Build Tools</text>
+  <rect x="270" y="360" width="75" height="35" class="box"/>
+  <text x="307" y="382" class="label" text-anchor="middle">Vite</text>
+  <rect x="355" y="360" width="85" height="35" class="box"/>
+  <text x="397" y="382" class="label" text-anchor="middle">esbuild</text>
+  <rect x="450" y="360" width="95" height="35" class="box"/>
+  <text x="497" y="382" class="label" text-anchor="middle">Webpack</text>
+  <rect x="555" y="360" width="100" height="35" class="box"/>
+  <text x="605" y="382" class="label" text-anchor="middle">Turbopack</text>
+
+  <!-- ECMAScript Spec -->
+  <rect x="40" y="370" width="200" height="50" rx="8" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" fill="none" stroke-dasharray="6,3"/>
+  <text x="140" y="393" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">ECMAScript 2024</text>
+  <text x="140" y="410" class="sublabel" text-anchor="middle">(TC39 Specification)</text>
+
+  <!-- Legend -->
+  <text x="350" y="440" class="sublabel" text-anchor="middle">Hover over boxes for highlight · Dashed border = specification layer</text>
+</svg>

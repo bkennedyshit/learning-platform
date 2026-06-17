@@ -1,0 +1,94 @@
+<svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="sr-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .sr-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.8; fill: none; }
+    .sr-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.3; }
+    .sr-lightcone { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-dasharray: 6,3; }
+    .sr-boosted-axis { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+    .sr-worldline { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .sr-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .sr-math { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-style: italic; }
+    .sr-accent { fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .sr-region { opacity: 0.08; }
+    .sr-event { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s ease; }
+    .sr-event:hover { fill: var(--interactive-accent, #58a6ff); r: 7; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .sr-formula-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    
+    /* Animations */
+    .sr-region { opacity: 0.08; animation: pulse 3s infinite alternate ease-in-out; }
+    @keyframes pulse { from { opacity: 0.04; } to { opacity: 0.12; } }
+    .sr-worldline { stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawPath 4s infinite ease-in-out; }
+    @keyframes drawPath { 0% { stroke-dashoffset: 400; } 50%, 100% { stroke-dashoffset: 0; } }
+    .sr-boosted-axis { stroke-dasharray: 350; stroke-dashoffset: 350; animation: drawAxis 4s infinite ease-in-out; }
+    @keyframes drawAxis { 0%, 20% { stroke-dashoffset: 350; } 70%, 100% { stroke-dashoffset: 0; } }
+    .sr-event { animation: popIn 4s infinite; }
+    @keyframes popIn { 0%, 40% { r: 0; opacity: 0; } 50%, 100% { r: 5; opacity: 1; } }
+  </style>
+
+  <!-- Background grid -->
+  <g class="sr-grid">
+    <line x1="100" y1="50" x2="100" y2="450"/><line x1="150" y1="50" x2="150" y2="450"/>
+    <line x1="200" y1="50" x2="200" y2="450"/><line x1="250" y1="50" x2="250" y2="450"/>
+    <line x1="350" y1="50" x2="350" y2="450"/><line x1="400" y1="50" x2="400" y2="450"/>
+    <line x1="450" y1="50" x2="450" y2="450"/><line x1="500" y1="50" x2="500" y2="450"/>
+    <line x1="50" y1="100" x2="550" y2="100"/><line x1="50" y1="150" x2="550" y2="150"/>
+    <line x1="50" y1="200" x2="550" y2="200"/><line x1="50" y1="300" x2="550" y2="300"/>
+    <line x1="50" y1="350" x2="550" y2="350"/><line x1="50" y1="400" x2="550" y2="400"/>
+  </g>
+
+  <!-- Future light cone (shaded) -->
+  <polygon points="300,250 550,0 50,0" fill="var(--interactive-accent, #58a6ff)" class="sr-region"/>
+  <!-- Past light cone (shaded) -->
+  <polygon points="300,250 550,500 50,500" fill="var(--interactive-accent, #58a6ff)" class="sr-region"/>
+
+  <!-- Light cone lines (45°) -->
+  <line x1="300" y1="250" x2="550" y2="0" class="sr-lightcone"/>
+  <line x1="300" y1="250" x2="50" y2="0" class="sr-lightcone"/>
+  <line x1="300" y1="250" x2="550" y2="500" class="sr-lightcone"/>
+  <line x1="300" y1="250" x2="50" y2="500" class="sr-lightcone"/>
+
+  <!-- Original axes (S frame) -->
+  <line x1="300" y1="480" x2="300" y2="20" class="sr-axis" marker-end="url(#sr-arrow)"/>
+  <line x1="50" y1="250" x2="560" y2="250" class="sr-axis" marker-end="url(#sr-arrow)"/>
+  <text x="310" y="18" class="sr-label">ct</text>
+  <text x="565" y="255" class="sr-label">x</text>
+
+  <!-- Boosted axes (S' frame, β = 0.4) -->
+  <!-- ct' axis tilted toward light cone -->
+  <line x1="300" y1="250" x2="380" y2="50" class="sr-boosted-axis" marker-end="url(#sr-arrow)"/>
+  <text x="388" y="45" class="sr-label" fill="var(--text-accent, #79c0ff)">ct'</text>
+  <!-- x' axis tilted toward light cone -->
+  <line x1="300" y1="250" x2="530" y2="158" class="sr-boosted-axis" marker-end="url(#sr-arrow)"/>
+  <text x="538" y="153" class="sr-label" fill="var(--text-accent, #79c0ff)">x'</text>
+
+  <!-- Sample worldline (accelerating observer) -->
+  <path d="M 300 450 Q 310 350 320 300 Q 340 200 380 100" class="sr-worldline"/>
+  <text x="390" y="95" class="sr-label sr-accent">Worldline</text>
+
+  <!-- Event markers -->
+  <circle cx="380" cy="170" r="5" class="sr-event"/>
+  <text x="395" y="168" class="sr-label">Event A (timelike)</text>
+  <circle cx="450" cy="250" r="5" class="sr-event"/>
+  <text x="455" y="240" class="sr-label">Event B (spacelike)</text>
+  <circle cx="425" cy="125" r="5" class="sr-event"/>
+  <text x="440" y="120" class="sr-label">Event C (lightlike)</text>
+
+  <!-- Region labels -->
+  <text x="300" y="80" class="sr-math" text-anchor="middle">FUTURE</text>
+  <text x="300" y="440" class="sr-math" text-anchor="middle">PAST</text>
+  <text x="130" y="255" class="sr-math" text-anchor="middle">ELSEWHERE</text>
+  <text x="480" y="255" class="sr-math" text-anchor="middle">ELSEWHERE</text>
+
+  <!-- Formula box -->
+  <rect x="20" y="460" width="280" height="35" class="sr-formula-box"/>
+  <text x="160" y="482" class="sr-math" text-anchor="middle">s² = −c²t² + x² + y² + z²</text>
+
+  <!-- Boost angle annotation -->
+  <path d="M 300 220 A 30 30 0 0 1 312 222" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5" fill="none"/>
+  <text x="318" y="218" class="sr-label" fill="var(--text-accent, #79c0ff)" font-size="11">φ = tanh⁻¹(β)</text>
+</svg>

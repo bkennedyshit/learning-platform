@@ -1,0 +1,81 @@
+<svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .cell-bg { fill: var(--background-secondary); stroke: var(--text-muted); stroke-width: 1.5; transition: all 0.2s ease; cursor: pointer; }
+    .cell-bg:hover { fill: var(--background-modifier-hover); stroke: var(--interactive-accent); }
+    .phoneme-text { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent); font-weight: bold; }
+    .grapheme-text { font-family: Inter, system-ui, sans-serif; font-size: 20px; fill: var(--text-normal); font-weight: bold; }
+    .label-desc { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted); font-weight: 600; }
+    .header-text { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal); font-weight: bold; }
+  </style>
+
+  <!-- Headers -->
+  <text x="110" y="30" class="header-text" text-anchor="middle">Short Vowels & Consonants</text>
+  <text x="410" y="30" class="header-text" text-anchor="middle">Common Digraphs (2 letters = 1 sound)</text>
+
+  <!-- ================= LEFT GRID ================= -->
+  <!-- Cell 1: Short /æ/ -> a -->
+  <g transform="translate(20, 50)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/æ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">a</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "c<u>a</u>t"</text>
+  </g>
+
+  <!-- Cell 2: Short /ɪ/ -> i -->
+  <g transform="translate(110, 50)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/ɪ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">i</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "p<u>i</u>n"</text>
+  </g>
+
+  <!-- Cell 3: Hard /k/ -> c/k -->
+  <g transform="translate(20, 130)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/k/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">c, k</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "<u>c</u>up"</text>
+  </g>
+
+  <!-- Cell 4: Dental /d/ -> d -->
+  <g transform="translate(110, 130)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/d/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">d</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "<u>d</u>og"</text>
+  </g>
+
+
+  <!-- ================= RIGHT GRID ================= -->
+  <!-- Cell 5: Digraph /ʃ/ -> sh -->
+  <g transform="translate(320, 50)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/ʃ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">sh</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "<u>sh</u>ip"</text>
+  </g>
+
+  <!-- Cell 6: Digraph /tʃ/ -> ch -->
+  <g transform="translate(410, 50)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/tʃ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">ch</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "<u>ch</u>in"</text>
+  </g>
+
+  <!-- Cell 7: Digraph /θ/ -> th -->
+  <g transform="translate(500, 50)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/θ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">th</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "<u>th</u>in"</text>
+  </g>
+
+  <!-- Cell 8: Digraph /ŋ/ -> ng -->
+  <g transform="translate(410, 130)">
+    <rect width="80" height="70" rx="6" class="cell-bg"/>
+    <text x="40" y="25" class="phoneme-text" text-anchor="middle">/ŋ/</text>
+    <text x="40" y="48" class="grapheme-text" text-anchor="middle">ng</text>
+    <text x="40" y="62" class="label-desc" text-anchor="middle">as in "si<u>ng</u>"</text>
+  </g>
+</svg>

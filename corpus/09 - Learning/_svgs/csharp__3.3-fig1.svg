@@ -1,0 +1,96 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-oop" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .good-box { fill: var(--background-secondary, #161b22); stroke: #4CAF50; stroke-width: 2; rx: 6; }
+    .bad-box { fill: var(--background-secondary, #161b22); stroke: #f44336; stroke-width: 2; rx: 6; }
+    .interface-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; stroke-dasharray: 6,3; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .good-label { fill: #4CAF50; }
+    .bad-label { fill: #f44336; }
+    .inherit-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-oop); }
+    .compose-line { stroke: #4CAF50; stroke-width: 2; fill: none; stroke-dasharray: 4,3; }
+    .note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+  </style>
+
+  <text x="350" y="22" class="title">Composition vs Inheritance — Game Architecture</text>
+
+  <!-- BAD: Deep inheritance (left side) -->
+  <text x="150" y="50" class="section-label bad-label">❌ deep inheritance</text>
+
+  <rect x="100" y="58" width="120" height="28" class="bad-box"/>
+  <text x="160" y="76" class="label">GameObject</text>
+
+  <line x1="160" y1="86" x2="160" y2="100" class="inherit-line"/>
+  <rect x="100" y="102" width="120" height="28" class="bad-box"/>
+  <text x="160" y="120" class="label">Entity</text>
+
+  <line x1="160" y1="130" x2="160" y2="144" class="inherit-line"/>
+  <rect x="100" y="146" width="120" height="28" class="bad-box"/>
+  <text x="160" y="164" class="label">LivingEntity</text>
+
+  <line x1="130" y1="174" x2="90" y2="192" class="inherit-line"/>
+  <line x1="190" y1="174" x2="230" y2="192" class="inherit-line"/>
+
+  <rect x="40" y="194" width="110" height="28" class="bad-box"/>
+  <text x="95" y="212" class="label">Player</text>
+
+  <rect x="180" y="194" width="110" height="28" class="bad-box"/>
+  <text x="235" y="212" class="label">Enemy</text>
+
+  <text x="160" y="245" class="note">Fragile: changing LivingEntity</text>
+  <text x="160" y="258" class="note">breaks both Player and Enemy</text>
+
+  <!-- GOOD: Composition (right side) -->
+  <text x="520" y="50" class="section-label good-label">✓ composition + interfaces</text>
+
+  <!-- Interfaces -->
+  <rect x="400" y="58" width="110" height="25" class="interface-box"/>
+  <text x="455" y="75" class="label">IDamageable</text>
+
+  <rect x="520" y="58" width="110" height="25" class="interface-box"/>
+  <text x="575" y="75" class="label">IInteractable</text>
+
+  <!-- Entity with components -->
+  <rect x="430" y="105" width="140" height="30" class="good-box"/>
+  <text x="500" y="124" class="label">Player (entity)</text>
+
+  <!-- Components -->
+  <rect x="370" y="155" width="90" height="25" class="box"/>
+  <text x="415" y="172" class="label">Health</text>
+
+  <rect x="470" y="155" width="90" height="25" class="box"/>
+  <text x="515" y="172" class="label">Movement</text>
+
+  <rect x="570" y="155" width="90" height="25" class="box"/>
+  <text x="615" y="172" class="label">Inventory</text>
+
+  <rect x="420" y="195" width="90" height="25" class="box"/>
+  <text x="465" y="212" class="label">Combat</text>
+
+  <rect x="520" y="195" width="90" height="25" class="box"/>
+  <text x="565" y="212" class="label">Dialogue</text>
+
+  <!-- Composition lines -->
+  <line x1="455" y1="135" x2="415" y2="155" class="compose-line"/>
+  <line x1="500" y1="135" x2="515" y2="155" class="compose-line"/>
+  <line x1="545" y1="135" x2="615" y2="155" class="compose-line"/>
+  <line x1="470" y1="135" x2="465" y2="195" class="compose-line"/>
+  <line x1="530" y1="135" x2="565" y2="195" class="compose-line"/>
+
+  <text x="520" y="245" class="note">Flexible: add/remove components</text>
+  <text x="520" y="258" class="note">independently. Each is testable.</text>
+
+  <!-- Bottom comparison -->
+  <rect x="50" y="280" width="600" height="80" class="box"/>
+  <text x="350" y="300" class="label">Decision Guide</text>
+  <text x="350" y="318" class="note">IS-A relationship (Slime IS-A Enemy) → Inheritance (keep it shallow, ≤2 levels)</text>
+  <text x="350" y="334" class="note">HAS-A relationship (Player HAS-A Inventory) → Composition (preferred)</text>
+  <text x="350" y="350" class="note">CAN-DO capability (CropPlot CAN-DO IDamageable) → Interface</text>
+</svg>

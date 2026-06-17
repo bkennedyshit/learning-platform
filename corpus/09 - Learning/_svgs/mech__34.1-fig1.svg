@@ -1,0 +1,189 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);transition:fill 0.3s;}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;transition:all 0.3s ease;}
+    .box:hover{stroke:var(--interactive-accent,#58a6ff);fill:rgba(88,166,255,0.02);filter:drop-shadow(0 0 4px rgba(88,166,255,0.15));}
+    .accent{fill:none;stroke:var(--interactive-accent,#58a6ff);stroke-width:1.5;}
+    .dim{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:0.8;}
+    .gdt{stroke:#ffd93d;stroke-width:1.2;transition:all 0.3s ease;cursor:pointer;}
+    .gdt:hover{filter:brightness(1.2) drop-shadow(0 0 6px rgba(255,217,61,0.6));fill:rgba(255,217,61,0.25) !important;}
+    
+    /* Animations */
+    @keyframes flow {
+      to { stroke-dashoffset: -20; }
+    }
+    .proj-line {
+      stroke-dasharray: 4 4;
+      animation: flow 2s linear infinite;
+    }
+    
+    @keyframes drift {
+      0% { transform: translate(0px, 0px); }
+      25% { transform: translate(4px, -3px); }
+      50% { transform: translate(-3px, 5px); }
+      75% { transform: translate(3px, 3px); }
+      100% { transform: translate(0px, 0px); }
+    }
+    .drift-dot {
+      animation: drift 6s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-zone {
+      0%, 100% { stroke-width: 1.5; opacity: 0.8; filter: drop-shadow(0 0 1px var(--interactive-accent)); }
+      50% { stroke-width: 2.2; opacity: 1; filter: drop-shadow(0 0 4px var(--interactive-accent)); }
+    }
+    .pulse-circle {
+      animation: pulse-zone 3s ease-in-out infinite;
+    }
+    
+    @keyframes step-pulse {
+      0%, 100% { fill: rgba(255,217,61,0.08); stroke: rgba(255,217,61,0.4); }
+      15%, 45% { fill: rgba(255,217,61,0.25); stroke: #ffd93d; filter: drop-shadow(0 0 4px rgba(255,217,61,0.5)); }
+      60% { fill: rgba(255,217,61,0.08); stroke: rgba(255,217,61,0.4); }
+    }
+    .step-1 { animation: step-pulse 12s infinite; }
+    .step-2 { animation: step-pulse 12s infinite 2s; }
+    .step-3 { animation: step-pulse 12s infinite 4s; }
+    .step-4 { animation: step-pulse 12s infinite 6s; }
+    .step-5 { animation: step-pulse 12s infinite 8s; }
+    .step-6 { animation: step-pulse 12s infinite 10s; }
+    
+    /* Highlight interaction for FCF */
+    .fcf-part { transition: all 0.3s; cursor: help; }
+    .fcf-part:hover { fill: var(--interactive-accent,#58a6ff); font-weight: bold; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 2 L8 5 L0 8z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent,#58a6ff)" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="var(--interactive-accent,#58a6ff)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <text x="360" y="22" class="title" text-anchor="middle">34.1 — Engineering Drawing &amp; GD&amp;T: Views, Projections &amp; Geometric Tolerances</text>
+  
+  <!-- Left: Orthographic views panel -->
+  <rect x="20" y="38" width="210" height="180" class="box" rx="4"/>
+  <text x="125" y="56" class="label" text-anchor="middle" font-weight="bold">Orthographic Projection</text>
+  <!-- Front view box -->
+  <rect x="60" y="65" width="70" height="55" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" style="transition: all 0.3s;" onmouseover="this.setAttribute('stroke-width','2.5')" onmouseout="this.setAttribute('stroke-width','1.5')"/>
+  <text x="95" y="95" class="sub" text-anchor="middle" style="pointer-events: none;">FRONT</text>
+  <text x="95" y="108" class="sub" text-anchor="middle" style="pointer-events: none;">VIEW</text>
+  <!-- Top view box -->
+  <rect x="60" y="38" width="70" height="24" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="95" y="53" class="sub" text-anchor="middle">TOP VIEW</text>
+  <!-- Side view box -->
+  <rect x="133" y="65" width="50" height="55" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="158" y="92" class="sub" text-anchor="middle">SIDE</text>
+  <text x="158" y="105" class="sub" text-anchor="middle">VIEW</text>
+  <!-- Projection lines (Animated flow) -->
+  <line x1="95" y1="62" x2="95" y2="65" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" class="proj-line"/>
+  <line x1="130" y1="92" x2="133" y2="92" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" class="proj-line"/>
+  
+  <text x="125" y="140" class="sub" text-anchor="middle">First-angle vs Third-angle</text>
+  <text x="125" y="153" class="sub" text-anchor="middle">ISO 128 — always state projection</text>
+  <text x="125" y="166" class="sub" text-anchor="middle">symbol on title block</text>
+  <text x="125" y="179" class="sub" text-anchor="middle">Hidden lines = dashed; visible = solid</text>
+  <text x="125" y="196" class="sub" text-anchor="middle">Centerlines = alternating long-short dash</text>
+  
+  <!-- Title block mini -->
+  <rect x="25" y="205" width="200" height="40" class="dim" rx="2"/>
+  <line x1="25" y1="220" x2="225" y2="220" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <line x1="140" y1="205" x2="140" y2="245" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <text x="82" y="216" class="mono" text-anchor="middle">PART NAME</text>
+  <text x="182" y="216" class="mono" text-anchor="middle">DWG NO.</text>
+  <text x="82" y="232" class="mono" text-anchor="middle">MATERIAL</text>
+  <text x="182" y="232" class="mono" text-anchor="middle">SCALE</text>
+  <text x="82" y="243" class="mono" text-anchor="middle">TOLERANCE ±0.1</text>
+  <text x="182" y="243" class="mono" text-anchor="middle">SHEET 1/1</text>
+  
+  <!-- Middle: GD&T symbols -->
+  <rect x="245" y="38" width="230" height="210" class="box" rx="4"/>
+  <text x="360" y="56" class="label" text-anchor="middle" font-weight="bold">GD&amp;T Symbols (ASME Y14.5)</text>
+  <!-- Feature control frame -->
+  <rect x="265" y="65" width="190" height="22" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" rx="2"/>
+  <line x1="305" y1="65" x2="305" y2="87" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <line x1="365" y1="65" x2="365" y2="87" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <line x1="415" y1="65" x2="415" y2="87" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="285" y="80" class="label fcf-part" text-anchor="middle" title="Position Symbol">⊕</text>
+  <text x="335" y="80" class="mono fcf-part" text-anchor="middle" title="Diameter &amp; Tolerance at MMC">⌀ 0.02 M</text>
+  <text x="390" y="80" class="mono fcf-part" text-anchor="middle" title="Primary Datum A">A</text>
+  <text x="440" y="80" class="mono fcf-part" text-anchor="middle" title="Secondary Datum B">B</text>
+  <text x="360" y="100" class="sub" text-anchor="middle">Feature Control Frame: symbol | tolerance | datum(s)</text>
+  <!-- GD&T categories table -->
+  <text x="260" y="118" class="sub" font-weight="bold">FORM</text>
+  <text x="260" y="130" class="mono">— Flatness  ○ Roundness  ⌭ Cylindricity</text>
+  <text x="260" y="142" class="mono">⊓ Straightness</text>
+  <text x="260" y="155" class="sub" font-weight="bold">ORIENTATION</text>
+  <text x="260" y="167" class="mono">∠ Angularity  ⊥ Perpendicularity  ∥ Parallelism</text>
+  <text x="260" y="180" class="sub" font-weight="bold">LOCATION</text>
+  <text x="260" y="192" class="mono">⊕ True Position  ◎ Concentricity  ⌖ Symmetry</text>
+  <text x="260" y="205" class="sub" font-weight="bold">RUNOUT</text>
+  <text x="260" y="217" class="mono">↗ Circular Runout   ⇱ Total Runout</text>
+  <text x="260" y="230" class="sub" font-weight="bold">PROFILE</text>
+  <text x="260" y="242" class="mono">⌒ Profile of Line   ⌓ Profile of Surface</text>
+  
+  <!-- Right: Tolerance zone + material condition -->
+  <rect x="490" y="38" width="210" height="210" class="box" rx="4"/>
+  <text x="595" y="56" class="label" text-anchor="middle" font-weight="bold">Tolerance Zones &amp; MMC/LMC</text>
+  <!-- Circular tolerance zone diagram (Animated) -->
+  <circle cx="595" cy="110" r="40" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1" stroke-dasharray="4 3"/>
+  <circle cx="595" cy="110" r="40" fill="url(#glowGrad)" pointer-events="none"/>
+  <circle cx="595" cy="110" r="25" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" class="pulse-circle"/>
+  <g class="drift-dot">
+    <circle cx="595" cy="110" r="3" fill="var(--interactive-accent,#58a6ff)"/>
+    <line x1="595" y1="105" x2="595" y2="115" stroke="var(--interactive-accent,#58a6ff)" stroke-width="0.8"/>
+    <line x1="590" y1="110" x2="600" y2="110" stroke="var(--interactive-accent,#58a6ff)" stroke-width="0.8"/>
+  </g>
+  <text x="595" y="87" class="mono" text-anchor="middle">TRUE</text>
+  <text x="595" y="97" class="mono" text-anchor="middle">POS</text>
+  <text x="595" y="160" class="sub" text-anchor="middle">Tolerance zone = cylinder</text>
+  <text x="595" y="172" class="sub" text-anchor="middle">dia ⌀0.02 around true pos</text>
+  <text x="505" y="192" class="sub" font-weight="bold">M = MMC (Maximum Material Cond)</text>
+  <text x="505" y="204" class="sub">Largest shaft / smallest hole</text>
+  <text x="505" y="215" class="sub">→ tightest fit; bonus tol applies</text>
+  <text x="505" y="227" class="sub" font-weight="bold">L = LMC (Least Material Cond)</text>
+  <text x="505" y="239" class="sub">Smallest shaft / largest hole</text>
+  
+  <!-- Bottom: Reading order flow (Animated Checklist) -->
+  <rect x="20" y="260" width="680" height="140" class="box" rx="4"/>
+  <text x="360" y="278" class="label" text-anchor="middle" font-weight="bold">Drawing Reading Order &amp; Checklist</text>
+  
+  <rect x="30" y="288" width="100" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-1" rx="3"/>
+  <text x="80" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">1. Title block</text>
+  <text x="80" y="317" class="sub" text-anchor="middle">material, scale, tol</text>
+  
+  <rect x="145" y="288" width="100" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-2" rx="3"/>
+  <text x="195" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">2. Views</text>
+  <text x="195" y="317" class="sub" text-anchor="middle">front/top/side/section</text>
+  
+  <rect x="260" y="288" width="100" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-3" rx="3"/>
+  <text x="310" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">3. Datum frame</text>
+  <text x="310" y="317" class="sub" text-anchor="middle">A=primary B=sec C=ter</text>
+  
+  <rect x="375" y="288" width="100" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-4" rx="3"/>
+  <text x="425" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">4. Feature ctrl</text>
+  <text x="425" y="317" class="sub" text-anchor="middle">frames on features</text>
+  
+  <rect x="490" y="288" width="100" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-5" rx="3"/>
+  <text x="540" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">5. Surface finish</text>
+  <text x="540" y="317" class="sub" text-anchor="middle">Ra / Rz values</text>
+  
+  <rect x="605" y="288" width="95" height="35" fill="rgba(255,217,61,0.15)" class="gdt step-6" rx="3"/>
+  <text x="652" y="305" class="sub" text-anchor="middle" style="fill:var(--text-normal,#c9d1d9); font-weight:bold;">6. Notes &amp; BOM</text>
+  <text x="652" y="317" class="sub" text-anchor="middle">general tol, finish</text>
+  
+  <line x1="130" y1="305" x2="145" y2="305" stroke="var(--text-muted,#8b949e)" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="245" y1="305" x2="260" y2="305" stroke="var(--text-muted,#8b949e)" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="360" y1="305" x2="375" y2="305" stroke="var(--text-muted,#8b949e)" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="475" y1="305" x2="490" y2="305" stroke="var(--text-muted,#8b949e)" stroke-width="1" marker-end="url(#arr)"/>
+  <line x1="590" y1="305" x2="605" y2="305" stroke="var(--text-muted,#8b949e)" stroke-width="1" marker-end="url(#arr)"/>
+  
+  <text x="360" y="355" class="sub" text-anchor="middle">GD&amp;T rule: Form tolerances NEVER need a datum. Orientation/Location ALWAYS need datums. Profile may or may not.</text>
+  <text x="360" y="370" class="sub" text-anchor="middle">The three-datum plane system (A▶B▶C) creates the Datum Reference Frame (DRF) — the coordinate origin for all measurements.</text>
+  <text x="360" y="385" class="sub" text-anchor="middle">ASME Y14.5-2018 is the governing standard. ISO 1101 is the international equivalent (minor symbol differences).</text>
+</svg>

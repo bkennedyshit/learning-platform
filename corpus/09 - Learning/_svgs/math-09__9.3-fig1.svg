@@ -1,0 +1,108 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="well-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .well-wall { stroke: var(--text-normal, #c9d1d9); stroke-width: 3; fill: none; }
+    .well-axis { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+    .well-level { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .well-wave1 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .well-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .well-elabel { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .osc-parabola { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .osc-level { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .osc-wave { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.8; }
+    .osc-prob { fill: var(--interactive-accent, #58a6ff); opacity: 0.1; }
+    .ladder-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#well-arrow); stroke-dasharray: 4; animation: flowLadder 1s linear infinite; }
+    @keyframes flowLadder { to { stroke-dashoffset: -8; } }
+    .ladder-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .well-wave1-anim {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      transform-origin: center 350px;
+      animation: drawWell 2s ease-out forwards, osc 2s ease-in-out 2s infinite alternate;
+    }
+    .well-wave2 { 
+      stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; 
+      transform-origin: center 280px; 
+      animation: osc 1.5s ease-in-out infinite alternate; 
+    }
+    .well-wave3 { 
+      stroke: #e07050; stroke-width: 2.5; fill: none; 
+      transform-origin: center 180px; 
+      animation: osc 1s ease-in-out infinite alternate; 
+    }
+    @keyframes osc { 
+      0% { transform: scaleY(1); } 
+      100% { transform: scaleY(-1); } 
+    }
+    @keyframes drawWell {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+
+  <!-- LEFT PANEL: Infinite Square Well -->
+  <text x="160" y="20" class="well-elabel" text-anchor="middle">Infinite Square Well</text>
+  
+  <!-- Walls -->
+  <line x1="60" y1="380" x2="60" y2="40" class="well-wall"/>
+  <line x1="280" y1="380" x2="280" y2="40" class="well-wall"/>
+  <line x1="60" y1="380" x2="280" y2="380" class="well-wall"/>
+
+  <!-- Energy levels -->
+  <line x1="70" y1="350" x2="270" y2="350" class="well-level"/>
+  <text x="285" y="354" class="well-label">E₁ = π²ℏ²/2mL²</text>
+  
+  <line x1="70" y1="280" x2="270" y2="280" class="well-level"/>
+  <text x="285" y="284" class="well-label">E₂ = 4E₁</text>
+  
+  <line x1="70" y1="180" x2="270" y2="180" class="well-level"/>
+  <text x="285" y="184" class="well-label">E₃ = 9E₁</text>
+
+  <!-- Wave functions (offset to their energy levels) -->
+  <!-- n=1: half sine -->
+  <path d="M 70 350 Q 120 320 170 310 Q 220 320 270 350" class="well-wave1 well-wave1-anim"/>
+  
+  <!-- n=2: full sine -->
+  <path d="M 70 280 Q 110 250 140 240 Q 160 250 170 280 Q 180 310 200 320 Q 240 310 270 280" class="well-wave2"/>
+  
+  <!-- n=3: 1.5 sine periods -->
+  <path d="M 70 180 Q 95 155 110 145 Q 125 155 140 180 Q 155 205 170 215 Q 185 205 200 180 Q 215 155 230 145 Q 245 155 270 180" class="well-wave3"/>
+
+  <!-- Labels -->
+  <text x="50" y="354" class="well-label">n=1</text>
+  <text x="50" y="284" class="well-label">n=2</text>
+  <text x="50" y="184" class="well-label">n=3</text>
+
+  <!-- RIGHT PANEL: Harmonic Oscillator -->
+  <text x="540" y="20" class="well-elabel" text-anchor="middle">Harmonic Oscillator</text>
+  
+  <!-- Parabola V(x) = ½mω²x² -->
+  <path d="M 400 380 Q 420 350 440 280 Q 470 160 500 100 Q 530 40 540 30" class="osc-parabola"/>
+  <path d="M 680 380 Q 660 350 640 280 Q 610 160 580 100 Q 550 40 540 30" class="osc-parabola"/>
+
+  <!-- Equally spaced energy levels -->
+  <line x1="440" y1="350" x2="640" y2="350" class="osc-level"/>
+  <text x="650" y="354" class="well-label">E₀ = ½ℏω</text>
+  
+  <line x1="450" y1="300" x2="630" y2="300" class="osc-level"/>
+  <text x="640" y="304" class="well-label">E₁ = 3/2 ℏω</text>
+  
+  <line x1="460" y1="250" x2="620" y2="250" class="osc-level"/>
+  <text x="630" y="254" class="well-label">E₂ = 5/2 ℏω</text>
+  
+  <line x1="470" y1="200" x2="610" y2="200" class="osc-level"/>
+  <text x="620" y="204" class="well-label">E₃ = 7/2 ℏω</text>
+
+  <!-- Ladder operator arrows -->
+  <line x1="420" y1="345" x2="420" y2="305" class="ladder-arrow"/>
+  <text x="405" y="325" class="ladder-label">â†</text>
+  
+  <line x1="430" y1="305" x2="430" y2="345" class="ladder-arrow"/>
+  <text x="432" y="325" class="ladder-label">â</text>
+
+  <!-- Spacing annotation -->
+  <text x="540" y="395" class="well-label" text-anchor="middle">ΔE = ℏω (uniform spacing)</text>
+</svg>

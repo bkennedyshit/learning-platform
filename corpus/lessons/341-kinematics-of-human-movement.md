@@ -1,0 +1,841 @@
+---
+title: "34.1 — Kinematics of Human Movement"
+subject: "Biomechanics & HCI"
+catalog: advanced
+audience_tier: higher-education
+chapter: "34.1"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [34 - Biomechanics & HCI](34---Biomechanics-&-HCI)*
+
+# 34.1 — Kinematics of Human Movement
+
+> *"If I have seen further, it is by standing on the shoulders of giants."* — Isaac Newton, 1675
+
+Kinematics is the geometry of motion without regard to forces. Before we can analyze the torques a BMX rider generates mid-air or the cardiovascular demands of a sprint, we must first describe **where** body segments are, **how fast** they move, and **how quickly** that speed changes. This chapter builds the mathematical machinery for tracking human movement in 2D and 3D.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Define **position**, **velocity**, and **acceleration** vectors for rigid body segments in 2D and 3D.
+2. Decompose human movement into **translational** and **rotational** kinematics.
+3. Compute **joint angles** from segment endpoint coordinates using inverse trigonometry.
+4. Derive the **kinematic chain** equations for multi-link systems (hip → knee → ankle).
+5. Apply **numerical differentiation** (finite differences) to discrete motion-capture data.
+6. Understand **gait cycle** phases and their kinematic signatures.
+7. Implement position/velocity/acceleration computation in Python with NumPy.
+
+---
+
+## 🖼️ Visual Anchor — Human Kinematic Chain
+
+![track-13__13.1-fig1](track-13__13.1-fig1.svg)
+
+---
+
+
+## 📚 1. Definitions
+
+### Definition 34.1.1 — Position Vector
+
+The **position vector** $\mathbf{r}(t)$ of a point on the body (e.g., a joint marker) in a fixed laboratory reference frame:
+
+$$
+\mathbf{r}(t) = x(t)\,\hat{\mathbf{i}} + y(t)\,\hat{\mathbf{j}} + z(t)\,\hat{\mathbf{k}}
+$$
+
+In 2D motion capture (sagittal plane): $\mathbf{r}(t) = (x(t),\, y(t))$.
+
+### Definition 34.1.2 — Velocity Vector
+
+The **instantaneous velocity** is the first time derivative of position:
+
+$$
+\mathbf{v}(t) = \frac{d\mathbf{r}}{dt} = \dot{x}\,\hat{\mathbf{i}} + \dot{y}\,\hat{\mathbf{j}} + \dot{z}\,\hat{\mathbf{k}}
+$$
+
+The **speed** (scalar) is $|\mathbf{v}| = \sqrt{\dot{x}^2 + \dot{y}^2 + \dot{z}^2}$.
+
+### Definition 34.1.3 — Acceleration Vector
+
+The **instantaneous acceleration** is the second time derivative of position:
+
+$$
+\mathbf{a}(t) = \frac{d\mathbf{v}}{dt} = \frac{d^2\mathbf{r}}{dt^2} = \ddot{x}\,\hat{\mathbf{i}} + \ddot{y}\,\hat{\mathbf{j}} + \ddot{z}\,\hat{\mathbf{k}}
+$$
+
+### Definition 34.1.4 — Joint Angle
+
+A **joint angle** $\theta_i$ is the angle between two adjacent body segments sharing a common joint. For segments defined by endpoints $P_1, P_2$ (proximal segment) and $P_2, P_3$ (distal segment):
+
+$$
+\theta = \cos^{-1}\left(\frac{\mathbf{u}\cdot\mathbf{v}}{|\mathbf{u}||\mathbf{v}|}\right)
+$$
+
+where $\mathbf{u} = P_2 - P_1$ and $\mathbf{v} = P_3 - P_2$.
+
+### Definition 34.1.5 — Kinematic Chain
+
+A **kinematic chain** is a series of rigid body segments connected by joints. The human lower limb forms an open kinematic chain: pelvis → femur (hip joint) → tibia (knee joint) → foot (ankle joint).
+
+The position of the $n$-th endpoint in a planar chain:
+
+$$
+\mathbf{r}_n = \sum_{i=1}^{n} L_i \begin{pmatrix} \cos\left(\sum_{j=1}^{i}\theta_j\right) \\ \sin\left(\sum_{j=1}^{i}\theta_j\right) \end{pmatrix}
+$$
+
+where $L_i$ is the length of segment $i$ and $\theta_j$ is the absolute angle of segment $j$.
+
+### Definition 34.1.6 — Gait Cycle
+
+One complete **gait cycle** (stride) consists of:
+- **Stance phase** (~60% of cycle): foot in contact with ground (heel strike → toe-off)
+- **Swing phase** (~40% of cycle): foot airborne (toe-off → heel strike)
+
+### Definition 34.1.7 — Numerical Differentiation (Finite Differences)
+
+For discrete sampled data at interval $\Delta t$:
+
+**Forward difference:**
+
+$$
+v_i \approx \frac{r_{i+1} - r_i}{\Delta t}
+$$
+
+**Central difference** (preferred — second-order accurate):
+
+$$
+v_i \approx \frac{r_{i+1} - r_{i-1}}{2\Delta t}
+$$
+
+**Second derivative (acceleration):**
+
+$$
+a_i \approx \frac{r_{i+1} - 2r_i + r_{i-1}}{(\Delta t)^2}
+$$
+
+### Definition 34.1.8 — Tangential and Normal Acceleration
+
+For curvilinear motion, acceleration decomposes into:
+
+$$
+\mathbf{a} = a_t\,\hat{\mathbf{e}}_t + a_n\,\hat{\mathbf{e}}_n
+$$
+
+where:
+- $a_t = \frac{dv}{dt}$ (tangential — changes speed)
+- $a_n = \frac{v^2}{\rho}$ (centripetal — changes direction, $\rho$ = radius of curvature)
+
+---
+
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 34.1.A1 — Rigid Segment Assumption
+
+Each body segment (thigh, shank, foot) is modeled as a **rigid body** — the distance between any two points on the segment remains constant throughout motion:
+
+$$
+|\mathbf{r}_A(t) - \mathbf{r}_B(t)| = L = \text{const}, \quad \forall\, t
+$$
+
+This is an approximation; soft tissue artifact introduces ~1–3 cm error in skin-mounted marker systems.
+
+### Axiom 34.1.A2 — Planar Motion Approximation (Sagittal Plane)
+
+For many locomotion analyses (walking, running, cycling), the dominant motion occurs in the **sagittal plane** (the plane dividing left/right). We project 3D motion onto 2D when:
+
+$$
+|z(t)| \ll \sqrt{x(t)^2 + y(t)^2}
+$$
+
+### Axiom 34.1.A3 — Continuity of Motion
+
+Human joint trajectories are **continuous** and at least **twice differentiable** (class $C^2$) under normal physiological conditions. Discontinuities indicate impact events (heel strike, landing).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 34.1.1 — Chain Rule for Kinematic Chains
+
+For a two-segment planar chain with segment lengths $L_1, L_2$ and absolute angles $\theta_1, \theta_2$, the endpoint velocity is:
+
+$$
+\dot{x}_2 = -L_1\dot\theta_1\sin\theta_1 - L_2\dot\theta_2\sin\theta_2
+$$
+
+$$
+\dot{y}_2 = L_1\dot\theta_1\cos\theta_1 + L_2\dot\theta_2\cos\theta_2
+$$
+
+**Derivation:**
+
+Starting from the position equations:
+
+$$
+x_2 = L_1\cos\theta_1 + L_2\cos\theta_2
+$$
+
+$$
+y_2 = L_1\sin\theta_1 + L_2\sin\theta_2
+$$
+
+Differentiating with respect to time using the chain rule:
+
+$$
+\dot{x}_2 = \frac{d}{dt}[L_1\cos\theta_1 + L_2\cos\theta_2] = -L_1\sin\theta_1\cdot\dot\theta_1 - L_2\sin\theta_2\cdot\dot\theta_2
+$$
+
+$$
+\dot{y}_2 = \frac{d}{dt}[L_1\sin\theta_1 + L_2\sin\theta_2] = L_1\cos\theta_1\cdot\dot\theta_1 + L_2\cos\theta_2\cdot\dot\theta_2
+$$
+
+$\blacksquare$
+
+### Lemma 34.1.2 — Jacobian of a Planar 2-Link Chain
+
+The relationship between joint angular velocities and endpoint linear velocity is given by the **Jacobian matrix**:
+
+$$
+\begin{pmatrix}\dot{x}_2 \\ \dot{y}_2\end{pmatrix} = \underbrace{\begin{pmatrix} -L_1\sin\theta_1 & -L_2\sin\theta_2 \\ L_1\cos\theta_1 & L_2\cos\theta_2 \end{pmatrix}}_{J(\theta_1,\theta_2)} \begin{pmatrix}\dot\theta_1 \\ \dot\theta_2\end{pmatrix}
+$$
+
+The Jacobian $J$ is singular when $\theta_1 = \theta_2$ (full extension) — this is a **kinematic singularity** where the chain cannot generate velocity in the radial direction.
+
+### Lemma 34.1.3 — Central Difference Error Bound
+
+The central difference approximation for velocity has truncation error of order $O((\Delta t)^2)$:
+
+$$
+v(t_i) = \frac{r(t_i + \Delta t) - r(t_i - \Delta t)}{2\Delta t} - \frac{(\Delta t)^2}{6}r'''(t_i) + O((\Delta t)^4)
+$$
+
+For motion capture at 120 Hz ($\Delta t = 1/120$ s), the truncation error is approximately $\frac{1}{6}\left(\frac{1}{120}\right)^2 \approx 1.16 \times 10^{-5}$ times the third derivative (jerk).
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 34.1.1 — Relative Motion of Connected Segments
+
+For two points $A$ and $B$ on the same rigid segment rotating with angular velocity $\omega$:
+
+$$
+\mathbf{v}_B = \mathbf{v}_A + \boldsymbol{\omega} \times \mathbf{r}_{B/A}
+$$
+
+$$
+\mathbf{a}_B = \mathbf{a}_A + \boldsymbol{\alpha} \times \mathbf{r}_{B/A} + \boldsymbol{\omega} \times (\boldsymbol{\omega} \times \mathbf{r}_{B/A})
+$$
+
+where $\boldsymbol{\alpha} = \dot{\boldsymbol{\omega}}$ is the angular acceleration and $\mathbf{r}_{B/A} = \mathbf{r}_B - \mathbf{r}_A$.
+
+The last term $\boldsymbol{\omega} \times (\boldsymbol{\omega} \times \mathbf{r}_{B/A}) = -\omega^2 \mathbf{r}_{B/A}$ is the **centripetal acceleration** directed toward the rotation center.
+
+### Theorem 34.1.2 — Forward Kinematics of an n-Link Planar Chain
+
+The position of the terminal endpoint of an $n$-link planar kinematic chain is:
+
+$$
+\mathbf{r}_{\text{end}} = \sum_{i=1}^{n} L_i \begin{pmatrix} \cos\Theta_i \\ \sin\Theta_i \end{pmatrix}, \quad \text{where } \Theta_i = \sum_{j=1}^{i}\theta_j
+$$
+
+The velocity of the endpoint:
+
+$$
+\mathbf{v}_{\text{end}} = \sum_{i=1}^{n} L_i\dot\Theta_i \begin{pmatrix} -\sin\Theta_i \\ \cos\Theta_i \end{pmatrix}
+$$
+
+The acceleration of the endpoint:
+
+$$
+\mathbf{a}_{\text{end}} = \sum_{i=1}^{n} L_i \left[\ddot\Theta_i \begin{pmatrix} -\sin\Theta_i \\ \cos\Theta_i \end{pmatrix} + \dot\Theta_i^2 \begin{pmatrix} -\cos\Theta_i \\ -\sin\Theta_i \end{pmatrix}\right]
+$$
+
+### Theorem 34.1.3 — Radius of Curvature from Cartesian Data
+
+For a parametric curve $(x(t), y(t))$, the instantaneous radius of curvature is:
+
+$$
+\rho = \frac{({\dot{x}}^2 + {\dot{y}}^2)^{3/2}}{|\dot{x}\ddot{y} - \ddot{x}\dot{y}|}
+$$
+
+This determines the centripetal acceleration $a_n = v^2/\rho$ experienced by a body segment following a curved path (critical for BMX pump-track analysis).
+
+---
+
+
+## ✍️ 5. Physics & Math Derivations
+
+### 5.1 Derivation — Velocity from Position via Differentiation
+
+**Given:** A BMX rider's hip joint position during a manual (wheelie) is tracked at 240 Hz. The sagittal-plane trajectory is modeled as:
+
+$$
+x(t) = v_0 t, \quad y(t) = h_0 + A\sin(\omega_p t)
+$$
+
+where $v_0 = 8$ m/s (forward speed), $h_0 = 0.95$ m (hip height), $A = 0.03$ m (vertical oscillation amplitude), $\omega_p = 2\pi \cdot 2$ rad/s (pedaling frequency at 2 Hz).
+
+**Step 1:** Differentiate to find velocity components:
+
+$$
+\dot{x}(t) = v_0 = 8 \text{ m/s}
+$$
+
+$$
+\dot{y}(t) = A\omega_p\cos(\omega_p t) = 0.03 \times 4\pi \cos(4\pi t) = 0.377\cos(4\pi t) \text{ m/s}
+$$
+
+**Step 2:** Speed magnitude:
+
+$$
+|\mathbf{v}(t)| = \sqrt{\dot{x}^2 + \dot{y}^2} = \sqrt{64 + 0.142\cos^2(4\pi t)}
+$$
+
+$$
+|\mathbf{v}|_{\max} = \sqrt{64.142} \approx 8.009 \text{ m/s}
+$$
+
+**Step 3:** Differentiate again for acceleration:
+
+$$
+\ddot{x}(t) = 0
+$$
+
+$$
+\ddot{y}(t) = -A\omega_p^2\sin(\omega_p t) = -0.03(4\pi)^2\sin(4\pi t) = -4.74\sin(4\pi t) \text{ m/s}^2
+$$
+
+**Step 4:** Peak vertical acceleration:
+
+$$
+|a_y|_{\max} = A\omega_p^2 = 0.03 \times (4\pi)^2 = 4.74 \text{ m/s}^2 \approx 0.48g
+$$
+
+This means the rider's hip experiences nearly half a g of vertical acceleration just from the pedaling oscillation.
+
+---
+
+### 5.2 Derivation — Joint Angle from Marker Coordinates
+
+**Given:** Three markers placed at hip $H = (0.5, 1.0)$, knee $K = (0.55, 0.55)$, and ankle $A = (0.52, 0.10)$ (all in meters).
+
+**Step 1:** Compute segment vectors:
+
+$$
+\mathbf{u} = K - H = (0.55 - 0.5,\; 0.55 - 1.0) = (0.05,\; -0.45)
+$$
+
+$$
+\mathbf{v} = A - K = (0.52 - 0.55,\; 0.10 - 0.55) = (-0.03,\; -0.45)
+$$
+
+**Step 2:** Compute dot product:
+
+$$
+\mathbf{u}\cdot\mathbf{v} = (0.05)(-0.03) + (-0.45)(-0.45) = -0.0015 + 0.2025 = 0.2010
+$$
+
+**Step 3:** Compute magnitudes:
+
+$$
+|\mathbf{u}| = \sqrt{0.05^2 + 0.45^2} = \sqrt{0.0025 + 0.2025} = \sqrt{0.2050} = 0.4528 \text{ m}
+$$
+
+$$
+|\mathbf{v}| = \sqrt{0.03^2 + 0.45^2} = \sqrt{0.0009 + 0.2025} = \sqrt{0.2034} = 0.4510 \text{ m}
+$$
+
+**Step 4:** Apply the angle formula:
+
+$$
+\cos\theta_{\text{knee}} = \frac{0.2010}{0.4528 \times 0.4510} = \frac{0.2010}{0.2042} = 0.9843
+$$
+
+$$
+\theta_{\text{knee}} = \cos^{-1}(0.9843) = 10.16° \approx 0.177 \text{ rad}
+$$
+
+This is the **included angle** at the knee. The anatomical knee flexion angle is $180° - 10.16° = 169.84°$ (nearly full extension).
+
+---
+
+### 5.3 Derivation — Numerical Differentiation with Noise Filtering
+
+**Problem:** Raw motion-capture data contains high-frequency noise. Direct differentiation amplifies noise (differentiation is a high-pass filter).
+
+**Step 1:** Given discrete positions $r_0, r_1, \ldots, r_N$ sampled at $\Delta t$, the central difference velocity is:
+
+$$
+v_i = \frac{r_{i+1} - r_{i-1}}{2\Delta t}
+$$
+
+**Step 2:** The noise in position has standard deviation $\sigma_r$. The noise in the computed velocity is:
+
+$$
+\sigma_v = \frac{\sqrt{2}\,\sigma_r}{2\Delta t} = \frac{\sigma_r}{\sqrt{2}\,\Delta t}
+$$
+
+For $\sigma_r = 1$ mm and $\Delta t = 1/120$ s:
+
+$$
+\sigma_v = \frac{0.001}{\sqrt{2} \times (1/120)} = \frac{0.001 \times 120}{\sqrt{2}} = \frac{0.12}{1.414} = 0.0849 \text{ m/s}
+$$
+
+**Step 3:** For acceleration (second derivative), noise amplification is worse:
+
+$$
+\sigma_a = \frac{\sqrt{6}\,\sigma_r}{(\Delta t)^2} \cdot \frac{1}{\sqrt{6}} = \frac{2\sigma_r}{(\Delta t)^2}
+$$
+
+More precisely, for the standard second-order central difference:
+
+$$
+\sigma_a = \frac{\sqrt{6}\,\sigma_r}{(\Delta t)^2}
+$$
+
+$$
+\sigma_a = \frac{\sqrt{6} \times 0.001}{(1/120)^2} = \frac{0.002449}{6.944 \times 10^{-5}} = 35.3 \text{ m/s}^2
+$$
+
+This is **3.6 g of noise** — completely unusable without filtering.
+
+**Step 4:** Solution — apply a **4th-order Butterworth low-pass filter** (cutoff 6–10 Hz for human movement) to position data BEFORE differentiating. The Butterworth filter has maximally flat passband:
+
+$$
+|H(f)|^2 = \frac{1}{1 + (f/f_c)^{2n}}
+$$
+
+where $n = 4$ (filter order) and $f_c$ is the cutoff frequency.
+
+---
+
+### 5.4 Derivation — 3D Rotation Matrix for Segment Orientation
+
+For a body segment in 3D, orientation is described by a rotation matrix $R \in SO(3)$. Given anatomical landmarks defining a local coordinate system:
+
+**Step 1:** Define the segment's local axes from three non-collinear markers $P_1, P_2, P_3$:
+
+$$
+\hat{\mathbf{e}}_1 = \frac{P_2 - P_1}{|P_2 - P_1|}
+$$
+
+$$
+\hat{\mathbf{e}}_3 = \frac{\hat{\mathbf{e}}_1 \times (P_3 - P_1)}{|\hat{\mathbf{e}}_1 \times (P_3 - P_1)|}
+$$
+
+$$
+\hat{\mathbf{e}}_2 = \hat{\mathbf{e}}_3 \times \hat{\mathbf{e}}_1
+$$
+
+**Step 2:** The rotation matrix from local to global frame:
+
+$$
+R = \begin{pmatrix} | & | & | \\ \hat{\mathbf{e}}_1 & \hat{\mathbf{e}}_2 & \hat{\mathbf{e}}_3 \\ | & | & | \end{pmatrix}
+$$
+
+**Step 3:** The angular velocity in the body frame is extracted from:
+
+$$
+\tilde{\omega} = R^T \dot{R} = \begin{pmatrix} 0 & -\omega_3 & \omega_2 \\ \omega_3 & 0 & -\omega_1 \\ -\omega_2 & \omega_1 & 0 \end{pmatrix}
+$$
+
+This skew-symmetric matrix encodes the angular velocity vector $\boldsymbol{\omega} = (\omega_1, \omega_2, \omega_3)$.
+
+---
+
+
+## 🧬 6. Biological Impact
+
+### Muscle Firing Sequences During Gait
+
+The kinematic phases of walking directly correspond to specific muscle activation patterns:
+
+| Gait Phase | Joint Action | Primary Muscles | EMG Onset |
+|:---|:---|:---|:---|
+| Heel Strike | Hip flexed 30°, knee extended | Hamstrings (eccentric) | 50 ms before contact |
+| Loading Response | Knee flexes 15° (shock absorption) | Quadriceps (eccentric) | At contact |
+| Midstance | Hip extends, ankle dorsiflexes | Gluteus medius, Tibialis anterior | 0–30% cycle |
+| Terminal Stance | Ankle plantarflexes (push-off) | Gastrocnemius, Soleus | 40–60% cycle |
+| Swing | Hip flexes, knee flexes 60° | Iliopsoas, Rectus femoris | 60–100% cycle |
+
+### BMX-Specific Kinematics
+
+During a BMX pump-track run:
+- **Hip angular velocity** reaches 300–500°/s during the pump motion
+- **Knee flexion** cycles between 90° (compressed) and 170° (extended) at 2–3 Hz
+- **Ankle plantarflexion** generates the final push force into the pedals
+- **Cervical spine** maintains near-zero angular displacement (vestibulo-ocular reflex stabilizes gaze)
+
+### Neuromuscular Coordination
+
+The central nervous system (CNS) uses **motor programs** (stored in the cerebellum and motor cortex) to coordinate multi-joint movements. The kinematic chain is not controlled joint-by-joint but as a **synergy** — a coordinated pattern reducing the degrees of freedom from ~244 (all body joints) to ~5–10 functional synergies.
+
+**Proprioceptive feedback loop:**
+1. Muscle spindles detect segment velocity (Ia afferents, 80–120 m/s conduction)
+2. Golgi tendon organs detect force (Ib afferents)
+3. Joint receptors detect angle limits
+4. Vestibular system detects head orientation and angular velocity
+5. All signals integrate in the spinal cord and cerebellum within 30–80 ms
+
+---
+
+## 💻 7. Software Implementation
+
+### 7.1 Position, Velocity, Acceleration from Motion Capture Data
+
+```python
+import numpy as np
+from scipy.signal import butter, filtfilt
+
+def butterworth_filter(data: np.ndarray, cutoff: float, fs: float, order: int = 4) -> np.ndarray:
+    """Apply zero-phase Butterworth low-pass filter to motion capture data.
+    
+    Args:
+        data: Position array (N_frames x N_dimensions)
+        cutoff: Cutoff frequency in Hz (typically 6-12 Hz for human movement)
+        fs: Sampling frequency in Hz
+        order: Filter order (4 is standard for biomechanics)
+    
+    Returns:
+        Filtered position data
+    """
+    nyquist = 0.5 * fs
+    normalized_cutoff = cutoff / nyquist
+    b, a = butter(order, normalized_cutoff, btype='low')
+    return filtfilt(b, a, data, axis=0)
+
+
+def compute_kinematics(positions: np.ndarray, dt: float, cutoff_hz: float = 6.0) -> dict:
+    """Compute velocity and acceleration from position data using central differences.
+    
+    Args:
+        positions: Array of shape (N, 2) or (N, 3) — [x, y] or [x, y, z] per frame
+        dt: Time step between frames (1/sampling_rate)
+        cutoff_hz: Low-pass filter cutoff frequency
+    
+    Returns:
+        Dictionary with 'position', 'velocity', 'acceleration', 'speed' arrays
+    """
+    fs = 1.0 / dt
+    
+    # Step 1: Filter position data to remove noise
+    pos_filtered = butterworth_filter(positions, cutoff_hz, fs)
+    
+    # Step 2: Central difference for velocity (interior points)
+    N = len(pos_filtered)
+    velocity = np.zeros_like(pos_filtered)
+    velocity[1:-1] = (pos_filtered[2:] - pos_filtered[:-2]) / (2 * dt)
+    velocity[0] = (pos_filtered[1] - pos_filtered[0]) / dt        # forward diff
+    velocity[-1] = (pos_filtered[-1] - pos_filtered[-2]) / dt     # backward diff
+    
+    # Step 3: Central difference for acceleration
+    acceleration = np.zeros_like(pos_filtered)
+    acceleration[1:-1] = (pos_filtered[2:] - 2*pos_filtered[1:-1] + pos_filtered[:-2]) / (dt**2)
+    acceleration[0] = acceleration[1]
+    acceleration[-1] = acceleration[-2]
+    
+    # Step 4: Compute scalar speed
+    speed = np.linalg.norm(velocity, axis=1)
+    
+    return {
+        'position': pos_filtered,
+        'velocity': velocity,
+        'acceleration': acceleration,
+        'speed': speed
+    }
+
+
+def joint_angle_2d(proximal: np.ndarray, joint: np.ndarray, distal: np.ndarray) -> np.ndarray:
+    """Compute joint angle time series from three marker positions.
+    
+    Args:
+        proximal: (N, 2) array of proximal marker positions
+        joint: (N, 2) array of joint center positions
+        distal: (N, 2) array of distal marker positions
+    
+    Returns:
+        (N,) array of joint angles in radians
+    """
+    u = proximal - joint  # proximal segment vector
+    v = distal - joint    # distal segment vector
+    
+    cos_angle = np.sum(u * v, axis=1) / (np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1))
+    cos_angle = np.clip(cos_angle, -1.0, 1.0)  # numerical safety
+    
+    return np.arccos(cos_angle)
+```
+
+### 7.2 Forward Kinematics of a Planar Chain
+
+```python
+import numpy as np
+
+def forward_kinematics_2d(lengths: list[float], angles: np.ndarray) -> np.ndarray:
+    """Compute endpoint positions for a planar kinematic chain.
+    
+    Args:
+        lengths: List of segment lengths [L1, L2, ..., Ln]
+        angles: Array of shape (N_frames, n_segments) with absolute angles in radians
+    
+    Returns:
+        Array of shape (N_frames, n_segments+1, 2) with all joint positions
+    """
+    n_frames = angles.shape[0]
+    n_segments = len(lengths)
+    positions = np.zeros((n_frames, n_segments + 1, 2))
+    
+    for i in range(n_segments):
+        cumulative_angle = np.sum(angles[:, :i+1], axis=1)
+        positions[:, i+1, 0] = positions[:, i, 0] + lengths[i] * np.cos(cumulative_angle)
+        positions[:, i+1, 1] = positions[:, i, 1] + lengths[i] * np.sin(cumulative_angle)
+    
+    return positions
+```
+
+### 7.3 Radius of Curvature Computation
+
+```python
+def radius_of_curvature(x: np.ndarray, y: np.ndarray, dt: float) -> np.ndarray:
+    """Compute instantaneous radius of curvature from 2D trajectory.
+    
+    Uses: rho = (x_dot^2 + y_dot^2)^(3/2) / |x_dot * y_ddot - x_ddot * y_dot|
+    """
+    x_dot = np.gradient(x, dt)
+    y_dot = np.gradient(y, dt)
+    x_ddot = np.gradient(x_dot, dt)
+    y_ddot = np.gradient(y_dot, dt)
+    
+    numerator = (x_dot**2 + y_dot**2)**1.5
+    denominator = np.abs(x_dot * y_ddot - x_ddot * y_dot)
+    denominator = np.where(denominator < 1e-10, 1e-10, denominator)  # avoid div by zero
+    
+    return numerator / denominator
+```
+
+---
+
+## 🧮 8. Worked Examples
+
+<details>
+<summary>Example 1: BMX Rider Hip Trajectory During a Jump</summary>
+
+**Problem:** A BMX rider launches off a ramp. The hip marker trajectory (sagittal plane) is:
+
+$$
+x(t) = 6t, \quad y(t) = 1.0 + 4t - 4.905t^2
+$$
+
+Find: (a) velocity at launch ($t=0$), (b) time of peak height, (c) peak height, (d) acceleration throughout.
+
+**Solution:**
+
+**(a) Velocity at $t = 0$:**
+
+$$
+v_x = \frac{dx}{dt} = 6 \text{ m/s}
+$$
+
+$$
+v_y = \frac{dy}{dt} = 4 - 9.81t \bigg|_{t=0} = 4 \text{ m/s}
+$$
+
+$$
+|\mathbf{v}_0| = \sqrt{6^2 + 4^2} = \sqrt{36 + 16} = \sqrt{52} = 7.21 \text{ m/s}
+$$
+
+Launch angle: $\alpha = \tan^{-1}(4/6) = 33.7°$
+
+**(b) Time of peak height:** Set $v_y = 0$:
+
+$$
+4 - 9.81t = 0 \implies t_{\text{peak}} = \frac{4}{9.81} = 0.408 \text{ s}
+$$
+
+**(c) Peak height:**
+
+$$
+y_{\text{peak}} = 1.0 + 4(0.408) - 4.905(0.408)^2 = 1.0 + 1.632 - 0.816 = 1.816 \text{ m}
+$$
+
+**(d) Acceleration:**
+
+$$
+a_x = \frac{d^2x}{dt^2} = 0
+$$
+
+$$
+a_y = \frac{d^2y}{dt^2} = -9.81 \text{ m/s}^2
+$$
+
+The acceleration is constant at $g$ downward throughout the flight (projectile motion).
+
+</details>
+
+<details>
+<summary>Example 2: Knee Angular Velocity During Pedaling</summary>
+
+**Problem:** During BMX pedaling at 90 RPM, the knee angle oscillates as:
+
+$$
+\theta_{\text{knee}}(t) = 110° + 35°\sin(2\pi \cdot 1.5 \cdot t)
+$$
+
+(90 RPM = 1.5 Hz). Find the maximum knee angular velocity and angular acceleration.
+
+**Solution:**
+
+**Step 1:** Convert to radians:
+
+$$
+\theta(t) = \frac{\pi}{180}[110 + 35\sin(3\pi t)] = 1.920 + 0.611\sin(3\pi t) \text{ rad}
+$$
+
+**Step 2:** Angular velocity:
+
+$$
+\dot\theta(t) = 0.611 \times 3\pi \cos(3\pi t) = 5.76\cos(3\pi t) \text{ rad/s}
+$$
+
+$$
+|\dot\theta|_{\max} = 5.76 \text{ rad/s} = 330°/\text{s}
+$$
+
+**Step 3:** Angular acceleration:
+
+$$
+\ddot\theta(t) = -5.76 \times 3\pi \sin(3\pi t) = -54.3\sin(3\pi t) \text{ rad/s}^2
+$$
+
+$$
+|\ddot\theta|_{\max} = 54.3 \text{ rad/s}^2 = 3112°/\text{s}^2
+$$
+
+**Physical interpretation:** The knee joint experiences peak angular accelerations exceeding 3000°/s² during fast pedaling — this drives the inertial loads on the quadriceps and hamstrings.
+
+</details>
+
+<details>
+<summary>Example 3: Filtering Noisy Motion Capture Data</summary>
+
+**Problem:** A motion capture system records hip position at 120 Hz with noise $\sigma_r = 2$ mm. What is the expected noise in (a) velocity and (b) acceleration computed via central differences? (c) If we filter at 6 Hz cutoff, what is the noise reduction factor?
+
+**Solution:**
+
+**(a) Velocity noise:**
+
+$$
+\sigma_v = \frac{\sigma_r}{\sqrt{2}\,\Delta t} = \frac{0.002}{\sqrt{2} \times (1/120)} = \frac{0.002 \times 120}{1.414} = \frac{0.24}{1.414} = 0.170 \text{ m/s}
+$$
+
+**(b) Acceleration noise:**
+
+$$
+\sigma_a = \frac{\sqrt{6}\,\sigma_r}{(\Delta t)^2} = \frac{2.449 \times 0.002}{(1/120)^2} = \frac{0.004899}{6.944 \times 10^{-5}} = 70.5 \text{ m/s}^2 \approx 7.2g
+$$
+
+This is catastrophically noisy — raw differentiation is useless.
+
+**(c) Noise reduction with 4th-order Butterworth at 6 Hz:**
+
+The filter attenuates frequencies above $f_c = 6$ Hz. The noise power above 6 Hz (assuming white noise up to Nyquist = 60 Hz):
+
+Fraction of noise bandwidth removed: $1 - 6/60 = 0.9$ (90% of noise band).
+
+For a 4th-order filter, the effective noise bandwidth is:
+
+$$
+\text{NBW} = f_c \times \frac{\pi}{2} \times \frac{1}{2n-1}\binom{2n-2}{n-1}\frac{1}{2^{2n-2}}
+$$
+
+Simplified: the RMS noise reduction factor is approximately $\sqrt{f_c / f_{\text{Nyquist}}} = \sqrt{6/60} = \sqrt{0.1} = 0.316$.
+
+Post-filter acceleration noise: $70.5 \times 0.316 \approx 22.3$ m/s² — still high. In practice, a **residual analysis** (Winter, 2009) is used to select optimal cutoff.
+
+</details>
+
+<details>
+<summary>Example 4: 3-Link Chain — Lower Limb Forward Kinematics</summary>
+
+**Problem:** Model the lower limb as a 3-link chain (thigh $L_1 = 0.42$ m, shank $L_2 = 0.40$ m, foot $L_3 = 0.15$ m). At a given instant, the absolute segment angles are $\theta_1 = -80°$, $\theta_2 = -95°$, $\theta_3 = -60°$ (measured from horizontal). Find the toe position relative to the hip.
+
+**Solution:**
+
+**Step 1:** Convert to radians:
+
+$$
+\theta_1 = -1.396 \text{ rad}, \quad \theta_2 = -1.658 \text{ rad}, \quad \theta_3 = -1.047 \text{ rad}
+$$
+
+**Step 2:** Compute each segment's contribution:
+
+Segment 1 (thigh):
+
+$$
+\Delta x_1 = 0.42\cos(-1.396) = 0.42 \times 0.1736 = 0.0729 \text{ m}
+$$
+
+$$
+\Delta y_1 = 0.42\sin(-1.396) = 0.42 \times (-0.9848) = -0.4136 \text{ m}
+$$
+
+Segment 2 (shank):
+
+$$
+\Delta x_2 = 0.40\cos(-1.658) = 0.40 \times (-0.0872) = -0.0349 \text{ m}
+$$
+
+$$
+\Delta y_2 = 0.40\sin(-1.658) = 0.40 \times (-0.9962) = -0.3985 \text{ m}
+$$
+
+Segment 3 (foot):
+
+$$
+\Delta x_3 = 0.15\cos(-1.047) = 0.15 \times 0.5000 = 0.0750 \text{ m}
+$$
+
+$$
+\Delta y_3 = 0.15\sin(-1.047) = 0.15 \times (-0.8660) = -0.1299 \text{ m}
+$$
+
+**Step 3:** Sum for toe position:
+
+$$
+x_{\text{toe}} = 0.0729 + (-0.0349) + 0.0750 = 0.1130 \text{ m}
+$$
+
+$$
+y_{\text{toe}} = -0.4136 + (-0.3985) + (-0.1299) = -0.9420 \text{ m}
+$$
+
+The toe is 11.3 cm forward and 94.2 cm below the hip — consistent with a standing posture.
+
+</details>
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal Cross-links
+- [4.1 - Newtonian Dynamics & Conservation Laws](4.1---Newtonian-Dynamics-&-Conservation-Laws) — Newton's laws underlying all kinematic analysis
+- [4.7 - Rigid Body Dynamics & Euler Angles](4.7---Rigid-Body-Dynamics-&-Euler-Angles) — Extension to full 3D rotational kinematics
+- [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl) — Vector calculus for velocity/acceleration fields
+- [34.2 - Rotational Dynamics in Extreme Sports](34.2---Rotational-Dynamics-in-Extreme-Sports) — Next chapter: applying kinematics to BMX rotation
+- [34.5 - Sensor Fusion - Accelerometers & Gyroscopes](34.5---Sensor-Fusion---Accelerometers-&-Gyroscopes) — Measuring kinematics with IMU hardware
+
+### Authoritative Sources
+- **McGinnis, P.M.** (2013). *Biomechanics of Sport and Exercise* (3rd ed.). Human Kinetics. — Chapters 1–5 on linear and angular kinematics.
+- **Winter, D.A.** (2009). *Biomechanics and Motor Control of Human Movement* (4th ed.). Wiley. — Gold standard for numerical methods in biomechanics.
+- **MIT 2.183** — Biomechanics and Neural Control of Movement. [OCW](https://ocw.mit.edu/courses/2-183-biomechanics-and-neural-control-of-movement-spring-2007/)
+- **Robertson, D.G.E. et al.** (2013). *Research Methods in Biomechanics* (2nd ed.). Human Kinetics. — Filtering and differentiation techniques.
+
+---

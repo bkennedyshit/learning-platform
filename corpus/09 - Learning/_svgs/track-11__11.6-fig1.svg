@@ -1,0 +1,56 @@
+<svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <style>
+    .rpe-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .rpe-trace { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 3s ease-in-out infinite; }
+    .rpe-baseline { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 2; }
+    .rpe-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .rpe-title { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .rpe-event { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; stroke-dasharray: 3 2; }
+    @keyframes draw { 40%, 100% { stroke-dashoffset: 0; } }
+  </style>
+  <text x="300" y="18" class="rpe-title" text-anchor="middle">Dopamine Neuron Firing: Reward Prediction Error</text>
+  <!-- Panel 1: Unexpected reward -->
+  <text x="100" y="45" class="rpe-label" font-weight="bold">A) Unexpected reward</text>
+  <line x1="30" y1="90" x2="280" y2="90" class="rpe-baseline"/>
+  <text x="15" y="93" class="rpe-label">baseline</text>
+  <!-- Burst at reward -->
+  <path d="M 30 90 L 140 90 L 145 55 L 150 50 L 155 55 L 160 90 L 280 90" class="rpe-trace"/>
+  <line x1="150" y1="100" x2="150" y2="110" class="rpe-event"/>
+  <text x="150" y="120" class="rpe-label" text-anchor="middle">Reward</text>
+  <text x="155" y="45" class="rpe-label" fill="var(--interactive-accent, #58a6ff)">δ > 0 (burst)</text>
+  <!-- Panel 2: Predicted reward -->
+  <text x="100" y="145" class="rpe-label" font-weight="bold">B) Fully predicted reward</text>
+  <line x1="30" y1="190" x2="280" y2="190" class="rpe-baseline"/>
+  <!-- Burst at cue, nothing at reward -->
+  <path d="M 30 190 L 80 190 L 85 160 L 90 155 L 95 160 L 100 190 L 280 190" class="rpe-trace"/>
+  <line x1="90" y1="200" x2="90" y2="210" class="rpe-event"/>
+  <text x="90" y="220" class="rpe-label" text-anchor="middle">Cue</text>
+  <line x1="200" y1="200" x2="200" y2="210" class="rpe-event"/>
+  <text x="200" y="220" class="rpe-label" text-anchor="middle">Reward</text>
+  <text x="200" y="183" class="rpe-label" fill="var(--text-muted, #8b949e)">δ = 0 (no change)</text>
+  <!-- Panel 3: Omitted reward -->
+  <text x="100" y="245" class="rpe-label" font-weight="bold">C) Expected reward omitted</text>
+  <line x1="30" y1="290" x2="280" y2="290" class="rpe-baseline"/>
+  <!-- Burst at cue, dip at expected reward time -->
+  <path d="M 30 290 L 80 290 L 85 265 L 90 260 L 95 265 L 100 290 L 190 290 L 195 310 L 200 315 L 205 310 L 210 290 L 280 290" class="rpe-trace"/>
+  <line x1="90" y1="295" x2="90" y2="305" class="rpe-event"/>
+  <text x="90" y="320" class="rpe-label" text-anchor="middle">Cue</text>
+  <line x1="200" y1="295" x2="200" y2="305" class="rpe-event"/>
+  <text x="200" y="330" class="rpe-label" text-anchor="middle">No reward!</text>
+  <text x="205" y="325" class="rpe-label" fill="#e74c3c">δ < 0 (pause)</text>
+  <!-- Right panel: TD equation -->
+  <rect x="310" y="40" width="270" height="120" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="445" y="62" class="rpe-title" text-anchor="middle">TD Learning Rule</text>
+  <text x="445" y="85" class="rpe-label" text-anchor="middle">δₜ = rₜ + γV(sₜ₊₁) − V(sₜ)</text>
+  <text x="445" y="108" class="rpe-label" text-anchor="middle">V(sₜ) ← V(sₜ) + α·δₜ</text>
+  <text x="445" y="135" class="rpe-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">δ > 0: better than expected (DA burst)</text>
+  <text x="445" y="150" class="rpe-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">δ < 0: worse than expected (DA pause)</text>
+  <!-- Neuromodulator summary -->
+  <rect x="310" y="180" width="270" height="140" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="445" y="200" class="rpe-title" text-anchor="middle">Neuromodulator → AI Mapping</text>
+  <text x="445" y="222" class="rpe-label" text-anchor="middle">Dopamine → Reward signal / TD error</text>
+  <text x="445" y="242" class="rpe-label" text-anchor="middle">Serotonin → Temperature / entropy</text>
+  <text x="445" y="262" class="rpe-label" text-anchor="middle">Acetylcholine → Learning rate / attention</text>
+  <text x="445" y="282" class="rpe-label" text-anchor="middle">Norepinephrine → Gain / urgency</text>
+  <text x="445" y="302" class="rpe-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">(Three-factor learning: pre × post × modulator)</text>
+</svg>

@@ -1,0 +1,70 @@
+<svg viewBox="0 0 580 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="ga" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="gb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+    <marker id="gc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .grid-b{stroke:var(--text-muted, #8b949e);stroke-width:0.5;opacity:0.3;}
+    .grid-t{stroke:var(--interactive-accent, #58a6ff);stroke-width:0.5;opacity:0.25;}
+    .ax{stroke:var(--text-muted, #8b949e);stroke-width:1.2;fill:none;}
+    .v1{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.8;fill:none;marker-end:url(#ga);}
+    .v2{stroke:var(--text-accent, #79c0ff);stroke-width:2.8;fill:none;marker-end:url(#gb);}
+    .arr{stroke:var(--text-muted, #8b949e);stroke-width:1.5;fill:none;stroke-dasharray:5 3;marker-end:url(#gc);}
+    .lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+    .mtx{font-family:Inter,system-ui,sans-serif;font-size:14px;fill:var(--text-normal, #c9d1d9);font-weight:bold;}
+  </style>
+  <!-- Before panel -->
+  <text x="60" y="20" class="mtx">Before: standard grid</text>
+  <g transform="translate(40,140) scale(50,-50)">
+    <line x1="-1.5" y1="0" x2="1.5" y2="0" class="ax"/>
+    <line x1="0" y1="-1.5" x2="0" y2="1.5" class="ax"/>
+    <line x1="-1" y1="-1.5" x2="-1" y2="1.5" class="grid-b"/>
+    <line x1="1" y1="-1.5" x2="1" y2="1.5" class="grid-b"/>
+    <line x1="-1.5" y1="-1" x2="1.5" y2="-1" class="grid-b"/>
+    <line x1="-1.5" y1="1" x2="1.5" y2="1" class="grid-b"/>
+    <line x1="0" y1="0" x2="1" y2="0" class="v1"/>
+    <line x1="0" y1="0" x2="0" y2="1" class="v2"/>
+  </g>
+  <text x="88" y="260" class="lbl" fill="var(--interactive-accent, #58a6ff)">e₁</text>
+  <text x="50" y="93" class="lbl" fill="var(--text-accent, #79c0ff)">e₂</text>
+  <!-- Arrow -->
+  <line x1="220" y1="150" x2="290" y2="150" class="arr"/>
+  <text x="230" y="144" class="lbl">A = [[2,1],[1,2]]</text>
+  <!-- After panel -->
+  <text x="310" y="20" class="mtx">After: transformed grid</text>
+  <g transform="translate(310,140) scale(40,-40)">
+    <line x1="-2" y1="0" x2="3" y2="0" class="ax"/>
+    <line x1="0" y1="-2" x2="0" y2="3" class="ax"/>
+    <line x1="1" y1="-2" x2="1" y2="3" class="grid-t">
+      <animate attributeName="x1" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="-2" y1="1" x2="3" y2="1" class="grid-t">
+      <animate attributeName="y1" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="0" y1="0" x2="1" y2="0" class="v1">
+      <animate attributeName="x2" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="0; 1; 1; 0" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="0" y1="0" x2="0" y2="1" class="v2">
+      <animate attributeName="x2" values="0; 1; 1; 0" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="1; 2; 2; 1" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    </line>
+  </g>
+  <text x="415" y="220" class="lbl" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="opacity" values="0; 1; 1; 0" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    Ae₁=(2,1)
+  </text>
+  <text x="348" y="82" class="lbl" fill="var(--text-accent, #79c0ff)">
+    <animate attributeName="opacity" values="0; 1; 1; 0" keyTimes="0; 0.3; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+    Ae₂=(1,2)
+  </text>
+</svg>

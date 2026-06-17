@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #1e1e2e; }
+      .text-light { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 14px; }
+      .text-bold { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: bold; }
+      .title { fill: #cdd6f4; font-family: 'Inter', sans-serif; font-size: 22px; font-weight: bold; text-anchor: middle; }
+      .router { fill: #313244; stroke: #89b4fa; stroke-width: 3px; rx: 50%; }
+      .as-cloud { fill: #181825; stroke: #585b70; stroke-width: 2px; stroke-dasharray: 6; }
+      .line { stroke: #45475a; stroke-width: 4px; }
+      .active-path { stroke: #a6e3a1; stroke-width: 4px; stroke-dasharray: 8; }
+      .packet { fill: #f9e2af; stroke: #fab387; stroke-width: 2px; rx: 4px; }
+      .as-label { fill: #bac2de; font-family: monospace; font-size: 18px; font-weight: bold; }
+    </style>
+  </defs>
+  <rect width="800" height="500" class="bg" />
+  
+  <text x="400" y="40" class="title">BGP Inter-Domain Routing (AS Paths)</text>
+
+  <!-- AS Clouds -->
+  <!-- AS 1 -->
+  <path d="M 120,200 Q 150,150 200,180 Q 250,160 270,220 Q 300,280 250,300 Q 180,330 130,280 Q 80,240 120,200" class="as-cloud" />
+  <text x="180" y="150" class="as-label">AS 100 (ISP A)</text>
+  
+  <!-- AS 2 -->
+  <path d="M 370,120 Q 420,80 470,110 Q 520,90 540,150 Q 570,210 520,230 Q 450,260 400,210 Q 350,170 370,120" class="as-cloud" />
+  <text x="450" y="80" class="as-label">AS 200 (Transit)</text>
+  
+  <!-- AS 3 -->
+  <path d="M 370,350 Q 420,310 470,340 Q 520,320 540,380 Q 570,440 520,460 Q 450,490 400,440 Q 350,400 370,350" class="as-cloud" />
+  <text x="450" y="480" class="as-label">AS 300 (Transit)</text>
+  
+  <!-- AS 4 -->
+  <path d="M 620,200 Q 650,150 700,180 Q 750,160 770,220 Q 800,280 750,300 Q 680,330 630,280 Q 580,240 620,200" class="as-cloud" />
+  <text x="690" y="150" class="as-label">AS 400 (Dest)</text>
+
+  <!-- Connections -->
+  <line x1="220" y1="240" x2="450" y2="170" class="line" />
+  <line x1="220" y1="240" x2="450" y2="390" class="line" />
+  <line x1="450" y1="170" x2="690" y2="240" class="line active-path" />
+  <line x1="450" y1="390" x2="690" y2="240" class="line" />
+  <line x1="220" y1="240" x2="450" y2="170" class="active-path" />
+
+  <!-- Routers -->
+  <circle cx="220" cy="240" r="25" class="router" />
+  <text x="220" y="245" class="text-bold" text-anchor="middle">R1</text>
+  
+  <circle cx="450" cy="170" r="25" class="router" />
+  <text x="450" y="175" class="text-bold" text-anchor="middle">R2</text>
+  
+  <circle cx="450" cy="390" r="25" class="router" />
+  <text x="450" y="395" class="text-bold" text-anchor="middle">R3</text>
+  
+  <circle cx="690" cy="240" r="25" class="router" />
+  <text x="690" y="245" class="text-bold" text-anchor="middle">R4</text>
+  
+  <!-- Host and Target -->
+  <rect x="30" y="225" width="40" height="30" class="packet" fill="#89dceb" stroke="#74c7ec" />
+  <text x="50" y="245" class="text-bold" style="fill:#11111b" text-anchor="middle">PC</text>
+  <line x1="70" y1="240" x2="195" y2="240" class="line" />
+  
+  <rect x="740" y="225" width="40" height="30" class="packet" fill="#f38ba8" stroke="#eba0ac" />
+  <text x="760" y="245" class="text-bold" style="fill:#11111b" text-anchor="middle">Srv</text>
+  <line x1="715" y1="240" x2="740" y2="240" class="line" />
+
+  <!-- Animated Packets -->
+  <g>
+    <rect x="-15" y="-10" width="30" height="20" class="packet" />
+    <text x="0" y="4" class="text-bold" style="fill:#11111b; font-size:10px;" text-anchor="middle">IP</text>
+    <animateMotion path="M 70 240 L 195 240 L 425 170 L 665 240 L 740 240" dur="4s" repeatCount="indefinite" />
+  </g>
+
+  <!-- Route Tables Info -->
+  <rect x="50" y="360" width="220" height="90" class="bg" stroke="#585b70" stroke-width="2" rx="4" />
+  <text x="60" y="380" class="text-bold" style="fill:#cba6f7;">R1 BGP Table for Dest</text>
+  <text x="60" y="405" class="text-light" style="font-family:monospace;">Path 1: [200, 400] (Best)</text>
+  <text x="60" y="430" class="text-light" style="font-family:monospace;">Path 2: [300, 400]</text>
+  
+</svg>

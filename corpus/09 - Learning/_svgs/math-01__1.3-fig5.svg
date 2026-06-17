@@ -1,0 +1,64 @@
+<svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="us-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .ax    { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.4; fill: none; }
+    .cu    { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .sh    { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; }
+    .sh2   { fill: var(--text-accent, #79c0ff); opacity: 0.18; }
+    .cu2   { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; }
+    .lab   { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .math  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+
+  <!-- Left: x-domain, wider rectangles -->
+  <text x="120" y="16" class="lab" text-anchor="middle" font-weight="bold">x-domain  (wide Δx)</text>
+  <line x1="20"  y1="160" x2="230" y2="160" class="ax"/>
+  <line x1="40"  y1="170" x2="40"  y2="30"  class="ax"/>
+  <rect x="55"  y="100" width="50" height="60" class="sh" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+  <rect x="105" y="80"  width="50" height="80" class="sh" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+  <rect x="155" y="95"  width="50" height="65" class="sh" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+  <path class="cu" d="M 40 180 C 80 130, 120 80, 170 90 S 220 130, 230 120"/>
+  <text x="120" y="178" class="math" text-anchor="middle">a ——— b</text>
+
+  <!-- Arrow -->
+  <path d="M 250 100 Q 280 80, 310 100" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" fill="none" marker-end="url(#us-arrow)"/>
+  <text x="280" y="76" class="lab" text-anchor="middle">u = φ(x)</text>
+  <text x="280" y="90" class="lab" text-anchor="middle">du = φ′(x)dx</text>
+
+  <!-- Right: u-domain, narrower rectangles (compressed) -->
+  <text x="470" y="16" class="lab" text-anchor="middle" font-weight="bold">u-domain  (compressed Δu)</text>
+  <line x1="330" y1="160" x2="580" y2="160" class="ax"/>
+  <line x1="350" y1="170" x2="350" y2="30"  class="ax"/>
+  <rect x="365" y="90"  width="32" height="70" class="sh2" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+  <rect x="397" y="75"  width="32" height="85" class="sh2" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+  <rect x="429" y="88"  width="32" height="72" class="sh2" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+  <path class="cu2" d="M 350 180 C 390 120, 440 75, 490 85 S 555 120, 570 110"/>
+  <text x="460" y="178" class="math" text-anchor="middle">φ(a) ——— φ(b)</text>
+
+  <!-- Equal areas annotation -->
+  <text x="300" y="200" class="lab" text-anchor="middle">Shaded areas are equal — area is preserved under substitution.</text>
+</svg>

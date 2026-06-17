@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #1e1e2e; }
+      .box { fill: #313244; stroke: #cba6f7; stroke-width: 2; rx: 8; }
+      .fn { fill: #89b4fa; stroke: #11111b; stroke-width: 2; rx: 4; }
+      .text { fill: #cdd6f4; font-family: monospace; font-size: 16px; }
+      .label { fill: #a6adc8; font-family: monospace; font-size: 14px; }
+      .event { fill: #f9e2af; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" class="bg"/>
+  <text x="400" y="40" text-anchor="middle" class="text" font-size="20" font-weight="bold">Serverless: Scale to Zero &amp; Cold Starts</text>
+
+  <rect x="50" y="100" width="200" height="200" class="box"/>
+  <text x="150" y="130" text-anchor="middle" class="text">Event Source</text>
+  <text x="150" y="150" text-anchor="middle" class="label">(API Gateway / Queue)</text>
+  
+  <rect x="450" y="100" width="300" height="200" class="box"/>
+  <text x="600" y="130" text-anchor="middle" class="text">Function Runtime Pool</text>
+  
+  <!-- Trigger Path -->
+  <path d="M 250 200 L 450 200" stroke="#a6adc8" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+  
+  <!-- Event animating -->
+  <circle cx="250" cy="200" r="8" class="event">
+    <animate attributeName="cx" values="250;450;250" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.49;0.5;1"/>
+  </circle>
+
+  <!-- Function Instantiation -->
+  <g transform="translate(525, 170)">
+    <rect x="0" y="0" width="150" height="60" class="fn">
+      <animate attributeName="opacity" values="0;1;1;0;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.1;0.6;0.7;1"/>
+      <animate attributeName="width" values="0;150;150;0;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.1;0.6;0.7;1"/>
+    </rect>
+    <text x="75" y="35" text-anchor="middle" fill="#11111b" font-family="monospace" font-size="14" font-weight="bold">
+      <animate attributeName="opacity" values="0;1;1;0;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.1;0.6;0.7;1"/>
+      Init &amp; Exec
+    </text>
+  </g>
+
+  <!-- Labels for Timeline -->
+  <text x="350" y="180" text-anchor="middle" class="label">Event Trigger</text>
+  <text x="600" y="260" text-anchor="middle" class="label">
+    <animate attributeName="opacity" values="1;0;0;1;1" dur="4s" repeatCount="indefinite" keyTimes="0;0.1;0.6;0.7;1"/>
+    State: Scaled to Zero
+  </text>
+  <text x="600" y="260" text-anchor="middle" class="label" fill="#a6e3a1">
+    <animate attributeName="opacity" values="0;1;1;0;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.1;0.6;0.7;1"/>
+    State: Active (Billed)
+  </text>
+</svg>

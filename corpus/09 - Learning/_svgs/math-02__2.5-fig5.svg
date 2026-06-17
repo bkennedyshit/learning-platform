@@ -1,0 +1,58 @@
+<svg viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <style>
+    .cgax { stroke:var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .cgv1 { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; }
+    .cgv2 { stroke:var(--text-accent, #79c0ff); stroke-width:2.5; fill:none; }
+    .cgvb { stroke:var(--text-normal, #c9d1d9); stroke-width:2; fill:none; stroke-dasharray:5 3; }
+    .cglb { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .cglc { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .cgfg { fill:var(--interactive-accent, #58a6ff); opacity:0.12; stroke:none; }
+    .cgfr { fill:var(--text-accent, #79c0ff); opacity:0.12; stroke:none; }
+  </style>
+  <defs>
+    <marker id="cga" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="cgb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+    <marker id="cgc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <!-- Axes -->
+  <line x1="40" y1="200" x2="260" y2="200" class="cgax"/>
+  <line x1="60" y1="220" x2="60"  y2="20"  class="cgax"/>
+  <!-- col1 = a1=(2,1)×60 →(180,140), col2 = a2=(0,3)×60→(60,20), b=(4,3)×60 -->
+  <!-- Area(A) = parallelogram a1,a2: pts (60,200),(180,140),(180,80),(60,80)... -->
+  <!-- Let's use: a1=(120,60) offset, a2=(0,120) offset from (60,200) -->
+  <!-- A full parallelogram: O=(60,200), a1=(180,140), a1+a2=(180,20), a2=(60,80) -->
+  <polygon points="60,200 180,140 180,20 60,80" class="cgfg">
+    <animate attributeName="points" values="60,200 180,140 180,20 60,80; 60,200 150,110 150,-10 60,80; 60,200 150,110 150,-10 60,80; 60,200 180,140 180,20 60,80" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+  </polygon>
+  <!-- b=(120,60)+something; let's say b replaces a1: A1(b): O, b, b+a2, a2 -->
+  <polygon points="60,200 150,110 150,-10 60,80" fill="var(--text-accent, #79c0ff)" opacity="0.1">
+    <animate attributeName="opacity" values="0; 0.1; 0.1; 0" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+  </polygon>
+  <!-- Vectors -->
+  <line x1="60" y1="200" x2="180" y2="140" class="cgv1" marker-end="url(#cga)">
+    <animate attributeName="x2" values="180; 150; 150; 180" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="140; 110; 110; 140" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+  </line>
+  <text x="185" y="137" class="cglc">
+    <animate attributeName="x" values="185; 155; 155; 185" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="y" values="137; 107; 107; 137" keyTimes="0; 0.4; 0.6; 1" dur="4s" repeatCount="indefinite" />
+    a₁
+  </text>
+  <line x1="60" y1="200" x2="60"  y2="80"  class="cgv2" marker-end="url(#cgb)"/>
+  <text x="30"  y="77"  fill="var(--text-accent, #79c0ff)" class="cglb">a₂</text>
+  <line x1="60" y1="200" x2="150" y2="110" class="cgvb" marker-end="url(#cgc)"/>
+  <text x="153" y="107" class="cglb">b</text>
+  <!-- Formula box -->
+  <rect x="285" y="50" width="220" height="110" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="395" y="76"  class="cglb" text-anchor="middle" font-weight="bold">Cramer's Rule (2×2)</text>
+  <text x="395" y="98"  class="cglb" text-anchor="middle" font-family="monospace">x₁ = det[b|a₂] / det A</text>
+  <text x="395" y="118" class="cglb" text-anchor="middle" font-family="monospace">x₂ = det[a₁|b] / det A</text>
+  <text x="395" y="145" class="cglc" text-anchor="middle">Ratio of sub-areas</text>
+  <text x="260" y="225" class="cglb" text-anchor="middle">Cramer's Rule solves Ax=b as ratios of determinants</text>
+</svg>

@@ -1,0 +1,327 @@
+---
+title: "35.7 — Audio Programming with JUCE & Python"
+subject: "Music Production & Sound Design"
+catalog: advanced
+audience_tier: higher-education
+chapter: "35.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 35.7 — Audio Programming with JUCE & Python
+
+> *"The advantage of being both a producer and a programmer: if the plugin you need doesn't exist, you can build it."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Explain the JUCE AudioProcessor architecture and write a minimal filter plugin in C++.
+2. Process audio in real time using Python sounddevice stream callbacks.
+3. Use librosa to extract BPM, beat positions, chroma, and MFCCs from an audio file.
+4. Apply audio plugins to audio files from Python using Spotify's pedalboard library.
+5. Build and test a JUCE plugin in a DAW host (VST3/AU).
+6. Describe the MIDI processing pipeline inside processBlock().
+
+---
+
+## 🖼️ Visual Anchor
+
+![music__35.7-fig1](music__35.7-fig1.svg)
+
+---
+
+## 📚 1. JUCE Framework Architecture
+
+**JUCE** (Jules' Utility Class Extensions) is the dominant open-source C++ framework for building audio plugins and applications. Used by Arturia, iZotope, Native Instruments, and thousands of independent developers.
+
+**Key features:**
+- Cross-platform: Windows (VST3, AAX, Standalone), macOS (VST3, AU, AUv3, AAX, Standalone), Linux (LV2, VST3)
+- Handles all plugin format wrappers — write code once, export multiple formats
+- GUI framework, DSP module library, MIDI utilities
+
+### 1.1 Plugin Architecture
+
+```cpp
+class MyPlugin : public juce::AudioProcessor {
+public:
+    // Called before processing starts (set up sample rate, buffer size)
+    void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+    
+    // Called every audio block (THE REAL-TIME PROCESSING ENGINE)
+    void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
+    
+    // Called when processing stops
+    void releaseResources() override;
+    
+    // Create the GUI editor
+    juce::AudioProcessorEditor* createEditor() override;
+    
+    // State save/load
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
+};
+```
+
+### 1.2 processBlock() — The Audio Thread
+
+**This runs on the real-time audio thread. Rules:**
+- NEVER allocate memory (malloc, new) on the audio thread
+- NEVER lock a mutex (can cause priority inversion → audio dropout)
+- NEVER call system calls (file I/O, network) — they can block
+- NEVER throw exceptions
+
+**Typical processBlock() flow:**
+1. Get buffer data: `buffer.getWritePointer(channel)` or `buffer.getArrayOfWritePointers()`
+2. Process MIDI: iterate through `midiMessages` → extract note on/off, CC
+3. Update voices/synth state from MIDI
+4. Per-sample or per-block DSP: apply filter, oscillator, gain, etc.
+5. Write results back to buffer (in-place or separate output buffer)
+
+---
+
+## 📚 2. Minimal IIR Filter Plugin
+
+```cpp
+#include <JuceHeader.h>
+
+class SimpleEQ : public juce::AudioProcessor {
+private:
+    juce::dsp::ProcessorDuplicator<
+        juce::dsp::IIR::Filter<float>,
+        juce::dsp::IIR::Coefficients<float>> lowPassFilter;
+    float cutoffHz = 1000.0f;
+
+public:
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override {
+        juce::dsp::ProcessSpec spec;
+        spec.sampleRate = sampleRate;
+        spec.maximumBlockSize = samplesPerBlock;
+        spec.numChannels = getTotalNumInputChannels();
+        
+        lowPassFilter.prepare(spec);
+        updateFilter(sampleRate);
+    }
+    
+    void updateFilter(double sampleRate) {
+        *lowPassFilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(
+            sampleRate, cutoffHz, 0.707f); // Q = 0.707 = Butterworth
+    }
+    
+    void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) override {
+        juce::dsp::AudioBlock<float> block(buffer);
+        juce::dsp::ProcessContextReplacing<float> context(block);
+        lowPassFilter.process(context);
+    }
+    
+    // ... rest of required methods
+};
+```
+
+### 2.1 JUCE DSP Module Highlights
+
+| Module | What it does |
+|--------|-------------|
+| `juce::dsp::IIR::Filter` | Biquad filter (LP, HP, BP, peak, shelf, notch) |
+| `juce::dsp::FIR::Filter` | FIR filter with arbitrary impulse response |
+| `juce::dsp::Convolution` | Convolution reverb from impulse response |
+| `juce::dsp::Reverb` | Schroeder-Moorer reverb |
+| `juce::dsp::Oscillator` | Band-limited sine/saw/square |
+| `juce::dsp::Gain` | Simple gain control |
+| `juce::dsp::Compressor` | Compressor with threshold/ratio/attack/release |
+| `juce::dsp::Limiter` | True peak limiter |
+| `juce::dsp::Oversampling` | 2×–16× oversampling for nonlinear processing |
+
+---
+
+## 📚 3. Python Audio Analysis with librosa
+
+**librosa** is the standard Python library for music analysis. Built on NumPy/SciPy.
+
+### 3.1 Essential librosa Operations
+
+```python
+import librosa
+import librosa.display
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load audio file
+y, sr = librosa.load("track.wav", sr=44100)  # y = sample array, sr = sample rate
+print(f"Duration: {len(y)/sr:.2f} seconds")
+
+# Tempo and beat positions
+tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+beat_times = librosa.frames_to_time(beats, sr=sr)
+print(f"Estimated BPM: {tempo:.1f}")
+
+# Chromagram (pitch content over time)
+chroma = librosa.feature.chroma_stft(y=y, sr=sr, n_chroma=12)
+# Shape: (12, n_frames) — 12 pitch classes
+
+# MFCCs (timbral fingerprint — 13 or 20 coefficients)
+mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+
+# Spectrogram
+D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
+librosa.display.specshow(D, sr=sr, x_axis='time', y_axis='hz')
+plt.colorbar(format='%+2.0f dB')
+plt.title('Spectrogram')
+plt.tight_layout()
+plt.show()
+
+# Onset detection (where notes/hits start)
+onsets = librosa.onset.onset_detect(y=y, sr=sr, units='time')
+```
+
+### 3.2 Real-Time Audio with sounddevice
+
+```python
+import sounddevice as sd
+import numpy as np
+
+sr = 44100
+buffer_size = 512
+
+def process(indata, outdata, frames, time, status):
+    if status:
+        print(status)
+    # Apply gain reduction
+    outdata[:] = indata * 0.5
+    # Or apply any numpy DSP here
+
+# Start real-time stream (input → process → output)
+with sd.Stream(samplerate=sr, blocksize=buffer_size,
+               channels=1, dtype='float32',
+               callback=process):
+    print("Streaming... press Enter to stop")
+    input()
+```
+
+### 3.3 Apply VST/AU Plugins from Python (Spotify Pedalboard)
+
+```python
+from pedalboard import Pedalboard, Reverb, Compressor, LowpassFilter
+from pedalboard.io import AudioFile
+import numpy as np
+
+# Load
+with AudioFile('input.wav') as f:
+    audio = f.read(f.frames)
+    sr = f.samplerate
+
+# Build pedal chain
+board = Pedalboard([
+    Compressor(threshold_db=-18, ratio=4),
+    LowpassFilter(cutoff_frequency_hz=2000),
+    Reverb(room_size=0.4, wet_level=0.3)
+])
+
+# Process
+output = board(audio, sr)
+
+# Save
+with AudioFile('output.wav', 'w', sr, output.shape[0]) as f:
+    f.write(output)
+```
+
+---
+
+## 📚 4. Audio Signal Processing in Python (scipy)
+
+The DSP from Track 32 connects directly here:
+
+```python
+from scipy.signal import butter, lfilter, sosfilt
+import numpy as np
+
+def butter_lowpass(cutoff_hz, fs, order=4):
+    """Create a Butterworth lowpass filter."""
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff_hz / nyq
+    sos = butter(order, normal_cutoff, btype='low', analog=False, output='sos')
+    return sos
+
+def apply_lowpass(data, cutoff_hz, fs=44100):
+    sos = butter_lowpass(cutoff_hz, fs)
+    return sosfilt(sos, data)
+
+# Apply to audio
+y, sr = librosa.load("track.wav")
+y_filtered = apply_lowpass(y, cutoff_hz=500, fs=sr)
+```
+
+---
+
+## 📚 5. MIDI Generation with midiutil
+
+```python
+from midiutil import MIDIFile
+import random
+
+def generate_melody(scale_notes, bars=4, subdivision=16):
+    """Generate a random melody from a scale."""
+    midi = MIDIFile(1)
+    midi.addTempo(0, 0, 120)
+    
+    total_beats = bars * 4
+    step_duration = 4 / subdivision  # Duration in beats for each subdivision
+    
+    for i in range(bars * subdivision):
+        time = i * step_duration
+        pitch = random.choice(scale_notes)
+        duration = step_duration
+        velocity = random.randint(60, 100)
+        midi.addNote(0, 0, pitch, time, duration, velocity)
+    
+    return midi
+
+# C major scale MIDI notes (two octaves)
+c_major = [60, 62, 64, 65, 67, 69, 71, 72, 74, 76]
+melody = generate_melody(c_major)
+
+with open("melody.mid", "wb") as f:
+    melody.writeFile(f)
+```
+
+---
+
+## ⚠️ 6. Common Misconceptions
+
+1. **"JUCE is only for professional developers."** JUCE has a free tier for open-source projects and is well-documented. Many indie developers ship commercial plugins with JUCE. The learning curve is C++, not JUCE itself.
+
+2. **"Python is too slow for real-time audio."** Python with sounddevice using a C callback IS fast enough for real-time processing. The numpy operations on float32 arrays in the callback run at near-C speed. The GIL is released during numpy operations.
+
+3. **"I need ASIO to use sounddevice on Windows."** For real-time performance, ASIO (or WASAPI exclusive mode) is recommended on Windows. For analysis and file processing, the default backend is fine.
+
+4. **"librosa works in real-time."** librosa is designed for offline analysis of audio files, not real-time processing. For real-time, use scipy + numpy + sounddevice callbacks.
+
+5. **"processBlock() can do anything."** processBlock() runs on the real-time audio thread. Violating real-time constraints (blocking, memory allocation, system calls) causes audio dropouts. Use message queues (juce::AbstractFifo, lock-free) to communicate between the audio thread and UI thread.
+
+6. **"JUCE DSP module = professional quality."** The JUCE DSP module is functional but some components (e.g. the reverb) are simplified. For professional quality, implement custom algorithms or use specialized libraries (e.g. Mach1, HRTF libraries).
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [Subject_Plan](Subject_Plan) — Fourier transforms, filters, FFT — the theory behind everything here
+- [Subject_Plan](Subject_Plan) — Python foundation
+- [35.8 - Generative Music & AI Audio](35.8---Generative-Music-&-AI-Audio) — apply audio programming to generative music
+
+### External
+- [JUCE documentation](https://docs.juce.com/) — official reference
+- [JUCE tutorials series](https://juce.com/learn/tutorials/) — beginner to advanced
+- [librosa documentation](https://librosa.org/doc/latest/index.html) — full API reference
+- [sounddevice documentation](https://python-sounddevice.readthedocs.io/) — real-time I/O
+- [Pedalboard (Spotify)](https://spotify.github.io/pedalboard/) — VST from Python
+- [TheAudioProgrammer YouTube](https://www.youtube.com/@TheAudioProgrammer) — JUCE deep dives
+
+---
+
+*Prev: [35.6 - Mastering & Loudness](35.6---Mastering-&-Loudness) | Next: [35.8 - Generative Music & AI Audio](35.8---Generative-Music-&-AI-Audio)*

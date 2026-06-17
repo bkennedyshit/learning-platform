@@ -1,0 +1,133 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; fill: var(--text-normal, #c9d1d9); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .vm    { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .stack { fill: #51cf66; opacity: 0.18; stroke: #51cf66; stroke-width: 1; }
+    .jit   { fill: #ffd93d; opacity: 0.18; stroke: #ffd93d; stroke-width: 1; }
+    .bc    { fill: #cc5de8; opacity: 0.18; stroke: #cc5de8; stroke-width: 1; }
+    .arr   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arrhi { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; }
+    .reg   { fill: #ff6b6b; opacity: 0.16; stroke: #ff6b6b; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="p8-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+    <marker id="p8-ahi" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Virtual Machines, Bytecode &amp; JIT Compilation (Chapter 29.8)</text>
+
+  <!-- LEFT: Stack-based VM execution model -->
+  <rect x="18" y="36" width="220" height="240" rx="5" class="box"/>
+  <text x="128" y="56" class="label" text-anchor="middle" font-weight="bold">Stack-Based VM</text>
+  <text x="128" y="70" class="small" text-anchor="middle">CPython · JVM · WebAssembly</text>
+
+  <text x="128" y="88"  class="small" text-anchor="middle">Bytecode for:  3 + 4 * 2</text>
+
+  <rect x="28" y="96" width="200" height="100" rx="3" class="bc"/>
+  <text x="36" y="113" class="mono">LOAD_CONST  3</text>
+  <text x="36" y="127" class="mono">LOAD_CONST  4</text>
+  <text x="36" y="141" class="mono">LOAD_CONST  2</text>
+  <text x="36" y="155" class="mono">BINARY_MUL</text>
+  <text x="36" y="169" class="mono">BINARY_ADD</text>
+  <text x="36" y="183" class="mono">RETURN_VALUE</text>
+
+  <!-- stack diagram -->
+  <text x="128" y="214" class="small" text-anchor="middle">Stack evolution:</text>
+  <text x="36"  y="228" class="small">[3] → [3,4] → [3,4,2]</text>
+  <text x="36"  y="242" class="small">→ [3,8]  → [11] → ret</text>
+
+  <text x="128" y="262" class="small" text-anchor="middle">Simple to implement · portable</text>
+  <text x="128" y="276" class="small" text-anchor="middle">Eval loop: switch(opcode)</text>
+
+  <!-- MIDDLE: Register-based VM -->
+  <rect x="252" y="36" width="220" height="240" rx="5" class="box"/>
+  <text x="362" y="56" class="label" text-anchor="middle" font-weight="bold">Register-Based VM</text>
+  <text x="362" y="70" class="small" text-anchor="middle">Lua 5 · Android Dalvik · .NET CLR</text>
+
+  <text x="362" y="88" class="small" text-anchor="middle">Same expression in reg-based:</text>
+
+  <rect x="262" y="96" width="200" height="100" rx="3" class="reg"/>
+  <text x="270" y="113" class="mono">MUL  r0, r1, r2   ; 4*2→r0</text>
+  <text x="270" y="127" class="mono">ADD  r3, r0, r3   ; +3→r3</text>
+  <text x="270" y="141" class="mono">RET  r3</text>
+  <text x="270" y="162" class="small">fewer instructions than stack VM</text>
+  <text x="270" y="176" class="small">larger instruction word (reg fields)</text>
+  <text x="270" y="190" class="small">Dalvik chose this over JVM-style</text>
+
+  <text x="362" y="214" class="small" text-anchor="middle">Tradeoffs:</text>
+  <text x="270" y="228" class="small">Stack: simpler codegen, more ops</text>
+  <text x="270" y="242" class="small">Reg:   fewer ops, decoder complex</text>
+  <text x="270" y="256" class="small">Both: portable, sandboxed, typesafe</text>
+  <text x="270" y="270" class="small">Wasm = stack-based (compact, safe)</text>
+
+  <!-- RIGHT: JIT tiers -->
+  <rect x="486" y="36" width="216" height="240" rx="5" class="box"/>
+  <text x="594" y="56" class="label" text-anchor="middle" font-weight="bold">JIT Compilation Tiers</text>
+  <text x="594" y="70" class="small" text-anchor="middle">V8 / JVM HotSpot / LuaJIT</text>
+
+  <rect x="496" y="80"  width="196" height="34" rx="3" class="vm"/>
+  <text x="594" y="95"  class="label" text-anchor="middle">Tier 0 — Interpreter</text>
+  <text x="594" y="108" class="small" text-anchor="middle">execute bytecode directly</text>
+
+  <line x1="594" y1="114" x2="594" y2="128" class="arr" marker-end="url(#p8-arr)"/>
+  <text x="640" y="125" class="small">hot fn?</text>
+
+  <rect x="496" y="128" width="196" height="34" rx="3" class="jit"/>
+  <text x="594" y="143" class="label" text-anchor="middle">Tier 1 — Baseline JIT</text>
+  <text x="594" y="156" class="small" text-anchor="middle">fast compile, little opt</text>
+
+  <line x1="594" y1="162" x2="594" y2="176" class="arr" marker-end="url(#p8-arr)"/>
+  <text x="640" y="173" class="small">very hot?</text>
+
+  <rect x="496" y="176" width="196" height="34" rx="3" class="jit"/>
+  <text x="594" y="191" class="label" text-anchor="middle">Tier 2 — Optimizing JIT</text>
+  <text x="594" y="204" class="small" text-anchor="middle">inline, speculative types, SIMD</text>
+
+  <line x1="594" y1="210" x2="594" y2="224" class="arr" marker-end="url(#p8-arr)"/>
+
+  <rect x="496" y="224" width="196" height="26" rx="3" class="stack"/>
+  <text x="594" y="241" class="small" text-anchor="middle">deoptimise → interpreter if guard fails</text>
+
+  <text x="594" y="266" class="small" text-anchor="middle">Profile-guided: count calls,</text>
+  <text x="594" y="278" class="small" text-anchor="middle">branch frequencies, type feedback</text>
+
+  <!-- BOTTOM: GC & Memory model -->
+  <rect x="18" y="292" width="684" height="112" rx="5" class="box"/>
+  <text x="360" y="312" class="label" text-anchor="middle" font-weight="bold">Garbage Collection Strategies &amp; Memory Models in VMs</text>
+
+  <rect x="30"  y="322" width="158" height="74" rx="3" class="vm"/>
+  <text x="109" y="338" class="small" text-anchor="middle" font-weight="bold">Mark-Sweep (JVM G1)</text>
+  <text x="38"  y="354" class="small">1. Mark reachable objects</text>
+  <text x="38"  y="367" class="small">2. Sweep unmarked (free)</text>
+  <text x="38"  y="380" class="small">3. Compact if fragmented</text>
+  <text x="38"  y="393" class="small">Stop-the-world or concurrent</text>
+
+  <rect x="200" y="322" width="158" height="74" rx="3" class="stack"/>
+  <text x="279" y="338" class="small" text-anchor="middle" font-weight="bold">Generational (CPython 3.13)</text>
+  <text x="208" y="354" class="small">Gen 0: new objects (nursery)</text>
+  <text x="208" y="367" class="small">Gen 1: survived 1+ collection</text>
+  <text x="208" y="380" class="small">Gen 2: long-lived (major GC)</text>
+  <text x="208" y="393" class="small">Most objects die young</text>
+
+  <rect x="370" y="322" width="158" height="74" rx="3" class="jit"/>
+  <text x="449" y="338" class="small" text-anchor="middle" font-weight="bold">Reference Counting (Swift/Py)</text>
+  <text x="378" y="354" class="small">ARC: auto retain/release</text>
+  <text x="378" y="367" class="small">Cycle detector for cycles</text>
+  <text x="378" y="380" class="small">Deterministic destroy time</text>
+  <text x="378" y="393" class="small">No stop-the-world pauses</text>
+
+  <rect x="540" y="322" width="154" height="74" rx="3" class="bc"/>
+  <text x="617" y="338" class="small" text-anchor="middle" font-weight="bold">RAII / Ownership (Rust)</text>
+  <text x="548" y="354" class="small">No GC: drop at scope end</text>
+  <text x="548" y="367" class="small">Borrow checker = compile-time</text>
+  <text x="548" y="380" class="small">alias + lifetime rules</text>
+  <text x="548" y="393" class="small">Zero-cost, no runtime overhead</text>
+</svg>

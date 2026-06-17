@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Turborepo
+.turbo/
+
+# Env / secrets  (keeps .env.local and the API key OUT of git)
+.env
+.env.*
+!.env*.example
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Python (problem-generator / scripts)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local-only corpus backup (not needed in the repo)
+corpus/_lessons-backup-*/
+
+# Test coverage
+coverage/
+
+# Generated content artifacts (rebuilt from /corpus at build time)
+apps/*/src/generated/
+apps/*/public/lesson-assets/

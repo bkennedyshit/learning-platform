@@ -1,0 +1,32 @@
+<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;height:auto;">
+  <style>
+    .lu-box{fill:var(--background-secondary, #161b22);stroke:var(--text-muted, #8b949e);stroke-width:1;rx:4;}
+    .lu-l{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+    .lu-a{fill:var(--interactive-accent, #58a6ff);opacity:0.2;}
+    .lu-b{fill:var(--text-accent, #79c0ff);opacity:0.2;}
+  </style>
+  <!-- L matrix block -->
+  <rect x="20" y="20" width="100" height="80" class="lu-box"/>
+  <polygon points="20,20 120,100 20,100" class="lu-a">
+    <animate attributeName="opacity" values="0; 1; 1; 0" keyTimes="0; 0.2; 0.8; 1" dur="5s" repeatCount="indefinite"/>
+  </polygon>
+  <text x="70" y="65" class="lu-l" text-anchor="middle">L</text>
+  <text x="70" y="110" class="lu-l" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">lower-tri</text>
+  <!-- × -->
+  <text x="132" y="65" class="lu-l">×</text>
+  <!-- U matrix block -->
+  <rect x="150" y="20" width="100" height="80" class="lu-box"/>
+  <polygon points="150,20 250,20 250,100" class="lu-b">
+    <animate attributeName="opacity" values="0; 0; 1; 0" keyTimes="0; 0.2; 0.4; 1" dur="5s" repeatCount="indefinite"/>
+  </polygon>
+  <text x="200" y="65" class="lu-l" text-anchor="middle">U</text>
+  <text x="200" y="110" class="lu-l" text-anchor="middle" fill="var(--text-accent, #79c0ff)">upper-tri</text>
+  <!-- = -->
+  <text x="262" y="65" class="lu-l">=</text>
+  <!-- A -->
+  <rect x="280" y="20" width="100" height="80" class="lu-box">
+    <animate attributeName="stroke" values="var(--text-muted, #8b949e); var(--interactive-accent, #58a6ff); var(--text-muted, #8b949e)" keyTimes="0; 0.6; 1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="330" y="65" class="lu-l" text-anchor="middle">A</text>
+  <text x="330" y="110" class="lu-l" text-anchor="middle">original</text>
+</svg>

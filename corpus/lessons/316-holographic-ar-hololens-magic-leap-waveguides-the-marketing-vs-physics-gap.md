@@ -1,0 +1,172 @@
+---
+title: "31.6 — Holographic AR: HoloLens, Magic Leap, Waveguides & the Marketing-vs-Physics"
+subject: "Holographics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "31.6"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 31.6 — Holographic AR: HoloLens, Magic Leap, Waveguides & the Marketing-vs-Physics Gap
+
+> *"Microsoft HoloLens 2 is marketed as 'holographic computing.' Its displays are simple waveguide displays with a fixed focus of approximately two meters."*
+> — paraphrased from [Wikipedia — HoloLens 2](https://en.wikipedia.org/wiki/HoloLens_2) (rephrased for compliance)
+
+This chapter is the **truth-in-marketing** chapter. The AR industry calls many things "holographic" that are not, in the strict optical sense, holograms. Knowing the actual physics lets you design real systems and not be fooled by spec sheets.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Describe the layers of a near-eye AR display: **light engine + microdisplay + combiner + eyepiece**.
+2. Compare the three combiner classes: **bird-bath / freeform**, **diffractive (SRG, holographic) waveguides**, **reflective / cascaded mirror waveguides**.
+3. Read AR display specs: **field of view**, **eyebox**, **angular resolution**, **eye relief**, **brightness (nits)**, **see-through transmission**.
+4. Recognize **vergence-accommodation conflict (VAC)** and when fixed-focus AR breaks down.
+5. Articulate what is *holographic* about HoloLens 2 / Magic Leap 2 (the **HOE combiners**) and what is not (the imagery itself is not a wavefront-reconstruction hologram).
+6. Survey the 2026 AR display landscape: HoloLens 2 (still mostly current), Magic Leap 2, Apple Vision Pro (passthrough not waveguide), Meta Quest 3 (passthrough), Samsung-Magic Leap waveguide partnership, XReal, Mojo Vision pivot, etc.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external):*
+> - 📺 [Microsoft Learn — HoloLens 2 hardware](https://learn.microsoft.com/en-us/hololens/hololens2-hardware)
+> - 📺 [Magic Leap 2 developer docs](https://developer-docs.magicleap.cloud/)
+> - 📖 [VR/AR Wiki — Waveguide article](https://vrarwiki.com/wiki/Waveguide)
+> - 📖 [nextmsc — Samsung & Magic Leap advance waveguide displays (2026)](https://www.nextmsc.com/news/samsung-and-magic-leap-advance-waveguide-displays)
+
+---
+
+## 📚 1. Anatomy of a Near-Eye Display
+
+```
+┌────────────┐   light   ┌─────────────┐   pupil   ┌──────┐
+│ Microdisplay│ ─────────▶│  Combiner /  │──────────▶│ Eye  │
+│ (LCoS/OLED/ │           │  Waveguide  │           └──────┘
+│  μLED)     │           │             │
+└────────────┘           └─────────────┘
+       ▲                        ▲
+       │                        │ ambient world
+   driver IC             Real world passes through
+```
+
+- **Light engine + microdisplay** — generates the source image (LCoS, OLED-on-silicon, μLED).
+- **Combiner** — overlays virtual on real (waveguide or partial mirror).
+- **Optical pupil expander** — tiles the small microdisplay output across the eyebox.
+
+---
+
+## 🛤️ 2. Combiner Classes
+
+| Class | How it works | Examples |
+|---|---|---|
+| **Bird-bath / freeform** | Curved partial mirror reflects projector image into eye | Meta Ray-Ban camera glasses (mostly displayless), early ODG, Lumus prototypes |
+| **Diffractive waveguide (SRG)** | Surface-relief grating in/out couples light + pupil-expands | HoloLens 2, many Magic Leap demos, Vuzix |
+| **Holographic / Bragg waveguide (HOE)** | Volume-Bragg grating photopolymer (Bayfol HX) couples light | DigiLens, parts of Magic Leap, Lumus Maximus |
+| **Reflective / cascaded mirror waveguide** | Stack of partial mirrors at angles | Lumus, some Apple Vision research |
+| **Pinlight** | Array of tiny point sources behind a mask | nVis research; not commercial |
+| **Direct retinal projection** | Scan laser into pupil (Maxwellian view) | QD Laser, Mojo Vision (closed) |
+| **Passthrough VR-as-AR** | Camera + display | Apple Vision Pro, Meta Quest 3 |
+
+---
+
+## 📏 3. Spec Vocabulary
+
+- **Field of View (FoV)** — diagonal visual angle of the virtual content. HoloLens 2 ~52°; Magic Leap 2 ~70°; passthrough VR ~100°+.
+- **Eyebox** — the volume your pupil can move within and still see the full image. ~10 mm cube is a usable target.
+- **Angular resolution** — pixels per degree (PPD). Human visual acuity is ~60 PPD; modern AR runs 25–50 PPD.
+- **Brightness** — nits at the eye. Outdoor AR needs > 5000 nits. Modern μLED + waveguide partnerships are reaching 20,000+ nits at the source per [nextmsc 2026](https://www.nextmsc.com/news/samsung-and-magic-leap-advance-waveguide-displays).
+- **Eye relief** — distance from lens to pupil. Affects glasses-compatibility.
+- **See-through transmission** — fraction of ambient light reaching the eye through the combiner.
+
+---
+
+## 🎯 4. Vergence-Accommodation Conflict (VAC)
+
+The eye uses two depth cues:
+- **Vergence** — both eyes converge / diverge to fuse a stereo pair.
+- **Accommodation** — the lens flexes to focus on the depth.
+
+Most AR displays use **fixed-focus** combiners (HoloLens 2 fixes focus at ~2 m). Stereo content moves the *vergence* depth cue, but accommodation stays at 2 m → conflict → eye strain.
+
+Fixes:
+- **Varifocal** displays (mechanical or liquid lenses).
+- **Multifocal** displays (multi-plane).
+- **True holographic** displays (each pixel emits a wavefront with proper depth).
+
+The *true* path to "holographic AR" is a **holographic waveguide + CGH per frame** at 60–120 Hz — a 2030+ research target.
+
+---
+
+## 🆚 5. What "Holographic" Means in HoloLens 2 vs True CGH
+
+| Feature | HoloLens 2 marketing | Optical reality |
+|---|---|---|
+| "Holographic computing" | Yes | Marketing for "spatial 3D content" |
+| Holographic waveguide combiner | Yes | True — uses HOE photopolymer-based diffractive elements |
+| Per-pixel wavefront reconstruction (true CGH) | No | Microdisplay outputs flat 2D image; combiner expands the pupil |
+| Per-pixel focal control | No | Single focal plane at ~2 m |
+
+Magic Leap 2 sits similarly but with a 70° FoV and dimming glass for outdoor use.
+
+---
+
+## 🌐 6. The 2026 AR Landscape
+
+| Device | Status (May 2026) | Optical class |
+|---|---|---|
+| HoloLens 2 | Microsoft scaled back consumer roadmap; enterprise stable | Diffractive waveguide |
+| Magic Leap 2 | Enterprise / medical focus; Samsung partnership active | Diffractive waveguide |
+| Apple Vision Pro 2 (M5) | $3,499; passthrough VR-as-AR; high-quality | LCD / OLED + passthrough |
+| Meta Quest 3 / 3S | $299–$499; passthrough VR-as-AR | LCD passthrough |
+| XReal Air 2 / Light | Bird-bath consumer glasses | Bird-bath |
+| Lumus Maximus | Reflective waveguide; brightness leader | Reflective waveguide |
+| DigiLens / Snap Spectacles 5+ | Enterprise + consumer | Holographic Bragg waveguide |
+
+---
+
+## 🛠️ 7. Worked Example (skeleton) — Pick the Right AR for an Arch-Viz Client Demo
+
+Scenario: walk a client through a planned interior on-site, with a phone-companion VR fallback.
+
+| Need | Pick |
+|---|---|
+| Best image quality, indoor | Apple Vision Pro (passthrough; no FoV constraints) |
+| Indoor + outdoor, see-through | Magic Leap 2 (~70° + dimming) |
+| Cost-sensitive demo | Quest 3S + USDZ scene |
+| Hands-on collaborative review | HoloLens 2 + Mesh |
+
+In every case, the asset pipeline is the same: Revit → USD → device-specific runtime ([20.8](20.8---Pipelines,-Interop-&-Productization---From-Architecture-to-Business)).
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [31.4 - Spatial Light Modulators & Holographic Displays - LCoS, DMD, Metasurfaces](31.4---Spatial-Light-Modulators-&-Holographic-Displays---LCoS,-DMD,-Metasurfaces)
+- [31.7 - Holography in Architecture & Engineering Visualization](31.7---Holography-in-Architecture-&-Engineering-Visualization)
+- [Subject_Plan](Subject_Plan) — VR side of the same headset spectrum
+- [Subject_Plan](Subject_Plan)
+
+### External
+- [Microsoft Learn — HoloLens 2 hardware](https://learn.microsoft.com/en-us/hololens/hololens2-hardware)
+- [Magic Leap 2 developer docs](https://developer-docs.magicleap.cloud/)
+- [VR/AR Wiki — Waveguide article](https://vrarwiki.com/wiki/Waveguide)
+- [nextmsc — Samsung & Magic Leap waveguide news (2026)](https://www.nextmsc.com/news/samsung-and-magic-leap-advance-waveguide-displays)
+- [Karl Guttag's KGOnTech blog](https://kguttag.com/) — long-running deep-dive AR optics analysis
+- [Stanford Wetzstein Lab — varifocal & multifocal papers](https://www.computationalimaging.org/)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"HoloLens shows holograms."** It shows stereo virtual content overlaid via a holographic *waveguide* — not a wavefront-reconstruction hologram.
+- **"Bigger FoV is always better."** Bigger FoV often costs eyebox, brightness, and form factor. Optimize for use case.
+- **"Passthrough VR is the same as AR."** Latency, occlusion fidelity, and lens distortion all matter; passthrough is improving but not yet equivalent to good optical see-through.
+- **"AR will replace phones in 5 years."** Said since 2014. Form factor + battery + optics still hard. Bet on incremental progress.

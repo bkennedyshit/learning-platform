@@ -1,0 +1,101 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="rp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .rp-stage { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; transition: all 0.2s; cursor: pointer; }
+    .rp-stage:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .rp-prog { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .rp-fixed { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; stroke-dasharray: 4 2; }
+    .rp-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .rp-sub { font-family: Inter, system-ui, sans-serif; font-size: 8px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .rp-conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; stroke-dasharray: 4, 4; animation: flow 1s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -16; } }
+    .rp-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .rp-legend { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <text x="360" y="20" class="rp-title">Modern GPU Rendering Pipeline</text>
+
+  <!-- Row 1: Vertex Processing -->
+  <rect x="20" y="40" width="95" height="55" class="rp-fixed"/>
+  <text x="67" y="62" class="rp-label">Input</text>
+  <text x="67" y="74" class="rp-label">Assembly</text>
+  <text x="67" y="87" class="rp-sub">(VBO/IBO bind)</text>
+
+  <line x1="115" y1="67" x2="140" y2="67" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="140" y="40" width="95" height="55" class="rp-prog"/>
+  <text x="187" y="62" class="rp-label">Vertex</text>
+  <text x="187" y="74" class="rp-label">Shader</text>
+  <text x="187" y="87" class="rp-sub">(MVP transform)</text>
+
+  <line x1="235" y1="67" x2="260" y2="67" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="260" y="40" width="95" height="55" class="rp-prog"/>
+  <text x="307" y="62" class="rp-label">Tessellation</text>
+  <text x="307" y="74" class="rp-sub">(Hull + Domain)</text>
+  <text x="307" y="87" class="rp-sub">[optional]</text>
+
+  <line x1="355" y1="67" x2="380" y2="67" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="380" y="40" width="95" height="55" class="rp-prog"/>
+  <text x="427" y="62" class="rp-label">Geometry</text>
+  <text x="427" y="74" class="rp-label">Shader</text>
+  <text x="427" y="87" class="rp-sub">[optional]</text>
+
+  <line x1="475" y1="67" x2="500" y2="67" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="500" y="40" width="95" height="55" class="rp-fixed"/>
+  <text x="547" y="62" class="rp-label">Clipping &</text>
+  <text x="547" y="74" class="rp-label">Culling</text>
+  <text x="547" y="87" class="rp-sub">(clip space)</text>
+
+  <line x1="595" y1="67" x2="620" y2="67" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="620" y="40" width="80" height="55" class="rp-fixed"/>
+  <text x="660" y="62" class="rp-label">Perspective</text>
+  <text x="660" y="74" class="rp-label">Divide</text>
+  <text x="660" y="87" class="rp-sub">(÷ w)</text>
+
+  <!-- Arrow down to row 2 -->
+  <line x1="660" y1="95" x2="660" y2="140" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <!-- Row 2: Rasterization -->
+  <rect x="560" y="140" width="120" height="55" class="rp-fixed"/>
+  <text x="620" y="162" class="rp-label">Rasterization</text>
+  <text x="620" y="175" class="rp-sub">(triangle setup,</text>
+  <text x="620" y="187" class="rp-sub">edge functions)</text>
+
+  <line x1="560" y1="167" x2="510" y2="167" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="380" y="140" width="130" height="55" class="rp-prog"/>
+  <text x="445" y="162" class="rp-label">Fragment / Pixel</text>
+  <text x="445" y="175" class="rp-label">Shader</text>
+  <text x="445" y="187" class="rp-sub">(lighting, texturing)</text>
+
+  <line x1="380" y1="167" x2="340" y2="167" class="rp-conn" marker-end="url(#rp-arrow)"/>
+
+  <rect x="200" y="140" width="140" height="55" class="rp-fixed"/>
+  <text x="270" y="162" class="rp-label">Output Merger</text>
+  <text x="270" y="175" class="rp-sub">(depth test, stencil,</text>
+  <text x="270" y="187" class="rp-sub">blending → framebuffer)</text>
+
+  <!-- Legend -->
+  <rect x="20" y="230" width="15" height="10" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" rx="2"/>
+  <text x="40" y="239" class="rp-legend">= Programmable stage</text>
+  <rect x="20" y="248" width="15" height="10" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" rx="2" stroke-dasharray="4 2"/>
+  <text x="40" y="257" class="rp-legend">= Fixed-function stage</text>
+
+  <!-- Data flow annotations -->
+  <rect x="20" y="280" width="680" height="120" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="360" y="300" class="rp-label" font-size="11px">Data at Each Stage</text>
+  <text x="30" y="320" class="rp-sub" text-anchor="start" font-size="9px">Input Assembly: raw vertices + indices from GPU memory (VBO/IBO)</text>
+  <text x="30" y="335" class="rp-sub" text-anchor="start" font-size="9px">Vertex Shader: per-vertex MVP transform → clip-space position (vec4)</text>
+  <text x="30" y="350" class="rp-sub" text-anchor="start" font-size="9px">Clipping: discard/clip triangles outside [-w, +w] frustum boundaries</text>
+  <text x="30" y="365" class="rp-sub" text-anchor="start" font-size="9px">Rasterization: generate fragments (pixel candidates) with interpolated attributes</text>
+  <text x="30" y="380" class="rp-sub" text-anchor="start" font-size="9px">Fragment Shader: compute final color per-fragment (lighting, textures, PBR)</text>
+  <text x="30" y="395" class="rp-sub" text-anchor="start" font-size="9px">Output Merger: depth/stencil test → blend → write to framebuffer</text>
+</svg>

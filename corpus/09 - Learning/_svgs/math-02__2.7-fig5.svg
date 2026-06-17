@@ -1,0 +1,70 @@
+<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="ocarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ocb1 { fill:var(--interactive-accent, #58a6ff); opacity:0.15; stroke:var(--interactive-accent, #58a6ff);
+             stroke-width:1.2; }
+    .ocb2 { fill:var(--text-accent, #79c0ff); opacity:0.15; stroke:var(--text-accent, #79c0ff); stroke-width:1.2; }
+    .ocv  { stroke:var(--text-normal, #c9d1d9); stroke-width:2.2; fill:none; marker-end:url(#ocarr); }
+    .ocw  { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.2; fill:none; marker-end:url(#ocarr); }
+    .ocwp { stroke:var(--text-accent, #79c0ff); stroke-width:2.2; fill:none; marker-end:url(#ocarr); }
+    .ocrt { stroke:var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .oclb { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .ocla { font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px;
+             fill:var(--interactive-accent, #58a6ff); }
+    .oclb2{ font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px;
+             fill:var(--text-accent, #79c0ff); }
+    .ocln { font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px;
+             fill:var(--text-normal, #c9d1d9); }
+  </style>
+  <!-- W region -->
+  <ellipse cx="160" cy="180" rx="120" ry="50" class="ocb1"/>
+  <text x="160" y="240" class="ocla" text-anchor="middle">W</text>
+  <!-- W-perp region -->
+  <ellipse cx="340" cy="120" rx="100" ry="40" class="ocb2"/>
+  <text x="340" y="90" class="oclb2" text-anchor="middle">W⊥</text>
+  <!-- origin -->
+  <circle cx="240" cy="150" r="4" fill="var(--text-normal, #c9d1d9)"/>
+  <text x="225" y="165" class="oclb">O</text>
+  <!-- v = w + w_perp -->
+  <line x1="240" y1="150" x2="240" y2="150" class="ocv" opacity="0">
+    <animate attributeName="opacity" to="1" begin="0.5s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="360" begin="0.5s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="50" begin="0.5s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="368" y="48" class="ocln" opacity="0">v
+    <animate attributeName="opacity" to="1" begin="1.1s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- w component -->
+  <line x1="240" y1="150" x2="240" y2="150" class="ocw" opacity="0">
+    <animate attributeName="opacity" to="1" begin="1.6s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="120" begin="1.6s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="175" begin="1.6s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="108" y="173" class="ocla" opacity="0">w
+    <animate attributeName="opacity" to="1" begin="2.2s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- w_perp component -->
+  <line x1="120" y1="175" x2="120" y2="175" class="ocwp" opacity="0">
+    <animate attributeName="opacity" to="1" begin="2.7s" dur="0.01s" fill="freeze" />
+    <animate attributeName="x2" to="360" begin="2.7s" dur="0.6s" fill="freeze" />
+    <animate attributeName="y2" to="50" begin="2.7s" dur="0.6s" fill="freeze" />
+  </line>
+  <text x="250" y="100" class="oclb2" opacity="0">w⊥
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </text>
+  <!-- right angle -->
+  <polyline points="128,168 135,157 146,163" class="ocrt" opacity="0">
+    <animate attributeName="opacity" to="1" begin="3.3s" dur="0.3s" fill="freeze" />
+  </polyline>
+  <!-- decomposition label -->
+  <g opacity="0">
+    <animate attributeName="opacity" to="1" begin="4.0s" dur="0.5s" fill="freeze" />
+    <text x="240" y="268" class="oclb" text-anchor="middle" font-weight="bold">v = w + w⊥  (unique decomposition)</text>
+    <text x="240" y="283" class="oclb" text-anchor="middle">ℝⁿ = W ⊕ W⊥,   dim W + dim W⊥ = n</text>
+  </g>
+</svg>

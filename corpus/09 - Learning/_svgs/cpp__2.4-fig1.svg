@@ -1,0 +1,93 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-own" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .own-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; cursor: pointer; }
+    .own-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .resource { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .dead { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; stroke-dasharray: 4,3; opacity: 0.5; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .own-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-own); }
+    .move-arrow { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; marker-end: url(#arrow-own); stroke-dasharray: 6,3; }
+    .weak-arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; marker-end: url(#arrow-own); stroke-dasharray: 3,3; }
+  </style>
+
+  <text x="350" y="22" class="title">Smart Pointer Ownership &amp; Move Semantics</text>
+
+  <!-- unique_ptr section -->
+  <text x="120" y="50" class="section-label">unique_ptr (exclusive)</text>
+  <rect x="30" y="60" width="100" height="40" class="own-box"/>
+  <text x="80" y="84" class="label">owner_a</text>
+  <rect x="160" y="60" width="80" height="40" class="resource"/>
+  <text x="200" y="84" class="label">Resource</text>
+  <line x1="130" y1="80" x2="160" y2="80" class="own-arrow"/>
+
+  <!-- After move -->
+  <rect x="30" y="115" width="100" height="40" class="dead"/>
+  <text x="80" y="139" class="label">owner_a</text>
+  <text x="80" y="150" class="detail">(nullptr)</text>
+  <rect x="300" y="115" width="100" height="40" class="own-box"/>
+  <text x="350" y="139" class="label">owner_b</text>
+  <rect x="430" y="115" width="80" height="40" class="resource"/>
+  <text x="470" y="139" class="label">Resource</text>
+  <line x1="400" y1="135" x2="430" y2="135" class="own-arrow"/>
+  <path d="M 130 135 C 200 135 250 135 300 135" class="move-arrow"/>
+  <text x="215" y="128" class="detail">std::move()</text>
+
+  <!-- shared_ptr section -->
+  <text x="120" y="185" class="section-label">shared_ptr (reference counted)</text>
+  <rect x="30" y="195" width="90" height="35" class="own-box"/>
+  <text x="75" y="216" class="label">ptr_a</text>
+  <rect x="140" y="195" width="90" height="35" class="own-box"/>
+  <text x="185" y="216" class="label">ptr_b</text>
+  <rect x="280" y="195" width="90" height="35" class="resource"/>
+  <text x="325" y="210" class="label">Resource</text>
+  <text x="325" y="224" class="detail">refcount: 2</text>
+  <line x1="120" y1="212" x2="280" y2="212" class="own-arrow"/>
+  <line x1="230" y1="212" x2="280" y2="212" class="own-arrow"/>
+
+  <!-- weak_ptr -->
+  <rect x="140" y="245" width="90" height="35" class="own-box"/>
+  <text x="185" y="266" class="label">weak_ptr</text>
+  <path d="M 230 262 C 260 262 270 220 280 215" class="weak-arrow"/>
+  <text x="270" y="258" class="detail">observes</text>
+  <text x="270" y="270" class="detail">(no ownership)</text>
+
+  <!-- Move semantics visualization -->
+  <text x="530" y="185" class="section-label">Move = Steal the Guts</text>
+
+  <!-- Before move -->
+  <rect x="430" y="200" width="120" height="55" class="own-box"/>
+  <text x="490" y="218" class="label">src vector</text>
+  <text x="440" y="235" class="detail">ptr: 0xABC</text>
+  <text x="440" y="248" class="detail">size: 1000</text>
+
+  <rect x="570" y="200" width="120" height="55" class="own-box"/>
+  <text x="630" y="218" class="label">dst vector</text>
+  <text x="580" y="235" class="detail">ptr: null</text>
+  <text x="580" y="248" class="detail">size: 0</text>
+
+  <!-- After move -->
+  <rect x="430" y="270" width="120" height="55" class="dead"/>
+  <text x="490" y="288" class="label">src (moved)</text>
+  <text x="440" y="305" class="detail">ptr: null</text>
+  <text x="440" y="318" class="detail">size: 0</text>
+
+  <rect x="570" y="270" width="120" height="55" class="own-box"/>
+  <text x="630" y="288" class="label">dst (owns)</text>
+  <text x="580" y="305" class="detail">ptr: 0xABC</text>
+  <text x="580" y="318" class="detail">size: 1000</text>
+
+  <path d="M 490 255 L 490 270" class="move-arrow"/>
+  <path d="M 630 255 L 630 270" class="own-arrow"/>
+  <text x="560" y="265" class="detail">O(1) transfer</text>
+
+  <!-- Bottom summary -->
+  <text x="350" y="360" class="section-label">Rule: unique_ptr by default | shared_ptr only when needed | raw ptr = non-owning view</text>
+</svg>

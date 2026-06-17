@@ -1,0 +1,675 @@
+---
+title: "05.2 — Action Potentials & Ion Channels"
+subject: "Neuroscience & Computational Cognition"
+catalog: advanced
+audience_tier: higher-education
+chapter: "5.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 05.2 — Action Potentials & Ion Channels
+
+> *"The nervous impulse is not a simple wave of negativity, but a brief, self-regenerating reversal of the membrane potential that propagates without decrement."*
+> — **Alan Hodgkin & Andrew Huxley**, Nobel Prize Lecture (1963)
+
+The action potential is the fundamental unit of neural communication — a ~1 ms electrochemical pulse that propagates along axons at speeds of 1–120 m/s. This chapter derives the complete Hodgkin-Huxley model from first principles, connecting ion channel biophysics to the differential equations that govern neural firing. Every modern computational neuroscience model — from integrate-and-fire to detailed compartmental simulations — descends from this framework.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Derive the Nernst equation for equilibrium potential of a single ion species.
+2. Apply the Goldman-Hodgkin-Katz (GHK) equation to calculate resting membrane potential.
+3. Describe the complete temporal sequence of an action potential (threshold → depolarization → repolarization → hyperpolarization → refractory).
+4. Write and solve the Hodgkin-Huxley equations for membrane voltage and gating variables.
+5. Explain voltage-gated Na⁺ and K⁺ channel kinetics using the m/h/n gating formalism.
+6. Calculate conduction velocity from axon diameter and myelination parameters.
+7. Distinguish absolute from relative refractory periods and compute maximum firing frequency.
+
+---
+
+## 🖼️ Visual Anchor — Action Potential Phases
+
+![neuro-05__fig1](neuro-05__fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 05.2.1 — Membrane Potential ($V_m$)
+
+The **membrane potential** is the electrical potential difference across the neuronal cell membrane:
+
+$$
+V_m = V_{\text{inside}} - V_{\text{outside}}
+$$
+
+At rest, $V_m \approx -70$ mV (the interior is negative relative to the exterior). This potential is maintained by:
+- The Na⁺/K⁺-ATPase pump (3 Na⁺ out, 2 K⁺ in per ATP hydrolyzed)
+- Differential membrane permeability (K⁺ leak channels dominate at rest)
+- The Donnan equilibrium of impermeant intracellular anions (proteins, organic phosphates)
+
+### Definition 05.2.2 — Ion Channel
+
+An **ion channel** is a transmembrane protein that forms a selective pore allowing specific ions to cross the lipid bilayer down their electrochemical gradient. Classification:
+
+| Type | Gating Mechanism | Example | Role |
+|:---|:---|:---|:---|
+| Voltage-gated | Membrane potential | Na_v1.1, K_v1.2 | Action potential generation |
+| Ligand-gated | Neurotransmitter binding | nAChR, NMDA-R, GABA_A-R | Synaptic transmission |
+| Leak (constitutive) | Always open | K_ir, TASK channels | Resting potential |
+| Mechanosensitive | Physical deformation | Piezo1/2 | Touch, proprioception |
+
+### Definition 05.2.3 — Nernst Equation
+
+The **Nernst equation** gives the equilibrium potential for a single ion species — the voltage at which the electrical driving force exactly balances the concentration gradient:
+
+$$
+E_X = \frac{RT}{zF} \ln\left(\frac{[X]_{\text{out}}}{[X]_{\text{in}}}\right) = \frac{61.5 \text{ mV}}{z} \log_{10}\left(\frac{[X]_{\text{out}}}{[X]_{\text{in}}}\right) \quad \text{(at 37°C)}
+$$
+
+where:
+- $R = 8.314$ J/(mol·K) — gas constant
+- $T = 310$ K (body temperature)
+- $z$ — ion valence (+1 for Na⁺/K⁺, +2 for Ca²⁺, −1 for Cl⁻)
+- $F = 96{,}485$ C/mol — Faraday constant
+
+Typical equilibrium potentials:
+
+| Ion | [out] mM | [in] mM | z | $E_X$ (mV) |
+|:---:|:---:|:---:|:---:|:---:|
+| K⁺ | 5 | 140 | +1 | −89 |
+| Na⁺ | 145 | 12 | +1 | +67 |
+| Ca²⁺ | 2.5 | 0.0001 | +2 | +136 |
+| Cl⁻ | 120 | 4 | −1 | −89 |
+
+### Definition 05.2.4 — Goldman-Hodgkin-Katz (GHK) Voltage Equation
+
+The **GHK equation** calculates the resting membrane potential considering multiple ion species with different permeabilities:
+
+$$
+V_m = \frac{RT}{F} \ln\left(\frac{P_{\text{K}}[\text{K}^+]_o + P_{\text{Na}}[\text{Na}^+]_o + P_{\text{Cl}}[\text{Cl}^-]_i}{P_{\text{K}}[\text{K}^+]_i + P_{\text{Na}}[\text{Na}^+]_i + P_{\text{Cl}}[\text{Cl}^-]_o}\right)
+$$
+
+At rest, relative permeabilities are approximately $P_K : P_{Na} : P_{Cl} = 1 : 0.04 : 0.45$.
+
+### Definition 05.2.5 — Action Potential
+
+An **action potential** (AP) is a transient, all-or-none reversal of membrane potential lasting ~1–2 ms, generated when $V_m$ reaches threshold (~−55 mV). Phases:
+
+1. **Threshold** (−55 mV): Sufficient Na⁺ channels open to create positive feedback
+2. **Depolarization** (−55 → +40 mV, ~0.5 ms): Massive Na⁺ influx through voltage-gated Na⁺ channels
+3. **Repolarization** (+40 → −70 mV, ~0.5 ms): Na⁺ channels inactivate; K⁺ channels open (delayed rectifier)
+4. **Hyperpolarization** (−70 → −90 mV): K⁺ channels slow to close; membrane overshoots resting potential
+5. **Recovery** (−90 → −70 mV): K⁺ channels close; Na⁺/K⁺-ATPase restores ionic gradients
+
+### Definition 05.2.6 — Refractory Periods
+
+- **Absolute refractory period** (~1 ms): Na⁺ channels are inactivated (h-gate closed); no stimulus can trigger another AP regardless of amplitude.
+- **Relative refractory period** (~2–4 ms): Some Na⁺ channels have recovered but K⁺ conductance is still elevated; a stronger-than-normal stimulus is required.
+
+Maximum firing frequency:
+
+$$
+f_{\max} = \frac{1}{t_{\text{absolute}} + t_{\text{relative}}} \approx \frac{1}{1 + 2 \text{ ms}} = 333 \text{ Hz}
+$$
+
+### Definition 05.2.7 — Voltage-Gated Na⁺ Channel (Na_v)
+
+The voltage-gated sodium channel has two gates:
+- **Activation gate (m)**: Opens rapidly upon depolarization (time constant ~0.1–0.5 ms)
+- **Inactivation gate (h)**: Closes slowly after depolarization (time constant ~1–2 ms)
+
+Channel states: Closed (m=0, h=1) → Open (m=1, h=1) → Inactivated (m=1, h=0) → Recovered (m=0, h=1)
+
+The Na⁺ current:
+
+$$
+I_{\text{Na}} = \bar{g}_{\text{Na}} \cdot m^3 \cdot h \cdot (V_m - E_{\text{Na}})
+$$
+
+### Definition 05.2.8 — Voltage-Gated K⁺ Channel (K_v, Delayed Rectifier)
+
+The delayed rectifier K⁺ channel has a single activation gate (n) that opens more slowly than the Na⁺ m-gate:
+
+$$
+I_{\text{K}} = \bar{g}_{\text{K}} \cdot n^4 \cdot (V_m - E_{\text{K}})
+$$
+
+The n⁴ kinetics create the characteristic delay: all four subunits must be in the open conformation simultaneously.
+
+
+
+
+---
+
+## 🔬 2. Biological Mechanisms
+
+### 2.1 — The Action Potential Cascade (Complete Temporal Sequence)
+
+**Phase 0 — Resting State** ($V_m = -70$ mV):
+- Na⁺ channels: Closed (m≈0, h≈1) — activation gate shut, inactivation gate open
+- K⁺ channels: Closed (n≈0.3) — partially activated at rest
+- Leak channels: Open — maintain resting potential via K⁺ leak
+- Na⁺/K⁺-ATPase: Active — 3 Na⁺ out, 2 K⁺ in per cycle
+
+**Phase 1 — Subthreshold Depolarization** ($-70 \rightarrow -55$ mV):
+
+$$
+\text{Stimulus (EPSP/current injection)} \rightarrow \text{Local depolarization} \rightarrow \text{Some Na}^+ \text{ channels open}
+$$
+
+If depolarization is insufficient, passive decay returns $V_m$ to rest (electrotonic spread with length constant $\lambda$).
+
+**Phase 2 — Threshold and Positive Feedback** ($V_m = -55$ mV):
+
+$$
+\text{Depolarization} \rightarrow m\text{-gates open} \rightarrow \text{Na}^+ \text{ influx} \rightarrow \text{Further depolarization} \rightarrow \text{More } m\text{-gates open}
+$$
+
+This is the **Hodgkin cycle** — a regenerative positive feedback loop. Once threshold is crossed, the AP is inevitable (all-or-none law).
+
+**Phase 3 — Rapid Depolarization** ($-55 \rightarrow +40$ mV, duration ~0.3 ms):
+
+$$
+g_{\text{Na}} \uparrow\uparrow\uparrow \quad (m^3 \rightarrow 1) \rightarrow I_{\text{Na}} = \bar{g}_{\text{Na}} \cdot m^3 h \cdot (V - E_{\text{Na}})
+$$
+
+Peak Na⁺ conductance: $\bar{g}_{\text{Na}} \approx 120$ mS/cm². The membrane potential approaches but never reaches $E_{\text{Na}} = +67$ mV because:
+- h-gate begins closing (inactivation)
+- K⁺ channels begin opening (delayed rectifier)
+
+**Phase 4 — Repolarization** ($+40 \rightarrow -70$ mV, duration ~0.5 ms):
+
+$$
+h \rightarrow 0 \text{ (Na}^+\text{ inactivation)} \quad \text{AND} \quad n^4 \rightarrow 1 \text{ (K}^+\text{ activation)}
+$$
+
+$$
+I_{\text{K}} = \bar{g}_{\text{K}} \cdot n^4 \cdot (V - E_{\text{K}}) \quad \text{drives } V_m \text{ negative}
+$$
+
+**Phase 5 — Hyperpolarization (Undershoot)** ($-70 \rightarrow -90$ mV):
+
+$$
+n^4 \text{ still elevated (slow K}^+\text{ deactivation)} \rightarrow V_m \text{ overshoots past } E_{\text{rest}} \text{ toward } E_{\text{K}} = -89 \text{ mV}
+$$
+
+**Phase 6 — Recovery** ($-90 \rightarrow -70$ mV):
+- K⁺ channels close (n → 0.3)
+- Na⁺ channels recover from inactivation (h → 1, requires hyperpolarization)
+- Na⁺/K⁺-ATPase restores ionic gradients
+
+### 2.2 — Saltatory Conduction in Myelinated Axons
+
+In myelinated axons, the AP "jumps" between Nodes of Ranvier:
+
+$$
+\text{Node}_1 \text{ (AP)} \xrightarrow{\text{electrotonic spread through myelin}} \text{Node}_2 \text{ (AP regenerated)}
+$$
+
+**Conduction velocity** scales with axon diameter:
+- Unmyelinated: $v \propto \sqrt{d}$ (typically 0.5–2 m/s)
+- Myelinated: $v \propto d$ (typically 10–120 m/s)
+
+Empirical relationship for myelinated axons:
+
+$$
+v \approx 6 \times d \quad \text{(m/s, where } d \text{ is in μm)}
+$$
+
+Example: A 20 μm diameter myelinated axon conducts at ~120 m/s (α motor neurons).
+
+### 2.3 — Ion Channel Molecular Structure
+
+Voltage-gated Na⁺ channel (Na_v1.1):
+- **α-subunit**: 4 homologous domains (I–IV), each with 6 transmembrane segments (S1–S6)
+- **Voltage sensor**: S4 segment — positively charged arginine residues every 3rd position; moves outward upon depolarization
+- **Selectivity filter**: DEKA ring (Asp-Glu-Lys-Ala) in the P-loops between S5–S6
+- **Inactivation gate**: Intracellular loop between domains III–IV (IFM motif — "ball and chain")
+
+Voltage-gated K⁺ channel (K_v1.2):
+- **4 separate subunits** (homotetramer), each with 6 TM segments
+- **Selectivity filter**: TVGYG sequence — dehydrates K⁺ ions for passage
+- **No fast inactivation** (delayed rectifier type) — explains slower kinetics
+
+---
+
+## 📐 3. Mathematical Models
+
+### 3.1 — The Hodgkin-Huxley Equations (1952)
+
+The complete Hodgkin-Huxley model describes the membrane as a parallel RC circuit with voltage-dependent conductances:
+
+**Membrane current equation:**
+
+$$
+C_m \frac{dV}{dt} = -\bar{g}_{\text{Na}} m^3 h (V - E_{\text{Na}}) - \bar{g}_{\text{K}} n^4 (V - E_{\text{K}}) - g_L (V - E_L) + I_{\text{ext}}
+$$
+
+where:
+- $C_m = 1.0$ μF/cm² — membrane capacitance
+- $\bar{g}_{\text{Na}} = 120$ mS/cm² — maximum Na⁺ conductance
+- $\bar{g}_{\text{K}} = 36$ mS/cm² — maximum K⁺ conductance
+- $g_L = 0.3$ mS/cm² — leak conductance
+- $E_{\text{Na}} = +50$ mV, $E_{\text{K}} = -77$ mV, $E_L = -54.4$ mV
+
+**Gating variable dynamics** (first-order kinetics):
+
+$$
+\frac{dm}{dt} = \alpha_m(V)(1-m) - \beta_m(V) m
+$$
+
+$$
+\frac{dh}{dt} = \alpha_h(V)(1-h) - \beta_h(V) h
+$$
+
+$$
+\frac{dn}{dt} = \alpha_n(V)(1-n) - \beta_n(V) n
+$$
+
+**Rate functions** (Hodgkin & Huxley, 1952; $V$ in mV, shifted so resting = 0):
+
+$$
+\alpha_m(V) = \frac{0.1(25-V)}{e^{(25-V)/10} - 1}, \quad \beta_m(V) = 4 e^{-V/18}
+$$
+
+$$
+\alpha_h(V) = 0.07 e^{-V/20}, \quad \beta_h(V) = \frac{1}{e^{(30-V)/10} + 1}
+$$
+
+$$
+\alpha_n(V) = \frac{0.01(10-V)}{e^{(10-V)/10} - 1}, \quad \beta_n(V) = 0.125 e^{-V/80}
+$$
+
+**Steady-state values and time constants:**
+
+$$
+x_\infty(V) = \frac{\alpha_x(V)}{\alpha_x(V) + \beta_x(V)}, \quad \tau_x(V) = \frac{1}{\alpha_x(V) + \beta_x(V)}
+$$
+
+### 3.2 — The Cable Equation (Spatial Propagation)
+
+For an axon with spatial extent, the membrane potential varies along the length $x$:
+
+$$
+C_m \frac{\partial V}{\partial t} = \frac{d}{4 R_i} \frac{\partial^2 V}{\partial x^2} - I_{\text{ion}}(V, m, h, n) + I_{\text{ext}}
+$$
+
+where:
+- $d$ = axon diameter
+- $R_i$ = intracellular resistivity (~150 Ω·cm for axoplasm)
+
+The **electrotonic length constant** (passive spread distance):
+
+$$
+\lambda = \sqrt{\frac{d \cdot R_m}{4 R_i}}
+$$
+
+where $R_m = 1/g_L$ is the membrane resistance. For a 10 μm unmyelinated axon:
+
+$$
+\lambda = \sqrt{\frac{10 \times 10^{-4} \text{ cm} \times 3333 \text{ Ω·cm}^2}{4 \times 150 \text{ Ω·cm}}} = \sqrt{\frac{3.33}{600}} \approx 0.075 \text{ cm} = 0.75 \text{ mm}
+$$
+
+### 3.3 — Integrate-and-Fire Model (Simplified)
+
+The leaky integrate-and-fire (LIF) model strips the HH model to its essential dynamics:
+
+$$
+\tau_m \frac{dV}{dt} = -(V - V_{\text{rest}}) + R_m I_{\text{ext}}
+$$
+
+with reset rule: if $V \geq V_{\text{thresh}}$, then $V \leftarrow V_{\text{reset}}$ and spike is recorded.
+
+- $\tau_m = R_m C_m \approx 10$–20 ms (membrane time constant)
+- $V_{\text{rest}} = -70$ mV
+- $V_{\text{thresh}} = -55$ mV
+- $V_{\text{reset}} = -80$ mV (models hyperpolarization)
+
+**F-I curve** (firing rate as function of input current):
+
+$$
+f(I) = \begin{cases} 0 & \text{if } I \lt I_{\text{thresh}} \\ \left[\tau_m \ln\left(\frac{R_m I - V_{\text{rest}} + V_{\text{thresh}}}{R_m I - V_{\text{rest}} + V_{\text{reset}}}\right)\right]^{-1} & \text{if } I \geq I_{\text{thresh}} \end{cases}
+$$
+
+### 3.4 — Nernst Equation Derivation from Thermodynamics
+
+Starting from the electrochemical potential $\mu$ for ion $X$ with valence $z$:
+
+$$
+\mu_X = \mu_X^0 + RT \ln[X] + zFV
+$$
+
+At equilibrium, $\mu_{\text{in}} = \mu_{\text{out}}$:
+
+$$
+RT \ln[X]_{\text{in}} + zFV_{\text{in}} = RT \ln[X]_{\text{out}} + zFV_{\text{out}}
+$$
+
+$$
+zF(V_{\text{in}} - V_{\text{out}}) = RT \ln[X]_{\text{out}} - RT \ln[X]_{\text{in}}
+$$
+
+$$
+E_X = V_{\text{in}} - V_{\text{out}} = \frac{RT}{zF} \ln\frac{[X]_{\text{out}}}{[X]_{\text{in}}}
+$$
+
+At $T = 310$ K:
+
+$$
+\frac{RT}{F} = \frac{8.314 \times 310}{96485} = 0.02672 \text{ V} = 26.72 \text{ mV}
+$$
+
+Converting to log₁₀: $E_X = \frac{61.5 \text{ mV}}{z} \log_{10}\frac{[X]_{\text{out}}}{[X]_{\text{in}}}$
+
+
+
+
+---
+
+## ✍️ 4. Derivations & Worked Calculations
+
+<details>
+<summary>🔍 Worked Example 05.2.1 — Nernst Potential for K⁺</summary>
+
+**Problem:** Calculate the equilibrium potential for K⁺ given $[\text{K}^+]_{\text{out}} = 5$ mM, $[\text{K}^+]_{\text{in}} = 140$ mM, at body temperature (37°C = 310 K).
+
+**Step 1:** Apply the Nernst equation with $z = +1$:
+
+$$
+E_K = \frac{RT}{zF} \ln\frac{[\text{K}^+]_{\text{out}}}{[\text{K}^+]_{\text{in}}}
+$$
+
+**Step 2:** Substitute values:
+
+$$
+E_K = \frac{8.314 \times 310}{1 \times 96485} \ln\frac{5}{140}
+$$
+
+**Step 3:** Compute the thermal voltage:
+
+$$
+\frac{RT}{F} = \frac{2577.3}{96485} = 0.02672 \text{ V} = 26.72 \text{ mV}
+$$
+
+**Step 4:** Compute the logarithm:
+
+$$
+\ln\frac{5}{140} = \ln(0.03571) = -3.332
+$$
+
+**Step 5:** Final result:
+
+$$
+E_K = 26.72 \times (-3.332) = -89.0 \text{ mV}
+$$
+
+**Interpretation:** The K⁺ equilibrium potential is −89 mV. Since the resting potential (−70 mV) is more positive than $E_K$, there is a net outward driving force on K⁺ at rest, meaning K⁺ tends to flow out of the cell.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.2.2 — GHK Resting Potential Calculation</summary>
+
+**Problem:** Calculate $V_m$ using the GHK equation with: $P_K : P_{Na} : P_{Cl} = 1 : 0.04 : 0.45$, and concentrations $[\text{K}^+]_o = 5$, $[\text{K}^+]_i = 140$, $[\text{Na}^+]_o = 145$, $[\text{Na}^+]_i = 12$, $[\text{Cl}^-]_o = 120$, $[\text{Cl}^-]_i = 4$ (all in mM).
+
+**Step 1:** GHK equation (note Cl⁻ is reversed because $z = -1$):
+
+$$
+V_m = 26.72 \ln\frac{P_K[\text{K}^+]_o + P_{Na}[\text{Na}^+]_o + P_{Cl}[\text{Cl}^-]_i}{P_K[\text{K}^+]_i + P_{Na}[\text{Na}^+]_i + P_{Cl}[\text{Cl}^-]_o}
+$$
+
+**Step 2:** Numerator:
+
+$$
+1(5) + 0.04(145) + 0.45(4) = 5 + 5.8 + 1.8 = 12.6
+$$
+
+**Step 3:** Denominator:
+
+$$
+1(140) + 0.04(12) + 0.45(120) = 140 + 0.48 + 54 = 194.48
+$$
+
+**Step 4:** Compute:
+
+$$
+V_m = 26.72 \ln\frac{12.6}{194.48} = 26.72 \ln(0.0648) = 26.72 \times (-2.737) = -73.1 \text{ mV}
+$$
+
+**Interpretation:** The GHK equation gives $V_m \approx -73$ mV, close to the measured resting potential of −70 mV. The slight discrepancy is due to the electrogenic Na⁺/K⁺-ATPase contributing an additional ~−3 mV.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.2.3 — Hodgkin-Huxley Gating Variable Steady States</summary>
+
+**Problem:** At $V = 0$ mV (HH convention, where rest = 0), calculate the steady-state values $m_\infty$, $h_\infty$, $n_\infty$ and their time constants.
+
+**Step 1:** Rate functions at $V = 0$:
+
+$$
+\alpha_m(0) = \frac{0.1(25-0)}{e^{(25-0)/10} - 1} = \frac{2.5}{e^{2.5} - 1} = \frac{2.5}{12.18 - 1} = \frac{2.5}{11.18} = 0.2237
+$$
+
+$$
+\beta_m(0) = 4 e^{-0/18} = 4 e^0 = 4.0
+$$
+
+$$
+\alpha_h(0) = 0.07 e^{-0/20} = 0.07
+$$
+
+$$
+\beta_h(0) = \frac{1}{e^{(30-0)/10} + 1} = \frac{1}{e^3 + 1} = \frac{1}{20.09 + 1} = \frac{1}{21.09} = 0.04742
+$$
+
+$$
+\alpha_n(0) = \frac{0.01(10-0)}{e^{(10-0)/10} - 1} = \frac{0.1}{e^1 - 1} = \frac{0.1}{1.718} = 0.05820
+$$
+
+$$
+\beta_n(0) = 0.125 e^{-0/80} = 0.125
+$$
+
+**Step 2:** Steady-state values:
+
+$$
+m_\infty = \frac{\alpha_m}{\alpha_m + \beta_m} = \frac{0.2237}{0.2237 + 4.0} = \frac{0.2237}{4.2237} = 0.0530
+$$
+
+$$
+h_\infty = \frac{\alpha_h}{\alpha_h + \beta_h} = \frac{0.07}{0.07 + 0.04742} = \frac{0.07}{0.1174} = 0.5961
+$$
+
+$$
+n_\infty = \frac{\alpha_n}{\alpha_n + \beta_n} = \frac{0.05820}{0.05820 + 0.125} = \frac{0.05820}{0.1832} = 0.3177
+$$
+
+**Step 3:** Time constants:
+
+$$
+\tau_m = \frac{1}{\alpha_m + \beta_m} = \frac{1}{4.2237} = 0.237 \text{ ms}
+$$
+
+$$
+\tau_h = \frac{1}{\alpha_h + \beta_h} = \frac{1}{0.1174} = 8.52 \text{ ms}
+$$
+
+$$
+\tau_n = \frac{1}{\alpha_n + \beta_n} = \frac{1}{0.1832} = 5.46 \text{ ms}
+$$
+
+**Interpretation:** At rest, $m \approx 0.05$ (Na⁺ activation gates mostly closed), $h \approx 0.60$ (inactivation gates mostly open — ready to fire), $n \approx 0.32$ (K⁺ gates partially open). The fast $\tau_m = 0.24$ ms vs slow $\tau_h = 8.5$ ms explains why Na⁺ channels activate before they inactivate.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.2.4 — Conduction Velocity and Internode Distance</summary>
+
+**Problem:** A myelinated axon has diameter $d = 15$ μm, internode distance $L = 1.5$ mm, and the AP takes 0.02 ms to regenerate at each node. Calculate conduction velocity.
+
+**Step 1:** Empirical formula for myelinated axons:
+
+$$
+v \approx 6d = 6 \times 15 = 90 \text{ m/s}
+$$
+
+**Step 2:** Alternative calculation from node-to-node timing. The electrotonic spread between nodes is nearly instantaneous (RC time constant of myelinated segment ≪ 0.02 ms). So velocity is dominated by nodal regeneration time:
+
+$$
+v = \frac{L}{t_{\text{node}}} = \frac{1.5 \times 10^{-3} \text{ m}}{0.02 \times 10^{-3} \text{ s}} = 75 \text{ m/s}
+$$
+
+**Step 3:** The discrepancy (90 vs 75 m/s) arises because the electrotonic spread time is not zero. A more accurate model:
+
+$$
+v = \frac{L}{t_{\text{node}} + t_{\text{spread}}}
+$$
+
+If $v = 90$ m/s: $t_{\text{total}} = L/v = 1.5 \times 10^{-3}/90 = 0.0167$ ms per internode.
+
+So $t_{\text{spread}} = 0.0167 - 0.02 \lt  0$ — this means the empirical formula already accounts for both delays. The actual internode distance for $d = 15$ μm is closer to $L \approx 100d = 1.5$ mm, consistent.
+
+**Key relationship:** Optimal myelination maintains $L/d \approx 100$ and $g$-ratio (axon diameter / total fiber diameter) $\approx 0.6$–0.7.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.2.5 — LIF Neuron Firing Rate</summary>
+
+**Problem:** A leaky integrate-and-fire neuron has $\tau_m = 15$ ms, $V_{\text{rest}} = -70$ mV, $V_{\text{thresh}} = -55$ mV, $V_{\text{reset}} = -80$ mV, $R_m = 10$ MΩ. Find the firing rate for $I_{\text{ext}} = 3$ nA.
+
+**Step 1:** Check if current exceeds threshold. The steady-state voltage for constant current:
+
+$$
+V_\infty = V_{\text{rest}} + R_m I = -70 + 10 \times 3 = -70 + 30 = -40 \text{ mV}
+$$
+
+Since $V_\infty = -40 \gt  V_{\text{thresh}} = -55$, the neuron fires repetitively. ✓
+
+**Step 2:** Apply the F-I curve formula:
+
+$$
+f = \left[\tau_m \ln\frac{V_\infty - V_{\text{reset}}}{V_\infty - V_{\text{thresh}}}\right]^{-1}
+$$
+
+**Step 3:** Substitute:
+
+$$
+f = \left[15 \text{ ms} \times \ln\frac{-40 - (-80)}{-40 - (-55)}\right]^{-1} = \left[15 \ln\frac{40}{15}\right]^{-1}
+$$
+
+**Step 4:** Compute:
+
+$$
+f = \left[15 \times \ln(2.667)\right]^{-1} = \left[15 \times 0.981\right]^{-1} = \left[14.71 \text{ ms}\right]^{-1} = 68.0 \text{ Hz}
+$$
+
+**Interpretation:** The neuron fires at 68 Hz — well within the physiological range for cortical neurons receiving strong excitatory drive. The interspike interval is ~14.7 ms.
+
+</details>
+
+---
+
+## 🤖 5. AI/ML Translation
+
+### 5.1 — The Action Potential as a Binary Activation Function
+
+The all-or-none nature of the action potential is the biological origin of binary/threshold activation:
+
+| Biological Feature | AI/ML Equivalent |
+|:---|:---|
+| Threshold at −55 mV | Bias term in $\sigma(Wx + b)$ |
+| All-or-none firing | Step function / hard threshold |
+| Graded response (firing rate) | ReLU / sigmoid continuous activation |
+| Refractory period | Dropout (prevents re-activation) |
+| Temporal coding (spike timing) | Spiking neural networks (SNNs) |
+
+### 5.2 — Hodgkin-Huxley → Recurrent Neural Networks
+
+The HH equations are a **4-dimensional dynamical system** $(V, m, h, n)$ with:
+- Nonlinear activation functions (rate equations)
+- Recurrent feedback (voltage affects gates which affect voltage)
+- Multiple time scales ($\tau_m \ll \tau_h, \tau_n$)
+
+This maps directly to **gated recurrent units**:
+- LSTM gates (input, forget, output) ↔ HH gates (m, h, n)
+- The LSTM forget gate ↔ Na⁺ inactivation (h-gate): both prevent sustained activation
+- The LSTM input gate ↔ Na⁺ activation (m-gate): controls what new information enters
+
+### 5.3 — Rate Coding vs. Temporal Coding
+
+**Rate coding** (mean firing frequency encodes stimulus intensity):
+- Maps to standard ANN: activation value = firing rate
+- Information capacity: ~100 bits/s per neuron
+
+**Temporal coding** (precise spike timing carries information):
+- Maps to spiking neural networks (SNNs)
+- Information capacity: ~1000+ bits/s per neuron
+- Enables coincidence detection (see [05.3 - Synaptic Plasticity & Hebbian Learning](05.3---Synaptic-Plasticity-&-Hebbian-Learning) for STDP)
+
+### 5.4 — What AI Currently Ignores
+
+1. **Ion channel diversity:** Real neurons express 100+ channel types with different kinetics. ANNs use one activation function per layer.
+2. **Dendritic computation:** Dendrites perform local nonlinear computation (NMDA spikes, Ca²⁺ plateaus) before the soma integrates. ANNs assume linear summation at the "soma" (weighted sum).
+3. **Metabolic constraints:** Real neurons consume ~20% of body's energy. No ANN architecture models energy cost of computation.
+4. **Stochastic channel gating:** Individual channels open/close probabilistically. This intrinsic noise may serve computational purposes (stochastic resonance).
+
+---
+
+## 🧬 6. Personal Context
+
+### Bilateral Processing and Conduction Velocity
+
+In subjects with enhanced bilateral processing, interhemispheric communication speed is critical. The corpus callosum contains axons ranging from 0.4–15 μm diameter, with corresponding conduction velocities of 2.4–90 m/s. The interhemispheric transfer time (IHTT) measured via ERP studies is typically 10–15 ms.
+
+For bilateral processors with larger callosal cross-sections (particularly the posterior regions connecting parietal and temporal cortices), the distribution of axon diameters may be shifted toward larger fibers, reducing IHTT and enabling tighter temporal coordination between hemispheres. This has direct implications for:
+- Bimanual motor coordination (see [05.4 - Hemispheric Lateralization & The Corpus Callosum](05.4---Hemispheric-Lateralization-&-The-Corpus-Callosum))
+- Cross-hemispheric binding of visual information
+- Bilateral language processing (reduced lateralization of Broca's/Wernicke's)
+
+### Neuroplasticity and Channel Expression
+
+5-HT2A receptor agonism (psychoplastogens) modulates ion channel expression through:
+
+$$
+\text{5-HT2A activation} \rightarrow \text{Gq/11} \rightarrow \text{PLC} \rightarrow \text{IP}_3 + \text{DAG} \rightarrow \text{Ca}^{2+} \text{ release} \rightarrow \text{CaMKII} \rightarrow \text{gene transcription}
+$$
+
+This cascade upregulates:
+- AMPA receptor trafficking to synapses (increasing excitatory drive)
+- BDNF expression (promoting dendritic growth)
+- Arc/Arg3.1 (immediate early gene for synaptic consolidation)
+
+The net effect is a temporary increase in cortical excitability and plasticity — effectively lowering the "threshold" for Hebbian learning (Chapter 05.3).
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [05.1 - Neuroanatomy & The Cortex](05.1---Neuroanatomy-&-The-Cortex) — Where these action potentials propagate
+- [05.3 - Synaptic Plasticity & Hebbian Learning](05.3---Synaptic-Plasticity-&-Hebbian-Learning) — What happens when APs reach synapses
+- [05.4 - Hemispheric Lateralization & The Corpus Callosum](05.4---Hemispheric-Lateralization-&-The-Corpus-Callosum) — Conduction across hemispheres
+- [05.6 - Neuromodulators - Dopamine, Serotonin, Acetylcholine](05.6---Neuromodulators---Dopamine,-Serotonin,-Acetylcholine) — Modulation of channel properties
+- [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space) — HH as a dynamical system
+- [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) — Stability analysis of HH fixed points
+- [23 - AI & Machine Learning Systems](23---AI-&-Machine-Learning-Systems) — Activation functions derived from neural firing
+
+### Authoritative Sources
+1. **Hodgkin, A. L. & Huxley, A. F.** (1952). A quantitative description of membrane current and its application to conduction and excitation in nerve. *J. Physiol.*, 117(4), 500–544.
+2. **Kandel, E. R. et al.** — *Principles of Neural Science*, 6th ed. Chapters 7–9: Ion channels and action potentials.
+3. **Sapolsky, R.** — *Human Behavioral Biology* (Stanford). Lecture 2: Neurophysiology.
+4. **Izhikevich, E. M.** (2007). *Dynamical Systems in Neuroscience*. MIT Press. — Comprehensive treatment of neural excitability models.
+5. **Koch, C.** (1999). *Biophysics of Computation*. Oxford University Press. — Cable theory and compartmental modeling.
+

@@ -1,0 +1,1037 @@
+---
+title: "26.8 — Building, Packaging & Distribution"
+subject: "Game Dev"
+catalog: advanced
+audience_tier: higher-education
+chapter: "26.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 26.8 — Building, Packaging & Distribution
+
+> *"A game is never finished, only shipped."* — Shigeru Miyamoto (attributed)
+
+The final mile of game development — getting your game from "runs on my machine" to "runs on every player's machine" — is filled with platform-specific gotchas, asset pipeline decisions, and distribution logistics. This chapter covers build systems, cross-platform compilation, asset cooking, store submission, patching, and CI/CD pipelines for games.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Configure **build pipelines** for Unity, Unreal, and Godot targeting multiple platforms.
+2. Set up **CI/CD** for automated builds, testing, and deployment.
+3. Understand **asset cooking** (texture compression, audio encoding, platform-specific formats).
+4. Submit games to **Steam, Epic, Meta Quest Store, and itch.io**.
+5. Implement **patching and delta updates** for live games.
+6. Handle **platform-specific requirements** (console certification, mobile store guidelines).
+7. Design a **versioning strategy** for builds, assets, and save compatibility.
+
+---
+
+## 🖼️ Visual Anchor — Build & Distribution Pipeline
+
+![gamedev__4.8-fig1](gamedev__4.8-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 26.8.1 — Asset Cooking
+
+**Asset cooking** transforms source assets (PSD, FBX, WAV) into platform-optimized runtime formats:
+
+| Source Format | Cooked (PC) | Cooked (Mobile/Quest) | Cooked (Console) |
+|--------------|-------------|----------------------|-----------------|
+| PSD/PNG texture | BC7 (DXT) | ASTC 4×4 | GNF (PS5) |
+| FBX mesh | Engine binary | Simplified LODs | Platform mesh |
+| WAV audio | Vorbis OGG | ADPCM | Platform codec |
+| C# scripts | IL2CPP native | IL2CPP ARM64 | Platform ABI |
+
+Cooking happens at build time, not runtime. Players never see source assets.
+
+### Definition 26.8.2 — Build Configuration
+
+| Config | Optimization | Debug Info | Asserts | Use Case |
+|--------|-------------|-----------|---------|----------|
+| **Debug** | None (O0) | Full | All | Development, breakpoints |
+| **Development** | Partial (O1) | Symbols | Some | Playtesting, profiling |
+| **Shipping** | Full (O2/O3) | Stripped | None | Release builds |
+
+### Definition 26.8.3 — Semantic Versioning for Games
+
+```
+MAJOR.MINOR.PATCH+BUILD
+  │      │     │     │
+  │      │     │     └── CI build number (auto-incremented)
+  │      │     └──────── Hotfix (save-compatible)
+  │      └────────────── Content update (may break saves → migration)
+  └───────────────────── Major release (new systems, marketing milestone)
+
+Example: 1.3.2+4567
+```
+
+### Definition 26.8.4 — Delta Patching
+
+**Delta patching** sends only the bytes that changed between versions, not the entire game. Steam's depot system and Epic's BuildPatch tool both implement this:
+
+$$
+\text{patch size} = \text{diff}(\text{old build}, \text{new build})
+$$
+
+Typical: a 2 GB game with a bug fix produces a 50-200 MB patch (not 2 GB re-download).
+
+---
+
+## 🧩 2. Mental Models / Architecture
+
+### Model 2.1 — Build Pipeline Stages
+
+```
+Source Control (Git/Perforce)
+    ↓
+CI Trigger (push to main / tag / schedule)
+    ↓
+Build Server (Unity Cloud Build / GitHub Actions / Jenkins)
+    ├── Compile code (IL2CPP / C++ / GDScript export)
+    ├── Cook assets (textures, audio, meshes)
+    ├── Run automated tests (unit + integration)
+    ├── Package (exe + data → installer/archive)
+    └── Sign (code signing certificate)
+    ↓
+Artifact Storage (S3 / Artifactory / Steam Depot)
+    ↓
+Distribution (Steam / Epic / Quest Store / itch.io)
+    ↓
+Players download & play
+```
+
+### Model 2.2 — Platform Matrix
+
+| Platform | Engine Support | Build Target | Key Constraint |
+|----------|---------------|-------------|----------------|
+| Windows PC | All | x64 exe + DLLs | DirectX 11/12, Vulkan |
+| macOS | Unity, Godot | .app bundle | Metal only, notarization required |
+| Linux | All | AppImage / Flatpak | Vulkan, glibc compatibility |
+| Quest 2/3 | Unity, Unreal, Godot | Android APK (ARM64) | 11.11ms budget, thermal throttle |
+| PlayStation 5 | Unity, Unreal | Proprietary | DevKit required, certification |
+| Xbox Series | Unity, Unreal | GDK | ID@Xbox program |
+| Nintendo Switch | Unity, Unreal | Proprietary | Weak GPU, 720p handheld |
+| iOS | Unity, Unreal, Godot | IPA | App Store review, 200MB OTA limit |
+| Android | All | APK/AAB | Fragmentation, thermal |
+| Web (HTML5) | Godot, Unity (limited) | WASM + WebGL | 256MB memory limit |
+
+---
+
+## 🔑 3. Mechanics
+
+### Mechanic 3.1 — Unity Build Pipeline
+
+```csharp
+// Editor script: automated build
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+
+public static class BuildScript
+{
+    [MenuItem("Build/Windows")]
+    public static void BuildWindows()
+    {
+        var options = new BuildPlayerOptions
+        {
+            scenes = new[] { "Assets/Scenes/Main.unity", "Assets/Scenes/Game.unity" },
+            locationPathName = "Builds/Windows/MyGame.exe",
+            target = BuildTarget.StandaloneWindows64,
+            options = BuildOptions.None
+        };
+        
+        BuildReport report = BuildPipeline.BuildPlayer(options);
+        if (report.summary.result != BuildResult.Succeeded)
+            throw new System.Exception($"Build failed: {report.summary.totalErrors} errors");
+    }
+    
+    [MenuItem("Build/Quest")]
+    public static void BuildQuest()
+    {
+        // Switch to Android platform
+        EditorUserBuildSettings.SwitchActiveBuildTarget(
+            BuildTargetGroup.Android, BuildTarget.Android);
+        
+        // Quest-specific settings
+        PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+        PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingBackend.IL2CPP);
+        
+        var options = new BuildPlayerOptions
+        {
+            scenes = new[] { "Assets/Scenes/Main.unity" },
+            locationPathName = "Builds/Quest/MyGame.apk",
+            target = BuildTarget.Android,
+            options = BuildOptions.None
+        };
+        
+        BuildPipeline.BuildPlayer(options);
+    }
+}
+```
+
+### Mechanic 3.2 — GitHub Actions CI for Godot
+
+```yaml
+# .github/workflows/build.yml
+name: Build Game
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - platform: windows
+            export_preset: "Windows Desktop"
+            artifact: "MyGame.exe"
+          - platform: linux
+            export_preset: "Linux/X11"
+            artifact: "MyGame.x86_64"
+          - platform: web
+            export_preset: "HTML5"
+            artifact: "index.html"
+    
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:26.2
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Export
+        run: |
+          mkdir -p builds/${{ matrix.platform }}
+          godot --headless --export-release \
+            "${{ matrix.export_preset }}" \
+            builds/${{ matrix.platform }}/${{ matrix.artifact }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-build
+          path: builds/${{ matrix.platform }}/
+```
+
+### Mechanic 3.3 — Steam Upload (Steamworks)
+
+```bash
+# steamcmd depot upload script
+# ContentBuilder/scripts/app_build_480.vdf
+
+"AppBuild"
+{
+    "AppID" "480"  // Your Steam App ID
+    "Desc" "v1.3.2 - Bug fixes"
+    "BuildOutput" "../output/"
+    "ContentRoot" "../content/"
+    "Depots"
+    {
+        "481"  // Windows depot
+        {
+            "FileMapping"
+            {
+                "LocalPath" "windows/*"
+                "DepotPath" "."
+                "recursive" "1"
+            }
+        }
+    }
+}
+```
+
+```bash
+# Upload command
+steamcmd +login myaccount +run_app_build \
+    ../scripts/app_build_480.vdf +quit
+```
+
+---
+
+## 💻 4. Code Patterns & Examples
+
+### 26.1 Python — Build Version Injection
+
+```python
+"""
+build_version.py — Inject version info into game builds.
+Run as pre-build step in CI.
+"""
+import subprocess
+import json
+from datetime import datetime
+from pathlib import Path
+
+def get_git_info() -> dict:
+    """Extract version info from git tags and commits."""
+    tag = subprocess.check_output(
+        ["git", "describe", "--tags", "--always"], text=True
+    ).strip()
+    
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"], text=True
+    ).strip()
+    
+    branch = subprocess.check_output(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
+    ).strip()
+    
+    # Count commits since last tag for build number
+    try:
+        build_num = subprocess.check_output(
+            ["git", "rev-list", "--count", "HEAD"], text=True
+        ).strip()
+    except subprocess.CalledProcessError:
+        build_num = "0"
+    
+    return {
+        "version": tag,
+        "commit": commit,
+        "branch": branch,
+        "build_number": int(build_num),
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+def inject_version(info: dict, target: Path):
+    """Write version info to a file the game reads at startup."""
+    target.write_text(json.dumps(info, indent=2))
+    print(f"Injected version: {info['version']}+{info['build_number']} ({info['commit']})")
+
+if __name__ == "__main__":
+    info = get_git_info()
+    inject_version(info, Path("Assets/Resources/version.json"))
+```
+
+### 26.2 C# — Runtime Version Display
+
+```csharp
+public class VersionDisplay : MonoBehaviour
+{
+    [SerializeField] private TMPro.TextMeshProUGUI versionText;
+    
+    void Start()
+    {
+        var versionJson = Resources.Load<TextAsset>("version");
+        if (versionJson != null)
+        {
+            var info = JsonUtility.FromJson<VersionInfo>(versionJson.text);
+            versionText.text = $"v{info.version}+{info.build_number}";
+            
+            #if DEVELOPMENT_BUILD
+            versionText.text += $" [{info.commit}]";
+            #endif
+        }
+    }
+    
+    [System.Serializable]
+    private class VersionInfo
+    {
+        public string version;
+        public string commit;
+        public int build_number;
+        public string timestamp;
+    }
+}
+```
+
+---
+
+## 🧮 5. Worked Examples
+
+### Example 26.8.1 — Design a Multi-Platform Build Matrix
+
+**Problem:** Your game targets Windows, Linux, Quest 3, and Web. Design the CI/CD pipeline with appropriate build configurations, testing, and deployment.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Pipeline design:**
+
+```yaml
+Triggers:
+  - Push to 'develop' → Development builds (all platforms)
+  - Push to 'main' → Shipping builds (all platforms)
+  - Tag 'v*' → Release builds → auto-deploy to stores
+
+Build Matrix:
+  ┌──────────────┬────────────┬──────────────┬─────────────┐
+  │ Platform     │ Config     │ Tests        │ Deploy      │
+  ├──────────────┼────────────┼──────────────┼─────────────┤
+  │ Windows x64  │ IL2CPP     │ Unit + Play  │ Steam       │
+  │ Linux x64    │ IL2CPP     │ Unit         │ Steam       │
+  │ Quest 3      │ IL2CPP ARM │ Unit         │ Meta Store  │
+  │ WebGL        │ WASM       │ Smoke test   │ itch.io     │
+  └──────────────┴────────────┴──────────────┴─────────────┘
+
+Estimated build times:
+  - Windows: ~8 min (IL2CPP compilation)
+  - Linux: ~10 min
+  - Quest: ~12 min (ARM cross-compile + asset re-cook)
+  - WebGL: ~15 min (WASM compilation is slow)
+  - Total (parallel): ~15 min
+
+Artifact sizes:
+  - Windows: ~500 MB (uncompressed), ~200 MB (Steam depot)
+  - Linux: ~450 MB
+  - Quest: ~150 MB (aggressive texture compression)
+  - WebGL: ~50 MB (must be small for web)
+```
+
+**Key decisions:**
+1. Quest gets ASTC texture compression (vs BC7 for PC) — must re-cook assets
+2. WebGL has 256MB memory limit — need aggressive LOD and streaming
+3. Linux build uses Vulkan only (no DirectX)
+4. All platforms share the same C# codebase via `#if UNITY_ANDROID` preprocessor directives
+
+</details>
+
+### Example 26.8.2 — Steam Store Submission Checklist
+
+**Problem:** You're ready to submit your first game to Steam. What are the required steps and common rejection reasons?
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Pre-submission checklist:**
+
+1. **Steamworks account** ($100 app credit fee per game)
+2. **Store page assets:**
+   - Header capsule: 460×215 px
+   - Small capsule: 231×87 px
+   - Main capsule: 616×353 px
+   - Hero graphic: 3840×1240 px
+   - Screenshots: minimum 5, 1920×1080 recommended
+   - Trailer: 1080p, < 2 min, gameplay-focused
+3. **Store description:** Short description (< 300 chars) + full description
+4. **System requirements:** Min and recommended specs
+5. **Content survey:** Age ratings, content descriptors
+6. **Build upload:** Via SteamPipe (steamcmd or GUI)
+7. **Depot configuration:** One depot per platform
+8. **Achievements** (optional but recommended): Steam API integration
+9. **Cloud saves:** Steamworks Cloud API or Auto-Cloud paths
+10. **Controller support:** Steam Input API for remapping
+
+**Common rejection reasons:**
+- Missing or misleading screenshots (must show actual gameplay)
+- Broken build (crashes on launch)
+- Missing required DLLs (Visual C++ redistributable)
+- Store page text has formatting errors
+- Content doesn't match age rating
+- Game requires external account/launcher not disclosed
+
+**Timeline:**
+- Store page review: 2-5 business days
+- Build review: 2-5 business days
+- Can run in parallel
+- Plan 2 weeks before desired launch date
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### ❌ Anti-Pattern: "Works on My Machine" Shipping
+
+Always test release builds on a clean machine (or VM). Development machines have SDKs, runtimes, and DLLs that players don't have. Common missing dependencies:
+- Visual C++ Redistributable (Windows)
+- .NET Runtime (if not using IL2CPP)
+- Vulkan drivers (Linux)
+
+### ❌ Anti-Pattern: No Automated Builds
+
+Manual builds are error-prone and unreproducible. Set up CI from day one — even a simple "build on push" catches compilation errors immediately.
+
+### ❌ Anti-Pattern: Shipping Debug Symbols
+
+Debug builds are 2-5× larger and significantly slower. Always ship Release/Shipping configuration. Keep debug symbols in a separate symbol server for crash analysis.
+
+### ❌ Anti-Pattern: Ignoring Platform Certification
+
+Console platforms (PlayStation, Xbox, Switch) have strict certification requirements (load times, suspend/resume, accessibility, error handling). Failing certification means weeks of delay. Read the TRCs/XRs early.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [26.7 - Performance & Optimization](26.7---Performance-&-Optimization)
+- **CI/CD concepts:** [08.8 - Git & Version Control](08.8---Git-&-Version-Control)
+- **Docker for builds:** [08.9 - Docker & Containers](08.9---Docker-&-Containers)
+- **Platform APIs:** [08.11 - Computer Networks Essentials](08.11---Computer-Networks-Essentials)
+
+### External Resources
+- **Steamworks Documentation** (partner.steamgames.com) — complete store integration guide
+- **Unity Cloud Build** — managed CI for Unity projects
+- **Unreal Automation Tool (UAT)** — command-line build system
+- **itch.io Creator Documentation** — simplest distribution for prototypes
+- **GDC: "Shipping Your First Game"** — practical postmortems
+
+### Practice
+- `_practice/scripts/4.8_build_version.py` — version injection and changelog generation
+
+
+
+---
+
+## 🔬 8. Advanced Topics — Platform Publishing, Asset Management & CI/CD for Games
+
+### 8.1 — Steam vs. Epic vs. itch.io: Publishing Platform Comparison
+
+#### Steam (Steamworks)
+
+```yaml
+# Steam app configuration (app_build.vdf)
+"AppBuild"
+{
+    "AppID" "480"  # Your Steam App ID
+    "Desc" "My Game v1.2.3 build"
+    "ContentRoot" "D:\builds\my_game\"
+    "BuildOutput" "D:\builds\steam_output\"
+    "Depots"
+    {
+        "481"  # Depot ID (one per platform/content chunk)
+        {
+            "FileMapping"
+            {
+                "LocalPath" "*"
+                "DepotPath" "."
+                "recursive" "1"
+            }
+            "FileExclusion" "*.pdb"  # Don't ship debug symbols
+            "FileExclusion" "*.map"
+        }
+    }
+}
+```
+
+**Steam Publishing Checklist:**
+1. **Steamworks Partner Account** ($100 app credit, recoupable)
+2. **Store Page Setup:** Capsule images (header 460×215, hero 3840×1240), screenshots (1920×1080 min), description, tags, system requirements
+3. **Build Upload:** Use `steamcmd` or Steamworks GUI to upload depots
+4. **Review Process:** 2-5 business days for initial review
+5. **Achievements, Cloud Saves, Trading Cards** (optional but expected)
+6. **Revenue Split:** 70/30 (standard), 75/25 (after $10M), 80/20 (after $50M)
+
+**Steam-Specific Integration:**
+
+```csharp
+// Steamworks.NET integration (C#)
+public class SteamIntegration : MonoBehaviour
+{
+    void Start()
+    {
+        if (!SteamAPI.Init())
+        {
+            Debug.LogError("Steam not running!");
+            Application.Quit();
+            return;
+        }
+    }
+    
+    void Update()
+    {
+        SteamAPI.RunCallbacks(); // Must call every frame
+    }
+    
+    // Unlock achievement
+    public void UnlockAchievement(string achievementId)
+    {
+        SteamUserStats.SetAchievement(achievementId);
+        SteamUserStats.StoreStats(); // Upload to Steam servers
+    }
+    
+    // Cloud save
+    public void CloudSave(string filename, byte[] data)
+    {
+        SteamRemoteStorage.FileWrite(filename, data, data.Length);
+    }
+    
+    public byte[] CloudLoad(string filename)
+    {
+        int size = SteamRemoteStorage.GetFileSize(filename);
+        byte[] buffer = new byte[size];
+        SteamRemoteStorage.FileRead(filename, buffer, size);
+        return buffer;
+    }
+}
+```
+
+#### Epic Games Store
+
+**Key Differences from Steam:**
+- **Revenue Split:** 88/12 (developer-favorable)
+- **Free Games Program:** Epic may fund your game for exclusivity
+- **Epic Online Services (EOS):** Free multiplayer, matchmaking, voice chat
+- **Build Upload:** Epic Games Launcher or BuildPatchTool CLI
+- **Review:** Similar timeline to Steam (3-7 days)
+- **No Trading Cards/Community Features** (less mature ecosystem)
+
+#### itch.io
+
+**Best for:** Prototypes, game jams, free games, early access without gatekeeping.
+
+```yaml
+# itch.io butler push (CLI tool)
+# butler push <directory> <user/game>:<channel>
+# Channels: windows, mac, linux, web
+
+# Example CI script
+steps:
+  - butler push ./build/windows myname/mygame:windows
+  - butler push ./build/mac myname/mygame:mac
+  - butler push ./build/linux myname/mygame:linux
+  - butler push ./build/web myname/mygame:web-html5
+```
+
+**itch.io Characteristics:**
+- **Revenue Split:** You choose (0% to 100%, default suggestion 10%)
+- **No Review Process:** Instant publishing
+- **Pay-What-You-Want:** Built-in pricing model
+- **Web Builds:** HTML5 games playable in browser
+- **Community:** Strong indie/jam community, less commercial visibility
+
+#### Platform Comparison Matrix
+
+| Criterion | Steam | Epic | itch.io |
+|-----------|-------|------|---------|
+| Revenue split | 70/30 → 80/20 | 88/12 | You choose |
+| Audience size | ~130M MAU | ~60M MAU | ~10M visitors/mo |
+| Review time | 2-5 days | 3-7 days | Instant |
+| Entry cost | $100/app | Free (invite-based) | Free |
+| DRM | Optional (Steamworks) | Optional | None |
+| Achievements | ✅ | ✅ | ❌ |
+| Cloud saves | ✅ | ✅ | ❌ |
+| Multiplayer services | ✅ (Steamworks) | ✅ (EOS, free) | ❌ |
+| Web builds | ❌ | ❌ | ✅ |
+| Best for | Commercial releases | Exclusivity deals | Prototypes, jams |
+
+---
+
+### 8.2 — Unity Addressables vs. Unreal Pak Files
+
+Large games can't load all assets at startup. Asset management systems handle on-demand loading, patching, and DLC.
+
+#### Unity Addressables
+
+Addressables decouple asset references from their physical location. Assets are loaded by address (string key) regardless of whether they're local, in a bundle, or on a CDN.
+
+```csharp
+// Unity Addressables: load assets by address
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
+public class AddressableLoader : MonoBehaviour
+{
+    // Load a single asset
+    public async void LoadWeapon(string weaponAddress)
+    {
+        AsyncOperationHandle<GameObject> handle = 
+            Addressables.LoadAssetAsync<GameObject>(weaponAddress);
+        
+        await handle.Task;
+        
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            GameObject weapon = Instantiate(handle.Result);
+            // Remember to release when done:
+            // Addressables.Release(handle);
+        }
+    }
+    
+    // Load all assets with a label (e.g., "level_3_assets")
+    public async void PreloadLevel(string levelLabel)
+    {
+        var handle = Addressables.LoadAssetsAsync<Object>(levelLabel, null);
+        await handle.Task;
+        
+        Debug.Log($"Loaded {handle.Result.Count} assets for {levelLabel}");
+    }
+    
+    // Download remote content (DLC, patches)
+    public async void DownloadDLC(string dlcLabel)
+    {
+        // Check download size first
+        var sizeHandle = Addressables.GetDownloadSizeAsync(dlcLabel);
+        await sizeHandle.Task;
+        long downloadSize = sizeHandle.Result;
+        
+        if (downloadSize > 0)
+        {
+            Debug.Log($"Downloading {downloadSize / 1024 / 1024}MB...");
+            var downloadHandle = Addressables.DownloadDependenciesAsync(dlcLabel);
+            
+            while (!downloadHandle.IsDone)
+            {
+                float progress = downloadHandle.PercentComplete;
+                UpdateProgressBar(progress);
+                await Task.Yield();
+            }
+        }
+    }
+}
+```
+
+**Addressables Build Pipeline:**
+1. Mark assets as "Addressable" in Inspector
+2. Assign to groups (local vs. remote)
+3. Build Addressables content (separate from player build)
+4. Upload remote bundles to CDN
+5. Update catalog (JSON manifest of all addressable assets)
+
+#### Unreal Pak Files
+
+Unreal packages assets into `.pak` files — compressed archives that the engine mounts at runtime.
+
+```cpp
+// Unreal: Mounting additional pak files (DLC, mods)
+void UMyGameInstance::LoadDLCPak(const FString& PakPath)
+{
+    FPakPlatformFile* PakPlatform = 
+        static_cast<FPakPlatformFile*>(FPlatformFileManager::Get().GetPlatformFile());
+    
+    if (PakPlatform)
+    {
+        // Mount the pak file
+        FPakFile* PakFile = new FPakFile(
+            PakPlatform, *PakPath, false);
+        
+        if (PakFile->IsValid())
+        {
+            PakPlatform->Mount(*PakPath, 0, *FPaths::ProjectContentDir());
+            UE_LOG(LogGame, Log, TEXT("Mounted DLC pak: %s"), *PakPath);
+            
+            // Assets in the pak are now accessible via normal asset paths
+            // e.g., /Game/DLC/Maps/NewLevel
+        }
+    }
+}
+
+// Async loading with streaming
+void UMyGameInstance::AsyncLoadLevel(const FString& LevelPath)
+{
+    FLatentActionInfo LatentInfo;
+    UGameplayStatics::LoadStreamLevel(this, FName(*LevelPath), 
+                                       true, true, LatentInfo);
+}
+```
+
+**Unreal Pak Patching:**
+- Pak files have priority ordering (higher priority overrides lower)
+- Patches ship as new pak files that override specific assets
+- No need to re-download entire game — only the patch pak
+- `UnrealPak.exe` command-line tool for creating/inspecting paks
+
+#### Comparison
+
+| Feature | Unity Addressables | Unreal Pak |
+|---------|-------------------|------------|
+| Granularity | Per-asset or per-group | Per-pak (can be per-chunk) |
+| Remote loading | Built-in CDN support | Custom implementation needed |
+| Hot-reload | ✅ (catalog update) | ❌ (requires restart for new paks) |
+| Compression | LZ4, LZMA per bundle | Zlib, Oodle per pak |
+| DLC support | Labels + remote groups | Mounted pak files |
+| Mod support | Possible (custom catalogs) | Native (pak mounting) |
+| Build time | Separate from player build | Part of cook process |
+
+---
+
+### 8.3 — CI/CD for Game Development
+
+Games have unique CI/CD challenges: large binary assets, long build times, platform-specific compilation, and the need for human QA alongside automated testing.
+
+#### GitHub Actions for Unity (GameCI)
+
+```yaml
+# .github/workflows/build.yml
+name: Build and Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true  # Games use Git LFS for large assets
+      
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          testMode: all  # EditMode + PlayMode tests
+          artifactsPath: test-results
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        targetPlatform:
+          - StandaloneWindows64
+          - StandaloneLinux64
+          - WebGL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: MyGame
+          versioning: Semantic
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+
+  deploy-steam:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-StandaloneWindows64
+          path: build/windows
+      
+      - uses: game-ci/steam-deploy@v3
+        with:
+          username: ${{ secrets.STEAM_USERNAME }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: 480
+          buildDescription: "CI build ${{ github.sha }}"
+          rootPath: build
+          depot1Path: windows
+          releaseBranch: beta  # Deploy to beta branch, not live
+```
+
+#### Unreal Engine CI (Custom)
+
+```yaml
+# Unreal builds are typically self-hosted (large engine, long builds)
+# .github/workflows/unreal-build.yml
+name: Unreal Build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: self-hosted  # Must have UE installed
+    timeout-minutes: 120   # Unreal builds are LONG
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - name: Build (Development)
+        shell: cmd
+        run: |
+          "C:\UE5\Engine\Build\BatchFiles\RunUAT.bat" ^
+            BuildCookRun ^
+            -project="%CD%\MyGame.uproject" ^
+            -platform=Win64 ^
+            -clientconfig=Development ^
+            -cook -stage -pak -archive ^
+            -archivedirectory="%CD%\Packaged" ^
+            -build -clean
+      
+      - name: Run Automated Tests
+        shell: cmd
+        run: |
+          "C:\UE5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" ^
+            "%CD%\MyGame.uproject" ^
+            -ExecCmds="Automation RunTests Game" ^
+            -log -unattended -nopause
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packaged-game
+          path: Packaged/
+```
+
+#### Build Time Optimization
+
+| Technique | Savings | Complexity |
+|-----------|---------|------------|
+| **Incremental builds** | 50-80% | Low (default in most engines) |
+| **Distributed compilation** (IncrediBuild, FASTBuild) | 60-90% for C++ | Medium |
+| **Asset caching** (Derived Data Cache in UE) | 70%+ for cook | Low |
+| **Build machine specs** | 30-50% (NVMe, 64GB RAM, 16+ cores) | $ |
+| **Parallel platform builds** | Linear with runners | Medium |
+| **Git LFS deduplication** | Reduces checkout time | Low |
+
+---
+
+## 📎 9. Appendix — Mathematical Foundations
+
+### Appendix 9.A — Code Signing & Security
+
+Code signing proves that a game binary hasn't been tampered with and comes from a verified publisher. It's **required** for:
+- Windows SmartScreen (unsigned = scary warning)
+- macOS Gatekeeper (unsigned = won't run without override)
+- iOS App Store (mandatory)
+- Google Play (mandatory)
+- Console platforms (mandatory)
+
+#### How Code Signing Works
+
+1. **Developer obtains a certificate** from a Certificate Authority (CA) — e.g., DigiCert, Sectigo
+2. **Private key** signs a hash of the binary:
+
+$$
+\text{signature} = \text{Sign}(H(\text{binary}), K_{private})
+$$
+
+3. **Certificate** (containing public key) is embedded in the binary
+4. **OS verifies** on launch:
+
+$$
+\text{Verify}(H(\text{binary}), \text{signature}, K_{public}) \stackrel{?}{=} \text{true}
+$$
+
+#### Platform-Specific Signing
+
+```yaml
+# Windows: SignTool (part of Windows SDK)
+signtool sign /f certificate.pfx /p password /t http://timestamp.digicert.com /fd sha256 MyGame.exe
+
+# macOS: codesign
+codesign --deep --force --verify --verbose --sign "Developer ID Application: My Company" MyGame.app
+# Then notarize:
+xcrun notarytool submit MyGame.zip --apple-id dev@company.com --team-id ABCDEF1234
+
+# Linux: GPG signature (optional, no OS enforcement)
+gpg --detach-sign --armor MyGame.AppImage
+```
+
+**Certificate Types:**
+- **Standard Code Signing:** $200-500/year, removes "Unknown Publisher" warning
+- **EV Code Signing:** $400-900/year, hardware token required, immediate SmartScreen reputation
+- **Apple Developer:** $99/year (individual), $299/year (organization)
+- **Google Play:** $25 one-time (developer account)
+
+---
+
+### Appendix 9.B — Mobile & Console Platform Certification
+
+#### iOS App Store Submission
+
+**Technical Requirements (TRCs):**
+1. **Launch time:** < 20 seconds to interactive content
+2. **Memory:** Stay within device memory limits (crash = rejection)
+3. **IPv6:** Must work on IPv6-only networks
+4. **Privacy:** Declare all data collection in App Privacy labels
+5. **Minimum iOS version:** Support at least current - 2 major versions
+6. **App Thinning:** Provide asset catalogs for device-specific resources
+7. **No private APIs:** Only use documented public frameworks
+
+**Submission Flow:**
+1. Archive build in Xcode (or Unity Cloud Build)
+2. Upload to App Store Connect via Transporter
+3. Fill metadata: screenshots (6.7", 6.5", 5.5" devices), description, keywords
+4. Submit for review (1-3 days typical, can be expedited)
+5. If rejected: fix issues, resubmit (common rejections: crashes, broken links, guideline violations)
+
+#### Google Play Submission
+
+**Technical Requirements:**
+1. **Target API Level:** Must target recent Android API (currently API 34+)
+2. **64-bit:** Required since 2019 (no 32-bit-only APKs)
+3. **App Bundle:** Must use AAB format (not APK) for Play Store
+4. **Permissions:** Justify every permission requested
+5. **Content Rating:** Complete IARC questionnaire
+6. **Data Safety:** Declare all data collection and sharing
+
+**Android App Bundle (AAB) vs. APK:**
+- AAB: Google generates optimized APKs per device (smaller downloads)
+- Split APKs: separate base + config APKs (language, density, ABI)
+- Play Asset Delivery: stream large assets on-demand (install-time, fast-follow, on-demand)
+
+```yaml
+# build.gradle configuration for Play Asset Delivery
+android {
+    assetPacks = [":install_time_pack", ":on_demand_pack"]
+}
+
+# install_time_pack/build.gradle
+plugins { id 'com.android.asset-pack' }
+assetPack {
+    packName = "install_time_pack"
+    dynamicDelivery {
+        deliveryType = "install-time"  # Downloaded with app
+    }
+}
+
+# on_demand_pack/build.gradle  
+assetPack {
+    packName = "on_demand_pack"
+    dynamicDelivery {
+        deliveryType = "on-demand"  # Downloaded when player requests
+    }
+}
+```
+
+#### Console Certification (PlayStation / Xbox / Nintendo Switch)
+
+Console certification is the most rigorous. Failing means weeks of delay.
+
+**Common Requirements Across All Consoles:**
+1. **Suspend/Resume:** Game must handle system suspend and resume gracefully
+2. **Controller disconnect:** Pause and show reconnection prompt
+3. **User switching:** Handle user sign-out mid-game
+4. **Error handling:** Never crash — show user-friendly error messages
+5. **Save data:** Must handle storage full, corrupted saves, cloud sync
+6. **Accessibility:** Subtitles, colorblind options, remappable controls
+7. **Load times:** Platform-specific maximums (e.g., < 30s to gameplay)
+8. **Network:** Handle disconnection, NAT types, platform-specific multiplayer APIs
+9. **Terminology:** Use platform-correct terms ("Options button" not "Start button" on PS5)
+10. **Trophies/Achievements:** Must have them, must be earnable, must not be trivial
+
+**Certification Timeline:**
+- First submission: 2-4 weeks for review
+- If failed: Fix issues, resubmit (another 1-2 weeks)
+- Budget 6-8 weeks total for first console release
+- Subsequent patches: 1-2 weeks (expedited for critical fixes)
+
+**Pro Tips:**
+- Read the TRC/XR/Lotcheck documents BEFORE development starts
+- Implement suspend/resume and controller disconnect from day one
+- Test on actual devkits (emulators miss hardware-specific issues)
+- Keep a "certification checklist" and test against it every milestone
+- Some requirements are platform-specific and under NDA — can't be shared publicly
+
+---
+

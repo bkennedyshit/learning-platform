@@ -1,0 +1,91 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .circle-a { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; }
+    .circle-b { fill: none; stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; }
+    .fill-inner { fill: var(--interactive-accent, #58a6ff); opacity: 0.3; }
+    .fill-left { fill: var(--interactive-accent, #58a6ff); opacity: 0.2; }
+    .fill-right { fill: var(--text-accent, #79c0ff); opacity: 0.2; }
+    .fill-full { fill: var(--text-muted, #8b949e); opacity: 0.15; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .join-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .table-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .venn-group { transition: all 0.3s; cursor: pointer; }
+    .venn-group:hover { filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <text x="350" y="25" class="title">SQL JOIN Types — Venn Diagram Reference</text>
+
+  <!-- INNER JOIN -->
+  <g class="venn-group" transform="translate(100, 80)">
+    <text x="70" y="-5" class="join-name">INNER JOIN</text>
+    <clipPath id="clip-inner-a"><circle cx="55" cy="55" r="40"/></clipPath>
+    <circle cx="55" cy="55" r="40" class="circle-a"/>
+    <circle cx="85" cy="55" r="40" class="circle-b"/>
+    <circle cx="85" cy="55" r="40" class="fill-inner" clip-path="url(#clip-inner-a)"/>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">B</text>
+    <text x="70" y="115" class="label">Only matching rows</text>
+  </g>
+
+  <!-- LEFT JOIN -->
+  <g class="venn-group" transform="translate(280, 80)">
+    <text x="70" y="-5" class="join-name">LEFT JOIN</text>
+    <circle cx="55" cy="55" r="40" class="fill-left"/>
+    <circle cx="55" cy="55" r="40" class="circle-a"/>
+    <circle cx="85" cy="55" r="40" class="circle-b"/>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">B</text>
+    <text x="70" y="115" class="label">All A + matching B</text>
+  </g>
+
+  <!-- RIGHT JOIN -->
+  <g class="venn-group" transform="translate(460, 80)">
+    <text x="70" y="-5" class="join-name">RIGHT JOIN</text>
+    <circle cx="55" cy="55" r="40" class="circle-a"/>
+    <circle cx="85" cy="55" r="40" class="fill-right"/>
+    <circle cx="85" cy="55" r="40" class="circle-b"/>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">B</text>
+    <text x="70" y="115" class="label">All B + matching A</text>
+  </g>
+
+  <!-- FULL OUTER JOIN -->
+  <g class="venn-group" transform="translate(100, 240)">
+    <text x="70" y="-5" class="join-name">FULL OUTER JOIN</text>
+    <circle cx="55" cy="55" r="40" class="fill-full"/>
+    <circle cx="85" cy="55" r="40" class="fill-full"/>
+    <circle cx="55" cy="55" r="40" class="circle-a"/>
+    <circle cx="85" cy="55" r="40" class="circle-b"/>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">B</text>
+    <text x="70" y="115" class="label">All rows from both</text>
+  </g>
+
+  <!-- CROSS JOIN -->
+  <g class="venn-group" transform="translate(280, 240)">
+    <text x="70" y="-5" class="join-name">CROSS JOIN</text>
+    <rect x="15" y="15" width="50" height="80" rx="4" style="fill: var(--interactive-accent, #58a6ff); opacity: 0.2; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5;"/>
+    <rect x="75" y="15" width="50" height="80" rx="4" style="fill: var(--text-accent, #79c0ff); opacity: 0.2; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5;"/>
+    <text x="40" y="60" class="label">m</text>
+    <text x="100" y="60" class="label">n</text>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">B</text>
+    <text x="70" y="115" class="label">m × n rows (Cartesian)</text>
+  </g>
+
+  <!-- LATERAL JOIN -->
+  <g class="venn-group" transform="translate(460, 240)">
+    <text x="70" y="-5" class="join-name">LATERAL JOIN</text>
+    <rect x="20" y="20" width="40" height="70" rx="4" style="fill: var(--interactive-accent, #58a6ff); opacity: 0.2; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5;"/>
+    <line x1="60" y1="35" x2="80" y2="35" style="stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3,2;"/>
+    <line x1="60" y1="55" x2="80" y2="55" style="stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3,2;"/>
+    <line x1="60" y1="75" x2="80" y2="75" style="stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3,2;"/>
+    <rect x="80" y="25" width="35" height="20" rx="3" style="fill: var(--text-accent, #79c0ff); opacity: 0.3; stroke: var(--text-accent, #79c0ff); stroke-width: 1;"/>
+    <rect x="80" y="48" width="35" height="15" rx="3" style="fill: var(--text-accent, #79c0ff); opacity: 0.3; stroke: var(--text-accent, #79c0ff); stroke-width: 1;"/>
+    <rect x="80" y="68" width="35" height="18" rx="3" style="fill: var(--text-accent, #79c0ff); opacity: 0.3; stroke: var(--text-accent, #79c0ff); stroke-width: 1;"/>
+    <text x="40" y="100" class="table-label">A</text>
+    <text x="100" y="100" class="table-label">f(A)</text>
+    <text x="70" y="115" class="label">Correlated subquery in FROM</text>
+  </g>
+</svg>

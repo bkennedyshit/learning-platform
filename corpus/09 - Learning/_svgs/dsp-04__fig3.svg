@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <style>
+      .text { font-family: sans-serif; fill: #333; }
+      .line { fill: none; stroke: #333; stroke-width: 2; }
+      .butterfly-line { fill: none; stroke: #007acc; stroke-width: 2; }
+      .node { fill: #fff; stroke: #333; stroke-width: 2; }
+      .twiddle { fill: #e67e22; font-weight: bold; }
+    </style>
+  </defs>
+
+  <text x="400" y="30" class="text" font-size="22" font-weight="bold" text-anchor="middle">Cooley-Tukey Radix-2 FFT Butterfly</text>
+
+  <g transform="translate(200, 100)">
+    <!-- Inputs -->
+    <text x="-40" y="45" class="text" font-size="18" font-weight="bold">a</text>
+    <text x="-40" y="155" class="text" font-size="18" font-weight="bold">b</text>
+
+    <!-- Lines -->
+    <line x1="0" y1="40" x2="300" y2="40" class="butterfly-line" />
+    <line x1="0" y1="150" x2="300" y2="150" class="butterfly-line" />
+    
+    <line x1="100" y1="40" x2="200" y2="150" class="butterfly-line" />
+    <line x1="100" y1="150" x2="200" y2="40" class="butterfly-line" />
+
+    <!-- Nodes -->
+    <circle cx="100" cy="40" r="5" class="node" />
+    <circle cx="100" cy="150" r="5" class="node" />
+    <circle cx="200" cy="40" r="5" class="node" />
+    <circle cx="200" cy="150" r="5" class="node" />
+
+    <!-- Multipliers -->
+    <text x="120" y="140" class="twiddle" font-size="16">W<tspan dy="5" font-size="12">N</tspan><tspan dy="-10" font-size="12">k</tspan></text>
+    <circle cx="150" cy="150" r="15" fill="#fff" stroke="#e67e22" stroke-width="2" />
+    <text x="150" y="155" class="text" font-size="16" text-anchor="middle">×</text>
+
+    <text x="210" y="170" class="text" font-size="16">-1</text>
+
+    <!-- Animated Data Flow -->
+    <circle cx="0" cy="40" r="4" fill="#2ecc71">
+      <animate attributeName="cx" values="0;100;200;300" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="40;40;40;40" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="0" cy="150" r="4" fill="#2ecc71">
+      <animate attributeName="cx" values="0;100;200;300" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="150;150;40;40" dur="2s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Outputs -->
+    <text x="320" y="45" class="text" font-size="18" font-weight="bold">A = a + W<tspan dy="5" font-size="12">N</tspan><tspan dy="-10" font-size="12">k</tspan> b</text>
+    <text x="320" y="155" class="text" font-size="18" font-weight="bold">B = a - W<tspan dy="5" font-size="12">N</tspan><tspan dy="-10" font-size="12">k</tspan> b</text>
+  </g>
+
+  <!-- Legend / Info -->
+  <g transform="translate(200, 320)">
+    <rect x="0" y="0" width="400" height="60" fill="#f9f9f9" stroke="#ccc" rx="5" />
+    <text x="200" y="25" class="text" font-size="14" text-anchor="middle">Basic operation of the Cooley-Tukey algorithm.</text>
+    <text x="200" y="45" class="text" font-size="14" text-anchor="middle">Reduces N-point DFT from O(N²) to O(N log₂ N).</text>
+  </g>
+</svg>

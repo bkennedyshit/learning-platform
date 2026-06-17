@@ -1,0 +1,61 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .mod-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; rx: 5; transition: all 0.2s; cursor: pointer; }
+    .mod-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .cat-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .mod-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ring { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3,3; }
+  </style>
+
+  <text x="350" y="22" class="title">Python Standard Library — Module Galaxy</text>
+
+  <!-- Central core -->
+  <circle cx="350" cy="210" r="30" fill="var(--interactive-accent, #58a6ff)" opacity="0.15" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2"/>
+  <text x="350" y="214" class="mod-label" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">builtins</text>
+
+  <!-- Ring 1: Data -->
+  <circle cx="350" cy="210" r="90" class="ring"/>
+  <text x="260" y="140" class="cat-label">Data</text>
+  <rect x="270" y="145" width="60" height="22" class="mod-box"/><text x="300" y="160" class="mod-label">json</text>
+  <rect x="340" y="130" width="60" height="22" class="mod-box"/><text x="370" y="145" class="mod-label">csv</text>
+  <rect x="410" y="145" width="65" height="22" class="mod-box"/><text x="442" y="160" class="mod-label">sqlite3</text>
+  <rect x="430" y="175" width="70" height="22" class="mod-box"/><text x="465" y="190" class="mod-label">dataclasses</text>
+
+  <!-- Ring 2: I/O & System -->
+  <circle cx="350" cy="210" r="150" class="ring"/>
+  <text x="130" y="100" class="cat-label">I/O &amp; System</text>
+  <rect x="140" y="105" width="55" height="22" class="mod-box"/><text x="167" y="120" class="mod-label">pathlib</text>
+  <rect x="140" y="135" width="40" height="22" class="mod-box"/><text x="160" y="150" class="mod-label">os</text>
+  <rect x="140" y="165" width="45" height="22" class="mod-box"/><text x="162" y="180" class="mod-label">sys</text>
+  <rect x="140" y="195" width="65" height="22" class="mod-box"/><text x="172" y="210" class="mod-label">subprocess</text>
+  <rect x="140" y="225" width="55" height="22" class="mod-box"/><text x="167" y="240" class="mod-label">shutil</text>
+
+  <!-- Ring 2: Networking -->
+  <text x="520" y="100" class="cat-label">Network</text>
+  <rect x="520" y="105" width="60" height="22" class="mod-box"/><text x="550" y="120" class="mod-label">socket</text>
+  <rect x="520" y="135" width="75" height="22" class="mod-box"/><text x="557" y="150" class="mod-label">http.server</text>
+  <rect x="520" y="165" width="70" height="22" class="mod-box"/><text x="555" y="180" class="mod-label">urllib</text>
+  <rect x="520" y="195" width="65" height="22" class="mod-box"/><text x="552" y="210" class="mod-label">asyncio</text>
+
+  <!-- Ring 3: Concurrency & Math -->
+  <text x="50" y="290" class="cat-label">Concurrency</text>
+  <rect x="50" y="295" width="70" height="22" class="mod-box"/><text x="85" y="310" class="mod-label">threading</text>
+  <rect x="50" y="325" width="90" height="22" class="mod-box"/><text x="95" y="340" class="mod-label">multiprocessing</text>
+  <rect x="50" y="355" width="90" height="22" class="mod-box"/><text x="95" y="370" class="mod-label">concurrent.futures</text>
+
+  <text x="250" y="290" class="cat-label">Math &amp; Algo</text>
+  <rect x="250" y="295" width="50" height="22" class="mod-box"/><text x="275" y="310" class="mod-label">math</text>
+  <rect x="310" y="295" width="70" height="22" class="mod-box"/><text x="345" y="310" class="mod-label">itertools</text>
+  <rect x="390" y="295" width="70" height="22" class="mod-box"/><text x="425" y="310" class="mod-label">functools</text>
+  <rect x="250" y="325" width="75" height="22" class="mod-box"/><text x="287" y="340" class="mod-label">collections</text>
+  <rect x="335" y="325" width="55" height="22" class="mod-box"/><text x="362" y="340" class="mod-label">heapq</text>
+  <rect x="400" y="325" width="55" height="22" class="mod-box"/><text x="427" y="340" class="mod-label">bisect</text>
+
+  <text x="510" y="290" class="cat-label">Dev Tools</text>
+  <rect x="510" y="295" width="60" height="22" class="mod-box"/><text x="540" y="310" class="mod-label">typing</text>
+  <rect x="580" y="295" width="55" height="22" class="mod-box"/><text x="607" y="310" class="mod-label">abc</text>
+  <rect x="510" y="325" width="70" height="22" class="mod-box"/><text x="545" y="340" class="mod-label">logging</text>
+  <rect x="590" y="325" width="55" height="22" class="mod-box"/><text x="617" y="340" class="mod-label">pdb</text>
+  <rect x="510" y="355" width="80" height="22" class="mod-box"/><text x="550" y="370" class="mod-label">contextlib</text>
+</svg>

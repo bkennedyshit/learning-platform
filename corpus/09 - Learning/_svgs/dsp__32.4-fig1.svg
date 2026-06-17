@@ -1,0 +1,155 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .math   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--interactive-accent, #58a6ff); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .fir    { fill: var(--background-secondary, #161b22); stroke: #51cf66; stroke-width: 1.5; }
+    .iir    { fill: var(--background-secondary, #161b22); stroke: #ffd93d; stroke-width: 1.5; }
+    .delay  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.3; }
+    .pass   { stroke: #51cf66; stroke-width: 2.5; fill: none; }
+    .stop   { stroke: #ff6b6b; stroke-width: 2.5; fill: none; stroke-dasharray: 5 3; }
+    .wire   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .axis   { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+  </style>
+  <defs>
+    <marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Digital Filters: FIR vs IIR Structure &amp; Frequency Response</text>
+
+  <!-- ===== TOP LEFT: FIR structure (transversal/direct form) ===== -->
+  <rect x="16" y="36" width="340" height="180" rx="5" class="fir"/>
+  <text x="186" y="56" class="label" text-anchor="middle" font-weight="bold" fill="#51cf66">FIR Filter — Direct Form (Transversal)</text>
+
+  <!-- Input -->
+  <text x="40" y="100" class="small">x[n] →</text>
+  <!-- Delay chain z⁻¹ boxes -->
+  <rect x="80"  y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="98"  y="104" class="math" text-anchor="middle">z⁻¹</text>
+  <rect x="136" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="154" y="104" class="math" text-anchor="middle">z⁻¹</text>
+  <rect x="192" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="210" y="104" class="math" text-anchor="middle">z⁻¹</text>
+  <rect x="248" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="266" y="104" class="math" text-anchor="middle">z⁻¹</text>
+
+  <!-- Tap lines down -->
+  <line x1="80"  y1="100" x2="80"  y2="138" class="wire"/>
+  <line x1="116" y1="100" x2="116" y2="138" class="wire"/>
+  <line x1="154" y1="100" x2="154" y2="138" class="wire"/>
+  <line x1="210" y1="100" x2="210" y2="138" class="wire"/>
+  <line x1="266" y1="100" x2="266" y2="138" class="wire"/>
+  <line x1="284" y1="100" x2="284" y2="138" class="wire"/>
+
+  <!-- Multiplier labels h[k] -->
+  <text x="80"  y="152" class="math" text-anchor="middle">h[0]</text>
+  <text x="116" y="152" class="math" text-anchor="middle">h[1]</text>
+  <text x="154" y="152" class="math" text-anchor="middle">h[2]</text>
+  <text x="210" y="152" class="math" text-anchor="middle">h[3]</text>
+  <text x="266" y="152" class="math" text-anchor="middle">h[N-1]</text>
+
+  <!-- Summation line + output -->
+  <line x1="68" y1="162" x2="290" y2="162" class="wire"/>
+  <line x1="290" y1="138" x2="290" y2="162" class="wire"/>
+  <line x1="290" y1="162" x2="340" y2="162" class="arr" marker-end="url(#a4)"/>
+  <text x="344" y="166" class="small">y[n]</text>
+
+  <!-- FIR Properties box -->
+  <text x="26" y="182" class="small" fill="#51cf66">✓ Always stable</text>
+  <text x="26" y="196" class="small" fill="#51cf66">✓ Linear phase possible</text>
+  <text x="140" y="182" class="small">y[n] = Σₖ h[k]·x[n−k]</text>
+  <text x="140" y="196" class="small">H(z) = Σ h[k] z⁻ᵏ (all zeros)</text>
+
+  <!-- ===== TOP RIGHT: IIR structure (Direct Form II) ===== -->
+  <rect x="370" y="36" width="334" height="180" rx="5" class="iir"/>
+  <text x="537" y="56" class="label" text-anchor="middle" font-weight="bold" fill="#ffd93d">IIR Filter — Direct Form II (Biquad)</text>
+
+  <!-- Input path -->
+  <text x="388" y="100" class="small">x[n] →</text>
+
+  <!-- Forward path (b coefficients) -->
+  <rect x="436" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="454" y="104" class="math" text-anchor="middle">w[n]</text>
+  <rect x="492" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="510" y="104" class="math" text-anchor="middle">z⁻¹</text>
+  <rect x="548" y="88" width="36" height="24" rx="4" class="delay"/>
+  <text x="566" y="104" class="math" text-anchor="middle">z⁻¹</text>
+
+  <line x1="436" y1="100" x2="436" y2="140" class="wire"/>
+  <line x1="510" y1="100" x2="510" y2="140" class="wire"/>
+  <line x1="566" y1="100" x2="566" y2="140" class="wire"/>
+
+  <text x="436" y="154" class="math" text-anchor="middle">b₀</text>
+  <text x="510" y="154" class="math" text-anchor="middle">b₁</text>
+  <text x="566" y="154" class="math" text-anchor="middle">b₂</text>
+
+  <!-- Feedback arrows (a coefficients) -->
+  <line x1="510" y1="100" x2="450" y2="100" stroke="#ffd93d" stroke-width="1" stroke-dasharray="3 2" opacity="0.7"/>
+  <text x="480" y="88" class="math" text-anchor="middle" fill="#ffd93d">−a₁</text>
+  <line x1="566" y1="100" x2="440" y2="82" stroke="#ffd93d" stroke-width="1" stroke-dasharray="3 2" opacity="0.6"/>
+  <text x="560" y="78" class="math" fill="#ffd93d">−a₂</text>
+
+  <line x1="380" y1="162" x2="592" y2="162" class="wire"/>
+  <line x1="592" y1="140" x2="592" y2="162" class="wire"/>
+  <line x1="592" y1="162" x2="690" y2="162" class="arr" marker-end="url(#a4)"/>
+  <text x="694" y="166" class="small">y[n]</text>
+
+  <text x="378" y="182" class="small" fill="#ffd93d">⚠ Stability requires poles inside unit circle</text>
+  <text x="378" y="196" class="small">H(z) = (b₀+b₁z⁻¹+b₂z⁻²) / (1+a₁z⁻¹+a₂z⁻²)</text>
+
+  <!-- ===== BOTTOM: Frequency response comparison ===== -->
+  <rect x="16" y="232" width="688" height="174" rx="4" class="box"/>
+  <text x="360" y="250" class="label" text-anchor="middle" font-weight="bold">Frequency Responses — Lowpass, Highpass, Bandpass, Bandstop</text>
+
+  <!-- LP response -->
+  <g transform="translate(30, 268)">
+    <line x1="0" y1="100" x2="150" y2="100" class="axis" marker-end="url(#a4)"/>
+    <line x1="10" y1="110" x2="10"  y2="260" class="axis"/>
+    <text x="75" y="116" class="small" text-anchor="middle">Lowpass (LPF)</text>
+    <path d="M 10 50 L 60 50 L 80 100 L 150 100" class="pass"/>
+    <line x1="60" y1="50" x2="60" y2="110" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" stroke-dasharray="2 2"/>
+    <text x="60" y="122" class="small" text-anchor="middle">fc</text>
+    <text x="30" y="46" class="small" fill="#51cf66">pass</text>
+    <text x="110" y="96" class="small" fill="#ff6b6b">stop</text>
+  </g>
+
+  <!-- HP response -->
+  <g transform="translate(200, 268)">
+    <line x1="0" y1="100" x2="150" y2="100" class="axis" marker-end="url(#a4)"/>
+    <line x1="10" y1="110" x2="10"  y2="260" class="axis"/>
+    <text x="75" y="116" class="small" text-anchor="middle">Highpass (HPF)</text>
+    <path d="M 10 100 L 70 100 L 90 50 L 150 50" class="pass"/>
+    <line x1="70" y1="50" x2="70" y2="110" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" stroke-dasharray="2 2"/>
+    <text x="70" y="122" class="small" text-anchor="middle">fc</text>
+    <text x="30" y="96" class="small" fill="#ff6b6b">stop</text>
+    <text x="115" y="46" class="small" fill="#51cf66">pass</text>
+  </g>
+
+  <!-- BP response -->
+  <g transform="translate(370, 268)">
+    <line x1="0" y1="100" x2="150" y2="100" class="axis" marker-end="url(#a4)"/>
+    <line x1="10" y1="110" x2="10"  y2="260" class="axis"/>
+    <text x="75" y="116" class="small" text-anchor="middle">Bandpass (BPF)</text>
+    <path d="M 10 100 L 40 100 L 55 50 L 95 50 L 110 100 L 150 100" class="pass"/>
+    <text x="75" y="46" class="small" text-anchor="middle" fill="#51cf66">pass</text>
+    <text x="22" y="96" class="small" fill="#ff6b6b">stop</text>
+    <text x="130" y="96" class="small" fill="#ff6b6b">stop</text>
+  </g>
+
+  <!-- Notch/BS response -->
+  <g transform="translate(540, 268)">
+    <line x1="0" y1="100" x2="150" y2="100" class="axis" marker-end="url(#a4)"/>
+    <line x1="10" y1="110" x2="10"  y2="260" class="axis"/>
+    <text x="75" y="116" class="small" text-anchor="middle">Bandstop / Notch</text>
+    <path d="M 10 50 L 40 50 L 55 100 L 95 100 L 110 50 L 150 50" class="pass"/>
+    <path d="M 55 100 L 95 100" class="stop"/>
+    <text x="75" y="106" class="small" text-anchor="middle" fill="#ff6b6b">notch</text>
+    <text x="22" y="46" class="small" fill="#51cf66">pass</text>
+    <text x="128" y="46" class="small" fill="#51cf66">pass</text>
+  </g>
+</svg>

@@ -1,0 +1,492 @@
+---
+title: "05.7 — Computational Cognition: Bio vs AI Neural Nets"
+subject: "Neuroscience & Computational Cognition"
+catalog: advanced
+audience_tier: higher-education
+chapter: "5.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 05.7 — Computational Cognition: Bio vs AI Neural Nets
+
+> *"The brain does not do backpropagation — but it does something that achieves similar ends through radically different means."*
+> — **Geoffrey Hinton**, Turing Award Lecture (2018)
+
+This capstone chapter synthesizes the entire track by placing biological neural computation side-by-side with artificial neural networks. We examine what biology does that AI cannot (yet), what AI does that biology cannot, and where the two are converging. The goal is not to declare a winner but to identify the design principles that each system has discovered independently — and those that remain unique to one domain.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Compare biological neurons to artificial neurons across 10+ dimensions (connectivity, learning rule, energy, timing, etc.).
+2. Explain why backpropagation is biologically implausible and describe proposed biological alternatives.
+3. Implement both Hebbian and backprop learning on the same toy task and compare convergence.
+4. Describe spiking neural networks (SNNs) and their advantages over rate-coded ANNs.
+5. Explain predictive coding as a biologically plausible alternative to backprop.
+6. Identify which biological principles have been successfully imported into AI (and which haven't).
+7. Articulate how bilateral processing and neuroplasticity research inform next-generation AI architectures.
+
+---
+
+## 🖼️ Visual Anchor — Biological vs Artificial Neuron
+
+![neuro-05__fig3](neuro-05__fig3.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 05.7.1 — Biological Neural Network
+
+A **biological neural network** is a computational system composed of neurons connected by synapses, characterized by:
+- **Spiking communication**: Binary all-or-none action potentials (temporal coding)
+- **Local learning rules**: STDP, Hebbian, neuromodulator-gated (no global error signal)
+- **Massive parallelism**: ~86 billion neurons operating simultaneously
+- **Energy efficiency**: ~20 watts for the entire brain (~10⁻¹⁵ joules per synaptic operation)
+- **Recurrent connectivity**: Extensive feedback loops at every level
+- **Heterogeneity**: 100+ neuron types, 100+ channel types, diverse morphologies
+
+### Definition 05.7.2 — Artificial Neural Network (ANN)
+
+An **artificial neural network** is a computational graph of nodes (artificial neurons) connected by weighted edges, characterized by:
+- **Rate coding**: Continuous activation values (no temporal dynamics)
+- **Global learning**: Backpropagation of error gradients through entire network
+- **Layer-wise organization**: Typically feedforward (with some recurrence in RNNs/Transformers)
+- **Homogeneity**: All neurons in a layer use the same activation function
+- **Deterministic**: Same input → same output (unless explicitly stochastic)
+- **Energy cost**: ~300W per GPU, ~$10^{-8}$ joules per operation (10⁷× less efficient than biology)
+
+### Definition 05.7.3 — Backpropagation
+
+**Backpropagation** (Rumelhart, Hinton, Williams, 1986) computes the gradient of a loss function with respect to all weights via the chain rule:
+
+$$
+\frac{\partial \mathcal{L}}{\partial w_{ij}^{(l)}} = \frac{\partial \mathcal{L}}{\partial a_i^{(l)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial z_i^{(l)}}{\partial w_{ij}^{(l)}} = \delta_i^{(l)} \cdot a_j^{(l-1)}
+$$
+
+where $\delta_i^{(l)} = \frac{\partial \mathcal{L}}{\partial z_i^{(l)}}$ is the error signal propagated backward.
+
+### Definition 05.7.4 — Spiking Neural Network (SNN)
+
+A **spiking neural network** uses biologically realistic neuron models (LIF, Izhikevich) that communicate via discrete spikes:
+- Information encoded in spike timing, not rate
+- Event-driven computation (only compute when spikes arrive)
+- Can implement STDP natively
+- Hardware: Intel Loihi (128K neurons), IBM TrueNorth (1M neurons), BrainScaleS
+
+### Definition 05.7.5 — Predictive Coding
+
+**Predictive coding** (Rao & Ballard, 1999) is a hierarchical generative model where each cortical level:
+1. Generates predictions about the level below
+2. Receives prediction errors from the level below
+3. Updates its representation to minimize prediction error
+
+$$
+\epsilon_l = x_l - g_l(\mu_{l+1}) \quad \text{(prediction error at level } l\text{)}
+$$
+
+$$
+\dot{\mu}_l = -\frac{\partial F}{\partial \mu_l} = \Pi_l \epsilon_l - \Pi_{l+1} \epsilon_{l+1} \cdot g'_{l+1}(\mu_l)
+$$
+
+This is biologically plausible because:
+- Only local computations required (prediction errors computed within each cortical area)
+- Feedback connections carry predictions (top-down)
+- Feedforward connections carry prediction errors (bottom-up)
+- Matches the laminar connectivity pattern (Layer II/III: errors; Layer V/VI: predictions)
+
+### Definition 05.7.6 — The Weight Transport Problem
+
+The **weight transport problem** is the primary biological implausibility of backpropagation: computing $\delta_i^{(l)}$ requires knowing the forward weights $W^{(l+1)}$ of the next layer (transposed). Biology has no mechanism to copy synaptic weights from forward to backward pathways.
+
+
+
+
+---
+
+## 🔬 2. Biological Mechanisms
+
+### 2.1 — The Complete Comparison Table
+
+| Dimension | Biological Neural Net | Artificial Neural Net |
+|:---|:---|:---|
+| **Basic unit** | Neuron (soma + dendrites + axon) | Node (weighted sum + activation) |
+| **Communication** | Spikes (binary, ~1ms) | Continuous values (float32) |
+| **Connectivity** | ~7,000 synapses/neuron, sparse | Fully connected layers or structured sparse |
+| **Learning rule** | Local (STDP, Hebbian, 3-factor) | Global (backprop, chain rule) |
+| **Error signal** | Neuromodulators (DA, ACh) | Explicit loss gradient |
+| **Feedback** | Massive recurrence at every level | Mostly feedforward (except RNN/Transformer) |
+| **Timing** | Temporal coding, oscillations | Discrete forward passes |
+| **Energy** | ~20W (entire brain) | ~300W per GPU |
+| **Noise** | Intrinsic stochasticity (useful) | Deterministic (noise added artificially) |
+| **Development** | Genetically guided + activity-dependent | Random initialization + training |
+| **Modularity** | Cortical areas, columns, layers | Layers, attention heads, experts |
+| **Memory** | Distributed in synaptic weights + structure | Distributed in weight matrices |
+| **Attention** | ACh + top-down feedback | Scaled dot-product attention |
+| **Reward** | Dopamine RPE | Loss function gradient |
+| **Plasticity window** | Critical periods, neuromodulator-gated | Always plastic during training |
+| **Scale** | 86B neurons, 150T synapses | Up to 1.8T parameters (GPT-4 class) |
+
+### 2.2 — Biological Alternatives to Backpropagation
+
+**Feedback Alignment (Lillicrap et al., 2016):**
+- Replace $W^T$ in backward pass with random fixed matrix $B$
+- Surprisingly, learning still works because forward weights align with $B$ over training
+- Biologically plausible: feedback connections don't need to match forward weights
+
+**Target Propagation (Lee et al., 2015):**
+- Each layer has a target (desired output) rather than a gradient
+- Targets propagated via approximate inverse mappings
+- Maps to cortical feedback connections providing "targets" for lower areas
+
+**Predictive Coding (Rao & Ballard, 1999; Whittington & Bogacz, 2017):**
+- Hierarchical generative model minimizing prediction errors
+- Mathematically equivalent to backprop under certain conditions
+- Naturally maps to cortical laminar architecture
+
+**Equilibrium Propagation (Scellier & Bengio, 2017):**
+- Energy-based model that reaches equilibrium
+- Gradient computed from difference between free and clamped equilibrium states
+- Only requires local Hebbian-like computations
+
+### 2.3 — What Biology Does That AI Cannot (Yet)
+
+1. **One-shot learning:** Humans learn new concepts from 1–5 examples. ANNs typically need thousands.
+2. **Causal reasoning:** Biological brains build causal models of the world. ANNs learn correlations.
+3. **Energy efficiency:** 10⁷× more efficient per operation.
+4. **Continual learning without catastrophic forgetting:** Biology uses complementary learning systems (hippocampus for fast learning, cortex for slow consolidation).
+5. **Embodied cognition:** Biological intelligence is grounded in sensorimotor experience.
+6. **Consciousness/qualia:** No AI system demonstrates phenomenal experience.
+
+### 2.4 — What AI Does That Biology Cannot
+
+1. **Perfect memory:** ANNs can store and retrieve exact sequences (context windows).
+2. **Instant knowledge transfer:** Weight copying between models (distillation, fine-tuning).
+3. **Arbitrary precision:** Float64 arithmetic vs. noisy biological computation.
+4. **Scalable parallelism:** Thousands of GPUs in perfect synchrony.
+5. **Explicit optimization:** Clear objective functions and guaranteed gradient descent.
+6. **Speed:** Billions of operations per second per unit vs. ~100 Hz neural firing.
+
+---
+
+## 📐 3. Mathematical Models
+
+### 3.1 — Hebbian Learning on XOR (Failure Case)
+
+The XOR problem: learn $f(0,0)=0$, $f(0,1)=1$, $f(1,0)=1$, $f(1,1)=0$.
+
+Single-layer Hebbian network with weights $\mathbf{w} = (w_1, w_2)^T$:
+
+$$
+y = \text{sign}(\mathbf{w}^T \mathbf{x})
+$$
+
+Hebbian update: $\Delta \mathbf{w} = \eta \cdot y \cdot \mathbf{x}$
+
+**Problem:** XOR is not linearly separable. No single hyperplane can separate the classes. Hebbian learning on a single layer **cannot solve XOR** — it requires a hidden layer (multi-layer architecture).
+
+### 3.2 — Backpropagation on XOR (Success)
+
+Two-layer network: hidden layer with 2 units, output layer with 1 unit.
+
+$$
+\mathbf{h} = \sigma(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1), \quad y = \sigma(\mathbf{w}_2^T \mathbf{h} + b_2)
+$$
+
+Loss: $\mathcal{L} = \frac{1}{2}(y - t)^2$
+
+Backprop computes:
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_1} = (y-t) \cdot \sigma'(z_2) \cdot \mathbf{w}_2 \cdot \sigma'(\mathbf{z}_1) \cdot \mathbf{x}^T
+$$
+
+After ~1000 iterations with $\eta = 0.5$, backprop reliably solves XOR.
+
+### 3.3 — Hebbian + Architecture = Success (Competitive Learning)
+
+While single-layer Hebbian fails on XOR, **multi-layer Hebbian with lateral inhibition** can solve it:
+
+Layer 1 (competitive/winner-take-all):
+- Neuron A learns to respond to (0,1) and (1,0) patterns
+- Neuron B learns to respond to (0,0) and (1,1) patterns
+
+Layer 2 (readout):
+- Excitatory from A, inhibitory from B
+
+This works because competitive Hebbian learning creates useful intermediate representations without backprop — but requires architectural inductive biases (lateral inhibition, multiple layers).
+
+### 3.4 — Predictive Coding Equivalence to Backprop
+
+For a hierarchical model with $L$ levels, predictive coding minimizes:
+
+$$
+F = \sum_{l=0}^{L} \frac{1}{2} \Pi_l \|\epsilon_l\|^2 = \sum_{l=0}^{L} \frac{1}{2} \Pi_l \|x_l - g_l(\mu_{l+1})\|^2
+$$
+
+The update for level-$l$ representation:
+
+$$
+\dot{\mu}_l = -\frac{\partial F}{\partial \mu_l} = \Pi_{l-1} \cdot g'_{l-1}(\mu_l)^T \cdot \epsilon_{l-1} - \Pi_l \cdot \epsilon_l
+$$
+
+**Theorem (Whittington & Bogacz, 2017):** At convergence of the inference dynamics, the weight updates in predictive coding are identical to backpropagation gradients:
+
+$$
+\Delta W_l^{\text{PC}} = -\eta \cdot \epsilon_{l-1} \cdot \mu_l^T = -\eta \frac{\partial \mathcal{L}}{\partial W_l} = \Delta W_l^{\text{BP}}
+$$
+
+This means the brain could implement backprop-equivalent learning using only local prediction error signals — no weight transport required.
+
+
+
+
+---
+
+## ✍️ 4. Derivations & Worked Calculations
+
+<details>
+<summary>🔍 Worked Example 05.7.0 — Biological vs Artificial Parameter Count</summary>
+
+**Problem:** Compare the "parameter count" of the human cortex to GPT-4. The cortex has 16.3 billion neurons with an average of 7,000 synapses each. Each synapse has at least 3 modifiable parameters (weight, release probability, receptor density). GPT-4 is estimated at 1.8 trillion parameters. Which system has more parameters?
+
+**Step 1:** Cortical parameter count:
+
+$$
+P_{\text{bio}} = N_{\text{neurons}} \times \bar{s} \times p_{\text{per synapse}} = 16.3 \times 10^9 \times 7000 \times 3
+$$
+
+$$
+= 16.3 \times 10^9 \times 21000 = 3.42 \times 10^{14} = 342 \text{ trillion parameters}
+$$
+
+**Step 2:** GPT-4 parameter count: ~1.8 trillion (estimated, MoE architecture)
+
+**Step 3:** Ratio:
+
+$$
+\frac{P_{\text{bio}}}{P_{\text{GPT-4}}} = \frac{342 \times 10^{12}}{1.8 \times 10^{12}} \approx 190
+$$
+
+**Interpretation:** The human cortex has approximately **190× more modifiable parameters** than GPT-4. However, this comparison is misleading because:
+- Biological parameters are highly structured (not arbitrary floats)
+- Many synapses are redundant (multiple synapses between same neuron pair)
+- The effective information content per biological parameter is lower (noisy, constrained)
+- GPT-4's parameters are optimized via backprop; biological parameters via local rules
+
+A fairer comparison might be "effective degrees of freedom" — but by raw count, biology still wins by two orders of magnitude.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.7.1 — Hebbian vs Backprop on AND Gate</summary>
+
+**Problem:** Train both a Hebbian and a backprop network to learn the AND function: $f(0,0)=0$, $f(0,1)=0$, $f(1,0)=0$, $f(1,1)=1$. Compare convergence.
+
+**Hebbian approach:** Single neuron, $y = \text{step}(w_1 x_1 + w_2 x_2 - \theta)$
+
+Initialize: $w_1 = 0.1$, $w_2 = 0.1$, $\theta = 0.5$, $\eta = 0.1$
+
+Epoch 1, pattern (1,1), target=1:
+- $z = 0.1(1) + 0.1(1) = 0.2 \lt  0.5$ → $y = 0$, error
+- Hebbian: $\Delta w_1 = 0.1 \times 1 \times 1 = 0.1$, $\Delta w_2 = 0.1 \times 1 \times 1 = 0.1$
+- New: $w_1 = 0.2$, $w_2 = 0.2$
+
+After 5 epochs: $w_1 \approx 0.5$, $w_2 \approx 0.5$, threshold $\theta = 0.5$
+- (1,1): $0.5 + 0.5 = 1.0 \gt  0.5$ ✓
+- (1,0): $0.5 + 0 = 0.5 = 0.5$ — boundary case
+- (0,1): $0 + 0.5 = 0.5$ — boundary case
+
+**Problem:** Pure Hebbian doesn't naturally learn the threshold. Need perceptron rule (error-correcting).
+
+**Backprop approach:** Same architecture, sigmoid activation, MSE loss:
+
+$$
+\Delta w_i = -\eta \frac{\partial \mathcal{L}}{\partial w_i} = \eta (t - y) \sigma'(z) x_i
+$$
+
+Converges reliably in ~50 iterations to $w_1 \approx w_2 \approx 5$, $b \approx -7.5$ (sigmoid saturates to approximate step function).
+
+**Conclusion:** For linearly separable problems, both work but backprop converges faster and more reliably. Hebbian requires additional mechanisms (threshold adaptation, normalization) to be practical.
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.7.2 — Energy Efficiency Comparison</summary>
+
+**Problem:** Compare the energy cost of a single "inference pass" in biology vs AI.
+
+**Biological brain (one cortical computation cycle, ~20ms):**
+- Active neurons per cycle: ~1% of 16B cortical neurons = 160M neurons
+- Synaptic operations per active neuron: ~1000 (not all synapses active)
+- Total operations: $160 \times 10^6 \times 1000 = 1.6 \times 10^{11}$ synaptic ops
+- Energy per synaptic operation: ~$10^{-15}$ J (1 femtojoule, from ATP hydrolysis)
+- Total energy per cycle: $1.6 \times 10^{11} \times 10^{-15} = 1.6 \times 10^{-4}$ J = 0.16 mJ
+- Power: $0.16 \text{ mJ} / 20 \text{ ms} = 8$ W (consistent with ~20W total brain)
+
+**AI (GPT-4 class, one forward pass, ~128 tokens):**
+- Parameters: ~1.8T (estimated)
+- FLOPs per token: ~2 × params = $3.6 \times 10^{12}$ FLOPs
+- For 128 tokens: $4.6 \times 10^{14}$ FLOPs
+- GPU efficiency: ~$10^{-11}$ J per FLOP (A100 at 300W, 312 TFLOPS)
+- Total energy: $4.6 \times 10^{14} \times 10^{-11} = 4.6 \times 10^3$ J = 4.6 kJ
+- Time: ~2 seconds → Power: ~2.3 kW
+
+**Efficiency ratio:**
+
+$$
+\frac{E_{\text{AI}}}{E_{\text{bio}}} = \frac{4600}{0.00016} \approx 2.9 \times 10^7
+$$
+
+Biology is ~30 million times more energy-efficient per "inference pass" (though the comparison is imperfect — the brain's "inference" is continuous, not discrete).
+
+</details>
+
+<details>
+<summary>🔍 Worked Example 05.7.3 — Feedback Alignment Convergence</summary>
+
+**Problem:** Show that feedback alignment (random $B$ instead of $W^T$) still provides a useful learning signal. For a 2-layer network with $W_1 \in \mathbb{R}^{3 \times 2}$, $W_2 \in \mathbb{R}^{1 \times 3}$, and random feedback $B \in \mathbb{R}^{2 \times 1}$, compute the angle between the true gradient and the FA gradient.
+
+**Step 1:** True backprop gradient for hidden layer:
+
+$$
+\delta_1^{\text{BP}} = W_2^T \delta_2 \odot \sigma'(z_1)
+$$
+
+**Step 2:** Feedback alignment gradient:
+
+$$
+\delta_1^{\text{FA}} = B \delta_2 \odot \sigma'(z_1)
+$$
+
+**Step 3:** Let $W_2 = (0.5, -0.3, 0.8)$, $B = \begin{pmatrix} 0.2 \\ -0.7 \end{pmatrix}$, $\delta_2 = 0.4$, $\sigma'(z_1) = (0.25, 0.20, 0.24)^T$.
+
+True: $\delta_1^{\text{BP}} = (0.5, -0.3, 0.8)^T \times 0.4 \odot (0.25, 0.20, 0.24)^T = (0.05, -0.024, 0.077)^T$
+
+FA: $\delta_1^{\text{FA}} = (0.2, -0.7)^T \times 0.4 \odot (0.25, 0.20)^T = (0.02, -0.056)^T$ (only 2D since $B$ is $2 \times 1$)
+
+The key insight: even though $B \neq W_2^T$, the sign of the gradient component is often preserved (both point "roughly" in the right direction). Over training, $W_2$ rotates to align with $B$, making FA increasingly accurate.
+
+</details>
+
+---
+
+## 🤖 5. AI/ML Translation
+
+### 5.1 — The Grand Mapping: Biology → AI Architecture
+
+| Biological Principle | AI Implementation | Status |
+|:---|:---|:---:|
+| Cortical columns | Capsule networks, MoE experts | Partial |
+| Hebbian/STDP learning | Contrastive learning, SimCLR | Active research |
+| Dopamine RPE | TD-learning, actor-critic | ✓ Mature |
+| Cortical hierarchy | Deep networks, U-Net | ✓ Mature |
+| Lateral inhibition | Softmax, winner-take-all | ✓ Mature |
+| Attention (ACh) | Transformer attention | ✓ Mature |
+| Working memory | Context window, KV cache | ✓ Mature |
+| Sleep consolidation | Experience replay (RL) | Partial |
+| Critical periods | Curriculum learning, warm-up | Partial |
+| Neuromodulation | Hypernetworks, meta-learning | Active research |
+| Bilateral processing | Multi-GPU, MoE | ✓ Mature |
+| Predictive coding | VAEs, diffusion models | Active research |
+| Spiking/temporal coding | Neuromorphic hardware (Loihi) | Early stage |
+| Dendritic computation | Attention within neurons? | Unexplored |
+| Glial modulation | No equivalent | Unexplored |
+| Consciousness/binding | No equivalent | Unknown |
+
+### 5.2 — Convergent Design Principles
+
+Both biology and AI have independently discovered:
+
+1. **Hierarchical feature extraction:** Cortical hierarchy ↔ deep layers
+2. **Sparse distributed representations:** ~1% cortical activation ↔ ReLU sparsity
+3. **Attention mechanisms:** ACh + top-down ↔ scaled dot-product attention
+4. **Normalization:** Homeostatic plasticity ↔ batch/layer normalization
+5. **Skip connections:** Cortical bypass pathways ↔ ResNet skip connections
+6. **Mixture of experts:** Hemispheric specialization ↔ MoE routing
+7. **Replay:** Hippocampal replay during sleep ↔ experience replay buffer
+8. **Curriculum:** Developmental stages ↔ curriculum learning
+
+### 5.3 — The Next Frontier: Bio-Inspired AI
+
+Principles from biology that are **not yet** in mainstream AI but show promise:
+
+1. **Dendritic computation:** Each synapse location on the dendrite matters. Could enable "attention within a neuron" — more expressive single units. Recent work (Gidon et al., 2020) shows single human dendrites can compute XOR — a capability that requires an entire hidden layer in standard ANNs.
+
+2. **Neuromodulatory meta-learning:** A separate slow system that controls how fast the main system learns. Maps to meta-learning / learning-to-learn. The brain has 4+ neuromodulatory systems operating at different timescales; AI typically has one learning rate.
+
+3. **Structural plasticity:** Growing and pruning connections (not just weights). Neural architecture search is a crude approximation. Biology does this continuously and locally — no global search required.
+
+4. **Predictive coding as training:** Replace backprop with local prediction error minimization. Could enable truly online, continual learning without catastrophic forgetting.
+
+5. **Stochastic resonance:** Noise that improves signal detection. Dropout is a crude version; biology uses it more sophisticatedly — intrinsic noise helps neurons detect weak signals that would be sub-threshold in a deterministic system.
+
+6. **Complementary learning systems:** Fast learning in hippocampus (episodic) + slow consolidation in cortex (semantic). Maps to experience replay + slow policy updates, but biology's implementation is far more sophisticated.
+
+7. **Embodied/enactive cognition:** Intelligence grounded in sensorimotor loops. Current LLMs are disembodied — they process text without physical grounding. Robotics + foundation models may bridge this gap.
+
+---
+
+## 🧬 6. Personal Context
+
+### Bilateral Processing as a Computational Architecture
+
+The bilateral processing phenotype can be understood as a specific architectural choice in the brain's "hardware":
+
+**Standard (lateralized) architecture:**
+- Model parallelism: Left hemisphere handles language pipeline, right handles spatial pipeline
+- Low inter-processor bandwidth requirement (minimal callosal traffic for routine tasks)
+- Efficient for tasks that fit within one hemisphere's specialization
+- Vulnerable to single-hemisphere damage
+
+**Bilateral architecture:**
+- Data parallelism: Both hemispheres process similar computations on different aspects of input
+- High inter-processor bandwidth requirement (heavy callosal traffic)
+- Efficient for tasks requiring cross-modal integration
+- Resilient to damage (redundancy)
+- Potentially slower for purely lateralized tasks (coordination overhead)
+
+This maps directly to the AI parallelism tradeoff: model parallelism (split the model across GPUs) vs. data parallelism (replicate the model, split the data). The brain's "choice" between these strategies is determined by callosal inhibition strength during development.
+
+### Neuroplasticity and Adaptive Architecture
+
+The research on 5-HT2A-mediated critical period reopening suggests that the brain's architecture is not fixed — it can be restructured. In AI terms, this is equivalent to:
+- **Neural architecture search (NAS)** applied to an already-trained network
+- **Pruning + regrowth** of connections based on new task demands
+- **Fine-tuning with temporarily elevated learning rate** (warm restart)
+
+The key biological insight that AI lacks: the brain has a built-in mechanism (neuromodulatory system) for deciding **when** to restructure and **how much** flexibility to allow. Current AI systems either train continuously (risking catastrophic forgetting) or freeze after training (no adaptation). The biological solution — gated plasticity windows — is a middle path that AI has not yet implemented well.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [05.1 - Neuroanatomy & The Cortex](05.1---Neuroanatomy-&-The-Cortex) — Cortical architecture as computational substrate
+- [05.2 - Action Potentials & Ion Channels](05.2---Action-Potentials-&-Ion-Channels) — Spiking dynamics for SNNs
+- [05.3 - Synaptic Plasticity & Hebbian Learning](05.3---Synaptic-Plasticity-&-Hebbian-Learning) — Biological learning rules
+- [05.4 - Hemispheric Lateralization & The Corpus Callosum](05.4---Hemispheric-Lateralization-&-The-Corpus-Callosum) — Bilateral architecture
+- [05.5 - The Default Mode Network & Cortical Entropy](05.5---The-Default-Mode-Network-&-Cortical-Entropy) — Free energy and generative models
+- [05.6 - Neuromodulators - Dopamine, Serotonin, Acetylcholine](05.6---Neuromodulators---Dopamine,-Serotonin,-Acetylcholine) — Reward and meta-learning signals
+- [23 - AI & Machine Learning Systems](23---AI-&-Machine-Learning-Systems) — Full AI/ML curriculum
+- [06 - Behavioral Psychology & Reinforcement Learning](06---Behavioral-Psychology-&-Reinforcement-Learning) — RL algorithms in detail
+- [13 - Biomechanics & Human-Computer Interface](13---Biomechanics-&-Human-Computer-Interface) — Brain-computer interfaces
+
+### Authoritative Sources
+1. **Hinton, G.** (2022). The Forward-Forward Algorithm: Some Preliminary Investigations. *arXiv:2212.13345*.
+2. **Lillicrap, T. P. et al.** (2016). Random synaptic feedback weights support error backpropagation for deep learning. *Nature Communications*, 7, 13276.
+3. **Whittington, J. C. R. & Bogacz, R.** (2017). An approximation of the error backpropagation algorithm in a predictive coding network with local Hebbian synaptic plasticity. *Neural Computation*, 29(5), 1229–1262.
+4. **Scellier, B. & Bengio, Y.** (2017). Equilibrium Propagation: Bridging the Gap between Energy-Based Models and Backpropagation. *Frontiers in Computational Neuroscience*, 11, 24.
+5. **Friston, K.** (2010). The free-energy principle: a unified brain theory? *Nature Reviews Neuroscience*, 11(2), 127–138.
+6. **Sapolsky, R.** — Stanford Behavioral Biology (full lecture series).
+7. **Kandel, E. R.** — *Principles of Neural Science*, 6th ed.
+8. **Sutton, R. S. & Barto, A. G.** (2018). *Reinforcement Learning: An Introduction*, 2nd ed.
+

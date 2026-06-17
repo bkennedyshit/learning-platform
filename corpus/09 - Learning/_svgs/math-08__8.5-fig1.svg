@@ -1,0 +1,87 @@
+<svg viewBox="0 0 650 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <defs>
+    <marker id="man-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .man-surface { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; opacity: 0.8; }
+    .man-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.8; fill: none; opacity: 0.5; }
+    .man-tangent { fill: var(--interactive-accent, #58a6ff); opacity: 0.08; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; }
+    .man-vector { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; marker-end: url(#man-arrow); }
+    .man-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .man-math { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-style: italic; text-anchor: middle; }
+    .man-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .man-dot { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+    .man-dot:hover { r: 7; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .man-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    
+    /* Animations */
+    .man-surface { animation: breatheSurface 4s infinite alternate ease-in-out; }
+    @keyframes breatheSurface { from { opacity: 0.6; } to { opacity: 0.9; } }
+    .man-vector { stroke-dasharray: 60; stroke-dashoffset: 60; animation: traceVector 2s infinite alternate ease-in-out; }
+    @keyframes traceVector { 0% { stroke-dashoffset: 60; } 50%, 100% { stroke-dashoffset: 0; } }
+    .man-dot { animation: dotPulse 2s infinite alternate ease-in-out; }
+    @keyframes dotPulse { 
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); } 
+      to { filter: drop-shadow(0 0 8px var(--text-accent, #79c0ff)); } 
+    }
+    .man-tangent { animation: hoverPlane 4s infinite alternate ease-in-out; transform-origin: 260px 215px; }
+    @keyframes hoverPlane { 
+      from { transform: scale(1); opacity: 0.06; } 
+      to { transform: scale(1.05); opacity: 0.12; } 
+    }
+  </style>
+
+  <!-- Curved surface (manifold) -->
+  <path d="M 50 250 Q 150 180 250 220 Q 350 260 450 200 Q 500 170 550 190" class="man-surface" stroke-width="3"/>
+  <path d="M 80 280 Q 180 210 280 250 Q 380 290 480 230" class="man-grid"/>
+  <path d="M 60 230 Q 160 160 260 200 Q 360 240 460 180" class="man-grid"/>
+  <!-- Coordinate grid on surface -->
+  <path d="M 150 170 Q 160 220 170 270" class="man-grid"/>
+  <path d="M 250 150 Q 260 210 270 260" class="man-grid"/>
+  <path d="M 350 160 Q 360 220 370 270" class="man-grid"/>
+
+  <!-- Point p on manifold -->
+  <circle cx="260" cy="215" r="5" class="man-dot"/>
+  <text x="248" y="235" class="man-label">p</text>
+
+  <!-- Tangent plane at p -->
+  <polygon points="180,160 340,160 360,240 200,240" class="man-tangent"/>
+  <text x="270" y="155" class="man-title">T_p M (Tangent Space)</text>
+
+  <!-- Tangent vectors -->
+  <line x1="260" y1="215" x2="330" y2="185" class="man-vector"/>
+  <text x="340" y="180" class="man-label" fill="var(--text-accent, #79c0ff)">∂/∂x¹</text>
+  <line x1="260" y1="215" x2="290" y2="170" class="man-vector"/>
+  <text x="298" y="163" class="man-label" fill="var(--text-accent, #79c0ff)">∂/∂x²</text>
+
+  <!-- General vector -->
+  <line x1="260" y1="215" x2="315" y2="175" class="man-vector" stroke="var(--interactive-accent, #58a6ff)"/>
+  <text x="325" y="168" class="man-label" fill="var(--interactive-accent, #58a6ff)">V = V^μ ∂_μ</text>
+
+  <!-- Manifold label -->
+  <text x="300" y="300" class="man-math">M (Spacetime Manifold)</text>
+
+  <!-- Formula box -->
+  <rect x="430" y="50" width="200" height="160" class="man-box"/>
+  <text x="530" y="75" class="man-title">Metric Tensor</text>
+  <text x="530" y="100" class="man-math">ds² = g_μν dx^μ dx^ν</text>
+  <text x="530" y="125" class="man-label" text-anchor="middle">Determines:</text>
+  <text x="530" y="145" class="man-label" text-anchor="middle">• Distances & angles</text>
+  <text x="530" y="162" class="man-label" text-anchor="middle">• Causal structure</text>
+  <text x="530" y="179" class="man-label" text-anchor="middle">• Curvature (via Γ, R)</text>
+  <text x="530" y="196" class="man-label" text-anchor="middle">• Geodesics (free fall)</text>
+
+  <!-- Chart/coordinate map -->
+  <rect x="430" y="250" width="200" height="120" class="man-box"/>
+  <text x="530" y="275" class="man-title">Coordinate Chart</text>
+  <text x="530" y="300" class="man-math">φ: U → ℝⁿ</text>
+  <text x="530" y="320" class="man-label" text-anchor="middle">p ↦ (x⁰, x¹, x², x³)</text>
+  <text x="530" y="345" class="man-label" text-anchor="middle">Multiple charts needed</text>
+  <text x="530" y="360" class="man-label" text-anchor="middle">(no single chart covers S²)</text>
+
+  <!-- Arrow from manifold to chart -->
+  <path d="M 380 250 Q 410 260 430 270" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" fill="none" marker-end="url(#man-arrow)"/>
+  <text x="400" y="248" class="man-label">φ</text>
+</svg>

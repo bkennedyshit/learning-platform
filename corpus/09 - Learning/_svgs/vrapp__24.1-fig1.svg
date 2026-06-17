@@ -1,0 +1,153 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; transition: all 0.3s ease; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); fill: var(--background-primary, #0d1117); }
+    .quest { fill: #4dabf7; opacity: 0.18; stroke: #4dabf7; stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .vision { fill: #c084fc; opacity: 0.18; stroke: #c084fc; stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .index { fill: #51cf66; opacity: 0.18; stroke: #51cf66; stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .pico { fill: #ffd93d; opacity: 0.18; stroke: #ffd93d; stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .quest:hover { opacity: 0.35; stroke-width: 2px; }
+    .vision:hover { opacity: 0.35; stroke-width: 2px; }
+    .index:hover { opacity: 0.35; stroke-width: 2px; }
+    .pico:hover { opacity: 0.35; stroke-width: 2px; }
+    .openxr { fill: var(--interactive-accent, #58a6ff); opacity: 0.22; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .openxr:hover { opacity: 0.4; stroke-width: 2px; }
+    .layer { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; transition: all 0.3s ease; }
+    .layer:hover { opacity: 0.35; stroke-width: 2px; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.4; fill: none; stroke-dasharray: 6, 4; animation: flow 2s linear infinite; }
+    @keyframes flow {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+  </style>
+  <defs>
+    <marker id="arrV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="24" class="title" text-anchor="middle">VR (Applied) — Hardware × Standards × Stack × Vertical</text>
+
+  <!-- TOP: Hardware row -->
+  <text x="40" y="58" class="label" font-weight="bold">Hardware (2026)</text>
+
+  <rect x="40"  y="65" width="155" height="55" class="quest"/>
+  <text x="117" y="83" class="label" text-anchor="middle">Meta Quest 3 / 3S</text>
+  <text x="117" y="98" class="sublabel" text-anchor="middle">$299 – $499</text>
+  <text x="117" y="112" class="sublabel" text-anchor="middle">Snapdragon XR2 Gen 2</text>
+
+  <rect x="205" y="65" width="155" height="55" class="vision"/>
+  <text x="282" y="83" class="label" text-anchor="middle">Apple Vision Pro 2</text>
+  <text x="282" y="98" class="sublabel" text-anchor="middle">$3,499 · M5 chip</text>
+  <text x="282" y="112" class="sublabel" text-anchor="middle">visionOS · RealityKit</text>
+
+  <rect x="370" y="65" width="155" height="55" class="index"/>
+  <text x="447" y="83" class="label" text-anchor="middle">Valve Index 2</text>
+  <text x="447" y="98" class="sublabel" text-anchor="middle">PC-tethered</text>
+  <text x="447" y="112" class="sublabel" text-anchor="middle">SteamVR + OpenXR</text>
+
+  <rect x="535" y="65" width="155" height="55" class="pico"/>
+  <text x="612" y="83" class="label" text-anchor="middle">Pico 5 · Vive Focus</text>
+  <text x="612" y="98" class="sublabel" text-anchor="middle">Standalone</text>
+  <text x="612" y="112" class="sublabel" text-anchor="middle">OpenXR</text>
+
+  <!-- MIDDLE: OpenXR layer -->
+  <rect x="40" y="135" width="650" height="50" class="openxr"/>
+  <text x="365" y="155" class="label" text-anchor="middle" font-weight="bold">OpenXR 1.1 — the cross-vendor runtime standard</text>
+  <text x="365" y="172" class="sublabel" text-anchor="middle">Action bindings · spaces · swapchains · extensions for hand · eye · body · passthrough · scene understanding</text>
+
+  <line x1="117" y1="120" x2="117" y2="135" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="282" y1="120" x2="282" y2="135" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="447" y1="120" x2="447" y2="135" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="612" y1="120" x2="612" y2="135" class="arrow" marker-end="url(#arrV)"/>
+
+  <!-- MIDDLE: SDK rows -->
+  <text x="40" y="210" class="label" font-weight="bold">App framework</text>
+
+  <rect x="40"  y="220" width="155" height="50" class="layer"/>
+  <text x="117" y="238" class="label" text-anchor="middle">Unity XR Toolkit</text>
+  <text x="117" y="252" class="sublabel" text-anchor="middle">C# · all headsets</text>
+  <text x="117" y="265" class="sublabel" text-anchor="middle">Quest dev path #1</text>
+
+  <rect x="205" y="220" width="155" height="50" class="layer"/>
+  <text x="282" y="238" class="label" text-anchor="middle">Unreal XR</text>
+  <text x="282" y="252" class="sublabel" text-anchor="middle">C++ / Blueprints</text>
+  <text x="282" y="265" class="sublabel" text-anchor="middle">High-end fidelity</text>
+
+  <rect x="370" y="220" width="155" height="50" class="layer"/>
+  <text x="447" y="238" class="label" text-anchor="middle">RealityKit + SwiftUI</text>
+  <text x="447" y="252" class="sublabel" text-anchor="middle">Vision Pro native</text>
+  <text x="447" y="265" class="sublabel" text-anchor="middle">USD-first</text>
+
+  <rect x="535" y="220" width="155" height="50" class="layer"/>
+  <text x="612" y="238" class="label" text-anchor="middle">WebXR (browser)</text>
+  <text x="612" y="252" class="sublabel" text-anchor="middle">three.js · A-Frame</text>
+  <text x="612" y="265" class="sublabel" text-anchor="middle">@react-three/xr</text>
+
+  <line x1="117" y1="185" x2="117" y2="220" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="282" y1="185" x2="282" y2="220" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="447" y1="185" x2="447" y2="220" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="612" y1="185" x2="612" y2="220" class="arrow" marker-end="url(#arrV)"/>
+
+  <!-- BOTTOM: Pipeline -->
+  <rect x="20" y="290" width="680" height="135" class="box"/>
+  <text x="360" y="312" class="label" text-anchor="middle" font-weight="bold">Architectural Visualization Pipeline (the vertical)</text>
+
+  <rect x="35"  y="335" width="100" height="42" class="layer"/>
+  <text x="85"  y="358" class="label" text-anchor="middle">Revit</text>
+  <text x="85"  y="372" class="sublabel" text-anchor="middle">BIM authoring</text>
+
+  <rect x="155" y="335" width="100" height="42" class="layer"/>
+  <text x="205" y="358" class="label" text-anchor="middle">IFC / Speckle</text>
+  <text x="205" y="372" class="sublabel" text-anchor="middle">Interop</text>
+
+  <rect x="275" y="335" width="100" height="42" class="layer"/>
+  <text x="325" y="358" class="label" text-anchor="middle">Blender · Twinmotion</text>
+  <text x="325" y="372" class="sublabel" text-anchor="middle">Polish</text>
+
+  <rect x="395" y="335" width="100" height="42" class="layer"/>
+  <text x="445" y="358" class="label" text-anchor="middle">USD / glTF</text>
+  <text x="445" y="372" class="sublabel" text-anchor="middle">Runtime asset</text>
+
+  <rect x="515" y="335" width="100" height="42" class="layer"/>
+  <text x="565" y="358" class="label" text-anchor="middle">Quest / VP / Web</text>
+  <text x="565" y="372" class="sublabel" text-anchor="middle">Delivery</text>
+
+  <rect x="635" y="335" width="50" height="42" class="layer"/>
+  <text x="660" y="362" class="label" text-anchor="middle">$$</text>
+
+  <line x1="135" y1="356" x2="155" y2="356" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="255" y1="356" x2="275" y2="356" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="375" y1="356" x2="395" y2="356" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="495" y1="356" x2="515" y2="356" class="arrow" marker-end="url(#arrV)"/>
+  <line x1="615" y1="356" x2="635" y2="356" class="arrow" marker-end="url(#arrV)"/>
+
+  <text x="360" y="402" class="sublabel" text-anchor="middle">Track 24 = bringing your Track 20 (Revit) + Track 09 (math) + Track 23 (holographic siblings) into a delivered VR product.</text>
+
+  <!-- Glowing flow dots -->
+  <circle r="3" fill="#4dabf7">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 117 90 L 117 245" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <circle r="3" fill="#c084fc">
+    <animateMotion dur="4s" begin="1s" repeatCount="indefinite" path="M 282 90 L 282 245" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="4s" begin="1s" repeatCount="indefinite" />
+  </circle>
+  <circle r="3" fill="#51cf66">
+    <animateMotion dur="4s" begin="2s" repeatCount="indefinite" path="M 447 90 L 447 245" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="4s" begin="2s" repeatCount="indefinite" />
+  </circle>
+  <circle r="3" fill="#ffd93d">
+    <animateMotion dur="4s" begin="3s" repeatCount="indefinite" path="M 612 90 L 612 245" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="4s" begin="3s" repeatCount="indefinite" />
+  </circle>
+  
+  <circle r="3.5" fill="#ff922b">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 85 356 L 660 356" />
+    <animate attributeName="opacity" values="0;1;1;1;0" keyTimes="0;0.1;0.5;0.9;1" dur="6s" repeatCount="indefinite" />
+  </circle>
+</svg>

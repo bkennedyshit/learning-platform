@@ -1,0 +1,86 @@
+<svg viewBox="0 0 650 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="hoh-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <radialGradient id="earth-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .hoh-inner { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .hoh-outer { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; stroke-dasharray: 8 4; }
+    .hoh-transfer { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    .hoh-burn { fill: #ff6b6b; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
+    .hoh-burn:hover { r: 10; filter: drop-shadow(0 0 8px #ff6b6b); }
+    .hoh-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .hoh-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .hoh-dv { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: #ff6b6b; font-weight: bold; }
+    .hoh-transfer { stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawTransfer 4s linear infinite; }
+    @keyframes drawTransfer { 0% { stroke-dashoffset: 600; } 100% { stroke-dashoffset: 0; } }
+    .hoh-velocity { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+  </style>
+
+  <!-- Central body -->
+  <circle cx="325" cy="250" r="30" fill="url(#earth-grad)"/>
+  <circle cx="325" cy="250" r="15" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="325" y="290" class="hoh-label" text-anchor="middle">Earth</text>
+
+  <!-- Inner circular orbit (LEO) r₁ -->
+  <circle cx="325" cy="250" r="80" class="hoh-inner"/>
+  <text x="325" y="155" class="hoh-label" text-anchor="middle">r₁ (LEO)</text>
+
+  <!-- Outer circular orbit (GEO) r₂ -->
+  <circle cx="325" cy="250" r="200" class="hoh-outer"/>
+  <text x="325" y="35" class="hoh-label" text-anchor="middle">r₂ (GEO)</text>
+
+  <!-- Hohmann transfer ellipse (half-ellipse from inner to outer) -->
+  <!-- Semi-major axis of transfer = (r1+r2)/2 = (80+200)/2 = 140 -->
+  <!-- Ellipse: center at (325+60, 250), rx=140, ry=110 — draw upper half -->
+  <path d="M 245 250 A 140 130 0 0 1 525 250" class="hoh-transfer"/>
+  
+  <!-- Animated Spacecraft -->
+  <g>
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 245 250 A 140 130 0 0 1 525 250" />
+    <circle cx="0" cy="0" r="6" fill="var(--text-accent, #79c0ff)" stroke="var(--background-secondary, #161b22)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Burn 1 at departure (bottom of inner orbit) -->
+  <circle cx="245" cy="250" r="7" class="hoh-burn"/>
+  <text x="195" y="245" class="hoh-dv">ΔV₁</text>
+  <text x="195" y="262" class="hoh-label">Burn 1 (prograde)</text>
+
+  <!-- Velocity arrow at burn 1 -->
+  <line x1="245" y1="250" x2="245" y2="210" class="hoh-velocity" marker-end="url(#hoh-arrow)"/>
+  <text x="250" y="205" class="hoh-label" fill="var(--text-accent, #79c0ff)">v₁ + ΔV₁</text>
+
+  <!-- Burn 2 at arrival (top of outer orbit) -->
+  <circle cx="525" cy="250" r="7" class="hoh-burn"/>
+  <text x="535" y="245" class="hoh-dv">ΔV₂</text>
+  <text x="535" y="262" class="hoh-label">Burn 2 (prograde)</text>
+
+  <!-- Velocity arrow at burn 2 -->
+  <line x1="525" y1="250" x2="525" y2="215" class="hoh-velocity" marker-end="url(#hoh-arrow)"/>
+
+  <!-- Transfer orbit labels -->
+  <text x="385" y="140" class="hoh-accent">Transfer Ellipse</text>
+  <text x="385" y="158" class="hoh-label">aₜ = (r₁ + r₂)/2</text>
+
+  <!-- Semi-major axis indicator -->
+  <line x1="245" y1="270" x2="525" y2="270" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="385" y="285" class="hoh-label" text-anchor="middle">2aₜ = r₁ + r₂</text>
+
+  <!-- Info box -->
+  <rect x="10" y="360" width="300" height="130" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="160" y="382" class="hoh-accent" text-anchor="middle">Hohmann Transfer Equations</text>
+  <text x="20" y="402" class="hoh-label">ΔV₁ = √(μ/r₁)(√(2r₂/(r₁+r₂)) − 1)</text>
+  <text x="20" y="422" class="hoh-label">ΔV₂ = √(μ/r₂)(1 − √(2r₁/(r₁+r₂)))</text>
+  <text x="20" y="442" class="hoh-label">ΔV_total = ΔV₁ + ΔV₂</text>
+  <text x="20" y="465" class="hoh-label">Transfer time = π√(aₜ³/μ)</text>
+  <text x="20" y="485" class="hoh-label">aₜ = (r₁ + r₂)/2</text>
+
+  <!-- Direction arrows on orbits -->
+  <path d="M 325 170 A 80 80 0 0 1 380 180" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" fill="none" marker-end="url(#hoh-arrow)"/>
+  <path d="M 325 50 A 200 200 0 0 1 420 65" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" fill="none" marker-end="url(#hoh-arrow)"/>
+</svg>

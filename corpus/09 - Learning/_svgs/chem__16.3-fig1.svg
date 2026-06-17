@@ -1,0 +1,53 @@
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .arrow-line { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; marker-end: url(#sarr); }
+    .conv-label { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+  <defs><marker id="sarr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal, #c9d1d9)"/></marker></defs>
+  <text x="300" y="22" class="title" text-anchor="middle">The Stoichiometry Roadmap</text>
+  <!-- Grams A -->
+  <rect x="20" y="60" width="100" height="50" class="box"/>
+  <text x="70" y="85" class="label" text-anchor="middle">Grams A</text>
+  <text x="70" y="100" class="sublabel" text-anchor="middle">(given)</text>
+  <!-- Arrow: grams → moles A -->
+  <line x1="120" y1="85" x2="170" y2="85" class="arrow-line"/>
+  <text x="145" y="75" class="conv-label" text-anchor="middle">÷ M_A</text>
+  <!-- Moles A -->
+  <rect x="170" y="60" width="100" height="50" class="box"/>
+  <text x="220" y="85" class="label" text-anchor="middle">Moles A</text>
+  <!-- Arrow: moles A → moles B -->
+  <line x1="270" y1="85" x2="330" y2="85" class="arrow-line"/>
+  <text x="300" y="75" class="conv-label" text-anchor="middle">× (b/a)</text>
+  <text x="300" y="60" class="sublabel" text-anchor="middle">mole ratio</text>
+  <!-- Moles B -->
+  <rect x="330" y="60" width="100" height="50" class="box"/>
+  <text x="380" y="85" class="label" text-anchor="middle">Moles B</text>
+  <!-- Arrow: moles B → grams B -->
+  <line x1="430" y1="85" x2="480" y2="85" class="arrow-line"/>
+  <text x="455" y="75" class="conv-label" text-anchor="middle">× M_B</text>
+  <!-- Grams B -->
+  <rect x="480" y="60" width="100" height="50" class="box"/>
+  <text x="530" y="85" class="label" text-anchor="middle">Grams B</text>
+  <text x="530" y="100" class="sublabel" text-anchor="middle">(answer)</text>
+  <!-- Alternative paths -->
+  <!-- Particles -->
+  <rect x="130" y="170" width="110" height="45" class="box" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="185" y="195" class="label" text-anchor="middle">Particles A</text>
+  <line x1="185" y1="110" x2="185" y2="170" class="arrow-line" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="200" y="145" class="conv-label" text-anchor="middle" style="fill: var(--text-muted, #8b949e);">× N_A</text>
+  <!-- Volume (gas) -->
+  <rect x="360" y="170" width="110" height="45" class="box" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="415" y="195" class="label" text-anchor="middle">Volume B (gas)</text>
+  <line x1="415" y1="110" x2="415" y2="170" class="arrow-line" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="435" y="145" class="conv-label" text-anchor="middle" style="fill: var(--text-muted, #8b949e);">× 22.4 L</text>
+  <!-- Solution -->
+  <rect x="245" y="230" width="110" height="45" class="box" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="300" y="250" class="label" text-anchor="middle">Volume (soln)</text>
+  <text x="300" y="265" class="sublabel" text-anchor="middle">n = c × V</text>
+  <line x1="300" y1="110" x2="300" y2="230" class="arrow-line" style="stroke: var(--text-muted, #8b949e);"/>
+  <text x="315" y="175" class="conv-label" text-anchor="middle" style="fill: var(--text-muted, #8b949e);">÷ c (M)</text>
+</svg>

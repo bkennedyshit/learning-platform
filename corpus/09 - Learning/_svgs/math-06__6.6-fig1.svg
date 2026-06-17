@@ -1,0 +1,59 @@
+<svg viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="vort-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .cylinder { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2.5; }
+    .streamline { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; opacity: 0.8; }
+    .streamline-top { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 200; stroke-dashoffset: 200; animation: flowVort 4s linear infinite; }
+    @keyframes flowVort { to { stroke-dashoffset: 0; } }
+    .lift-arrow { stroke: var(--text-accent, #79c0ff); stroke-width: 3; fill: none; marker-end: url(#vort-arrow); color: var(--text-accent, #79c0ff); }
+    .circ-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 5 3; }
+    .stag-point { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spin-indicator { transform-origin: 280px 210px; animation: rotate 3s linear infinite; }
+  </style>
+
+  <!-- Streamlines (asymmetric due to circulation) -->
+  <path d="M 40 100 Q 180 90 280 80 Q 380 90 520 100" class="streamline"/>
+  <path d="M 40 140 Q 180 120 240 130 Q 200 160 180 210 Q 200 260 280 280 Q 380 260 520 180" class="streamline-top"/>
+  <path d="M 40 180 Q 150 170 200 180 Q 180 200 180 210 Q 180 230 220 250 Q 300 290 520 220" class="streamline-top" style="animation-delay: 0.5s;"/>
+  <path d="M 40 250 Q 150 260 200 280 Q 250 310 320 310 Q 420 290 520 270" class="streamline"/>
+  <path d="M 40 300 Q 200 310 280 330 Q 380 320 520 310" class="streamline"/>
+  <path d="M 40 340 Q 200 345 280 350 Q 380 345 520 340" class="streamline"/>
+
+  <!-- Cylinder -->
+  <circle cx="280" cy="210" r="50" class="cylinder"/>
+
+  <!-- Circulation indicator (spinning arrow) -->
+  <g class="spin-indicator">
+    <path d="M 280 175 A 35 35 0 1 1 279 175" class="circ-arrow"/>
+    <polygon points="279,172 283,178 275,178" fill="var(--interactive-accent, #58a6ff)"/>
+  </g>
+  <text x="280" y="215" class="label" text-anchor="middle" style="fill: var(--text-muted, #8b949e);">Γ</text>
+
+  <!-- Stagnation points (shifted down due to circulation) -->
+  <circle cx="235" cy="245" r="5" class="stag-point"/>
+  <circle cx="325" cy="245" r="5" class="stag-point"/>
+  <text x="235" y="265" class="label" text-anchor="middle">S₁</text>
+  <text x="325" y="265" class="label" text-anchor="middle">S₂</text>
+
+  <!-- Lift arrow -->
+  <line x1="280" y1="150" x2="280" y2="60" class="lift-arrow">
+    <animate attributeName="y2" values="60; 40; 60" dur="1.5s" repeatCount="indefinite" />
+  </line>
+  <text x="295" y="70" class="label-accent">Lift L = ρU∞Γ</text>
+
+  <!-- Free-stream arrow -->
+  <line x1="40" y1="50" x2="120" y2="50" style="stroke: var(--text-normal, #c9d1d9); stroke-width: 2; marker-end: url(#vort-arrow); color: var(--text-normal, #c9d1d9);"/>
+  <text x="130" y="55" class="label">U∞</text>
+
+  <!-- Title -->
+  <text x="280" y="400" class="title-label" text-anchor="middle">Kutta-Joukowski: L' = ρU∞Γ (per unit span)</text>
+</svg>

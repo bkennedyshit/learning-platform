@@ -1,0 +1,271 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .gate-path { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: var(--background-primary, #0d1117); }
+    .gate-bubble { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: var(--background-primary, #0d1117); }
+    .wire-glow { stroke-width: 2; fill: none; stroke-linecap: round; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .tb-text { font-family: Menlo, Monaco, Consolas, "Fira Code", monospace; font-size: 9px; fill: var(--text-normal, #c9d1d9); }
+    .tb-header { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); font-weight: bold; }
+  </style>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Digital Logic — Combinational Gates &amp; Truth Tables</text>
+
+  <!-- ==================== QUADRANT 1: AND GATE ==================== -->
+  <g id="quad-and">
+    <rect x="20" y="45" width="315" height="145" class="box"/>
+    <text x="35" y="65" class="label" font-weight="bold" fill="#ffd93d">AND Gate</text>
+
+    <!-- Inputs Wires and readouts -->
+    <!-- Input A -->
+    <line x1="50" y1="85" x2="90" y2="85" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="42" y="88" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;0;0;1;1;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy1" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="32" y="88" class="sublabel">A</text>
+
+    <!-- Input B -->
+    <line x1="50" y1="105" x2="90" y2="105" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#343a40;#343a40;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="42" y="108" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;1;1;0;0;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy2" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="32" y="108" class="sublabel">B</text>
+
+    <!-- Gate Symbol -->
+    <path d="M 90 75 L 105 75 C 122 75 122 115 105 115 L 90 115 Z" class="gate-path"/>
+    <text x="103" y="100" class="sublabel" font-weight="bold" fill="var(--text-muted, #8b949e)">AND</text>
+
+    <!-- Output Y Wire & readout -->
+    <line x1="120" y1="95" x2="160" y2="95" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#343a40;#343a40;#343a40;#343a40;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="165" y="98" class="tb-text" font-weight="bold" fill="#58a6ff">
+      <animate attributeName="textContent" values="0;0;0;0;0;0;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy3" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="175" y="98" class="sublabel">Y</text>
+
+    <!-- Truth Table -->
+    <rect x="210" y="55" width="105" height="120" rx="3" fill="#0d1117" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    
+    <!-- Table Row Highlights -->
+    <rect x="212" y="77" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0.25;0.25;0;0;0;0;0;0;0.25" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="91" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0.25;0.25;0;0;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="105" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0.25;0.25;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="119" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0;0;0.25;0.25;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="220" y="70" class="tb-header">A  B  |  Y</text>
+    <line x1="215" y1="73" x2="310" y2="73" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    <text x="220" y="87" class="tb-text">0  0  |  0</text>
+    <text x="220" y="101" class="tb-text">0  1  |  0</text>
+    <text x="220" y="115" class="tb-text">1  0  |  0</text>
+    <text x="220" y="129" class="tb-text" font-weight="bold" fill="#58a6ff">1  1  |  1</text>
+  </g>
+
+  <!-- ==================== QUADRANT 2: OR GATE ==================== -->
+  <g id="quad-or">
+    <rect x="365" y="45" width="315" height="145" class="box"/>
+    <text x="380" y="65" class="label" font-weight="bold" fill="#ffd93d">OR Gate</text>
+
+    <!-- Inputs Wires -->
+    <line x1="395" y1="85" x2="435" y2="85" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="387" y="88" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;0;0;1;1;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy4" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="377" y="88" class="sublabel">A</text>
+
+    <line x1="395" y1="105" x2="435" y2="105" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#343a40;#343a40;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="387" y="108" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;1;1;0;0;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy5" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="377" y="108" class="sublabel">B</text>
+
+    <!-- Gate Symbol -->
+    <path d="M 430 75 C 438 85 438 105 430 115 C 450 115 460 105 470 95 C 460 85 450 75 430 75 Z" class="gate-path"/>
+    <text x="440" y="100" class="sublabel" font-weight="bold" fill="var(--text-muted, #8b949e)">OR</text>
+
+    <!-- Output Y Wire & readout -->
+    <line x1="470" y1="95" x2="510" y2="95" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="515" y="98" class="tb-text" font-weight="bold" fill="#58a6ff">
+      <animate attributeName="textContent" values="0;0;1;1;1;1;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy6" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="525" y="98" class="sublabel">Y</text>
+
+    <!-- Truth Table -->
+    <rect x="555" y="55" width="105" height="120" rx="3" fill="#0d1117" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    
+    <!-- Table Row Highlights -->
+    <rect x="557" y="77" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0.25;0.25;0;0;0;0;0;0;0.25" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="91" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0.25;0.25;0;0;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="105" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0.25;0.25;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="119" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0;0;0.25;0.25;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="565" y="70" class="tb-header">A  B  |  Y</text>
+    <line x1="560" y1="73" x2="655" y2="73" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    <text x="565" y="87" class="tb-text">0  0  |  0</text>
+    <text x="565" y="101" class="tb-text" font-weight="bold" fill="#58a6ff">0  1  |  1</text>
+    <text x="565" y="115" class="tb-text" font-weight="bold" fill="#58a6ff">1  0  |  1</text>
+    <text x="565" y="129" class="tb-text" font-weight="bold" fill="#58a6ff">1  1  |  1</text>
+  </g>
+
+  <!-- ==================== QUADRANT 3: NAND GATE ==================== -->
+  <g id="quad-nand">
+    <rect x="20" y="210" width="315" height="145" class="box"/>
+    <text x="35" y="230" class="label" font-weight="bold" fill="#ffd93d">NAND Gate</text>
+
+    <!-- Inputs Wires -->
+    <line x1="50" y1="250" x2="90" y2="250" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="42" y="253" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;0;0;1;1;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy7" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="32" y="253" class="sublabel">A</text>
+
+    <line x1="50" y1="270" x2="90" y2="270" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#343a40;#343a40;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="42" y="273" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;1;1;0;0;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy8" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="32" y="273" class="sublabel">B</text>
+
+    <!-- Gate Symbol -->
+    <path d="M 90 240 L 105 240 C 122 240 122 280 105 280 L 90 280 Z" class="gate-path"/>
+    <circle cx="123" cy="260" r="3.5" class="gate-bubble"/>
+    <text x="101" y="264" class="sublabel" font-weight="bold" fill="var(--text-muted, #8b949e)">NAND</text>
+
+    <!-- Output Y Wire & readout -->
+    <line x1="126" y1="260" x2="160" y2="260" class="wire-glow">
+      <animate attributeName="stroke" values="#58a6ff;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40;#343a40;#58a6ff" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="165" y="263" class="tb-text" font-weight="bold" fill="#58a6ff">
+      <animate attributeName="textContent" values="1;1;1;1;1;1;0;0;1" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      1<animate attributeName="dummy9" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="175" y="263" class="sublabel">Y</text>
+
+    <!-- Truth Table -->
+    <rect x="210" y="220" width="105" height="120" rx="3" fill="#0d1117" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    
+    <!-- Table Row Highlights -->
+    <rect x="212" y="242" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0.25;0.25;0;0;0;0;0;0;0.25" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="256" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0.25;0.25;0;0;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="270" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0.25;0.25;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="212" y="284" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0;0;0.25;0.25;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="220" y="235" class="tb-header">A  B  |  Y</text>
+    <line x1="215" y1="238" x2="310" y2="238" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    <text x="220" y="252" class="tb-text" font-weight="bold" fill="#58a6ff">0  0  |  1</text>
+    <text x="220" y="266" class="tb-text" font-weight="bold" fill="#58a6ff">0  1  |  1</text>
+    <text x="220" y="280" class="tb-text" font-weight="bold" fill="#58a6ff">1  0  |  1</text>
+    <text x="220" y="294" class="tb-text">1  1  |  0</text>
+  </g>
+
+  <!-- ==================== QUADRANT 4: XOR GATE ==================== -->
+  <g id="quad-xor">
+    <rect x="365" y="210" width="315" height="145" class="box"/>
+    <text x="380" y="230" class="label" font-weight="bold" fill="#ffd93d">XOR Gate</text>
+
+    <!-- Inputs Wires -->
+    <line x1="395" y1="250" x2="430" y2="250" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="387" y="253" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;0;0;1;1;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy10" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="377" y="253" class="sublabel">A</text>
+
+    <line x1="395" y1="270" x2="430" y2="270" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#343a40;#343a40;#58a6ff;#58a6ff;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="387" y="273" class="tb-text" font-weight="bold">
+      <animate attributeName="textContent" values="0;0;1;1;0;0;1;1;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy11" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="377" y="273" class="sublabel">B</text>
+
+    <!-- Gate Symbol -->
+    <path d="M 419 240 C 427 250 427 270 419 280" fill="none" stroke="var(--text-normal, #c9d1d9)" stroke-width="2"/>
+    <path d="M 425 240 C 433 250 433 270 425 280 C 445 280 455 270 465 260 C 455 250 445 240 425 240 Z" class="gate-path"/>
+    <text x="438" y="264" class="sublabel" font-weight="bold" fill="var(--text-muted, #8b949e)">XOR</text>
+
+    <!-- Output Y Wire & readout -->
+    <line x1="465" y1="260" x2="510" y2="260" class="wire-glow">
+      <animate attributeName="stroke" values="#343a40;#343a40;#58a6ff;#58a6ff;#58a6ff;#58a6ff;#343a40;#343a40;#343a40" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+    <text x="515" y="263" class="tb-text" font-weight="bold" fill="#58a6ff">
+      <animate attributeName="textContent" values="0;0;1;1;1;1;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+      0<animate attributeName="dummy12" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="525" y="263" class="sublabel">Y</text>
+
+    <!-- Truth Table -->
+    <rect x="555" y="220" width="105" height="120" rx="3" fill="#0d1117" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    
+    <!-- Table Row Highlights -->
+    <rect x="557" y="242" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0.25;0.25;0;0;0;0;0;0;0.25" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="256" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0.25;0.25;0;0;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="270" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0.25;0.25;0;0;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="557" y="284" width="101" height="13" fill="#58a6ff" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0;0;0.25;0.25;0" keyTimes="0;0.23;0.25;0.48;0.50;0.73;0.75;0.98;1" dur="8s" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="565" y="235" class="tb-header">A  B  |  Y</text>
+    <line x1="560" y1="238" x2="655" y2="238" stroke="var(--text-muted, #8b949e)" stroke-width="0.8"/>
+    <text x="565" y="252" class="tb-text">0  0  |  0</text>
+    <text x="565" y="266" class="tb-text" font-weight="bold" fill="#58a6ff">0  1  |  1</text>
+    <text x="565" y="280" class="tb-text" font-weight="bold" fill="#58a6ff">1  0  |  1</text>
+    <text x="565" y="294" class="tb-text">1  1  |  0</text>
+  </g>
+</svg>

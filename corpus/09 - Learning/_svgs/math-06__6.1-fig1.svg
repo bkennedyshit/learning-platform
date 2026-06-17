@@ -1,0 +1,91 @@
+<svg viewBox="0 0 560 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="stress-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .tet-edge { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .tet-face { fill: var(--interactive-accent, #58a6ff); opacity: 0.12; }
+    .tet-face-oblique { fill: var(--text-accent, #79c0ff); opacity: 0.15; }
+    .stress-vec {
+      stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.2; fill: none;
+      marker-end: url(#stress-arrow); color: var(--interactive-accent, #58a6ff);
+      transition: all 0.25s ease; cursor: pointer;
+    }
+    .stress-vec:hover {
+      stroke-width: 3.5;
+      filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff));
+    }
+    .normal-vec {
+      stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none;
+      marker-end: url(#stress-arrow); color: var(--text-accent, #79c0ff);
+      stroke-dasharray: 6 3;
+    }
+    .axis-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .coord-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted, #8b949e); }
+    .pulse-dot { fill: var(--interactive-accent, #58a6ff); }
+    @keyframes pulse {
+      0%, 100% { r: 4; opacity: 1; }
+      50% { r: 7; opacity: 0.6; }
+    }
+    .pulse-dot { animation: pulse 2s ease-in-out infinite; }
+  </style>
+
+  <!-- Coordinate axes -->
+  <line x1="80" y1="380" x2="200" y2="380" class="axis-line" marker-end="url(#stress-arrow)" style="color: var(--text-muted, #8b949e);"/>
+  <line x1="80" y1="380" x2="80" y2="260" class="axis-line" marker-end="url(#stress-arrow)" style="color: var(--text-muted, #8b949e);"/>
+  <line x1="80" y1="380" x2="30" y2="430" class="axis-line" marker-end="url(#stress-arrow)" style="color: var(--text-muted, #8b949e);"/>
+  <text x="210" y="385" class="coord-label">x₁</text>
+  <text x="72" y="250" class="coord-label">x₂</text>
+  <text x="15" y="445" class="coord-label">x₃</text>
+
+  <!-- Tetrahedron edges -->
+  <polygon points="280,400 450,400 360,180" class="tet-face"/>
+  <polygon points="280,400 360,180 220,280" class="tet-face"/>
+  <polygon points="450,400 360,180 220,280" class="tet-face-oblique"/>
+  <line x1="280" y1="400" x2="450" y2="400" class="tet-edge"/>
+  <line x1="280" y1="400" x2="360" y2="180" class="tet-edge"/>
+  <line x1="280" y1="400" x2="220" y2="280" class="tet-edge"/>
+  <line x1="450" y1="400" x2="360" y2="180" class="tet-edge"/>
+  <line x1="450" y1="400" x2="220" y2="280" class="tet-edge"/>
+  <line x1="360" y1="180" x2="220" y2="280" class="tet-edge"/>
+
+  <!-- Stress vectors on coordinate faces -->
+  <line x1="365" y1="390" x2="405" y2="350" class="stress-vec">
+    <animate attributeName="x2" values="405;415;405" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="350;340;350" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="410" y="345" class="label-accent">σ₁₁</text>
+  <line x1="310" y1="330" x2="270" y2="300" class="stress-vec">
+    <animate attributeName="x2" values="270;260;270" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="300;290;300" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="250" y="295" class="label-accent">σ₂₂</text>
+  <line x1="300" y1="360" x2="260" y2="390" class="stress-vec">
+    <animate attributeName="x2" values="260;250;260" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="390;400;390" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="240" y="400" class="label-accent">σ₃₃</text>
+
+  <!-- Traction vector on oblique face -->
+  <line x1="345" y1="285" x2="420" y2="220" class="stress-vec" style="stroke: var(--text-accent, #79c0ff); stroke-width: 3;">
+    <animate attributeName="x2" values="420;440;420" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="220;200;220" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="425" y="215" class="label" style="fill: var(--text-accent, #79c0ff); font-weight: bold;">t⁽ⁿ⁾</text>
+
+  <!-- Normal vector on oblique face -->
+  <line x1="345" y1="285" x2="390" y2="250" class="normal-vec"/>
+  <text x="395" y="248" class="label" style="fill: var(--text-accent, #79c0ff);">n̂</text>
+
+  <!-- Pulsing centroid -->
+  <circle cx="345" cy="285" r="4" class="pulse-dot"/>
+
+  <!-- Title -->
+  <text x="280" y="460" class="label-title" text-anchor="middle">Cauchy Tetrahedron: t⁽ⁿ⁾ = σ · n̂</text>
+</svg>

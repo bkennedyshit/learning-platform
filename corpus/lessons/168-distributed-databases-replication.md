@@ -1,0 +1,450 @@
+---
+title: "16.8 — Distributed Databases & Replication"
+subject: "Databases & Storage Engines"
+catalog: advanced
+audience_tier: higher-education
+chapter: "16.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 16.8 — Distributed Databases & Replication
+
+> *"Distributing a database is the act of trading one hard problem (a single machine failing) for three hard problems (replication lag, consensus, and partial failure). Do it when you must, not before."*
+
+> *"Raft was written to be understood. Read the paper. It's 18 pages and worth more than most database textbooks."*
+
+Everything we've studied so far — storage engines, B-trees, LSM-trees, WAL, MVCC, query processing — applies to a single machine. The moment data must live on more than one machine, every assumption changes: networks partition, nodes fail independently, clocks drift, and the database must make explicit choices about consistency, availability, and latency.
+
+This chapter covers the two fundamental mechanisms that make multi-machine databases possible: **replication** (copies of data on multiple machines) and **partitioning / sharding** (different subsets of data on different machines). And it covers the consensus algorithm — **Raft** — that makes distributed agreement possible.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Explain **leader-follower replication**: the WAL streaming mechanism, synchronous vs asynchronous durability trade-off, and failover.
+2. Describe the three **replication lag anomalies**: read-your-writes, monotonic reads, and consistent prefix — and their fixes.
+3. Walk through the **Raft consensus algorithm**: leader election, log replication, safety, and why `2f+1` nodes tolerate `f` failures.
+4. Explain **partitioning strategies**: range partitioning, hash partitioning, and consistent hashing (virtual nodes).
+5. Identify the operational challenges of replication: replication slots, WAL retention, monitoring lag with `pg_stat_replication`.
+6. Compare **NewSQL systems** (CockroachDB, Spanner, TiDB) on their replication and consistency models.
+
+---
+
+## 🖼️ Visual Anchor
+
+![dbs__30.8-fig1](dbs__30.8-fig1.svg)
+
+*Figure 30.8.1 — Leader-follower replication, Raft consensus with partition tolerance, replication lag anomalies, and partitioning strategies.*
+
+---
+
+## 📚 1. Leader-Follower (Single-Master) Replication
+
+### 1.1 The Basic Model
+
+In **leader-follower replication** (also called primary-secondary, master-replica, or single-master replication):
+
+- **One leader** (primary) accepts all writes
+- **One or more followers** (replicas) receive a copy of every write and apply it in the same order
+- Reads can be served by any replica (with staleness trade-off) or only by the leader (for consistency)
+
+```
+Client --WRITE--> Leader --WAL stream--> Follower 1
+                        --WAL stream--> Follower 2
+Client --READ --> Follower 1 (may be slightly stale)
+```
+
+### 1.2 PostgreSQL Streaming Replication
+
+PostgreSQL implements replication via **WAL streaming**:
+
+1. Leader writes WAL records for every data change
+2. A `walsender` process on the leader streams WAL records to `walreceiver` on the follower
+3. The follower's **startup process** applies WAL records to its own buffer pool and storage
+4. The follower is in "hot standby" mode — it can serve read-only queries even while recovering
+
+```bash
+# On the primary: configure replication
+# postgresql.conf:
+wal_level = replica            # must be at least 'replica' for streaming
+max_wal_senders = 5            # max concurrent replication connections
+wal_keep_size = 1024           # MB of WAL to retain (before replication slots)
+
+# pg_hba.conf:
+host replication replicator 10.0.0.0/24 md5
+
+# On the standby: recovery.conf (or postgresql.conf in PG 12+):
+primary_conninfo = 'host=10.0.0.1 user=replicator password=...'
+```
+
+### 1.3 Synchronous vs Asynchronous Replication
+
+| Mode | Durability | Latency | Risk |
+|---|---|---|---|
+| **Asynchronous** (default) | Leader commits without waiting for follower ACK | Low — no replica wait | Loss of committed data on leader failure (follower may be behind) |
+| **Synchronous** (`synchronous_standby_names`) | Leader waits for ≥1 follower to acknowledge WAL flush before COMMIT | Higher — network RTT added to commit | No data loss on single node failure |
+| **Quorum sync** (PostgreSQL 10+) | Wait for `ANY N` or `FIRST N` of a list of standbys | Tunable | Balance between performance and durability |
+
+```sql
+-- Enable synchronous replication for critical tables
+ALTER SYSTEM SET synchronous_standby_names = 'ANY 1 (standby1, standby2)';
+SELECT pg_reload_conf();
+-- Now commits wait for ANY 1 of the listed standbys to flush WAL
+```
+
+**Trade-off**: Synchronous replication adds the round-trip time from leader to replica to every write's latency. For replicas in the same data center (~1ms RTT), this is acceptable. For cross-region replicas (~100ms RTT), synchronous replication becomes a significant throughput bottleneck.
+
+### 1.4 Replication Slots
+
+Without replication slots, if a follower falls behind, the leader may have already removed the WAL files the follower needs. **Replication slots** prevent the leader from removing WAL that any slot's consumer has not yet confirmed:
+
+```sql
+-- Create a physical replication slot
+SELECT pg_create_physical_replication_slot('standby1_slot');
+
+-- Monitor slots
+SELECT slot_name, active, restart_lsn, confirmed_flush_lsn,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) AS lag_bytes
+FROM pg_replication_slots;
+```
+
+**Warning**: A stale or abandoned replication slot causes **WAL accumulation** — the leader retains all WAL since the slot's `restart_lsn`. If a replica is offline for days, the primary's `pg_wal/` directory can fill the disk. Monitor slot lag and drop inactive slots.
+
+### 1.5 Monitoring Replication
+
+```sql
+-- On the primary: check all connected standbys
+SELECT client_addr,
+       application_name,
+       state,
+       sent_lsn,
+       write_lsn,
+       flush_lsn,
+       replay_lsn,
+       write_lag,
+       flush_lag,
+       replay_lag
+FROM pg_stat_replication;
+
+-- write_lag:  time between primary commit and standby writing WAL to disk
+-- flush_lag:  time between primary commit and standby fsyncing WAL
+-- replay_lag: time between primary commit and standby applying WAL
+-- replay_lag is the most important for "how stale are my reads?"
+```
+
+---
+
+## 📚 2. Replication Lag Anomalies
+
+When reads are served from replicas, replication lag can cause surprising behaviour. DDIA Chapter 5 categorises these into three anomalies:
+
+### 2.1 Read-Your-Writes (Read-After-Write Consistency)
+
+**Problem**: User writes something (e.g., updates their profile), then immediately reads from a replica that hasn't applied the write yet. They see their old profile.
+
+```
+User:     POST /profile  → writes to Leader
+          GET  /profile  → reads from Replica (stale! change not yet replicated)
+          "Why didn't my update save?!"
+```
+
+**Fixes**:
+- Always read user's own writes from the leader for a short window after a write
+- Track write LSN in the session; route read to a replica only when replica's LSN ≥ write LSN
+- Set a cookie with the write timestamp; reject reads from replicas lagging behind that timestamp
+
+### 2.2 Monotonic Reads
+
+**Problem**: User reads from Replica A (sees state at time T=100), then reads from Replica B (sees state at time T=80, more lagged). They see events "go backward in time".
+
+```
+Request 1 → Replica A (replay_lag=50ms) → sees posts from 08:00 to 12:00
+Request 2 → Replica B (replay_lag=200ms) → sees posts from 08:00 to 11:50 (fewer!)
+```
+
+**Fix**: Sticky session routing — route all requests from the same user to the same replica. Breaks on replica failure; fallback to another replica is acceptable (one-time backward jump on failure is better than constant jitter).
+
+### 2.3 Consistent Prefix Reads
+
+**Problem**: Writes that are causally related are replicated in the wrong order to some replicas.
+
+```
+Causal chain: A writes "Question: what time is it?"
+              B writes "Answer: 3pm"
+
+Replica sees Answer before Question → causally nonsensical
+```
+
+**Fix**: In PostgreSQL streaming replication, WAL is strictly ordered — this anomaly cannot occur within a single replication stream. It is a problem in leaderless / multi-master replication (Cassandra, DynamoDB, CRDTs) where different partitions may be replicated at different rates.
+
+---
+
+## 📚 3. Raft Consensus Algorithm
+
+### 3.1 Why Consensus?
+
+In leader-follower replication, the leader is a single point of failure. When the leader fails, a new leader must be elected — but how do multiple nodes agree on who the new leader is without themselves becoming split-brained?
+
+**Consensus algorithms** (Paxos, Raft, Viewstamped Replication) solve the problem of getting multiple nodes to agree on a single value (here: who is the leader, or what is the next log entry) despite arbitrary failures.
+
+### 3.2 Raft Fundamentals
+
+**Raft** (Ongaro & Ousterhout, 2014) was designed to be the most understandable consensus algorithm. A Raft cluster has:
+
+- **Leader**: handles all client requests, replicates log entries to followers
+- **Follower**: passive, replicates log from leader
+- **Candidate**: a node that believes the leader is dead and is seeking election
+
+**Term**: a logical clock, monotonically increasing. Each election starts a new term. If a node sees a higher term, it immediately reverts to follower.
+
+### 3.3 Leader Election
+
+```
+Trigger: Follower's election timeout expires without hearing from leader
+         (randomised: 150–300ms to prevent split votes)
+
+Candidate process:
+1. Increment current term
+2. Vote for self
+3. Send RequestVote RPCs to all other nodes
+
+RequestVote grants a vote if:
+  - Candidate's term > voter's current term
+  - Candidate's log is at least as up-to-date as voter's log
+    (last log term > voter's OR last log term = voter's AND log length ≥ voter's)
+  - Voter hasn't voted for someone else this term
+
+Election succeeds when candidate has votes from a MAJORITY (⌊N/2⌋ + 1 nodes)
+```
+
+### 3.4 Log Replication
+
+Once a leader is elected:
+
+```
+Client sends command C to leader.
+Leader appends entry (term=current_term, command=C) to its log.
+Leader sends AppendEntries RPCs to all followers simultaneously.
+
+AppendEntries includes:
+  - term
+  - leaderId
+  - prevLogIndex + prevLogTerm (for consistency check)
+  - entries[] (new entries to append)
+  - leaderCommit (highest committed index)
+
+Follower accepts if: prevLogIndex/prevLogTerm match its log.
+  → Follower appends entries, responds OK.
+
+Leader marks entry COMMITTED when it has received OK from a MAJORITY.
+Leader applies committed entry to state machine.
+Leader notifies followers of commitIndex in next AppendEntries.
+Followers apply committed entries to their state machines.
+```
+
+### 3.5 Safety: Why 2f+1 Nodes Tolerate f Failures
+
+**Theorem**: With 2f+1 nodes, Raft tolerates f simultaneous failures.
+
+**Proof sketch**: Any majority of a 2f+1 node cluster has at least f+1 nodes. If f nodes fail, the remaining f+1 nodes can form a majority (f+1 > f). With fewer than f+1 nodes, no majority is possible — the cluster stops making progress (but doesn't make incorrect decisions).
+
+```
+3 nodes (f=1): tolerate 1 failure. Majority = 2. 
+  After 1 failure: 2 remaining nodes can form majority. ✓
+  After 2 failures: 1 remaining node, cannot form majority. ✗ (stalls)
+
+5 nodes (f=2): tolerate 2 failures. Majority = 3.
+  After 2 failures: 3 remaining nodes form majority. ✓
+
+Standard production: 3 or 5 Raft nodes.
+```
+
+### 3.6 Raft Log Safety
+
+The key safety property: **if an entry is committed in term T, no future leader will overwrite it**.
+
+This is guaranteed by the log completeness requirement in leader election: a node cannot win an election unless its log is at least as complete as a majority of the cluster. Since a committed entry was replicated to a majority, at least one node in any future majority has that entry — so any new leader will have it too.
+
+---
+
+## 📚 4. Partitioning / Sharding
+
+### 4.1 When Partitioning is Needed
+
+A single Postgres instance on a large server handles ~100k-500k TPS for OLTP. Beyond this, or when the dataset exceeds a single machine's storage, **partitioning** splits the data across multiple machines:
+
+- Each machine holds a **shard** (subset of data)
+- Each shard is an independent database with its own B-tree index, buffer pool, WAL
+- A **routing layer** directs each query to the correct shard
+
+### 4.2 Range Partitioning
+
+**Scheme**: Partition by a key range. Shard A: `user_id` 1–1,000,000. Shard B: `user_id` 1,000,001–2,000,000.
+
+```sql
+-- PostgreSQL native table partitioning (declarative)
+CREATE TABLE orders (
+    id BIGINT,
+    user_id INT,
+    amount DECIMAL,
+    created_at TIMESTAMP
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE orders_2025 PARTITION OF orders
+    FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');
+CREATE TABLE orders_2026 PARTITION OF orders
+    FOR VALUES FROM ('2026-01-01') TO ('2027-01-01');
+```
+
+**Pros**: Range queries stay on one shard (e.g., all orders from 2026).
+**Cons**: Sequential inserts (e.g., monotonically increasing timestamps) all go to the latest partition → **hot spot**. Uneven data distribution across partitions.
+
+### 4.3 Hash Partitioning
+
+**Scheme**: `shard = hash(partition_key) mod N_shards`
+
+```sql
+CREATE TABLE users (id BIGINT, name TEXT) PARTITION BY HASH (id);
+CREATE TABLE users_0 PARTITION OF users FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE users_1 PARTITION OF users FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE users_2 PARTITION OF users FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE users_3 PARTITION OF users FOR VALUES WITH (MODULUS 4, REMAINDER 3);
+```
+
+**Pros**: Even distribution of writes and data across shards.
+**Cons**: Range queries must hit ALL shards. Adding/removing shards requires remapping all data (unless using consistent hashing).
+
+### 4.4 Consistent Hashing
+
+**Problem with mod-N hashing**: Adding 1 shard changes `N` → remaps `(N-1)/N` ≈ 100% of keys. A ring-based consistent hash remaps only `K/N` keys (where K = total keys).
+
+**Algorithm**:
+- Map each shard to one or more positions on a virtual "hash ring" (0 to 2^32 − 1)
+- Map each key to a position on the ring using the same hash function
+- A key belongs to the shard at the next clockwise position on the ring
+
+```
+Ring: 0 ─────────────────── 2^32−1
+      Shard A: position 100M
+      Shard B: position 200M
+      Shard C: position 300M
+
+Key hash 150M → belongs to Shard B (next clockwise from 150M)
+Key hash 250M → belongs to Shard C
+Key hash 350M → wraps around → belongs to Shard A
+
+Add Shard D at position 250M: only keys between 200M and 250M move from C → D
+```
+
+**Virtual nodes**: Each shard maps to V virtual positions on the ring (e.g., V=150 in Cassandra). This ensures even distribution even when shards have heterogeneous capacity. More virtual nodes = more even spread.
+
+**Users**: Cassandra, DynamoDB, Redis Cluster all use consistent hashing with virtual nodes.
+
+---
+
+## 📚 5. NewSQL Systems: Distributed Databases with ACID
+
+### 5.1 The Landscape
+
+Traditional sharding sacrifices cross-shard ACID transactions. **NewSQL** systems provide ACID + horizontal scalability via **distributed transactions using consensus**:
+
+| System | Consensus | Storage | SQL | Highlight |
+|---|---|---|---|---|
+| **CockroachDB** | Raft (per range) | RocksDB | PostgreSQL-compatible | Multi-region locality, survivability zones |
+| **Google Spanner** | Multi-Paxos (Paxos per shard) | Bigtable-based | ANSI SQL (GoogleSQL) | TrueTime for external consistency |
+| **TiDB** | Raft (TiKV) | RocksDB (TiKV) + TiFlash (columnar) | MySQL-compatible | HTAP: TP + AP in one system |
+| **YugabyteDB** | Raft | DocDB (RocksDB-based) | PostgreSQL-compatible | Lower CPU overhead than CockroachDB |
+
+### 5.2 CockroachDB Architecture
+
+CockroachDB stores data in **ranges** (similar to partitions), each 64–512 MB. Each range is replicated to 3 nodes using Raft:
+
+```
+Data → split into ranges → each range = Raft group (3–5 nodes)
+       range_key: /Table/orders/0001 ... /Table/orders/1000
+
+Leader of each Raft group accepts writes for that range.
+Read can be served by any replica (with bounded staleness) or leader (consistent).
+```
+
+Cross-range transactions use a **distributed transaction coordinator** with a timestamp-based protocol similar to Spanner's TrueTime (but without GPS clocks — they use bounded clock uncertainty).
+
+---
+
+## 📚 6. PostgreSQL Logical Replication
+
+### 6.1 Physical vs Logical Replication
+
+| Type | Granularity | Use case |
+|---|---|---|
+| **Physical (streaming)** | Page-level WAL stream (byte-for-byte copy) | High-availability standby, disaster recovery |
+| **Logical** | Row-level change stream (INSERT/UPDATE/DELETE) | CDC, cross-version migration, partial replication |
+
+**Logical replication** decodes WAL into row-level events:
+
+```sql
+-- On publisher:
+ALTER SYSTEM SET wal_level = logical;
+CREATE PUBLICATION orders_pub FOR TABLE orders;
+
+-- On subscriber (different PostgreSQL version acceptable):
+CREATE SUBSCRIPTION orders_sub
+CONNECTION 'host=primary port=5432 dbname=mydb user=replicator'
+PUBLICATION orders_pub;
+
+-- Monitor logical replication
+SELECT * FROM pg_stat_subscription;
+SELECT * FROM pg_stat_replication;
+```
+
+Logical replication is the basis for **Change Data Capture (CDC)** tools like Debezium, which publish database changes to Kafka topics for downstream consumers.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [16.5 - Write-Ahead Logging & Recovery](16.5---Write-Ahead-Logging-&-Recovery) — WAL streaming replication is built on the WAL
+- [16.4 - Transaction Management & ACID](16.4---Transaction-Management-&-ACID) — distributed transactions and ACID trade-offs
+- [16.1 - Storage Engine Fundamentals](16.1---Storage-Engine-Fundamentals) — each shard is a standalone storage engine
+- [27.3 - Databases at Scale](27.3---Databases-at-Scale) — when to shard vs scale-up
+- [27.1 - System Design Fundamentals](27.1---System-Design-Fundamentals) — CAP, PACELC in the replication context
+
+### External
+- [Raft paper: Ongaro & Ousterhout 2014 — "In Search of an Understandable Consensus Algorithm"](https://raft.github.io/raft.pdf)
+- [Raft visualization (interactive)](https://raft.github.io/)
+- [MIT 6.824 — Distributed Systems, Raft lab](https://pdos.csail.mit.edu/6.824/)
+- [DDIA Chapter 5 — Replication](https://dataintensive.net/)
+- [DDIA Chapter 6 — Partitioning](https://dataintensive.net/)
+- [DDIA Chapter 9 — Consistency and Consensus](https://dataintensive.net/)
+- [PostgreSQL Streaming Replication Documentation](https://www.postgresql.org/docs/current/warm-standby.html)
+- [PostgreSQL Logical Replication Documentation](https://www.postgresql.org/docs/current/logical-replication.html)
+- [CockroachDB Architecture Documentation](https://www.cockroachlabs.com/docs/stable/architecture/overview.html)
+- [TiDB Architecture Overview](https://docs.pingcap.com/tidb/stable/tidb-architecture)
+- [Dynamo paper: DeCandia et al. 2007](https://dl.acm.org/doi/10.1145/1294261.1294281)
+- [Spanner paper: Corbett et al. 2012](https://dl.acm.org/doi/10.1145/2491245)
+
+---
+
+## ⚠️ 8. Common Misconceptions
+
+- **"Leader-follower replication provides high availability automatically."** Failover requires either manual intervention or an external tool (Patroni, Stolon, repmgr). The new leader must be elected; clients must reconnect. Automated failover adds complexity and risk of split-brain if done incorrectly.
+- **"Reads from replicas are always safe."** They are eventually consistent. Replication lag anomalies (read-your-writes, monotonic reads) require application awareness. Don't read from a replica immediately after a write in the same user request without compensating logic.
+- **"Sharding solves all scale problems."** Sharding distributes load but complicates cross-shard queries (scatter-gather), cross-shard transactions, and re-sharding when growth demands change. Exhaust single-machine options first.
+- **"Raft is the same as Paxos."** They solve the same problem but differently. Raft is easier to understand and implement correctly (that was the design goal). Paxos (Multi-Paxos) is older, more theoretically studied, and used by Spanner and Chubby. CockroachDB and etcd use Raft.
+- **"Consistent hashing means data is consistent."** "Consistent" in consistent hashing means "consistent mapping" — a node addition/removal causes only minimal key remapping. It has nothing to do with data consistency (linearizability/ACID). Confusingly named.
+- **"Replication slots are free."** Stale replication slots cause WAL to accumulate indefinitely on the primary until disk is full. Always monitor `pg_replication_slots` and drop inactive slots. Set `max_slot_wal_keep_size` as a safety valve.
+
+---
+
+*Back to: [Subject_Plan](Subject_Plan) | [README](README) | [LEARNING_PATH](LEARNING_PATH)*
+
+*This is the final chapter. You now have the vocabulary to diagnose any database performance or correctness problem from the storage engine up through distribution. The next step: use it.*

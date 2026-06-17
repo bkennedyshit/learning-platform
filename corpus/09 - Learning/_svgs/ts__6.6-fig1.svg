@@ -1,0 +1,78 @@
+<svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-ts66" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ts66-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; }
+    .ts66-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts66-accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .ts66-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts66-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts66-note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts66-section { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .ts66-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#arrow-ts66); stroke-dasharray: 6 4; animation: flow 1.5s linear infinite; }
+    .ts66-esm { stroke: #4ade80; animation: glowGreen 2s infinite alternate; }
+    .ts66-cjs { stroke: #f59e0b; stroke-dasharray: 4,3; animation: glowOrange 3s infinite alternate; }
+
+    @keyframes flow { to { stroke-dashoffset: -10; } }
+    @keyframes glowGreen {
+      from { filter: drop-shadow(0 0 2px #4ade80); }
+      to { filter: drop-shadow(0 0 8px #4ade80); }
+    }
+    @keyframes glowOrange {
+      from { filter: drop-shadow(0 0 2px #f59e0b); }
+      to { filter: drop-shadow(0 0 6px #f59e0b); }
+    }
+  </style>
+
+  <text x="350" y="22" class="ts66-title">Module Resolution: ESM vs CJS</text>
+
+  <!-- ESM side -->
+  <text x="180" y="50" class="ts66-section">esm (the future ✅)</text>
+  <rect x="30" y="58" width="300" height="90" class="ts66-accent ts66-esm"/>
+  <text x="180" y="78" class="ts66-label">import { add } from "./math.js"</text>
+  <text x="180" y="98" class="ts66-note">• Static (parse-time) → tree-shakeable</text>
+  <text x="180" y="113" class="ts66-note">• Async loading</text>
+  <text x="180" y="128" class="ts66-note">• Top-level await</text>
+  <text x="180" y="143" class="ts66-note">• "type": "module" in package.json</text>
+
+  <!-- CJS side -->
+  <text x="530" y="50" class="ts66-section">cjs (legacy ⚠️)</text>
+  <rect x="380" y="58" width="300" height="90" class="ts66-box ts66-cjs"/>
+  <text x="530" y="78" class="ts66-label">const { add } = require("./math")</text>
+  <text x="530" y="98" class="ts66-note">• Dynamic (runtime) → no tree-shaking</text>
+  <text x="530" y="113" class="ts66-note">• Synchronous loading</text>
+  <text x="530" y="128" class="ts66-note">• No top-level await</text>
+  <text x="530" y="143" class="ts66-note">• Default in Node.js (without "type": "module")</text>
+
+  <!-- Build pipeline -->
+  <text x="350" y="175" class="ts66-section">build pipeline</text>
+  <rect x="50" y="185" width="120" height="40" class="ts66-box"/>
+  <text x="110" y="200" class="ts66-label">.ts source</text>
+  <text x="110" y="215" class="ts66-note">Always ESM syntax</text>
+
+  <path d="M 170 205 L 210 205" class="ts66-arrow"/>
+
+  <rect x="210" y="185" width="130" height="40" class="ts66-accent"/>
+  <text x="275" y="200" class="ts66-label">tsc / bundler</text>
+  <text x="275" y="215" class="ts66-note">Transforms modules</text>
+
+  <path d="M 340 195 L 390 180" class="ts66-arrow"/>
+  <path d="M 340 215 L 390 230" class="ts66-arrow"/>
+
+  <rect x="390" y="165" width="130" height="30" class="ts66-box ts66-esm"/>
+  <text x="455" y="185" class="ts66-label">.js (ESM output)</text>
+
+  <rect x="390" y="215" width="130" height="30" class="ts66-box ts66-cjs"/>
+  <text x="455" y="235" class="ts66-label">.cjs (CJS output)</text>
+
+  <rect x="540" y="185" width="140" height="40" class="ts66-box"/>
+  <text x="610" y="200" class="ts66-label">.d.ts (types)</text>
+  <text x="610" y="215" class="ts66-note">Consumed by TS users</text>
+
+  <!-- Recommendation -->
+  <rect x="100" y="260" width="500" height="30" class="ts66-accent"/>
+  <text x="350" y="280" class="ts66-label">Write ESM always. Use tsup/Vite to emit both formats if needed.</text>
+</svg>

@@ -1,0 +1,78 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .section { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); font-weight: bold; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#ptr-arr); }
+    .decision-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="ptr-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="300" y="20" class="title" text-anchor="middle">Smart Pointer Decision Tree</text>
+
+  <!-- Decision flow -->
+  <text x="300" y="45" class="label-bold" text-anchor="middle">Do you need heap allocation?</text>
+  <text x="150" y="60" class="label" text-anchor="middle">No → use stack (default)</text>
+  <text x="420" y="60" class="label" text-anchor="middle">Yes ↓</text>
+
+  <text x="300" y="80" class="label-bold" text-anchor="middle">Single owner or shared?</text>
+
+  <!-- Single owner branch -->
+  <rect x="50" y="95" width="150" height="50" class="box-accent"/>
+  <text x="125" y="115" class="label-bold" text-anchor="middle">Box&lt;T&gt;</text>
+  <text x="125" y="132" class="label" text-anchor="middle">Single owner, heap</text>
+  <text x="50" y="160" class="label">• Recursive types</text>
+  <text x="50" y="173" class="label">• Large data on heap</text>
+  <text x="50" y="186" class="label">• Trait objects (Box&lt;dyn T&gt;)</text>
+
+  <!-- Shared branch -->
+  <text x="420" y="90" class="label-bold" text-anchor="middle">Shared → Multi-thread?</text>
+
+  <!-- Single-thread shared -->
+  <rect x="280" y="105" width="130" height="50" class="box-accent"/>
+  <text x="345" y="125" class="label-bold" text-anchor="middle">Rc&lt;T&gt;</text>
+  <text x="345" y="142" class="label" text-anchor="middle">Single-thread shared</text>
+  <text x="280" y="170" class="label">• Non-atomic refcount</text>
+  <text x="280" y="183" class="label">• Immutable by default</text>
+  <text x="280" y="196" class="label">• Use Weak&lt;T&gt; for cycles</text>
+
+  <!-- Multi-thread shared -->
+  <rect x="440" y="105" width="130" height="50" class="box-accent"/>
+  <text x="505" y="125" class="label-bold" text-anchor="middle">Arc&lt;T&gt;</text>
+  <text x="505" y="142" class="label" text-anchor="middle">Multi-thread shared</text>
+  <text x="440" y="170" class="label">• Atomic refcount</text>
+  <text x="440" y="183" class="label">• Thread-safe (Send+Sync)</text>
+  <text x="440" y="196" class="label">• Slightly slower than Rc</text>
+
+  <!-- Interior mutability -->
+  <text x="300" y="225" class="title" text-anchor="middle">Need to mutate through shared reference?</text>
+
+  <rect x="50" y="240" width="150" height="55" class="box"/>
+  <text x="125" y="258" class="label-bold" text-anchor="middle">Cell&lt;T&gt;</text>
+  <text x="60" y="275" class="label">Copy types only</text>
+  <text x="60" y="288" class="label">Zero overhead</text>
+
+  <rect x="225" y="240" width="150" height="55" class="box"/>
+  <text x="300" y="258" class="label-bold" text-anchor="middle">RefCell&lt;T&gt;</text>
+  <text x="235" y="275" class="label">Runtime borrow checking</text>
+  <text x="235" y="288" class="label">Single-thread only</text>
+
+  <rect x="400" y="240" width="170" height="55" class="box-accent"/>
+  <text x="485" y="258" class="label-bold" text-anchor="middle">Mutex&lt;T&gt; / RwLock&lt;T&gt;</text>
+  <text x="410" y="275" class="label">Thread-safe locking</text>
+  <text x="410" y="288" class="label">RwLock: many readers OR 1 writer</text>
+
+  <!-- Common combos -->
+  <text x="300" y="320" class="section" text-anchor="middle">COMMON COMBINATIONS</text>
+  <rect x="30" y="330" width="540" height="60" class="box"/>
+  <text x="40" y="350" class="label">Single-thread shared + mutable:  Rc&lt;RefCell&lt;T&gt;&gt;   (Python-like semantics)</text>
+  <text x="40" y="367" class="label">Multi-thread shared + mutable:   Arc&lt;Mutex&lt;T&gt;&gt;    (thread-safe shared state)</text>
+  <text x="40" y="384" class="label">Multi-thread shared + read-heavy: Arc&lt;RwLock&lt;T&gt;&gt;  (concurrent readers, exclusive writer)</text>
+</svg>

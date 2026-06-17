@@ -1,0 +1,217 @@
+---
+title: "19.4 — Message Queues & Event-Driven Architecture"
+subject: "System Design & Distributed Architecture"
+catalog: advanced
+audience_tier: higher-education
+chapter: "19.4"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 19.4 — Message Queues & Event-Driven Architecture
+
+> *"A Kafka topic is a log, not a queue. A queue forgets. A log remembers. The bug you keep shipping is choosing the wrong one."*
+
+Asynchronous messaging is how you **decouple services**, **survive bursts**, and **transform a synchronous call graph into something that doesn't fall over**. This chapter teaches the brokers (Kafka 4.0, NATS JetStream, RabbitMQ 4.1, SQS/SNS, Redis Streams) and the patterns built on top (event sourcing, CQRS, Saga, outbox, idempotency).
+
+---
+
+## 🎯 Learning Objectives
+
+1. Distinguish a **log** (Kafka, NATS JetStream, Pulsar) from a **queue** (RabbitMQ classic, SQS, Redis Streams' consumer group).
+2. Explain Kafka 4.0's **KRaft-only** consensus and what it changed operationally.
+3. Use **at-least-once**, **at-most-once**, **exactly-once** semantics correctly.
+4. Apply **idempotent consumers** with deduplication keys.
+5. Implement the **outbox pattern** to make DB writes + event publish atomic.
+6. Apply the **Saga pattern** for cross-service workflows; choose orchestration vs choreography.
+7. Build a basic **event-sourced** aggregate + **CQRS** read model.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external — open in browser):*
+> - 📺 [Confluent Developer — Apache Kafka course](https://developer.confluent.io/courses/apache-kafka/events/)
+> - 📺 [NATS JetStream concepts](https://docs.nats.io/nats-concepts/jetstream)
+> - 📺 [RabbitMQ tutorials](https://www.rabbitmq.com/getstarted.html)
+> - 📺 [microservices.io — Saga, Outbox, Event Sourcing patterns](https://microservices.io/patterns/)
+
+---
+
+## 📚 1. The 2026 Broker Landscape
+
+> Kafka 4.0, released in January 2026, finally makes KRaft mode the sole consensus mechanism, removing ZooKeeper from the distribution entirely. RabbitMQ 4.1, which landed in February 2026, doubles down on native streams and delivers quorum-queue performance improvements that narrow the throughput gap. — paraphrased from [tech-insider.org — Kafka vs RabbitMQ 2026](https://tech-insider.org/kafka-vs-rabbitmq-2026/). Content rephrased for compliance.
+
+> Kafka excels at high-throughput, durable event streaming where the log is the source of truth — CDC, event sourcing, CQRS read-model rebuilds, and real-time analytics pipelines feeding Flink or Spark. — paraphrased from [digitalis.io — Kafka vs Pulsar vs RabbitMQ vs NATS](https://digitalis.io/post/kafka-vs-pulsar-vs-rabbitmq-vs-nats-whats-actually-best-for-your-use-case). Content rephrased for compliance.
+
+> Kafka is a partitioned, append-only log; NATS JetStream is a consistent, addressable message store with built-in messaging, queuing, KV, and Object Store. Kafka requires a fleet of JVM processes for full functionality; NATS ships everything in a single ~20 MB nats-server binary. — paraphrased from [synadia — Beyond Streaming](https://www.synadia.com/resources/beyond-streaming). Content rephrased for compliance.
+
+| Broker | Model | Best at | Operational cost |
+|---|---|---|---|
+| **Apache Kafka 4.0** | Partitioned log | Event streaming, CDC, log-as-source-of-truth, analytics | High — JVM cluster + Kafka Connect ecosystem |
+| **Apache Pulsar** | Log + topic-based queue hybrid | Multi-tenancy, geo-replication | Medium-high — BookKeeper |
+| **NATS JetStream** | Stream + KV + ObjectStore | Lightweight everything, edge, IoT, microservice glue | Low — single binary |
+| **RabbitMQ 4.1** | Queue (now also Streams) | Routing-heavy classic queueing, work distribution | Low-medium |
+| **AWS SQS / SNS** | Managed queue + pub/sub fanout | Simplicity on AWS, pay-per-message | None (managed) |
+| **Redis Streams** | Lightweight log with consumer groups | When you already have Redis and don't need Kafka scale | Tiny (just Redis) |
+| **Google Pub/Sub** | Managed pub/sub | GCP-native ingestion | None |
+
+**Default 2026 picks:**
+- **Internal microservices on AWS, modest scale:** SQS + SNS or NATS JetStream.
+- **Event log / analytics / CDC:** Kafka 4.0 or NATS JetStream depending on team JVM tolerance.
+- **Routing-heavy workflows (RPC-like):** RabbitMQ 4.1.
+
+---
+
+## 📚 2. Delivery Semantics
+
+| Semantic | Producer side | Consumer side | Cost |
+|---|---|---|---|
+| **At-most-once** | Fire-and-forget | No retry | Cheapest; loses messages |
+| **At-least-once** | Retry until ack | Idempotent; possible duplicates | Default in Kafka, NATS, SQS |
+| **Effectively-once** | Idempotent producer + transactions | Dedup by event ID | Kafka transactions, idempotent NATS |
+
+**Reality:** "exactly-once" across systems is a fiction — what you actually achieve is **at-least-once + idempotent consumer = effectively-once**. Bake idempotency into your consumer, not your dreams.
+
+---
+
+## 📚 3. The Outbox Pattern
+
+**Problem:** you want to "write to DB AND publish event" atomically. Two-phase commit is fragile.
+
+**Solution:**
+1. In one DB transaction, write the business row **and** an `outbox` row containing the event.
+2. A separate process (or a CDC connector like Debezium) reads the `outbox` table and publishes to the broker.
+3. Mark the outbox row processed (or rely on log offsets).
+
+```sql
+BEGIN;
+UPDATE order_status SET state='paid' WHERE id=$1;
+INSERT INTO outbox(id, topic, payload) VALUES (uuid(), 'order.paid', $2);
+COMMIT;
+```
+
+This makes the DB the source of truth and turns "event published" into a derived fact. Pairs naturally with **CDC** ([19.3](19.3---Databases-at-Scale)).
+
+---
+
+## 📚 4. Saga Pattern — Cross-Service Workflows
+
+A Saga is a sequence of local transactions across services with **compensating actions** for rollback. Two flavours:
+
+| Variant | How |
+|---|---|
+| **Choreography** | Each service listens for events; emits its own. No central coordinator. Simpler but harder to reason about. |
+| **Orchestration** | A Saga orchestrator (Temporal, Camunda, or app code) drives steps and compensations. Easier to debug. |
+
+**Example — ecommerce order:**
+1. Order service: create order (compensate: cancel order).
+2. Payment service: charge card (compensate: refund).
+3. Inventory service: reserve stock (compensate: release).
+4. Shipping service: schedule delivery (compensate: cancel shipment).
+
+If step 4 fails, the orchestrator runs compensations in reverse for steps 1–3.
+
+**2026 default for production sagas:** [Temporal](https://temporal.io/) — durable execution, code-first, multi-language SDKs.
+
+---
+
+## 📚 5. Event Sourcing & CQRS
+
+### Event sourcing
+Persist every state change as an event in an append-only log. Current state = fold over the log.
+
+```
+events: [Created, NameChanged, EmailVerified, Suspended]
+state(t) = fold(events[0..t])
+```
+
+**Wins:** complete audit trail; rebuild read models at any time; natural fit for Kafka/JetStream.
+**Costs:** event-schema evolution is a discipline; debugging requires log-walking; reads need projections.
+
+### CQRS — Command Query Responsibility Segregation
+Separate the **write model** (commands → events) from the **read model** (denormalized projections optimized for queries). The read model is rebuilt by replaying events.
+
+Pairs naturally with event sourcing, but you can do CQRS without it (Postgres-on-write, Elasticsearch-on-read is "lite CQRS").
+
+---
+
+## 📚 6. Idempotency Keys
+
+Anywhere a client retries (which is everywhere), require an **idempotency key**:
+
+```http
+POST /api/charges HTTP/1.1
+Idempotency-Key: 4f8a-2c1e-...
+```
+
+Server stores `(idempotency_key → response)` for ~24 hours. Replays return the cached response. This is the Stripe pattern — see [19.5](19.5---API-Design) for header conventions.
+
+For consumers: dedupe on `(topic, partition, offset)` or on a business-level event ID.
+
+---
+
+## 🛠️ 7. Worked Example — Reliable Order-Placed Pipeline
+
+**Goal:** when a user places an order, charge their card, reserve stock, and notify the warehouse — none of which is allowed to "miss".
+
+**Architecture:**
+1. **API gateway** ([19.5](19.5---API-Design)) accepts `POST /orders` with idempotency key.
+2. **Order service** writes `orders` row + `outbox` row in one Postgres transaction (`order.created` event).
+3. **Debezium CDC** reads the WAL → Kafka topic `order.events`.
+4. **Payment service** consumes `order.created`, charges card, emits `payment.succeeded` or `payment.failed`. Idempotent on order ID.
+5. **Inventory service** consumes `payment.succeeded`, reserves stock, emits `inventory.reserved`.
+6. **Saga orchestrator** (Temporal) watches the chain; if `inventory.reserved` doesn't arrive within N minutes, runs compensation (`payment.refund`, `order.cancel`).
+7. **Notification service** consumes `inventory.reserved`, emails customer + warehouse.
+
+**Properties:**
+- DB and Kafka stay consistent (outbox).
+- Each consumer is idempotent → at-least-once + dedup = effectively-once.
+- Failures are visible (Saga state is queryable).
+- No service synchronously calls another — they all read from Kafka.
+
+This is the **2026 default architecture** for any non-trivial transactional workflow.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [19.1 - System Design Fundamentals](19.1---System-Design-Fundamentals) — CAP/PACELC for the broker itself
+- [19.3 - Databases at Scale](19.3---Databases-at-Scale) — the outbox pattern lives here too
+- [19.5 - API Design](19.5---API-Design) — idempotency keys as an HTTP header
+- [19.6 - Microservices & Service Mesh](19.6---Microservices-&-Service-Mesh) — async pub/sub minimizes service coupling
+- [22.5 - ROS 2 & Middleware - Nodes, Topics, Services, Actions, DDS](22.5---ROS-2-&-Middleware---Nodes,-Topics,-Services,-Actions,-DDS) — same pub/sub patterns at robot scale
+
+### External
+- [Apache Kafka docs](https://kafka.apache.org/documentation/)
+- [Confluent Developer free Kafka course](https://developer.confluent.io/)
+- [NATS / JetStream docs](https://docs.nats.io/)
+- [RabbitMQ docs](https://www.rabbitmq.com/documentation.html)
+- [Apache Pulsar docs](https://pulsar.apache.org/docs/)
+- [Debezium (CDC)](https://debezium.io/)
+- [Temporal (durable workflows)](https://temporal.io/)
+- [microservices.io — Saga, Outbox, Event Sourcing](https://microservices.io/patterns/)
+- [tech-insider — Kafka vs RabbitMQ 2026](https://tech-insider.org/kafka-vs-rabbitmq-2026/)
+- [synadia — Beyond Streaming (NATS vs Kafka)](https://www.synadia.com/resources/beyond-streaming)
+- [digitalis.io — Kafka vs Pulsar vs RabbitMQ vs NATS](https://digitalis.io/post/kafka-vs-pulsar-vs-rabbitmq-vs-nats-whats-actually-best-for-your-use-case)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"Kafka is a queue."** It's a log. Consumer offsets let multiple consumer groups replay independently — that's the entire point.
+- **"Exactly-once is a configuration setting."** It's a *system property* you build with idempotency + transactions; no flag delivers it for free.
+- **"RabbitMQ is dead."** RabbitMQ 4.1 with quorum queues + native streams is alive and competitive; pick by workload.
+- **"NATS is a toy."** Production-scale users include Synadia, Walmart, Mastercard. JetStream is durable, sharded, and 20 MB.
+- **"Saga = distributed transaction."** Saga is *eventual consistency with compensations*; it explicitly is NOT ACID across services.
+- **"We need event sourcing because audit log."** Often you need a normal DB + an append-only audit table. Event sourcing is heavyweight; choose deliberately.
+
+---
+
+*Next: [19.5 - API Design](19.5---API-Design) — Where the broker meets the world.*

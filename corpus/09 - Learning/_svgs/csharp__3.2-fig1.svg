@@ -1,0 +1,98 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-types" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .type-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .type-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .value-box { fill: var(--background-secondary, #161b22); stroke: #4CAF50; stroke-width: 2; rx: 6; }
+    .ref-box { fill: var(--background-secondary, #161b22); stroke: #FF9800; stroke-width: 2; rx: 6; }
+    .root-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; rx: 8; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .value-label { fill: #4CAF50; }
+    .ref-label { fill: #FF9800; }
+    .inherit-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .mem-note { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <text x="350" y="22" class="title">C# Type System — Value Types vs Reference Types</text>
+
+  <!-- Root: System.Object -->
+  <rect x="280" y="35" width="140" height="32" class="root-box"/>
+  <text x="350" y="55" class="label">System.Object</text>
+
+  <!-- Branch lines -->
+  <line x1="320" y1="67" x2="180" y2="95" class="inherit-line"/>
+  <line x1="380" y1="67" x2="520" y2="95" class="inherit-line"/>
+
+  <!-- Value Type branch -->
+  <text x="120" y="92" class="section-label value-label">value types (stack)</text>
+  <rect x="110" y="97" width="140" height="30" class="value-box"/>
+  <text x="180" y="116" class="label">System.ValueType</text>
+
+  <line x1="130" y1="127" x2="70" y2="155" class="inherit-line"/>
+  <line x1="180" y1="127" x2="180" y2="155" class="inherit-line"/>
+  <line x1="220" y1="127" x2="290" y2="155" class="inherit-line"/>
+
+  <!-- Value type children -->
+  <rect x="20" y="157" width="110" height="50" class="value-box"/>
+  <text x="75" y="175" class="label">Primitives</text>
+  <text x="75" y="192" class="note">int, float, bool</text>
+  <text x="75" y="202" class="note">double, char, byte</text>
+
+  <rect x="140" y="157" width="110" height="50" class="value-box"/>
+  <text x="195" y="175" class="label">Structs</text>
+  <text x="195" y="192" class="note">Vector3, DateTime</text>
+  <text x="195" y="202" class="note">Custom structs</text>
+
+  <rect x="260" y="157" width="100" height="50" class="value-box"/>
+  <text x="310" y="175" class="label">Enums</text>
+  <text x="310" y="192" class="note">Season, Flags</text>
+
+  <!-- Reference Type branch -->
+  <text x="480" y="92" class="section-label ref-label">reference types (heap)</text>
+  <rect x="450" y="97" width="160" height="30" class="ref-box"/>
+  <text x="530" y="116" class="label">Reference Types</text>
+
+  <line x1="480" y1="127" x2="420" y2="155" class="inherit-line"/>
+  <line x1="530" y1="127" x2="530" y2="155" class="inherit-line"/>
+  <line x1="580" y1="127" x2="640" y2="155" class="inherit-line"/>
+
+  <!-- Reference type children -->
+  <rect x="370" y="157" width="100" height="50" class="ref-box"/>
+  <text x="420" y="175" class="label">Classes</text>
+  <text x="420" y="192" class="note">List&lt;T&gt;, your code</text>
+  <text x="420" y="202" class="note">MonoBehaviour</text>
+
+  <rect x="480" y="157" width="100" height="50" class="ref-box"/>
+  <text x="530" y="175" class="label">string</text>
+  <text x="530" y="192" class="note">Immutable</text>
+  <text x="530" y="202" class="note">Special-cased</text>
+
+  <rect x="590" y="157" width="100" height="50" class="ref-box"/>
+  <text x="640" y="175" class="label">Arrays</text>
+  <text x="640" y="192" class="note">int[], T[]</text>
+  <text x="640" y="202" class="note">Always heap</text>
+
+  <!-- Memory layout comparison -->
+  <text x="180" y="245" class="section-label value-label">stack memory (value)</text>
+  <rect x="40" y="255" width="280" height="60" class="value-box" style="stroke-dasharray: 4,3;"/>
+  <text x="60" y="275" class="mem-note">[X=1][Y=2][Z=3]  ← inline, contiguous</text>
+  <text x="60" y="295" class="mem-note">No pointer, no GC, copied on assign</text>
+
+  <text x="530" y="245" class="section-label ref-label">heap memory (reference)</text>
+  <rect x="380" y="255" width="300" height="60" class="ref-box" style="stroke-dasharray: 4,3;"/>
+  <text x="400" y="275" class="mem-note">[ptr]→ Header|TypeInfo|X|Y|Z  ← heap</text>
+  <text x="400" y="295" class="mem-note">GC tracked, shared reference on assign</text>
+
+  <!-- Key insight -->
+  <rect x="100" y="340" width="500" height="55" class="type-box"/>
+  <text x="350" y="360" class="label">Key Insight: In Python, EVERYTHING is a heap reference.</text>
+  <text x="350" y="378" class="label">In C#, you CHOOSE: struct (fast, copied) vs class (shared, GC'd).</text>
+  <text x="350" y="392" class="note">For games: use structs for small, frequent data (positions, colors, damage events)</text>
+</svg>

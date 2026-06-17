@@ -1,0 +1,882 @@
+---
+title: "08.12 — Computer Architecture: Performance Intuition"
+subject: "Python"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.12"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 08.12 — Computer Architecture: Performance Intuition
+
+> *"Premature optimization is the root of all evil. But we should not pass up our opportunities in that critical 3%."* — Donald Knuth
+
+Python is ~100x slower than C for tight loops. Understanding *why* — and knowing when it matters — is the difference between a data scientist who waits 10 hours for training and one who finishes in 10 minutes. This chapter builds the hardware intuition that informs every performance decision.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Explain the CPU pipeline: fetch, decode, execute, memory, writeback.
+2. Reason about cache behavior: spatial/temporal locality, cache lines, false sharing.
+3. Understand branch prediction and why unpredictable branches are expensive.
+4. Explain SIMD (Single Instruction, Multiple Data) and why NumPy is fast.
+5. Profile Python code and identify hardware-level bottlenecks.
+6. Make informed decisions about when to use NumPy, Cython, or Rust extensions.
+
+---
+
+## 🖼️ Visual Anchor — Memory Hierarchy
+
+![python__1.12-fig1](python__1.12-fig1.svg)
+
+---
+
+## 📚 1. Definitions / Concepts
+
+### Definition 08.12.1 — Clock Cycle and IPC
+
+- **Clock cycle**: One tick of the CPU clock (~0.3ns at 3.5 GHz)
+- **IPC (Instructions Per Cycle)**: Modern CPUs execute 4-6 instructions per cycle via superscalar execution
+- **Throughput**: IPC × clock frequency = instructions/second
+
+### Definition 08.12.2 — Cache Line
+
+The minimum unit of data transfer between cache levels. Typically **64 bytes**. When you access one byte, the entire 64-byte cache line is loaded. This is why sequential array access is fast (spatial locality) and random pointer chasing is slow.
+
+### Definition 08.12.3 — Branch Prediction
+
+Modern CPUs speculatively execute instructions before knowing if a branch is taken. Misprediction penalty: ~15-20 cycles. Predictable branches (always true, always false, regular patterns) are nearly free. Random branches (e.g., `if random() > 0.5`) are expensive.
+
+### Definition 08.12.4 — SIMD (Single Instruction, Multiple Data)
+
+Process multiple data elements with one instruction:
+- AVX-256: 8 floats simultaneously
+- AVX-512: 16 floats simultaneously
+
+NumPy, BLAS, and CUDA all exploit SIMD/SIMT for massive throughput.
+
+---
+
+## 📐 2. Mental Models / Principles
+
+### Principle 1.12.1 — Why Python Is Slow (At the Hardware Level)
+
+For `a + b` where a, b are Python ints:
+1. Dereference `a` pointer → cache miss possible (~100ns)
+2. Check type of `a` → branch
+3. Dereference `b` pointer → another potential cache miss
+4. Check type of `b` → branch
+5. Dispatch to `int.__add__` → indirect function call
+6. Allocate new int object → malloc (~50ns)
+7. Compute result → 1 cycle
+8. Return new object → pointer store
+
+**Total: ~200-500ns** for one addition. In C: **~0.3ns** (one instruction).
+
+This is why NumPy exists: it amortizes Python overhead over millions of elements processed in C/Fortran.
+
+### Principle 1.12.2 — Data-Oriented Design
+
+```python
+# BAD for cache: Array of Structs (AoS)
+# Each particle is scattered in memory
+particles = [Particle(x, y, vx, vy) for _ in range(1_000_000)]
+# Accessing all x values → cache misses (stride = sizeof(Particle))
+
+# GOOD for cache: Struct of Arrays (SoA)
+# All x values contiguous in memory
+x = np.zeros(1_000_000)
+y = np.zeros(1_000_000)
+vx = np.zeros(1_000_000)
+vy = np.zeros(1_000_000)
+# Accessing all x values → sequential reads → cache hits
+```
+
+### Principle 1.12.3 — Amdahl's Law
+
+Speedup from parallelization is limited by the serial fraction:
+
+$$
+S = \frac{1}{(1-p) + p/n}
+$$
+
+Where $p$ = parallelizable fraction, $n$ = number of processors. If 10% of your code is serial, maximum speedup is 10x regardless of how many GPUs you add.
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Profiling Python Performance
+
+```python
+import cProfile
+import pstats
+
+# Function-level profiling
+with cProfile.Profile() as pr:
+    result = expensive_function()
+
+stats = pstats.Stats(pr)
+stats.sort_stats("cumulative")
+stats.print_stats(20)
+
+# Line-level profiling (pip install line-profiler)
+# @profile  # Decorate function
+# kernprof -l -v script.py
+
+# Memory profiling
+# pip install memory-profiler
+# @profile
+# python -m memory_profiler script.py
+```
+
+### 3.2 — NumPy: Bridging Python to Hardware
+
+```python
+import numpy as np
+import time
+
+n = 10_000_000
+
+# Pure Python: ~3 seconds
+start = time.perf_counter()
+result = sum(x**2 for x in range(n))
+print(f"Python: {time.perf_counter() - start:.3f}s")
+
+# NumPy: ~0.02 seconds (150x faster)
+arr = np.arange(n, dtype=np.float64)
+start = time.perf_counter()
+result = np.sum(arr**2)
+print(f"NumPy: {time.perf_counter() - start:.3f}s")
+
+# Why: NumPy uses SIMD + contiguous memory + no Python object overhead
+```
+
+---
+
+## ✍️ 4. Derivations & Worked Examples
+
+### Example 08.12.1 — Cache-Friendly vs Cache-Hostile Access
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```python
+import numpy as np
+import time
+
+# Row-major (C order) — cache friendly
+matrix = np.zeros((10000, 10000), order='C')
+
+start = time.perf_counter()
+for i in range(10000):
+    for j in range(10000):
+        matrix[i, j] = i + j  # Sequential in memory
+row_time = time.perf_counter() - start
+
+# Column-major access — cache hostile
+start = time.perf_counter()
+for j in range(10000):
+    for i in range(10000):
+        matrix[i, j] = i + j  # Stride = 10000 * 8 bytes between accesses
+col_time = time.perf_counter() - start
+
+print(f"Row-major: {row_time:.2f}s")
+print(f"Col-major: {col_time:.2f}s")
+# Typically 3-10x difference due to cache misses
+```
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 1.12.1 — Premature Optimization
+
+Profile first. The bottleneck is almost never where you think it is. Optimize the 3% that matters, not the 97% that doesn't.
+
+### Gotcha 1.12.2 — Python Object Overhead
+
+Each Python object has 28+ bytes of overhead (refcount, type pointer, GC header). A list of 1M ints uses ~28MB. A NumPy array of 1M int64s uses ~8MB.
+
+---
+
+## 🧮 7. Hands-On Lab
+
+```bash
+python _practice/scripts/1.12_architecture.py --demo
+```
+
+Benchmarks cache-friendly vs cache-hostile access patterns, measures Python vs NumPy overhead, and reports your CPU's cache sizes.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+- Previous: [08.11 - Computer Networks Essentials](08.11---Computer-Networks-Essentials)
+- Next: [08.13 - Algorithms & Data Structures in Python](08.13---Algorithms-&-Data-Structures-in-Python)
+- GPU architecture: [08.15 - GPU Computing & CUDA Foundations](08.15---GPU-Computing-&-CUDA-Foundations)
+- Math connection (Amdahl's Law): [08.1 - Real Numbers, Sequences & Limits](08.1---Real-Numbers,-Sequences-&-Limits)
+- [What Every Programmer Should Know About Memory (Drepper)](https://people.freebsd.org/~lstewart/articles/cpumemory.pdf)
+- [Computer Systems: A Programmer's Perspective (Bryant & O'Hallaron)](https://csapp.cs.cmu.edu/)
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — Cache Line Analysis: Why Data Layout Determines Performance
+
+**Problem:** Two programs process the same amount of data but one is 10x faster. Demonstrate how CPU cache line behavior explains this, measure the effect in Python/NumPy, and show how to write cache-friendly code.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Cache Line Fundamentals
+
+```python
+# Modern CPUs don't access memory byte-by-byte.
+# They load CACHE LINES: 64 bytes at a time (on x86/ARM).
+#
+# Memory hierarchy (typical desktop, 2024):
+# Register:    ~0.3ns,  ~1KB total
+# L1 cache:    ~1ns,    32-64KB per core
+# L2 cache:    ~4ns,    256KB-1MB per core
+# L3 cache:    ~12ns,   8-64MB shared
+# RAM:         ~80ns,   16-128GB
+# SSD:         ~100μs,  1-8TB
+#
+# Key insight: L1 is 80x faster than RAM.
+# If your data fits in L1, your program runs 80x faster than if it doesn't.
+# Cache lines are the UNIT of transfer between levels.
+```
+
+#### Step 2: Row-Major vs Column-Major Access
+
+```python
+import numpy as np
+import time
+
+def benchmark_access_patterns():
+    """Demonstrate cache-friendly vs cache-hostile access patterns."""
+    N = 10_000
+    # NumPy arrays are row-major (C order) by default:
+    # Row i is stored contiguously: [row0_col0, row0_col1, ..., row0_colN, row1_col0, ...]
+    matrix = np.random.rand(N, N)
+
+    # Pattern 1: Row-major traversal (CACHE-FRIENDLY)
+    # Accesses consecutive memory addresses → each cache line fully utilized
+    start = time.perf_counter()
+    total = 0.0
+    for i in range(N):
+        for j in range(N):
+            total += matrix[i, j]  # Sequential in memory
+    row_major_time = time.perf_counter() - start
+
+    # Pattern 2: Column-major traversal (CACHE-HOSTILE)
+    # Jumps N*8 bytes between accesses → each cache line used for 1 element
+    start = time.perf_counter()
+    total = 0.0
+    for j in range(N):
+        for i in range(N):
+            total += matrix[i, j]  # Stride = N * 8 bytes
+    col_major_time = time.perf_counter() - start
+
+    print(f"Row-major (cache-friendly): {row_major_time:.3f}s")
+    print(f"Col-major (cache-hostile):  {col_major_time:.3f}s")
+    print(f"Slowdown: {col_major_time / row_major_time:.1f}x")
+    # Typical result: 3-10x slowdown for column-major access
+
+# benchmark_access_patterns()
+```
+
+#### Step 3: NumPy Vectorized Operations (Cache-Optimal)
+
+```python
+def benchmark_numpy_vs_loops():
+    """NumPy operations are cache-optimized at the C level."""
+    N = 10_000
+    matrix = np.random.rand(N, N)
+
+    # Pure Python loop (interpreted, cache-hostile due to object overhead)
+    start = time.perf_counter()
+    total = sum(matrix[i, j] for i in range(N) for j in range(N))
+    python_time = time.perf_counter() - start
+
+    # NumPy sum (C loop, cache-friendly, SIMD-accelerated)
+    start = time.perf_counter()
+    total = matrix.sum()
+    numpy_time = time.perf_counter() - start
+
+    print(f"Python loop: {python_time:.3f}s")
+    print(f"NumPy sum:   {numpy_time:.6f}s")
+    print(f"Speedup: {python_time / numpy_time:.0f}x")
+    # Typical: 100-500x speedup (cache + SIMD + no interpreter overhead)
+```
+
+#### Step 4: Struct of Arrays vs Array of Structs
+
+```python
+import numpy as np
+from dataclasses import dataclass
+
+# ARRAY OF STRUCTS (AoS) — Object-oriented, cache-hostile for bulk operations
+@dataclass
+class Particle:
+    x: float
+    y: float
+    z: float
+    vx: float
+    vy: float
+    vz: float
+    mass: float
+
+# 1M particles as AoS: each particle is 56 bytes, scattered in memory
+particles_aos = [Particle(0, 0, 0, 1, 1, 1, 08.0) for _ in range(1_000_000)]
+
+# To update all x positions: must load entire 56-byte particle for each,
+# but only use 8 bytes (x field). Cache utilization: 8/64 = 12.5%
+
+
+# STRUCT OF ARRAYS (SoA) — Data-oriented, cache-friendly for bulk operations
+class ParticleSystem:
+    """Store each attribute as a contiguous array."""
+    def __init__(self, n: int):
+        self.x = np.zeros(n)
+        self.y = np.zeros(n)
+        self.z = np.zeros(n)
+        self.vx = np.zeros(n)
+        self.vy = np.zeros(n)
+        self.vz = np.zeros(n)
+        self.mass = np.zeros(n)
+
+    def update_positions(self, dt: float):
+        """Update all positions — accesses x, y, z, vx, vy, vz contiguously."""
+        self.x += self.vx * dt  # Entire x array is contiguous → perfect cache usage
+        self.y += self.vy * dt
+        self.z += self.vz * dt
+
+# SoA: updating x reads ONLY x and vx arrays (contiguous, 100% cache utilization)
+# AoS: updating x reads entire particle structs (12.5% cache utilization)
+# Result: SoA is 5-8x faster for bulk operations on large datasets
+```
+
+**Final Answer:**
+
+```python
+# Cache-friendly coding rules:
+# 1. Access arrays sequentially (row-major for C/NumPy, column-major for Fortran)
+# 2. Use Struct of Arrays (SoA) for bulk operations on large datasets
+# 3. Keep hot data small (fit in L1/L2 if possible)
+# 4. Use NumPy/vectorized operations (C-level cache optimization + SIMD)
+# 5. Avoid pointer chasing (linked lists are cache-hostile; use arrays)
+# 6. Batch operations on the same data before moving to next dataset
+```
+
+</details>
+
+### Example 9.2 — False Sharing: The Hidden Performance Killer in Multithreading
+
+**Problem:** Your multi-threaded program scales poorly despite having no logical data dependencies between threads. Demonstrate false sharing, explain why it happens at the hardware level, and show the fix.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: What Is False Sharing?
+
+```python
+# False sharing occurs when threads on different cores modify variables
+# that happen to reside on the SAME cache line (64 bytes).
+#
+# Even though the threads access DIFFERENT variables, the hardware
+# cache coherency protocol (MESI/MOESI) forces cache line invalidation
+# across cores, causing constant cache misses.
+#
+# Example: Thread 0 writes counter[0], Thread 1 writes counter[1]
+# If counter[0] and counter[1] are on the same cache line:
+# → Every write by Thread 0 invalidates Thread 1's cache line
+# → Every write by Thread 1 invalidates Thread 0's cache line
+# → Both threads constantly reload from L3/RAM instead of L1
+```
+
+#### Step 2: Demonstrating False Sharing in Python (via C extension concept)
+
+```python
+import numpy as np
+import multiprocessing as mp
+import time
+from multiprocessing import shared_memory
+
+def worker_false_sharing(shm_name: str, index: int, iterations: int):
+    """Write to adjacent array elements (same cache line)."""
+    shm = shared_memory.SharedMemory(name=shm_name)
+    arr = np.ndarray((64,), dtype=np.int64, buffer=shm.buf)
+    for _ in range(iterations):
+        arr[index] += 1  # Adjacent indices = same cache line!
+    shm.close()
+
+def worker_no_false_sharing(shm_name: str, index: int, iterations: int):
+    """Write to elements padded to separate cache lines."""
+    shm = shared_memory.SharedMemory(name=shm_name)
+    arr = np.ndarray((64,), dtype=np.int64, buffer=shm.buf)
+    # Each worker uses index * 8 (64 bytes apart = separate cache lines)
+    padded_index = index * 8  # 8 int64s = 64 bytes = 1 cache line
+    for _ in range(iterations):
+        arr[padded_index] += 1
+    shm.close()
+
+def benchmark_false_sharing():
+    """Compare performance with and without false sharing."""
+    num_workers = 4
+    iterations = 10_000_000
+
+    # Create shared memory
+    shm = shared_memory.SharedMemory(create=True, size=64 * 8)
+
+    # Test 1: False sharing (adjacent elements)
+    start = time.perf_counter()
+    processes = [
+        mp.Process(target=worker_false_sharing, args=(shm.name, i, iterations))
+        for i in range(num_workers)
+    ]
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+    false_sharing_time = time.perf_counter() - start
+
+    # Test 2: No false sharing (padded elements)
+    start = time.perf_counter()
+    processes = [
+        mp.Process(target=worker_no_false_sharing, args=(shm.name, i, iterations))
+        for i in range(num_workers)
+    ]
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+    no_false_sharing_time = time.perf_counter() - start
+
+    print(f"False sharing:    {false_sharing_time:.3f}s")
+    print(f"No false sharing: {no_false_sharing_time:.3f}s")
+    print(f"Speedup from fixing: {false_sharing_time / no_false_sharing_time:.1f}x")
+    # Typical: 2-8x speedup from eliminating false sharing
+
+    shm.close()
+    shm.unlink()
+
+# benchmark_false_sharing()
+```
+
+#### Step 3: The Fix — Cache Line Padding
+
+```python
+# In C/C++/Rust, the fix is explicit padding:
+# struct alignas(64) PaddedCounter {
+#     int64_t value;
+#     char padding[56];  // Pad to 64 bytes (one full cache line)
+# };
+# PaddedCounter counters[NUM_THREADS];  // Each on its own cache line
+
+# In Python/NumPy, use stride:
+# Instead of: counters = np.zeros(4, dtype=np.int64)  # All on 1-2 cache lines
+# Use:        counters = np.zeros(32, dtype=np.int64)  # index 0, 8, 16, 24
+#             thread_i uses counters[i * 8]  # 64 bytes apart
+```
+
+**Final Answer:**
+
+```python
+# False sharing detection:
+# 1. Program scales poorly with more threads (slower than single-threaded!)
+# 2. perf stat shows high "cache-misses" and "bus-cycles"
+# 3. Threads write to adjacent memory locations
+#
+# False sharing fix:
+# 1. Pad shared data to cache line boundaries (64 bytes on x86/ARM)
+# 2. Use thread-local accumulators, merge at the end
+# 3. Avoid shared mutable state entirely (message passing)
+#
+# In Python: false sharing is rare because the GIL serializes access.
+# It matters for: multiprocessing with SharedMemory, C extensions, Cython, no-GIL builds.
+```
+
+</details>
+
+### Example 9.3 — SIMD via NumPy: Vectorized Computation Under the Hood
+
+**Problem:** NumPy achieves near-C performance for array operations. Explain how SIMD (Single Instruction, Multiple Data) instructions enable this, and demonstrate the performance difference between scalar and vectorized operations.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: What Is SIMD?
+
+```python
+# SIMD = Single Instruction, Multiple Data
+# One CPU instruction processes MULTIPLE data elements simultaneously.
+#
+# Without SIMD (scalar): process one float at a time
+#   add r1, r2 → r3    (1 addition per cycle)
+#
+# With SIMD (AVX-256): process 4 doubles simultaneously
+#   vaddpd ymm0, ymm1, ymm2    (4 additions per cycle)
+#
+# With SIMD (AVX-512): process 8 doubles simultaneously
+#   vaddpd zmm0, zmm1, zmm2    (8 additions per cycle)
+#
+# SIMD register widths:
+# SSE:     128 bits = 2 doubles or 4 floats
+# AVX:     256 bits = 4 doubles or 8 floats
+# AVX-512: 512 bits = 8 doubles or 16 floats
+# ARM NEON: 128 bits = 2 doubles or 4 floats
+# ARM SVE:  128-2048 bits (variable length)
+```
+
+#### Step 2: NumPy Uses SIMD Internally
+
+```python
+import numpy as np
+import time
+
+def scalar_vs_vectorized():
+    """Compare scalar Python loop vs NumPy vectorized operation."""
+    N = 10_000_000
+    a = np.random.rand(N)
+    b = np.random.rand(N)
+
+    # Scalar (Python loop — no SIMD, interpreter overhead)
+    start = time.perf_counter()
+    c_scalar = np.empty(N)
+    for i in range(N):
+        c_scalar[i] = a[i] + b[i]
+    scalar_time = time.perf_counter() - start
+
+    # Vectorized (NumPy — SIMD + C loop + cache-friendly)
+    start = time.perf_counter()
+    c_vector = a + b
+    vector_time = time.perf_counter() - start
+
+    print(f"Scalar (Python loop): {scalar_time:.3f}s")
+    print(f"Vectorized (NumPy):   {vector_time:.6f}s")
+    print(f"Speedup: {scalar_time / vector_time:.0f}x")
+    # Typical: 100-200x speedup
+
+    # Verify correctness
+    assert np.allclose(c_scalar, c_vector)
+
+# scalar_vs_vectorized()
+```
+
+#### Step 3: Checking SIMD Support
+
+```python
+import numpy as np
+
+def check_simd_support():
+    """Check what SIMD instructions NumPy was compiled with."""
+    # NumPy build configuration
+    np.show_config()
+    # Look for: "baseline" and "found" entries showing SSE, AVX, AVX2, AVX512
+
+    # Check at runtime what's available:
+    import platform
+    print(f"Architecture: {platform.machine()}")  # x86_64, aarch64
+    print(f"NumPy version: {np.__version__}")
+
+    # On x86: check /proc/cpuinfo for flags
+    # grep -o 'avx[^ ]*' /proc/cpuinfo | sort -u
+    # avx, avx2, avx512f, avx512bw, avx512cd, avx512dq, avx512vl
+
+check_simd_support()
+```
+
+#### Step 4: Writing SIMD-Friendly NumPy Code
+
+```python
+def simd_friendly_patterns():
+    """Patterns that enable SIMD optimization in NumPy."""
+    N = 1_000_000
+    
+    # GOOD: Contiguous array operations (SIMD-friendly)
+    a = np.random.rand(N)  # C-contiguous
+    b = a * 2.0 + 08.0      # Fused multiply-add, SIMD-accelerated
+    
+    # GOOD: Universal functions (ufuncs) — all SIMD-optimized
+    c = np.sin(a)           # Vectorized sin() using SIMD
+    d = np.exp(a)           # Vectorized exp()
+    e = np.sqrt(a)          # Vectorized sqrt (single SIMD instruction!)
+    
+    # BAD: Non-contiguous access (breaks SIMD)
+    strided = a[::2]        # Every other element — not contiguous
+    # Operations on strided arrays can't use SIMD efficiently
+    
+    # BAD: Object arrays (no SIMD possible)
+    obj_arr = np.array([1, "two", 3.0], dtype=object)
+    # Each element is a Python object pointer — no SIMD
+    
+    # GOOD: Explicit dtype for maximum SIMD width
+    f32 = np.random.rand(N).astype(np.float32)  # 8 per AVX register
+    f64 = np.random.rand(N)                      # 4 per AVX register
+    # float32 operations process 2x more elements per SIMD instruction
+```
+
+**Final Answer:**
+
+```python
+# SIMD optimization rules for Python/NumPy:
+# 1. Use contiguous arrays (C-order, no strides)
+# 2. Use NumPy ufuncs instead of Python loops
+# 3. Prefer float32 over float64 when precision allows (2x SIMD throughput)
+# 4. Avoid object arrays (no SIMD possible)
+# 5. Use np.einsum for complex tensor operations (optimized internally)
+# 6. Check np.show_config() to verify SIMD compilation flags
+#
+# For maximum control: use Numba @njit (generates SIMD code from Python)
+```
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 10.1 NUMA Awareness — Why Memory Location Matters on Multi-Socket Systems
+
+Non-Uniform Memory Access (NUMA) means that memory access time depends on which CPU socket is accessing which memory bank. On multi-socket servers (common in ML training), ignoring NUMA can halve performance.
+
+**The NUMA Architecture:**
+
+```python
+# Single-socket (most desktops/laptops): All memory is equidistant. NUMA irrelevant.
+#
+# Dual-socket server:
+# ┌─────────────────┐     ┌─────────────────┐
+# │  Socket 0       │     │  Socket 1       │
+# │  Cores 0-31     │     │  Cores 32-63    │
+# │  L3 Cache 32MB  │     │  L3 Cache 32MB  │
+# └────────┬────────┘     └────────┬────────┘
+#          │                        │
+#    ┌─────┴─────┐           ┌─────┴─────┐
+#    │ Memory    │           │ Memory    │
+#    │ Node 0    │           │ Memory    │
+#    │ 256 GB    │←─ QPI ──→│ Node 1    │
+#    │           │  (~100ns) │ 256 GB    │
+#    └───────────┘           └───────────┘
+#
+# Core 0 accessing Node 0 memory: ~80ns (local)
+# Core 0 accessing Node 1 memory: ~130ns (remote, crosses QPI interconnect)
+# Penalty: 60% slower for remote access!
+```
+
+**NUMA in Python/NumPy:**
+
+```python
+import os
+import numpy as np
+
+def numa_aware_allocation():
+    """Demonstrate NUMA-aware memory allocation."""
+    # Check NUMA topology:
+    # numactl --hardware
+    # node 0: cpus 0-31, memory 256GB
+    # node 1: cpus 32-63, memory 256GB
+
+    # Pin process to NUMA node 0 (Linux):
+    os.sched_setaffinity(0, set(range(32)))  # Use cores 0-31 only
+
+    # Allocate array — will be placed on Node 0 (first-touch policy)
+    # The OS allocates memory on the NUMA node of the thread that first writes it
+    data = np.zeros(1_000_000_000, dtype=np.float64)  # 8 GB
+    # Since we're pinned to Node 0, this goes to Node 0's memory
+
+    # If we later move threads to Node 1 cores, accessing this array
+    # incurs the remote penalty (~60% slower)
+
+    # Best practice for multi-socket:
+    # 1. Pin workers to specific NUMA nodes: numactl --cpunodebind=0 --membind=0 python train.py
+    # 2. Use separate processes per NUMA node (multiprocessing)
+    # 3. Each process allocates its own data (first-touch places it locally)
+```
+
+**PyTorch NUMA Awareness:**
+
+```python
+# PyTorch DataLoader with NUMA pinning:
+# torch.utils.data.DataLoader(
+#     dataset,
+#     num_workers=8,
+#     pin_memory=True,  # Pin to CUDA-accessible memory
+#     # Workers should be NUMA-local to the GPU's PCIe slot
+# )
+#
+# For multi-GPU training on multi-socket:
+# GPU 0-3 on Socket 0 → DataLoader workers on cores 0-31
+# GPU 4-7 on Socket 1 → DataLoader workers on cores 32-63
+```
+
+### 10.2 Modern Superscalar Pipelines — Why Branch Prediction Matters
+
+Modern CPUs execute multiple instructions per cycle (superscalar) using deep pipelines (14-20+ stages). When a branch mispredicts, the entire pipeline must be flushed — wasting 10-20 cycles.
+
+**The Pipeline:**
+
+```python
+# Simplified 5-stage pipeline (real CPUs have 14-20+ stages):
+# Fetch → Decode → Execute → Memory → Writeback
+#
+# Superscalar: multiple instructions in each stage simultaneously
+# Intel Core i9: up to 6 instructions decoded per cycle, 12 execution ports
+#
+# The problem: conditional branches (if/else)
+# The CPU must GUESS which branch to take BEFORE the condition is evaluated
+# (because it needs to keep the pipeline full)
+#
+# If guess is WRONG: flush pipeline, restart from correct branch
+# Cost: 10-20 wasted cycles per misprediction
+```
+
+**Branch Prediction Impact in Python:**
+
+```python
+import numpy as np
+import time
+
+def branch_prediction_demo():
+    """Demonstrate branch prediction effects on sorted vs unsorted data."""
+    N = 10_000_000
+    
+    # Unsorted data: branches are unpredictable (50/50 random)
+    unsorted = np.random.randint(0, 256, size=N)
+    
+    # Sorted data: branches are predictable (long runs of same outcome)
+    sorted_data = np.sort(unsorted.copy())
+    
+    threshold = 128
+    
+    # Test with unsorted (branch predictor fails ~50% of the time)
+    start = time.perf_counter()
+    total = sum(x for x in unsorted if x >= threshold)
+    unsorted_time = time.perf_counter() - start
+    
+    # Test with sorted (branch predictor succeeds ~99% of the time)
+    start = time.perf_counter()
+    total = sum(x for x in sorted_data if x >= threshold)
+    sorted_time = time.perf_counter() - start
+    
+    print(f"Unsorted (unpredictable branches): {unsorted_time:.3f}s")
+    print(f"Sorted (predictable branches):     {sorted_time:.3f}s")
+    print(f"Speedup from predictable branches: {unsorted_time / sorted_time:.2f}x")
+    # In C: 2-5x difference. In Python: smaller effect due to interpreter overhead
+    # but still measurable (1.2-1.5x)
+    
+    # BRANCHLESS alternative (NumPy — no branches at all):
+    start = time.perf_counter()
+    mask = unsorted >= threshold
+    total = unsorted[mask].sum()  # No branches — SIMD comparison + masked sum
+    numpy_time = time.perf_counter() - start
+    print(f"NumPy branchless:                  {numpy_time:.6f}s")
+
+# branch_prediction_demo()
+```
+
+**Practical Implications for Python:**
+
+1. **NumPy vectorized operations avoid branches entirely** — they use SIMD comparisons and masked operations instead of if/else per element.
+
+2. **Sorted data processes faster** even in Python, because the CPU's branch predictor learns the pattern.
+
+3. **For hot loops in C extensions/Cython:** replace `if x > threshold` with branchless arithmetic: `result += (x > threshold) * x` — the comparison produces 0 or 1 without a branch.
+
+---
+
+
+
+### 10.3 Memory Bandwidth — The True Bottleneck for Modern CPUs
+
+Modern CPUs can compute far faster than memory can deliver data. This "memory wall" means most programs are memory-bandwidth-bound, not compute-bound.
+
+**The Numbers (2024):**
+
+```python
+# Intel Core i9-14900K:
+# - Peak compute: ~1000 GFLOPS (fp64) with AVX-512
+# - Memory bandwidth: ~90 GB/s (DDR5-5600, dual channel)
+# - To keep compute busy: need 1000 GFLOPS × 8 bytes/float = 8000 GB/s
+# - Actual bandwidth: 90 GB/s
+# - Ratio: 8000/90 ≈ 89:1 (compute is 89x faster than memory can feed it!)
+#
+# This means: unless your data fits in cache, you're memory-bound.
+# The CPU spends most of its time WAITING for data from RAM.
+
+# Arithmetic Intensity (AI) = FLOPs per byte loaded from memory
+# If AI < machine's compute/bandwidth ratio → memory-bound
+# If AI > machine's compute/bandwidth ratio → compute-bound
+#
+# Matrix multiply: AI = O(N) — compute-bound for large N (great for GPUs!)
+# Vector addition: AI = O(1) — always memory-bound (2 loads + 1 store per add)
+# Neural network inference: depends on layer type
+#   - Linear layers (large): compute-bound
+#   - Activation functions: memory-bound (element-wise, low AI)
+#   - Attention: memory-bound for long sequences (lots of data movement)
+```
+
+**Practical Implications for Python:**
+
+```python
+import numpy as np
+import time
+
+def demonstrate_bandwidth_bound():
+    """Show that simple operations are memory-bandwidth limited."""
+    N = 100_000_000  # 100M elements × 8 bytes = 800 MB
+
+    a = np.random.rand(N)
+    b = np.random.rand(N)
+
+    # Vector addition: 2 reads + 1 write = 24 bytes per element, 1 FLOP per element
+    # Arithmetic intensity = 1/24 ≈ 0.04 FLOPS/byte (extremely memory-bound)
+    start = time.perf_counter()
+    c = a + b
+    elapsed = time.perf_counter() - start
+
+    bytes_moved = 3 * N * 8  # 2 reads + 1 write, 8 bytes each
+    bandwidth = bytes_moved / elapsed / 1e9
+    print(f"Vector add: {bandwidth:.1f} GB/s (theoretical max: ~90 GB/s)")
+    # Typically achieves 30-60 GB/s (limited by memory bandwidth)
+
+    # Matrix multiply: much higher arithmetic intensity
+    M = 5000
+    A = np.random.rand(M, M)
+    B = np.random.rand(M, M)
+
+    start = time.perf_counter()
+    C = A @ B
+    elapsed = time.perf_counter() - start
+
+    flops = 2 * M**3  # Matrix multiply is O(N³) FLOPs
+    gflops = flops / elapsed / 1e9
+    print(f"Matrix multiply: {gflops:.1f} GFLOPS (compute-bound, uses SIMD + cache)")
+    # Typically achieves 50-200 GFLOPS (limited by compute, not memory)
+```
+
+**Why This Matters for ML:**
+
+The memory wall explains why:
+1. **Tensor Cores exist:** They increase compute density (more FLOPs per byte loaded)
+2. **Quantization helps:** INT8 halves memory traffic → 2x faster for memory-bound ops
+3. **Kernel fusion matters:** Fusing operations avoids writing intermediate results to memory
+4. **Flash Attention works:** It keeps data in SRAM (on-chip) instead of reading/writing HBM
+
+---

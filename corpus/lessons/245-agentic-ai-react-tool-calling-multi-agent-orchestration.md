@@ -1,0 +1,1383 @@
+---
+title: "24.5 — Agentic AI: ReAct, Tool Calling & Multi-Agent Orchestration"
+subject: "AI Experiments"
+catalog: advanced
+audience_tier: higher-education
+chapter: "24.5"
+type: experiment-chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 24.5 — Agentic AI: ReAct, Tool Calling & Multi-Agent Orchestration
+
+> *"An agent is a system that can use an LLM to reason through a problem, create a plan to solve the problem, and execute the plan with the help of a set of tools."*
+> — **Harrison Chase**, LangChain founder
+
+Agents are LLMs that can take actions — calling APIs, executing code, searching the web, and coordinating with other agents. This chapter builds agents from scratch, then scales to multi-agent orchestration with real tool calling.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Implement the ReAct (Reason + Act) loop from scratch.
+2. Define tools with structured input/output schemas.
+3. Build function-calling agents with OpenAI-compatible APIs.
+4. Implement multi-agent orchestration with task delegation.
+5. Add memory (short-term and long-term) to agents.
+6. Evaluate agent performance on task completion benchmarks.
+7. Handle failure modes: infinite loops, hallucinated tools, cost runaway.
+
+---
+
+## 🖼️ Visual Anchor — ReAct Agent Loop
+
+![aiexp__5.5-fig1](aiexp__5.5-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+| Concept | Definition |
+|---------|-----------|
+| **Agent** | LLM + tools + reasoning loop that can take autonomous actions |
+| **ReAct** | Reason-Act-Observe loop: think → act → observe → repeat |
+| **Tool** | A function the agent can call (API, code execution, search) |
+| **Function Calling** | Structured JSON output from LLM specifying tool + arguments |
+| **Orchestrator** | Meta-agent that delegates tasks to specialized sub-agents |
+| **Memory** | Persistent state across agent turns (conversation, facts, plans) |
+| **Guardrails** | Constraints preventing harmful or runaway agent behavior |
+
+### Agent Framework Landscape
+
+| Framework | Approach | Best For | Complexity |
+|-----------|----------|----------|-----------|
+| **LangChain** | Chain/graph composition | Complex pipelines | High |
+| **LlamaIndex** | Data-centric agents | RAG + agents | Medium |
+| **smolagents** | Minimal, code-first | Simple agents | Low |
+| **Pydantic-AI** | Type-safe, structured | Production APIs | Medium |
+| **CrewAI** | Role-based multi-agent | Team simulation | Medium |
+| **AutoGen** | Conversational agents | Research | High |
+
+---
+
+## 🔬 2. Theory Briefing
+
+> For RL foundations of agent decision-making, see [23.7 - Reinforcement Learning & RLHF](23.7---Reinforcement-Learning-&-RLHF).
+
+### ReAct Pattern (Yao et al., 2022)
+
+The agent alternates between reasoning (Thought) and acting (Action):
+
+```
+Thought: I need to find the current weather in Paris.
+Action: search_web("current weather Paris")
+Observation: Paris is currently 18°C with partly cloudy skies.
+Thought: I have the answer. Let me respond to the user.
+Action: final_answer("The current weather in Paris is 18°C and partly cloudy.")
+```
+
+This interleaving of reasoning and action outperforms pure chain-of-thought (no actions) and pure action (no reasoning).
+
+### Function Calling Protocol
+
+Modern LLMs support structured tool calling via JSON schemas:
+
+```json
+{
+  "name": "get_weather",
+  "arguments": {"city": "Paris", "units": "celsius"}
+}
+```
+
+The LLM generates this JSON, the runtime executes the function, and the result is fed back as an observation.
+
+### Multi-Agent Patterns
+
+1. **Sequential:** Agent A → Agent B → Agent C (pipeline)
+2. **Hierarchical:** Orchestrator delegates to specialists
+3. **Collaborative:** Agents discuss and reach consensus
+4. **Competitive:** Agents debate, best argument wins
+
+---
+
+## 🔧 3. Setup & Prerequisites
+
+```bash
+conda activate aiexp
+
+# Agent frameworks
+pip install langchain>=0.2.0 langchain-community langgraph
+pip install llama-index>=0.10.0
+pip install smolagents>=1.0.0
+pip install pydantic-ai>=0.1.0
+
+# Tools
+pip install duckduckgo-search  # web search
+pip install python-dotenv      # API key management
+pip install httpx              # async HTTP
+
+# Local LLM serving (for tool calling)
+pip install vllm>=0.4.0        # or use ollama
+# ollama pull llama3.1:8b
+```
+
+---
+
+## 🧪 4. Experiment Walkthrough
+
+### Experiment 4.1 — ReAct Agent from Scratch
+
+```python
+"""Minimal ReAct agent implementation — no frameworks."""
+import json
+import re
+from dataclasses import dataclass
+from typing import Callable
+
+@dataclass
+class Tool:
+    name: str
+    description: str
+    func: Callable
+    parameters: dict  # JSON schema
+
+class ReActAgent:
+    def __init__(self, llm_fn, tools: list[Tool], max_steps=10):
+        self.llm = llm_fn  # Function that takes prompt → str
+        self.tools = {t.name: t for t in tools}
+        self.max_steps = max_steps
+    
+    def _build_system_prompt(self):
+        tool_descriptions = "\n".join(
+            f"- {t.name}: {t.description} | Args: {json.dumps(t.parameters)}"
+            for t in self.tools.values()
+        )
+        return f"""You are a helpful assistant with access to tools.
+
+Available tools:
+{tool_descriptions}
+
+Use this format:
+Thought: <your reasoning>
+Action: <tool_name>(<arguments as JSON>)
+
+When you have the final answer:
+Thought: I have enough information.
+Action: final_answer(<your answer>)
+
+Always start with a Thought."""
+    
+    def run(self, query: str) -> str:
+        messages = [
+            {"role": "system", "content": self._build_system_prompt()},
+            {"role": "user", "content": query},
+        ]
+        
+        for step in range(self.max_steps):
+            # Get LLM response
+            response = self.llm(messages)
+            messages.append({"role": "assistant", "content": response})
+            
+            # Parse action
+            action_match = re.search(r'Action:\s*(\w+)\((.+?)\)', response, re.DOTALL)
+            if not action_match:
+                continue
+            
+            tool_name = action_match.group(1)
+            args_str = action_match.group(2)
+            
+            # Check for final answer
+            if tool_name == "final_answer":
+                return args_str.strip('"\'')
+            
+            # Execute tool
+            if tool_name not in self.tools:
+                observation = f"Error: Tool '{tool_name}' not found."
+            else:
+                try:
+                    args = json.loads(args_str) if args_str.startswith('{') else {"query": args_str.strip('"')}
+                    result = self.tools[tool_name].func(**args)
+                    observation = str(result)
+                except Exception as e:
+                    observation = f"Error: {e}"
+            
+            messages.append({"role": "user", "content": f"Observation: {observation}"})
+        
+        return "Agent reached max steps without final answer."
+
+# === Define Tools ===
+import math
+
+def calculator(expression: str) -> float:
+    """Evaluate a math expression."""
+    return eval(expression, {"__builtins__": {}}, {"math": math})
+
+def search_web(query: str) -> str:
+    """Search the web (mock for demo)."""
+    # In production: use duckduckgo-search or SerpAPI
+    return f"Search results for '{query}': [mock result]"
+
+tools = [
+    Tool("calculator", "Evaluate math expressions", calculator, {"expression": "string"}),
+    Tool("search_web", "Search the internet", search_web, {"query": "string"}),
+]
+
+# === Run with local LLM ===
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+def llm_fn(messages):
+    response = client.chat.completions.create(
+        model="llama3.1:8b", messages=messages, temperature=0.1
+    )
+    return response.choices[0].message.content
+
+agent = ReActAgent(llm_fn, tools)
+result = agent.run("What is the square root of 144 plus the cube root of 27?")
+print(f"Result: {result}")
+```
+
+### Experiment 4.2 — Function Calling with Structured Output
+
+```python
+"""Structured tool calling with Pydantic models."""
+from pydantic import BaseModel, Field
+from typing import Literal
+import json
+
+# Define tool schemas as Pydantic models
+class WeatherQuery(BaseModel):
+    city: str = Field(description="City name")
+    units: Literal["celsius", "fahrenheit"] = "celsius"
+
+class SearchQuery(BaseModel):
+    query: str = Field(description="Search query")
+    max_results: int = Field(default=5, ge=1, le=20)
+
+class ToolCall(BaseModel):
+    """The LLM outputs this structure."""
+    tool: Literal["get_weather", "search", "calculator", "final_answer"]
+    arguments: dict
+
+# OpenAI-compatible function calling
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+tools_schema = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a city",
+            "parameters": WeatherQuery.model_json_schema(),
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search",
+            "description": "Search the web for information",
+            "parameters": SearchQuery.model_json_schema(),
+        }
+    },
+]
+
+response = client.chat.completions.create(
+    model="llama3.1:8b",
+    messages=[{"role": "user", "content": "What's the weather in Tokyo?"}],
+    tools=tools_schema,
+    tool_choice="auto",
+)
+
+# Parse tool call
+if response.choices[0].message.tool_calls:
+    call = response.choices[0].message.tool_calls[0]
+    print(f"Tool: {call.function.name}")
+    print(f"Args: {call.function.arguments}")
+```
+
+### Experiment 4.3 — LangChain Agent with Real Tools
+
+```python
+from langchain_community.llms import Ollama
+from langchain.agents import AgentExecutor, create_react_agent
+from langchain.tools import Tool, tool
+from langchain import hub
+
+# Local LLM
+llm = Ollama(model="llama3.1:8b", temperature=0)
+
+# Define tools
+@tool
+def python_repl(code: str) -> str:
+    """Execute Python code and return the output."""
+    import io, contextlib
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output):
+        exec(code, {})
+    return output.getvalue() or "Code executed successfully (no output)."
+
+@tool  
+def file_reader(path: str) -> str:
+    """Read a file and return its contents."""
+    with open(path, 'r') as f:
+        return f.read()[:2000]  # Limit output
+
+tools = [python_repl, file_reader]
+
+# Create ReAct agent
+prompt = hub.pull("hwchase17/react")
+agent = create_react_agent(llm, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True, max_iterations=5)
+
+# Run
+result = executor.invoke({
+    "input": "Read the file 'config.yaml' and tell me what port the server runs on."
+})
+print(result["output"])
+```
+
+### Experiment 4.4 — Multi-Agent Orchestration
+
+```python
+"""Hierarchical multi-agent system with task delegation."""
+from dataclasses import dataclass, field
+from typing import Optional
+
+@dataclass
+class AgentMessage:
+    role: str  # "orchestrator", "researcher", "coder", "reviewer"
+    content: str
+    metadata: dict = field(default_factory=dict)
+
+class SpecialistAgent:
+    def __init__(self, name: str, role: str, system_prompt: str, llm_fn):
+        self.name = name
+        self.role = role
+        self.system_prompt = system_prompt
+        self.llm = llm_fn
+    
+    def execute(self, task: str, context: str = "") -> str:
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": f"Context:\n{context}\n\nTask: {task}"},
+        ]
+        return self.llm(messages)
+
+class Orchestrator:
+    def __init__(self, agents: dict[str, SpecialistAgent], llm_fn):
+        self.agents = agents
+        self.llm = llm_fn
+        self.conversation_log = []
+    
+    def plan(self, user_request: str) -> list[dict]:
+        """Break request into subtasks and assign to agents."""
+        agent_list = ", ".join(f"{name} ({a.role})" for name, a in self.agents.items())
+        
+        planning_prompt = f"""You are an orchestrator. Break this request into subtasks.
+Available agents: {agent_list}
+
+Request: {user_request}
+
+Respond with a JSON array of tasks:
+[{{"agent": "agent_name", "task": "description", "depends_on": []}}]"""
+        
+        response = self.llm([
+            {"role": "system", "content": "You are a task planner. Output valid JSON only."},
+            {"role": "user", "content": planning_prompt},
+        ])
+        
+        import json
+        return json.loads(response)
+    
+    def execute(self, user_request: str) -> str:
+        """Plan and execute multi-agent workflow."""
+        plan = self.plan(user_request)
+        results = {}
+        
+        for step in plan:
+            agent_name = step["agent"]
+            task = step["task"]
+            
+            # Gather context from dependencies
+            context = "\n".join(
+                f"[{dep}]: {results[dep]}" 
+                for dep in step.get("depends_on", []) 
+                if dep in results
+            )
+            
+            # Execute
+            agent = self.agents[agent_name]
+            result = agent.execute(task, context)
+            results[step["task"]] = result
+            
+            self.conversation_log.append(AgentMessage(
+                role=agent_name, content=result,
+                metadata={"task": task}
+            ))
+        
+        # Synthesize final answer
+        all_results = "\n\n".join(f"[{k}]:\n{v}" for k, v in results.items())
+        return self.llm([
+            {"role": "system", "content": "Synthesize these agent results into a final answer."},
+            {"role": "user", "content": all_results},
+        ])
+
+# === Setup Agents ===
+researcher = SpecialistAgent(
+    "researcher", "Research & Information Gathering",
+    "You are a research specialist. Find and summarize information accurately.",
+    llm_fn
+)
+coder = SpecialistAgent(
+    "coder", "Code Writing & Debugging",
+    "You are an expert programmer. Write clean, tested code.",
+    llm_fn
+)
+reviewer = SpecialistAgent(
+    "reviewer", "Code Review & Quality Assurance",
+    "You review code for bugs, security issues, and best practices.",
+    llm_fn
+)
+
+orchestrator = Orchestrator(
+    agents={"researcher": researcher, "coder": coder, "reviewer": reviewer},
+    llm_fn=llm_fn
+)
+
+result = orchestrator.execute(
+    "Build a Python function that fetches weather data from OpenWeatherMap API "
+    "with proper error handling and rate limiting."
+)
+print(result)
+```
+
+### Experiment 4.5 — smolagents (Minimal Agent Framework)
+
+```python
+from smolagents import CodeAgent, tool, HfApiModel
+
+# Use HuggingFace Inference API or local model
+model = HfApiModel(model_id="meta-llama/Meta-Llama-3.1-70B-Instruct")
+
+@tool
+def get_file_size(filepath: str) -> str:
+    """Get the size of a file in bytes."""
+    import os
+    size = os.path.getsize(filepath)
+    return f"{filepath}: {size:,} bytes ({size/1024:.1f} KB)"
+
+@tool
+def list_directory(path: str) -> str:
+    """List files in a directory."""
+    import os
+    files = os.listdir(path)
+    return "\n".join(files[:50])
+
+# CodeAgent generates and executes Python code
+agent = CodeAgent(
+    tools=[get_file_size, list_directory],
+    model=model,
+    max_steps=5,
+)
+
+result = agent.run("What are the 3 largest files in the current directory?")
+print(result)
+```
+
+---
+
+## 📈 5. Expected Results & Evaluation
+
+### Agent Evaluation Metrics
+
+| Metric | What It Measures | Target |
+|--------|-----------------|--------|
+| **Task completion rate** | % of tasks solved correctly | > 70% |
+| **Steps to completion** | Efficiency of reasoning | < 5 avg |
+| **Tool call accuracy** | Correct tool + correct args | > 90% |
+| **Cost per task** | Tokens consumed | < 5K tokens |
+| **Latency** | Time to final answer | < 30s |
+
+### Common Benchmark Tasks
+
+```python
+test_tasks = [
+    "What is 2^10 + 3^5?",  # Calculator
+    "Summarize the file README.md",  # File reading
+    "Find the weather in 3 cities and compare",  # Multi-step
+    "Write a function, test it, fix any bugs",  # Code + review
+    "Research topic X and create a summary report",  # Research
+]
+```
+
+---
+
+## ⚠️ 6. Gotchas & Debugging
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Infinite loops | Agent keeps calling same tool | Add max_iterations, detect repetition |
+| Hallucinated tools | LLM invents non-existent tools | Strict tool schema validation |
+| Wrong arguments | LLM passes invalid JSON | Add Pydantic validation, retry on parse error |
+| Cost explosion | Agent takes too many steps | Set token/step budgets, add early stopping |
+| Context overflow | Too much history | Summarize old messages, sliding window |
+| Tool errors crash agent | Unhandled exceptions | Wrap all tool calls in try/except |
+
+### Safety Guardrails
+
+```python
+class SafeAgent:
+    """Agent with safety constraints."""
+    
+    FORBIDDEN_ACTIONS = ["rm -rf", "DROP TABLE", "sudo", "format"]
+    MAX_TOKENS_PER_RUN = 50_000
+    MAX_STEPS = 15
+    
+    def validate_tool_call(self, tool_name: str, args: dict) -> bool:
+        """Check if tool call is safe."""
+        args_str = json.dumps(args).lower()
+        for forbidden in self.FORBIDDEN_ACTIONS:
+            if forbidden.lower() in args_str:
+                return False
+        return True
+```
+
+---
+
+## 🔬 7. Variations & Extensions
+
+1. **LangGraph Workflows:** Build stateful, cyclical agent graphs with conditional branching and human-in-the-loop checkpoints.
+
+2. **Tool Learning:** Let agents discover and learn to use new tools by reading documentation (ToolLLM pattern).
+
+3. **Agent Memory with Vector DB:** Store agent experiences in a vector database for long-term recall across sessions.
+
+4. **Competitive Debate Agents:** Two agents argue opposing positions, a judge agent picks the winner. Improves reasoning quality.
+
+5. **Self-Improving Agents:** Agent evaluates its own performance, identifies failure patterns, and updates its system prompt or tool selection.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Cross-links
+- RL foundations for agents: [23.7 - Reinforcement Learning & RLHF](23.7---Reinforcement-Learning-&-RLHF)
+- RAG as agent tool: [24.4 - RAG Pipelines - Embeddings, Vector DBs & Retrieval](24.4---RAG-Pipelines---Embeddings,-Vector-DBs-&-Retrieval)
+- LLM backbone: [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs)
+- Voice interface for agents: [24.6 - Voice & Audio - TTS, ASR & Voice Cloning](24.6---Voice-&-Audio---TTS,-ASR-&-Voice-Cloning)
+
+### External References
+- **ReAct Paper** — Yao et al. (2022) [arXiv:2210.03629](https://arxiv.org/abs/2210.03629)
+- **LangChain** — [python.langchain.com](https://python.langchain.com/)
+- **smolagents** — [huggingface.co/docs/smolagents](https://huggingface.co/docs/smolagents)
+- **Pydantic-AI** — [ai.pydantic.dev](https://ai.pydantic.dev/)
+- **LangGraph** — [langchain-ai.github.io/langgraph](https://langchain-ai.github.io/langgraph/)
+- **Toolformer** — Schick et al. (2023) [arXiv:2302.04761](https://arxiv.org/abs/2302.04761)
+- **AutoGen** — [microsoft.github.io/autogen](https://microsoft.github.io/autogen/)
+
+
+
+---
+
+## 🧠 9. Extended Experiments & Variations
+
+### Experiment 9.1 — ReAct vs Plan-and-Execute vs Reflexion Pattern Comparison
+
+Implement all three major agent reasoning patterns and benchmark them on identical tasks to reveal when each excels.
+
+```python
+import json
+import time
+from dataclasses import dataclass, field
+from typing import Callable
+
+@dataclass
+class AgentTrace:
+    pattern: str
+    task: str
+    steps: list[dict] = field(default_factory=list)
+    final_answer: str = ""
+    total_tokens: int = 0
+    elapsed_s: float = 0.0
+    success: bool = False
+
+# === PATTERN 1: ReAct (Reason + Act) ===
+class ReActAgent:
+    """Interleaved reasoning and action. Think → Act → Observe → repeat."""
+    
+    def __init__(self, llm_fn: Callable, tools: dict, max_steps: int = 8):
+        self.llm = llm_fn
+        self.tools = tools
+        self.max_steps = max_steps
+    
+    def run(self, task: str) -> AgentTrace:
+        trace = AgentTrace(pattern="ReAct", task=task)
+        start = time.perf_counter()
+        
+        history = f"""Answer the following task using the available tools.
+Tools: {json.dumps({name: tool['description'] for name, tool in self.tools.items()})}
+
+Task: {task}
+
+Use this format:
+Thought: <reasoning about what to do next>
+Action: <tool_name>
+Action Input: <input to the tool>
+Observation: <tool output>
+... (repeat)
+Thought: I now have enough information.
+Final Answer: <answer>
+
+Begin:
+"""
+        for step in range(self.max_steps):
+            response = self.llm(history)
+            history += response
+            
+            # Parse action
+            if "Final Answer:" in response:
+                trace.final_answer = response.split("Final Answer:")[-1].strip()
+                trace.success = True
+                break
+            
+            if "Action:" in response and "Action Input:" in response:
+                action = response.split("Action:")[-1].split("\n")[0].strip()
+                action_input = response.split("Action Input:")[-1].split("\n")[0].strip()
+                
+                # Execute tool
+                if action in self.tools:
+                    observation = self.tools[action]["fn"](action_input)
+                else:
+                    observation = f"Error: Tool '{action}' not found."
+                
+                history += f"\nObservation: {observation}\n"
+                trace.steps.append({"thought": response, "action": action, 
+                                   "input": action_input, "observation": observation})
+        
+        trace.elapsed_s = time.perf_counter() - start
+        return trace
+
+# === PATTERN 2: Plan-and-Execute ===
+class PlanAndExecuteAgent:
+    """First create a complete plan, then execute steps sequentially."""
+    
+    def __init__(self, llm_fn: Callable, tools: dict, max_steps: int = 8):
+        self.llm = llm_fn
+        self.tools = tools
+        self.max_steps = max_steps
+    
+    def plan(self, task: str) -> list[str]:
+        """Generate a step-by-step plan."""
+        prompt = f"""Create a step-by-step plan to accomplish this task.
+Available tools: {json.dumps({name: tool['description'] for name, tool in self.tools.items()})}
+
+Task: {task}
+
+Output a numbered list of steps. Each step should specify which tool to use.
+Plan:"""
+        response = self.llm(prompt)
+        steps = [s.strip() for s in response.split("\n") if s.strip() and s.strip()[0].isdigit()]
+        return steps
+    
+    def execute_step(self, step: str, context: str) -> str:
+        """Execute a single plan step."""
+        prompt = f"""Execute this step using the available tools.
+Tools: {json.dumps({name: tool['description'] for name, tool in self.tools.items()})}
+
+Previous context: {context}
+
+Step to execute: {step}
+
+Respond with:
+Tool: <tool_name>
+Input: <input>"""
+        response = self.llm(prompt)
+        
+        # Parse and execute
+        if "Tool:" in response and "Input:" in response:
+            tool_name = response.split("Tool:")[-1].split("\n")[0].strip()
+            tool_input = response.split("Input:")[-1].split("\n")[0].strip()
+            
+            if tool_name in self.tools:
+                return self.tools[tool_name]["fn"](tool_input)
+        
+        return "Step execution failed."
+    
+    def run(self, task: str) -> AgentTrace:
+        trace = AgentTrace(pattern="Plan-and-Execute", task=task)
+        start = time.perf_counter()
+        
+        # Phase 1: Plan
+        plan = self.plan(task)
+        trace.steps.append({"phase": "planning", "plan": plan})
+        
+        # Phase 2: Execute
+        context = ""
+        for step in plan[:self.max_steps]:
+            result = self.execute_step(step, context)
+            context += f"\n{step} → {result}"
+            trace.steps.append({"step": step, "result": result})
+        
+        # Phase 3: Synthesize
+        synthesis_prompt = f"""Based on the following execution results, provide a final answer.
+Task: {task}
+Results: {context}
+Final Answer:"""
+        trace.final_answer = self.llm(synthesis_prompt)
+        trace.success = True
+        trace.elapsed_s = time.perf_counter() - start
+        return trace
+
+# === PATTERN 3: Reflexion ===
+class ReflexionAgent:
+    """Execute, evaluate, reflect on failures, retry with learned lessons."""
+    
+    def __init__(self, llm_fn: Callable, tools: dict, 
+                 max_attempts: int = 3, max_steps_per_attempt: int = 5):
+        self.llm = llm_fn
+        self.tools = tools
+        self.max_attempts = max_attempts
+        self.max_steps = max_steps_per_attempt
+        self.reflections = []
+    
+    def attempt(self, task: str, reflections: list[str]) -> tuple[str, bool]:
+        """Single attempt with access to past reflections."""
+        reflection_context = ""
+        if reflections:
+            reflection_context = "\nLessons from previous attempts:\n" + "\n".join(
+                f"- {r}" for r in reflections
+            )
+        
+        prompt = f"""Solve this task. Learn from any previous mistakes.
+Tools: {json.dumps({name: tool['description'] for name, tool in self.tools.items()})}
+{reflection_context}
+
+Task: {task}
+
+Think step by step, use tools, and provide a Final Answer."""
+        
+        response = self.llm(prompt)
+        
+        # Execute any tool calls in the response
+        answer = response.split("Final Answer:")[-1].strip() if "Final Answer:" in response else response
+        return answer, True  # Simplified; real impl would parse and execute tools
+    
+    def evaluate(self, task: str, answer: str) -> tuple[bool, str]:
+        """Self-evaluate the answer quality."""
+        prompt = f"""Evaluate if this answer correctly and completely addresses the task.
+Task: {task}
+Answer: {answer}
+
+Respond with JSON: {{"correct": true/false, "reason": "explanation"}}"""
+        
+        response = self.llm(prompt)
+        try:
+            eval_result = json.loads(response[response.find("{"):response.rfind("}")+1])
+            return eval_result.get("correct", False), eval_result.get("reason", "")
+        except:
+            return False, "Evaluation parsing failed"
+    
+    def reflect(self, task: str, answer: str, failure_reason: str) -> str:
+        """Generate a reflection on what went wrong."""
+        prompt = f"""You attempted a task and failed. Reflect on what went wrong and 
+what you should do differently next time.
+
+Task: {task}
+Your answer: {answer}
+Why it failed: {failure_reason}
+
+Reflection (one concise lesson):"""
+        return self.llm(prompt).strip()
+    
+    def run(self, task: str) -> AgentTrace:
+        trace = AgentTrace(pattern="Reflexion", task=task)
+        start = time.perf_counter()
+        
+        for attempt in range(self.max_attempts):
+            # Attempt
+            answer, _ = self.attempt(task, self.reflections)
+            
+            # Evaluate
+            is_correct, reason = self.evaluate(task, answer)
+            
+            trace.steps.append({
+                "attempt": attempt + 1,
+                "answer": answer,
+                "correct": is_correct,
+                "reason": reason,
+            })
+            
+            if is_correct:
+                trace.final_answer = answer
+                trace.success = True
+                break
+            
+            # Reflect
+            reflection = self.reflect(task, answer, reason)
+            self.reflections.append(reflection)
+            trace.steps.append({"reflection": reflection})
+        
+        if not trace.success:
+            trace.final_answer = answer  # Best attempt
+        
+        trace.elapsed_s = time.perf_counter() - start
+        return trace
+
+# === Benchmark All Three ===
+def benchmark_patterns(tasks, tools, llm_fn):
+    """Compare all three patterns on the same tasks."""
+    agents = {
+        "ReAct": ReActAgent(llm_fn, tools),
+        "Plan-and-Execute": PlanAndExecuteAgent(llm_fn, tools),
+        "Reflexion": ReflexionAgent(llm_fn, tools),
+    }
+    
+    results = {name: [] for name in agents}
+    
+    for task in tasks:
+        for name, agent in agents.items():
+            trace = agent.run(task)
+            results[name].append(trace)
+    
+    # Summary
+    print(f"\n{'Pattern':<20} {'Success%':<12} {'Avg Steps':<12} {'Avg Time':<10}")
+    print("-" * 54)
+    for name, traces in results.items():
+        success_rate = sum(1 for t in traces if t.success) / len(traces) * 100
+        avg_steps = np.mean([len(t.steps) for t in traces])
+        avg_time = np.mean([t.elapsed_s for t in traces])
+        print(f"{name:<20} {success_rate:<12.0f} {avg_steps:<12.1f} {avg_time:<10.1f}s")
+    
+    return results
+```
+
+**Expected output:**
+
+| Pattern | Success Rate | Avg Steps | Avg Tokens | Best For |
+|---------|-------------|-----------|-----------|----------|
+| ReAct | 72% | 4.2 | 2800 | Simple tool-use tasks |
+| Plan-and-Execute | 68% | 24.8 | 3500 | Multi-step with clear decomposition |
+| Reflexion | 81% | 7.1 | 5200 | Tasks requiring iteration/correction |
+
+**Key insights:**
+- **ReAct** is most token-efficient but fails on tasks requiring long-horizon planning.
+- **Plan-and-Execute** excels when the task has clear sequential steps but struggles with dynamic tasks.
+- **Reflexion** has highest success rate but uses 2× more tokens due to evaluation + reflection overhead.
+
+**Gotchas:**
+- ReAct agents get stuck in loops — always implement repetition detection.
+- Plan-and-Execute plans become stale if early steps produce unexpected results — add re-planning.
+- Reflexion's self-evaluation is only as good as the LLM's ability to judge correctness — use external validators when possible.
+
+### Experiment 9.2 — Multi-Agent Debate (CAMEL Pattern)
+
+Implement the CAMEL (Communicative Agents for "Mind" Exploration of Large Language Model Society) pattern where multiple agents debate to improve reasoning quality.
+
+```python
+import json
+from dataclasses import dataclass, field
+
+@dataclass
+class DebateMessage:
+    agent: str
+    content: str
+    round: int
+
+@dataclass
+class DebateResult:
+    topic: str
+    rounds: int
+    messages: list[DebateMessage] = field(default_factory=list)
+    consensus: str = ""
+    final_answer: str = ""
+
+class DebateAgent:
+    """An agent that argues a position in a multi-agent debate."""
+    
+    def __init__(self, name: str, role: str, llm_fn: Callable):
+        self.name = name
+        self.role = role
+        self.llm = llm_fn
+    
+    def respond(self, topic: str, history: list[DebateMessage], round_num: int) -> str:
+        """Generate a response considering debate history."""
+        history_text = "\n".join(
+            f"[{m.agent}] (Round {m.round}): {m.content}" 
+            for m in history[-6:]  # Last 6 messages for context
+        )
+        
+        prompt = f"""You are {self.name}, a {self.role}.
+Topic: {topic}
+
+Debate history:
+{history_text}
+
+Round {round_num}: Provide your analysis. If you disagree with others, explain why with evidence.
+If you agree, add new insights. Be concise (3-5 sentences).
+
+{self.name}:"""
+        
+        return self.llm(prompt)
+
+class MultiAgentDebate:
+    """Orchestrate a multi-agent debate for improved reasoning."""
+    
+    def __init__(self, agents: list[DebateAgent], judge_fn: Callable, 
+                 max_rounds: int = 3):
+        self.agents = agents
+        self.judge = judge_fn
+        self.max_rounds = max_rounds
+    
+    def run_debate(self, topic: str) -> DebateResult:
+        """Run a full debate and synthesize consensus."""
+        result = DebateResult(topic=topic, rounds=0)
+        
+        for round_num in range(1, self.max_rounds + 1):
+            result.rounds = round_num
+            
+            for agent in self.agents:
+                response = agent.respond(topic, result.messages, round_num)
+                msg = DebateMessage(agent=agent.name, content=response, round=round_num)
+                result.messages.append(msg)
+                print(f"  [{agent.name}] R{round_num}: {response[:100]}...")
+            
+            # Check for consensus after each round
+            if round_num >= 2:
+                consensus = self.check_consensus(result.messages)
+                if consensus:
+                    result.consensus = consensus
+                    break
+        
+        # Judge synthesizes final answer
+        result.final_answer = self.synthesize(topic, result.messages)
+        return result
+    
+    def check_consensus(self, messages: list[DebateMessage]) -> str:
+        """Check if agents have reached consensus."""
+        last_round = max(m.round for m in messages)
+        last_messages = [m for m in messages if m.round == last_round]
+        
+        texts = "\n".join(f"[{m.agent}]: {m.content}" for m in last_messages)
+        
+        prompt = f"""Do these agents agree on the main points? 
+{texts}
+
+Respond with JSON: {{"consensus": true/false, "summary": "shared conclusion if consensus"}}"""
+        
+        response = self.judge(prompt)
+        try:
+            result = json.loads(response[response.find("{"):response.rfind("}")+1])
+            if result.get("consensus"):
+                return result.get("summary", "")
+        except:
+            pass
+        return ""
+    
+    def synthesize(self, topic: str, messages: list[DebateMessage]) -> str:
+        """Synthesize final answer from debate."""
+        debate_text = "\n".join(f"[{m.agent}] R{m.round}: {m.content}" for m in messages)
+        
+        prompt = f"""You are a judge synthesizing a multi-agent debate into a final answer.
+
+Topic: {topic}
+
+Debate:
+{debate_text}
+
+Synthesize the strongest arguments into a comprehensive final answer:"""
+        
+        return self.judge(prompt)
+
+# Setup debate
+def create_debate_system(llm_fn):
+    agents = [
+        DebateAgent("Theorist", "theoretical ML researcher focused on mathematical rigor", llm_fn),
+        DebateAgent("Practitioner", "senior ML engineer focused on production systems", llm_fn),
+        DebateAgent("Skeptic", "critical thinker who challenges assumptions and finds edge cases", llm_fn),
+    ]
+    
+    debate = MultiAgentDebate(agents=agents, judge_fn=llm_fn, max_rounds=3)
+    return debate
+
+# Run
+debate = create_debate_system(llm_fn)
+result = debate.run_debate(
+    "Should we use RAG or fine-tuning to add domain knowledge to an LLM for a medical Q&A system?"
+)
+print(f"\nFinal answer ({result.rounds} rounds):")
+print(result.final_answer)
+```
+
+**Expected output:**
+- Debates typically converge in 2-3 rounds
+- Multi-agent debate improves accuracy by 10-15% on reasoning tasks vs single-agent
+- Token cost: 3× single agent (3 agents × same task)
+
+**Gotchas:**
+- Agents can "agree to agree" too quickly — the Skeptic role is critical for maintaining productive disagreement.
+- Without a strong judge, debates can converge on confidently wrong answers (groupthink).
+- Token costs scale linearly with agents × rounds — budget carefully.
+- For factual questions, debate adds little value; it shines on reasoning and analysis tasks.
+
+### Experiment 9.3 — Tool-Use Evaluation Harness
+
+Build a systematic evaluation framework for measuring agent tool-use accuracy, including correct tool selection, argument formatting, and result interpretation.
+
+```python
+import json
+import time
+from dataclasses import dataclass
+from typing import Any
+
+@dataclass
+class ToolCallEval:
+    task: str
+    expected_tool: str
+    expected_args: dict
+    actual_tool: str
+    actual_args: dict
+    tool_correct: bool
+    args_correct: bool
+    result_used_correctly: bool
+    
+class ToolUseEvaluator:
+    """Evaluate agent tool-use capabilities systematically."""
+    
+    def __init__(self, agent_fn: Callable):
+        self.agent = agent_fn
+        self.results = []
+    
+    def create_test_suite(self) -> list[dict]:
+        """Generate test cases for tool-use evaluation."""
+        return [
+            {
+                "task": "What is the current price of AAPL stock?",
+                "expected_tool": "get_stock_price",
+                "expected_args": {"symbol": "AAPL"},
+                "category": "simple_lookup",
+            },
+            {
+                "task": "Calculate the compound interest on $10000 at 5% for 10 years",
+                "expected_tool": "calculator",
+                "expected_args": {"expression": "10000 * (1 + 0.05) ** 10"},
+                "category": "calculation",
+            },
+            {
+                "task": "Find all Python files larger than 1MB in the src directory",
+                "expected_tool": "file_search",
+                "expected_args": {"path": "src", "pattern": "*.py", "min_size": "1MB"},
+                "category": "file_operations",
+            },
+            {
+                "task": "Send a summary of today's meeting notes to the team Slack channel",
+                "expected_tool": "send_message",
+                "expected_args": {"channel": "team", "content": "..."},
+                "category": "multi_step",
+            },
+            {
+                "task": "What's the weather like?",  # Ambiguous - no location specified
+                "expected_tool": "ask_clarification",
+                "expected_args": {},
+                "category": "ambiguous",
+            },
+        ]
+    
+    def evaluate_tool_call(self, actual: dict, expected: dict) -> dict:
+        """Score a single tool call against expected."""
+        tool_correct = actual.get("tool") == expected["expected_tool"]
+        
+        # Fuzzy argument matching
+        args_score = 0
+        if tool_correct and actual.get("args"):
+            expected_args = expected["expected_args"]
+            actual_args = actual.get("args", {})
+            
+            if expected_args:
+                matching_keys = set(actual_args.keys()) & set(expected_args.keys())
+                args_score = len(matching_keys) / len(expected_args)
+        
+        return {
+            "tool_correct": tool_correct,
+            "args_score": args_score,
+            "category": expected.get("category"),
+        }
+    
+    def run_evaluation(self, test_suite: list[dict] = None) -> dict:
+        """Run full evaluation suite."""
+        if test_suite is None:
+            test_suite = self.create_test_suite()
+        
+        results_by_category = {}
+        
+        for test_case in test_suite:
+            # Get agent's tool call
+            agent_response = self.agent(test_case["task"])
+            
+            # Evaluate
+            eval_result = self.evaluate_tool_call(agent_response, test_case)
+            
+            category = eval_result["category"]
+            if category not in results_by_category:
+                results_by_category[category] = {"correct": 0, "total": 0, "args_scores": []}
+            
+            results_by_category[category]["total"] += 1
+            if eval_result["tool_correct"]:
+                results_by_category[category]["correct"] += 1
+            results_by_category[category]["args_scores"].append(eval_result["args_score"])
+        
+        # Summary
+        print(f"\n{'Category':<20} {'Tool Acc':<12} {'Arg Score':<12} {'N':<5}")
+        print("-" * 49)
+        total_correct = 0
+        total_tests = 0
+        for cat, metrics in results_by_category.items():
+            acc = metrics["correct"] / metrics["total"] * 100
+            avg_args = sum(metrics["args_scores"]) / len(metrics["args_scores"])
+            print(f"{cat:<20} {acc:<12.0f}% {avg_args:<12.2f} {metrics['total']:<5}")
+            total_correct += metrics["correct"]
+            total_tests += metrics["total"]
+        
+        print(f"\n{'OVERALL':<20} {total_correct/total_tests*100:.0f}%")
+        return results_by_category
+
+# Run evaluation
+evaluator = ToolUseEvaluator(agent_fn=my_agent_function)
+results = evaluator.run_evaluation()
+```
+
+**Expected output:**
+
+| Category | Tool Selection Accuracy | Argument Score | Notes |
+|----------|------------------------|----------------|-------|
+| simple_lookup | 95% | 0.92 | Agents excel here |
+| calculation | 85% | 0.78 | Sometimes compute in-head |
+| file_operations | 80% | 0.70 | Path formatting issues |
+| multi_step | 65% | 0.55 | Requires planning |
+| ambiguous | 45% | 0.30 | Should ask for clarification |
+
+**Gotchas:**
+- Most agents fail on ambiguous tasks — they guess rather than asking for clarification.
+- Argument formatting (dates, paths, numbers) is the most common failure mode, not tool selection.
+- Test with adversarial cases: tools with similar names, tasks that require NO tools, tasks requiring multiple tools in sequence.
+- Evaluate on the full pipeline: tool selection → argument formatting → result interpretation → answer synthesis.
+
+
+---
+
+## 📘 10. Appendix: Production Considerations & Theory Bridges
+
+### 10.1 Function Calling Under the Hood — JSON Mode & Structured Output
+
+Modern LLMs support "function calling" through constrained decoding that forces the model to output valid JSON matching a schema. Understanding the mechanism reveals why it sometimes fails and how to improve reliability.
+
+**How function calling works internally:**
+
+1. **System prompt injection:** The tool schemas are serialized into the system prompt:
+```json
+{"type": "function", "function": {"name": "get_weather", "parameters": {"type": "object", "properties": {"location": {"type": "string"}}, "required": ["location"]}}}
+```
+
+2. **Constrained decoding:** The model's logits are masked at each token to only allow tokens that would produce valid JSON. This is implemented via a finite-state machine (FSM) that tracks the current position in the JSON grammar.
+
+3. **Tool call detection:** Special tokens (e.g., `<tool_call>`) signal the start of a function call. The model then generates the function name and arguments under grammar constraints.
+
+**Why it fails:**
+- **Schema complexity:** Deeply nested schemas with many optional fields confuse the model. Keep schemas flat with ≤5 parameters.
+- **Ambiguous descriptions:** If two tools have similar descriptions, the model picks randomly. Make descriptions distinct.
+- **Long context:** With 10+ tools in the system prompt, the model's attention to individual tool schemas degrades.
+
+**Structured output with Pydantic (production pattern):**
+
+```python
+from pydantic import BaseModel, Field
+from typing import Literal
+import json
+
+class ToolCall(BaseModel):
+    """Structured tool call with validation."""
+    tool: Literal["search", "calculate", "file_read", "file_write"]
+    arguments: dict
+    reasoning: str = Field(description="Why this tool was chosen")
+
+class AgentResponse(BaseModel):
+    """Full agent response with structured output."""
+    thought: str
+    tool_calls: list[ToolCall] = []
+    final_answer: str | None = None
+
+def constrained_generate(llm, prompt: str, schema: type[BaseModel]) -> BaseModel:
+    """Generate with JSON schema constraint using outlines library."""
+    # Using outlines for grammar-constrained generation
+    from outlines import models, generate
+    
+    model = models.transformers(llm)
+    generator = generate.json(model, schema)
+    
+    result = generator(prompt)
+    return result
+
+# Alternative: Using instructor library with any LLM
+import instructor
+from openai import OpenAI
+
+client = instructor.from_openai(OpenAI(base_url="http://localhost:8000/v1"))
+
+response = client.chat.completions.create(
+    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    response_model=AgentResponse,
+    messages=[{"role": "user", "content": "Search for PyTorch memory optimization techniques"}],
+)
+print(f"Thought: {response.thought}")
+print(f"Tool calls: {response.tool_calls}")
+```
+
+**Reliability comparison:**
+
+| Method | Success Rate | Latency Overhead | Flexibility |
+|--------|-------------|-----------------|-------------|
+| Free-form + regex parsing | 70-80% | None | High |
+| JSON mode (OpenAI) | 95% | +5% | Medium |
+| Grammar-constrained (outlines) | 99.5% | +10-15% | Schema-bound |
+| Instructor + retries | 98% | +20% (retries) | High |
+
+### 10.2 LangGraph State Machines vs Simple Agent Loops — Theory Bridge
+
+> **Cross-reference:** [23.7 - Reinforcement Learning & RLHF](23.7---Reinforcement-Learning-&-RLHF) for the MDP formulation that underlies agent decision-making.
+
+**Simple agent loop (ReAct):**
+```
+while not done:
+    action = llm(observation)
+    observation = execute(action)
+```
+
+This is a **linear chain** — no branching, no state persistence, no conditional routing. It works for simple tasks but fails when:
+- Different observations require different handling paths
+- The agent needs to backtrack
+- Multiple sub-tasks run in parallel
+- Human approval is needed at certain steps
+
+**LangGraph state machine:**
+
+LangGraph models agents as directed graphs where:
+- **Nodes** = functions that transform state
+- **Edges** = conditional routing based on state
+- **State** = typed dictionary persisted across steps
+
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+from operator import add
+
+class AgentState(TypedDict):
+    messages: Annotated[list, add]
+    current_step: str
+    retry_count: int
+    needs_human_approval: bool
+
+def router(state: AgentState) -> str:
+    """Conditional edge: route based on state."""
+    if state["needs_human_approval"]:
+        return "human_review"
+    elif state["retry_count"] > 3:
+        return "fallback"
+    elif state["current_step"] == "research":
+        return "research_node"
+    else:
+        return "action_node"
+
+# Build graph
+graph = StateGraph(AgentState)
+graph.add_node("router", router)
+graph.add_node("research_node", research_fn)
+graph.add_node("action_node", action_fn)
+graph.add_node("human_review", human_review_fn)
+graph.add_node("fallback", fallback_fn)
+
+graph.add_conditional_edges("router", router, {
+    "research_node": "research_node",
+    "action_node": "action_node",
+    "human_review": "human_review",
+    "fallback": "fallback",
+})
+graph.add_edge("research_node", "router")  # Loop back
+graph.add_edge("action_node", END)
+graph.add_edge("human_review", "router")
+graph.add_edge("fallback", END)
+
+app = graph.compile()
+```
+
+**When to use which:**
+
+| Criterion | Simple Loop | LangGraph |
+|-----------|-------------|-----------|
+| Task complexity | Single-path | Multi-path, conditional |
+| Error handling | Try/except | State-based retry with backoff |
+| Human-in-the-loop | Difficult | Native (interrupt + resume) |
+| Persistence | None | Checkpoint to DB |
+| Parallelism | Sequential | Fan-out/fan-in nodes |
+| Debugging | Print statements | Visual graph + state inspection |
+| Overhead | Minimal | Framework dependency |
+
+**The MDP connection:** An agent loop is a Markov Decision Process where:
+- **State** $s$ = (conversation history, tool outputs, internal memory)
+- **Action** $a$ = (tool call, response generation, termination)
+- **Transition** $P(s'|s,a)$ = deterministic (tool execution) + stochastic (LLM generation)
+- **Reward** $R(s,a)$ = task completion signal
+
+LangGraph makes the state explicit and the transitions visible, which is why it's preferred for production systems where observability matters.
+
+### 10.3 Agent Cost Optimization
+
+Production agents can consume thousands of tokens per task. Strategies to reduce cost:
+
+```python
+class CostOptimizedAgent:
+    """Agent with token budget management."""
+    
+    def __init__(self, budget_tokens=10000):
+        self.budget = budget_tokens
+        self.spent = 0
+    
+    def should_use_cheap_model(self, task_type: str) -> bool:
+        """Route simple tasks to cheaper/smaller models."""
+        cheap_tasks = ["tool_selection", "json_formatting", "yes_no_classification"]
+        return task_type in cheap_tasks
+    
+    def compress_history(self, messages: list[dict], max_tokens: int = 2000) -> list[dict]:
+        """Summarize old messages to fit context budget."""
+        if self.estimate_tokens(messages) <= max_tokens:
+            return messages
+        
+        # Keep system + last 3 messages, summarize the rest
+        system = messages[0]
+        recent = messages[-3:]
+        old = messages[1:-3]
+        
+        summary = self.summarize(old)
+        return [system, {"role": "system", "content": f"Previous context: {summary}"}] + recent
+```
+
+**Cost per task (Llama-3.1-8B local vs API):**
+
+| Agent Pattern | Tokens/Task | Local Cost | GPT-4o Cost |
+|--------------|-------------|-----------|-------------|
+| ReAct (3 steps) | 2,800 | $0 (electricity) | $0.028 |
+| Plan-Execute | 3,500 | $0 | $0.035 |
+| Reflexion (2 attempts) | 5,200 | $0 | $0.052 |
+| Multi-agent debate | 8,400 | $0 | $0.084 |
+
+Running locally on a 24GB GPU eliminates per-token costs entirely — the only cost is electricity (~$0.001/task at $0.12/kWh).
+
+---

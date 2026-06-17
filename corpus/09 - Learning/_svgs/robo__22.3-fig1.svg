@@ -1,0 +1,150 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .node-box { fill: #0d1117; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 8; }
+    .data-text { font-family: Fira Code, Courier New, monospace; font-size: 9px; fill: #ffd93d; }
+    .arrow { stroke: #8b949e; stroke-width: 1.2; fill: none; }
+    .wheel { fill: #21262d; stroke: #8b949e; stroke-width: 2; }
+  </style>
+  <defs>
+    <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#58a6ff"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="24" class="title" text-anchor="middle">ROS 2 Middleware — Publisher, Subscriber &amp; DDS QoS Architecture</text>
+
+  <!-- LEFT: Publisher Node -->
+  <rect x="20" y="55" width="200" height="250" class="node-box"/>
+  <rect x="20" y="55" width="200" height="28" fill="#58a6ff" fill-opacity="0.15" rx="8"/>
+  <circle cx="38" cy="69" r="6" fill="#51cf66"/>
+  <text x="52" y="73" class="label" font-weight="bold" fill="#58a6ff">Node: /teleop_keyboard</text>
+
+  <!-- Publisher Internals -->
+  <text x="35" y="105" class="sublabel" font-weight="bold">Publisher instantiated:</text>
+  <text x="35" y="120" class="data-text" fill="#51cf66">create_publisher&lt;Twist&gt;()</text>
+
+  <!-- Active Code Preview -->
+  <rect x="30" y="132" width="180" height="72" rx="4" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="38" y="147" class="data-text" fill="#8b949e">msg = Twist()</text>
+  <text x="38" y="161" class="data-text" fill="#ff6b6b">msg.linear.x = 0.5  # m/s</text>
+  <text x="38" y="175" class="data-text" fill="#ffd93d">msg.angular.z = 1.2 # rad/s</text>
+  <text x="38" y="189" class="data-text" fill="#58a6ff">pub.publish(msg)</text>
+
+  <!-- Node Status Indicators -->
+  <text x="35" y="225" class="sublabel">Language: <tspan fill="#ffd93d">rclpy (Python)</tspan></text>
+  <text x="35" y="240" class="sublabel">Publish Rate: <tspan fill="#51cf66">50 Hz</tspan></text>
+  <text x="35" y="255" class="sublabel">Transport: <tspan fill="#58a6ff">Intra-Process Enabled</tspan></text>
+  
+  <rect x="35" y="270" width="80" height="20" rx="3" fill="#51cf66" fill-opacity="0.1"/>
+  <text x="75" y="283" class="sublabel" fill="#51cf66" font-weight="bold" text-anchor="middle">ACTIVE PUB</text>
+
+
+  <!-- MIDDLE: DDS Global Data Space / Topic -->
+  <rect x="235" y="55" width="250" height="250" class="box" fill="#0d1117" stroke="#30363d"/>
+  
+  <!-- Topic name band -->
+  <rect x="245" y="90" width="230" height="24" rx="4" fill="#1f242c" stroke="#58a6ff" stroke-width="1"/>
+  <text x="360" y="106" class="label" text-anchor="middle" font-weight="bold" fill="#ffd93d">Topic: /cmd_vel</text>
+  <text x="360" y="125" class="sublabel" text-anchor="middle" fill="#8b949e">geometry_msgs/msg/Twist</text>
+
+  <!-- DDS Data Pipe -->
+  <line x1="220" y1="160" x2="500" y2="160" stroke="#58a6ff" stroke-width="3" opacity="0.4"/>
+  <line x1="220" y1="160" x2="500" y2="160" stroke="#58a6ff" stroke-width="1" opacity="0.8"/>
+
+  <!-- Animated Glowing Data Packets -->
+  <circle r="5" fill="#51cf66" filter="drop-shadow(0px 0px 3px #51cf66)">
+    <animate attributeName="cx" values="220; 500" dur="2.5s" repeatCount="indefinite" begin="0s"/>
+  </circle>
+  <circle r="5" fill="#ffd93d" filter="drop-shadow(0px 0px 3px #ffd93d)">
+    <animate attributeName="cx" values="220; 500" dur="2.5s" repeatCount="indefinite" begin="0.6s"/>
+  </circle>
+  <circle r="5" fill="#ff6b6b" filter="drop-shadow(0px 0px 3px #ff6b6b)">
+    <animate attributeName="cx" values="220; 500" dur="2.5s" repeatCount="indefinite" begin="1.2s"/>
+  </circle>
+  <circle r="5" fill="#58a6ff" filter="drop-shadow(0px 0px 3px #58a6ff)">
+    <animate attributeName="cx" values="220; 500" dur="2.5s" repeatCount="indefinite" begin="1.8s"/>
+  </circle>
+
+  <!-- QoS Policies Highlight -->
+  <g transform="translate(250, 185)">
+    <text x="0" y="15" class="sublabel" font-weight="bold" fill="#c9d1d9">DDS QoS Configuration:</text>
+    <rect x="0" y="25" width="220" height="65" rx="4" fill="#161b22" stroke="#30363d" stroke-width="0.8"/>
+    
+    <text x="10" y="40" class="sublabel">Reliability: <tspan fill="#58a6ff" font-weight="bold">RELIABLE</tspan></text>
+    <text x="10" y="55" class="sublabel">Durability: <tspan fill="#8b949e">VOLATILE</tspan></text>
+    <text x="10" y="72" class="sublabel">History: <tspan fill="#ffd93d">KEEP_LAST (Depth: 10)</tspan></text>
+  </g>
+
+
+  <!-- RIGHT: Subscriber Node -->
+  <rect x="500" y="55" width="200" height="250" class="node-box"/>
+  <rect x="500" y="55" width="200" height="28" fill="#58a6ff" fill-opacity="0.15" rx="8"/>
+  <circle cx="518" cy="69" r="6" fill="#ffd93d">
+    <animate attributeName="fill" values="#ffd93d;#58a6ff;#ffd93d" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  <text x="532" y="73" class="label" font-weight="bold" fill="#58a6ff">Node: /diff_drive_controller</text>
+
+  <!-- Subscriber Internals -->
+  <text x="515" y="105" class="sublabel" font-weight="bold">Subscriber instantiated:</text>
+  <text x="515" y="120" class="data-text" fill="#ffd93d">create_subscription&lt;Twist&gt;()</text>
+
+  <!-- Callback details -->
+  <rect x="510" y="132" width="180" height="72" rx="4" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="518" y="147" class="data-text" fill="#8b949e">def cmd_vel_cb(self, msg):</text>
+  <text x="518" y="161" class="data-text" fill="#51cf66">  # Diff-Drive Inverse Kinematics</text>
+  <text x="518" y="175" class="data-text" fill="#58a6ff">  v_L = msg.linear.x - msg.angular.z * B/2</text>
+  <text x="518" y="189" class="data-text" fill="#58a6ff">  v_R = msg.linear.x + msg.angular.z * B/2</text>
+
+  <!-- Subscribed Motor Outputs -->
+  <g transform="translate(515, 215)">
+    <text x="0" y="10" class="sublabel">Calculated Wheel Velocities:</text>
+    <text x="0" y="25" class="sublabel" font-weight="bold">v_Left: <tspan fill="#ff6b6b">-0.1 m/s</tspan></text>
+    <text x="0" y="38" class="sublabel" font-weight="bold">v_Right: <tspan fill="#51cf66">1.1 m/s</tspan></text>
+  </g>
+
+  <!-- Motor Wheel Representation (Dynamic Spin) -->
+  <g transform="translate(565, 280)">
+    <rect x="-10" y="-12" width="20" height="24" class="wheel" rx="2"/>
+    <line x1="-10" y1="0" x2="10" y2="0" stroke="#ffd93d" stroke-width="2"/>
+    <animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="8s" repeatCount="indefinite"/>
+  </g>
+  <g transform="translate(635, 280)">
+    <rect x="-10" y="-12" width="20" height="24" class="wheel" rx="2"/>
+    <line x1="-10" y1="0" x2="10" y2="0" stroke="#51cf66" stroke-width="2"/>
+    <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1s" repeatCount="indefinite"/>
+  </g>
+  <text x="565" y="298" class="sublabel" text-anchor="middle" font-size="8px">Left (Spin)</text>
+  <text x="635" y="298" class="sublabel" text-anchor="middle" font-size="8px">Right (Spin)</text>
+
+
+  <!-- BOTTOM: QoS Compatibility -->
+  <rect x="20" y="320" width="680" height="100" class="box"/>
+  <text x="40" y="340" class="label" font-weight="bold" fill="#ff6b6b">DDS QoS Policy Compatibility Rules (Silent Failures)</text>
+  
+  <text x="40" y="360" class="sublabel" fill="#c9d1d9">
+    ROS 2 communications require compatible Quality of Service settings. The <tspan fill="#ffd93d" font-weight="bold">Request vs Offeree</tspan> rule states:
+  </text>
+  <text x="40" y="375" class="sublabel" fill="#8b949e">
+    "A Subscriber's requested Reliability policy must be <tspan fill="#ffd93d" font-weight="bold">less than or equal to</tspan> the Publisher's offered Reliability policy."
+  </text>
+
+  <!-- Compat cases -->
+  <g transform="translate(40, 390)">
+    <!-- Case 1 -->
+    <rect x="0" y="0" width="290" height="20" rx="3" fill="#51cf66" fill-opacity="0.1" stroke="#51cf66" stroke-opacity="0.3" stroke-width="0.8"/>
+    <text x="8" y="13" class="sublabel" font-size="9px">Pub: <tspan font-weight="bold">RELIABLE</tspan> ➔ Sub: <tspan font-weight="bold">BEST_EFFORT</tspan></text>
+    <text x="280" y="13" class="sublabel" font-size="9px" fill="#51cf66" font-weight="bold" text-anchor="end">✅ CONNECTED</text>
+
+    <!-- Case 2 -->
+    <rect x="310" y="0" width="290" height="20" rx="3" fill="#ff6b6b" fill-opacity="0.1" stroke="#ff6b6b" stroke-opacity="0.3" stroke-width="0.8"/>
+    <text x="318" y="13" class="sublabel" font-size="9px">Pub: <tspan font-weight="bold">BEST_EFFORT</tspan> ➔ Sub: <tspan font-weight="bold">RELIABLE</tspan></text>
+    <text x="590" y="13" class="sublabel" font-size="9px" fill="#ff6b6b" font-weight="bold" text-anchor="end">❌ SILENT MISMATCH</text>
+  </g>
+</svg>

@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@600;800&amp;display=swap');
+      .svg-bg {
+        fill: var(--background-primary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 12px;
+      }
+      .title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        fill: var(--text-normal);
+      }
+      .subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        fill: var(--text-muted);
+      }
+      .lang-header {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        fill: var(--text-normal);
+      }
+      .card-bg {
+        fill: var(--background-secondary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 6px;
+      }
+      .card-s {
+        stroke: #3b82f6; /* Blue for Subject */
+        stroke-width: 2;
+      }
+      .card-v {
+        stroke: #eab308; /* Amber for Verb */
+        stroke-width: 2;
+      }
+      .card-o {
+        stroke: #ec4899; /* Pink for Object */
+        stroke-width: 2;
+      }
+      .role-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .text-s { fill: #3b82f6; }
+      .text-v { fill: #eab308; }
+      .text-o { fill: #ec4899; }
+      
+      .word-main {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        fill: var(--text-normal);
+      }
+      .word-sub {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: var(--text-muted);
+      }
+      
+      /* Particles */
+      .particle-badge {
+        stroke-width: 1.5;
+        rx: 15px;
+      }
+      .particle-badge-wa {
+        fill: rgba(168, 85, 247, 0.1);
+        stroke: var(--interactive-accent);
+      }
+      .particle-badge-o {
+        fill: rgba(236, 72, 153, 0.1);
+        stroke: #ec4899;
+      }
+      .particle-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        text-anchor: middle;
+      }
+      
+      /* Crossover paths */
+      .cross-path {
+        fill: none;
+        stroke: var(--text-faint);
+        stroke-width: 1.5;
+        stroke-dasharray: 4,4;
+      }
+      .pulse-dot {
+        fill: var(--interactive-accent);
+        filter: drop-shadow(0 0 3px var(--interactive-accent));
+      }
+      .flow-arrow {
+        stroke: var(--divider-color);
+        stroke-width: 2;
+        fill: none;
+      }
+      
+      /* Explanatory notes */
+      .note-box {
+        fill: var(--background-secondary);
+        stroke: var(--divider-color);
+        stroke-width: 1;
+        rx: 8px;
+      }
+      .note-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .note-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: var(--text-muted);
+      }
+      .anchor-ring {
+        stroke: #eab308;
+        stroke-width: 2;
+        fill: none;
+        stroke-dasharray: 4,2;
+      }
+    </style>
+    
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,2 L8,5 L0,8 z" fill="var(--divider-color)" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,2 L8,5 L0,8 z" fill="#3b82f6" />
+    </marker>
+    <marker id="arrow-pink" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,2 L8,5 L0,8 z" fill="#ec4899" />
+    </marker>
+  </defs>
+
+  <!-- Container Background -->
+  <rect width="100%" height="100%" class="svg-bg" />
+
+  <!-- Header -->
+  <g transform="translate(30, 45)">
+    <text x="0" y="0" class="title">SVO vs SOV — Sentence Structure Mapping</text>
+    <text x="0" y="20" class="subtitle">Contrasting English Subject-Verb-Object (SVO) with Japanese Subject-Object-Verb (SOV) structure</text>
+  </g>
+
+  <!-- TOP HALF: ENGLISH SVO -->
+  <g transform="translate(30, 95)">
+    <text x="0" y="15" class="lang-header">English (SVO) — Word-Order Dependent</text>
+    
+    <!-- Subject Card -->
+    <g transform="translate(40, 30)">
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-s" />
+      <text x="15" y="20" class="role-label text-s">Subject (S)</text>
+      <text x="15" y="42" class="word-main">Developer</text>
+    </g>
+    
+    <!-- Flow Arrow 1 -->
+    <path d="M 210,60 L 265,60" class="flow-arrow" marker-end="url(#arrow)" />
+    
+    <!-- Verb Card -->
+    <g transform="translate(280, 30)">
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-v" />
+      <text x="15" y="20" class="role-label text-v">Verb (V)</text>
+      <text x="15" y="42" class="word-main">writes</text>
+    </g>
+    
+    <!-- Flow Arrow 2 -->
+    <path d="M 450,60 L 505,60" class="flow-arrow" marker-end="url(#arrow)" />
+    
+    <!-- Object Card -->
+    <g transform="translate(520, 30)">
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-o" />
+      <text x="15" y="20" class="role-label text-o">Object (O)</text>
+      <text x="15" y="42" class="word-main">code</text>
+    </g>
+  </g>
+
+  <!-- MIDDLE: TRANSLATION & CROSSOVER FLOW -->
+  <!-- Paths for animation -->
+  <path id="flow-s" d="M 150,185 Q 150,225 150,265" class="cross-path" />
+  <path id="flow-v" d="M 390,185 C 390,225 630,225 630,265" class="cross-path" />
+  <path id="flow-o" d="M 630,185 C 630,225 390,225 390,265" class="cross-path" />
+
+  <!-- Animated Glowing Dots along Crossover Paths -->
+  <circle r="4" class="pulse-dot">
+    <animateMotion path="M 150,185 Q 150,225 150,265" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle r="4" class="pulse-dot" fill="#eab308">
+    <animateMotion path="M 390,185 C 390,225 630,225 630,265" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle r="4" class="pulse-dot" fill="#ec4899">
+    <animateMotion path="M 630,185 C 630,225 390,225 390,265" dur="3s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- BOTTOM HALF: JAPANESE SOV -->
+  <g transform="translate(30, 260)">
+    <text x="0" y="15" class="lang-header">Japanese (SOV) — Particle-Driven Case Marking</text>
+    
+    <!-- Subject/Topic Card with は -->
+    <g transform="translate(40, 30)">
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-s" />
+      <text x="15" y="20" class="role-label text-s">Topic / Subject (S)</text>
+      <text x="15" y="42" class="word-main">開発者</text>
+      <text x="75" y="42" class="word-sub">(Developer)</text>
+      
+      <!-- Particle wa hanger badge -->
+      <g transform="translate(145, 30)">
+        <circle cx="0" cy="0" r="14" class="particle-badge particle-badge-wa" />
+        <text x="0" y="5" class="particle-text" fill="var(--interactive-accent)">は</text>
+      </g>
+    </g>
+    
+    <!-- Flow Arrow 1 -->
+    <path d="M 215,60 L 265,60" class="flow-arrow" stroke="#3b82f6" marker-end="url(#arrow-blue)" />
+    
+    <!-- Object Card with を -->
+    <g transform="translate(280, 30)">
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-o" />
+      <text x="15" y="20" class="role-label text-o">Direct Object (O)</text>
+      <text x="15" y="42" class="word-main">コード</text>
+      <text x="75" y="42" class="word-sub">(code)</text>
+      
+      <!-- Particle o hanger badge -->
+      <g transform="translate(145, 30)">
+        <circle cx="0" cy="0" r="14" class="particle-badge particle-badge-o" />
+        <text x="0" y="5" class="particle-text" fill="#ec4899">を</text>
+      </g>
+    </g>
+    
+    <!-- Flow Arrow 2 -->
+    <path d="M 455,60 L 505,60" class="flow-arrow" stroke="#ec4899" marker-end="url(#arrow-pink)" />
+    
+    <!-- Verb Card at End -->
+    <g transform="translate(520, 30)">
+      <!-- Animated Warning Pulsing Anchor behind Verb -->
+      <rect x="-3" y="-3" width="166" height="66" fill="none" class="anchor-ring" rx="8">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
+        <animate attributeName="transform" type="scale" values="1;1.01;1" transform-origin="80 30" dur="2s" repeatCount="indefinite" />
+      </rect>
+      
+      <rect x="0" y="0" width="160" height="60" class="card-bg card-v" />
+      <text x="15" y="20" class="role-label text-v">Verb (V) — Anchor</text>
+      <text x="15" y="42" class="word-main">書きます</text>
+      <text x="95" y="42" class="word-sub">(writes)</text>
+    </g>
+  </g>
+
+  <!-- SIDE NOTES / EXPLANATION CARD -->
+  <g transform="translate(50, 375)">
+    <rect x="-10" y="-10" width="700" height="50" class="note-box" />
+    <text x="10" y="12" class="note-title">💡 Grammatical Concept: The "Type Annotation" Paradigm</text>
+    <text x="10" y="30" class="note-text">
+      Because particles (<tspan fill="var(--interactive-accent)" font-weight="600">は</tspan> and <tspan fill="#ec4899" font-weight="600">を</tspan>) act as explicit labels, Japanese word order is highly flexible. Noun blocks can be shuffled: 
+      <tspan fill="#ec4899" font-weight="600">コードを</tspan> <tspan fill="var(--interactive-accent)" font-weight="600">開発者は</tspan> <tspan fill="#eab308" font-weight="600">書きます</tspan> is perfectly valid! The only strict, non-negotiable rule: <tspan fill="#eab308" font-weight="600" class="bold-word">The Verb ALWAYS comes last</tspan>.
+    </text>
+  </g>
+</svg>

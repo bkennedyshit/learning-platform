@@ -1,0 +1,74 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="spin-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .bloch-circle { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .bloch-equator { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; stroke-dasharray: 4 3; }
+    .bloch-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; marker-end: url(#spin-arrow); }
+    .bloch-state { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; marker-end: url(#spin-arrow); }
+    .bloch-precess { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 6 3; }
+    .bloch-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .bloch-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .bloch-dot { fill: var(--interactive-accent, #58a6ff); }
+    .spin-precess-path {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.6;
+      stroke-dasharray: 150;
+      stroke-dashoffset: 150;
+      animation: precess 3s linear infinite;
+    }
+    @keyframes precess {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+
+  <!-- Bloch Sphere -->
+  <ellipse cx="200" cy="200" rx="140" ry="140" class="bloch-circle"/>
+  <ellipse cx="200" cy="200" rx="140" ry="40" class="bloch-equator"/>
+
+  <!-- Axes -->
+  <line x1="200" y1="200" x2="200" y2="40" class="bloch-axis"/>
+  <text x="205" y="30" class="bloch-label">|↑⟩ (z)</text>
+  <line x1="200" y1="200" x2="200" y2="360" class="bloch-axis"/>
+  <text x="205" y="375" class="bloch-label">|↓⟩</text>
+  <line x1="200" y1="200" x2="350" y2="200" class="bloch-axis"/>
+  <text x="355" y="197" class="bloch-label">x</text>
+  <line x1="200" y1="200" x2="130" y2="250" class="bloch-axis"/>
+  <text x="115" y="260" class="bloch-label">y</text>
+
+  <!-- State vector |ψ⟩ = cos(θ/2)|↑⟩ + e^{iφ}sin(θ/2)|↓⟩ -->
+  <line x1="200" y1="200" x2="280" y2="120" class="bloch-state">
+    <animate attributeName="x2" values="280; 200; 120; 200; 280" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="120; 140; 120; 100; 120" dur="3s" repeatCount="indefinite" />
+  </line>
+  <circle cx="280" cy="120" r="5" class="bloch-dot">
+    <animate attributeName="cx" values="280; 200; 120; 200; 280" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="cy" values="120; 140; 120; 100; 120" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <text x="290" y="95" class="bloch-accent">|ψ⟩</text>
+
+  <!-- Precession cone -->
+  <ellipse cx="200" cy="120" rx="80" ry="20" class="spin-precess-path"/>
+
+  <!-- Angles -->
+  <path d="M 200 180 A 20 20 0 0 1 215 170" stroke="var(--text-muted, #8b949e)" stroke-width="1" fill="none"/>
+  <text x="220" y="175" class="bloch-label" font-size="11">θ</text>
+
+  <!-- Right panel: Info -->
+  <rect x="380" y="40" width="200" height="320" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="480" y="70" class="bloch-accent" text-anchor="middle">Bloch Sphere</text>
+  <text x="480" y="100" class="bloch-label" text-anchor="middle">|ψ⟩ = cos(θ/2)|↑⟩</text>
+  <text x="480" y="120" class="bloch-label" text-anchor="middle">+ e^{iφ}sin(θ/2)|↓⟩</text>
+  <text x="480" y="160" class="bloch-label" text-anchor="middle">θ: polar angle</text>
+  <text x="480" y="180" class="bloch-label" text-anchor="middle">φ: azimuthal angle</text>
+  <text x="480" y="220" class="bloch-accent" text-anchor="middle">Spin-1/2 Algebra</text>
+  <text x="480" y="250" class="bloch-label" text-anchor="middle">[Ŝₓ, Ŝᵧ] = iℏŜ_z</text>
+  <text x="480" y="275" class="bloch-label" text-anchor="middle">Ŝ² = (3/4)ℏ²</text>
+  <text x="480" y="300" class="bloch-label" text-anchor="middle">Ŝ_z = ±ℏ/2</text>
+  <text x="480" y="335" class="bloch-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">Precession: ω = γB</text>
+</svg>

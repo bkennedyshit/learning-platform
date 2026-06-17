@@ -1,0 +1,76 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-sql1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .op-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; transition: all 0.3s; cursor: pointer; }
+    .op-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .sql-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-sql1); }
+    .accent-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-sql1); }
+    .greek { font-family: serif; font-size: 18px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+  </style>
+
+  <text x="350" y="25" class="title">Relational Algebra → SQL Mapping</text>
+
+  <!-- Left column: Relational Algebra -->
+  <text x="170" y="55" class="section-label">relational algebra</text>
+
+  <rect x="70" y="70" width="200" height="40" class="op-box"/>
+  <text x="170" y="85" class="greek">σ</text>
+  <text x="170" y="100" class="label">Selection (filter rows)</text>
+
+  <rect x="70" y="130" width="200" height="40" class="op-box"/>
+  <text x="170" y="145" class="greek">π</text>
+  <text x="170" y="160" class="label">Projection (pick cols)</text>
+
+  <rect x="70" y="190" width="200" height="40" class="op-box"/>
+  <text x="170" y="205" class="greek">×</text>
+  <text x="170" y="220" class="label">Cartesian Product</text>
+
+  <rect x="70" y="250" width="200" height="40" class="op-box"/>
+  <text x="170" y="265" class="greek">⋈</text>
+  <text x="170" y="280" class="label">Natural Join</text>
+
+  <rect x="70" y="310" width="200" height="40" class="op-box"/>
+  <text x="170" y="325" class="greek">∪ ∩ −</text>
+  <text x="170" y="340" class="label">Set Operations</text>
+
+  <rect x="70" y="370" width="200" height="40" class="op-box"/>
+  <text x="170" y="385" class="greek">÷</text>
+  <text x="170" y="400" class="label">Division (∀ quantifier)</text>
+
+  <!-- Right column: SQL -->
+  <text x="530" y="55" class="section-label">sql syntax</text>
+
+  <rect x="430" y="70" width="200" height="40" class="sql-box"/>
+  <text x="530" y="95" class="label">WHERE predicate</text>
+
+  <rect x="430" y="130" width="200" height="40" class="sql-box"/>
+  <text x="530" y="155" class="label">SELECT col1, col2</text>
+
+  <rect x="430" y="190" width="200" height="40" class="sql-box"/>
+  <text x="530" y="215" class="label">CROSS JOIN</text>
+
+  <rect x="430" y="250" width="200" height="40" class="sql-box"/>
+  <text x="530" y="275" class="label">INNER JOIN ... ON</text>
+
+  <rect x="430" y="310" width="200" height="40" class="sql-box"/>
+  <text x="530" y="335" class="label">UNION / INTERSECT / EXCEPT</text>
+
+  <rect x="430" y="370" width="200" height="40" class="sql-box"/>
+  <text x="530" y="395" class="label">NOT EXISTS(NOT EXISTS)</text>
+
+  <!-- Arrows connecting them -->
+  <line x1="270" y1="90" x2="430" y2="90" class="accent-arrow"/>
+  <line x1="270" y1="150" x2="430" y2="150" class="accent-arrow"/>
+  <line x1="270" y1="210" x2="430" y2="210" class="accent-arrow"/>
+  <line x1="270" y1="270" x2="430" y2="270" class="accent-arrow"/>
+  <line x1="270" y1="330" x2="430" y2="330" class="accent-arrow"/>
+  <line x1="270" y1="390" x2="430" y2="390" class="accent-arrow"/>
+</svg>

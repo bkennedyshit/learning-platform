@@ -1,0 +1,84 @@
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="bd-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .bd-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; rx: 8; cursor: pointer; transition: all 0.2s; }
+    .bd-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .bd-line { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; color: var(--text-normal, #c9d1d9); }
+    .bd-fb { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; color: var(--interactive-accent, #58a6ff); }
+    .bd-sum { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .bd-lbl { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .bd-acc { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .bd-sig { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .bd-signal { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <!-- Input R(s) -->
+  <text x="30" y="115" class="bd-acc">R(s)</text>
+  <line x1="55" y1="110" x2="95" y2="110" class="bd-line" marker-end="url(#bd-arr)"/>
+
+  <!-- Summing Junction -->
+  <circle cx="115" cy="110" r="15" class="bd-sum"/>
+  <text x="115" y="115" class="bd-lbl" font-size="16">Σ</text>
+  <text x="100" y="98" class="bd-sig">+</text>
+  <text x="100" y="130" class="bd-sig">−</text>
+
+  <!-- Error E(s) -->
+  <line x1="130" y1="110" x2="190" y2="110" class="bd-line" marker-end="url(#bd-arr)"/>
+  <text x="160" y="100" class="bd-sig">E(s)</text>
+
+  <!-- Controller C(s) -->
+  <rect x="190" y="85" width="100" height="50" class="bd-box"/>
+  <text x="240" y="115" class="bd-lbl">C(s)</text>
+
+  <!-- Controller output -->
+  <line x1="290" y1="110" x2="350" y2="110" class="bd-line" marker-end="url(#bd-arr)"/>
+  <text x="320" y="100" class="bd-sig">U(s)</text>
+
+  <!-- Plant G(s) -->
+  <rect x="350" y="85" width="100" height="50" class="bd-box"/>
+  <text x="400" y="115" class="bd-lbl">G(s)</text>
+
+  <!-- Output Y(s) -->
+  <line x1="450" y1="110" x2="560" y2="110" class="bd-line" marker-end="url(#bd-arr)"/>
+  <text x="575" y="115" class="bd-acc">Y(s)</text>
+
+  <!-- Pickoff point -->
+  <circle cx="520" cy="110" r="4" fill="var(--text-normal, #c9d1d9)"/>
+
+  <!-- Feedback path -->
+  <line x1="520" y1="110" x2="520" y2="230" class="bd-fb"/>
+  <line x1="520" y1="230" x2="115" y2="230" class="bd-fb"/>
+  <line x1="115" y1="230" x2="115" y2="125" class="bd-fb" marker-end="url(#bd-arr)"/>
+
+  <!-- Feedback block H(s) -->
+  <rect x="270" y="205" width="100" height="50" class="bd-box"/>
+  <text x="320" y="235" class="bd-lbl">H(s)</text>
+  <text x="320" y="275" class="bd-sig">B(s) = H(s)Y(s)</text>
+
+  <!-- Result box -->
+  <rect x="540" y="180" width="160" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="620" y="205" class="bd-acc">Closed-Loop TF:</text>
+  <text x="620" y="230" class="bd-lbl">T(s) = C·G/(1+C·G·H)</text>
+  <text x="620" y="250" class="bd-sig">Characteristic: 1+C·G·H=0</text>
+
+  <!-- Animated Signals -->
+  <circle r="4" class="bd-signal">
+    <animateMotion dur="1.5s" repeatCount="indefinite" path="M55,110 L100,110" />
+  </circle>
+  <circle r="4" class="bd-signal">
+    <animateMotion dur="1.5s" repeatCount="indefinite" path="M130,110 L190,110" />
+  </circle>
+  <circle r="4" class="bd-signal">
+    <animateMotion dur="1.5s" repeatCount="indefinite" path="M290,110 L350,110" />
+  </circle>
+  <circle r="4" class="bd-signal">
+    <animateMotion dur="1.5s" repeatCount="indefinite" path="M450,110 L560,110" />
+  </circle>
+  <circle r="4" class="bd-signal">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M520,110 L520,230 L115,230 L115,125" />
+  </circle>
+</svg>

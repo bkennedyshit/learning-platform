@@ -1,0 +1,374 @@
+---
+title: "16.6 — Concurrency Control & MVCC"
+subject: "Databases & Storage Engines"
+catalog: advanced
+audience_tier: higher-education
+chapter: "16.6"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 16.6 — Concurrency Control & MVCC
+
+> *"Readers should never block writers. Writers should never block readers. This is the most important sentence in database concurrency."*
+
+> *"Two-Phase Locking is provably correct. MVCC is cleverly correct. Understanding both teaches you everything about isolation."*
+
+Concurrency control is the mechanism that makes Isolation possible — the I in ACID. Without it, concurrent transactions would corrupt each other's data in unpredictable ways. There are two major approaches:
+
+1. **Two-Phase Locking (2PL)**: pessimistic — acquire locks to prevent conflicts. Provably achieves serializability.
+2. **Multi-Version Concurrency Control (MVCC)**: optimistic — maintain multiple versions of rows; readers see old versions while writers create new ones. Readers never block writers.
+
+PostgreSQL uses **MVCC** for isolation at all levels, supplemented by **row-level locks** for write-write conflicts and **SSI (Serializable Snapshot Isolation)** for the Serializable isolation level.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Explain **Two-Phase Locking**: the growing phase, the shrinking phase, and the Strict 2PL variant.
+2. Construct a **deadlock scenario** with two transactions and explain wound-wait + wait-die resolution strategies.
+3. Explain PostgreSQL **MVCC**: xmin, xmax, t_ctid, and how visibility is determined.
+4. Describe how PostgreSQL constructs a **transaction snapshot** at BEGIN.
+5. Explain why `UPDATE` in PostgreSQL creates a new tuple instead of modifying in place.
+6. Explain why **VACUUM** is necessary and what happens without it (table bloat, txid wraparound).
+7. Distinguish between **autovacuum**, manual `VACUUM`, `VACUUM FULL`, and `VACUUM ANALYZE`.
+
+---
+
+## 🖼️ Visual Anchor
+
+![db-16__fig4](db-16__fig4.svg)
+
+*Figure 30.6.1 — 2PL growing/shrinking phases, MVCC row header (xmin/xmax), and snapshot isolation timeline.*
+
+---
+
+## 📚 1. Two-Phase Locking (2PL)
+
+### 1.1 The Core Algorithm
+
+**Two-Phase Locking (2PL)** is the classic pessimistic concurrency control algorithm. The fundamental theorem: *if every transaction follows 2PL, the resulting schedule is conflict-serializable.*
+
+**Phase 1 — Growing Phase**: A transaction may *acquire* locks but may not *release* any lock.
+**Phase 2 — Shrinking Phase**: A transaction may *release* locks but may not *acquire* any new lock.
+
+```
+T1 timeline:
+  ──── Acquire S(A) ── Acquire S(B) ── Acquire X(C) ──┬── Release X(C) ── Release S(B) ── Release S(A) ──
+                                                        ↑
+                                              Lock point (lock set is maximal here)
+  ← Growing phase ────────────────────────────────── → ← Shrinking phase ─────────────────────────────────→
+```
+
+**Lock types**:
+- **S (Shared)**: for reads. Multiple transactions can hold S locks on the same row simultaneously.
+- **X (Exclusive)**: for writes. Only one transaction can hold an X lock. Incompatible with S locks.
+
+### 1.2 Strict 2PL
+
+**Strict 2PL**: Hold all X (exclusive) locks until the transaction commits or aborts. This prevents cascading aborts — if T1 releases an X lock before commit and T2 reads the modified value, then T1 aborts, T2 has read data that no longer exists (and must also abort — a "cascade").
+
+Almost all production databases implement Strict 2PL (or a variant like Rigorous 2PL where all locks are held until end).
+
+### 1.3 Lock Compatibility Matrix
+
+| Held → \ Requested ↓ | S (Shared) | X (Exclusive) |
+|---|---|---|
+| S (Shared) | ✓ Compatible | ✗ Conflict |
+| X (Exclusive) | ✗ Conflict | ✗ Conflict |
+
+PostgreSQL extends this with additional lock modes for different operations:
+- `AccessShareLock` — acquired by SELECT (not FOR UPDATE)
+- `RowShareLock` — acquired by SELECT FOR UPDATE/SHARE
+- `RowExclusiveLock` — acquired by INSERT/UPDATE/DELETE
+- `ShareUpdateExclusiveLock` — acquired by VACUUM, ANALYZE, CREATE INDEX CONCURRENTLY
+- `ShareLock` — acquired by CREATE INDEX
+- `ShareRowExclusiveLock` — acquired by CREATE TRIGGER
+- `ExclusiveLock` — blocks all but AccessShare (read-only)
+- `AccessExclusiveLock` — acquired by DROP TABLE, TRUNCATE, REINDEX, VACUUM FULL; blocks everything
+
+---
+
+## 📚 2. Deadlocks
+
+### 2.1 What is a Deadlock?
+
+A **deadlock** occurs when two or more transactions are each waiting for a lock held by another — a circular dependency with no resolution without aborting one:
+
+```
+T1 holds lock on row A, waiting for lock on row B
+T2 holds lock on row B, waiting for lock on row A
+
+Wait-for graph:
+T1 → T2 (T1 waits for T2 to release B)
+T2 → T1 (T2 waits for T1 to release A)
+Cycle detected → deadlock!
+```
+
+### 2.2 Deadlock Detection
+
+PostgreSQL periodically runs a deadlock detector (triggered when a lock wait exceeds `deadlock_timeout`, default 1 second). The detector:
+1. Builds the wait-for graph from `pg_locks`
+2. Detects cycles using DFS
+3. Aborts the "youngest" transaction in the cycle (the one with the highest XID — cheapest to restart)
+
+```sql
+-- Simulate a deadlock:
+-- Session 1:
+BEGIN; UPDATE accounts SET balance=100 WHERE id=1;  -- acquires X lock on row id=1
+
+-- Session 2:
+BEGIN; UPDATE accounts SET balance=200 WHERE id=2;  -- acquires X lock on row id=2
+       UPDATE accounts SET balance=300 WHERE id=1;  -- waits for Session 1 to release id=1
+
+-- Session 1 (after Session 2 is waiting):
+       UPDATE accounts SET balance=400 WHERE id=2;  -- waits for Session 2 to release id=2
+-- → DEADLOCK DETECTED
+-- PostgreSQL aborts Session 1 with:
+-- ERROR:  deadlock detected
+-- DETAIL:  Process X waits for ShareLock on transaction Y; blocked by process Z.
+-- HINT:   See server log for query details.
+```
+
+### 2.3 Deadlock Prevention Strategies
+
+| Strategy | Mechanism | Notes |
+|---|---|---|
+| **Consistent lock ordering** | Always acquire locks in the same order (e.g., by primary key ascending) | Best app-level prevention |
+| **Timeout** | Set `lock_timeout = 5000` (ms) — give up if lock can't be acquired | Converts deadlock to explicit error |
+| **Wound-Wait** | If T_i requests a lock held by T_j: if T_i is older, abort T_j ("wound"); if T_i is younger, wait | Preemptive |
+| **Wait-Die** | If T_i requests a lock held by T_j: if T_i is older, wait; if T_i is younger, abort T_i ("die") | Conservative |
+
+---
+
+## 📚 3. Multi-Version Concurrency Control (MVCC)
+
+### 3.1 The Core Idea
+
+Instead of locking rows while a transaction is running, MVCC stores **multiple versions** of each row simultaneously. Readers see a consistent snapshot of the database as of their transaction's start time, while writers create new versions. 
+
+The key benefit: **readers never block writers, and writers never block readers**. This allows high concurrency without the write-read contention that plagues 2PL systems.
+
+### 3.2 PostgreSQL Tuple Versioning
+
+Every row in PostgreSQL has a **heap tuple header** with MVCC fields:
+
+```
+HeapTupleHeader fields:
+  t_xmin:     XID of the transaction that created this tuple version
+  t_xmax:     XID of the transaction that deleted/superseded this version
+              (0 means "still alive")
+  t_ctid:     (page, offset) of the current version of this row
+              (for the current version: points to itself)
+              (for an old version: points to the new version)
+  t_infomask: bit flags including:
+              HEAP_XMIN_COMMITTED  — xmin transaction has committed
+              HEAP_XMAX_COMMITTED  — xmax transaction has committed
+              HEAP_XMAX_INVALID    — xmax is not set (tuple is alive)
+              HEAP_HOT_UPDATED     — this tuple was HOT-updated
+              HEAP_ONLY_TUPLE      — this is a HOT tuple (no index entry)
+```
+
+### 3.3 INSERT, UPDATE, DELETE in MVCC
+
+**INSERT**: Creates a new tuple with `t_xmin = current_xid`, `t_xmax = 0` (alive).
+
+**DELETE**: Sets `t_xmax = current_xid` on the existing tuple. The tuple is not physically removed. It becomes a "dead tuple" after the deleting transaction commits and no snapshot needs to see it anymore.
+
+**UPDATE**: An UPDATE is logically a DELETE + INSERT:
+1. Set `t_xmax = current_xid` on the old tuple (mark as superseded by this transaction)
+2. Insert a new tuple with `t_xmin = current_xid`, `t_xmax = 0`
+3. Set `t_ctid` on the old tuple to point to the new tuple's location
+
+```
+Example: UPDATE users SET name='Bob2' WHERE id=1
+
+Before:
+Tuple at (page=5, offset=3): xmin=100, xmax=0, t_ctid=(5,3), name='Bob'
+
+After UPDATE by xid=200:
+Old tuple at (5,3): xmin=100, xmax=200, t_ctid=(5,7), name='Bob'  ← superseded
+New tuple at (5,7): xmin=200, xmax=0,   t_ctid=(5,7), name='Bob2' ← current
+```
+
+### 3.4 Snapshot Construction
+
+At the start of a transaction (or at each statement for Read Committed), PostgreSQL creates a **snapshot**:
+
+```
+Snapshot {
+  xmin:  lowest active XID at snapshot time
+         (transactions with XID < xmin are either committed or aborted)
+  xmax:  next XID to be assigned
+         (transactions with XID >= xmax don't exist yet)
+  xip:   array of XIDs that are active (running, not committed) at snapshot time
+}
+```
+
+**Visibility rule**: A tuple version is visible to a snapshot if:
+1. `t_xmin` has committed AND `t_xmin < snapshot.xmax` AND `t_xmin NOT IN snapshot.xip`
+2. AND `t_xmax = 0` OR (`t_xmax` has NOT committed) OR (`t_xmax` is in `snapshot.xip`)
+
+In plain English: the tuple was created by a committed transaction that started before this snapshot, and it hasn't been deleted by a committed transaction that started before this snapshot.
+
+```python
+def is_visible(tuple, snapshot):
+    # Creator must be committed and visible in snapshot
+    if not xid_committed(tuple.xmin):
+        return False
+    if tuple.xmin >= snapshot.xmax:
+        return False  # created after snapshot
+    if tuple.xmin in snapshot.xip:
+        return False  # creator still active at snapshot time
+
+    # Deleter must NOT have committed and been visible
+    if tuple.xmax == 0:
+        return True  # not deleted
+    if not xid_committed(tuple.xmax):
+        return True  # deleter aborted
+    if tuple.xmax >= snapshot.xmax:
+        return True  # deleted after snapshot
+    if tuple.xmax in snapshot.xip:
+        return True  # deleter still active at snapshot time
+
+    return False  # deleted before snapshot
+```
+
+---
+
+## 📚 4. VACUUM: The Garbage Collector
+
+### 4.1 Why VACUUM is Necessary
+
+Every UPDATE and DELETE leaves dead tuples in heap pages. These dead tuples:
+- Waste disk space
+- Slow down sequential scans (must read dead tuples and check visibility)
+- Bloat indexes (dead index entries pointing to dead heap tuples)
+
+VACUUM reclaims this space:
+
+```
+Before VACUUM:
+Page: [live_tuple | dead_tuple | live_tuple | dead_tuple | dead_tuple | live_tuple]
+                        ↑                        ↑              ↑
+                   xmax committed            xmax committed  xmax committed
+
+After VACUUM:
+Page: [live_tuple | ___FREE___ | live_tuple | ______FREE SPACE______ | live_tuple]
+```
+
+### 4.2 VACUUM Modes
+
+| Command | What it does | Locks | Notes |
+|---|---|---|---|
+| `VACUUM tablename` | Mark dead tuples as free, update visibility map and FSM | No table lock | Standard maintenance; safe for production |
+| `VACUUM ANALYZE tablename` | VACUUM + update planner statistics (pg_statistic) | No table lock | Best regular maintenance command |
+| `VACUUM FULL tablename` | Rebuild table in a new file, reclaim disk space | **Full table lock** | Rarely needed; blocks all access |
+| `AUTOVACUUM` | Background daemon runs VACUUM automatically | No table lock | Triggered when dead tuples exceed threshold |
+
+### 4.3 Autovacuum Thresholds
+
+Autovacuum triggers when:
+```
+dead_tuples > autovacuum_vacuum_threshold + autovacuum_vacuum_scale_factor × reltuples
+            = 50 (default)               + 0.2 (20%)                       × table_row_count
+```
+
+For a 10-million-row table: autovacuum triggers when 2,000,050 dead tuples accumulate. On a table with heavy UPDATE traffic, this can mean autovacuum runs frequently — which is correct behaviour.
+
+### 4.4 Transaction ID (XID) Wraparound — The Other Reason for VACUUM
+
+PostgreSQL transaction IDs are 32-bit integers. After 2^32 ≈ 4 billion transactions, XIDs wrap around. If this happens, old tuples (with XID=1) would appear "newer" than recent tuples — catastrophic visibility corruption.
+
+VACUUM prevents this by "freezing" old tuples: tuples older than `vacuum_freeze_min_age` transactions have their xmin replaced with a special `FrozenTransactionId (2)`, which is visible to all snapshots. This removes old XIDs from the aging counter.
+
+```sql
+-- Check oldest unfrozen XID in each table
+SELECT relname, age(relfrozenxid) AS xid_age
+FROM pg_class WHERE relkind='r'
+ORDER BY xid_age DESC LIMIT 10;
+
+-- Age approaching 2 billion = danger zone
+-- autovacuum_freeze_max_age = 200000000 (200M, default)
+-- When age > max_age: aggressive autovacuum runs forcibly
+```
+
+### 4.5 Visibility Map
+
+PostgreSQL maintains a **Visibility Map** (one bit per page) tracking which pages contain only tuples visible to all active transactions:
+- If a page is "all-visible", VACUUM can skip it (no dead tuples to clean)
+- Index-only scans can skip heap fetches for "all-visible" pages (the index entry is sufficient)
+
+The visibility map is updated by VACUUM and invalidated by any write to the page.
+
+---
+
+## 📚 5. SSI: Serializable Snapshot Isolation
+
+### 5.1 The Problem with Snapshot Isolation
+
+As discussed in [chapter 16.4](16.4---Transaction-Management-&-ACID), Snapshot Isolation prevents phantom reads but not write skew. PostgreSQL's Serializable isolation level uses **SSI** to detect and abort transactions that would violate serializability.
+
+### 5.2 How SSI Works
+
+SSI tracks read/write dependencies between transactions using **SIREAD locks** (predicates, not data locks):
+
+1. When T1 reads a set of rows, it records the predicate as a SIREAD lock.
+2. When T2 modifies a row that would have matched T1's predicate:
+   - If T1 has already committed: mark T2 as having a dangerous read-write conflict.
+   - If T1 is still active: note the conflict for later resolution.
+3. When a cycle of dangerous conflicts is detected (T1→T2→T1 or longer), abort the youngest transaction.
+
+```sql
+-- SSI in practice: the dangerous write skew example
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT COUNT(*) FROM doctors WHERE on_call = true;  -- SIREAD lock on this predicate
+UPDATE doctors SET on_call = false WHERE name = 'Alice';
+COMMIT;
+-- If concurrent transaction has read same predicate and written to doctors:
+-- ERROR: could not serialize access due to concurrent update
+-- → Application must retry
+```
+
+The overhead of SSI is primarily in tracking SIREAD locks (memory) and checking for cycles at commit time. For most OLTP workloads, this is negligible (<15% overhead over Snapshot Isolation).
+
+---
+
+## 🔗 6. Cross-links & Further Reading
+
+### Internal
+- [16.4 - Transaction Management & ACID](16.4---Transaction-Management-&-ACID) — the isolation levels that MVCC implements
+- [16.5 - Write-Ahead Logging & Recovery](16.5---Write-Ahead-Logging-&-Recovery) — WAL records the changes MVCC creates
+- [16.2 - B-Trees & Page Management](16.2---B-Trees-&-Page-Management) — HOT updates, xmin/xmax in heap pages
+- [16.7 - Query Processing & Execution](16.7---Query-Processing-&-Execution) — index-only scans use the visibility map
+
+### External
+- [CMU 15-445 Lecture 19 — Two-Phase Locking](https://15445.courses.cs.cmu.edu/)
+- [CMU 15-445 Lecture 18 — Timestamp Ordering Concurrency Control](https://15445.courses.cs.cmu.edu/)
+- [PostgreSQL MVCC Documentation](https://www.postgresql.org/docs/current/mvcc.html)
+- [PostgreSQL Visibility Map Documentation](https://www.postgresql.org/docs/current/storage-vm.html)
+- [PostgreSQL VACUUM Documentation](https://www.postgresql.org/docs/current/sql-vacuum.html)
+- [SSI paper: Cahill et al. — Serializable Isolation for Snapshot Databases (SIGMOD 2008)](https://dl.acm.org/doi/10.1145/1376616.1376690)
+- [DDIA Chapter 7 — "Weak Isolation Levels"](https://dataintensive.net/)
+- [Hussein Nasser — PostgreSQL MVCC Deep Dive (YouTube)](https://www.youtube.com/@hnasr)
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+- **"MVCC means no locks."** MVCC eliminates read-write conflicts but NOT write-write conflicts. Two transactions trying to update the same row still block (via row-level X locks). MVCC readers see old versions; writers wait for conflicting writers.
+- **"VACUUM can run without any performance impact."** VACUUM consumes I/O (reading and writing pages). On a write-heavy table undergoing a burst insert, autovacuum's I/O competes with the workload. Tune `autovacuum_cost_delay` and `autovacuum_cost_limit` to throttle autovacuum during peak traffic.
+- **"XID wraparound only affects old databases."** It affects any database that does enough transactions. A database processing 1,000 TPS reaches the dangerous zone (2 billion transactions) in about 23 days if VACUUM doesn't freeze old tuples. Monitor `pg_class.relfrozenxid` age.
+- **"VACUUM FULL is the same as VACUUM but better."** VACUUM FULL acquires an ACCESS EXCLUSIVE lock, blocking ALL reads and writes for the duration. Use it rarely (perhaps after a massive delete/purge) and never on production without a maintenance window. Use `pg_repack` extension for online table rebuilding.
+- **"Index-only scans always skip the heap."** Only when the visibility map shows the page as "all-visible". On pages with dead tuples, index-only scans still fetch the heap. After VACUUM, the visibility map is updated and index-only scans become fully heap-free.
+
+---
+
+*Next: [16.7 - Query Processing & Execution](16.7---Query-Processing-&-Execution) — How a SQL string becomes a result set.*

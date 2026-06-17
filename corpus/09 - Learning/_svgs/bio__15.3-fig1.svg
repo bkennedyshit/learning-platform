@@ -1,0 +1,49 @@
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="cd-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .flow-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; color: var(--interactive-accent, #58a6ff); }
+    .molecule { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; rx: 10; cursor: pointer; transition: all 0.2s; }
+    .molecule:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .process { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-accent, #79c0ff); }
+  </style>
+  <text x="300" y="25" class="title" text-anchor="middle">The Central Dogma — Information Flow in Biology</text>
+  <!-- DNA -->
+  <rect x="30" y="100" width="120" height="60" class="molecule"/>
+  <text x="90" y="125" class="label" text-anchor="middle">DNA</text>
+  <text x="90" y="145" class="sublabel" text-anchor="middle">Storage (genome)</text>
+  <!-- Transcription arrow -->
+  <line x1="150" y1="130" x2="210" y2="130" class="flow-arrow" marker-end="url(#cd-arrow)"/>
+  <text x="180" y="118" class="process" text-anchor="middle">Transcription</text>
+  <text x="180" y="155" class="sublabel" text-anchor="middle">RNA Pol II</text>
+  <!-- mRNA -->
+  <rect x="210" y="100" width="120" height="60" class="molecule"/>
+  <text x="270" y="125" class="label" text-anchor="middle">mRNA</text>
+  <text x="270" y="145" class="sublabel" text-anchor="middle">Message (transient)</text>
+  <!-- Translation arrow -->
+  <line x1="330" y1="130" x2="390" y2="130" class="flow-arrow" marker-end="url(#cd-arrow)"/>
+  <text x="360" y="118" class="process" text-anchor="middle">Translation</text>
+  <text x="360" y="155" class="sublabel" text-anchor="middle">Ribosome</text>
+  <!-- Protein -->
+  <rect x="390" y="100" width="120" height="60" class="molecule"/>
+  <text x="450" y="125" class="label" text-anchor="middle">Protein</text>
+  <text x="450" y="145" class="sublabel" text-anchor="middle">Function (enzyme)</text>
+  <!-- Replication loop -->
+  <path d="M 90 100 Q 90 60 60 60 Q 30 60 30 100" stroke="var(--text-muted, #8b949e)" stroke-width="2" fill="none" marker-start="url(#cd-arrow)"/>
+  <text x="60" y="55" class="sublabel" text-anchor="middle">Replication</text>
+  <!-- Reverse transcription -->
+  <path d="M 240 100 Q 240 60 180 60 Q 120 60 120 100" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-start="url(#cd-arrow)"/>
+  <text x="180" y="50" class="sublabel" text-anchor="middle">Reverse Transcription</text>
+  <!-- Processing annotations -->
+  <rect x="30" y="200" width="530" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="50" y="225" class="sublabel">Processing steps:</text>
+  <text x="50" y="245" class="sublabel">DNA → pre-mRNA: Promoter recognition → Elongation → Termination</text>
+  <text x="50" y="260" class="sublabel">pre-mRNA → mRNA: 5' capping + Splicing (intron removal) + 3' polyadenylation</text>
+  <text x="50" y="275" class="sublabel">mRNA → Protein: Initiation (AUG) → Elongation (6 aa/s) → Termination (stop codon) → Folding + PTMs</text>
+</svg>

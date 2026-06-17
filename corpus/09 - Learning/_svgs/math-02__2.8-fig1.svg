@@ -1,0 +1,74 @@
+<svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="svdarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    @keyframes rotU { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(10deg); } }
+    @keyframes scaleS { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15, 0.85); } }
+    @keyframes rotV { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-10deg); } }
+    .u-group { transform-origin: 150px 100px; animation: rotU 4s ease-in-out infinite; }
+    .s-group { transform-origin: 250px 100px; animation: scaleS 4s ease-in-out infinite; }
+    .v-group { transform-origin: 350px 100px; animation: rotV 4s ease-in-out infinite; }
+    .svdbox  { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1.2; rx:6; }
+    .svdarr  { stroke:var(--text-muted, #8b949e); stroke-width:1.5; fill:none;
+               marker-end:url(#svdarr); }
+    .svdt    { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9);
+               text-anchor:middle; }
+    .svdma   { font-family:'Latin Modern Math',serif; font-style:italic; font-size:18px;
+               fill:var(--interactive-accent, #58a6ff); font-weight:bold; text-anchor:middle; }
+    .svdmu   { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+               fill:var(--text-accent, #79c0ff); text-anchor:middle; }
+    .svdms   { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+               fill:var(--text-normal, #c9d1d9); text-anchor:middle; }
+    .svdmv   { font-family:'Latin Modern Math',serif; font-style:italic; font-size:16px;
+               fill:var(--interactive-accent, #58a6ff); text-anchor:middle; }
+    .svdlbl  { font-family:Inter,system-ui,sans-serif; font-size:11px;
+               fill:var(--text-muted, #8b949e); text-anchor:middle; }
+  </style>
+  <!-- A box -->
+  <rect x="10" y="60" width="80" height="80" rx="6" class="svdbox"/>
+  <text x="50" y="106" class="svdma">A</text>
+  <text x="50" y="155" class="svdt">m × n matrix</text>
+  <!-- = sign -->
+  <text x="100" y="106" class="svdms">=</text>
+  <!-- U box -->
+  <g class="u-group">
+    <rect x="110" y="60" width="80" height="80" rx="6" class="svdbox"/>
+    <text x="150" y="100" class="svdmu">U</text>
+    <text x="150" y="118" class="svdlbl">rotate/reflect</text>
+    <text x="150" y="130" class="svdlbl">in ℝᵐ</text>
+    <text x="150" y="155" class="svdt">m × m orthogonal</text>
+  </g>
+  <!-- · -->
+  <text x="200" y="106" class="svdms">·</text>
+  <!-- Sigma box -->
+  <g class="s-group">
+    <rect x="210" y="60" width="80" height="80" rx="6" class="svdbox"/>
+    <text x="250" y="100" class="svdms">Σ</text>
+    <text x="250" y="118" class="svdlbl">scale axes</text>
+    <text x="250" y="130" class="svdlbl\">σ₁ ≥ σ₂ ≥ … ≥ 0</text>
+    <text x="250" y="155" class="svdt">m × n diagonal</text>
+  </g>
+  <!-- · -->
+  <text x="300" y="106" class="svdms">·</text>
+  <!-- Vt box -->
+  <g class="v-group">
+    <rect x="310" y="60" width="80" height="80" rx="6" class="svdbox"/>
+    <text x="350" y="100" class="svdmv">Vᵀ</text>
+    <text x="350" y="118" class="svdlbl">rotate/reflect</text>
+    <text x="350" y="130" class="svdlbl\">in ℝⁿ</text>
+    <text x="350" y="155" class="svdt">n × n orthogonal</text>
+  </g>
+  <!-- action description -->
+  <rect x="420" y="40" width="250" height="120" rx="6" class="svdbox"/>
+  <text x="545" y="65" class="svdt" font-weight="bold">Geometric Reading</text>
+  <text x="545" y="84" class="svdt">1. Vᵀ: rotate input basis</text>
+  <text x="545" y="100" class="svdt">2. Σ: stretch along new axes</text>
+  <text x="545" y="116" class="svdt">   by singular values σᵢ</text>
+  <text x="545" y="132" class="svdt">3. U: rotate output basis</text>
+  <text x="545" y="148" class="svdt">   into ℝᵐ</text>
+  <line x1="400" y1="100" x2="420" y2="100" class="svdarr"/>
+</svg>

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .block { fill: #1e293b; stroke: #475569; stroke-width: 2; rx: 8; }
+      .code { font-family: 'Courier New', Courier, monospace; font-size: 14px; fill: #cbd5e1; }
+      .hl { fill: #3b82f6; }
+      .var { fill: #10b981; }
+      .num { fill: #ec4899; }
+      .opt { fill: #f59e0b; text-decoration: line-through; opacity: 0.5; }
+      .arrow { stroke: #64748b; stroke-width: 2; fill: none; }
+      .arrow-glow { stroke: #3b82f6; stroke-width: 4; fill: none; opacity: 0; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+    </marker>
+    <marker id="arrowhead-glow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="400" fill="#0f172a" rx="12" />
+
+  <text x="400" y="40" font-family="sans-serif" font-size="20" fill="#f8fafc" text-anchor="middle" font-weight="bold" letter-spacing="2">INTERMEDIATE REPRESENTATION &amp; OPTIMIZATION</text>
+
+  <!-- Block 1: Unoptimized -->
+  <g transform="translate(100, 100)">
+    <rect width="250" height="150" class="block" stroke="#64748b"/>
+    <text x="10" y="25" class="code" font-weight="bold" fill="#f8fafc">entry_block:</text>
+    <text x="20" y="50" class="code"><tspan class="hl">store</tspan> i32 <tspan class="num">42</tspan>, i32* <tspan class="var">%x</tspan></text>
+    
+    <!-- Redundant operation -->
+    <g>
+      <text x="20" y="75" class="code">
+        <tspan class="hl">load</tspan> i32, i32* <tspan class="var">%x</tspan>
+      </text>
+      <animate attributeName="opacity" values="1;0.3;0.3" dur="4s" repeatCount="indefinite" />
+      <line x1="15" y1="70" x2="200" y2="70" stroke="#ef4444" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;1" dur="4s" repeatCount="indefinite" />
+      </line>
+    </g>
+
+    <text x="20" y="100" class="code"><tspan class="var">%y</tspan> = <tspan class="hl">add</tspan> i32 <tspan class="var">%x</tspan>, <tspan class="num">1</tspan></text>
+    
+    <text x="20" y="125" class="code"><tspan class="hl">ret</tspan> i32 <tspan class="var">%y</tspan></text>
+  </g>
+
+  <!-- Arrow -->
+  <g>
+    <path d="M 360 175 L 440 175" class="arrow" marker-end="url(#arrowhead)" />
+    <path d="M 360 175 L 440 175" class="arrow-glow" marker-end="url(#arrowhead-glow)">
+      <animate attributeName="stroke-dasharray" values="0,100;100,0;100,0" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <text x="400" y="165" font-family="sans-serif" font-size="12" fill="#3b82f6" text-anchor="middle" font-weight="bold">
+      <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/>
+      Dead Code Elim
+    </text>
+  </g>
+
+  <!-- Block 2: Optimized -->
+  <g transform="translate(450, 100)">
+    <rect width="250" height="150" class="block" stroke="#10b981"/>
+    <text x="10" y="25" class="code" font-weight="bold" fill="#f8fafc">entry_block:</text>
+    <text x="20" y="50" class="code"><tspan class="hl">store</tspan> i32 <tspan class="num">42</tspan>, i32* <tspan class="var">%x</tspan></text>
+    
+    <!-- Constant Folded / Optimized -->
+    <g>
+      <text x="20" y="75" class="code" opacity="0">
+        <tspan class="var">%y</tspan> = <tspan class="hl">add</tspan> i32 <tspan class="num">42</tspan>, <tspan class="num">1</tspan>
+        <animate attributeName="opacity" values="0;1;1" dur="4s" repeatCount="indefinite" />
+      </text>
+    </g>
+
+    <text x="20" y="100" class="code" opacity="0">
+      <tspan class="hl">ret</tspan> i32 <tspan class="num">43</tspan> <!-- Constant folding applied conceptually -->
+      <animate attributeName="opacity" values="0;1;1" dur="4s" repeatCount="indefinite" />
+    </text>
+  </g>
+
+  <rect x="100" y="280" width="600" height="60" fill="#1e293b" rx="8" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4"/>
+  <text x="400" y="315" font-family="sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle">
+    SSA (Static Single Assignment) form guarantees variables are assigned exactly once.
+  </text>
+</svg>

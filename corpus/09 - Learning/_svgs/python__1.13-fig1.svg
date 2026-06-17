@@ -1,0 +1,48 @@
+<svg viewBox="0 0 650 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.3; }
+    .curve-log { stroke: #98c379; stroke-width: 2.5; fill: none; }
+    .curve-n { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .curve-nlogn { stroke: #e5c07b; stroke-width: 2.5; fill: none; }
+    .curve-n2 { stroke: #e06c75; stroke-width: 2.5; fill: none; }
+    .curve-exp { stroke: #c678dd; stroke-width: 2.5; fill: none; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .legend { font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+  </style>
+  <defs><marker id="alg-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 2 L 7 5 L 0 8 z" fill="var(--text-normal, #c9d1d9)"/></marker></defs>
+
+  <text x="325" y="20" class="title">Algorithm Complexity — Growth Rate Comparison</text>
+
+  <!-- Axes -->
+  <line x1="80" y1="330" x2="600" y2="330" class="axis" marker-end="url(#alg-arr)"/>
+  <line x1="80" y1="330" x2="80" y2="40" class="axis" marker-end="url(#alg-arr)"/>
+  <text x="340" y="360" class="label" text-anchor="middle">Input size (n)</text>
+  <text x="40" y="185" class="label" text-anchor="middle" transform="rotate(-90,40,185)">Operations</text>
+
+  <!-- Grid -->
+  <line x1="80" y1="280" x2="600" y2="280" class="grid"/>
+  <line x1="80" y1="230" x2="600" y2="230" class="grid"/>
+  <line x1="80" y1="180" x2="600" y2="180" class="grid"/>
+  <line x1="80" y1="130" x2="600" y2="130" class="grid"/>
+  <line x1="80" y1="80" x2="600" y2="80" class="grid"/>
+
+  <!-- O(log n) -->
+  <path d="M 80 330 Q 150 250 250 220 Q 400 190 600 180" class="curve-log"/>
+  <!-- O(n) -->
+  <path d="M 80 330 L 600 80" class="curve-n"/>
+  <!-- O(n log n) -->
+  <path d="M 80 330 Q 200 260 350 180 Q 450 130 550 70" class="curve-nlogn"/>
+  <!-- O(n²) -->
+  <path d="M 80 330 Q 200 310 300 250 Q 380 180 420 80" class="curve-n2"/>
+  <!-- O(2^n) -->
+  <path d="M 80 330 Q 120 325 160 310 Q 200 270 220 80" class="curve-exp"/>
+
+  <!-- Legend -->
+  <line x1="420" y1="50" x2="450" y2="50" class="curve-log"/><text x="460" y="54" class="legend" fill="#98c379">O(log n) — binary search</text>
+  <line x1="420" y1="70" x2="450" y2="70" class="curve-n"/><text x="460" y="74" class="legend" fill="var(--interactive-accent, #58a6ff)">O(n) — linear scan</text>
+  <line x1="420" y1="90" x2="450" y2="90" class="curve-nlogn"/><text x="460" y="94" class="legend" fill="#e5c07b">O(n log n) — merge sort</text>
+  <line x1="420" y1="110" x2="450" y2="110" class="curve-n2"/><text x="460" y="114" class="legend" fill="#e06c75">O(n²) — nested loops</text>
+  <line x1="420" y1="130" x2="450" y2="130" class="curve-exp"/><text x="460" y="134" class="legend" fill="#c678dd">O(2ⁿ) — brute force</text>
+</svg>

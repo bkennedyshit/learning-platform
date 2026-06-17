@@ -1,0 +1,149 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    @keyframes wave-flow {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes laser-glow-anim {
+      0%, 100% { opacity: 0.8; r: 4.5; }
+      50% { opacity: 1.0; r: 6.5; }
+    }
+    @keyframes record-pulse {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.35; }
+    }
+    @keyframes arrow-flow {
+      from { stroke-dashoffset: 12; }
+      to { stroke-dashoffset: 0; }
+    }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .ray { stroke: #ffd93d; stroke-width: 1.4; fill: none; }
+    .ref-wave { stroke: #4dabf7; stroke-width: 1.4; fill: none; stroke-dasharray: 6, 4; animation: wave-flow 1.2s linear infinite; filter: url(#glow-blue); }
+    .obj-wave { stroke: #ff6b6b; stroke-width: 1.4; fill: none; stroke-dasharray: 6, 4; animation: wave-flow 1.2s linear infinite; filter: url(#glow-red); }
+    .laser-dot { fill: #ffd93d; animation: laser-glow-anim 2s ease-in-out infinite; filter: url(#glow-yellow); }
+    .step { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; transition: opacity 0.3s; }
+    .step:hover { opacity: 0.35 !important; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.4; fill: none; stroke-dasharray: 4, 2; animation: arrow-flow 1s linear infinite; }
+    .recording { fill: #c084fc; opacity: 0.18; stroke: #c084fc; stroke-width: 1.5; rx: 4; animation: record-pulse 3s ease-in-out infinite; }
+  </style>
+  <defs>
+    <marker id="arrH" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow-yellow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <text x="360" y="24" class="title" text-anchor="middle">Holographics — From a Wave to a Display</text>
+
+  <!-- LEFT: classical recording geometry -->
+  <rect x="20" y="50" width="320" height="200" class="box"/>
+  <text x="180" y="72" class="label" text-anchor="middle" font-weight="bold">Classical Hologram Recording (Leith-Upatnieks)</text>
+
+  <!-- Laser source dot -->
+  <circle cx="55" cy="160" r="5" class="laser-dot"/>
+  <text x="40" y="155" class="sublabel" fill="#ffd93d">Laser</text>
+
+  <!-- Reference wave (top path) -->
+  <path d="M 60 158 Q 120 110 180 110 L 250 110 L 280 170" class="ref-wave"/>
+  <text x="140" y="105" class="sublabel" fill="#4dabf7">Reference wave</text>
+
+  <!-- Object beam (bottom path) -->
+  <path d="M 60 162 Q 100 200 150 200" class="obj-wave"/>
+  <circle cx="180" cy="200" r="14" fill="none" stroke="#ff6b6b" stroke-width="1.4"/>
+  <text x="180" y="218" class="sublabel" fill="#ff6b6b" text-anchor="middle">Object</text>
+  <path d="M 195 200 Q 240 200 280 180" class="obj-wave"/>
+  <text x="225" y="195" class="sublabel" fill="#ff6b6b">Object wave</text>
+
+  <!-- Photographic plate / SLM -->
+  <rect x="278" y="135" width="6" height="80" class="recording"/>
+  <text x="290" y="150" class="sublabel">Plate / SLM</text>
+
+  <text x="180" y="240" class="sublabel" text-anchor="middle">Interference of reference + object waves → fringes recorded</text>
+
+  <!-- RIGHT: physics ↔ algorithm parallel -->
+  <rect x="360" y="50" width="340" height="200" class="box"/>
+  <text x="530" y="72" class="label" text-anchor="middle" font-weight="bold">Physics ↔ Algorithm</text>
+
+  <!-- Two parallel columns -->
+  <text x="430" y="95"  class="label">Physics (lab)</text>
+  <text x="630" y="95"  class="label">Algorithm (code)</text>
+
+  <rect x="375" y="105" width="130" height="28" class="step"/>
+  <text x="440" y="123" class="sublabel" text-anchor="middle">Wave equation</text>
+  <rect x="565" y="105" width="130" height="28" class="step"/>
+  <text x="630" y="123" class="sublabel" text-anchor="middle">Helmholtz / FFT propagator</text>
+
+  <rect x="375" y="138" width="130" height="28" class="step"/>
+  <text x="440" y="156" class="sublabel" text-anchor="middle">Diffraction / interference</text>
+  <rect x="565" y="138" width="130" height="28" class="step"/>
+  <text x="630" y="156" class="sublabel" text-anchor="middle">Angular spectrum / Fresnel</text>
+
+  <rect x="375" y="171" width="130" height="28" class="step"/>
+  <text x="440" y="189" class="sublabel" text-anchor="middle">Recording medium</text>
+  <rect x="565" y="171" width="130" height="28" class="step"/>
+  <text x="630" y="189" class="sublabel" text-anchor="middle">Phase pattern on SLM</text>
+
+  <rect x="375" y="204" width="130" height="28" class="step"/>
+  <text x="440" y="222" class="sublabel" text-anchor="middle">Reconstruction (laser)</text>
+  <rect x="565" y="204" width="130" height="28" class="step"/>
+  <text x="630" y="222" class="sublabel" text-anchor="middle">Display + viewer</text>
+
+  <!-- BOTTOM: end-to-end pipeline -->
+  <rect x="20" y="270" width="680" height="150" class="box"/>
+  <text x="360" y="292" class="label" text-anchor="middle" font-weight="bold">2026 Holographic Pipeline (Photons → Pixels → Product)</text>
+
+  <rect x="35"  y="315" width="100" height="42" class="step"/>
+  <text x="85"  y="338" class="label" text-anchor="middle">3D Scene</text>
+  <text x="85"  y="352" class="sublabel" text-anchor="middle">Revit · USD · NeRF</text>
+
+  <rect x="155" y="315" width="100" height="42" class="step"/>
+  <text x="205" y="338" class="label" text-anchor="middle">CGH solver</text>
+  <text x="205" y="352" class="sublabel" text-anchor="middle">FFT · GS · neural</text>
+
+  <rect x="275" y="315" width="100" height="42" class="step"/>
+  <text x="325" y="338" class="label" text-anchor="middle">SLM / display</text>
+  <text x="325" y="352" class="sublabel" text-anchor="middle">LCoS · DMD · meta</text>
+
+  <rect x="395" y="315" width="100" height="42" class="step"/>
+  <text x="445" y="338" class="label" text-anchor="middle">Light field</text>
+  <text x="445" y="352" class="sublabel" text-anchor="middle">Looking Glass</text>
+
+  <rect x="515" y="315" width="100" height="42" class="step"/>
+  <text x="565" y="338" class="label" text-anchor="middle">AR optics</text>
+  <text x="565" y="352" class="sublabel" text-anchor="middle">waveguide</text>
+
+  <rect x="635" y="315" width="50" height="42" class="step"/>
+  <text x="660" y="338" class="label" text-anchor="middle">Eye</text>
+
+  <line x1="135" y1="336" x2="155" y2="336" class="arrow" marker-end="url(#arrH)"/>
+  <line x1="255" y1="336" x2="275" y2="336" class="arrow" marker-end="url(#arrH)"/>
+  <line x1="375" y1="336" x2="395" y2="336" class="arrow" marker-end="url(#arrH)"/>
+  <line x1="495" y1="336" x2="515" y2="336" class="arrow" marker-end="url(#arrH)"/>
+  <line x1="615" y1="336" x2="635" y2="336" class="arrow" marker-end="url(#arrH)"/>
+
+  <text x="360" y="385" class="sublabel" text-anchor="middle">"Holographic" displays span this whole spectrum — from true CGH/SLM (rare in 2026) to multi-view light fields (commodity) to waveguide AR (HoloLens / Magic Leap).</text>
+  <text x="360" y="402" class="sublabel" text-anchor="middle">Knowing which is which is the difference between marketing and engineering.</text>
+</svg>

@@ -1,0 +1,82 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="cv-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .cv-cell { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+    .cv-kern { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.1; }
+    g:nth-of-type(1) .cv-kern { animation: scan 4s infinite; }
+    .cv-out { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: var(--text-accent, #79c0ff); fill-opacity: 0.15; animation: pulseOut 2s infinite alternate; }
+    @keyframes scan { 0%, 20% { transform: translate(0px, 0px); } 25%, 45% { transform: translate(24px, 0px); } 50%, 70% { transform: translate(48px, 0px); } 75%, 95% { transform: translate(0px, 24px); } 100% { transform: translate(0px, 0px); } }
+    @keyframes pulseOut { from { fill-opacity: 0.15; } to { fill-opacity: 0.3; } }
+    .cv-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .cv-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .cv-val { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+  </style>
+  <!-- Input grid 5x5 -->
+  <text x="100" y="20" class="cv-accent">Input (5×5)</text>
+  <g transform="translate(40,30)">
+    <rect x="0" y="0" width="120" height="120" class="cv-cell"/>
+    <line x1="24" y1="0" x2="24" y2="120" class="cv-cell"/>
+    <line x1="48" y1="0" x2="48" y2="120" class="cv-cell"/>
+    <line x1="72" y1="0" x2="72" y2="120" class="cv-cell"/>
+    <line x1="96" y1="0" x2="96" y2="120" class="cv-cell"/>
+    <line x1="0" y1="24" x2="120" y2="24" class="cv-cell"/>
+    <line x1="0" y1="48" x2="120" y2="48" class="cv-cell"/>
+    <line x1="0" y1="72" x2="120" y2="72" class="cv-cell"/>
+    <line x1="0" y1="96" x2="120" y2="96" class="cv-cell"/>
+    <!-- Highlight 3x3 kernel region -->
+    <rect x="0" y="0" width="72" height="72" class="cv-kern"/>
+    <!-- Values in kernel region -->
+    <text x="12" y="16" class="cv-val">1</text>
+    <text x="36" y="16" class="cv-val">0</text>
+    <text x="60" y="16" class="cv-val">2</text>
+    <text x="12" y="40" class="cv-val">1</text>
+    <text x="36" y="40" class="cv-val">1</text>
+    <text x="60" y="40" class="cv-val">0</text>
+    <text x="12" y="64" class="cv-val">3</text>
+    <text x="36" y="64" class="cv-val">0</text>
+    <text x="60" y="64" class="cv-val">1</text>
+  </g>
+  <!-- Kernel 3x3 -->
+  <text x="280" y="20" class="cv-accent">Kernel (3×3)</text>
+  <g transform="translate(240,30)">
+    <rect x="0" y="0" width="72" height="72" class="cv-kern"/>
+    <line x1="24" y1="0" x2="24" y2="72" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+    <line x1="48" y1="0" x2="48" y2="72" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+    <line x1="0" y1="24" x2="72" y2="24" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+    <line x1="0" y1="48" x2="72" y2="48" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+    <text x="12" y="16" class="cv-val">1</text>
+    <text x="36" y="16" class="cv-val">0</text>
+    <text x="60" y="16" class="cv-val">-1</text>
+    <text x="12" y="40" class="cv-val">1</text>
+    <text x="36" y="40" class="cv-val">0</text>
+    <text x="60" y="40" class="cv-val">-1</text>
+    <text x="12" y="64" class="cv-val">1</text>
+    <text x="36" y="64" class="cv-val">0</text>
+    <text x="60" y="64" class="cv-val">-1</text>
+  </g>
+  <!-- Arrow -->
+  <line x1="330" y1="70" x2="380" y2="70" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2" marker-end="url(#cv-arr)"/>
+  <text x="355" y="60" class="cv-label">*</text>
+  <!-- Output 3x3 -->
+  <text x="450" y="20" class="cv-accent">Output (3×3)</text>
+  <g transform="translate(400,30)">
+    <rect x="0" y="0" width="72" height="72" class="cv-out"/>
+    <line x1="24" y1="0" x2="24" y2="72" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+    <line x1="48" y1="0" x2="48" y2="72" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+    <line x1="0" y1="24" x2="72" y2="24" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+    <line x1="0" y1="48" x2="72" y2="48" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+    <text x="12" y="16" class="cv-val">-1</text>
+    <text x="36" y="16" class="cv-val">…</text>
+    <text x="60" y="16" class="cv-val">…</text>
+  </g>
+  <!-- Formula box -->
+  <rect x="30" y="180" width="540" height="120" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="205" class="cv-accent">Convolution Formula</text>
+  <text x="300" y="230" class="cv-label">(I * K)[i,j] = Σₘ Σₙ I[i+m, j+n] · K[m, n]</text>
+  <text x="300" y="255" class="cv-label">Output size: ⌊(W - K + 2P) / S⌋ + 1</text>
+  <text x="300" y="280" class="cv-label" fill="var(--text-muted, #8b949e)">W=input, K=kernel, P=padding, S=stride</text>
+</svg>

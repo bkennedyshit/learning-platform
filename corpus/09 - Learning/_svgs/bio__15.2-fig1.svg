@@ -1,0 +1,72 @@
+<svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 500px; height: auto;">
+  <style>
+    .grid-line { stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .header-cell { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .data-cell { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 0.5; cursor: pointer; transition: all 0.2s; }
+    .data-cell:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.15; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .ratio { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    .dom { fill: var(--interactive-accent, #58a6ff); opacity: 0.2; }
+    .gamete { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+  </style>
+  <text x="250" y="25" class="title" text-anchor="middle">Dihybrid Cross: AaBb × AaBb → 9:3:3:1</text>
+  <!-- Column headers -->
+  <rect x="100" y="50" width="80" height="35" class="header-cell"/>
+  <rect x="180" y="50" width="80" height="35" class="header-cell"/>
+  <rect x="260" y="50" width="80" height="35" class="header-cell"/>
+  <rect x="340" y="50" width="80" height="35" class="header-cell"/>
+  <text x="140" y="72" class="gamete" text-anchor="middle">AB</text>
+  <text x="220" y="72" class="gamete" text-anchor="middle">Ab</text>
+  <text x="300" y="72" class="gamete" text-anchor="middle">aB</text>
+  <text x="380" y="72" class="gamete" text-anchor="middle">ab</text>
+  <!-- Row headers -->
+  <rect x="20" y="85" width="80" height="60" class="header-cell"/>
+  <rect x="20" y="145" width="80" height="60" class="header-cell"/>
+  <rect x="20" y="205" width="80" height="60" class="header-cell"/>
+  <rect x="20" y="265" width="80" height="60" class="header-cell"/>
+  <text x="60" y="118" class="gamete" text-anchor="middle">AB</text>
+  <text x="60" y="178" class="gamete" text-anchor="middle">Ab</text>
+  <text x="60" y="238" class="gamete" text-anchor="middle">aB</text>
+  <text x="60" y="298" class="gamete" text-anchor="middle">ab</text>
+  <!-- Data cells with genotypes (4x4 grid) -->
+  <!-- Row 1: AB × ... -->
+  <rect x="100" y="85" width="80" height="60" class="data-cell"/><rect x="100" y="85" width="80" height="60" class="dom"/>
+  <text x="140" y="115" class="label" text-anchor="middle">AABB</text>
+  <rect x="180" y="85" width="80" height="60" class="data-cell"/><rect x="180" y="85" width="80" height="60" class="dom"/>
+  <text x="220" y="115" class="label" text-anchor="middle">AABb</text>
+  <rect x="260" y="85" width="80" height="60" class="data-cell"/><rect x="260" y="85" width="80" height="60" class="dom"/>
+  <text x="300" y="115" class="label" text-anchor="middle">AaBB</text>
+  <rect x="340" y="85" width="80" height="60" class="data-cell"/><rect x="340" y="85" width="80" height="60" class="dom"/>
+  <text x="380" y="115" class="label" text-anchor="middle">AaBb</text>
+  <!-- Row 2: Ab × ... -->
+  <rect x="100" y="145" width="80" height="60" class="data-cell"/><rect x="100" y="145" width="80" height="60" class="dom"/>
+  <text x="140" y="175" class="label" text-anchor="middle">AABb</text>
+  <rect x="180" y="145" width="80" height="60" class="data-cell"/>
+  <text x="220" y="175" class="label" text-anchor="middle">AAbb</text>
+  <rect x="260" y="145" width="80" height="60" class="data-cell"/><rect x="260" y="145" width="80" height="60" class="dom"/>
+  <text x="300" y="175" class="label" text-anchor="middle">AaBb</text>
+  <rect x="340" y="145" width="80" height="60" class="data-cell"/>
+  <text x="380" y="175" class="label" text-anchor="middle">Aabb</text>
+  <!-- Row 3: aB × ... -->
+  <rect x="100" y="205" width="80" height="60" class="data-cell"/><rect x="100" y="205" width="80" height="60" class="dom"/>
+  <text x="140" y="235" class="label" text-anchor="middle">AaBB</text>
+  <rect x="180" y="205" width="80" height="60" class="data-cell"/><rect x="180" y="205" width="80" height="60" class="dom"/>
+  <text x="220" y="235" class="label" text-anchor="middle">AaBb</text>
+  <rect x="260" y="205" width="80" height="60" class="data-cell"/>
+  <text x="300" y="235" class="label" text-anchor="middle">aaBB</text>
+  <rect x="340" y="205" width="80" height="60" class="data-cell"/>
+  <text x="380" y="235" class="label" text-anchor="middle">aaBb</text>
+  <!-- Row 4: ab × ... -->
+  <rect x="100" y="265" width="80" height="60" class="data-cell"/><rect x="100" y="265" width="80" height="60" class="dom"/>
+  <text x="140" y="295" class="label" text-anchor="middle">AaBb</text>
+  <rect x="180" y="265" width="80" height="60" class="data-cell"/>
+  <text x="220" y="295" class="label" text-anchor="middle">Aabb</text>
+  <rect x="260" y="265" width="80" height="60" class="data-cell"/>
+  <text x="300" y="295" class="label" text-anchor="middle">aaBb</text>
+  <rect x="340" y="265" width="80" height="60" class="data-cell"/>
+  <text x="380" y="295" class="label" text-anchor="middle">aabb</text>
+  <!-- Ratio summary -->
+  <rect x="50" y="345" width="400" height="40" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="250" y="370" class="ratio" text-anchor="middle" font-size="13">9 A_B_ : 3 A_bb : 3 aaB_ : 1 aabb</text>
+</svg>

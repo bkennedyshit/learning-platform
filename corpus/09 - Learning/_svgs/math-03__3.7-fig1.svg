@@ -1,0 +1,55 @@
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <style>
+    .ht-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; }
+    .ht-rod { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 4; }
+    .ht-t0 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .ht-t1 { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+    .ht-t2 { stroke: var(--text-muted, #8b949e); stroke-width: 2; fill: none; stroke-dasharray: 5 3; }
+    .ht-tinf { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 2 2; }
+    .ht-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .ht-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .ht-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+  </style>
+  <defs>
+    <marker id="ht-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <!-- Rod representation -->
+  <rect x="80" y="240" width="440" height="20" class="ht-rod"/>
+  <text x="300" y="275" class="ht-label" text-anchor="middle">Rod: 0 ≤ x ≤ L, u(0,t)=u(L,t)=0</text>
+  <!-- Axes for temperature profile -->
+  <line x1="80" y1="220" x2="520" y2="220" class="ht-axis" marker-end="url(#ht-arr)"/>
+  <line x1="80" y1="220" x2="80" y2="30" class="ht-axis" marker-end="url(#ht-arr)"/>
+  <text x="535" y="225" class="ht-label">x</text>
+  <text x="65" y="30" class="ht-label">u(x,t)</text>
+  <!-- t=0: initial condition (e.g., sin(πx/L)) -->
+  <path d="M 80 220 Q 200 50 300 50 Q 400 50 520 220" class="ht-t0" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- t=0.5: partially decayed -->
+  <path d="M 80 220 Q 200 100 300 100 Q 400 100 520 220" class="ht-t1" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- t=2: mostly decayed -->
+  <path d="M 80 220 Q 200 170 300 170 Q 400 170 520 220" class="ht-t2" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- t→∞: equilibrium at 0 -->
+  <line x1="80" y1="220" x2="520" y2="220" class="ht-tinf"/>
+  <!-- Animated particle showing decay -->
+  <circle r="4" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="cy" values="50;100;170;220" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="300;300;300;300" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Legend -->
+  <rect x="400" y="30" width="130" height="90" class="ht-box"/>
+  <line x1="410" y1="48" x2="440" y2="48" class="ht-t0"/>
+  <text x="445" y="52" class="ht-accent">t = 0</text>
+  <line x1="410" y1="68" x2="440" y2="68" class="ht-t1"/>
+  <text x="445" y="72" class="ht-label" fill="var(--text-accent, #79c0ff)">t = 0.5</text>
+  <line x1="410" y1="88" x2="440" y2="88" class="ht-t2"/>
+  <text x="445" y="92" class="ht-label">t = 2</text>
+  <line x1="410" y1="108" x2="440" y2="108" class="ht-tinf"/>
+  <text x="445" y="112" class="ht-label">t → ∞</text>
+</svg>

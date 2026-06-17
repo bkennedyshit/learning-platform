@@ -1,0 +1,93 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-conc" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .timeline { stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .thread-bar { rx: 3; transition: all 0.2s; cursor: pointer; }
+    .thread-bar:hover { filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); opacity: 1; }
+    .cpu-bar { fill: var(--interactive-accent, #58a6ff); opacity: 0.8; }
+    .io-bar { fill: var(--text-muted, #8b949e); opacity: 0.4; }
+    .blocked-bar { fill: #e06c75; opacity: 0.5; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-title { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .gil-lock { fill: #e06c75; opacity: 0.2; stroke: #e06c75; stroke-width: 1; stroke-dasharray: 3,2; }
+    .legend-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 4; }
+  </style>
+
+  <text x="350" y="20" class="title">Python Concurrency Models — GIL Impact Visualization</text>
+
+  <!-- Threading (GIL-bound) -->
+  <text x="20" y="55" class="section-title">Threading (GIL)</text>
+  <rect x="15" y="60" width="320" height="100" class="gil-lock"/>
+  <text x="25" y="75" class="label">Thread 1:</text>
+  <rect x="100" y="65" width="60" height="15" class="thread-bar cpu-bar"/>
+  <rect x="160" y="65" width="40" height="15" class="thread-bar io-bar"/>
+  <rect x="200" y="65" width="50" height="15" class="thread-bar cpu-bar"/>
+  <rect x="250" y="65" width="70" height="15" class="thread-bar io-bar"/>
+
+  <text x="25" y="100" class="label">Thread 2:</text>
+  <rect x="100" y="90" width="60" height="15" class="thread-bar blocked-bar"/>
+  <rect x="160" y="90" width="40" height="15" class="thread-bar cpu-bar"/>
+  <rect x="200" y="90" width="50" height="15" class="thread-bar blocked-bar"/>
+  <rect x="250" y="90" width="70" height="15" class="thread-bar cpu-bar"/>
+
+  <text x="25" y="125" class="label">Thread 3:</text>
+  <rect x="100" y="115" width="60" height="15" class="thread-bar blocked-bar"/>
+  <rect x="160" y="115" width="40" height="15" class="thread-bar blocked-bar"/>
+  <rect x="200" y="115" width="50" height="15" class="thread-bar cpu-bar"/>
+  <rect x="250" y="115" width="70" height="15" class="thread-bar blocked-bar"/>
+
+  <text x="100" y="150" class="label" fill="var(--text-muted, #8b949e)">⚠️ Only ONE thread runs Python at a time (GIL)</text>
+
+  <!-- Multiprocessing -->
+  <text x="380" y="55" class="section-title">Multiprocessing (No GIL)</text>
+  <text x="385" y="75" class="label">Process 1:</text>
+  <rect x="460" y="65" width="200" height="15" class="thread-bar cpu-bar"/>
+  <text x="385" y="100" class="label">Process 2:</text>
+  <rect x="460" y="90" width="200" height="15" class="thread-bar cpu-bar"/>
+  <text x="385" y="125" class="label">Process 3:</text>
+  <rect x="460" y="115" width="200" height="15" class="thread-bar cpu-bar"/>
+  <text x="460" y="150" class="label" fill="var(--text-muted, #8b949e)">✓ True parallelism (separate interpreters)</text>
+
+  <!-- asyncio -->
+  <text x="20" y="195" class="section-title">asyncio (Cooperative)</text>
+  <text x="25" y="215" class="label">Task A:</text>
+  <rect x="100" y="205" width="40" height="15" class="thread-bar cpu-bar"/>
+  <rect x="140" y="205" width="80" height="15" class="thread-bar io-bar"/>
+  <rect x="280" y="205" width="30" height="15" class="thread-bar cpu-bar"/>
+
+  <text x="25" y="240" class="label">Task B:</text>
+  <rect x="140" y="230" width="30" height="15" class="thread-bar cpu-bar"/>
+  <rect x="170" y="230" width="60" height="15" class="thread-bar io-bar"/>
+  <rect x="310" y="230" width="20" height="15" class="thread-bar cpu-bar"/>
+
+  <text x="25" y="265" class="label">Task C:</text>
+  <rect x="220" y="255" width="60" height="15" class="thread-bar cpu-bar"/>
+  <rect x="280" y="255" width="50" height="15" class="thread-bar io-bar"/>
+
+  <text x="100" y="290" class="label" fill="var(--text-muted, #8b949e)">✓ Single thread, no GIL contention. Yields at await points.</text>
+
+  <!-- Decision matrix -->
+  <rect x="380" y="185" width="300" height="130" class="legend-box"/>
+  <text x="530" y="205" class="section-title" text-anchor="middle">When to Use What</text>
+  <text x="390" y="225" class="label">I/O-bound (network, disk) → asyncio</text>
+  <text x="390" y="245" class="label">I/O-bound (legacy sync) → threading</text>
+  <text x="390" y="265" class="label">CPU-bound (math, ML) → multiprocessing</text>
+  <text x="390" y="285" class="label">CPU-bound (NumPy) → releases GIL!</text>
+  <text x="390" y="305" class="label">GPU-bound (CUDA) → async + multiproc</text>
+
+  <!-- Legend -->
+  <rect x="20" y="330" width="660" height="70" class="legend-box"/>
+  <rect x="40" y="345" width="30" height="12" class="cpu-bar thread-bar"/>
+  <text x="80" y="355" class="label">CPU work (running Python bytecode)</text>
+  <rect x="250" y="345" width="30" height="12" class="io-bar thread-bar"/>
+  <text x="290" y="355" class="label">I/O wait (network, disk)</text>
+  <rect x="450" y="345" width="30" height="12" class="blocked-bar thread-bar"/>
+  <text x="490" y="355" class="label">Blocked by GIL</text>
+  <rect x="40" y="370" width="30" height="12" class="gil-lock"/>
+  <text x="80" y="380" class="label">GIL scope (only one thread executes Python at a time)</text>
+</svg>

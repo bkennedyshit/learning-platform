@@ -1,0 +1,739 @@
+---
+title: "Statistical Learning Optimization"
+subject: "AI & Machine Learning Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "23.1"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 23.1 — Statistical Learning & Optimization
+
+> *"A learning algorithm is an optimization algorithm that minimizes a cost function over a training set — but the true objective is generalization, not memorization."*
+> — **Yoshua Bengio**, *Deep Learning* (2016)
+
+Optimization is the engine of machine learning. Every model — from linear regression to billion-parameter transformers — learns by iteratively adjusting parameters to minimize a loss function. This chapter builds the mathematical machinery of gradient-based optimization from first principles: computing gradients, understanding convergence, and mastering the adaptive algorithms (SGD, Momentum, RMSProp, Adam) that power modern deep learning.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Define the empirical risk minimization (ERM) framework and distinguish training loss from generalization error.
+2. Compute gradients and Jacobians for multivariate loss functions by hand.
+3. Derive the gradient descent update rule from first-order Taylor expansion.
+4. Prove convergence of gradient descent for convex, $L$-smooth functions.
+5. Implement SGD, Momentum, RMSProp, and Adam from scratch and explain each correction term.
+6. Analyze the effect of learning rate on convergence speed and stability.
+7. Distinguish convex from non-convex optimization landscapes and identify saddle points.
+
+---
+
+## 🖼️ Visual Anchor — Gradient Descent on a Loss Surface
+
+![track-10__10.1-fig1](track-10__10.1-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 23.1.1 — Hypothesis Space and Model
+
+A **model** (or hypothesis) is a parameterized function $f_\theta : \mathcal{X} \to \mathcal{Y}$ mapping inputs to predictions. The **hypothesis space** $\mathcal{H} = \{f_\theta : \theta \in \Theta\}$ is the set of all functions reachable by varying parameters $\theta \in \mathbb{R}^d$.
+
+### Definition 23.1.2 — Loss Function
+
+A **loss function** $\ell : \mathcal{Y} \times \mathcal{Y} \to \mathbb{R}_{\geq 0}$ measures the discrepancy between a prediction $\hat{y} = f_\theta(x)$ and the true label $y$. Common choices:
+
+- **Mean Squared Error (MSE):** $\ell(\hat{y}, y) = \frac{1}{2}(\hat{y} - y)^2$
+- **Cross-Entropy:** $\ell(\hat{y}, y) = -\sum_{k=1}^K y_k \log \hat{y}_k$
+- **Hinge Loss:** $\ell(\hat{y}, y) = \max(0, 1 - y\hat{y})$
+
+### Definition 23.1.3 — Empirical Risk
+
+Given a dataset $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$, the **empirical risk** (training loss) is:
+
+$$
+\mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \ell(f_\theta(x_i), y_i).
+$$
+
+The goal of training is to find $\theta^* = \arg\min_\theta \mathcal{L}(\theta)$.
+
+### Definition 23.1.4 — Gradient
+
+The **gradient** of $\mathcal{L}$ with respect to parameters $\theta \in \mathbb{R}^d$ is the vector of partial derivatives:
+
+$$
+\nabla_\theta \mathcal{L} = \begin{pmatrix} \frac{\partial \mathcal{L}}{\partial \theta_1} \\ \vdots \\ \frac{\partial \mathcal{L}}{\partial \theta_d} \end{pmatrix} \in \mathbb{R}^d.
+$$
+
+The gradient points in the direction of steepest ascent. Its negative $-\nabla_\theta \mathcal{L}$ points toward steepest descent.
+
+### Definition 23.1.5 — Convexity
+
+A function $f: \mathbb{R}^d \to \mathbb{R}$ is **convex** if for all $x, y \in \mathbb{R}^d$ and $\lambda \in [0,1]$:
+
+$$
+f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda)f(y).
+$$
+
+Equivalently (for twice-differentiable $f$): $f$ is convex iff the Hessian $\nabla^2 f(x) \succeq 0$ (positive semi-definite) for all $x$.
+
+### Definition 23.1.6 — $L$-Smoothness (Lipschitz Gradient)
+
+$f$ is **$L$-smooth** if its gradient is Lipschitz continuous:
+
+$$
+\|\nabla f(x) - \nabla f(y)\| \leq L\|x - y\| \quad \forall x, y.
+$$
+
+This bounds the curvature: the function cannot curve faster than a quadratic with Hessian eigenvalues $\leq L$.
+
+### Definition 23.1.7 — Strong Convexity
+
+$f$ is **$\mu$-strongly convex** ($\mu > 0$) if:
+
+$$
+f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\|y-x\|^2 \quad \forall x, y.
+$$
+
+Strong convexity guarantees a unique global minimum and faster convergence rates.
+
+### Definition 23.1.8 — Condition Number
+
+For an $L$-smooth, $\mu$-strongly convex function, the **condition number** is $\kappa = L/\mu$. It measures the elongation of the loss surface contours. Higher $\kappa$ means slower convergence for gradient descent.
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 10.1.P1 (Empirical Risk Minimization Principle):** A learning algorithm should select the hypothesis $f_\theta \in \mathcal{H}$ that minimizes the empirical risk $\mathcal{L}(\theta)$ over the training data, subject to regularization to control generalization.
+
+**Postulate 10.1.P2 (Gradient as Local Linear Approximation):** For differentiable $\mathcal{L}$, the first-order Taylor expansion provides the best local linear approximation:
+
+$$
+\mathcal{L}(\theta + \delta) \approx \mathcal{L}(\theta) + \nabla\mathcal{L}(\theta)^T \delta.
+$$
+
+To decrease $\mathcal{L}$, choose $\delta$ opposing the gradient: $\delta = -\eta\nabla\mathcal{L}(\theta)$.
+
+**Postulate 10.1.P3 (Stochastic Gradient is Unbiased):** For a mini-batch $\mathcal{B} \subset \mathcal{D}$ sampled uniformly:
+
+$$
+\mathbb{E}_\mathcal{B}\left[\frac{1}{|\mathcal{B}|}\sum_{i \in \mathcal{B}} \nabla\ell_i(\theta)\right] = \nabla\mathcal{L}(\theta).
+$$
+
+The stochastic gradient is an unbiased estimator of the true gradient.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 23.1.1 — Descent Lemma ($L$-Smooth Functions)
+
+If $f$ is $L$-smooth, then for all $x, y$:
+
+$$
+f(y) \leq f(x) + \nabla f(x)^T(y - x) + \frac{L}{2}\|y - x\|^2.
+$$
+
+**Proof.** Define $g(t) = f(x + t(y-x))$. By the fundamental theorem of calculus:
+
+$$
+f(y) - f(x) = g(1) - g(0) = \int_0^1 g'(t)\,dt = \int_0^1 \nabla f(x + t(y-x))^T(y-x)\,dt.
+$$
+
+Subtract $\nabla f(x)^T(y-x)$:
+
+$$
+f(y) - f(x) - \nabla f(x)^T(y-x) = \int_0^1 [\nabla f(x+t(y-x)) - \nabla f(x)]^T(y-x)\,dt.
+$$
+
+Apply Cauchy-Schwarz and $L$-smoothness:
+
+$$
+\leq \int_0^1 \|\nabla f(x+t(y-x)) - \nabla f(x)\| \cdot \|y-x\|\,dt \leq \int_0^1 Lt\|y-x\|^2\,dt = \frac{L}{2}\|y-x\|^2.
+$$
+
+$\blacksquare$
+
+### Lemma 23.1.2 — Sufficient Decrease with Step Size $\eta = 1/L$
+
+If $f$ is $L$-smooth and we set $x_{t+1} = x_t - \frac{1}{L}\nabla f(x_t)$, then:
+
+$$
+f(x_{t+1}) \leq f(x_t) - \frac{1}{2L}\|\nabla f(x_t)\|^2.
+$$
+
+**Proof.** Apply the Descent Lemma with $y = x_{t+1} = x_t - \frac{1}{L}\nabla f(x_t)$:
+
+$$
+f(x_{t+1}) \leq f(x_t) + \nabla f(x_t)^T\left(-\frac{1}{L}\nabla f(x_t)\right) + \frac{L}{2}\left\|\frac{1}{L}\nabla f(x_t)\right\|^2
+$$
+
+$$
+= f(x_t) - \frac{1}{L}\|\nabla f(x_t)\|^2 + \frac{1}{2L}\|\nabla f(x_t)\|^2 = f(x_t) - \frac{1}{2L}\|\nabla f(x_t)\|^2.
+$$
+
+$\blacksquare$
+
+### Lemma 23.1.3 — Gradient of MSE Loss (Linear Model)
+
+For a linear model $\hat{y} = \mathbf{w}^T\mathbf{x} + b$ with MSE loss $\mathcal{L} = \frac{1}{2N}\sum_{i=1}^N(\mathbf{w}^T\mathbf{x}_i + b - y_i)^2$:
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{w}} = \frac{1}{N}\sum_{i=1}^N (\mathbf{w}^T\mathbf{x}_i + b - y_i)\mathbf{x}_i = \frac{1}{N}X^T(X\mathbf{w} + b\mathbf{1} - \mathbf{y})
+$$
+
+$$
+\frac{\partial \mathcal{L}}{\partial b} = \frac{1}{N}\sum_{i=1}^N (\mathbf{w}^T\mathbf{x}_i + b - y_i)
+$$
+
+where $X \in \mathbb{R}^{N \times d}$ is the data matrix (rows are samples).
+
+**Proof.** Let $r_i = \mathbf{w}^T\mathbf{x}_i + b - y_i$ (residual). Then $\mathcal{L} = \frac{1}{2N}\sum_i r_i^2$.
+
+$$
+\frac{\partial \mathcal{L}}{\partial w_j} = \frac{1}{N}\sum_{i=1}^N r_i \frac{\partial r_i}{\partial w_j} = \frac{1}{N}\sum_{i=1}^N r_i \cdot x_{ij}.
+$$
+
+In vector form: $\nabla_\mathbf{w}\mathcal{L} = \frac{1}{N}\sum_i r_i \mathbf{x}_i = \frac{1}{N}X^T\mathbf{r}$. $\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 23.1.1 — Gradient Descent Convergence (Convex, $L$-Smooth)
+
+Let $f$ be convex and $L$-smooth with minimizer $x^*$. Gradient descent with step size $\eta = 1/L$ satisfies:
+
+$$
+f(x_T) - f(x^*) \leq \frac{L\|x_0 - x^*\|^2}{2T}.
+$$
+
+This is a $O(1/T)$ convergence rate.
+
+### Theorem 23.1.2 — GD Convergence ($\mu$-Strongly Convex, $L$-Smooth)
+
+If $f$ is additionally $\mu$-strongly convex, gradient descent with $\eta = 1/L$ achieves **linear convergence**:
+
+$$
+f(x_T) - f(x^*) \leq \left(1 - \frac{\mu}{L}\right)^T [f(x_0) - f(x^*)].
+$$
+
+The convergence rate depends on the condition number $\kappa = L/\mu$. After $T = \kappa \ln(1/\epsilon)$ iterations, the error is below $\epsilon$.
+
+### Theorem 23.1.3 — SGD Convergence Rate (Convex)
+
+For convex $f$ with bounded stochastic gradient variance $\mathbb{E}\|\nabla f_i(x) - \nabla f(x)\|^2 \leq \sigma^2$, SGD with decreasing step size $\eta_t = c/\sqrt{t}$ achieves:
+
+$$
+\mathbb{E}[f(\bar{x}_T)] - f(x^*) = O\left(\frac{\|x_0 - x^*\|^2 + \sigma^2}{\sqrt{T}}\right).
+$$
+
+The $O(1/\sqrt{T})$ rate is slower than full GD's $O(1/T)$ due to gradient noise, but each iteration costs $O(1)$ vs $O(N)$.
+
+### Theorem 23.1.4 — Adam Bias Correction
+
+The Adam optimizer maintains exponential moving averages $m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t$ and $v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$. Without correction, $\mathbb{E}[m_t] = (1-\beta_1^t)\mathbb{E}[g_t]$ (biased toward zero). The bias-corrected estimates:
+
+$$
+\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
+$$
+
+satisfy $\mathbb{E}[\hat{m}_t] = \mathbb{E}[g_t]$ (unbiased).
+
+
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Gradient Descent Update Rule
+
+**Goal:** Find the direction $\delta$ that maximally decreases $\mathcal{L}(\theta)$ locally.
+
+**Step 1.** First-order Taylor expansion around current parameters $\theta_t$:
+
+$$
+\mathcal{L}(\theta_t + \delta) \approx \mathcal{L}(\theta_t) + \nabla\mathcal{L}(\theta_t)^T\delta.
+$$
+
+**Step 2.** We want to minimize the RHS subject to $\|\delta\| = \eta$ (fixed step size). By Cauchy-Schwarz:
+
+$$
+\nabla\mathcal{L}(\theta_t)^T\delta \geq -\|\nabla\mathcal{L}(\theta_t)\|\cdot\|\delta\|
+$$
+
+with equality when $\delta = -\eta\frac{\nabla\mathcal{L}(\theta_t)}{\|\nabla\mathcal{L}(\theta_t)\|}$.
+
+**Step 3.** Dropping the normalization (absorbing magnitude into $\eta$):
+
+$$
+\theta_{t+1} = \theta_t - \eta\nabla\mathcal{L}(\theta_t).
+$$
+
+This is the **gradient descent update rule**. $\blacksquare$
+
+### 5.2 Proof of Theorem 23.1.1 (GD Convergence, Convex $L$-Smooth)
+
+**Setup:** $f$ convex, $L$-smooth, $x_{t+1} = x_t - \frac{1}{L}\nabla f(x_t)$, minimizer $x^*$.
+
+**Step 1.** From Lemma 23.1.2 (sufficient decrease):
+
+$$
+f(x_{t+1}) \leq f(x_t) - \frac{1}{2L}\|\nabla f(x_t)\|^2. \tag{1}
+$$
+
+**Step 2.** By convexity: $f(x^*) \geq f(x_t) + \nabla f(x_t)^T(x^* - x_t)$, which rearranges to:
+
+$$
+f(x_t) - f(x^*) \leq \nabla f(x_t)^T(x_t - x^*) \leq \|\nabla f(x_t)\|\cdot\|x_t - x^*\|. \tag{2}
+$$
+
+**Step 3.** From (1): $\|\nabla f(x_t)\|^2 \leq 2L[f(x_t) - f(x_{t+1})]$. Summing from $t=0$ to $T-1$:
+
+$$
+\sum_{t=0}^{T-1}\|\nabla f(x_t)\|^2 \leq 2L[f(x_0) - f(x_T)] \leq 2L[f(x_0) - f(x^*)].
+$$
+
+**Step 4.** The minimum gradient norm satisfies:
+
+$$
+\min_{0 \leq t < T}\|\nabla f(x_t)\|^2 \leq \frac{2L[f(x_0) - f(x^*)]}{T}.
+$$
+
+**Step 5.** For the function value gap, use the telescoping argument. Define $\Delta_t = f(x_t) - f(x^*)$. From convexity and the update rule:
+
+$$
+\|x_{t+1} - x^*\|^2 = \|x_t - x^*\|^2 - \frac{2}{L}\nabla f(x_t)^T(x_t - x^*) + \frac{1}{L^2}\|\nabla f(x_t)\|^2.
+$$
+
+By convexity: $\nabla f(x_t)^T(x_t - x^*) \geq f(x_t) - f(x^*) = \Delta_t$. Therefore:
+
+$$
+\|x_{t+1} - x^*\|^2 \leq \|x_t - x^*\|^2 - \frac{2\Delta_t}{L} + \frac{1}{L^2}\|\nabla f(x_t)\|^2.
+$$
+
+Since $\|\nabla f(x_t)\|^2 \leq 2L\Delta_t$ (from $L$-smoothness and convexity):
+
+$$
+\|x_{t+1} - x^*\|^2 \leq \|x_t - x^*\|^2 - \frac{2\Delta_t}{L} + \frac{2\Delta_t}{L} = \|x_t - x^*\|^2.
+$$
+
+This shows iterates don't move away from $x^*$. Telescoping the sufficient decrease:
+
+$$
+T \cdot \Delta_T \leq \sum_{t=0}^{T-1}\Delta_t \leq \frac{L\|x_0 - x^*\|^2}{2}.
+$$
+
+Therefore: $f(x_T) - f(x^*) \leq \frac{L\|x_0 - x^*\|^2}{2T}$. $\blacksquare$
+
+### 5.3 Derivation of Momentum (Polyak's Heavy Ball)
+
+**Motivation:** Standard GD oscillates in narrow valleys (high condition number). Momentum accumulates velocity in consistent gradient directions.
+
+**Step 1.** Introduce velocity $v_t$:
+
+$$
+v_{t+1} = \beta v_t + \nabla\mathcal{L}(\theta_t), \quad \beta \in [0, 1)
+$$
+
+$$
+\theta_{t+1} = \theta_t - \eta v_{t+1}
+$$
+
+**Step 2.** Unrolling the recursion for $v_t$:
+
+$$
+v_t = \sum_{k=0}^{t-1} \beta^{t-1-k}\nabla\mathcal{L}(\theta_k).
+$$
+
+This is an exponentially weighted sum of past gradients. Recent gradients have weight $\approx 1$; gradients $k$ steps ago have weight $\beta^k$.
+
+**Step 3.** Effective step size analysis. In a direction with consistent gradient $g$:
+
+$$
+v_\infty = g + \beta g + \beta^2 g + \cdots = \frac{g}{1-\beta}.
+$$
+
+The effective step size is $\frac{\eta}{1-\beta}$. With $\beta = 0.9$, momentum amplifies the step by $10\times$ in consistent directions while canceling oscillations in inconsistent directions.
+
+### 5.4 Derivation of Adam Optimizer
+
+**Step 1.** First moment estimate (mean of gradients):
+
+$$
+m_t = \beta_1 m_{t-1} + (1 - \beta_1)g_t, \quad m_0 = 0.
+$$
+
+**Step 2.** Second moment estimate (mean of squared gradients):
+
+$$
+v_t = \beta_2 v_{t-1} + (1 - \beta_2)g_t^2, \quad v_0 = 0.
+$$
+
+**Step 3.** Bias correction derivation. Unrolling $m_t$:
+
+$$
+m_t = (1-\beta_1)\sum_{k=1}^t \beta_1^{t-k}g_k.
+$$
+
+Taking expectation (assuming stationary $\mathbb{E}[g_k] = g$):
+
+$$
+\mathbb{E}[m_t] = g(1-\beta_1)\sum_{k=1}^t \beta_1^{t-k} = g(1-\beta_1)\cdot\frac{1-\beta_1^t}{1-\beta_1} = g(1-\beta_1^t).
+$$
+
+This is biased by factor $(1-\beta_1^t)$. Dividing corrects it:
+
+$$
+\hat{m}_t = \frac{m_t}{1-\beta_1^t} \implies \mathbb{E}[\hat{m}_t] = g.
+$$
+
+**Step 4.** The Adam update:
+
+$$
+\theta_{t+1} = \theta_t - \eta\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}.
+$$
+
+**Dimension analysis:** $\hat{m}_t \in \mathbb{R}^d$ (gradient scale), $\hat{v}_t \in \mathbb{R}^d$ (squared gradient scale), division is element-wise. The ratio $\hat{m}_t/\sqrt{\hat{v}_t}$ is approximately a sign vector with magnitude $\approx 1$, providing adaptive per-parameter learning rates.
+
+**Step 5.** Default hyperparameters (Kingma & Ba, 2015): $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\epsilon = 10^{-8}$, $\eta = 0.001$.
+
+### 5.5 Derivation of the Cross-Entropy Gradient
+
+For a $K$-class softmax output $\hat{y}_k = \frac{e^{z_k}}{\sum_j e^{z_j}}$ with one-hot target $y$ (class $c$):
+
+**Step 1.** Cross-entropy loss:
+
+$$
+\mathcal{L} = -\sum_{k=1}^K y_k \log\hat{y}_k = -\log\hat{y}_c = -z_c + \log\sum_j e^{z_j}.
+$$
+
+**Step 2.** Gradient with respect to logit $z_k$:
+
+$$
+\frac{\partial \mathcal{L}}{\partial z_k} = -\frac{\partial z_c}{\partial z_k} + \frac{e^{z_k}}{\sum_j e^{z_j}} = -\mathbb{1}[k=c] + \hat{y}_k = \hat{y}_k - y_k.
+$$
+
+**Step 3.** In vector form:
+
+$$
+\nabla_\mathbf{z}\mathcal{L} = \hat{\mathbf{y}} - \mathbf{y} \in \mathbb{R}^K.
+$$
+
+This elegant result — the gradient of cross-entropy w.r.t. logits is simply (prediction − target) — is why cross-entropy + softmax is the standard classification setup. $\blacksquare$
+
+### 5.6 Softmax Jacobian (Full Derivation)
+
+The Jacobian $\frac{\partial \hat{y}_i}{\partial z_j}$ of the softmax function:
+
+**Case $i = j$:**
+
+$$
+\frac{\partial \hat{y}_i}{\partial z_i} = \frac{e^{z_i}\sum_k e^{z_k} - e^{z_i}\cdot e^{z_i}}{(\sum_k e^{z_k})^2} = \hat{y}_i(1 - \hat{y}_i).
+$$
+
+**Case $i \neq j$:**
+
+$$
+\frac{\partial \hat{y}_i}{\partial z_j} = \frac{0 - e^{z_i}\cdot e^{z_j}}{(\sum_k e^{z_k})^2} = -\hat{y}_i\hat{y}_j.
+$$
+
+**Compact form:**
+
+$$
+\frac{\partial \hat{y}_i}{\partial z_j} = \hat{y}_i(\delta_{ij} - \hat{y}_j)
+$$
+
+where $\delta_{ij}$ is the Kronecker delta. In matrix form: $J = \text{diag}(\hat{\mathbf{y}}) - \hat{\mathbf{y}}\hat{\mathbf{y}}^T \in \mathbb{R}^{K \times K}$.
+
+
+
+---
+
+## 💻 6. Code Examples
+
+### SGD, Momentum, and Adam from Scratch
+
+```python
+import numpy as np
+
+# --- Gradient Descent Variants on Rosenbrock function ---
+# f(x,y) = (1-x)^2 + 100(y-x^2)^2
+# grad_f = [-2(1-x) - 400x(y-x^2), 200(y-x^2)]
+
+def rosenbrock(theta: np.ndarray) -> float:
+    """Rosenbrock function. Shape: theta=(2,)"""
+    x, y = theta
+    return (1 - x)**2 + 100*(y - x**2)**2
+
+def grad_rosenbrock(theta: np.ndarray) -> np.ndarray:
+    """Gradient of Rosenbrock. Returns shape (2,)"""
+    x, y = theta
+    dx = -2*(1 - x) - 400*x*(y - x**2)
+    dy = 200*(y - x**2)
+    return np.array([dx, dy])
+
+def sgd(theta0, grad_fn, lr=0.001, steps=1000):
+    """Vanilla SGD. theta: (d,), returns trajectory (steps+1, d)"""
+    theta = theta0.copy()
+    trajectory = [theta.copy()]
+    for _ in range(steps):
+        g = grad_fn(theta)          # shape: (d,)
+        theta -= lr * g             # shape: (d,) -= scalar * (d,)
+        trajectory.append(theta.copy())
+    return np.array(trajectory)     # shape: (steps+1, d)
+
+def sgd_momentum(theta0, grad_fn, lr=0.001, beta=0.9, steps=1000):
+    """SGD with Momentum. v: (d,), theta: (d,)"""
+    theta = theta0.copy()
+    v = np.zeros_like(theta)        # velocity, shape: (d,)
+    trajectory = [theta.copy()]
+    for _ in range(steps):
+        g = grad_fn(theta)          # shape: (d,)
+        v = beta * v + g            # shape: (d,) = scalar*(d,) + (d,)
+        theta -= lr * v             # shape: (d,) -= scalar * (d,)
+        trajectory.append(theta.copy())
+    return np.array(trajectory)
+
+def adam(theta0, grad_fn, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8, steps=1000):
+    """Adam optimizer. All internal states shape: (d,)"""
+    theta = theta0.copy()
+    m = np.zeros_like(theta)        # 1st moment, shape: (d,)
+    v = np.zeros_like(theta)        # 2nd moment, shape: (d,)
+    trajectory = [theta.copy()]
+    for t in range(1, steps + 1):
+        g = grad_fn(theta)          # shape: (d,)
+        m = beta1 * m + (1 - beta1) * g        # shape: (d,)
+        v = beta2 * v + (1 - beta2) * g**2     # shape: (d,), element-wise square
+        m_hat = m / (1 - beta1**t)              # bias correction, shape: (d,)
+        v_hat = v / (1 - beta2**t)              # bias correction, shape: (d,)
+        theta -= lr * m_hat / (np.sqrt(v_hat) + eps)  # shape: (d,)
+        trajectory.append(theta.copy())
+    return np.array(trajectory)
+
+# --- Demo ---
+theta0 = np.array([-1.0, 1.0])
+traj_sgd = sgd(theta0, grad_rosenbrock, lr=0.0001, steps=5000)
+traj_mom = sgd_momentum(theta0, grad_rosenbrock, lr=0.0001, beta=0.9, steps=5000)
+traj_adam = adam(theta0, grad_rosenbrock, lr=0.01, steps=5000)
+
+print(f"SGD final:      {traj_sgd[-1]}, loss={rosenbrock(traj_sgd[-1]):.6f}")
+print(f"Momentum final: {traj_mom[-1]}, loss={rosenbrock(traj_mom[-1]):.6f}")
+print(f"Adam final:     {traj_adam[-1]}, loss={rosenbrock(traj_adam[-1]):.6f}")
+```
+
+### Learning Rate Comparison
+
+```python
+import numpy as np
+
+def quadratic_gd(lr, steps=50):
+    """GD on f(x) = 0.5*x^2, grad = x. Demonstrates lr effect."""
+    x = 23.0
+    history = [x]
+    for _ in range(steps):
+        x = x - lr * x  # grad f = x
+        history.append(x)
+    return history
+
+# lr < 2/L (L=1 here) converges; lr > 2/L diverges
+for lr in [0.1, 0.5, 0.9, 1.5, 2.1]:
+    h = quadratic_gd(lr, steps=20)
+    status = "converges" if abs(h[-1]) < 1e-3 else "DIVERGES"
+    print(f"lr={lr:.1f}: x_20={h[-1]:>12.4f}  [{status}]")
+```
+
+> **See also:** `_practice/scripts/10.1_optimization.py` for a full problem generator with SGD convergence analysis.
+
+
+
+---
+
+## 🧮 7. Worked Examples
+
+### Example 23.1.E1 — Derive SGD Convergence Rate for Quadratic
+
+<details>
+<summary>🔍 Full Solution: Convergence of GD on f(x) = ½xᵀAx</summary>
+
+**Problem:** Let $f(x) = \frac{1}{2}x^TAx$ where $A$ is symmetric positive definite with eigenvalues $\mu \leq \lambda_1 \leq \cdots \leq \lambda_d \leq L$. Show GD with $\eta = 1/L$ converges linearly.
+
+**Step 1.** Gradient: $\nabla f(x) = Ax$. Update: $x_{t+1} = x_t - \frac{1}{L}Ax_t = (I - \frac{1}{L}A)x_t$.
+
+**Step 2.** Decompose $x_0$ in eigenbasis of $A$: $x_0 = \sum_i c_i v_i$ where $Av_i = \lambda_i v_i$.
+
+$$
+x_t = \left(I - \frac{1}{L}A\right)^t x_0 = \sum_i c_i\left(1 - \frac{\lambda_i}{L}\right)^t v_i.
+$$
+
+**Step 3.** Each component shrinks by factor $|1 - \lambda_i/L|$. Since $0 \lt  \lambda_i \leq L$:
+
+$$
+0 \leq 1 - \frac{\lambda_i}{L} \leq 1 - \frac{\mu}{L} = 1 - \frac{1}{\kappa}.
+$$
+
+**Step 4.** Error bound:
+
+$$
+\|x_t\|^2 = \sum_i c_i^2\left(1-\frac{\lambda_i}{L}\right)^{2t} \leq \left(1-\frac{1}{\kappa}\right)^{2t}\|x_0\|^2.
+$$
+
+$$
+f(x_t) = \frac{1}{2}x_t^TAx_t \leq \frac{L}{2}\|x_t\|^2 \leq \frac{L}{2}\left(1-\frac{1}{\kappa}\right)^{2t}\|x_0\|^2.
+$$
+
+**Conclusion:** Linear convergence with rate $(1-1/\kappa)$. After $T = \kappa\ln(1/\epsilon)$ steps, $f(x_T) \leq \epsilon \cdot f(x_0)$.
+
+</details>
+
+### Example 23.1.E2 — Compute Adam Update Step-by-Step
+
+<details>
+<summary>🔍 Full Solution: Adam on a 2D problem</summary>
+
+**Problem:** Apply one step of Adam to $f(x,y) = x^2 + 10y^2$ starting at $(3, 1)$ with $\beta_1=0.9$, $\beta_2=0.999$, $\eta=0.01$, $\epsilon=10^{-8}$.
+
+**Step 1.** Gradient at $(3,1)$: $g_1 = (2x, 20y) = (6, 20)$.
+
+**Step 2.** First moment: $m_1 = 0.9 \cdot (0,0) + 0.1 \cdot (6,20) = (0.6, 2.0)$.
+
+**Step 3.** Second moment: $v_1 = 0.999 \cdot (0,0) + 0.001 \cdot (36, 400) = (0.036, 0.4)$.
+
+**Step 4.** Bias correction ($t=1$):
+
+$$
+\hat{m}_1 = \frac{(0.6, 2.0)}{1 - 0.9^1} = \frac{(0.6, 2.0)}{0.1} = (6.0, 20.0)
+$$
+
+$$
+\hat{v}_1 = \frac{(0.036, 0.4)}{1 - 0.999^1} = \frac{(0.036, 0.4)}{0.001} = (36.0, 400.0)
+$$
+
+**Step 5.** Update:
+
+$$
+\theta_1 = (3, 1) - 0.01 \cdot \frac{(6.0, 20.0)}{\sqrt{(36.0, 400.0)} + 10^{-8}} = (3, 1) - 0.01 \cdot \frac{(6.0, 20.0)}{(6.0, 20.0)}
+$$
+
+$$
+= (3, 1) - 0.01 \cdot (1.0, 1.0) = (2.99, 0.99).
+$$
+
+**Key insight:** Adam's first step moves approximately $\eta$ in each coordinate regardless of gradient magnitude — this is the adaptive learning rate property.
+
+</details>
+
+### Example 23.1.E3 — Gradient of Cross-Entropy for Binary Classification
+
+<details>
+<summary>🔍 Full Solution: Sigmoid + BCE gradient derivation</summary>
+
+**Problem:** For binary cross-entropy $\mathcal{L} = -[y\log\sigma(z) + (1-y)\log(1-\sigma(z))]$ where $\sigma(z) = 1/(1+e^{-z})$, derive $\partial\mathcal{L}/\partial z$.
+
+**Step 1.** Key identity: $\sigma'(z) = \sigma(z)(1-\sigma(z))$. Also: $1-\sigma(z) = \sigma(-z)$.
+
+**Step 2.** Compute $\frac{\partial}{\partial z}\log\sigma(z)$:
+
+$$
+\frac{\partial}{\partial z}\log\sigma(z) = \frac{\sigma'(z)}{\sigma(z)} = \frac{\sigma(z)(1-\sigma(z))}{\sigma(z)} = 1 - \sigma(z).
+$$
+
+**Step 3.** Compute $\frac{\partial}{\partial z}\log(1-\sigma(z))$:
+
+$$
+\frac{\partial}{\partial z}\log(1-\sigma(z)) = \frac{-\sigma'(z)}{1-\sigma(z)} = \frac{-\sigma(z)(1-\sigma(z))}{1-\sigma(z)} = -\sigma(z).
+$$
+
+**Step 4.** Chain together:
+
+$$
+\frac{\partial\mathcal{L}}{\partial z} = -y(1-\sigma(z)) - (1-y)(-\sigma(z)) = -y + y\sigma(z) + \sigma(z) - y\sigma(z) = \sigma(z) - y.
+$$
+
+**Result:** $\frac{\partial\mathcal{L}}{\partial z} = \hat{y} - y$ (prediction minus target), identical to the multi-class case.
+
+</details>
+
+### Example 23.1.E4 — Momentum Dampens Oscillation
+
+<details>
+<summary>🔍 Full Solution: Momentum on an ill-conditioned quadratic</summary>
+
+**Problem:** Consider $f(x,y) = 50x^2 + 0.5y^2$ (condition number $\kappa = 100$). Compare vanilla GD vs momentum starting at $(1, 10)$.
+
+**Step 1.** Gradient: $\nabla f = (100x, y)$. Optimal $\eta$ for GD: $\eta = 2/(L+\mu) = 2/(100+1) \approx 0.0198$.
+
+**Step 2.** Vanilla GD update at $(1, 10)$:
+
+$$
+(x_1, y_1) = (1, 10) - 0.0198(100, 10) = (1 - 1.98, 10 - 0.198) = (-0.98, 9.802).
+$$
+
+The $x$-component oscillates (sign flip)! The $y$-component barely moves.
+
+**Step 3.** With momentum ($\beta = 0.9$), after several steps the velocity in $y$ accumulates:
+
+$$
+v_y^{(t)} \approx \frac{y \cdot \text{grad}_y}{1-\beta} = \frac{10}{0.1} \cdot \eta = 10 \cdot 0.0198 \cdot 10 = 1.98
+$$
+
+while oscillations in $x$ cancel: $v_x$ averages toward 0 due to sign alternation.
+
+**Conclusion:** Momentum accelerates convergence along the shallow direction ($y$) by factor $\approx 1/(1-\beta) = 10$ while damping oscillations in the steep direction ($x$).
+
+</details>
+
+### Example 23.1.E5 — Condition Number and Convergence Speed
+
+<details>
+<summary>🔍 Full Solution: Iterations needed for ε-accuracy</summary>
+
+**Problem:** For $f(x) = \frac{1}{2}x^TAx$ with $A = \text{diag}(1, 100)$, how many GD iterations to reach $f(x_T) \leq 10^{-6} f(x_0)$?
+
+**Step 1.** $L = 100$, $\mu = 1$, $\kappa = 100$.
+
+**Step 2.** From Theorem 23.1.2: $f(x_T) \leq (1 - 1/\kappa)^T f(x_0) = (1 - 0.01)^T f(x_0)$.
+
+**Step 3.** Solve $(0.99)^T \leq 10^{-6}$:
+
+$$
+T \geq \frac{\ln(10^{-6})}{\ln(0.99)} = \frac{-6\ln 10}{\ln 0.99} = \frac{-13.816}{-0.01005} \approx 1375.
+$$
+
+**Step 4.** With momentum (Nesterov accelerated): $T \approx 2\sqrt{\kappa}\ln(1/\epsilon) = 2\cdot10\cdot6\ln10 \approx 276$ iterations.
+
+**Conclusion:** Momentum reduces iterations from $O(\kappa)$ to $O(\sqrt{\kappa})$ — from 1375 to ~276 for this problem.
+
+</details>
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Cross-links
+- Gradient computation and partial derivatives: [1.4 - Multivariable Limits & Partial Derivatives](1.4---Multivariable-Limits-&-Partial-Derivatives)
+- Hessian matrices and eigenvalues for curvature analysis: [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)
+- Taylor series expansions: [1.3 - Sequences, Series & Convergence Tests](1.3---Sequences,-Series-&-Convergence-Tests)
+- Convexity and optimization in higher dimensions: [1.5 - Integral Calculus & Techniques](1.5---Integral-Calculus-&-Techniques)
+- Probability foundations for stochastic methods: [Subject_Plan](Subject_Plan)
+- Feeds directly into backpropagation: [23.2 - Deep Neural Networks - Backprop & Architecture](23.2---Deep-Neural-Networks---Backprop-&-Architecture)
+
+### External References
+- **Goodfellow, Bengio, Courville** — *Deep Learning*, Chapter 8: Optimization for Training Deep Models ([deeplearningbook.org](https://www.deeplearningbook.org/))
+- **Kingma & Ba (2015)** — *Adam: A Method for Stochastic Optimization* ([arXiv:1412.6980](https://arxiv.org/abs/1412.6980))
+- **Stanford CS229** — Andrew Ng's lecture notes on optimization ([cs229.stanford.edu](https://cs229.stanford.edu/))
+- **Ruder (2016)** — *An Overview of Gradient Descent Optimization Algorithms* ([arXiv:1609.04747](https://arxiv.org/abs/1609.04747))
+- **Boyd & Vandenberghe** — *Convex Optimization* (free textbook, [stanford.edu/~boyd/cvxbook](https://stanford.edu/~boyd/cvxbook/))
+- **MIT 6.S191** — Introduction to Deep Learning, Lecture 1 ([introtodeeplearning.com](https://introtodeeplearning.com/))
+

@@ -1,0 +1,97 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .code{font-family:ui-monospace,monospace;font-size:8.5px;fill:var(--interactive-accent,#58a6ff);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .codebox{
+      fill:#0d1117;
+      stroke:var(--interactive-accent,#58a6ff);
+      stroke-width:1.2;
+      animation: compile-glow 4s infinite ease-in-out;
+    }
+    .cursor {
+      animation: blink 1s step-end infinite;
+      fill: var(--interactive-accent,#58a6ff);
+      font-weight: bold;
+    }
+    @keyframes compile-glow {
+      0%, 100% { stroke: var(--interactive-accent,#58a6ff); stroke-width: 1.2; }
+      50% { stroke: #51cf66; stroke-width: 1.6; }
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">35.7 — Audio Programming with JUCE &amp; Python: DSP Plugins &amp; Analysis</text>
+  <!-- JUCE architecture -->
+  <rect x="20" y="35" width="240" height="200" class="box" rx="4"/>
+  <text x="130" y="52" class="label" text-anchor="middle" font-weight="bold">JUCE Plugin Architecture</text>
+  <text x="30" y="68" class="sub" font-weight="bold">AudioProcessor (core class):</text>
+  <rect x="30" y="75" width="220" height="110" class="codebox" rx="3"/>
+  <text x="40" y="92" class="code">class MyPlugin : public AudioProcessor {</text>
+  <text x="40" y="106" class="code">  void prepareToPlay(double sr,</text>
+  <text x="40" y="118" class="code">    int blockSize) override;</text>
+  <text x="40" y="132" class="code">  void processBlock(AudioBuffer&lt;float&gt;&amp;</text>
+  <text x="40" y="144" class="code">    buffer, MidiBuffer&amp;) override;</text>
+  <text x="40" y="158" class="code">  AudioProcessorEditor* createEditor()</text>
+  <text x="40" y="170" class="code">    override; // GUI</text>
+  <text x="40" y="182" class="code">};</text>
+  <text x="52" y="182" class="code cursor">|</text>
+  <text x="30" y="200" class="sub" font-weight="bold">Plugin formats (auto-generated):</text>
+  <text x="30" y="212" class="sub">VST3 · AU (macOS) · AAX (Pro Tools)</text>
+  <text x="30" y="224" class="sub">LV2 (Linux) · Standalone · AUv3 (iOS)</text>
+  <!-- Python audio -->
+  <rect x="275" y="35" width="250" height="200" class="box" rx="4"/>
+  <text x="400" y="52" class="label" text-anchor="middle" font-weight="bold">Python Audio Stack</text>
+  <rect x="285" y="60" width="230" height="165" class="codebox" rx="3"/>
+  <text x="295" y="76" class="code">import librosa, numpy as np</text>
+  <text x="295" y="90" class="code">import soundfile as sf</text>
+  <text x="295" y="104" class="code"># Load + analyse</text>
+  <text x="295" y="118" class="code">y, sr = librosa.load("beat.wav")</text>
+  <text x="295" y="132" class="code">tempo, beats = librosa.beat.beat_track(y=y)</text>
+  <text x="295" y="146" class="code">chroma = librosa.feature.chroma_stft(y=y,sr=sr)</text>
+  <text x="295" y="160" class="code">mfcc = librosa.feature.mfcc(y=y, n_mfcc=13)</text>
+  <text x="295" y="174" class="code"># Write processed output</text>
+  <text x="295" y="188" class="code">sf.write("out.wav", y_processed, sr)</text>
+  <text x="295" y="202" class="code"># Real-time: use pyaudio or sounddevice</text>
+  <text x="295" y="216" class="code">import sounddevice as sd</text>
+  <text x="425" y="216" class="code cursor">|</text>
+  <!-- Real-time DSP with Python -->
+  <rect x="540" y="35" width="160" height="200" class="box" rx="4"/>
+  <text x="620" y="52" class="label" text-anchor="middle" font-weight="bold">Python Audio Libs</text>
+  <text x="550" y="68" class="sub" font-weight="bold">Analysis:</text>
+  <text x="550" y="80" class="sub">librosa: spectral, beats, MFCCs</text>
+  <text x="550" y="92" class="sub">essentia: professional audio ML</text>
+  <text x="550" y="104" class="sub">madmom: beat tracking</text>
+  <text x="550" y="118" class="sub" font-weight="bold">Synthesis/DSP:</text>
+  <text x="550" y="130" class="sub">scipy.signal: filters, FFT</text>
+  <text x="550" y="142" class="sub">numpy: buffer math</text>
+  <text x="550" y="154" class="sub">pedalboard: apply VST/AU plugins</text>
+  <text x="550" y="168" class="sub" font-weight="bold">Real-time I/O:</text>
+  <text x="550" y="180" class="sub">sounddevice: streams, callbacks</text>
+  <text x="550" y="192" class="sub">pyaudio: PortAudio wrapper</text>
+  <text x="550" y="204" class="sub">jack: JACK audio server</text>
+  <text x="550" y="220" class="sub" font-weight="bold">UI/visualization:</text>
+  <text x="550" y="232" class="sub">matplotlib: spectrograms</text>
+  <!-- Bottom: JUCE DSP pipeline + MIDI deep dive -->
+  <rect x="20" y="248" width="680" height="155" class="box" rx="4"/>
+  <text x="360" y="265" class="label" text-anchor="middle" font-weight="bold">JUCE DSP Pipeline &amp; MIDI Processing</text>
+  <text x="30" y="282" class="sub" font-weight="bold">JUCE DSP Module chain (processBlock):</text>
+  <text x="30" y="296" class="sub">1. Read MidiBuffer → parse noteOn/noteOff/CC events → update synth voice state</text>
+  <text x="30" y="310" class="sub">2. Per-sample (or per-block): oscillator → filter → VCA (applying ADSR) → output buffer</text>
+  <text x="30" y="324" class="sub">3. Apply juce::dsp::Convolution for reverb, juce::dsp::IIR::Filter for EQ bands</text>
+  <text x="30" y="342" class="sub" font-weight="bold">Audio plugin development flow:</text>
+  <text x="30" y="356" class="sub">Projucer (project config) → Xcode/VS (build) → VST3 binary → load in DAW host → debug with JUCE AudioProcessorValueTreeState</text>
+  <text x="360" y="282" class="sub" font-weight="bold">Python: real-time effect with sounddevice callback:</text>
+  <text x="360" y="296" class="sub">def callback(indata, outdata, frames, time, status):</text>
+  <text x="360" y="310" class="sub">    outdata[:] = apply_effect(indata)   # any numpy DSP</text>
+  <text x="360" y="324" class="sub">with sd.Stream(callback=callback, samplerate=44100):</text>
+  <text x="360" y="338" class="sub">    input()  # run until keypress</text>
+  <text x="360" y="355" class="sub" font-weight="bold">Pedalboard (Spotify) — apply VSTs from Python:</text>
+  <text x="360" y="369" class="sub">from pedalboard import Pedalboard, Reverb, Compressor</text>
+  <text x="360" y="383" class="sub">board = Pedalboard([Compressor(threshold_db=-18), Reverb()])</text>
+  <text x="360" y="397" class="sub">output = board(audio, sample_rate=44100)</text>
+</svg>

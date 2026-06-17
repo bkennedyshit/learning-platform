@@ -1,0 +1,1695 @@
+---
+title: "Wave Functions The Schrodinger Equation"
+subject: "Quantum Mechanics & Quantum Field Theory"
+catalog: advanced
+audience_tier: higher-education
+chapter: "9.1"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 9.1 — Wave Functions & The Schrödinger Equation
+
+> *"The wave function does not describe the state of a physical system. It describes the state of our knowledge of a physical system."* — Werner Heisenberg
+
+Quantum mechanics begins with a radical departure from classical physics: the state of a particle is not a point in phase space $(x, p)$ but a complex-valued function $\Psi(x,t)$ whose squared modulus gives the probability density for finding the particle at position $x$ at time $t$. This chapter builds the Schrödinger equation from first principles — starting from de Broglie's hypothesis and the correspondence principle — and develops the full mathematical machinery of wave mechanics: normalization, expectation values, probability current, and the uncertainty principle.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. State the Born interpretation and compute probability densities from $\Psi(x,t)$.
+2. Derive the time-dependent Schrödinger equation from the de Broglie relations and the energy-momentum dispersion.
+3. Separate variables to obtain the time-independent Schrödinger equation (TISE).
+4. Compute expectation values $\langle x \rangle$, $\langle p \rangle$, $\langle x^2 \rangle$, $\langle p^2 \rangle$ using the position and momentum operators.
+5. Derive and interpret the probability current $\mathbf{j}(x,t)$ and the continuity equation.
+6. Prove the Ehrenfest theorem connecting quantum expectation values to classical equations of motion.
+7. Derive the generalized uncertainty principle $\Delta A \cdot \Delta B \geq \frac{1}{2}|\langle [\hat{A}, \hat{B}] \rangle|$.
+
+---
+
+## 🖼️ Visual Anchor — The Quantum Wave Function
+
+![math-09__9.1-fig1](math-09__9.1-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 9.1.1 — Wave Function
+
+The **wave function** $\Psi(x,t)$ is a complex-valued function of position and time that completely specifies the quantum state of a particle. For a single particle in one dimension:
+
+$$
+\Psi : \mathbb{R} \times \mathbb{R} \to \mathbb{C}, \quad (x, t) \mapsto \Psi(x,t).
+$$
+
+The wave function must be:
+- **Square-integrable:** $\int_{-\infty}^{\infty} |\Psi(x,t)|^2 \, dx < \infty$
+- **Continuous** (and typically piecewise continuously differentiable)
+- **Single-valued** at every point in space
+
+### Definition 9.1.2 — Born Rule (Probability Interpretation)
+
+The **probability** of finding the particle between positions $a$ and $b$ at time $t$ is:
+
+$$
+P(a \leq x \leq b, t) = \int_a^b |\Psi(x,t)|^2 \, dx.
+$$
+
+The quantity $|\Psi(x,t)|^2 = \Psi^*(x,t)\Psi(x,t)$ is the **probability density**. The normalization condition requires:
+
+$$
+\int_{-\infty}^{\infty} |\Psi(x,t)|^2 \, dx = 1.
+$$
+
+### Definition 9.1.3 — Normalization
+
+A wave function is **normalized** if:
+
+$$
+\langle \Psi | \Psi \rangle = \int_{-\infty}^{\infty} |\Psi(x,t)|^2 \, dx = 1.
+$$
+
+If $\Psi$ is not normalized but is normalizable (i.e., the integral is finite and non-zero), we define the normalized wave function as:
+
+$$
+\Psi_{\text{norm}}(x,t) = \frac{\Psi(x,t)}{\sqrt{\int_{-\infty}^{\infty} |\Psi(x,t)|^2 \, dx}}.
+$$
+
+### Definition 9.1.4 — Position Operator
+
+In the position representation, the **position operator** acts by multiplication:
+
+$$
+\hat{x}\,\Psi(x,t) = x\,\Psi(x,t).
+$$
+
+### Definition 9.1.5 — Momentum Operator
+
+The **momentum operator** in the position representation is:
+
+$$
+\hat{p} = -i\hbar \frac{\partial}{\partial x}.
+$$
+
+This follows from the de Broglie relation $p = \hbar k$ and the plane-wave representation $e^{ikx}$.
+
+### Definition 9.1.6 — Expectation Value
+
+The **expectation value** of an observable $\hat{Q}$ in state $\Psi$ is:
+
+$$
+\langle \hat{Q} \rangle = \int_{-\infty}^{\infty} \Psi^*(x,t) \, \hat{Q} \, \Psi(x,t) \, dx.
+$$
+
+For position and momentum specifically:
+
+$$
+\langle x \rangle = \int_{-\infty}^{\infty} x \, |\Psi(x,t)|^2 \, dx,
+$$
+
+$$
+\langle p \rangle = \int_{-\infty}^{\infty} \Psi^* \left( -i\hbar \frac{\partial}{\partial x} \right) \Psi \, dx.
+$$
+
+### Definition 9.1.7 — Variance and Standard Deviation (Uncertainty)
+
+The **variance** of observable $\hat{Q}$ is:
+
+$$
+(\Delta Q)^2 = \langle \hat{Q}^2 \rangle - \langle \hat{Q} \rangle^2.
+$$
+
+The **standard deviation** $\Delta Q = \sqrt{\langle \hat{Q}^2 \rangle - \langle \hat{Q} \rangle^2}$ quantifies the quantum uncertainty in the measurement of $Q$.
+
+### Definition 9.1.8 — Probability Current Density
+
+The **probability current** (or probability flux) is:
+
+$$
+j(x,t) = \frac{\hbar}{2mi}\left( \Psi^* \frac{\partial \Psi}{\partial x} - \Psi \frac{\partial \Psi^*}{\partial x} \right) = \frac{1}{m} \operatorname{Re}\left( \Psi^* \hat{p} \, \Psi \right).
+$$
+
+### Definition 9.1.9 — Hamiltonian Operator
+
+The **Hamiltonian** for a particle of mass $m$ in potential $V(x)$ is:
+
+$$
+\hat{H} = \frac{\hat{p}^2}{2m} + V(\hat{x}) = -\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2} + V(x).
+$$
+
+### Definition 9.1.10 — Stationary State
+
+A **stationary state** is a solution of the form:
+
+$$
+\Psi(x,t) = \psi(x) \, e^{-iEt/\hbar},
+$$
+
+where $\psi(x)$ satisfies the time-independent Schrödinger equation and $E$ is the energy eigenvalue. The probability density $|\Psi(x,t)|^2 = |\psi(x)|^2$ is time-independent.
+
+### Definition 9.1.11 — Commutator
+
+The **commutator** of two operators $\hat{A}$ and $\hat{B}$ is:
+
+$$
+[\hat{A}, \hat{B}] = \hat{A}\hat{B} - \hat{B}\hat{A}.
+$$
+
+If $[\hat{A}, \hat{B}] = 0$, the operators **commute** and can be simultaneously diagonalized (share a common eigenbasis).
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Postulate 9.1.P1 — The State Postulate
+
+The state of a quantum system at time $t$ is completely described by a wave function $\Psi(x,t) \in L^2(\mathbb{R})$ (the Hilbert space of square-integrable functions). Two wave functions that differ only by a global phase $e^{i\alpha}$ represent the same physical state.
+
+### Postulate 9.1.P2 — The Born Rule
+
+The probability of finding the particle in the interval $[a, b]$ is:
+
+$$
+P(a \leq x \leq b) = \int_a^b |\Psi(x,t)|^2 \, dx.
+$$
+
+This is the fundamental link between the mathematical formalism and experimental measurement.
+
+### Postulate 9.1.P3 — The Measurement Postulate
+
+If a measurement of observable $\hat{Q}$ yields the value $q$, the wave function immediately after measurement **collapses** to the eigenstate of $\hat{Q}$ corresponding to eigenvalue $q$:
+
+$$
+\Psi \xrightarrow{\text{measure } Q} \psi_q \quad \text{(eigenstate with } \hat{Q}\psi_q = q\psi_q\text{)}.
+$$
+
+### Postulate 9.1.P4 — Time Evolution (Schrödinger Equation)
+
+Between measurements, the wave function evolves according to the **time-dependent Schrödinger equation**:
+
+$$
+i\hbar \frac{\partial \Psi(x,t)}{\partial t} = \hat{H}\,\Psi(x,t).
+$$
+
+This is a first-order linear PDE in time, making time evolution deterministic and unitary.
+
+### Postulate 9.1.P5 — Canonical Commutation Relation
+
+The fundamental commutation relation between position and momentum is:
+
+$$
+[\hat{x}, \hat{p}] = i\hbar.
+$$
+
+This single relation encodes the entire structure of quantum mechanics in one dimension. It is the quantum analogue of the Poisson bracket $\{x, p\} = 1$ in classical Hamiltonian mechanics.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 9.1.1 — Normalization is Preserved Under Schrödinger Evolution
+
+**Statement:** If $\Psi(x,0)$ is normalized, then $\Psi(x,t)$ remains normalized for all $t$:
+
+$$
+\frac{d}{dt} \int_{-\infty}^{\infty} |\Psi(x,t)|^2 \, dx = 0.
+$$
+
+**Proof.**
+
+$$
+\frac{d}{dt} \int_{-\infty}^{\infty} |\Psi|^2 \, dx = \int_{-\infty}^{\infty} \frac{\partial}{\partial t}(\Psi^* \Psi) \, dx = \int_{-\infty}^{\infty} \left( \frac{\partial \Psi^*}{\partial t}\Psi + \Psi^* \frac{\partial \Psi}{\partial t} \right) dx.
+$$
+
+From the Schrödinger equation: $\frac{\partial \Psi}{\partial t} = \frac{1}{i\hbar}\hat{H}\Psi = -\frac{i}{\hbar}\hat{H}\Psi$.
+
+Taking the complex conjugate (noting $\hat{H}$ is Hermitian, so $\hat{H}^\dagger = \hat{H}$, and $V(x)$ is real):
+
+$$
+\frac{\partial \Psi^*}{\partial t} = \frac{i}{\hbar}\hat{H}\Psi^* = \frac{i}{\hbar}\left( -\frac{\hbar^2}{2m}\frac{\partial^2 \Psi^*}{\partial x^2} + V\Psi^* \right).
+$$
+
+Substituting:
+
+$$
+\frac{d}{dt}\int |\Psi|^2 dx = \int \left[ \frac{i}{\hbar}\left(-\frac{\hbar^2}{2m}\Psi^*_{xx} + V\Psi^*\right)\Psi + \Psi^*\left(-\frac{i}{\hbar}\right)\left(-\frac{\hbar^2}{2m}\Psi_{xx} + V\Psi\right) \right] dx.
+$$
+
+The potential terms cancel: $\frac{i}{\hbar}V\Psi^*\Psi - \frac{i}{\hbar}V\Psi^*\Psi = 0$.
+
+The kinetic terms give:
+
+$$
+= \frac{i\hbar}{2m}\int_{-\infty}^{\infty}\left( \Psi\Psi^*_{xx} - \Psi^*\Psi_{xx} \right) dx = \frac{i\hbar}{2m}\int_{-\infty}^{\infty} \frac{\partial}{\partial x}\left( \Psi\Psi^*_x - \Psi^*\Psi_x \right) dx.
+$$
+
+This is a total derivative. Evaluating at the boundaries:
+
+$$
+= \frac{i\hbar}{2m}\left[ \Psi\Psi^*_x - \Psi^*\Psi_x \right]_{-\infty}^{\infty} = 0,
+$$
+
+since $\Psi \to 0$ as $|x| \to \infty$ (square-integrability). $\blacksquare$
+
+### Lemma 9.1.2 — The Canonical Commutation Relation $[\hat{x}, \hat{p}] = i\hbar$
+
+**Statement:** For the operators $\hat{x} = x$ and $\hat{p} = -i\hbar\frac{d}{dx}$ acting on differentiable functions:
+
+$$
+[\hat{x}, \hat{p}] = i\hbar \hat{I}.
+$$
+
+**Proof.** We compute $[\hat{x}, \hat{p}]f(x)$ for an arbitrary test function $f(x)$:
+
+$$
+[\hat{x}, \hat{p}]f = \hat{x}\hat{p}f - \hat{p}\hat{x}f.
+$$
+
+**First term:**
+
+$$
+\hat{x}\hat{p}f = x \cdot \left(-i\hbar \frac{df}{dx}\right) = -i\hbar \, x \frac{df}{dx}.
+$$
+
+**Second term:**
+
+$$
+\hat{p}\hat{x}f = -i\hbar \frac{d}{dx}(xf) = -i\hbar\left( f + x\frac{df}{dx} \right) = -i\hbar f - i\hbar \, x\frac{df}{dx}.
+$$
+
+**Subtracting:**
+
+$$
+[\hat{x}, \hat{p}]f = -i\hbar \, x\frac{df}{dx} - \left( -i\hbar f - i\hbar \, x\frac{df}{dx} \right) = -i\hbar \, x\frac{df}{dx} + i\hbar f + i\hbar \, x\frac{df}{dx} = i\hbar f.
+$$
+
+Since this holds for all $f$: $[\hat{x}, \hat{p}] = i\hbar \hat{I}$. $\blacksquare$
+
+### Lemma 9.1.3 — Continuity Equation for Probability
+
+**Statement:** The probability density $\rho(x,t) = |\Psi(x,t)|^2$ and probability current $j(x,t)$ satisfy:
+
+$$
+\frac{\partial \rho}{\partial t} + \frac{\partial j}{\partial x} = 0.
+$$
+
+**Proof.** From the Schrödinger equation and its conjugate:
+
+$$
+i\hbar \frac{\partial \Psi}{\partial t} = -\frac{\hbar^2}{2m}\frac{\partial^2 \Psi}{\partial x^2} + V\Psi,
+$$
+
+$$
+-i\hbar \frac{\partial \Psi^*}{\partial t} = -\frac{\hbar^2}{2m}\frac{\partial^2 \Psi^*}{\partial x^2} + V\Psi^*.
+$$
+
+Compute $\frac{\partial \rho}{\partial t}$:
+
+$$
+\frac{\partial \rho}{\partial t} = \Psi^*\frac{\partial \Psi}{\partial t} + \Psi\frac{\partial \Psi^*}{\partial t}.
+$$
+
+From the Schrödinger equation: $\frac{\partial \Psi}{\partial t} = \frac{i\hbar}{2m}\Psi_{xx} - \frac{i}{\hbar}V\Psi$.
+
+From the conjugate: $\frac{\partial \Psi^*}{\partial t} = -\frac{i\hbar}{2m}\Psi^*_{xx} + \frac{i}{\hbar}V\Psi^*$.
+
+Substituting (potential terms cancel):
+
+$$
+\frac{\partial \rho}{\partial t} = \frac{i\hbar}{2m}\left( \Psi^*\Psi_{xx} - \Psi\Psi^*_{xx} \right) = \frac{i\hbar}{2m}\frac{\partial}{\partial x}\left( \Psi^*\Psi_x - \Psi\Psi^*_x \right).
+$$
+
+Recognizing $j = \frac{\hbar}{2mi}(\Psi^*\Psi_x - \Psi\Psi^*_x)$:
+
+$$
+\frac{\partial \rho}{\partial t} = -\frac{\partial j}{\partial x}.
+$$
+
+Therefore $\frac{\partial \rho}{\partial t} + \frac{\partial j}{\partial x} = 0$. $\blacksquare$
+
+### Lemma 9.1.4 — Hermiticity of the Momentum Operator
+
+**Statement:** The momentum operator $\hat{p} = -i\hbar\frac{d}{dx}$ is Hermitian on the space of square-integrable functions vanishing at infinity:
+
+$$
+\int_{-\infty}^{\infty} f^*(x)\,\hat{p}\,g(x)\,dx = \int_{-\infty}^{\infty} (\hat{p}\,f)^*\,g(x)\,dx.
+$$
+
+**Proof.** The left side is:
+
+$$
+\text{LHS} = \int_{-\infty}^{\infty} f^*\left(-i\hbar \frac{dg}{dx}\right) dx = -i\hbar \int_{-\infty}^{\infty} f^* \frac{dg}{dx}\,dx.
+$$
+
+Integrate by parts with $u = f^*$, $dv = \frac{dg}{dx}dx$:
+
+$$
+= -i\hbar \left[ f^* g \right]_{-\infty}^{\infty} + i\hbar \int_{-\infty}^{\infty} \frac{df^*}{dx}\,g\,dx.
+$$
+
+The boundary term vanishes (both $f, g \in L^2$, so they vanish at $\pm\infty$):
+
+$$
+= i\hbar \int_{-\infty}^{\infty} \frac{df^*}{dx}\,g\,dx = \int_{-\infty}^{\infty} \left( -i\hbar\frac{df}{dx} \right)^* g\,dx = \int_{-\infty}^{\infty} (\hat{p}f)^* g\,dx = \text{RHS}.
+$$
+
+Therefore $\hat{p}$ is Hermitian. $\blacksquare$
+
+### Lemma 9.1.5 — Commutator $[\hat{x}^n, \hat{p}]$
+
+**Statement:** For any positive integer $n$:
+
+$$
+[\hat{x}^n, \hat{p}] = in\hbar\,\hat{x}^{n-1}.
+$$
+
+**Proof by induction.**
+
+**Base case** ($n=1$): $[\hat{x}, \hat{p}] = i\hbar$ (Lemma 9.1.2). ✓
+
+**Inductive step:** Assume $[\hat{x}^k, \hat{p}] = ik\hbar\,\hat{x}^{k-1}$. We use the identity $[\hat{A}\hat{B}, \hat{C}] = \hat{A}[\hat{B}, \hat{C}] + [\hat{A}, \hat{C}]\hat{B}$:
+
+$$
+[\hat{x}^{k+1}, \hat{p}] = [\hat{x}\cdot\hat{x}^k, \hat{p}] = \hat{x}[\hat{x}^k, \hat{p}] + [\hat{x}, \hat{p}]\hat{x}^k.
+$$
+
+Substituting the inductive hypothesis and the base case:
+
+$$
+= \hat{x}(ik\hbar\,\hat{x}^{k-1}) + (i\hbar)\hat{x}^k = ik\hbar\,\hat{x}^k + i\hbar\,\hat{x}^k = i(k+1)\hbar\,\hat{x}^k.
+$$
+
+This completes the induction. $\blacksquare$
+
+### Lemma 9.1.6 — Commutator $[\hat{p}, V(\hat{x})]$
+
+**Statement:** For a potential $V(x)$ that is analytic (expressible as a power series):
+
+$$
+[\hat{p}, V(\hat{x})] = -i\hbar \frac{dV}{dx}.
+$$
+
+**Proof.** Act on a test function $f(x)$:
+
+$$
+[\hat{p}, V]f = \hat{p}(Vf) - V(\hat{p}f) = -i\hbar\frac{d}{dx}(Vf) - V\left(-i\hbar\frac{df}{dx}\right).
+$$
+
+Expanding the product rule:
+
+$$
+= -i\hbar\left( \frac{dV}{dx}f + V\frac{df}{dx} \right) + i\hbar V\frac{df}{dx} = -i\hbar\frac{dV}{dx}\,f.
+$$
+
+Since this holds for all $f$: $[\hat{p}, V(\hat{x})] = -i\hbar\frac{dV}{dx}$. $\blacksquare$
+
+
+
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 9.1.1 — The Time-Dependent Schrödinger Equation
+
+For a non-relativistic particle of mass $m$ in potential $V(x)$, the wave function evolves according to:
+
+$$
+i\hbar \frac{\partial \Psi(x,t)}{\partial t} = -\frac{\hbar^2}{2m}\frac{\partial^2 \Psi(x,t)}{\partial x^2} + V(x)\Psi(x,t).
+$$
+
+### Theorem 9.1.2 — The Time-Independent Schrödinger Equation (TISE)
+
+Separation of variables $\Psi(x,t) = \psi(x)e^{-iEt/\hbar}$ yields the eigenvalue equation:
+
+$$
+\hat{H}\psi(x) = E\psi(x) \quad \Longleftrightarrow \quad -\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} + V(x)\psi(x) = E\psi(x).
+$$
+
+The general solution to the TDSE is a superposition of stationary states:
+
+$$
+\Psi(x,t) = \sum_n c_n \psi_n(x) e^{-iE_n t/\hbar}, \quad c_n = \int_{-\infty}^{\infty} \psi_n^*(x)\Psi(x,0)\,dx.
+$$
+
+### Theorem 9.1.3 — Ehrenfest's Theorem
+
+The expectation values of position and momentum obey classical-like equations of motion:
+
+$$
+\frac{d\langle x \rangle}{dt} = \frac{\langle p \rangle}{m}, \qquad \frac{d\langle p \rangle}{dt} = -\left\langle \frac{dV}{dx} \right\rangle.
+$$
+
+### Theorem 9.1.4 — The Generalized Uncertainty Principle
+
+For any two Hermitian operators $\hat{A}$ and $\hat{B}$:
+
+$$
+\Delta A \cdot \Delta B \geq \frac{1}{2}\left| \langle [\hat{A}, \hat{B}] \rangle \right|.
+$$
+
+**Corollary (Heisenberg Uncertainty Principle):** Since $[\hat{x}, \hat{p}] = i\hbar$:
+
+$$
+\Delta x \cdot \Delta p \geq \frac{\hbar}{2}.
+$$
+
+### Theorem 9.1.5 — Energy-Time Uncertainty Relation
+
+For any observable $\hat{Q}$ not explicitly time-dependent:
+
+$$
+\Delta E \cdot \Delta t_Q \geq \frac{\hbar}{2}, \quad \text{where } \Delta t_Q = \frac{\Delta Q}{|d\langle Q\rangle/dt|}.
+$$
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of the Schrödinger Equation from de Broglie Relations
+
+**Starting point:** The de Broglie hypothesis assigns wave properties to matter:
+
+$$
+E = \hbar\omega, \qquad p = \hbar k.
+$$
+
+**Step 1:** Consider a free particle ($V = 0$) with definite energy and momentum. Its wave function is a plane wave:
+
+$$
+\Psi(x,t) = A\,e^{i(kx - \omega t)}.
+$$
+
+**Step 2:** Compute the time derivative:
+
+$$
+\frac{\partial \Psi}{\partial t} = -i\omega\,\Psi = -\frac{iE}{\hbar}\,\Psi.
+$$
+
+Therefore:
+
+$$
+i\hbar\frac{\partial \Psi}{\partial t} = E\,\Psi. \tag{1}
+$$
+
+**Step 3:** Compute the second spatial derivative:
+
+$$
+\frac{\partial^2 \Psi}{\partial x^2} = (ik)^2\,\Psi = -k^2\,\Psi.
+$$
+
+Therefore:
+
+$$
+-\frac{\hbar^2}{2m}\frac{\partial^2 \Psi}{\partial x^2} = \frac{\hbar^2 k^2}{2m}\,\Psi = \frac{p^2}{2m}\,\Psi. \tag{2}
+$$
+
+**Step 4:** For a free particle, $E = \frac{p^2}{2m}$. Combining (1) and (2):
+
+$$
+i\hbar\frac{\partial \Psi}{\partial t} = -\frac{\hbar^2}{2m}\frac{\partial^2 \Psi}{\partial x^2}.
+$$
+
+**Step 5:** For a particle in a potential $V(x)$, the total energy is $E = \frac{p^2}{2m} + V(x)$. By the correspondence principle, we promote this to an operator equation:
+
+$$
+i\hbar\frac{\partial \Psi}{\partial t} = \left( -\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2} + V(x) \right)\Psi = \hat{H}\Psi.
+$$
+
+This is the **time-dependent Schrödinger equation**. $\blacksquare$
+
+### 5.2 Separation of Variables: TDSE → TISE
+
+**Step 1:** Assume a separable solution $\Psi(x,t) = \psi(x)\,\phi(t)$.
+
+**Step 2:** Substitute into the TDSE:
+
+$$
+i\hbar\,\psi(x)\frac{d\phi}{dt} = -\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2}\,\phi(t) + V(x)\psi(x)\phi(t).
+$$
+
+**Step 3:** Divide both sides by $\psi(x)\phi(t)$:
+
+$$
+i\hbar\frac{1}{\phi}\frac{d\phi}{dt} = \frac{1}{\psi}\left( -\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} + V(x)\psi \right).
+$$
+
+**Step 4:** The left side depends only on $t$; the right side depends only on $x$. For equality to hold for all $x$ and $t$, both sides must equal a constant. Call it $E$ (the separation constant, which we identify as energy):
+
+**Time equation:**
+
+$$
+i\hbar\frac{d\phi}{dt} = E\phi \quad \Longrightarrow \quad \phi(t) = e^{-iEt/\hbar}.
+$$
+
+**Spatial equation (TISE):**
+
+$$
+-\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} + V(x)\psi(x) = E\psi(x).
+$$
+
+This is an eigenvalue equation: $\hat{H}\psi = E\psi$. The eigenvalues $E_n$ are the allowed energies; the eigenfunctions $\psi_n(x)$ are the stationary states. $\blacksquare$
+
+### 5.3 Proof of Ehrenfest's Theorem
+
+**Goal:** Show $\frac{d\langle x\rangle}{dt} = \frac{\langle p\rangle}{m}$.
+
+**Step 1:** By definition:
+
+$$
+\frac{d\langle x\rangle}{dt} = \frac{d}{dt}\int_{-\infty}^{\infty} x\,|\Psi|^2\,dx = \int_{-\infty}^{\infty} x\frac{\partial}{\partial t}|\Psi|^2\,dx.
+$$
+
+**Step 2:** Use the continuity equation $\frac{\partial|\Psi|^2}{\partial t} = -\frac{\partial j}{\partial x}$:
+
+$$
+= -\int_{-\infty}^{\infty} x\frac{\partial j}{\partial x}\,dx.
+$$
+
+**Step 3:** Integrate by parts. Let $u = x$, $dv = \frac{\partial j}{\partial x}dx$:
+
+$$
+= -\left[ xj \right]_{-\infty}^{\infty} + \int_{-\infty}^{\infty} j\,dx.
+$$
+
+The boundary term vanishes ($j \to 0$ as $|x| \to \infty$). Substituting $j = \frac{\hbar}{2mi}(\Psi^*\Psi_x - \Psi\Psi^*_x)$:
+
+$$
+\frac{d\langle x\rangle}{dt} = \int_{-\infty}^{\infty} j\,dx = \frac{1}{m}\int_{-\infty}^{\infty} \Psi^*\left(-i\hbar\frac{\partial}{\partial x}\right)\Psi\,dx = \frac{\langle p\rangle}{m}.
+$$
+
+$\blacksquare$
+
+**Goal:** Show $\frac{d\langle p\rangle}{dt} = -\langle \frac{dV}{dx}\rangle$.
+
+**Step 1:**
+
+$$
+\frac{d\langle p\rangle}{dt} = \frac{d}{dt}\int \Psi^*\left(-i\hbar\frac{\partial}{\partial x}\right)\Psi\,dx = -i\hbar\int\left(\frac{\partial\Psi^*}{\partial t}\frac{\partial\Psi}{\partial x} + \Psi^*\frac{\partial^2\Psi}{\partial x\partial t}\right)dx.
+$$
+
+**Step 2:** Alternatively, use the general result for any operator $\hat{Q}$ not explicitly time-dependent:
+
+$$
+\frac{d\langle \hat{Q}\rangle}{dt} = \frac{1}{i\hbar}\langle [\hat{Q}, \hat{H}] \rangle.
+$$
+
+**Step 3:** Compute $[\hat{p}, \hat{H}]$:
+
+$$
+[\hat{p}, \hat{H}] = \left[\hat{p}, \frac{\hat{p}^2}{2m} + V(\hat{x})\right] = \frac{1}{2m}[\hat{p}, \hat{p}^2] + [\hat{p}, V(\hat{x})].
+$$
+
+The first commutator vanishes: $[\hat{p}, \hat{p}^2] = 0$ (any operator commutes with powers of itself).
+
+From Lemma 9.1.6: $[\hat{p}, V(\hat{x})] = -i\hbar\frac{dV}{dx}$.
+
+Therefore:
+
+$$
+[\hat{p}, \hat{H}] = -i\hbar\frac{dV}{dx}.
+$$
+
+**Step 4:** Substituting:
+
+$$
+\frac{d\langle p\rangle}{dt} = \frac{1}{i\hbar}\langle -i\hbar\frac{dV}{dx}\rangle = -\left\langle\frac{dV}{dx}\right\rangle.
+$$
+
+$\blacksquare$
+
+### 5.4 Proof of the Generalized Uncertainty Principle
+
+**Step 1:** Define the deviation operators:
+
+$$
+\hat{A}' = \hat{A} - \langle A\rangle, \qquad \hat{B}' = \hat{B} - \langle B\rangle.
+$$
+
+Note: $[\hat{A}', \hat{B}'] = [\hat{A}, \hat{B}]$ (the constant shifts cancel in the commutator).
+
+Also: $(\Delta A)^2 = \langle \hat{A}'^2\rangle$ and $(\Delta B)^2 = \langle \hat{B}'^2\rangle$.
+
+**Step 2:** Consider the state $\vert\phi\rangle = (\hat{A}' + i\lambda\hat{B}')\vert\Psi\rangle$ for real parameter $\lambda$. The norm is non-negative:
+
+$$
+\langle\phi\vert\phi\rangle \geq 0.
+$$
+
+**Step 3:** Expand:
+
+$$
+\langle\phi\vert\phi\rangle = \langle\Psi\vert(\hat{A}' - i\lambda\hat{B}')(\hat{A}' + i\lambda\hat{B}')\vert\Psi\rangle.
+$$
+
+$$
+= \langle \hat{A}'^2\rangle + i\lambda\langle \hat{A}'\hat{B}'\rangle - i\lambda\langle \hat{B}'\hat{A}'\rangle + \lambda^2\langle \hat{B}'^2\rangle.
+$$
+
+$$
+= (\Delta A)^2 + \lambda^2(\Delta B)^2 + i\lambda\langle[\hat{A}', \hat{B}']\rangle.
+$$
+
+$$
+= (\Delta A)^2 + \lambda^2(\Delta B)^2 + i\lambda\langle[\hat{A}, \hat{B}]\rangle.
+$$
+
+**Step 4:** Since $[\hat{A}, \hat{B}]$ is anti-Hermitian times $i$ for Hermitian $\hat{A}, \hat{B}$ (i.e., $\langle[\hat{A},\hat{B}]\rangle$ is purely imaginary), write $\langle[\hat{A},\hat{B}]\rangle = iC$ where $C$ is real. Then:
+
+$$
+f(\lambda) = (\Delta A)^2 - \lambda C + \lambda^2(\Delta B)^2 \geq 0 \quad \forall \lambda \in \mathbb{R}.
+$$
+
+**Step 5:** This is a quadratic in $\lambda$ that is non-negative everywhere. The discriminant must be non-positive:
+
+$$
+C^2 - 4(\Delta A)^2(\Delta B)^2 \leq 0.
+$$
+
+$$
+(\Delta A)^2(\Delta B)^2 \geq \frac{C^2}{4} = \frac{|\langle[\hat{A},\hat{B}]\rangle|^2}{4}.
+$$
+
+Taking the square root:
+
+$$
+\Delta A \cdot \Delta B \geq \frac{1}{2}|\langle[\hat{A},\hat{B}]\rangle|.
+$$
+
+$\blacksquare$
+
+**Application to $\hat{x}$ and $\hat{p}$:** Since $[\hat{x},\hat{p}] = i\hbar$, we have $|\langle[\hat{x},\hat{p}]\rangle| = \hbar$, giving:
+
+$$
+\Delta x \cdot \Delta p \geq \frac{\hbar}{2}.
+$$
+
+### 5.5 Derivation of the Time Evolution of Expectation Values
+
+**General formula:** For any operator $\hat{Q}$ (possibly time-dependent):
+
+$$
+\frac{d}{dt}\langle\hat{Q}\rangle = \frac{1}{i\hbar}\langle[\hat{Q},\hat{H}]\rangle + \left\langle\frac{\partial\hat{Q}}{\partial t}\right\rangle.
+$$
+
+**Proof:**
+
+$$
+\frac{d}{dt}\langle\hat{Q}\rangle = \frac{d}{dt}\langle\Psi\vert\hat{Q}\vert\Psi\rangle = \left\langle\frac{\partial\Psi}{\partial t}\bigg\vert\hat{Q}\bigg\vert\Psi\right\rangle + \left\langle\Psi\bigg\vert\frac{\partial\hat{Q}}{\partial t}\bigg\vert\Psi\right\rangle + \left\langle\Psi\bigg\vert\hat{Q}\bigg\vert\frac{\partial\Psi}{\partial t}\right\rangle.
+$$
+
+From the Schrödinger equation: $\vert\dot{\Psi}\rangle = \frac{1}{i\hbar}\hat{H}\vert\Psi\rangle$, so $\langle\dot{\Psi}\vert = -\frac{1}{i\hbar}\langle\Psi\vert\hat{H}$.
+
+Substituting:
+
+$$
+= -\frac{1}{i\hbar}\langle\Psi\vert\hat{H}\hat{Q}\vert\Psi\rangle + \left\langle\frac{\partial\hat{Q}}{\partial t}\right\rangle + \frac{1}{i\hbar}\langle\Psi\vert\hat{Q}\hat{H}\vert\Psi\rangle.
+$$
+
+$$
+= \frac{1}{i\hbar}\langle\Psi\vert(\hat{Q}\hat{H} - \hat{H}\hat{Q})\vert\Psi\rangle + \left\langle\frac{\partial\hat{Q}}{\partial t}\right\rangle = \frac{1}{i\hbar}\langle[\hat{Q},\hat{H}]\rangle + \left\langle\frac{\partial\hat{Q}}{\partial t}\right\rangle.
+$$
+
+$\blacksquare$
+
+### 5.6 Gaussian Wave Packet: Explicit Computation of $\Delta x \cdot \Delta p$
+
+**Setup:** Consider the normalized Gaussian wave packet at $t = 0$:
+
+$$
+\Psi(x, 0) = \left(\frac{2a}{\pi}\right)^{1/4} e^{-ax^2},
+$$
+
+where $a > 0$ is a real parameter controlling the width.
+
+**Step 1: Verify normalization.**
+
+$$
+\int_{-\infty}^{\infty} |\Psi|^2\,dx = \sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} e^{-2ax^2}\,dx.
+$$
+
+Using the Gaussian integral $\int_{-\infty}^{\infty} e^{-\alpha x^2}dx = \sqrt{\frac{\pi}{\alpha}}$ with $\alpha = 2a$:
+
+$$
+= \sqrt{\frac{2a}{\pi}} \cdot \sqrt{\frac{\pi}{2a}} = 1. \quad \checkmark
+$$
+
+**Step 2: Compute $\langle x \rangle$.**
+
+$$
+\langle x \rangle = \sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} x\,e^{-2ax^2}\,dx = 0,
+$$
+
+since the integrand is an odd function of $x$.
+
+**Step 3: Compute $\langle x^2 \rangle$.**
+
+$$
+\langle x^2 \rangle = \sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} x^2\,e^{-2ax^2}\,dx.
+$$
+
+Using $\int_{-\infty}^{\infty} x^2 e^{-\alpha x^2}dx = \frac{1}{2}\sqrt{\frac{\pi}{\alpha^3}}$ with $\alpha = 2a$:
+
+$$
+= \sqrt{\frac{2a}{\pi}} \cdot \frac{1}{2}\sqrt{\frac{\pi}{(2a)^3}} = \sqrt{\frac{2a}{\pi}} \cdot \frac{1}{2} \cdot \frac{\sqrt{\pi}}{(2a)^{3/2}} = \frac{1}{2} \cdot \frac{1}{2a} = \frac{1}{4a}.
+$$
+
+Therefore: $(\Delta x)^2 = \langle x^2\rangle - \langle x\rangle^2 = \frac{1}{4a}$, so $\Delta x = \frac{1}{2\sqrt{a}}$.
+
+**Step 4: Compute $\langle p \rangle$.**
+
+$$
+\langle p \rangle = -i\hbar\sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} e^{-ax^2}\frac{d}{dx}(e^{-ax^2})\,dx = -i\hbar\sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} e^{-ax^2}(-2ax)e^{-ax^2}\,dx.
+$$
+
+$$
+= 2ia\hbar\sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} x\,e^{-2ax^2}\,dx = 0 \quad (\text{odd integrand}).
+$$
+
+**Step 5: Compute $\langle p^2 \rangle$.**
+
+$$
+\langle p^2 \rangle = -\hbar^2\sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} e^{-ax^2}\frac{d^2}{dx^2}(e^{-ax^2})\,dx.
+$$
+
+Compute the second derivative:
+
+$$
+\frac{d}{dx}(e^{-ax^2}) = -2ax\,e^{-ax^2},
+$$
+
+$$
+\frac{d^2}{dx^2}(e^{-ax^2}) = (-2a + 4a^2x^2)e^{-ax^2}.
+$$
+
+Substituting:
+
+$$
+\langle p^2\rangle = -\hbar^2\sqrt{\frac{2a}{\pi}}\int_{-\infty}^{\infty} e^{-ax^2}(-2a + 4a^2x^2)e^{-ax^2}\,dx.
+$$
+
+$$
+= -\hbar^2\sqrt{\frac{2a}{\pi}}\left[ -2a\int e^{-2ax^2}dx + 4a^2\int x^2 e^{-2ax^2}dx \right].
+$$
+
+$$
+= -\hbar^2\sqrt{\frac{2a}{\pi}}\left[ -2a\sqrt{\frac{\pi}{2a}} + 4a^2 \cdot \frac{1}{2}\sqrt{\frac{\pi}{(2a)^3}} \right].
+$$
+
+$$
+= -\hbar^2\sqrt{\frac{2a}{\pi}}\left[ -2a\sqrt{\frac{\pi}{2a}} + 2a^2\cdot\frac{\sqrt{\pi}}{(2a)^{3/2}} \right].
+$$
+
+Simplify each term:
+
+First term: $-2a\sqrt{\frac{\pi}{2a}} = -2a \cdot \frac{\sqrt{\pi}}{\sqrt{2a}} = -\sqrt{2a}\sqrt{\pi}$.
+
+Second term: $2a^2 \cdot \frac{\sqrt{\pi}}{(2a)^{3/2}} = 2a^2 \cdot \frac{\sqrt{\pi}}{2\sqrt{2}a^{3/2}} = \frac{a^{1/2}\sqrt{\pi}}{\sqrt{2}} = \frac{\sqrt{a}\sqrt{\pi}}{\sqrt{2}}$.
+
+So:
+
+$$
+\langle p^2\rangle = -\hbar^2\sqrt{\frac{2a}{\pi}}\left[ -\sqrt{2a\pi} + \frac{\sqrt{a\pi}}{\sqrt{2}} \right] = -\hbar^2\sqrt{\frac{2a}{\pi}}\cdot\sqrt{\pi}\left[ -\sqrt{2a} + \frac{\sqrt{a}}{\sqrt{2}} \right].
+$$
+
+$$
+= -\hbar^2\sqrt{2a}\left[ -\sqrt{2a} + \frac{\sqrt{a}}{\sqrt{2}} \right] = -\hbar^2\sqrt{2a}\left[ -\sqrt{2a} + \sqrt{\frac{a}{2}} \right].
+$$
+
+$$
+= -\hbar^2\left[ -2a + \sqrt{2a}\cdot\sqrt{\frac{a}{2}} \right] = -\hbar^2\left[ -2a + a \right] = -\hbar^2(-a) = a\hbar^2.
+$$
+
+Therefore: $(\Delta p)^2 = \langle p^2\rangle - \langle p\rangle^2 = a\hbar^2$, so $\Delta p = \hbar\sqrt{a}$.
+
+**Step 6: Compute the uncertainty product.**
+
+$$
+\Delta x \cdot \Delta p = \frac{1}{2\sqrt{a}} \cdot \hbar\sqrt{a} = \frac{\hbar}{2}.
+$$
+
+The Gaussian wave packet **saturates** the Heisenberg uncertainty bound — it is a **minimum-uncertainty state**. $\blacksquare$
+
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 9.1.1 — Normalizing a Triangular Wave Function
+
+**Problem:** A particle in the region $0 \leq x \leq a$ has wave function:
+
+$$
+\Psi(x, 0) = \begin{cases} Ax & 0 \leq x \leq a/2 \\ A(a - x) & a/2 \leq x \leq a \\ 0 & \text{otherwise} \end{cases}
+$$
+
+Find the normalization constant $A$.
+
+**Solution:**
+
+**Step 1:** Apply the normalization condition:
+
+$$
+\int_0^a |\Psi|^2\,dx = 1.
+$$
+
+**Step 2:** Split the integral at $x = a/2$:
+
+$$
+\int_0^{a/2} A^2 x^2\,dx + \int_{a/2}^a A^2(a-x)^2\,dx = 1.
+$$
+
+**Step 3:** Evaluate the first integral:
+
+$$
+A^2\int_0^{a/2} x^2\,dx = A^2\left[\frac{x^3}{3}\right]_0^{a/2} = A^2 \cdot \frac{a^3}{24}.
+$$
+
+**Step 4:** Evaluate the second integral. Let $u = a - x$, $du = -dx$. When $x = a/2$, $u = a/2$; when $x = a$, $u = 0$:
+
+$$
+A^2\int_{a/2}^a (a-x)^2\,dx = A^2\int_{a/2}^0 u^2(-du) = A^2\int_0^{a/2} u^2\,du = A^2 \cdot \frac{a^3}{24}.
+$$
+
+**Step 5:** Combine:
+
+$$
+A^2\left(\frac{a^3}{24} + \frac{a^3}{24}\right) = 1 \implies A^2 \cdot \frac{a^3}{12} = 1 \implies A = \sqrt{\frac{12}{a^3}} = \frac{2\sqrt{3}}{a^{3/2}}.
+$$
+
+---
+
+### Example 9.1.2 — Expectation Value of Momentum for a Complex Exponential
+
+**Problem:** A particle has wave function $\Psi(x) = \left(\frac{2a}{\pi}\right)^{1/4} e^{-ax^2 + ibx}$ where $a, b$ are real positive constants. Compute $\langle p \rangle$.
+
+**Solution:**
+
+**Step 1:** Apply the momentum operator:
+
+$$
+\hat{p}\Psi = -i\hbar\frac{\partial}{\partial x}\left[\left(\frac{2a}{\pi}\right)^{1/4} e^{-ax^2 + ibx}\right].
+$$
+
+**Step 2:** Compute the derivative:
+
+$$
+\frac{\partial}{\partial x}e^{-ax^2 + ibx} = (-2ax + ib)e^{-ax^2 + ibx}.
+$$
+
+Therefore:
+
+$$
+\hat{p}\Psi = -i\hbar(-2ax + ib)\Psi = (2i\hbar ax + \hbar b)\Psi.
+$$
+
+**Step 3:** Compute the expectation value:
+
+$$
+\langle p \rangle = \int_{-\infty}^{\infty} \Psi^*\hat{p}\Psi\,dx = \int_{-\infty}^{\infty} |\Psi|^2(2i\hbar ax + \hbar b)\,dx.
+$$
+
+Note that $|\Psi|^2 = \sqrt{\frac{2a}{\pi}}e^{-2ax^2}$ (the $e^{ibx}$ phase cancels in $|\Psi|^2$).
+
+**Step 4:** The $2i\hbar ax$ term integrates to zero (odd function times even Gaussian):
+
+$$
+\langle p \rangle = \hbar b \int_{-\infty}^{\infty} |\Psi|^2\,dx = \hbar b \cdot 1 = \hbar b.
+$$
+
+**Physical interpretation:** The factor $e^{ibx}$ gives the wave packet a net momentum $p_0 = \hbar b$ (a "boost" in momentum space). This is the de Broglie relation: $p = \hbar k$ with $k = b$.
+
+---
+
+### Example 9.1.3 — Time Evolution of a Superposition State
+
+**Problem:** A particle in an infinite square well of width $L$ starts in the state:
+
+$$
+\Psi(x, 0) = \frac{1}{\sqrt{2}}\psi_1(x) + \frac{1}{\sqrt{2}}\psi_2(x),
+$$
+
+where $\psi_n(x) = \sqrt{\frac{2}{L}}\sin\left(\frac{n\pi x}{L}\right)$ and $E_n = \frac{n^2\pi^2\hbar^2}{2mL^2}$.
+
+Find $\Psi(x,t)$ and compute $\langle x \rangle(t)$.
+
+**Solution:**
+
+**Step 1:** Time evolution attaches phase factors to each energy eigenstate:
+
+$$
+\Psi(x,t) = \frac{1}{\sqrt{2}}\psi_1(x)e^{-iE_1 t/\hbar} + \frac{1}{\sqrt{2}}\psi_2(x)e^{-iE_2 t/\hbar}.
+$$
+
+**Step 2:** Compute $\langle x \rangle$:
+
+$$
+\langle x \rangle = \int_0^L x\,|\Psi(x,t)|^2\,dx.
+$$
+
+Expand $|\Psi|^2$:
+
+$$
+|\Psi|^2 = \frac{1}{2}|\psi_1|^2 + \frac{1}{2}|\psi_2|^2 + \frac{1}{2}\psi_1\psi_2\left(e^{i(E_2-E_1)t/\hbar} + e^{-i(E_2-E_1)t/\hbar}\right).
+$$
+
+$$
+= \frac{1}{2}|\psi_1|^2 + \frac{1}{2}|\psi_2|^2 + \psi_1\psi_2\cos(\omega_{21}t),
+$$
+
+where $\omega_{21} = (E_2 - E_1)/\hbar = \frac{3\pi^2\hbar}{2mL^2}$.
+
+**Step 3:** Compute the three integrals:
+
+$$
+\int_0^L x|\psi_n|^2\,dx = \frac{2}{L}\int_0^L x\sin^2\left(\frac{n\pi x}{L}\right)dx = \frac{L}{2} \quad (\text{for all } n).
+$$
+
+The cross term:
+
+$$
+\int_0^L x\,\psi_1\psi_2\,dx = \frac{2}{L}\int_0^L x\sin\left(\frac{\pi x}{L}\right)\sin\left(\frac{2\pi x}{L}\right)dx.
+$$
+
+Using the product-to-sum formula: $\sin A\sin B = \frac{1}{2}[\cos(A-B) - \cos(A+B)]$:
+
+$$
+= \frac{1}{L}\int_0^L x\left[\cos\left(\frac{\pi x}{L}\right) - \cos\left(\frac{3\pi x}{L}\right)\right]dx.
+$$
+
+Evaluate each by integration by parts ($\int x\cos(kx)dx = \frac{x\sin(kx)}{k} + \frac{\cos(kx)}{k^2}$):
+
+For $k = \pi/L$:
+
+$$
+\int_0^L x\cos\left(\frac{\pi x}{L}\right)dx = \left[\frac{xL\sin(\pi x/L)}{\pi} + \frac{L^2\cos(\pi x/L)}{\pi^2}\right]_0^L = \frac{L^2\cos\pi}{\pi^2} - \frac{L^2}{\pi^2} = \frac{-2L^2}{\pi^2}.
+$$
+
+For $k = 3\pi/L$:
+
+$$
+\int_0^L x\cos\left(\frac{3\pi x}{L}\right)dx = \left[\frac{xL\sin(3\pi x/L)}{3\pi} + \frac{L^2\cos(3\pi x/L)}{9\pi^2}\right]_0^L = \frac{L^2(-1)}{9\pi^2} - \frac{L^2}{9\pi^2} = \frac{-2L^2}{9\pi^2}.
+$$
+
+Therefore:
+
+$$
+\int_0^L x\,\psi_1\psi_2\,dx = \frac{1}{L}\left(\frac{-2L^2}{\pi^2} - \frac{-2L^2}{9\pi^2}\right) = \frac{1}{L}\cdot\frac{-2L^2}{\pi^2}\left(1 - \frac{1}{9}\right) = \frac{-2L}{\pi^2}\cdot\frac{8}{9} = \frac{-16L}{9\pi^2}.
+$$
+
+**Step 4:** Assemble:
+
+$$
+\langle x\rangle(t) = \frac{1}{2}\cdot\frac{L}{2} + \frac{1}{2}\cdot\frac{L}{2} + \frac{-16L}{9\pi^2}\cos(\omega_{21}t) = \frac{L}{2} - \frac{16L}{9\pi^2}\cos\left(\frac{3\pi^2\hbar t}{2mL^2}\right).
+$$
+
+The expectation value oscillates about the center of the well with amplitude $\frac{16L}{9\pi^2} \approx 0.18L$ and angular frequency $\omega_{21}$.
+
+---
+
+### Example 9.1.4 — Verifying the Uncertainty Principle for the Ground State of the Infinite Well
+
+**Problem:** For the ground state $\psi_1(x) = \sqrt{\frac{2}{L}}\sin\left(\frac{\pi x}{L}\right)$ of the infinite square well, compute $\Delta x \cdot \Delta p$ and verify it exceeds $\hbar/2$.
+
+**Solution:**
+
+**Step 1: Compute $\langle x \rangle$ and $\langle x^2 \rangle$.**
+
+$$
+\langle x \rangle = \frac{2}{L}\int_0^L x\sin^2\left(\frac{\pi x}{L}\right)dx = \frac{L}{2}.
+$$
+
+$$
+\langle x^2 \rangle = \frac{2}{L}\int_0^L x^2\sin^2\left(\frac{\pi x}{L}\right)dx.
+$$
+
+Using $\sin^2\theta = \frac{1-\cos 2\theta}{2}$:
+
+$$
+= \frac{1}{L}\int_0^L x^2\,dx - \frac{1}{L}\int_0^L x^2\cos\left(\frac{2\pi x}{L}\right)dx = \frac{L^2}{3} - \frac{1}{L}\int_0^L x^2\cos\left(\frac{2\pi x}{L}\right)dx.
+$$
+
+The second integral (by parts twice, or using $\int_0^L x^2\cos(2\pi x/L)dx = \frac{L^3}{2\pi^2}$):
+
+$$
+\int_0^L x^2\cos\left(\frac{2\pi x}{L}\right)dx = \frac{L^3}{2\pi^2}.
+$$
+
+Therefore:
+
+$$
+\langle x^2\rangle = \frac{L^2}{3} - \frac{L^2}{2\pi^2}.
+$$
+
+$$
+(\Delta x)^2 = \langle x^2\rangle - \langle x\rangle^2 = \frac{L^2}{3} - \frac{L^2}{2\pi^2} - \frac{L^2}{4} = L^2\left(\frac{1}{12} - \frac{1}{2\pi^2}\right).
+$$
+
+**Step 2: Compute $\langle p \rangle$ and $\langle p^2 \rangle$.**
+
+$\langle p \rangle = 0$ (the wave function is real and the well is symmetric about $L/2$).
+
+$$
+\langle p^2 \rangle = -\hbar^2\frac{2}{L}\int_0^L \sin\left(\frac{\pi x}{L}\right)\frac{d^2}{dx^2}\sin\left(\frac{\pi x}{L}\right)dx.
+$$
+
+$$
+\frac{d^2}{dx^2}\sin\left(\frac{\pi x}{L}\right) = -\frac{\pi^2}{L^2}\sin\left(\frac{\pi x}{L}\right).
+$$
+
+$$
+\langle p^2\rangle = -\hbar^2\frac{2}{L}\cdot\left(-\frac{\pi^2}{L^2}\right)\int_0^L\sin^2\left(\frac{\pi x}{L}\right)dx = \frac{2\hbar^2\pi^2}{L^3}\cdot\frac{L}{2} = \frac{\pi^2\hbar^2}{L^2}.
+$$
+
+Therefore: $(\Delta p)^2 = \frac{\pi^2\hbar^2}{L^2}$, so $\Delta p = \frac{\pi\hbar}{L}$.
+
+**Step 3: Compute the product.**
+
+$$
+\Delta x \cdot \Delta p = L\sqrt{\frac{1}{12} - \frac{1}{2\pi^2}} \cdot \frac{\pi\hbar}{L} = \pi\hbar\sqrt{\frac{1}{12} - \frac{1}{2\pi^2}}.
+$$
+
+Numerically:
+
+$$
+\frac{1}{12} - \frac{1}{2\pi^2} = 0.08333 - 0.05066 = 0.03267.
+$$
+
+$$
+\Delta x \cdot \Delta p = \pi\hbar\sqrt{0.03267} = \pi\hbar \cdot 0.1807 = 0.5678\,\hbar.
+$$
+
+Since $\frac{\hbar}{2} = 0.5\,\hbar$, we confirm:
+
+$$
+\Delta x \cdot \Delta p = 0.5678\,\hbar > \frac{\hbar}{2}. \quad \checkmark
+$$
+
+The ground state of the infinite well is **not** a minimum-uncertainty state (only the Gaussian achieves equality).
+
+---
+
+### Example 9.1.5 — Computing the Probability Current for a Plane Wave
+
+**Problem:** Compute the probability current $j(x,t)$ for the plane wave $\Psi(x,t) = Ae^{i(kx - \omega t)}$.
+
+**Solution:**
+
+**Step 1:** Compute the spatial derivative:
+
+$$
+\frac{\partial\Psi}{\partial x} = ik\,\Psi.
+$$
+
+**Step 2:** Compute $\Psi^*$:
+
+$$
+\Psi^* = A^*e^{-i(kx - \omega t)}.
+$$
+
+$$
+\frac{\partial\Psi^*}{\partial x} = -ik\,\Psi^*.
+$$
+
+**Step 3:** Substitute into the probability current formula:
+
+$$
+j = \frac{\hbar}{2mi}\left(\Psi^*\frac{\partial\Psi}{\partial x} - \Psi\frac{\partial\Psi^*}{\partial x}\right).
+$$
+
+$$
+= \frac{\hbar}{2mi}\left(\Psi^* \cdot ik\Psi - \Psi \cdot (-ik)\Psi^*\right) = \frac{\hbar}{2mi}\left(ik|\Psi|^2 + ik|\Psi|^2\right).
+$$
+
+$$
+= \frac{\hbar}{2mi} \cdot 2ik|A|^2 = \frac{\hbar k}{m}|A|^2.
+$$
+
+**Step 4:** Recognize $\hbar k = p$ and $p/m = v$ (classical velocity):
+
+$$
+j = \frac{p}{m}|A|^2 = v\,\rho,
+$$
+
+where $\rho = |A|^2$ is the (uniform) probability density. This is the quantum analogue of the classical current density $\mathbf{j} = \rho\mathbf{v}$.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) — The TISE is an eigenvalue equation $\hat{H}\psi = E\psi$
+- [2.7 - Inner Product Spaces & Orthogonality](2.7---Inner-Product-Spaces-&-Orthogonality) — Wave functions live in a Hilbert space with inner product $\langle f|g\rangle = \int f^*g\,dx$
+- [9.2 - Hilbert Space & Bra-Ket Formalism](9.2---Hilbert-Space-&-Bra-Ket-Formalism) — Abstract formulation of everything in this chapter
+- [9.3 - The 1D Infinite Square Well & Harmonic Oscillator](9.3---The-1D-Infinite-Square-Well-&-Harmonic-Oscillator) — Explicit solutions to the TISE
+- [9.4 - Angular Momentum, Spin & Fine Structure](9.4---Angular-Momentum,-Spin-&-Fine-Structure) — Extension to 3D and internal degrees of freedom
+
+### External References
+- **Griffiths, D.J.** *Introduction to Quantum Mechanics*, 3rd ed. — Chapters 1–3 cover all material in this note.
+- **Susskind, L. & Friedman, A.** *Quantum Mechanics: The Theoretical Minimum* — Lectures 1–4 for the conceptual foundation.
+- **MIT OCW 8.04** — [Quantum Physics I](https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/) — Video lectures covering wave mechanics.
+- **Tong, D.** [Quantum Field Theory Lecture Notes](https://www.damtp.cam.ac.uk/user/tong/qft.html) — Chapter 1 for the transition from QM to QFT.
+
+---
+
+*Next: [9.2 - Hilbert Space & Bra-Ket Formalism](9.2---Hilbert-Space-&-Bra-Ket-Formalism) — The abstract algebraic framework underlying wave mechanics.*
+
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Free-Particle Gaussian Wave Packet: Time Evolution
+
+**Problem:** A free particle ($V = 0$) has initial wave function:
+
+$$
+\Psi(x, 0) = \left(\frac{2a}{\pi}\right)^{1/4} e^{ik_0 x} e^{-ax^2}
+$$
+
+where $a > 0$ determines the initial width and $k_0$ is the central wave number. Find $\Psi(x,t)$ for all $t > 0$ and show the wave packet spreads.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Fourier Transform of the Initial State
+
+The momentum-space wave function is:
+
+$$
+\phi(k) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} \Psi(x,0)\,e^{-ikx}\,dx = \frac{1}{\sqrt{2\pi}}\left(\frac{2a}{\pi}\right)^{1/4} \int_{-\infty}^{\infty} e^{i(k_0 - k)x} e^{-ax^2}\,dx.
+$$
+
+This is a standard Gaussian integral of the form $\int_{-\infty}^{\infty} e^{-\alpha x^2 + \beta x}\,dx = \sqrt{\frac{\pi}{\alpha}}\,e^{\beta^2/(4\alpha)}$ with $\alpha = a$ and $\beta = i(k_0 - k)$:
+
+$$
+\phi(k) = \frac{1}{\sqrt{2\pi}}\left(\frac{2a}{\pi}\right)^{1/4}\sqrt{\frac{\pi}{a}}\,\exp\left(\frac{-( k - k_0)^2}{4a}\right).
+$$
+
+Simplify the prefactor:
+
+$$
+\frac{1}{\sqrt{2\pi}}\left(\frac{2a}{\pi}\right)^{1/4}\sqrt{\frac{\pi}{a}} = \frac{1}{\sqrt{2\pi}} \cdot \frac{(2a)^{1/4}}{\pi^{1/4}} \cdot \frac{\pi^{1/2}}{a^{1/2}} = \frac{(2a)^{1/4}\pi^{1/4}}{a^{1/2}\sqrt{2\pi}}.
+$$
+
+$$
+= \frac{2^{1/4}}{a^{1/4}\sqrt{2}\pi^{1/4}} = \frac{1}{2^{1/4} a^{1/4} \pi^{1/4}} = \left(\frac{1}{2a\pi}\right)^{1/4}.
+$$
+
+Therefore:
+
+$$
+\phi(k) = \left(\frac{1}{2\pi a}\right)^{1/4} \exp\left(-\frac{(k - k_0)^2}{4a}\right).
+$$
+
+This is a Gaussian centered at $k_0$ with width $\Delta k = \sqrt{a}$.
+
+#### Step 2: Time Evolution in Momentum Space
+
+For a free particle, $E = \hbar^2 k^2 / (2m)$, so:
+
+$$
+\Psi(x,t) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\infty} \phi(k)\,e^{i(kx - \omega(k)t)}\,dk
+$$
+
+where $\omega(k) = \hbar k^2/(2m)$. Substituting $\phi(k)$:
+
+$$
+\Psi(x,t) = \frac{1}{\sqrt{2\pi}}\left(\frac{1}{2\pi a}\right)^{1/4}\int_{-\infty}^{\infty} \exp\left(-\frac{(k-k_0)^2}{4a} + ikx - \frac{i\hbar k^2 t}{2m}\right)dk.
+$$
+
+#### Step 3: Complete the Square in the Exponent
+
+Let $q = k - k_0$. The exponent becomes:
+
+$$
+-\frac{q^2}{4a} + i(q + k_0)x - \frac{i\hbar(q + k_0)^2 t}{2m}.
+$$
+
+Expand:
+
+$$
+= -\frac{q^2}{4a} + iqx + ik_0 x - \frac{i\hbar t}{2m}(q^2 + 2qk_0 + k_0^2).
+$$
+
+$$
+= -q^2\left(\frac{1}{4a} + \frac{i\hbar t}{2m}\right) + q\left(ix - \frac{i\hbar t k_0}{m}\right) + ik_0 x - \frac{i\hbar k_0^2 t}{2m}.
+$$
+
+Define:
+
+$$
+\gamma(t) \equiv \frac{1}{4a} + \frac{i\hbar t}{2m}, \qquad \beta \equiv i\left(x - \frac{\hbar k_0 t}{m}\right).
+$$
+
+The exponent is $-\gamma q^2 + \beta q + ik_0 x - \frac{i\hbar k_0^2 t}{2m}$.
+
+#### Step 4: Evaluate the Gaussian Integral
+
+$$
+\int_{-\infty}^{\infty} e^{-\gamma q^2 + \beta q}\,dq = \sqrt{\frac{\pi}{\gamma}}\,e^{\beta^2/(4\gamma)}.
+$$
+
+Therefore:
+
+$$
+\Psi(x,t) = \frac{1}{\sqrt{2\pi}}\left(\frac{1}{2\pi a}\right)^{1/4}\sqrt{\frac{\pi}{\gamma}}\,\exp\left(\frac{\beta^2}{4\gamma} + ik_0 x - \frac{i\hbar k_0^2 t}{2m}\right).
+$$
+
+#### Step 5: Compute the Probability Density
+
+$$
+|\Psi(x,t)|^2 = \left(\frac{2a}{\pi}\right)^{1/2}\frac{1}{2|\gamma|}\sqrt{\frac{\pi}{|\gamma|^2}} \cdot \exp\left(-\frac{(x - v_g t)^2}{2\sigma(t)^2}\right) \cdot \frac{1}{\sqrt{2\pi}\,\sigma(t)}
+$$
+
+where the group velocity is $v_g = \hbar k_0/m$ and the time-dependent width is:
+
+$$
+\sigma(t)^2 = \frac{1}{4a}\left(1 + \frac{4a^2\hbar^2 t^2}{m^2}\right) = \sigma_0^2\left(1 + \frac{t^2}{\tau^2}\right),
+$$
+
+with $\sigma_0 = 1/(2\sqrt{a})$ and the spreading time scale $\tau = m/(2a\hbar)$.
+
+#### Step 6: Physical Interpretation
+
+The normalized result is:
+
+$$
+|\Psi(x,t)|^2 = \frac{1}{\sqrt{2\pi}\,\sigma(t)}\exp\left(-\frac{(x - v_g t)^2}{2\sigma(t)^2}\right).
+$$
+
+Key physics:
+- The center moves at the group velocity $v_g = \hbar k_0 / m = p_0/m$ (classical!).
+- The width grows: $\sigma(t) = \sigma_0\sqrt{1 + t^2/\tau^2}$.
+- At $t = \tau$, the width has increased by a factor of $\sqrt{2}$.
+- The spreading rate is faster for lighter particles and narrower initial packets (larger $a$). $\blacksquare$
+
+</details>
+
+### Example 8.2 — Reflection and Transmission at a Potential Step
+
+**Problem:** A particle of energy $E > 0$ is incident from the left on a potential step:
+
+$$
+V(x) = \begin{cases} 0 & x < 0 \\ V_0 & x > 0 \end{cases}
+$$
+
+For the case $E > V_0 > 0$, find the reflection coefficient $R$ and transmission coefficient $T$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Write the TISE in Each Region
+
+**Region I** ($x \lt  0$, $V = 0$):
+
+$$
+-\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} = E\psi \implies \frac{d^2\psi}{dx^2} = -k_1^2\psi, \quad k_1 = \frac{\sqrt{2mE}}{\hbar}.
+$$
+
+General solution: $\psi_I(x) = Ae^{ik_1 x} + Be^{-ik_1 x}$ (incident + reflected).
+
+**Region II** ($x \gt  0$, $V = V_0$):
+
+$$
+-\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} + V_0\psi = E\psi \implies \frac{d^2\psi}{dx^2} = -k_2^2\psi, \quad k_2 = \frac{\sqrt{2m(E - V_0)}}{\hbar}.
+$$
+
+General solution: $\psi_{II}(x) = Ce^{ik_2 x} + De^{-ik_2 x}$.
+
+Since there is no wave coming from the right: $D = 0$.
+
+#### Step 2: Apply Boundary Conditions at $x = 0$
+
+Continuity of $\psi$:
+
+$$
+A + B = C. \tag{1}
+$$
+
+Continuity of $\psi'$:
+
+$$
+ik_1(A - B) = ik_2 C \implies k_1(A - B) = k_2 C. \tag{2}
+$$
+
+#### Step 3: Solve for $B/A$ and $C/A$
+
+From (1): $C = A + B$. Substitute into (2):
+
+$$
+k_1(A - B) = k_2(A + B).
+$$
+
+$$
+k_1 A - k_1 B = k_2 A + k_2 B.
+$$
+
+$$
+A(k_1 - k_2) = B(k_1 + k_2).
+$$
+
+$$
+\frac{B}{A} = \frac{k_1 - k_2}{k_1 + k_2}.
+$$
+
+From (1):
+
+$$
+\frac{C}{A} = 1 + \frac{B}{A} = \frac{2k_1}{k_1 + k_2}.
+$$
+
+#### Step 4: Compute Reflection and Transmission Coefficients
+
+The reflection coefficient is:
+
+$$
+R = \left|\frac{B}{A}\right|^2 = \left(\frac{k_1 - k_2}{k_1 + k_2}\right)^2.
+$$
+
+The transmission coefficient uses the probability current ratio $j_{\text{trans}}/j_{\text{inc}}$:
+
+$$
+T = \frac{k_2}{k_1}\left|\frac{C}{A}\right|^2 = \frac{k_2}{k_1}\cdot\frac{4k_1^2}{(k_1 + k_2)^2} = \frac{4k_1 k_2}{(k_1 + k_2)^2}.
+$$
+
+#### Step 5: Verify $R + T = 1$
+
+$$
+R + T = \frac{(k_1 - k_2)^2 + 4k_1 k_2}{(k_1 + k_2)^2} = \frac{k_1^2 - 2k_1 k_2 + k_2^2 + 4k_1 k_2}{(k_1 + k_2)^2} = \frac{(k_1 + k_2)^2}{(k_1 + k_2)^2} = 1. \quad \checkmark
+$$
+
+#### Step 6: Limiting Cases
+
+- $E \gg V_0$: $k_2 \to k_1$, so $R \to 0$, $T \to 1$ (no reflection).
+- $E \to V_0^+$: $k_2 \to 0$, so $R \to 1$, $T \to 0$ (total reflection).
+- Classical limit: classically $R = 0$ for $E \gt  V_0$. The quantum reflection is a purely wave-mechanical effect. $\blacksquare$
+
+</details>
+
+### Example 8.3 — Quantum Tunneling Through a Rectangular Barrier
+
+**Problem:** A particle of energy $E < V_0$ encounters a rectangular barrier:
+
+$$
+V(x) = \begin{cases} 0 & x < 0 \\ V_0 & 0 \leq x \leq L \\ 0 & x > L \end{cases}
+$$
+
+Derive the transmission probability $T$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Define Wave Numbers
+
+Region I ($x \lt  0$): $k = \sqrt{2mE}/\hbar$.
+
+Region II ($0 \leq x \leq L$): $\kappa = \sqrt{2m(V_0 - E)}/\hbar$ (evanescent).
+
+Region III ($x \gt  L$): same $k$ as Region I.
+
+#### Step 2: Write Solutions
+
+$$
+\psi_I = Ae^{ikx} + Be^{-ikx}, \quad \psi_{II} = Ce^{\kappa x} + De^{-\kappa x}, \quad \psi_{III} = Fe^{ikx}.
+$$
+
+(No leftward wave in Region III.)
+
+#### Step 3: Boundary Conditions at $x = 0$
+
+$$
+A + B = C + D, \tag{1}
+$$
+
+$$
+ik(A - B) = \kappa(C - D). \tag{2}
+$$
+
+#### Step 4: Boundary Conditions at $x = L$
+
+$$
+Ce^{\kappa L} + De^{-\kappa L} = Fe^{ikL}, \tag{3}
+$$
+
+$$
+\kappa(Ce^{\kappa L} - De^{-\kappa L}) = ikFe^{ikL}. \tag{4}
+$$
+
+#### Step 5: Solve the System
+
+From (3) and (4):
+
+$$
+C = \frac{F e^{ikL}}{2}\left(1 + \frac{ik}{\kappa}\right)e^{-\kappa L}, \quad D = \frac{F e^{ikL}}{2}\left(1 - \frac{ik}{\kappa}\right)e^{\kappa L}.
+$$
+
+Substitute into (1) and (2). After algebraic manipulation (multiplying and collecting real/imaginary parts):
+
+$$
+\frac{A}{F} = e^{ikL}\left[\cosh(\kappa L) + \frac{i}{2}\left(\frac{\kappa}{k} - \frac{k}{\kappa}\right)\sinh(\kappa L)\right].
+$$
+
+#### Step 6: Transmission Coefficient
+
+$$
+T = \left|\frac{F}{A}\right|^2 = \frac{1}{\cosh^2(\kappa L) + \frac{1}{4}\left(\frac{\kappa}{k} - \frac{k}{\kappa}\right)^2\sinh^2(\kappa L)}.
+$$
+
+Using $\cosh^2 x = 1 + \sinh^2 x$:
+
+$$
+T = \frac{1}{1 + \left[1 + \frac{1}{4}\left(\frac{\kappa}{k} - \frac{k}{\kappa}\right)^2\right]\sinh^2(\kappa L)}.
+$$
+
+Simplify the bracket:
+
+$$
+1 + \frac{1}{4}\left(\frac{\kappa^2 - k^2}{k\kappa}\right)^2 = 1 + \frac{(\kappa^2 + k^2)^2 - 4k^2\kappa^2}{4k^2\kappa^2} = \frac{(\kappa^2 + k^2)^2}{4k^2\kappa^2}.
+$$
+
+Wait — let's be more careful. We have $\frac{\kappa}{k} - \frac{k}{\kappa} = \frac{\kappa^2 - k^2}{k\kappa}$. So:
+
+$$
+\frac{1}{4}\left(\frac{\kappa^2 - k^2}{k\kappa}\right)^2 = \frac{(\kappa^2 - k^2)^2}{4k^2\kappa^2}.
+$$
+
+And $1 + \frac{(\kappa^2 - k^2)^2}{4k^2\kappa^2} = \frac{4k^2\kappa^2 + (\kappa^2 - k^2)^2}{4k^2\kappa^2} = \frac{(\kappa^2 + k^2)^2}{4k^2\kappa^2}$.
+
+Therefore:
+
+$$
+T = \left[1 + \frac{(k^2 + \kappa^2)^2}{4k^2\kappa^2}\sinh^2(\kappa L)\right]^{-1}.
+$$
+
+Substituting $k^2 = 2mE/\hbar^2$ and $\kappa^2 = 2m(V_0 - E)/\hbar^2$, so $k^2 + \kappa^2 = 2mV_0/\hbar^2$:
+
+$$
+\boxed{T = \left[1 + \frac{V_0^2}{4E(V_0 - E)}\sinh^2\left(\frac{\sqrt{2m(V_0 - E)}}{\hbar}L\right)\right]^{-1}.}
+$$
+
+#### Step 7: Thick Barrier Approximation ($\kappa L \gg 1$)
+
+$\sinh(\kappa L) \approx \frac{1}{2}e^{\kappa L}$, so:
+
+$$
+T \approx \frac{16E(V_0 - E)}{V_0^2}\,e^{-2\kappa L}.
+$$
+
+The exponential suppression $e^{-2\kappa L}$ is the hallmark of quantum tunneling. $\blacksquare$
+
+</details>
+
+### Example 8.4 — Scattering from a Finite Square Well: Resonances
+
+**Problem:** A particle of energy $E > 0$ scatters off a finite square well of depth $V_0$ and width $L$:
+
+$$
+V(x) = \begin{cases} 0 & |x| > L/2 \\ -V_0 & |x| \leq L/2 \end{cases}
+$$
+
+Find the transmission coefficient and show that perfect transmission ($T = 1$) occurs at specific resonance energies.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Step 1: Define Wave Numbers
+
+Outside the well: $k = \sqrt{2mE}/\hbar$.
+
+Inside the well: $q = \sqrt{2m(E + V_0)}/\hbar$.
+
+#### Step 2: The Transmission Coefficient
+
+By the same transfer-matrix method as the barrier problem (replacing $\kappa \to iq$, i.e., $\sinh(i\alpha) = i\sin\alpha$):
+
+$$
+T = \left[1 + \frac{(q^2 - k^2)^2}{4k^2 q^2}\sin^2(qL)\right]^{-1}.
+$$
+
+Since $q^2 - k^2 = 2mV_0/\hbar^2$:
+
+$$
+T = \left[1 + \frac{V_0^2}{4E(E + V_0)}\sin^2\left(\frac{\sqrt{2m(E + V_0)}}{\hbar}L\right)\right]^{-1}.
+$$
+
+#### Step 3: Resonance Condition
+
+Perfect transmission $T = 1$ occurs when $\sin^2(qL) = 0$, i.e.:
+
+$$
+qL = n\pi, \quad n = 1, 2, 3, \ldots
+$$
+
+$$
+\frac{\sqrt{2m(E_n + V_0)}}{\hbar}L = n\pi \implies E_n = \frac{n^2\pi^2\hbar^2}{2mL^2} - V_0.
+$$
+
+#### Step 4: Physical Interpretation
+
+At resonance energies, the well width equals an integer number of half-wavelengths of the interior wave. This is the quantum analogue of a Fabry-Pérot interferometer: waves reflected from the two edges of the well interfere destructively, producing zero net reflection.
+
+These are called **transmission resonances** or **Ramsauer-Townsend resonances** (observed experimentally in electron-noble gas scattering). $\blacksquare$
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### Appendix 9.1 — The Madelung Hydrodynamic Interpretation
+
+The Schrödinger equation can be recast as a pair of classical-looking fluid equations. This remarkable reformulation, due to Erwin Madelung (1927), reveals the hidden hydrodynamic structure of quantum mechanics.
+
+**Setup:** Write the wave function in polar form:
+
+$$
+\Psi(x,t) = \sqrt{\rho(x,t)}\,e^{iS(x,t)/\hbar},
+$$
+
+where $\rho = |\Psi|^2$ is the probability density and $S$ is a real phase function.
+
+**Step 1: Substitute into the Schrödinger equation.**
+
+$$
+i\hbar\frac{\partial\Psi}{\partial t} = -\frac{\hbar^2}{2m}\frac{\partial^2\Psi}{\partial x^2} + V\Psi.
+$$
+
+Compute the left side:
+
+$$
+i\hbar\frac{\partial\Psi}{\partial t} = i\hbar\left(\frac{\dot{\rho}}{2\sqrt{\rho}} + \frac{i\dot{S}}{\hbar}\sqrt{\rho}\right)e^{iS/\hbar} = \left(\frac{i\hbar\dot{\rho}}{2\sqrt{\rho}} - \dot{S}\sqrt{\rho}\right)e^{iS/\hbar}.
+$$
+
+Compute the right side (the kinetic term requires the second derivative):
+
+$$
+\frac{\partial\Psi}{\partial x} = \left(\frac{\rho'}{2\sqrt{\rho}} + \frac{iS'}{\hbar}\sqrt{\rho}\right)e^{iS/\hbar}.
+$$
+
+$$
+\frac{\partial^2\Psi}{\partial x^2} = \left[\frac{\rho''}{2\sqrt{\rho}} - \frac{(\rho')^2}{4\rho^{3/2}} + \frac{iS''\sqrt{\rho}}{\hbar} + \frac{iS'\rho'}{\hbar\sqrt{\rho}} - \frac{(S')^2\sqrt{\rho}}{\hbar^2}\right]e^{iS/\hbar}.
+$$
+
+**Step 2: Separate real and imaginary parts.**
+
+Equating imaginary parts gives the **continuity equation**:
+
+$$
+\frac{\partial\rho}{\partial t} + \frac{\partial}{\partial x}\left(\rho\,\frac{\partial S/\partial x}{m}\right) = 0.
+$$
+
+Defining the velocity field $v(x,t) = \frac{1}{m}\frac{\partial S}{\partial x}$, this is:
+
+$$
+\frac{\partial\rho}{\partial t} + \frac{\partial(\rho v)}{\partial x} = 0.
+$$
+
+This is identical to the classical continuity equation for a compressible fluid.
+
+Equating real parts gives the **quantum Hamilton-Jacobi equation**:
+
+$$
+\frac{\partial S}{\partial t} + \frac{(\nabla S)^2}{2m} + V + Q = 0,
+$$
+
+where the **quantum potential** is:
+
+$$
+Q = -\frac{\hbar^2}{2m}\frac{1}{\sqrt{\rho}}\frac{\partial^2\sqrt{\rho}}{\partial x^2} = -\frac{\hbar^2}{2m}\left(\frac{\rho''}{2\rho} - \frac{(\rho')^2}{4\rho^2}\right).
+$$
+
+**Step 3: Derive the Euler equation.**
+
+Taking $\partial/\partial x$ of the Hamilton-Jacobi equation and using $v = S'/m$:
+
+$$
+m\frac{\partial v}{\partial t} + mv\frac{\partial v}{\partial x} = -\frac{\partial V}{\partial x} - \frac{\partial Q}{\partial x}.
+$$
+
+This is Newton's second law for a fluid element, with an extra "quantum force" $-\partial Q/\partial x$.
+
+**Physical significance:**
+- When $\hbar \to 0$, $Q \to 0$ and we recover classical Hamilton-Jacobi theory.
+- The quantum potential is responsible for all non-classical effects: tunneling, interference, zero-point energy.
+- Bohm (1952) elevated this to a full interpretation of QM (de Broglie-Bohm pilot wave theory), where particles follow deterministic trajectories guided by $S$.
+
+**References:** Madelung, E. (1927) *Z. Phys.* **40**, 322; Bohm, D. (1952) *Phys. Rev.* **85**, 166; Holland, P. *The Quantum Theory of Motion* (Cambridge, 1993).
+
+---
+
+### Appendix 9.2 — The WKB Approximation: Connecting Waves to Classical Trajectories
+
+The Wentzel-Kramers-Brillouin (WKB) method provides approximate solutions to the Schrödinger equation in the semiclassical limit where the potential varies slowly compared to the de Broglie wavelength.
+
+**Starting point:** For the TISE $-\frac{\hbar^2}{2m}\psi'' + V(x)\psi = E\psi$, write $\psi = e^{i\phi(x)/\hbar}$ and expand $\phi$ in powers of $\hbar$:
+
+$$
+\phi(x) = \phi_0(x) + \hbar\phi_1(x) + \hbar^2\phi_2(x) + \cdots
+$$
+
+**Zeroth order** ($\hbar^0$): $(\phi_0')^2 = 2m(E - V) = p(x)^2$, giving $\phi_0 = \pm\int p(x)\,dx$.
+
+**First order** ($\hbar^1$): $2\phi_0'\phi_1' + i\phi_0'' = 0$, giving $\phi_1 = \frac{i}{2}\ln p(x)$.
+
+**The WKB wave function** (classically allowed region, $E > V$):
+
+$$
+\psi_{\text{WKB}}(x) \approx \frac{A}{\sqrt{p(x)}}\exp\left(\frac{i}{\hbar}\int^x p(x')\,dx'\right) + \frac{B}{\sqrt{p(x)}}\exp\left(-\frac{i}{\hbar}\int^x p(x')\,dx'\right).
+$$
+
+**In the classically forbidden region** ($E < V$), $p(x) \to i|p(x)| = i\kappa(x)\hbar$:
+
+$$
+\psi_{\text{WKB}}(x) \approx \frac{C}{\sqrt{\kappa(x)}}e^{-\int^x \kappa\,dx'} + \frac{D}{\sqrt{\kappa(x)}}e^{+\int^x \kappa\,dx'}.
+$$
+
+**Connection formulas** at turning points (where $E = V$) require Airy function matching — the WKB approximation breaks down precisely at these points.
+
+**Application — WKB tunneling probability:**
+
+$$
+T \approx \exp\left(-\frac{2}{\hbar}\int_{x_1}^{x_2}\sqrt{2m(V(x) - E)}\,dx\right),
+$$
+
+where $x_1, x_2$ are the classical turning points. This generalizes the rectangular barrier result to arbitrary barrier shapes.
+
+**References:** Griffiths QM §9.1; Sakurai §2.4; Landau & Lifshitz *Quantum Mechanics* §46–50.
+

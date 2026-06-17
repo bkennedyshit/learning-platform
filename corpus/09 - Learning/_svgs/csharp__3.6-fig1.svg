@@ -1,0 +1,109 @@
+<svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-life" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .phase-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .init-box { fill: var(--background-secondary, #161b22); stroke: #4CAF50; stroke-width: 2; rx: 6; }
+    .physics-box { fill: var(--background-secondary, #161b22); stroke: #2196F3; stroke-width: 2; rx: 6; }
+    .logic-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+    .teardown-box { fill: var(--background-secondary, #161b22); stroke: #f44336; stroke-width: 2; rx: 6; }
+    .method { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .phase-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .init-label { fill: #4CAF50; }
+    .physics-label { fill: #2196F3; }
+    .logic-label { fill: var(--interactive-accent, #58a6ff); }
+    .teardown-label { fill: #f44336; }
+    .flow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-life); }
+    .loop-flow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-life); stroke-dasharray: 6,3; }
+    .note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <text x="350" y="22" class="title">Unity MonoBehaviour Lifecycle — Execution Order</text>
+
+  <!-- INITIALIZATION -->
+  <text x="60" y="50" class="phase-label init-label">initialization (once)</text>
+
+  <rect x="50" y="58" width="130" height="30" class="init-box"/>
+  <text x="115" y="77" class="method">Awake()</text>
+  <text x="195" y="77" class="note">Self-init, runs even if disabled</text>
+
+  <path d="M 115 88 L 115 100" class="flow"/>
+
+  <rect x="50" y="102" width="130" height="30" class="init-box"/>
+  <text x="115" y="121" class="method">OnEnable()</text>
+  <text x="195" y="121" class="note">Subscribe events, each activation</text>
+
+  <path d="M 115 132 L 115 144" class="flow"/>
+
+  <rect x="50" y="146" width="130" height="30" class="init-box"/>
+  <text x="115" y="165" class="method">Start()</text>
+  <text x="195" y="165" class="note">Cross-references safe, before first Update</text>
+
+  <!-- PHYSICS LOOP -->
+  <path d="M 115 176 L 115 205" class="flow"/>
+  <text x="60" y="200" class="phase-label physics-label">physics (0-N per frame)</text>
+
+  <rect x="50" y="208" width="130" height="30" class="physics-box"/>
+  <text x="115" y="227" class="method">FixedUpdate()</text>
+  <text x="195" y="227" class="note">Fixed 0.02s timestep, physics/forces</text>
+
+  <rect x="50" y="245" width="130" height="25" class="physics-box"/>
+  <text x="115" y="262" class="method">OnCollision/Trigger</text>
+
+  <!-- Loop arrow for FixedUpdate -->
+  <path d="M 50 225 C 30 225 30 250 50 250" class="loop-flow"/>
+
+  <!-- GAME LOGIC -->
+  <path d="M 115 270 L 115 295" class="flow"/>
+  <text x="60" y="292" class="phase-label logic-label">game logic (once per frame)</text>
+
+  <rect x="50" y="300" width="130" height="30" class="logic-box"/>
+  <text x="115" y="319" class="method">Update()</text>
+  <text x="195" y="319" class="note">Input, AI, game logic</text>
+
+  <path d="M 115 330 L 115 342" class="flow"/>
+
+  <rect x="50" y="344" width="130" height="30" class="logic-box"/>
+  <text x="115" y="363" class="method">LateUpdate()</text>
+  <text x="195" y="363" class="note">Camera follow, after ALL Updates</text>
+
+  <!-- Frame loop -->
+  <path d="M 180 355 C 250 355 250 210 180 210" class="loop-flow"/>
+  <text x="265" y="285" class="note">next frame</text>
+
+  <!-- TEARDOWN -->
+  <text x="420" y="50" class="phase-label teardown-label">teardown</text>
+
+  <rect x="420" y="58" width="130" height="30" class="teardown-box"/>
+  <text x="485" y="77" class="method">OnDisable()</text>
+  <text x="565" y="77" class="note">Unsubscribe events</text>
+
+  <path d="M 485 88 L 485 100" class="flow"/>
+
+  <rect x="420" y="102" width="130" height="30" class="teardown-box"/>
+  <text x="485" y="121" class="method">OnDestroy()</text>
+  <text x="565" y="121" class="note">Final cleanup</text>
+
+  <!-- Key rules box -->
+  <rect x="380" y="170" width="300" height="130" class="phase-box"/>
+  <text x="530" y="190" class="method">Key Rules</text>
+  <text x="395" y="210" class="note">• ALL Awake() before ANY Start()</text>
+  <text x="395" y="226" class="note">• FixedUpdate may run 0, 1, or N times per frame</text>
+  <text x="395" y="242" class="note">• LateUpdate after ALL Update calls</text>
+  <text x="395" y="258" class="note">• Order between scripts is UNDEFINED</text>
+  <text x="395" y="274" class="note">  (unless set via Script Execution Order)</text>
+  <text x="395" y="290" class="note">• OnEnable/OnDisable pair for event subscriptions</text>
+
+  <!-- Use case box -->
+  <rect x="380" y="320" width="300" height="100" class="phase-box"/>
+  <text x="530" y="340" class="method">When to Use What</text>
+  <text x="395" y="358" class="note">Awake → GetComponent, self-references</text>
+  <text x="395" y="374" class="note">Start → FindObject, cross-references</text>
+  <text x="395" y="390" class="note">Update → Input, game logic, animation</text>
+  <text x="395" y="406" class="note">FixedUpdate → Rigidbody, forces, physics</text>
+  <text x="395" y="422" class="note">LateUpdate → Camera, IK, post-processing</text>
+</svg>

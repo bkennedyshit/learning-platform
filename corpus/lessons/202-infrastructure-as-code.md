@@ -1,0 +1,260 @@
+---
+title: "20.2 — Infrastructure as Code"
+subject: "DevOps & SRE"
+catalog: advanced
+audience_tier: higher-education
+chapter: "20.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 20.2 — Infrastructure as Code
+
+> *"Click-ops is technical debt that pays compound interest."*
+
+If [20.1](20.1---CI-CD-Foundations) is the assembly line, **IaC is the factory blueprints**. Every cloud resource, every DNS record, every IAM role, every Kubernetes namespace is described in code, reviewed via PR, applied through a pipeline, and reconciled against a tracked state. The 2026 reality is messier than 2022 — Terraform went BSL, OpenTofu forked under MPL 2.0, Pulumi went bigger on Python/TS/Go, and Crossplane made Kubernetes itself the IaC control plane.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compare **Terraform**, **OpenTofu**, **Pulumi**, **Ansible**, and **Crossplane** by paradigm (declarative provisioning vs procedural config vs k8s-native).
+2. Explain the **HashiCorp BSL relicensing** (Aug 2023) and the **OpenTofu fork** under MPL 2.0 / Linux Foundation governance.
+3. Identify the OpenTofu features that diverge from Terraform — native state encryption, provider `for_each`, early variable evaluation, `-exclude`.
+4. Author a Terraform / OpenTofu **module** with inputs, outputs, providers, and a remote backend.
+5. Manage state safely: locking, encryption, drift detection, import.
+6. Pick when to use **Ansible** (config + day-2 ops) vs Terraform/OpenTofu (provisioning).
+7. Use **Crossplane** to manage cloud resources from inside a Kubernetes cluster.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external — open in browser):*
+> - 📺 [HashiCorp Terraform docs (Get Started)](https://developer.hashicorp.com/terraform/tutorials)
+> - 📺 [OpenTofu — Getting Started](https://opentofu.org/docs/intro/)
+> - 📺 [Pulumi — Crosswalk for AWS](https://www.pulumi.com/docs/clouds/aws/guides/)
+> - 📺 [TechWorld with Nana — Terraform Tutorial](https://www.youtube.com/@TechWorldwithNana)
+> - 📺 [DevOps Toolkit — Crossplane vs Terraform](https://www.youtube.com/@DevOpsToolkit)
+
+---
+
+## 📚 1. The IaC Landscape (2026)
+
+| Tool | Paradigm | Language | License | Best for |
+|---|---|---|---|---|
+| **Terraform** | Declarative provisioning | HCL | BSL 1.1 (HashiCorp / IBM) | Existing Terraform shops; HCP integration |
+| **OpenTofu** | Declarative provisioning | HCL (Terraform-compatible) | MPL 2.0 (Linux Foundation) | New projects; orgs avoiding BSL |
+| **Pulumi** | Declarative provisioning | TypeScript, Python, Go, C#, Java, YAML | Apache 2.0 | Teams that want loops, types, IDE help |
+| **Ansible** | Procedural config-management | YAML (Jinja templating) | GPL | Day-2 ops, OS config, network devices, edge |
+| **Crossplane** | Declarative provisioning *as Kubernetes CRDs* | YAML manifests | Apache 2.0 | Platform teams already on Kubernetes |
+| **Chef / Puppet** | Procedural config-management | Ruby DSL | Apache 2.0 / Apache 2.0 | Legacy fleets |
+
+### The 2023–2026 license fork
+
+In August 2023 HashiCorp moved Terraform from MPL 2.0 to the Business Source License (BSL 1.1), restricting commercial use by competing products. A fork — **OpenTofu** — was announced within weeks and accepted by the Linux Foundation. IBM completed its acquisition of HashiCorp in February 2025; in March 2026 HCP Terraform's legacy free tier ended and pricing moved to a per-managed-resource model. (paraphrased from [tutorials.technology — OpenTofu vs Terraform 2026](https://tutorials.technology/tutorials/opentofu-vs-terraform-2026.html), [env0 — Terraform Alternatives 2026 Buyer's Guide](https://www.env0.com/blog/terraform-cloud-tfc-alternatives-comprehensive-buyers-guide), and [turbogeek — OpenTofu vs Terraform 2026](https://www.turbogeek.co.uk/opentofu-vs-terraform-2026/), rephrased for compliance)
+
+OpenTofu has shipped CLI features that Terraform's open-source CLI does not include — built-in state encryption, provider iteration with `for_each`, early variable evaluation, and the `-exclude` flag. (paraphrased from [scalr — OpenTofu vs Terraform](https://scalr.com/learning-center/opentofu-vs-terraform), rephrased for compliance)
+
+> **Heuristic for 2026:** If you're starting fresh, start on OpenTofu — Terraform-compatible HCL, MPL 2.0, no per-resource pricing. If you're on Terraform Cloud / Enterprise with deep HCP ties, audit before migrating.
+
+---
+
+## 📐 2. Terraform / OpenTofu — The Vocabulary
+
+### Definition 20.2.1 — Resource
+
+A managed cloud object (VM, S3 bucket, IAM role) declared in HCL:
+```hcl
+resource "aws_s3_bucket" "data" {
+  bucket = "myorg-data-${var.env}"
+}
+```
+
+### Definition 20.2.2 — Module
+
+A reusable group of resources with `variables.tf` (inputs), `outputs.tf` (outputs), and `main.tf` (body). The unit of composition.
+
+### Definition 20.2.3 — State
+
+A serialized record of "what we believe exists" — kept in a backend (S3 + DynamoDB lock, GCS, Azure Blob, OpenTofu HTTP backend). Locked during apply to prevent concurrent writes.
+
+### Definition 20.2.4 — Provider
+
+A plugin that translates resources to API calls (AWS, Azure, Google, Kubernetes, GitHub). Pinned by version constraints in `required_providers`.
+
+### Skeleton module
+
+```hcl
+# modules/web-bucket/main.tf
+variable "name" { type = string }
+variable "tags" { type = map(string); default = {} }
+
+resource "aws_s3_bucket" "this" {
+  bucket = var.name
+  tags   = var.tags
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration { status = "Enabled" }
+}
+
+output "arn" { value = aws_s3_bucket.this.arn }
+```
+
+```hcl
+# envs/prod/main.tf
+terraform {
+  required_version = ">= 1.6"   # or OpenTofu >= 1.7
+  backend "s3" {
+    bucket         = "myorg-tfstate-prod"
+    key            = "web/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "tfstate-lock"
+    encrypt        = true
+  }
+}
+
+module "data" {
+  source = "../../modules/web-bucket"
+  name   = "myorg-prod-data"
+  tags   = { env = "prod", owner = "platform" }
+}
+```
+
+---
+
+## 🔐 3. State Discipline
+
+State is the most operationally dangerous file in your infra repo. Three rules:
+
+1. **Never check it into Git.** Use a remote backend with locking + versioning.
+2. **Encrypt at rest.** Terraform: backend-level (S3 SSE-KMS, GCS CMEK). OpenTofu: native state-and-plan encryption (KMS, PBKDF2, etc).
+3. **Practice `terraform import` / `tofu import`.** When click-ops happens (and it will), importing the resource into state beats deleting + recreating in production.
+
+For multi-environment + multi-team setups, prefer **workspaces** (Terraform Cloud / OpenTofu HTTP backend) or per-env state files. Avoid one giant monolithic state — small blast radius beats one rerun-the-world `apply`.
+
+---
+
+## 🟣 4. Pulumi — IaC in Real Programming Languages
+
+```typescript
+// pulumi/index.ts (TypeScript)
+import * as aws from "@pulumi/aws";
+
+const env = new pulumi.Config().require("env");
+
+const bucket = new aws.s3.Bucket(`data-${env}`, {
+  versioning: { enabled: true },
+  tags: { env, owner: "platform" },
+});
+
+export const arn = bucket.arn;
+```
+
+Strengths: real loops, conditionals, type-checking, jest-style unit tests, IDE autocomplete. Trade-off: easier to write code that's harder to review than equivalent HCL — discipline still required.
+
+---
+
+## 🛠️ 5. Ansible — When You Need *Config*, Not *Provisioning*
+
+```yaml
+# playbooks/harden.yml
+- hosts: web
+  become: true
+  tasks:
+    - name: Ensure latest fail2ban
+      apt: { name: fail2ban, state: latest, update_cache: yes }
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line:  'PermitRootLogin no'
+      notify: Restart sshd
+  handlers:
+    - name: Restart sshd
+      service: { name: sshd, state: restarted }
+```
+
+**Decision heuristic:** Cloud resources, networks, IAM → Terraform/OpenTofu/Pulumi. OS config, package install, edge devices, network appliances, ad-hoc operational runs → Ansible. Most orgs use both.
+
+---
+
+## ☸️ 6. Crossplane — IaC From Inside Kubernetes
+
+Crossplane turns the cluster into the IaC control plane. You apply Kubernetes manifests; Crossplane reconciles them to AWS/GCP/Azure resources via providers, the same way Argo CD reconciles workloads.
+
+```yaml
+apiVersion: rds.aws.upbound.io/v1beta1
+kind: Instance
+metadata: { name: orders-prod }
+spec:
+  forProvider:
+    region: us-east-1
+    instanceClass: db.t4g.medium
+    engine: postgres
+    engineVersion: "16"
+    allocatedStorage: 50
+    skipFinalSnapshot: false
+  providerConfigRef: { name: aws-prod }
+```
+
+Why care: a single GitOps loop ([20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration)) provisions both cluster workloads *and* their backing cloud resources. One reconciliation model, one audit log, one rollback path.
+
+---
+
+## 🛠️ 7. Worked Example — Module Versioning & Promotion
+
+**Scenario:** A `modules/web-bucket` module used by dev, staging, and prod.
+
+1. Tag releases of the module repo: `v1.2.0`.
+2. Each env pins a version:
+   ```hcl
+   module "data" {
+     source  = "git::https://github.com/myorg/tf-modules.git//modules/web-bucket?ref=v1.2.0"
+     name    = "myorg-${var.env}-data"
+   }
+   ```
+3. Dev pins to `v1.3.0-rc.1` first, runs for a week, then promotes to staging, then prod.
+4. CI runs `tofu plan` on every PR to catch drift; `tofu apply` runs only on merges to `main` via a workflow with manual approval for prod.
+
+This pattern decouples **module velocity** (fast) from **environment promotion** (deliberate).
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [20.1 - CI-CD Foundations](20.1---CI-CD-Foundations) — the pipeline that runs `plan` / `apply`
+- [20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration) — what your IaC provisions
+- [20.8 - Cost & Capacity Engineering - FinOps](20.8---Cost-&-Capacity-Engineering---FinOps) — cost-allocation tags enforced via IaC
+- [Subject_Plan](Subject_Plan) — the cloud APIs underneath
+
+### External
+- [Terraform docs](https://developer.hashicorp.com/terraform)
+- [OpenTofu](https://opentofu.org/) · [OpenTofu state encryption](https://opentofu.org/docs/language/state/encryption/)
+- [Pulumi docs](https://www.pulumi.com/docs/)
+- [Ansible docs](https://docs.ansible.com/)
+- [Crossplane docs](https://docs.crossplane.io/)
+- [SpaceLift — OpenTofu vs Terraform](https://spacelift.io/blog/opentofu-vs-terraform)
+- [techbytes — IaC Security Cheat Sheet 2026](https://techbytes.app/posts/iac-security-cheat-sheet-terraform-opentofu-2026/)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"OpenTofu is just a slower Terraform."** OpenTofu has shipped features (state encryption, provider `for_each`) that Terraform OSS doesn't have. (paraphrased from [scalr — OpenTofu vs Terraform](https://scalr.com/learning-center/opentofu-vs-terraform), rephrased for compliance)
+- **"State files don't need encryption — they're in S3."** They contain plaintext secrets, IPs, and ARNs that map your environment. Encrypt at the state layer, not just at rest.
+- **"Ansible can replace Terraform."** It can mutate config but isn't a drift-tracked declarative model for cloud APIs. Different tool for a different layer.
+- **"Crossplane replaces Terraform."** It overlaps for cloud provisioning but lives in your cluster, with a different operational model. Many orgs use both.
+- **"More modules = better."** Module sprawl is technical debt. Prefer fewer, well-versioned, well-documented modules to many tiny ones.
+
+---
+
+*Next: [20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration) — Where the artifacts run.*

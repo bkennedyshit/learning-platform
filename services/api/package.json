@@ -1,0 +1,25 @@
+{
+  "name": "@learning-platform/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "migrate": "pnpm run build && node dist/migrate.js",
+    "test": "pnpm run build && node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@learning-platform/llm-adapter": "workspace:*",
+    "@learning-platform/object-storage": "workspace:^",
+    "argon2": "^0.44.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@types/pg": "^8.15.4",
+    "typescript": "^5.8.3"
+  }
+}

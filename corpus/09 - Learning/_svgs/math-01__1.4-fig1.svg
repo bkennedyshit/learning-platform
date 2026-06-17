@@ -1,0 +1,61 @@
+<svg viewBox="0 0 620 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="mv-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ax     { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .surf   { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; opacity: 0.85; }
+    .level  { stroke: var(--text-accent, #79c0ff); stroke-width: 1.4; fill: none; stroke-dasharray: 5 3; }
+    .proj   { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; stroke-dasharray: 3 3; opacity: 0.6; }
+    .drop   { stroke: var(--text-muted, #8b949e); stroke-width: 0.8; stroke-dasharray: 2 3; }
+    .lbl    { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math   { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .acc    { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Axes -->
+  <line x1="310" y1="420" x2="560" y2="300" class="ax" marker-end="url(#mv-arrow)"/>
+  <line x1="310" y1="420" x2="60"  y2="300" class="ax" marker-end="url(#mv-arrow)"/>
+  <line x1="310" y1="420" x2="310" y2="60"  class="ax" marker-end="url(#mv-arrow)"/>
+  <text x="572" y="298" class="lbl">x</text>
+  <text x="44"  y="298" class="lbl">y</text>
+  <text x="316" y="52"  class="lbl">z</text>
+  <!-- Surface cross-sections (approximate paraboloid z = x^2+y^2) drawn as elliptic arcs -->
+  <ellipse cx="310" cy="200" rx="140" ry="55" class="surf" transform="rotate(-8,310,200)"/>
+  <ellipse cx="310" cy="240" rx="100" ry="38" class="surf" transform="rotate(-8,310,240)"/>
+  <ellipse cx="310" cy="270" rx="60"  ry="22" class="surf" transform="rotate(-8,310,270)"/>
+  <!-- Top "cap" of surface -->
+  <path d="M 170 200 Q 310 120 450 200" class="surf"/>
+  <!-- Level curve projections in the xy-plane area (near the bottom) -->
+  <ellipse cx="310" cy="380" rx="130" ry="28" class="level"/>
+  <ellipse cx="310" cy="380" rx="90"  ry="20" class="level"/>
+  <ellipse cx="310" cy="380" rx="50"  ry="11" class="level"/>
+  <!-- Vertical projection lines -->
+  <line x1="180" y1="200" x2="180" y2="352" class="drop"/>
+  <line x1="440" y1="200" x2="440" y2="352" class="drop"/>
+  <!-- Labels -->
+  <text x="466" y="198" class="acc">z = f(x,y)</text>
+  <text x="450" y="378" class="math">level curves</text>
+  <text x="450" y="393" class="lbl">f(x,y) = c</text>
+</svg>

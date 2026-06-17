@@ -1,0 +1,78 @@
+<svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;height:auto;">
+  <style>
+    .ax   { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.4; fill: none; }
+    .reg  { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .slice-h { fill: var(--interactive-accent, #58a6ff); opacity: 0.30; stroke: var(--interactive-accent, #58a6ff); stroke-width: 0.7; }
+    .slice-v { fill: var(--text-accent, #79c0ff); opacity: 0.30; stroke: var(--text-accent, #79c0ff); stroke-width: 0.7; }
+    .bound{ stroke: var(--text-normal, #c9d1d9); stroke-width: 1.6; fill: none; stroke-dasharray: 4 2; }
+    .lab  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .math { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .title{ font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .ref  { stroke: var(--text-muted, #8b949e); stroke-width: 0.8; stroke-dasharray: 3 2; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- LEFT PANEL: dy dx order -->
+  <line x1="30" y1="240" x2="290" y2="240" class="ax"/>
+  <line x1="40" y1="250" x2="40" y2="30" class="ax"/>
+  <text x="294" y="244" class="math">x</text>
+  <text x="30" y="28" class="math">y</text>
+  <text x="160" y="270" class="title" text-anchor="middle">∫dx ∫dy (y inner)</text>
+  <!-- Region: triangle with vertices (40,240),(220,240),(40,80) -->
+  <polygon points="40,240 220,240 40,80" class="reg"/>
+  <!-- Horizontal slices (fixing x, varying y) -->
+  <rect x="40" y="170" width="60" height="15" class="slice-h"/>
+  <rect x="40" y="150" width="120" height="15" class="slice-h"/>
+  <rect x="40" y="130" width="100" height="15" class="slice-h"/>
+  <rect x="40" y="110" width="80" height="15" class="slice-h"/>
+  <rect x="40" y="90" width="40" height="15" class="slice-h"/>
+  <!-- Axis labels -->
+  <text x="220" y="255" class="math" text-anchor="middle">b</text>
+  <text x="27"  y="80"  class="math">d</text>
+  <text x="27"  y="244" class="math">c</text>
+  <text x="40"  y="255" class="math">a</text>
+  <line x1="220" y1="240" x2="220" y2="245" class="ax"/>
+  <line x1="35"  y1="80"  x2="40"  y2="80"  class="ax"/>
+  <!-- RIGHT PANEL: dx dy order -->
+  <line x1="350" y1="240" x2="610" y2="240" class="ax"/>
+  <line x1="360" y1="250" x2="360" y2="30" class="ax"/>
+  <text x="614" y="244" class="math">x</text>
+  <text x="350" y="28" class="math">y</text>
+  <text x="480" y="270" class="title" text-anchor="middle">∫dy ∫dx (x inner)</text>
+  <!-- Same region -->
+  <polygon points="360,240 540,240 360,80" class="reg"/>
+  <!-- Vertical slices (fixing y, varying x) -->
+  <rect x="355" y="80"  width="15" height="160" class="slice-v"/>
+  <rect x="375" y="80"  width="15" height="155" class="slice-v"/>
+  <rect x="395" y="90"  width="15" height="145" class="slice-v"/>
+  <rect x="415" y="100" width="15" height="135" class="slice-v"/>
+  <rect x="435" y="115" width="15" height="120" class="slice-v"/>
+  <rect x="455" y="133" width="15" height="102" class="slice-v"/>
+  <rect x="475" y="153" width="15" height="82"  class="slice-v"/>
+  <rect x="495" y="175" width="15" height="60"  class="slice-v"/>
+  <rect x="515" y="200" width="15" height="35"  class="slice-v"/>
+  <text x="540" y="255" class="math" text-anchor="middle">b</text>
+  <text x="347" y="80"  class="math">d</text>
+  <text x="347" y="244" class="math">c</text>
+  <text x="360" y="255" class="math">a</text>
+  <line x1="540" y1="240" x2="540" y2="245" class="ax"/>
+  <line x1="355" y1="80"  x2="360" y2="80"  class="ax"/>
+</svg>

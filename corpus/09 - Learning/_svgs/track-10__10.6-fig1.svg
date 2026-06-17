@@ -1,0 +1,54 @@
+<svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="diff-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="diff-rev" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .diff-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.2; rx: 8; }
+    .diff-fwd { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6 4; animation: diffFlowFwd 1.5s linear infinite; }
+    .diff-rev { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 6 4; animation: diffFlowRev 1.5s linear infinite; }
+    @keyframes diffFlowFwd { to { stroke-dashoffset: -10; } }
+    @keyframes diffFlowRev { to { stroke-dashoffset: 10; } }
+    .diff-lbl { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .diff-acc { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+  </style>
+  <!-- Data distribution -->
+  <rect x="20" y="70" width="80" height="50" class="diff-box"/>
+  <text x="60" y="100" class="diff-acc">x₀ ~ p(x)</text>
+  <text x="60" y="60" class="diff-lbl">Clean data</text>
+  <!-- Intermediate noisy -->
+  <rect x="170" y="70" width="80" height="50" class="diff-box"/>
+  <text x="210" y="100" class="diff-lbl">x_t</text>
+  <text x="210" y="60" class="diff-lbl">Noisy</text>
+  <!-- More noisy -->
+  <rect x="320" y="70" width="80" height="50" class="diff-box"/>
+  <text x="360" y="100" class="diff-lbl">x_{T-1}</text>
+  <!-- Pure noise -->
+  <rect x="470" y="70" width="90" height="50" class="diff-box"/>
+  <text x="515" y="100" class="diff-acc">x_T ~ N(0,I)</text>
+  <text x="515" y="60" class="diff-lbl">Pure noise</text>
+  <!-- Forward arrows (top) -->
+  <line x1="100" y1="85" x2="170" y2="85" class="diff-fwd" marker-end="url(#diff-arr)"/>
+  <line x1="250" y1="85" x2="320" y2="85" class="diff-fwd" marker-end="url(#diff-arr)"/>
+  <line x1="400" y1="85" x2="470" y2="85" class="diff-fwd" marker-end="url(#diff-arr)"/>
+  <text x="135" y="75" class="diff-acc">+noise</text>
+  <text x="285" y="75" class="diff-acc">+noise</text>
+  <text x="435" y="75" class="diff-acc">+noise</text>
+  <!-- Reverse arrows (bottom) -->
+  <line x1="470" y1="110" x2="400" y2="110" class="diff-rev" marker-end="url(#diff-rev)"/>
+  <line x1="320" y1="110" x2="250" y2="110" class="diff-rev" marker-end="url(#diff-rev)"/>
+  <line x1="170" y1="110" x2="100" y2="110" class="diff-rev" marker-end="url(#diff-rev)"/>
+  <text x="435" y="130" fill="var(--text-accent, #79c0ff)" class="diff-lbl">denoise</text>
+  <text x="285" y="130" fill="var(--text-accent, #79c0ff)" class="diff-lbl">denoise</text>
+  <text x="135" y="130" fill="var(--text-accent, #79c0ff)" class="diff-lbl">denoise</text>
+  <!-- Labels -->
+  <text x="300" y="170" class="diff-acc">Forward: q(x_t | x_{t-1}) = N(√(1-β_t) x_{t-1}, β_t I)</text>
+  <text x="300" y="195" fill="var(--text-accent, #79c0ff)" class="diff-lbl" font-weight="bold">Reverse: p_θ(x_{t-1} | x_t) — learned by neural network</text>
+  <!-- Info box -->
+  <rect x="100" y="210" width="400" height="30" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="230" class="diff-lbl">Training objective: predict noise ε_θ(x_t, t) ≈ ε added at step t</text>
+</svg>

@@ -1,0 +1,77 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-ts65" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ts65-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; }
+    .ts65-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .ts65-accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; animation: pulseGlow 3s infinite alternate; }
+    .ts65-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ts65-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ts65-note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ts65-section { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .ts65-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#arrow-ts65); stroke-dasharray: 6 4; animation: flow 1s linear infinite; }
+    .ts65-loop { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 6,4; animation: flowReverse 2s linear infinite; }
+
+    @keyframes flow { to { stroke-dashoffset: -10; } }
+    @keyframes flowReverse { to { stroke-dashoffset: 20; } }
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); }
+      to { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+    }
+  </style>
+
+  <text x="350" y="22" class="ts65-title">JavaScript Event Loop &amp; Async Model</text>
+
+  <!-- Call Stack -->
+  <text x="100" y="50" class="ts65-section">call stack (sync)</text>
+  <rect x="30" y="58" width="140" height="120" class="ts65-accent"/>
+  <rect x="40" y="145" width="120" height="25" class="ts65-box"/>
+  <text x="100" y="162" class="ts65-label">main()</text>
+  <rect x="40" y="115" width="120" height="25" class="ts65-box"/>
+  <text x="100" y="132" class="ts65-label">fetchUser()</text>
+  <rect x="40" y="85" width="120" height="25" class="ts65-box"/>
+  <text x="100" y="102" class="ts65-label">await...</text>
+  <text x="100" y="68" class="ts65-note">LIFO — one at a time</text>
+
+  <!-- Web APIs / Runtime -->
+  <text x="350" y="50" class="ts65-section">runtime apis (async)</text>
+  <rect x="230" y="58" width="240" height="80" class="ts65-box"/>
+  <text x="350" y="78" class="ts65-label">fetch(), setTimeout(),</text>
+  <text x="350" y="95" class="ts65-label">file I/O, DB queries</text>
+  <text x="350" y="120" class="ts65-note">Run in parallel (OS threads / libuv)</text>
+
+  <!-- Microtask Queue -->
+  <text x="350" y="155" class="ts65-section">microtask queue (promises)</text>
+  <rect x="230" y="162" width="240" height="35" class="ts65-accent"/>
+  <text x="350" y="184" class="ts65-label">Promise.then(), await resume</text>
+
+  <!-- Macrotask Queue -->
+  <text x="350" y="210" class="ts65-section">macrotask queue</text>
+  <rect x="230" y="218" width="240" height="35" class="ts65-box"/>
+  <text x="350" y="240" class="ts65-label">setTimeout, setInterval, I/O</text>
+
+  <!-- Event Loop -->
+  <rect x="540" y="100" width="140" height="100" class="ts65-accent"/>
+  <text x="610" y="125" class="ts65-label">Event Loop</text>
+  <text x="610" y="145" class="ts65-note">1. Run call stack</text>
+  <text x="610" y="160" class="ts65-note">2. Drain microtasks</text>
+  <text x="610" y="175" class="ts65-note">3. One macrotask</text>
+  <text x="610" y="190" class="ts65-note">4. Repeat</text>
+
+  <!-- Arrows -->
+  <path d="M 170 100 L 230 90" class="ts65-arrow"/>
+  <path d="M 470 100 L 540 130" class="ts65-arrow"/>
+  <path d="M 540 170 L 470 178" class="ts65-arrow"/>
+  <path d="M 230 178 L 170 140" class="ts65-arrow"/>
+
+  <!-- Loop arrow -->
+  <path d="M 610 200 C 610 250 610 270 540 270 L 170 270 C 100 270 100 250 100 200 L 100 178" class="ts65-loop"/>
+
+  <!-- Key insight -->
+  <text x="350" y="290" class="ts65-section">key insight</text>
+  <text x="350" y="308" class="ts65-note">await pauses YOUR function, not the thread. Other code keeps running.</text>
+  <text x="350" y="320" class="ts65-note">Python asyncio works the same way — single thread, cooperative multitasking.</text>
+</svg>

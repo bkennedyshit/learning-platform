@@ -1,0 +1,100 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .code { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); }
+    .accent-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; fill: none; }
+    .chain-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-proto); stroke-dasharray: 20; stroke-dashoffset: 20; animation: drawArrow 1.5s infinite; }
+    .scope-line { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; }
+    @keyframes drawArrow { to { stroke-dashoffset: 0; } }
+  </style>
+  <defs>
+    <marker id="arrow-proto" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" class="title" text-anchor="middle">JavaScript Core Mechanics</text>
+
+  <!-- Left: Scope & Closures -->
+  <text x="170" y="55" class="label" text-anchor="middle" font-weight="bold">Lexical Scope & Closures</text>
+
+  <!-- Global scope -->
+  <rect x="30" y="65" width="280" height="180" class="box" opacity="0.5"/>
+  <text x="45" y="82" class="sublabel">Global Scope</text>
+  <text x="45" y="100" class="code">const x = 10;</text>
+  <text x="45" y="115" class="code">function outer() {</text>
+
+  <!-- Outer scope -->
+  <rect x="55" y="120" width="240" height="110" class="box" opacity="0.7"/>
+  <text x="70" y="137" class="sublabel">outer() Scope</text>
+  <text x="70" y="155" class="code">const y = 20;</text>
+  <text x="70" y="170" class="code">function inner() {</text>
+
+  <!-- Inner scope (closure) -->
+  <rect x="80" y="175" width="200" height="45" class="accent-box"/>
+  <text x="95" y="192" class="sublabel" fill="var(--interactive-accent, #58a6ff)">inner() — CLOSURE</text>
+  <text x="95" y="208" class="code">return x + y + z;</text>
+  <text x="95" y="215" class="sublabel">// accesses x, y from outer scopes</text>
+
+  <!-- Right: Prototype Chain -->
+  <text x="530" y="55" class="label" text-anchor="middle" font-weight="bold">Prototype Chain</text>
+
+  <!-- Object instances -->
+  <rect x="430" y="65" width="180" height="55" class="box"/>
+  <text x="520" y="82" class="label" text-anchor="middle" font-weight="bold">rex (instance)</text>
+  <text x="445" y="98" class="code">name: "Rex"</text>
+  <text x="445" y="112" class="code">breed: "Shepherd"</text>
+
+  <path d="M 520 120 L 520 140" class="chain-arrow"/>
+
+  <rect x="430" y="145" width="180" height="55" class="box"/>
+  <text x="520" y="162" class="label" text-anchor="middle" font-weight="bold">Dog.prototype</text>
+  <text x="445" y="178" class="code">bark()</text>
+  <text x="445" y="192" class="code">constructor: Dog</text>
+
+  <path d="M 520 200 L 520 220" class="chain-arrow"/>
+
+  <rect x="430" y="225" width="180" height="55" class="box"/>
+  <text x="520" y="242" class="label" text-anchor="middle" font-weight="bold">Animal.prototype</text>
+  <text x="445" y="258" class="code">speak()</text>
+  <text x="445" y="272" class="code">constructor: Animal</text>
+
+  <path d="M 520 280 L 520 300" class="chain-arrow"/>
+
+  <rect x="430" y="305" width="180" height="45" class="box"/>
+  <text x="520" y="325" class="label" text-anchor="middle" font-weight="bold">Object.prototype</text>
+  <text x="445" y="340" class="code">toString(), hasOwnProperty()</text>
+
+  <path d="M 520 350 L 520 370" class="chain-arrow"/>
+  <text x="520" y="385" class="label" text-anchor="middle" fill="var(--text-muted, #8b949e)">null</text>
+
+  <!-- Bottom: this binding rules -->
+  <text x="200" y="280" class="label" text-anchor="middle" font-weight="bold">`this` Binding Rules (Priority Order)</text>
+
+  <rect x="20" y="290" width="90" height="50" class="accent-box"/>
+  <text x="65" y="310" class="label" text-anchor="middle">1. new</text>
+  <text x="65" y="325" class="sublabel" text-anchor="middle">→ new object</text>
+
+  <rect x="120" y="290" width="90" height="50" class="box"/>
+  <text x="165" y="310" class="label" text-anchor="middle">2. explicit</text>
+  <text x="165" y="325" class="sublabel" text-anchor="middle">call/apply/bind</text>
+
+  <rect x="220" y="290" width="90" height="50" class="box"/>
+  <text x="265" y="310" class="label" text-anchor="middle">3. implicit</text>
+  <text x="265" y="325" class="sublabel" text-anchor="middle">obj.method()</text>
+
+  <rect x="320" y="290" width="90" height="50" class="box"/>
+  <text x="365" y="310" class="label" text-anchor="middle">4. default</text>
+  <text x="365" y="325" class="sublabel" text-anchor="middle">globalThis</text>
+
+  <!-- Arrow function note -->
+  <rect x="50" y="355" width="350" height="35" rx="6" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5" fill="none"/>
+  <text x="225" y="377" class="label" text-anchor="middle" fill="var(--text-accent, #79c0ff)">Arrow functions: NO own `this` — inherit from lexical scope</text>
+
+  <!-- Legend -->
+  <text x="350" y="412" class="sublabel" text-anchor="middle">Solid border = own properties · Dashed = inherited via [[Prototype]] chain</text>
+</svg>

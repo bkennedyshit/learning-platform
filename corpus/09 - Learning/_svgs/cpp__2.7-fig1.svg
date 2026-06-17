@@ -1,0 +1,121 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .cache-level { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; transition: all 0.3s; cursor: pointer; }
+    .cache-level:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .hot { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .speed { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .data-block { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1; rx: 2; }
+    .data-hot { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 2; }
+    .data-cold { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 2; opacity: 0.5; }
+  </style>
+
+  <text x="350" y="22" class="title">Memory Hierarchy &amp; Data Layout Optimization</text>
+
+  <!-- Memory pyramid -->
+  <text x="170" y="48" class="section-label">Memory Hierarchy</text>
+
+  <!-- Registers -->
+  <polygon points="170,60 130,60 110,80 190,80" class="cache-level hot"/>
+  <text x="150" y="74" class="label">Regs</text>
+  <text x="280" y="74" class="speed">~0 cycles</text>
+
+  <!-- L1 -->
+  <polygon points="200,85 100,85 80,110 220,110" class="cache-level hot"/>
+  <text x="150" y="101" class="label">L1 (64KB)</text>
+  <text x="280" y="101" class="speed">~4 cycles</text>
+
+  <!-- L2 -->
+  <polygon points="230,115 70,115 50,145 250,145" class="cache-level"/>
+  <text x="150" y="134" class="label">L2 (512KB)</text>
+  <text x="280" y="134" class="speed">~12 cycles</text>
+
+  <!-- L3 -->
+  <polygon points="260,150 40,150 20,185 280,185" class="cache-level"/>
+  <text x="150" y="171" class="label">L3 (8-64MB)</text>
+  <text x="280" y="171" class="speed">~40 cycles</text>
+
+  <!-- RAM -->
+  <rect x="10" y="190" width="280" height="35" class="cache-level"/>
+  <text x="150" y="212" class="label">RAM (16-128GB)</text>
+  <text x="280" y="212" class="speed">~100 cycles</text>
+
+  <!-- AoS vs SoA comparison -->
+  <text x="520" y="48" class="section-label">AoS vs SoA Layout</text>
+
+  <!-- AoS -->
+  <text x="520" y="70" class="detail">Array of Structures (AoS)</text>
+  <rect x="380" y="78" width="30" height="15" class="data-hot"/>
+  <rect x="410" y="78" width="30" height="15" class="data-hot"/>
+  <rect x="440" y="78" width="30" height="15" class="data-cold"/>
+  <rect x="470" y="78" width="30" height="15" class="data-cold"/>
+  <rect x="500" y="78" width="30" height="15" class="data-cold"/>
+  <text x="395" y="107" class="detail">pos</text>
+  <text x="425" y="107" class="detail">vel</text>
+  <text x="455" y="107" class="detail">hp</text>
+  <text x="485" y="107" class="detail">name</text>
+  <text x="515" y="107" class="detail">flags</text>
+
+  <rect x="380" y="112" width="30" height="15" class="data-hot"/>
+  <rect x="410" y="112" width="30" height="15" class="data-hot"/>
+  <rect x="440" y="112" width="30" height="15" class="data-cold"/>
+  <rect x="470" y="112" width="30" height="15" class="data-cold"/>
+  <rect x="500" y="112" width="30" height="15" class="data-cold"/>
+  <text x="560" y="100" class="detail">← cache line</text>
+  <text x="560" y="113" class="detail">  loads cold</text>
+  <text x="560" y="126" class="detail">  data too!</text>
+
+  <!-- SoA -->
+  <text x="520" y="155" class="detail">Structure of Arrays (SoA)</text>
+  <rect x="380" y="163" width="30" height="15" class="data-hot"/>
+  <rect x="410" y="163" width="30" height="15" class="data-hot"/>
+  <rect x="440" y="163" width="30" height="15" class="data-hot"/>
+  <rect x="470" y="163" width="30" height="15" class="data-hot"/>
+  <rect x="500" y="163" width="30" height="15" class="data-hot"/>
+  <text x="560" y="174" class="detail">← all positions!</text>
+
+  <rect x="380" y="183" width="30" height="15" class="data-hot"/>
+  <rect x="410" y="183" width="30" height="15" class="data-hot"/>
+  <rect x="440" y="183" width="30" height="15" class="data-hot"/>
+  <rect x="470" y="183" width="30" height="15" class="data-hot"/>
+  <rect x="500" y="183" width="30" height="15" class="data-hot"/>
+  <text x="560" y="194" class="detail">← all velocities!</text>
+
+  <rect x="380" y="203" width="30" height="15" class="data-cold"/>
+  <rect x="410" y="203" width="30" height="15" class="data-cold"/>
+  <rect x="440" y="203" width="30" height="15" class="data-cold"/>
+  <rect x="470" y="203" width="30" height="15" class="data-cold"/>
+  <rect x="500" y="203" width="30" height="15" class="data-cold"/>
+  <text x="560" y="214" class="detail">← cold (untouched)</text>
+
+  <!-- Cache line diagram -->
+  <text x="350" y="250" class="section-label">Cache Line (64 bytes)</text>
+  <rect x="100" y="260" width="500" height="30" class="cache-level"/>
+  <rect x="100" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="162" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="224" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="286" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="348" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="410" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="472" y="260" width="62" height="30" class="data-hot"/>
+  <rect x="534" y="260" width="62" height="30" class="data-hot"/>
+  <text x="131" y="279" class="detail">f[0]</text>
+  <text x="193" y="279" class="detail">f[1]</text>
+  <text x="255" y="279" class="detail">f[2]</text>
+  <text x="317" y="279" class="detail">f[3]</text>
+  <text x="379" y="279" class="detail">f[4]</text>
+  <text x="441" y="279" class="detail">f[5]</text>
+  <text x="503" y="279" class="detail">f[6]</text>
+  <text x="565" y="279" class="detail">f[7]</text>
+  <text x="350" y="305" class="detail">16 floats fit in one cache line — SIMD processes 8 at once (AVX2)</text>
+
+  <!-- Performance numbers -->
+  <text x="350" y="335" class="section-label">Optimization Impact</text>
+  <text x="150" y="355" class="detail">Sequential access: ~1 cycle/element</text>
+  <text x="150" y="370" class="detail">Random access: ~100 cycles/element</text>
+  <text x="480" y="355" class="detail">SoA + SIMD: up to 16x faster</text>
+  <text x="480" y="370" class="detail">Branchless: eliminates 15-cycle stalls</text>
+</svg>

@@ -1,0 +1,96 @@
+<svg viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="lap-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <radialGradient id="sphere-grad" cx="40%" cy="35%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.05"/>
+    </radialGradient>
+  </defs>
+  
+  <style>
+    .equip-line {
+      stroke: var(--text-muted, #8b949e);
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+    .equip-line:hover {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      opacity: 1;
+      filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff));
+    }
+    .conductor {
+      fill: url(#sphere-grad);
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2.5;
+    }
+    .field-arrow {
+      color: var(--text-normal, #c9d1d9);
+      stroke: currentColor;
+      stroke-width: 1.2;
+      fill: none;
+      transition: all 0.2s;
+      stroke-dasharray: 5, 5;
+      animation: fieldArrowFlow 1s linear infinite;
+    }
+    @keyframes fieldArrowFlow {
+      to { stroke-dashoffset: -10; }
+    }
+    .field-arrow:hover {
+      color: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+    }
+    .axis { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4,3; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math-label { font-family: 'Latin Modern Math', serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; text-anchor: middle; }
+    @keyframes radiate {
+      0% { opacity: 0.6; stroke-width: 1; }
+      50% { opacity: 1; stroke-width: 1.5; }
+      100% { opacity: 0.6; stroke-width: 1; }
+    }
+    .animate-equip { animation: radiate 3s ease-in-out infinite; }
+  </style>
+
+  <text x="300" y="25" class="title-label">Laplace Equation: ∇²φ = 0 (Equipotentials around conductor)</text>
+
+  <!-- Axes -->
+  <line x1="50" y1="225" x2="550" y2="225" class="axis"/>
+  <line x1="300" y1="50" x2="300" y2="400" class="axis"/>
+
+  <!-- Equipotential lines (concentric ellipses distorted by boundary) -->
+  <ellipse cx="300" cy="225" rx="220" ry="170" class="equip-line"/>
+  <ellipse cx="300" cy="225" rx="180" ry="140" class="equip-line animate-equip"/>
+  <ellipse cx="300" cy="225" rx="140" ry="110" class="equip-line"/>
+  <ellipse cx="300" cy="225" rx="105" ry="85" class="equip-line"/>
+  <ellipse cx="300" cy="225" rx="75" ry="62" class="equip-line"/>
+
+  <!-- Conducting sphere -->
+  <circle cx="300" cy="225" r="45" class="conductor"/>
+
+  <!-- Field arrows (radial, perpendicular to equipotentials) -->
+  <line x1="345" y1="225" x2="385" y2="225" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="255" y1="225" x2="215" y2="225" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="300" y1="180" x2="300" y2="140" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="300" y1="270" x2="300" y2="310" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="332" y1="193" x2="355" y2="165" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="268" y1="257" x2="245" y2="285" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="332" y1="257" x2="355" y2="285" class="field-arrow" marker-end="url(#lap-arrow)"/>
+  <line x1="268" y1="193" x2="245" y2="165" class="field-arrow" marker-end="url(#lap-arrow)"/>
+
+  <!-- Labels -->
+  <text x="300" y="230" class="math-label" text-anchor="middle">φ = V₀</text>
+  <text x="440" y="220" class="label">φ₁</text>
+  <text x="500" y="220" class="label">φ₂</text>
+  <text x="300" y="430" class="label" text-anchor="middle">E = −∇φ (perpendicular to equipotentials)</text>
+  
+  <!-- Boundary condition annotation -->
+  <rect x="400" y="50" width="180" height="55" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="490" y="70" class="label" text-anchor="middle">Boundary Conditions:</text>
+  <text x="490" y="88" class="math-label" text-anchor="middle">φ|_S = V₀ (Dirichlet)</text>
+  <text x="490" y="100" class="label" text-anchor="middle" font-size="11" fill="var(--text-muted, #8b949e)">∂φ/∂n|_S given (Neumann)</text>
+</svg>

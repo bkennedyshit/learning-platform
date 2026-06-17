@@ -1,0 +1,221 @@
+---
+title: "43.5 — The Perfect System & Infinitives"
+subject: "Latin"
+catalog: advanced
+audience_tier: higher-education
+chapter: "43.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 43.5 — The Perfect System & Infinitives
+
+*Back to [Subject_Plan](Subject_Plan) | [← 43.4](43.4---The-Verb-System-—-Present-System-Active-&-Passive) | [43.6 →](43.6---Participles,-Gerunds-&-The-Subjunctive)*
+
+> **Chapter goal:** Master the three perfect-system tenses (perfect, pluperfect, future perfect) in active and passive voice; learn all six Latin infinitives; and command the indirect statement (accusative + infinitive) — the single most important Latin construction.
+
+---
+
+## 1. The Perfect System — Overview
+
+The perfect system covers all completed actions and is built from the **3rd and 4th principal parts**:
+
+| System | Tenses | Built from |
+|--------|--------|-----------|
+| Present system | Present, Imperfect, Future | 1st/2nd principal parts (present stem) |
+| Perfect system | Perfect, Pluperfect, Future Perfect | 3rd principal part (perfect active stem) / 4th principal part (perfect passive participle) |
+
+---
+
+## 2. Perfect Active Indicative — "did / has done / have done"
+
+**Formation:** Perfect active stem (3rd principal part minus *-ī*) + perfect active personal endings
+
+**Perfect active personal endings (unique — unlike any other tense):**
+
+| Person | Singular | Plural |
+|--------|---------|--------|
+| 1st | **-ī** | **-imus** |
+| 2nd | **-istī** | **-istis** |
+| 3rd | **-it** | **-ērunt** (-ēre poetic variant) |
+
+### All Four Conjugations — Perfect Active
+
+| Verb | 3rd pp | Stem | sg. 1 | sg. 2 | sg. 3 | pl. 1 | pl. 2 | pl. 3 |
+|------|--------|------|-------|-------|-------|-------|-------|-------|
+| *amō* | *amāvī* | amāv- | *amāvī* | *amāvistī* | *amāvit* | *amāvimus* | *amāvistis* | *amāvērunt* |
+| *moneō* | *monuī* | monu- | *monuī* | *monuistī* | *monuit* | *monuimus* | *monuistis* | *monuērunt* |
+| *agō* | *ēgī* | ēg- | *ēgī* | *ēgistī* | *ēgit* | *ēgimus* | *ēgistis* | *ēgērunt* |
+| *capiō* | *cēpī* | cēp- | *cēpī* | *cēpistī* | *cēpit* | *cēpimus* | *cēpistis* | *cēpērunt* |
+| *audiō* | *audīvī* | audīv- | *audīvī* | *audīvistī* | *audīvit* | *audīvimus* | *audīvistis* | *audīvērunt* |
+
+### Common Irregular Perfect Stems
+
+| Verb | Perfect stem | Perfect 1st sg. | Pattern |
+|------|-------------|----------------|---------|
+| *esse* | fu- | *fuī* | — |
+| *dīcō* | dīx- | *dīxī* | consonant + *s* → *-xī* |
+| *dūcō* | dūx- | *dūxī* | |
+| *scrībō* | scrīps- | *scrīpsī* | |
+| *mittō* | mīs- | *mīsī* | |
+| *veniō* | vēn- | *vēnī* | vowel lengthening |
+| *videō* | vīd- | *vīdī* | |
+| *faciō* | fēc- | *fēcī* | vowel change |
+| *vincō* | vīc- | *vīcī* | |
+| *currō* | cucurr- | *cucurrī* | reduplication |
+| *cadō* | cecid- | *cecidī* | reduplication |
+| *dō* | ded- | *dedī* | reduplication |
+| *stō* | stet- | *stetī* | reduplication |
+| *pōnō* | posu- | *posuī* | |
+| *petō* | petīv- | *petīvī* | |
+| *ferō* | tul- | *tulī* | suppletive |
+| *tollō* | sustul- | *sustulī* | suppletive |
+| *sum (fut.)* | fu- | see above | |
+
+---
+
+## 3. Pluperfect Active — "had done"
+
+**Formation:** Perfect active stem + **-erā-** + imperfect endings
+
+| Person | Singular | Plural |
+|--------|---------|--------|
+| 1st | *amāveram* | *amāverāmus* |
+| 2nd | *amāverās* | *amāverātis* |
+| 3rd | *amāverat* | *amāverant* |
+
+---
+
+## 4. Future Perfect Active — "will have done"
+
+**Formation:** Perfect active stem + **-eri-** + future endings (except 1st sg. -erō)
+
+| Person | Singular | Plural |
+|--------|---------|--------|
+| 1st | *amāverō* | *amāverimus* |
+| 2nd | *amāveris* | *amāveritis* |
+| 3rd | *amāverit* | *amāverint* |
+
+> **Future perfect is common in Latin** — especially in temporal clauses: *"Cum Caesar vēnerit, dīcam."* — When Caesar arrives (lit. will have arrived), I will speak.
+
+---
+
+## 5. Perfect Passive System
+
+**Formation:** **Perfect passive participle** (4th principal part) + present/imperfect/future of *esse*
+
+The perfect passive participle (PPP) is a **verbal adjective** — it agrees with the subject in gender, case, number.
+
+| Tense | esse form | Meaning |
+|-------|----------|---------|
+| **Perfect passive** | present of *esse* | was/has been verb-ed |
+| **Pluperfect passive** | imperfect of *esse* | had been verb-ed |
+| **Future perfect passive** | future of *esse* | will have been verb-ed |
+
+### Perfect Passive Examples (*amō, amātum*)
+
+| Person | Perfect passive | Pluperfect passive |
+|--------|----------------|-------------------|
+| sg. 1 (m.) | *amātus sum* | *amātus eram* |
+| sg. 1 (f.) | *amāta sum* | *amāta eram* |
+| sg. 3 (m.) | *amātus est* | *amātus erat* |
+| pl. 3 (m.) | *amātī sunt* | *amātī erant* |
+| pl. 3 (f.) | *amātae sunt* | *amātae erant* |
+
+---
+
+## 6. The Six Latin Infinitives
+
+Every Latin verb has **six infinitive forms** — present/perfect/future × active/passive:
+
+| | Active | Passive |
+|--|--------|---------|
+| **Present** | amā**re** | amā**rī** |
+| **Perfect** | amāv**isse** | amātum esse (PPP + esse) |
+| **Future** | amātū**rum esse** (FPA + esse) | amātum īrī (PPP + īrī) |
+
+| Infinitive | Meaning | Time relative to main verb |
+|-----------|---------|--------------------------|
+| Present active *amāre* | to love | same time as main verb |
+| Perfect active *amāvisse* | to have loved | before main verb |
+| Future active *amātūrum esse* | to be about to love | after main verb |
+| Present passive *amārī* | to be loved | same time |
+| Perfect passive *amātum esse* | to have been loved | before main verb |
+| Future passive *amātum īrī* | to be about to be loved | after main verb |
+
+---
+
+## 7. Indirect Statement (Accusative + Infinitive)
+
+**The single most important Latin construction.** After verbs of saying, thinking, knowing, perceiving, and feeling, Latin introduces a subordinate clause not with *quod* + indicative (as in later Latin / Romance languages) but with an **accusative subject + infinitive**.
+
+### Verbs that trigger indirect statement:
+*dīcō* (say), *putō* (think), *crēdō* (believe), *sciō* (know), *nesciō* (not know), *sentiō* (feel/perceive), *audiō* (hear), *videō* (see in the sense of perceive), *nūntiō* (announce), *scrībō* (write [that]), *legō* (read [that]), *spērō* (hope)
+
+### Structure
+
+```
+Main clause subject + verb of saying/thinking/etc. + [ACCUSATIVE subject + INFINITIVE]
+```
+
+**The tense of the infinitive is relative to the main verb:**
+- **Present infinitive** = action happening at same time as main verb
+- **Perfect infinitive** = action happened before main verb
+- **Future infinitive** = action will happen after main verb
+
+### Worked Examples
+
+*Dīcit puellam esse bonam.*
+→ He says [that] the girl is good. (present inf. *esse* — simultaneous)
+→ *puellam* = accusative subject; *esse* = present infinitive; *bonam* agrees with *puellam* (f. acc. sg.)
+
+*Dīcit puellam fuisse bonam.*
+→ He says [that] the girl was good. (perfect inf. *fuisse* — prior to saying)
+
+*Putō servum vēnisse.*
+→ I think [that] the slave came. (*vēnisse* = perfect of *venīre* — prior to thinking)
+
+*Spērō tē venīre.*
+→ I hope [that] you are coming. (*tē* = acc.; *venīre* = present inf.)
+
+*Scīvit Rōmam esse magnam urbem.*
+→ He knew [that] Rome was a great city. (present inf. — simultaneous with *scīvit*)
+
+**Reflexive in indirect statement:** When the accusative subject refers back to the main subject, use the **reflexive** *sē* (not *eum/eam*):
+*Dīcit sē esse bonum.* — He says that he (himself) is good.
+*Dīcit eum esse bonum.* — He says that he (someone else) is good.
+
+---
+
+## 8. Common Misconceptions / Where Students Fail
+
+1. **Using *quod* + indicative for indirect statement:** This is classical English grammar borrowed into Latin. Classical Latin uses acc. + inf. exclusively after the verbs listed above.
+2. **Forgetting PPP agreement:** In perfect passive constructions, the PPP agrees with the **subject**, not the object of the main verb.
+3. **Wrong infinitive tense in indirect statement:** *"Dīcit sē venīre"* (present — he is coming now) ≠ *"Dīcit sē vēnisse"* (perfect — he came before this moment). Tense of infinitive matters.
+4. **Confusing future perfect with pluperfect:** *amāverit* (future perfect, 3rd sg.) vs. *amāverat* (pluperfect, 3rd sg.) — the vowel -i- (future perfect) vs. -a- (pluperfect) is the key.
+5. **Not knowing irregular perfect stems:** These must be memorised. *veniō/vēnī, videō/vīdī, faciō/fēcī, dīcō/dīxī* — the 3rd principal part is non-negotiable.
+
+---
+
+## 📚 Primary Sources
+
+- Wheelock's Latin, Chapters 12–25 — [wheelockslatin.com](https://wheelockslatin.com/)
+- Perseus Digital Library — parsing — [perseus.tufts.edu](http://www.perseus.tufts.edu/)
+- ScorpioMartianus — Perfect system — [YouTube](https://www.youtube.com/@ScorpioMartianus)
+- Dickinson College Commentaries — indirect statement — [dcc.dickinson.edu](https://dcc.dickinson.edu/)
+
+<details>
+<summary>🧠 Active Recall Prompts</summary>
+
+1. Write the perfect active of *amō, agō, esse* in all 6 persons.
+2. Give the perfect 1st sg. of: *dīcō, dūcō, mittō, veniō, videō, faciō, ferō, pōnō*.
+3. Write all six infinitives of *amō*. What does each mean relative to the main verb?
+4. Translate using indirect statement: "She says that the soldiers are coming." / "I know that Caesar won." / "They hope that you will return."
+5. What is the reflexive rule in indirect statement? Give 2 examples contrasting *sē* vs. *eum*.
+6. Form the perfect passive of *amō* for *puella* (f. sg.) and *puerī* (m. pl.).
+7. Translate: *"Putāvit servōs fūgisse."* — Parse every word.
+
+</details>

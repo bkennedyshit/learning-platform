@@ -1,0 +1,41 @@
+<svg viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 400px; height: auto;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal)"/>
+    </marker>
+    <marker id="run-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--h1-color)"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .grid { stroke: var(--text-muted); stroke-width: 0.5; opacity: 0.5; }
+    .axis { stroke: var(--text-normal); stroke-width: 2; }
+    .line { stroke: var(--interactive-accent); stroke-width: 3; fill: none; }
+    .rise-run { stroke: var(--h1-color); stroke-width: 2; stroke-dasharray: 4; fill: none; }
+    .point { fill: var(--text-accent); stroke: var(--background-secondary); stroke-width: 2; cursor: pointer; transition: r 0.2s; }
+    .point:hover { fill: var(--h1-color); r: 6; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal); }
+    .annotation { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--h1-color); font-weight: bold; }
+  </style>
+
+  <path class="grid" d="M -150 -200 V 200 M -100 -200 V 200 M -50 -200 V 200 M 50 -200 V 200 M 100 -200 V 200 M 150 -200 V 200" />
+  <path class="grid" d="M -200 -150 H 200 M -200 -100 H 200 M -200 -50 H 200 M -200 50 H 200 M -200 100 H 200 M -200 150 H 200" />
+
+  <line x1="-190" y1="0" x2="190" y2="0" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="0" y1="190" x2="0" y2="-190" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+  <!-- y = 1/2 x + 1 (SVG: y = -0.5x - 50) -->
+  <line x1="-200" y1="50" x2="200" y2="-150" class="line" />
+  
+  <!-- Rise and Run from (0, 1) to (2, 2) i.e. (0, -50) to (100, -100) -->
+  <path class="rise-run" d="M 0 -50 H 100 V -90" marker-end="url(#run-arrow)"/>
+  <circle cx="0" cy="-50" r="4" class="point"/>
+  <circle cx="100" cy="-100" r="4" class="point"/>
+
+  <text x="30" y="-30" class="annotation">Run: +2</text>
+  <text x="110" y="-70" class="annotation">Rise: +1</text>
+  
+  <rect x="-160" y="-180" width="120" height="40" rx="4" fill="var(--background-secondary)" stroke="var(--text-muted)"/>
+  <text x="-100" y="-155" class="label" text-anchor="middle" fill="var(--interactive-accent)" font-weight="bold">y = 1/2 x + 1</text>
+</svg>

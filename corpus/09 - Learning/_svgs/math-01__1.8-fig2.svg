@@ -1,0 +1,60 @@
+<svg viewBox="0 0 760 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;height:auto;">
+  <defs>
+    <marker id="cplx-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .cbox  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; }
+    .carr  { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#cplx-arr); }
+    .czero { stroke: var(--text-muted, #8b949e); stroke-width: 1.6; fill: none; marker-end: url(#cplx-arr); stroke-dasharray: 4 3; }
+    .clab  { font-family: 'Latin Modern Math',serif; font-style: italic; font-size: 14px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    .csub  { font-family: Inter,system-ui,sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .czlab { font-family: 'Latin Modern Math',serif; font-style: italic; font-size: 13px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Boxes -->
+  <rect x="10"  y="30" width="80" height="40" rx="6" class="cbox"/>
+  <rect x="170" y="30" width="80" height="40" rx="6" class="cbox"/>
+  <rect x="330" y="30" width="80" height="40" rx="6" class="cbox"/>
+  <rect x="490" y="30" width="80" height="40" rx="6" class="cbox"/>
+  <rect x="650" y="30" width="80" height="40" rx="6" class="cbox"/>
+  <!-- Labels -->
+  <text x="50"  y="55" class="clab">Ω⁰</text>
+  <text x="210" y="55" class="clab">Ω¹</text>
+  <text x="370" y="55" class="clab">Ω²</text>
+  <text x="530" y="55" class="clab">Ω³</text>
+  <text x="690" y="55" class="clab">0</text>
+  <!-- Arrows between boxes -->
+  <line x1="90"  y1="50" x2="168" y2="50" class="carr"/>
+  <line x1="250" y1="50" x2="328" y2="50" class="carr"/>
+  <line x1="410" y1="50" x2="488" y2="50" class="carr"/>
+  <line x1="570" y1="50" x2="648" y2="50" class="carr"/>
+  <!-- d labels -->
+  <text x="130" y="42" class="czlab">d</text>
+  <text x="290" y="42" class="czlab">d</text>
+  <text x="450" y="42" class="czlab">d</text>
+  <text x="610" y="42" class="czlab">d</text>
+  <!-- d²=0 arc label -->
+  <path d="M 90 30 Q 210 5 328 30" stroke="var(--text-muted, #8b949e)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+  <text x="210" y="14" class="csub">d² = 0: im(d) ⊆ ker(d)</text>
+</svg>

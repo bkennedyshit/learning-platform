@@ -1,0 +1,150 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .wave{fill:none;stroke:var(--interactive-accent,#58a6ff);stroke-width:2;}
+    .synthbox{fill:var(--background-secondary,#161b22);stroke:var(--interactive-accent,#58a6ff);stroke-width:1.4;}
+  </style>
+  <defs>
+    <clipPath id="wave-clip">
+      <rect x="60" y="55" width="60" height="130"/>
+    </clipPath>
+  </defs>
+  <text x="360" y="22" class="title" text-anchor="middle">35.2 — Sound Design &amp; Synthesis: Oscillators, Filters, Envelopes &amp; Modulation</text>
+  <!-- Waveform types -->
+  <rect x="20" y="35" width="220" height="160" class="box" rx="4"/>
+  <text x="130" y="52" class="label" text-anchor="middle" font-weight="bold">Basic Waveforms</text>
+  <!-- Basic Waveforms playing inside clip-path -->
+  <g clip-path="url(#wave-clip)">
+    <!-- Sine wave -->
+    <path d="M60,72 Q70,62 80,72 Q90,82 100,72 Q110,62 120,72" class="wave">
+      <animate attributeName="d" dur="2s" repeatCount="indefinite" values="
+        M60,72 Q70,62 80,72 Q90,82 100,72 Q110,62 120,72;
+        M60,72 Q70,82 80,72 Q90,62 100,72 Q110,82 120,72;
+        M60,72 Q70,62 80,72 Q90,82 100,72 Q110,62 120,72
+      "/>
+    </path>
+    <!-- Sawtooth -->
+    <path d="M60,95 L75,85 L75,105 L90,85 L90,105 L105,85 L105,105 L120,85 M120,95 L135,85 L135,105" class="wave" stroke="#51cf66">
+      <animateTransform attributeName="transform" type="translate" dur="0.8s" repeatCount="indefinite" from="0,0" to="-15,0"/>
+    </path>
+    <!-- Square -->
+    <path d="M60,112 L60,120 L75,120 L75,112 L90,112 L90,120 L105,120 L105,112 L120,112 L120,120 L135,120 L135,112 L150,112" class="wave" stroke="#ffd93d">
+      <animateTransform attributeName="transform" type="translate" dur="1s" repeatCount="indefinite" from="0,0" to="-30,0"/>
+    </path>
+    <!-- Triangle -->
+    <path d="M60,148 L72,132 L84,148 L96,132 L108,148 L120,132 L132,148 L144,132 L156,148" class="wave" stroke="#ff6b6b">
+      <animateTransform attributeName="transform" type="translate" dur="1.2s" repeatCount="indefinite" from="0,0" to="-24,0"/>
+    </path>
+    <!-- Noise -->
+    <path d="M60,172 L65,164 L68,178 L73,162 L77,175 L82,168 L86,180 L91,163 L95,173 L100,166 L104,177 L109,162 L113,170 L118,176 L122,163 L127,172 L130,164 L133,178 L138,162" class="wave" stroke="var(--text-muted,#8b949e)">
+      <animateTransform attributeName="transform" type="translate" dur="0.2s" repeatCount="indefinite" from="0,0" to="-20,0"/>
+    </path>
+  </g>
+  <!-- Text descriptors -->
+  <text x="30" y="74" class="sub">Sine</text>
+  <text x="130" y="74" class="sub">pure tone, warm, sub bass</text>
+  <text x="30" y="98" class="sub">Saw</text>
+  <text x="130" y="98" class="sub" fill="#51cf66">all harmonics, bright, leads</text>
+  <text x="30" y="122" class="sub">Square</text>
+  <text x="130" y="122" class="sub" fill="#ffd93d">odd harmonics, hollow, keys</text>
+  <text x="30" y="146" class="sub">Triangle</text>
+  <text x="130" y="146" class="sub" fill="#ff6b6b">soft, odd harmonics, mellow</text>
+  <text x="30" y="170" class="sub">Noise</text>
+  <text x="130" y="170" class="sub">all freqs, percussion, SFX</text>
+  <!-- Synthesis chain -->
+  <rect x="255" y="35" width="445" height="160" class="box" rx="4"/>
+  <text x="477" y="52" class="label" text-anchor="middle" font-weight="bold">Subtractive Synthesis Signal Chain</text>
+  <rect x="265" y="62" width="60" height="40" class="synthbox" rx="3"/>
+  <text x="295" y="80" class="sub" text-anchor="middle">OSC 1</text>
+  <text x="295" y="92" class="sub" text-anchor="middle">Saw 440Hz</text>
+  <rect x="265" y="108" width="60" height="40" class="synthbox" rx="3"/>
+  <text x="295" y="126" class="sub" text-anchor="middle">OSC 2</text>
+  <text x="295" y="138" class="sub" text-anchor="middle">Sub -12st</text>
+  <rect x="345" y="80" width="60" height="40" class="synthbox" rx="3"/>
+  <text x="375" y="98" class="sub" text-anchor="middle">MIXER</text>
+  <text x="375" y="110" class="sub" text-anchor="middle">blend/tune</text>
+  <rect x="425" y="80" width="65" height="40" class="synthbox" rx="3"/>
+  <text x="457" y="98" class="sub" text-anchor="middle">FILTER</text>
+  <text x="457" y="110" class="sub" text-anchor="middle">LP/HP/BP</text>
+  <rect x="510" y="80" width="65" height="40" class="synthbox" rx="3"/>
+  <text x="542" y="98" class="sub" text-anchor="middle">AMP</text>
+  <text x="542" y="110" class="sub" text-anchor="middle">volume</text>
+  <rect x="595" y="80" width="65" height="40" class="synthbox" rx="3"/>
+  <text x="627" y="98" class="sub" text-anchor="middle">FX</text>
+  <text x="627" y="110" class="sub" text-anchor="middle">reverb/delay</text>
+  <line x1="325" y1="85" x2="345" y2="98" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="325" y1="125" x2="345" y2="108" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="405" y1="100" x2="425" y2="100" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="490" y1="100" x2="510" y2="100" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="575" y1="100" x2="595" y2="100" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <!-- LFO + Envelope below chain -->
+  <rect x="345" y="135" width="80" height="30" fill="none" stroke="#ffd93d" stroke-width="1" rx="3"/>
+  <text x="385" y="153" class="sub" text-anchor="middle" fill="#ffd93d">LFO → Filter Cutoff</text>
+  <rect x="435" y="135" width="80" height="30" fill="none" stroke="#ff6b6b" stroke-width="1" rx="3"/>
+  <text x="475" y="153" class="sub" text-anchor="middle" fill="#ff6b6b">ENV → Amp (ADSR)</text>
+  <rect x="525" y="135" width="80" height="30" fill="none" stroke="#51cf66" stroke-width="1" rx="3"/>
+  <text x="565" y="153" class="sub" text-anchor="middle" fill="#51cf66">ENV2 → Filter (toneVary)</text>
+  <!-- ADSR envelope diagram -->
+  <rect x="20" y="210" width="260" height="190" class="box" rx="4"/>
+  <text x="130" y="227" class="label" text-anchor="middle" font-weight="bold">ADSR Envelope</text>
+  <line x1="40" y1="370" x2="40" y2="240" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="40" y1="370" x2="265" y2="370" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <!-- ADSR curve -->
+  <path d="M40,370 L70,240 L100,285 L160,285 L190,370" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="2"/>
+  <circle r="4" fill="var(--interactive-accent,#58a6ff)">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M40,370 L70,240 L100,285 L160,285 L190,370" />
+  </circle>
+  <line x1="70" y1="240" x2="70" y2="370" stroke="var(--text-muted,#8b949e)" stroke-dasharray="3 2" stroke-width="0.8"/>
+  <line x1="100" y1="285" x2="100" y2="370" stroke="var(--text-muted,#8b949e)" stroke-dasharray="3 2" stroke-width="0.8"/>
+  <line x1="160" y1="285" x2="160" y2="370" stroke="var(--text-muted,#8b949e)" stroke-dasharray="3 2" stroke-width="0.8"/>
+  <line x1="190" y1="370" x2="190" y2="370" stroke="var(--text-muted,#8b949e)" stroke-dasharray="3 2" stroke-width="0.8"/>
+  <text x="55" y="383" class="mono" text-anchor="middle">A</text>
+  <text x="85" y="383" class="mono" text-anchor="middle">D</text>
+  <text x="130" y="383" class="mono" text-anchor="middle">S</text>
+  <text x="175" y="383" class="mono" text-anchor="middle">R</text>
+  <text x="130" y="340" class="sub" text-anchor="middle">Sustain level</text>
+  <text x="35" y="245" class="sub">Peak</text>
+  <!-- Filter types -->
+  <rect x="295" y="210" width="210" height="190" class="box" rx="4"/>
+  <text x="400" y="227" class="label" text-anchor="middle" font-weight="bold">Filter Types</text>
+  <!-- LP filter freq curve -->
+  <line x1="310" y1="390" x2="310" y2="250" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <line x1="310" y1="390" x2="490" y2="390" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <path fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="2">
+    <animate attributeName="d" dur="4s" repeatCount="indefinite" values="
+      M310,270 L340,270 L360,275 L380,300 L395,370 L490,370;
+      M310,270 L400,270 L420,275 L440,300 L455,370 L490,370;
+      M310,270 L340,270 L360,275 L380,300 L395,370 L490,370
+    "/>
+  </path>
+  <text x="400" y="260" class="sub" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">Low-Pass (LP)</text>
+  <text x="400" y="272" class="sub" text-anchor="middle">passes lows, cuts highs</text>
+  <path d="M310,370 L330,370 L350,345 L370,300 L385,275 L405,270 L490,270" fill="none" stroke="#ffd93d" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="400" y="290" class="sub" text-anchor="middle" fill="#ffd93d">High-Pass →</text>
+  <!-- Resonance illustration -->
+  <text x="400" y="320" class="sub" text-anchor="middle">Resonance / Q: boosts</text>
+  <text x="400" y="332" class="sub" text-anchor="middle">frequencies around cutoff</text>
+  <text x="400" y="344" class="sub" text-anchor="middle">Creates classic synth "wah"</text>
+  <text x="400" y="358" class="sub" text-anchor="middle">High Q + env sweep = 303 acid</text>
+  <text x="400" y="372" class="sub" text-anchor="middle">Filter slope: 12 or 24 dB/oct</text>
+  <!-- Modulation sources -->
+  <rect x="520" y="210" width="180" height="190" class="box" rx="4"/>
+  <text x="610" y="227" class="label" text-anchor="middle" font-weight="bold">Modulation Sources</text>
+  <text x="530" y="244" class="sub" font-weight="bold">LFO (Low Freq Osc):</text>
+  <text x="530" y="256" class="sub">Rate: 0.1–20 Hz (below audio)</text>
+  <text x="530" y="268" class="sub">Shape: sine/tri/saw/square/SH</text>
+  <text x="530" y="280" class="sub">Targets: pitch (vibrato), filter</text>
+  <text x="530" y="292" class="sub">(wah), amp (tremolo), pan</text>
+  <text x="530" y="308" class="sub" font-weight="bold">Envelope (ADSR):</text>
+  <text x="530" y="320" class="sub">Key-triggered one-shot</text>
+  <text x="530" y="332" class="sub">Snappy A (0ms) = percussive</text>
+  <text x="530" y="344" class="sub">Long A = pad/swell</text>
+  <text x="530" y="360" class="sub" font-weight="bold">Velocity / MIDI CC:</text>
+  <text x="530" y="372" class="sub">Velocity → filter cutoff (dynamics)</text>
+  <text x="530" y="384" class="sub">Mod wheel → LFO depth (vibrato)</text>
+  <text x="530" y="396" class="sub">Aftertouch → vibrato on hold</text>
+</svg>

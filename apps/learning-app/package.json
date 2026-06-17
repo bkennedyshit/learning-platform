@@ -1,0 +1,31 @@
+{
+  "name": "@learning-platform/learning-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/generate-content.mjs && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "generate": "node scripts/generate-content.mjs",
+    "check": "tsc --noEmit",
+    "test": "echo \"learning-app test scaffold\""
+  },
+  "dependencies": {
+    "katex": "^0.17.0",
+    "marked": "^18.0.5",
+    "marked-katex-extension": "^5.1.10",
+    "mermaid": "^11.15.0",
+    "next": "16.2.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "typescript": "^5"
+  }
+}

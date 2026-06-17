@@ -1,0 +1,1155 @@
+---
+title: "13.5 — Async, Promises & Async Generators"
+subject: "TypeScript"
+catalog: advanced
+audience_tier: higher-education
+chapter: "13.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 13.5 — Async, Promises & Async Generators
+
+> *"Async/await is the best thing that happened to JavaScript error handling. But TypeScript makes it even better by typing the success path — now we need to type the error path too."* — **Matt Pocock**
+
+JavaScript is single-threaded but non-blocking. TypeScript adds type safety to the async model — `Promise<T>` tells you what you'll get on success, but the error channel is untyped by default. This chapter teaches you to handle both paths properly.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Type Promises correctly and understand `Awaited<T>` for unwrapping.
+2. Handle errors in async code using typed Result patterns and try/catch.
+3. Use `AbortController` for cancellation of fetch requests and long-running operations.
+4. Write async generators for streaming data processing.
+5. Apply concurrent patterns: `Promise.all`, `allSettled`, `race`, `any`.
+6. Implement retry logic, timeouts, and debouncing with proper types.
+7. Compare Python's `asyncio` with JavaScript's event loop model.
+
+---
+
+## 🖼️ Visual Anchor — Async Execution Model
+
+![ts__6.5-fig1](ts__6.5-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 13.5.1 — Promises in TypeScript
+
+A `Promise<T>` represents a value that will be available in the future. TypeScript types the **success** value but not the error:
+
+```ts
+// Promise<string> — will resolve to a string
+async function fetchName(id: string): Promise<string> {
+  const res = await fetch(`/api/users/${id}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data.name;
+}
+
+// Awaited<T> unwraps nested Promises
+type A = Awaited<Promise<string>>;           // string
+type B = Awaited<Promise<Promise<number>>>;  // number
+```
+
+### Definition 13.5.2 — The Event Loop (JS vs Python)
+
+| JavaScript | Python (asyncio) |
+|-----------|-----------------|
+| Single event loop, always running | Must explicitly `asyncio.run()` |
+| `await` pauses the function, not the thread | Same — `await` yields to event loop |
+| Callbacks/microtasks/macrotasks | Coroutines + tasks |
+| `setTimeout` / `setInterval` | `asyncio.sleep()` / `loop.call_later()` |
+| No GIL (single-threaded by design) | GIL limits true parallelism |
+| Web Workers for CPU parallelism | `multiprocessing` for CPU parallelism |
+
+### Definition 13.5.3 — AbortController
+
+The standard way to cancel async operations:
+
+```ts
+const controller = new AbortController();
+
+// Pass signal to fetch
+const response = await fetch("/api/data", {
+  signal: controller.signal,
+});
+
+// Cancel from elsewhere
+controller.abort(); // fetch throws AbortError
+
+// Check if aborted
+if (controller.signal.aborted) {
+  console.log("Request was cancelled");
+}
+```
+
+### Definition 13.5.4 — Async Generators
+
+Functions that yield values asynchronously over time:
+
+```ts
+async function* paginate<T>(url: string): AsyncGenerator<T[], void, undefined> {
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const res = await fetch(`${url}?page=${page}`);
+    const data = await res.json();
+    yield data.items;
+    hasMore = data.hasNextPage;
+    page++;
+  }
+}
+
+// Consume with for-await-of
+for await (const batch of paginate<User>("/api/users")) {
+  console.log(`Got ${batch.length} users`);
+}
+```
+
+---
+
+## 🧩 2. Mental Models
+
+### Model 6.5.1 — Promise as a Container
+
+Think of `Promise<T>` like `Option<T>` but for time:
+- `Option<T>` = "might not have a value" (space)
+- `Promise<T>` = "don't have the value yet" (time)
+
+Both are containers you can `.then()`/`map()` over without extracting the value.
+
+### Model 6.5.2 — Error Handling Strategy Matrix
+
+| Strategy | When to Use | Typed? |
+|----------|------------|--------|
+| `try/catch` | Simple, local error handling | ❌ `catch(e: unknown)` |
+| `Result<T, E>` | Composable pipelines, expected failures | ✅ Fully typed |
+| `.catch()` on Promise | One-off error recovery | ❌ Returns `T \| ErrorType` |
+| Effect.ts | Complex apps with many failure modes | ✅ Fully typed |
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Typed Error Handling
+
+```ts
+// Problem: catch gives you 'unknown'
+async function fetchUser(id: string): Promise<User> {
+  try {
+    const res = await fetch(`/api/users/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (error: unknown) {
+    // Must narrow — error could be anything
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch user: ${error.message}`);
+    }
+    throw new Error("Unknown error");
+  }
+}
+
+// Better: Result-based async
+type AsyncResult<T, E = Error> = Promise<Result<T, E>>;
+
+async function fetchUserSafe(id: string): AsyncResult<User> {
+  try {
+    const res = await fetch(`/api/users/${id}`);
+    if (!res.ok) return Err(new Error(`HTTP ${res.status}`));
+    const data = await res.json();
+    return Ok(data as User);
+  } catch (e) {
+    return Err(e instanceof Error ? e : new Error(String(e)));
+  }
+}
+
+// Caller handles both paths explicitly
+const result = await fetchUserSafe("123");
+if (result._tag === "Ok") {
+  console.log(result.value.name);
+} else {
+  console.error(result.error.message);
+}
+```
+
+### 3.2 — Concurrent Patterns
+
+```ts
+// Promise.all — fail fast (one rejection = all fail)
+const [users, posts, comments] = await Promise.all([
+  fetchUsers(),   // Promise<User[]>
+  fetchPosts(),   // Promise<Post[]>
+  fetchComments() // Promise<Comment[]>
+]);
+// Type: [User[], Post[], Comment[]]
+
+// Promise.allSettled — never throws, reports all results
+const results = await Promise.allSettled([
+  fetchUsers(),
+  fetchPosts(),
+  riskyOperation(),
+]);
+// Type: [PromiseSettledResult<User[]>, PromiseSettledResult<Post[]>, ...]
+
+for (const result of results) {
+  if (result.status === "fulfilled") {
+    console.log("Success:", result.value);
+  } else {
+    console.error("Failed:", result.reason);
+  }
+}
+
+// Promise.race — first to settle wins
+const result = await Promise.race([
+  fetchFromPrimary(),
+  fetchFromFallback(),
+]);
+
+// Promise.any — first to SUCCEED wins (ignores rejections)
+const fastest = await Promise.any([
+  fetchFromCDN1(),
+  fetchFromCDN2(),
+  fetchFromCDN3(),
+]);
+```
+
+### 3.3 — Cancellation with AbortController
+
+```ts
+// Cancellable fetch wrapper
+async function fetchWithTimeout<T>(
+  url: string,
+  options: { timeout: number; signal?: AbortSignal } = { timeout: 5000 }
+): Promise<T> {
+  const controller = new AbortController();
+
+  // Link external signal if provided
+  if (options.signal) {
+    options.signal.addEventListener("abort", () => controller.abort());
+  }
+
+  // Auto-cancel after timeout
+  const timeoutId = setTimeout(() => controller.abort(), options.timeout);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Usage with manual cancellation
+const controller = new AbortController();
+
+// Start fetch
+const dataPromise = fetchWithTimeout<User[]>("/api/users", {
+  timeout: 10000,
+  signal: controller.signal,
+});
+
+// Cancel if user navigates away
+window.addEventListener("beforeunload", () => controller.abort());
+```
+
+### 3.4 — Async Generators for Streaming
+
+```ts
+// Server-Sent Events as async generator
+async function* streamEvents(url: string): AsyncGenerator<ServerEvent> {
+  const response = await fetch(url);
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n\n");
+    buffer = lines.pop()!; // Keep incomplete chunk
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        yield JSON.parse(line.slice(6));
+      }
+    }
+  }
+}
+
+// Consume
+for await (const event of streamEvents("/api/stream")) {
+  console.log("Event:", event);
+}
+
+// Batch processing with backpressure
+async function* batchProcess<T, R>(
+  items: T[],
+  processor: (item: T) => Promise<R>,
+  concurrency: number = 5
+): AsyncGenerator<R> {
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency);
+    const results = await Promise.all(batch.map(processor));
+    for (const result of results) {
+      yield result;
+    }
+  }
+}
+```
+
+### 3.5 — Retry and Timeout Utilities
+
+```ts
+// Generic retry with exponential backoff
+async function retry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxAttempts?: number;
+    baseDelay?: number;
+    maxDelay?: number;
+    signal?: AbortSignal;
+  } = {}
+): Promise<T> {
+  const { maxAttempts = 3, baseDelay = 1000, maxDelay = 30000, signal } = options;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      signal?.throwIfAborted();
+      return await fn();
+    } catch (error) {
+      if (attempt === maxAttempts) throw error;
+      if (signal?.aborted) throw error;
+
+      const delay = Math.min(baseDelay * 2 ** (attempt - 1), maxDelay);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("Unreachable");
+}
+
+// Usage
+const data = await retry(
+  () => fetch("/api/flaky-endpoint").then(r => r.json()),
+  { maxAttempts: 5, baseDelay: 500 }
+);
+```
+
+---
+
+## 💻 4. Code Patterns & Examples
+
+### Pattern 6.5.1 — Typed Async Queue
+
+```ts
+class AsyncQueue<T> {
+  private queue: T[] = [];
+  private resolvers: ((value: T) => void)[] = [];
+
+  enqueue(item: T): void {
+    const resolver = this.resolvers.shift();
+    if (resolver) {
+      resolver(item);
+    } else {
+      this.queue.push(item);
+    }
+  }
+
+  dequeue(): Promise<T> {
+    const item = this.queue.shift();
+    if (item !== undefined) {
+      return Promise.resolve(item);
+    }
+    return new Promise<T>(resolve => {
+      this.resolvers.push(resolve);
+    });
+  }
+
+  get size(): number { return this.queue.length; }
+  get pending(): number { return this.resolvers.length; }
+}
+
+// Usage: producer/consumer pattern
+const queue = new AsyncQueue<string>();
+
+// Producer
+setInterval(() => queue.enqueue(`msg-${Date.now()}`), 100);
+
+// Consumer
+async function consume() {
+  while (true) {
+    const msg = await queue.dequeue();
+    console.log("Processing:", msg);
+  }
+}
+```
+
+---
+
+## 🧮 5. Worked Examples
+
+### Example 13.5.1 — Build a Rate-Limited API Client
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+class RateLimiter {
+  private tokens: number;
+  private lastRefill: number;
+
+  constructor(
+    private readonly maxTokens: number,
+    private readonly refillRate: number, // tokens per second
+  ) {
+    this.tokens = maxTokens;
+    this.lastRefill = Date.now();
+  }
+
+  async acquire(): Promise<void> {
+    this.refill();
+    if (this.tokens > 0) {
+      this.tokens--;
+      return;
+    }
+    // Wait for next token
+    const waitTime = (1 / this.refillRate) * 1000;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+    this.refill();
+    this.tokens--;
+  }
+
+  private refill(): void {
+    const now = Date.now();
+    const elapsed = (now - this.lastRefill) / 1000;
+    this.tokens = Math.min(this.maxTokens, this.tokens + elapsed * this.refillRate);
+    this.lastRefill = now;
+  }
+}
+
+class RateLimitedClient {
+  private limiter: RateLimiter;
+
+  constructor(requestsPerSecond: number = 10) {
+    this.limiter = new RateLimiter(requestsPerSecond, requestsPerSecond);
+  }
+
+  async get<T>(url: string): Promise<T> {
+    await this.limiter.acquire();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+}
+```
+
+</details>
+
+### Example 13.5.2 — Implement `Promise.allSettled` from Scratch
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+type SettledResult<T> =
+  | { status: "fulfilled"; value: T }
+  | { status: "rejected"; reason: unknown };
+
+function allSettled<T extends readonly unknown[]>(
+  promises: { [K in keyof T]: Promise<T[K]> }
+): Promise<{ [K in keyof T]: SettledResult<T[K]> }> {
+  return Promise.all(
+    promises.map(p =>
+      p.then(
+        (value) => ({ status: "fulfilled" as const, value }),
+        (reason) => ({ status: "rejected" as const, reason }),
+      )
+    )
+  ) as any;
+}
+
+// Usage
+const [userResult, postResult] = await allSettled([
+  fetchUser("123"),
+  fetchPost("456"),
+] as const);
+
+if (userResult.status === "fulfilled") {
+  console.log(userResult.value); // User
+}
+```
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 6.5.1 — Unhandled Promise Rejections
+
+```ts
+// ❌ Fire-and-forget async (rejection silently lost)
+async function save() { /* might throw */ }
+save(); // No await, no .catch() — rejection vanishes!
+
+// ✅ Always handle
+save().catch(console.error);
+// or
+await save();
+// or
+void save(); // Explicit "I know I'm not awaiting" (still needs error handling)
+```
+
+### Gotcha 6.5.2 — Sequential vs Parallel Await
+
+```ts
+// ❌ Sequential (slow — each waits for the previous)
+const users = await fetchUsers();    // 200ms
+const posts = await fetchPosts();    // 200ms
+const comments = await fetchComments(); // 200ms
+// Total: ~600ms
+
+// ✅ Parallel (fast — all run simultaneously)
+const [users, posts, comments] = await Promise.all([
+  fetchUsers(),    // 200ms
+  fetchPosts(),    // 200ms  } all at once
+  fetchComments(), // 200ms
+]);
+// Total: ~200ms
+```
+
+### Gotcha 6.5.3 — `async` Functions Always Return Promises
+
+```ts
+// This returns Promise<number>, not number!
+async function add(a: number, b: number): Promise<number> {
+  return a + b; // Automatically wrapped in Promise.resolve()
+}
+
+// Can't use in synchronous contexts:
+// const sum: number = add(1, 2); // ❌ Type 'Promise<number>' not assignable to 'number'
+const sum: number = await add(1, 2); // ✅
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [13.4 - OOP & FP Patterns in TypeScript](13.4---OOP-&-FP-Patterns-in-TypeScript)
+- **Next:** [13.6 - Modules & Build Systems](13.6---Modules-&-Build-Systems)
+- **Python async comparison:** [08.4 - Concurrency - asyncio, threading, multiprocessing & the GIL](08.4---Concurrency---asyncio,-threading,-multiprocessing-&-the-GIL)
+- **Backend async patterns:** [13.8 - Backend with TypeScript - Node, Bun, Deno, Express, Fastify, Hono](13.8---Backend-with-TypeScript---Node,-Bun,-Deno,-Express,-Fastify,-Hono)
+
+### External Resources
+- [MDN — Using Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
+- [TypeScript Handbook — Async/Await](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-1-7.html)
+- [Jake Archibald — JavaScript Event Loop](https://www.youtube.com/watch?v=cCOL7MC4Pl0)
+- [AbortController MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
+
+---
+
+*Last updated: 2026-05-24*
+
+
+
+---
+
+## 🏗️ 8. Modern Async Patterns: Disposables, Cancellation & Structured Concurrency
+
+### 8.1 — AsyncDisposable and the `using` Declaration (ES2024+)
+
+The `using` keyword (TS 5.2+) provides deterministic resource cleanup — like Python's `with` or C#'s `using`. When the scope exits (normally or via exception), the resource's `[Symbol.asyncDispose]()` method is called automatically.
+
+```ts
+// Define a disposable resource
+class DatabaseConnection implements AsyncDisposable {
+  private pool: Pool;
+
+  constructor(connectionString: string) {
+    this.pool = new Pool(connectionString);
+  }
+
+  async query(sql: string, params?: unknown[]): Promise<Row[]> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(sql, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async [Symbol.asyncDispose](): Promise<void> {
+    console.log("Closing database pool...");
+    await this.pool.end();
+  }
+}
+
+// Usage with `await using` — cleanup is GUARANTEED
+async function processUsers(): Promise<void> {
+  await using db = new DatabaseConnection("postgres://localhost/mydb");
+  await using tempFile = await TempFile.create("/tmp/export.csv");
+
+  const users = await db.query("SELECT * FROM users WHERE active = true");
+
+  for (const user of users) {
+    await tempFile.writeLine(`${user.name},${user.email}`);
+  }
+
+  // When this scope exits:
+  // 1. tempFile[Symbol.asyncDispose]() is called (deletes temp file)
+  // 2. db[Symbol.asyncDispose]() is called (closes pool)
+  // Order: reverse of declaration (LIFO), just like destructors
+}
+```
+
+#### Disposable Stack (Managing Multiple Resources)
+
+```ts
+async function complexOperation(): Promise<void> {
+  await using stack = new AsyncDisposableStack();
+
+  // Add resources dynamically
+  const db = stack.use(new DatabaseConnection(DB_URL));
+  const cache = stack.use(new RedisConnection(REDIS_URL));
+  const lock = stack.use(await acquireDistributedLock("process-users"));
+
+  // If any of these throw, ALL resources are cleaned up
+  const users = await db.query("SELECT * FROM users");
+  await cache.set("users", JSON.stringify(users));
+
+  // stack[Symbol.asyncDispose]() cleans up: lock → cache → db (reverse order)
+}
+```
+
+#### Building Custom Disposables
+
+```ts
+// Helper: create a disposable from any cleanup function
+function disposable<T>(
+  resource: T,
+  cleanup: (resource: T) => Promise<void> | void
+): T & AsyncDisposable {
+  return Object.assign(resource, {
+    [Symbol.asyncDispose]: () => cleanup(resource),
+  });
+}
+
+// Usage:
+async function withTempDir(): Promise<void> {
+  await using dir = disposable(
+    await fs.mkdtemp("/tmp/app-"),
+    async (path) => {
+      await fs.rm(path, { recursive: true });
+      console.log(`Cleaned up ${path}`);
+    }
+  );
+
+  // Use dir as a string path
+  await fs.writeFile(`${dir}/data.json`, "{}");
+}
+```
+
+### 8.2 — AbortController Propagation Patterns
+
+`AbortController` is the standard cancellation mechanism in JavaScript. The key challenge is propagating cancellation through deeply nested async operations.
+
+#### The Propagation Pattern
+
+```ts
+// Top-level controller (e.g., HTTP request handler)
+async function handleRequest(req: Request): Promise<Response> {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  // Cancel everything if the client disconnects
+  req.signal.addEventListener("abort", () => controller.abort());
+
+  // Set a global timeout
+  const timeout = setTimeout(() => controller.abort(new Error("Timeout")), 30_000);
+
+  try {
+    const user = await fetchUser(req.params.id, signal);
+    const posts = await fetchPosts(user.id, signal);
+    const enriched = await enrichWithComments(posts, signal);
+    return Response.json(enriched);
+  } catch (e) {
+    if (signal.aborted) {
+      return new Response("Request cancelled", { status: 499 });
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// Every downstream function accepts and respects the signal
+async function fetchUser(id: string, signal: AbortSignal): Promise<User> {
+  const response = await fetch(`/api/users/${id}`, { signal });
+  if (!response.ok) throw new Error(`User ${id} not found`);
+  return response.json();
+}
+
+async function fetchPosts(userId: string, signal: AbortSignal): Promise<Post[]> {
+  // Check signal before expensive operations
+  signal.throwIfAborted();
+
+  const response = await fetch(`/api/users/${userId}/posts`, { signal });
+  return response.json();
+}
+```
+
+#### Derived Controllers (Scoped Cancellation)
+
+```ts
+// Create a child controller that cancels when parent cancels OR on its own timeout
+function deriveController(
+  parent: AbortSignal,
+  timeoutMs?: number
+): AbortController {
+  const child = new AbortController();
+
+  // If parent aborts, abort child
+  parent.addEventListener("abort", () => child.abort(parent.reason));
+
+  // Optional: auto-abort after timeout
+  if (timeoutMs) {
+    setTimeout(() => child.abort(new Error("Operation timeout")), timeoutMs);
+  }
+
+  return child;
+}
+
+async function fetchWithRetry(
+  url: string,
+  parentSignal: AbortSignal,
+  maxRetries = 3
+): Promise<Response> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // Each attempt gets its own 5s timeout, but parent can cancel all
+    const attemptController = deriveController(parentSignal, 5000);
+
+    try {
+      const response = await fetch(url, { signal: attemptController.signal });
+      if (response.ok) return response;
+    } catch (e) {
+      if (parentSignal.aborted) throw e; // Don't retry if parent cancelled
+      if (attempt === maxRetries) throw e;
+      await sleep(1000 * attempt); // Exponential backoff
+    }
+  }
+  throw new Error("Unreachable");
+}
+```
+
+### 8.3 — Cancellation Token vs AbortSignal
+
+| Feature | AbortSignal (Web Standard) | Cancellation Token (Custom) |
+|---------|---------------------------|---------------------------|
+| Standard | ✅ Web API, Node.js | ❌ Custom implementation |
+| Composable | ⚠️ Manual wiring | ✅ Can build hierarchies |
+| Reason tracking | ✅ `signal.reason` | ✅ Custom |
+| Cooperative | ✅ Must check/pass signal | ✅ Must check token |
+| Framework support | ✅ fetch, streams, Node APIs | ❌ Must integrate manually |
+
+```ts
+// Custom CancellationToken with hierarchy support
+class CancellationToken {
+  private _cancelled = false;
+  private _reason: unknown;
+  private _listeners = new Set<(reason: unknown) => void>();
+  private _children = new Set<CancellationToken>();
+
+  get cancelled(): boolean { return this._cancelled; }
+  get reason(): unknown { return this._reason; }
+
+  cancel(reason?: unknown): void {
+    if (this._cancelled) return;
+    this._cancelled = true;
+    this._reason = reason;
+    this._listeners.forEach(fn => fn(reason));
+    this._children.forEach(child => child.cancel(reason));
+  }
+
+  onCancel(fn: (reason: unknown) => void): () => void {
+    if (this._cancelled) { fn(this._reason); return () => {}; }
+    this._listeners.add(fn);
+    return () => this._listeners.delete(fn);
+  }
+
+  throwIfCancelled(): void {
+    if (this._cancelled) throw new CancellationError(this._reason);
+  }
+
+  // Create a child token that cancels when parent cancels
+  child(): CancellationToken {
+    const child = new CancellationToken();
+    this._children.add(child);
+    if (this._cancelled) child.cancel(this._reason);
+    return child;
+  }
+
+  // Bridge to AbortSignal
+  toAbortSignal(): AbortSignal {
+    const controller = new AbortController();
+    this.onCancel((reason) => controller.abort(reason));
+    return controller.signal;
+  }
+}
+
+class CancellationError extends Error {
+  constructor(public readonly reason: unknown) {
+    super(`Operation cancelled: ${reason}`);
+    this.name = "CancellationError";
+  }
+}
+```
+
+### 8.4 — Effect's Structured Concurrency
+
+Effect provides structured concurrency where child fibers (lightweight threads) are automatically cancelled when their parent scope exits:
+
+```ts
+import { Effect, Fiber, Schedule } from "effect";
+
+// Structured concurrency: all fibers are scoped
+const program = Effect.gen(function* () {
+  // Fork concurrent tasks — they're automatically scoped to this function
+  const userFiber = yield* Effect.fork(fetchUser("123"));
+  const postsFiber = yield* Effect.fork(fetchPosts("123"));
+  const metricsFiber = yield* Effect.fork(collectMetrics());
+
+  // Wait for the ones we need
+  const user = yield* Fiber.join(userFiber);
+  const posts = yield* Fiber.join(postsFiber);
+
+  // metricsFiber is automatically interrupted when this scope exits
+  // No leaked background tasks!
+
+  return { user, posts };
+});
+
+// Race: first to complete wins, others are cancelled
+const fastest = Effect.race(
+  fetchFromPrimary("data"),
+  fetchFromReplica("data"),
+);
+
+// Timeout with automatic cancellation
+const withTimeout = Effect.timeout(fetchLargeDataset(), "5 seconds");
+
+// Retry with schedule
+const resilient = Effect.retry(
+  fetchExternalAPI(),
+  Schedule.exponential("1 second").pipe(
+    Schedule.compose(Schedule.recurs(5))
+  )
+);
+```
+
+### 8.5 — Async Generators for Streaming Data
+
+```ts
+// Paginated API consumption as an async generator
+async function* fetchAllPages<T>(
+  baseUrl: string,
+  signal?: AbortSignal
+): AsyncGenerator<T[], void, undefined> {
+  let cursor: string | null = null;
+
+  do {
+    signal?.throwIfAborted();
+
+    const url = cursor ? `${baseUrl}?cursor=${cursor}` : baseUrl;
+    const response = await fetch(url, { signal });
+    const data = await response.json();
+
+    yield data.items as T[];
+    cursor = data.nextCursor;
+  } while (cursor);
+}
+
+// Consume with for-await-of
+async function processAllUsers(signal: AbortSignal): Promise<void> {
+  for await (const batch of fetchAllPages<User>("/api/users", signal)) {
+    for (const user of batch) {
+      await processUser(user);
+    }
+  }
+}
+
+// Transform async generators (like RxJS operators but native)
+async function* filter<T>(
+  source: AsyncIterable<T>,
+  predicate: (item: T) => boolean
+): AsyncGenerator<T> {
+  for await (const item of source) {
+    if (predicate(item)) yield item;
+  }
+}
+
+async function* map<T, U>(
+  source: AsyncIterable<T>,
+  transform: (item: T) => U
+): AsyncGenerator<U> {
+  for await (const item of source) {
+    yield transform(item);
+  }
+}
+
+async function* take<T>(
+  source: AsyncIterable<T>,
+  count: number
+): AsyncGenerator<T> {
+  let taken = 0;
+  for await (const item of source) {
+    if (taken >= count) return;
+    yield item;
+    taken++;
+  }
+}
+
+// Compose:
+async function getFirst10ActiveUsers(): Promise<User[]> {
+  const allPages = fetchAllPages<User>("/api/users");
+  const flattened = flatMap(allPages, batch => batch);
+  const active = filter(flattened, u => u.isActive);
+  const first10 = take(active, 10);
+
+  const result: User[] = [];
+  for await (const user of first10) {
+    result.push(user);
+  }
+  return result;
+}
+```
+
+---
+
+## 📎 9. Appendix — Deep Dives & Theory
+
+### Appendix A — zone.js Deprecation and Its Implications
+
+Angular historically used `zone.js` to automatically detect async operations and trigger change detection. This is being deprecated in favor of Signals.
+
+#### What zone.js Did
+
+```ts
+// zone.js monkey-patches ALL async APIs:
+// - setTimeout, setInterval
+// - Promise.then
+// - addEventListener
+// - XMLHttpRequest
+// - fetch
+// - MutationObserver
+
+// This allowed Angular to know when async work completed:
+Zone.current.fork({
+  name: "angular",
+  onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+    delegate.invokeTask(target, task, applyThis, applyArgs);
+    // After ANY async task completes → trigger change detection
+    changeDetection.tick();
+  }
+});
+```
+
+#### Why It's Being Deprecated
+
+1. **Performance overhead** — patching every async API adds ~100KB and slows all async operations
+2. **Incompatibility** — doesn't work with `async/await` compiled to native (not Promises)
+3. **Over-triggering** — runs change detection for ALL async ops, even irrelevant ones
+4. **Debugging nightmare** — stack traces go through zone.js wrappers
+5. **Web Worker issues** — zone.js can't patch Web Worker message passing
+
+#### The Replacement: Signals + `zoneless` Mode
+
+```ts
+// Angular 17+ with signals (no zone.js needed)
+@Component({
+  selector: "app-counter",
+  template: `<button (click)="increment()">Count: {{ count() }}</button>`,
+})
+export class CounterComponent {
+  count = signal(0);
+
+  increment() {
+    this.count.update(c => c + 1);
+    // Angular knows to re-render because the signal changed
+    // No zone.js needed!
+  }
+}
+
+// Enable zoneless in app config:
+// bootstrapApplication(AppComponent, {
+//   providers: [provideExperimentalZonelessChangeDetection()]
+// });
+```
+
+### Appendix B — Async Iterators vs Web Streams
+
+Both handle streaming data, but they have different design philosophies:
+
+| Feature | Async Iterators | Web Streams (ReadableStream) |
+|---------|----------------|------------------------------|
+| Pull vs Push | Pull (consumer requests next) | Push (producer pushes data) |
+| Backpressure | Implicit (consumer controls pace) | Explicit (highWaterMark, desiredSize) |
+| Cancellation | `return()` method | `reader.cancel()` / `controller.close()` |
+| Composition | Generator functions | `.pipeThrough()` TransformStreams |
+| Browser support | ✅ All modern | ✅ All modern |
+| Node.js | ✅ Native | ✅ Since Node 18 |
+| Memory model | One item at a time | Queued chunks with backpressure |
+
+#### Converting Between Them
+
+```ts
+// Async Iterator → ReadableStream
+function iterableToStream<T>(iterable: AsyncIterable<T>): ReadableStream<T> {
+  const iterator = iterable[Symbol.asyncIterator]();
+  return new ReadableStream<T>({
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      if (done) {
+        controller.close();
+      } else {
+        controller.enqueue(value);
+      }
+    },
+    async cancel() {
+      await iterator.return?.();
+    },
+  });
+}
+
+// ReadableStream → Async Iterator (built-in since Node 18)
+async function* streamToIterable<T>(stream: ReadableStream<T>): AsyncGenerator<T> {
+  const reader = stream.getReader();
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      yield value;
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+```
+
+#### When to Use Which
+
+**Use Async Iterators when:**
+- You're writing application-level code
+- You want simple `for await...of` consumption
+- You're paginating API results
+- You need generator-based transformation pipelines
+
+**Use Web Streams when:**
+- You're building infrastructure (HTTP servers, file processing)
+- You need explicit backpressure control
+- You're piping between I/O sources (file → transform → network)
+- You're working with `fetch()` response bodies
+
+### Appendix C — Promise Combinators Reference
+
+```ts
+// Promise.all — ALL must succeed, fails fast on first rejection
+const [user, posts, comments] = await Promise.all([
+  fetchUser(id),
+  fetchPosts(id),
+  fetchComments(id),
+]);
+// If any rejects, the entire Promise.all rejects immediately
+// Other promises continue running (not cancelled!)
+
+// Promise.allSettled — wait for ALL to complete (success or failure)
+const results = await Promise.allSettled([
+  fetchUser(id),
+  fetchPosts(id),
+  fetchComments(id),
+]);
+// results: { status: "fulfilled", value: T } | { status: "rejected", reason: any }[]
+// Never rejects! Always resolves with all results.
+
+// Promise.race — first to settle (resolve OR reject) wins
+const fastest = await Promise.race([
+  fetchFromPrimary(id),
+  fetchFromReplica(id),
+]);
+// Losers continue running in background (potential resource leak!)
+
+// Promise.any — first to RESOLVE wins (ignores rejections)
+const result = await Promise.any([
+  fetchFromCDN1(url),
+  fetchFromCDN2(url),
+  fetchFromOrigin(url),
+]);
+// Only rejects if ALL promises reject (AggregateError)
+
+// Custom: Promise.race with cancellation (no resource leak)
+async function raceWithCancel<T>(
+  factories: (() => { promise: Promise<T>; cancel: () => void })[]
+): Promise<T> {
+  const entries = factories.map(f => f());
+  try {
+    const result = await Promise.race(entries.map(e => e.promise));
+    return result;
+  } finally {
+    entries.forEach(e => e.cancel()); // Cancel all (winner already resolved)
+  }
+}
+```
+
+### Appendix D — Microtask vs Macrotask Scheduling
+
+Understanding the event loop is critical for async TypeScript:
+
+```ts
+// Execution order quiz:
+console.log("1 - sync");
+
+setTimeout(() => console.log("2 - macrotask (setTimeout)"), 0);
+
+Promise.resolve().then(() => console.log("3 - microtask (Promise.then)"));
+
+queueMicrotask(() => console.log("4 - microtask (queueMicrotask)"));
+
+requestAnimationFrame(() => console.log("5 - before next paint"));
+
+console.log("6 - sync");
+
+// Output order:
+// 1 - sync
+// 6 - sync
+// 3 - microtask (Promise.then)
+// 4 - microtask (queueMicrotask)
+// 5 - before next paint (browser only)
+// 2 - macrotask (setTimeout)
+
+// Key insight: ALL microtasks drain before ANY macrotask runs
+// This means a microtask loop can starve the event loop:
+async function dangerous() {
+  while (true) {
+    await Promise.resolve(); // Yields to microtask queue, NOT macrotask
+    // setTimeout callbacks, I/O, etc. are STARVED
+  }
+}
+```
+
+---
+
+*Last updated: 2026-05-24*

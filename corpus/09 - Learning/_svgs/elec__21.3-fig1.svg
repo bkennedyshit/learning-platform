@@ -1,0 +1,234 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .wire { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    
+    /* MOSFET layers */
+    .p-sub { fill: #201a30; stroke: #8c52ff; stroke-width: 1.2; }
+    .n-well { fill: #172c47; stroke: #1a73e8; stroke-width: 1.2; }
+    .oxide { fill: #f8f9fa; stroke: #e9ecef; stroke-width: 0.8; opacity: 0.9; }
+    .gate-poly { fill: #ffd93d; stroke: #f1c40f; stroke-width: 1; }
+    .metal-contact { fill: #a1b0cb; stroke: #7e8c9f; stroke-width: 0.8; }
+    
+    /* Active channel & flow */
+    .inversion-layer {
+      fill: #1a73e8;
+      opacity: 0.8;
+      filter: drop-shadow(0 0 4px #58a6ff);
+    }
+    .depletion-bound {
+      stroke: #8b949e;
+      stroke-width: 1;
+      stroke-dasharray: 3 3;
+      fill: none;
+    }
+    .electron {
+      fill: #58a6ff;
+      filter: drop-shadow(0 0 2px #58a6ff);
+    }
+    
+    /* LED Indicator */
+    .led-off { fill: #495057; stroke: #343a40; stroke-width: 1.5; }
+    .led-on { fill: #2b8a3e; stroke: #40c057; stroke-width: 1.5; filter: drop-shadow(0 0 4px #40c057); }
+    .led-glow {
+      animation: led-glow-pulse 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes led-glow-pulse {
+      0% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+  </style>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Semiconductors — MOSFET Switching States</text>
+
+  <!-- LEFT: Cut-off State (OFF) -->
+  <g id="state-off">
+    <rect x="20" y="45" width="315" height="310" class="box"/>
+    <text x="177" y="68" class="label" text-anchor="middle" font-weight="bold">1. Cut-off State (OFF)</text>
+
+    <!-- Circuit details -->
+    <text x="45" y="100" class="sublabel" fill="#ffd93d" font-weight="bold">V_GS = 0V (&lt; V_th)</text>
+    <text x="210" y="100" class="sublabel" fill="#ff6b6b" font-weight="bold">Load is OFF</text>
+    
+    <!-- LED Symbol (OFF) -->
+    <path d="M 270 85 L 290 85" class="wire"/>
+    <polygon points="255,80 265,85 255,90" class="led-off"/>
+    <line x1="265" y1="77" x2="265" y2="93" stroke="#495057" stroke-width="2"/>
+    <path d="M 230 85 L 245 85" class="wire"/>
+    <!-- Load resistor -->
+    <polyline points="210,85 214,79 218,91 222,79 226,91 230,85" stroke="#ff6b6b" stroke-width="1.8" fill="none"/>
+    <line x1="177" y1="85" x2="210" y2="85" class="wire"/>
+    <!-- V_DD Rail -->
+    <line x1="280" y1="85" x2="280" y2="60" class="wire"/>
+    <circle cx="280" cy="58" r="2.5" fill="#ff6b6b"/>
+    <text x="290" y="58" class="sublabel" fill="#ff6b6b">5V (VDD)</text>
+    
+    <!-- Connect LED to Drain -->
+    <path d="M 245 85 L 245 130 C 245 130, 245 140, 245 145" class="wire"/>
+
+    <!-- P-Substrate and N+ Wells -->
+    <rect x="45" y="180" width="265" height="130" class="p-sub"/>
+    <text x="177" y="295" class="sublabel">P-substrate (Si)</text>
+    
+    <!-- Source Well (Left) -->
+    <rect x="70" y="180" width="60" height="40" class="n-well"/>
+    <text x="100" y="205" class="sublabel" fill="#58a6ff">N+</text>
+    <text x="100" y="235" class="sublabel" text-anchor="middle">Source (S)</text>
+
+    <!-- Drain Well (Right) -->
+    <rect x="220" y="180" width="60" height="40" class="n-well"/>
+    <text x="250" y="205" class="sublabel" fill="#58a6ff">N+</text>
+    <text x="250" y="235" class="sublabel" text-anchor="middle">Drain (D)</text>
+
+    <!-- Depletion Regions (OFF has wide barriers) -->
+    <path d="M 60 180 C 60 230, 140 230, 140 180" class="depletion-bound"/>
+    <path d="M 210 180 C 210 230, 290 230, 290 180" class="depletion-bound"/>
+    <text x="177" y="222" class="sublabel" text-anchor="middle">Depletion Regions block current</text>
+
+    <!-- Gate Dielectric (SiO2) -->
+    <rect x="120" y="172" width="110" height="8" class="oxide"/>
+    <text x="175" y="178" style="font-family: Inter, sans-serif; font-size: 7px; fill: #000; font-weight: bold;" text-anchor="middle">SiO₂</text>
+
+    <!-- Gate Metal (Polysilicon) -->
+    <rect x="130" y="152" width="90" height="20" class="gate-poly"/>
+    <text x="175" y="166" class="sublabel" fill="#000" font-weight="bold">Gate (G)</text>
+
+    <!-- Contacts & Connections -->
+    <rect x="85" y="170" width="30" height="10" class="metal-contact"/>
+    <rect x="235" y="170" width="30" height="10" class="metal-contact"/>
+
+    <!-- External Wiring -->
+    <!-- Source to GND -->
+    <path d="M 100 170 L 100 130 L 60 130" class="wire"/>
+    <!-- GND Symbol -->
+    <line x1="50" y1="130" x2="50" y2="140" stroke="#8b949e" stroke-width="1.5"/>
+    <line x1="45" y1="135" x2="45" y2="135" class="wire"/>
+    <line x1="40" y1="130" x2="40" y2="140" stroke="#8b949e" stroke-width="1.5" />
+    <path d="M 60 130 L 45 130" class="wire"/>
+    <line x1="45" y1="125" x2="45" y2="135" stroke="#8b949e" stroke-width="1.5"/>
+    <line x1="41" y1="131" x2="49" y2="131" stroke="#8b949e" stroke-width="1.5"/>
+    <line x1="43" y1="135" x2="47" y2="135" stroke="#8b949e" stroke-width="1.5"/>
+
+    <!-- Gate to GND (V_GS = 0V) -->
+    <path d="M 175 152 L 175 120" class="wire"/>
+    <circle cx="175" cy="120" r="3" fill="var(--text-normal, #c9d1d9)"/>
+    <text x="182" y="123" class="sublabel">0V (Off)</text>
+
+    <!-- Drain to LED -->
+    <path d="M 250 170 L 250 145" class="wire"/>
+  </g>
+
+
+  <!-- RIGHT: Ohmic/Switching State (ON) -->
+  <g id="state-on">
+    <rect x="365" y="45" width="315" height="310" class="box"/>
+    <text x="522" y="68" class="label" text-anchor="middle" font-weight="bold">2. Ohmic/Switching State (ON)</text>
+
+    <!-- Circuit details -->
+    <text x="390" y="100" class="sublabel" fill="#ffd93d" font-weight="bold">V_GS = 5V (&gt; V_th)</text>
+    <text x="555" y="100" class="sublabel" fill="#51cf66" font-weight="bold">Load is ON (Conducting)</text>
+    
+    <!-- LED Symbol (ON) -->
+    <path d="M 615 85 L 635 85" class="wire"/>
+    <polygon points="600,80 610,85 600,90" class="led-on"/>
+    <line x1="610" y1="77" x2="610" y2="93" stroke="#40c057" stroke-width="2" filter="drop-shadow(0 0 3px #40c057)"/>
+    <path d="M 575 85 L 590 85" class="wire"/>
+    
+    <!-- Rays from LED -->
+    <g class="led-glow">
+      <line x1="600" y1="74" x2="594" y2="67" stroke="#40c057" stroke-width="1.2"/>
+      <line x1="606" y1="73" x2="602" y2="65" stroke="#40c057" stroke-width="1.2"/>
+      <line x1="614" y1="78" x2="621" y2="72" stroke="#40c057" stroke-width="1.2"/>
+    </g>
+
+    <!-- Load resistor -->
+    <polyline points="555,85 559,79 563,91 567,79 571,91 575,85" stroke="#ff6b6b" stroke-width="1.8" fill="none"/>
+    <line x1="522" y1="85" x2="555" y2="85" class="wire"/>
+    <!-- V_DD Rail -->
+    <line x1="625" y1="85" x2="625" y2="60" class="wire"/>
+    <circle cx="625" cy="58" r="2.5" fill="#ff6b6b"/>
+    <text x="635" y="58" class="sublabel" fill="#ff6b6b">5V (VDD)</text>
+    
+    <!-- Connect LED to Drain -->
+    <path d="M 590 85 L 590 145" class="wire"/>
+
+    <!-- P-Substrate and N+ Wells -->
+    <rect x="390" y="180" width="265" height="130" class="p-sub"/>
+    <text x="522" y="295" class="sublabel">P-substrate (Si)</text>
+    
+    <!-- Source Well (Left) -->
+    <rect x="415" y="180" width="60" height="40" class="n-well"/>
+    <text x="445" y="205" class="sublabel" fill="#58a6ff">N+</text>
+    <text x="445" y="235" class="sublabel" text-anchor="middle">Source (S)</text>
+
+    <!-- Drain Well (Right) -->
+    <rect x="565" y="180" width="60" height="40" class="n-well"/>
+    <text x="595" y="205" class="sublabel" fill="#58a6ff">N+</text>
+    <text x="595" y="235" class="sublabel" text-anchor="middle">Drain (D)</text>
+
+    <!-- Induced N-Channel (Inversion Layer) under Gate Oxide -->
+    <rect x="475" y="180" width="90" height="8" class="inversion-layer"/>
+    <text x="522" y="201" class="sublabel" fill="#4dabf7" font-weight="bold" style="font-size: 8px;">N-Channel</text>
+
+    <!-- Thin Depletion region (pushed away from channel) -->
+    <path d="M 405 180 C 405 210, 475 195, 475 188" class="depletion-bound" opacity="0.4"/>
+    <path d="M 565 188 C 565 195, 635 210, 635 180" class="depletion-bound" opacity="0.4"/>
+    <path d="M 475 188 L 565 188" class="depletion-bound" opacity="0.4"/>
+
+    <!-- Gate Dielectric (SiO2) -->
+    <rect x="465" y="172" width="110" height="8" class="oxide"/>
+    <text x="520" y="178" style="font-family: Inter, sans-serif; font-size: 7px; fill: #000; font-weight: bold;" text-anchor="middle">SiO₂</text>
+
+    <!-- Gate Metal (Polysilicon) -->
+    <rect x="475" y="152" width="90" height="20" class="gate-poly" filter="drop-shadow(0 0 2px #ffd93d)"/>
+    <text x="520" y="166" class="sublabel" fill="#000" font-weight="bold">Gate (G)</text>
+
+    <!-- Contacts & Connections -->
+    <rect x="430" y="170" width="30" height="10" class="metal-contact"/>
+    <rect x="580" y="170" width="30" height="10" class="metal-contact"/>
+
+    <!-- External Wiring -->
+    <!-- Source to GND -->
+    <path d="M 445 170 L 445 130 L 405 130" class="wire"/>
+    <!-- GND Symbol -->
+    <line x1="390" y1="130" x2="390" y2="130" stroke="#8b949e" stroke-width="1.5" />
+    <path d="M 405 130 L 390 130" class="wire"/>
+    <line x1="390" y1="125" x2="390" y2="135" stroke="#8b949e" stroke-width="1.5"/>
+    <line x1="386" y1="131" x2="394" y2="131" stroke="#8b949e" stroke-width="1.5"/>
+    <line x1="388" y1="135" x2="392" y2="135" stroke="#8b949e" stroke-width="1.5"/>
+
+    <!-- Gate to 5V (V_GS = 5V) -->
+    <path d="M 520 152 L 520 120" class="wire" stroke="#ffd93d"/>
+    <circle cx="520" cy="120" r="3" fill="#ffd93d" filter="drop-shadow(0 0 2px #ffd93d)"/>
+    <text x="527" y="123" class="sublabel" fill="#ffd93d">5V (On)</text>
+
+    <!-- Drain to LED -->
+    <path d="M 595 170 L 595 145" class="wire"/>
+
+    <!-- Moving Electrons (Source to Drain in channel) -->
+    <!-- Electron 1 -->
+    <circle cx="445" cy="184" r="2.2" class="electron">
+      <animate attributeName="cx" values="445;485;525;565;595" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="cy" values="184;184;184;184;184" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0s" />
+    </circle>
+    <!-- Electron 2 -->
+    <circle cx="445" cy="184" r="2.2" class="electron">
+      <animate attributeName="cx" values="445;485;525;565;595" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0.4s" />
+      <animate attributeName="cy" values="184;184;184;184;184" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0.4s" />
+    </circle>
+    <!-- Electron 3 -->
+    <circle cx="445" cy="184" r="2.2" class="electron">
+      <animate attributeName="cx" values="445;485;525;565;595" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0.8s" />
+      <animate attributeName="cy" values="184;184;184;184;184" keyTimes="0;0.25;0.5;0.75;1" dur="1.2s" repeatCount="indefinite" begin="0.8s" />
+    </circle>
+
+    <!-- Conventional Current indicators (flowing Drain to Source!) -->
+    <path d="M 595 130 L 595 160" stroke="#ff6b6b" stroke-width="1.2" stroke-dasharray="4 6" fill="none">
+      <animate attributeName="stroke-dashoffset" values="0;10" dur="0.6s" repeatCount="indefinite" />
+    </path>
+    <text x="605" y="145" class="sublabel" fill="#ff6b6b">Conventional Current (I_D)</text>
+  </g>
+</svg>

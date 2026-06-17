@@ -1,0 +1,1207 @@
+---
+title: "14.7 — Advanced — Triggers, Stored Procedures, Recursive CTEs"
+subject: "SQL"
+catalog: advanced
+audience_tier: higher-education
+chapter: "14.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 14.7 — Advanced — Triggers, Stored Procedures, Recursive CTEs
+
+> *"The database is not just a dumb data store. It's a programmable engine that can enforce business rules, maintain derived data, and traverse complex structures — all without a round-trip to the application."* — Joe Celko
+
+This chapter covers SQL's procedural extensions — the features that turn a database from a passive store into an active participant in your application logic. Triggers react to data changes automatically. Stored procedures encapsulate complex operations. Recursive CTEs traverse trees and graphs. Used judiciously, these tools eliminate entire classes of bugs and reduce application complexity.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Write PL/pgSQL functions and procedures with control flow, variables, and error handling.
+2. Design triggers for audit logging, data validation, and derived column maintenance.
+3. Use recursive CTEs to traverse hierarchies (org charts, bill-of-materials, category trees).
+4. Create and maintain materialized views for expensive pre-computations.
+5. Implement table partitioning for large datasets.
+6. Understand when to use database-side logic vs application-side logic.
+
+---
+
+## 🖼️ Visual Anchor — Trigger Execution Flow
+
+![sql__7.7-fig1](sql__7.7-fig1.svg)
+
+---
+
+## 📚 1. PL/pgSQL — Procedural SQL
+
+### 1.1 Functions vs Procedures
+
+| Feature | Function | Procedure |
+|---------|----------|-----------|
+| Returns value | Yes | No (void) |
+| Called from SELECT | Yes | No |
+| Called with CALL | No | Yes |
+| Transaction control | No (runs in caller's tx) | Yes (can COMMIT/ROLLBACK) |
+| Use case | Computations, transforms | Multi-step operations |
+
+### 1.2 Function Syntax
+
+```sql
+CREATE OR REPLACE FUNCTION calculate_tax(
+    amount NUMERIC,
+    tax_rate NUMERIC DEFAULT 0.08
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+IMMUTABLE  -- same inputs always produce same output (enables caching)
+AS $$
+BEGIN
+    RETURN amount * tax_rate;
+END;
+$$;
+
+-- Usage:
+SELECT order_id, total, calculate_tax(total) AS tax FROM orders;
+```
+
+### 1.3 Control Flow
+
+```sql
+CREATE OR REPLACE FUNCTION get_discount_tier(total_purchases NUMERIC)
+RETURNS TEXT
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+BEGIN
+    IF total_purchases >= 10000 THEN
+        RETURN 'platinum';
+    ELSIF total_purchases >= 5000 THEN
+        RETURN 'gold';
+    ELSIF total_purchases >= 1000 THEN
+        RETURN 'silver';
+    ELSE
+        RETURN 'bronze';
+    END IF;
+END;
+$$;
+```
+
+### 1.4 Loops and Cursors
+
+```sql
+CREATE OR REPLACE FUNCTION process_pending_orders()
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    order_rec RECORD;
+    processed_count INTEGER := 0;
+BEGIN
+    FOR order_rec IN
+        SELECT order_id, customer_id, total
+        FROM orders
+        WHERE status = 'pending'
+        ORDER BY created_at
+        LIMIT 100
+    LOOP
+        -- Process each order
+        UPDATE orders SET status = 'processing' WHERE order_id = order_rec.order_id;
+        processed_count := processed_count + 1;
+    END LOOP;
+
+    RETURN processed_count;
+END;
+$$;
+```
+
+### 1.5 Error Handling
+
+```sql
+CREATE OR REPLACE FUNCTION safe_transfer(
+    from_account INTEGER,
+    to_account INTEGER,
+    amount NUMERIC
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    source_balance NUMERIC;
+BEGIN
+    -- Lock source account
+    SELECT balance INTO source_balance
+    FROM accounts WHERE account_id = from_account
+    FOR UPDATE;
+
+    IF source_balance IS NULL THEN
+        RAISE EXCEPTION 'Account % not found', from_account;
+    END IF;
+
+    IF source_balance < amount THEN
+        RAISE EXCEPTION 'Insufficient funds: have %, need %', source_balance, amount
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    UPDATE accounts SET balance = balance - amount WHERE account_id = from_account;
+    UPDATE accounts SET balance = balance + amount WHERE account_id = to_account;
+
+    RETURN TRUE;
+
+EXCEPTION
+    WHEN check_violation THEN
+        RAISE NOTICE 'Transfer failed: %', SQLERRM;
+        RETURN FALSE;
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Unexpected error: % %', SQLSTATE, SQLERRM;
+        RETURN FALSE;
+END;
+$$;
+```
+
+### 1.6 Procedures with Transaction Control
+
+```sql
+CREATE OR REPLACE PROCEDURE batch_archive_orders(batch_size INTEGER DEFAULT 1000)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    affected INTEGER;
+BEGIN
+    LOOP
+        -- Move old delivered orders to archive
+        WITH moved AS (
+            DELETE FROM orders
+            WHERE status = 'delivered'
+              AND delivered_at < NOW() - INTERVAL '2 years'
+            LIMIT batch_size
+            RETURNING *
+        )
+        INSERT INTO orders_archive SELECT * FROM moved;
+
+        GET DIAGNOSTICS affected = ROW_COUNT;
+        COMMIT;  -- commit each batch (procedures can do this!)
+
+        EXIT WHEN affected < batch_size;
+        PERFORM pg_sleep(0.1);  -- brief pause to reduce load
+    END LOOP;
+END;
+$$;
+
+-- Call:
+CALL batch_archive_orders(5000);
+```
+
+---
+
+## 📚 2. Triggers
+
+### 2.1 Trigger Anatomy
+
+A trigger fires automatically when a specified event occurs on a table:
+
+```sql
+CREATE TRIGGER trigger_name
+    {BEFORE | AFTER | INSTEAD OF}
+    {INSERT | UPDATE | DELETE | TRUNCATE}
+    ON table_name
+    [FOR EACH ROW | FOR EACH STATEMENT]
+    [WHEN (condition)]
+    EXECUTE FUNCTION trigger_function();
+```
+
+### 2.2 Audit Logging Trigger
+
+```sql
+-- Audit table
+CREATE TABLE audit_log (
+    audit_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    table_name  TEXT NOT NULL,
+    operation   TEXT NOT NULL,
+    row_id      BIGINT,
+    old_data    JSONB,
+    new_data    JSONB,
+    changed_by  TEXT DEFAULT current_user,
+    changed_at  TIMESTAMP DEFAULT NOW()
+);
+
+-- Generic audit trigger function
+CREATE OR REPLACE FUNCTION audit_trigger_func()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO audit_log (table_name, operation, row_id, new_data)
+        VALUES (TG_TABLE_NAME, 'INSERT', NEW.id, to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO audit_log (table_name, operation, row_id, old_data, new_data)
+        VALUES (TG_TABLE_NAME, 'UPDATE', NEW.id, to_jsonb(OLD), to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO audit_log (table_name, operation, row_id, old_data)
+        VALUES (TG_TABLE_NAME, 'DELETE', OLD.id, to_jsonb(OLD));
+        RETURN OLD;
+    END IF;
+END;
+$$;
+
+-- Attach to tables:
+CREATE TRIGGER employees_audit
+    AFTER INSERT OR UPDATE OR DELETE ON employees
+    FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+```
+
+### 2.3 Data Validation Trigger
+
+```sql
+CREATE OR REPLACE FUNCTION validate_salary_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Prevent salary decreases of more than 20%
+    IF NEW.salary < OLD.salary * 0.8 THEN
+        RAISE EXCEPTION 'Salary decrease exceeds 20%% limit (old: %, new: %)',
+            OLD.salary, NEW.salary;
+    END IF;
+
+    -- Auto-set updated_at
+    NEW.updated_at := NOW();
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER check_salary_change
+    BEFORE UPDATE OF salary ON employees
+    FOR EACH ROW
+    WHEN (OLD.salary IS DISTINCT FROM NEW.salary)
+    EXECUTE FUNCTION validate_salary_change();
+```
+
+### 2.4 Derived Column Maintenance
+
+```sql
+-- Maintain a denormalized order_count on customers table
+CREATE OR REPLACE FUNCTION update_customer_order_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE customers SET order_count = order_count + 1
+        WHERE customer_id = NEW.customer_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE customers SET order_count = order_count - 1
+        WHERE customer_id = OLD.customer_id;
+    END IF;
+    RETURN NULL;  -- AFTER trigger, return value ignored
+END;
+$$;
+
+CREATE TRIGGER maintain_order_count
+    AFTER INSERT OR DELETE ON orders
+    FOR EACH ROW EXECUTE FUNCTION update_customer_order_count();
+```
+
+### 2.5 Trigger Execution Order
+
+1. BEFORE triggers (can modify NEW, can cancel operation by returning NULL)
+2. The actual INSERT/UPDATE/DELETE
+3. AFTER triggers (see final state, can't modify the row)
+
+Multiple triggers on the same event fire in alphabetical order by name.
+
+---
+
+## 📚 3. Recursive CTEs
+
+### 3.1 Syntax
+
+```sql
+WITH RECURSIVE cte_name AS (
+    -- Base case (non-recursive term)
+    SELECT ...
+
+    UNION ALL  -- or UNION (eliminates duplicates, prevents infinite loops)
+
+    -- Recursive case (references cte_name)
+    SELECT ...
+    FROM cte_name
+    JOIN other_table ON ...
+    WHERE termination_condition
+)
+SELECT * FROM cte_name;
+```
+
+### 3.2 Organizational Hierarchy (Tree Traversal)
+
+```sql
+-- Find all reports (direct and indirect) under manager ID 1
+WITH RECURSIVE org_tree AS (
+    -- Base: the manager themselves
+    SELECT emp_id, name, manager_id, 1 AS depth, ARRAY[name] AS path
+    FROM employees
+    WHERE emp_id = 1
+
+    UNION ALL
+
+    -- Recursive: find direct reports of current level
+    SELECT e.emp_id, e.name, e.manager_id, ot.depth + 1, ot.path || e.name
+    FROM employees e
+    INNER JOIN org_tree ot ON e.manager_id = ot.emp_id
+    WHERE ot.depth < 10  -- safety limit to prevent infinite recursion
+)
+SELECT depth, name, path
+FROM org_tree
+ORDER BY path;
+```
+
+### 3.3 Bill of Materials (BOM)
+
+```sql
+-- Find all components needed to build product 'Widget-X'
+WITH RECURSIVE bom AS (
+    SELECT
+        component_id,
+        component_name,
+        quantity,
+        1 AS level
+    FROM product_components
+    WHERE parent_product_id = 100  -- Widget-X
+
+    UNION ALL
+
+    SELECT
+        pc.component_id,
+        pc.component_name,
+        pc.quantity * bom.quantity AS total_quantity,
+        bom.level + 1
+    FROM product_components pc
+    INNER JOIN bom ON pc.parent_product_id = bom.component_id
+    WHERE bom.level < 20
+)
+SELECT level, component_name, SUM(total_quantity) AS total_needed
+FROM bom
+GROUP BY level, component_name
+ORDER BY level, component_name;
+```
+
+### 3.4 Graph Traversal (Shortest Path)
+
+```sql
+-- Find shortest path between nodes in a graph
+WITH RECURSIVE paths AS (
+    SELECT
+        target_node AS current_node,
+        ARRAY[source_node, target_node] AS path,
+        edge_weight AS total_cost
+    FROM edges
+    WHERE source_node = 'A'
+
+    UNION ALL
+
+    SELECT
+        e.target_node,
+        p.path || e.target_node,
+        p.total_cost + e.edge_weight
+    FROM paths p
+    INNER JOIN edges e ON p.current_node = e.source_node
+    WHERE e.target_node <> ALL(p.path)  -- prevent cycles
+      AND array_length(p.path, 1) < 10  -- max depth
+)
+SELECT path, total_cost
+FROM paths
+WHERE current_node = 'Z'
+ORDER BY total_cost
+LIMIT 1;
+```
+
+### 3.5 Generating Series (Recursive)
+
+```sql
+-- Generate dates (alternative to generate_series)
+WITH RECURSIVE dates AS (
+    SELECT DATE '2026-01-01' AS d
+    UNION ALL
+    SELECT d + 1 FROM dates WHERE d < '2026-12-31'
+)
+SELECT d FROM dates;
+
+-- Fibonacci sequence
+WITH RECURSIVE fib AS (
+    SELECT 1 AS n, 1::BIGINT AS fib_n, 0::BIGINT AS fib_prev
+    UNION ALL
+    SELECT n + 1, fib_n + fib_prev, fib_n
+    FROM fib
+    WHERE n < 50
+)
+SELECT n, fib_n FROM fib;
+```
+
+---
+
+## 📚 4. Materialized Views
+
+### 4.1 Creating and Refreshing
+
+```sql
+-- Expensive aggregation pre-computed:
+CREATE MATERIALIZED VIEW mv_daily_metrics AS
+SELECT
+    date_trunc('day', event_time) AS day,
+    event_type,
+    COUNT(*) AS event_count,
+    COUNT(DISTINCT user_id) AS unique_users,
+    AVG(duration_ms) AS avg_duration
+FROM events
+GROUP BY 1, 2
+WITH DATA;  -- populate immediately (vs WITH NO DATA for deferred)
+
+-- Create index on materialized view:
+CREATE UNIQUE INDEX idx_mv_daily_metrics ON mv_daily_metrics(day, event_type);
+
+-- Refresh (full rebuild):
+REFRESH MATERIALIZED VIEW mv_daily_metrics;
+
+-- Concurrent refresh (no lock, requires unique index):
+REFRESH MATERIALIZED VIEW CONCURRENTLY mv_daily_metrics;
+```
+
+### 4.2 Refresh Strategies
+
+| Strategy | Mechanism | Freshness |
+|----------|-----------|-----------|
+| Manual | `REFRESH MATERIALIZED VIEW` | On-demand |
+| Scheduled | pg_cron or application cron | Periodic (e.g., hourly) |
+| Trigger-based | Trigger on source table calls refresh | Near real-time (expensive) |
+| Incremental | Custom logic to update only changed rows | Best performance |
+
+```sql
+-- Scheduled refresh with pg_cron:
+SELECT cron.schedule('refresh_daily_metrics', '0 * * * *',
+    'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_daily_metrics');
+```
+
+---
+
+## 📚 5. Table Partitioning
+
+### 5.1 Declarative Partitioning (PostgreSQL 10+)
+
+```sql
+-- Partition by range (time-series data):
+CREATE TABLE events (
+    event_id    BIGINT GENERATED ALWAYS AS IDENTITY,
+    event_time  TIMESTAMP NOT NULL,
+    event_type  TEXT NOT NULL,
+    payload     JSONB
+) PARTITION BY RANGE (event_time);
+
+-- Create partitions:
+CREATE TABLE events_2025_q1 PARTITION OF events
+    FOR VALUES FROM ('2025-01-01') TO ('2025-04-01');
+CREATE TABLE events_2025_q2 PARTITION OF events
+    FOR VALUES FROM ('2025-04-01') TO ('2025-07-01');
+CREATE TABLE events_2025_q3 PARTITION OF events
+    FOR VALUES FROM ('2025-07-01') TO ('2025-10-01');
+CREATE TABLE events_2025_q4 PARTITION OF events
+    FOR VALUES FROM ('2025-10-01') TO ('2026-01-01');
+
+-- Queries automatically route to relevant partitions:
+SELECT * FROM events WHERE event_time >= '2025-07-15' AND event_time < '2025-08-01';
+-- Only scans events_2025_q3!
+```
+
+### 5.2 Partition by List
+
+```sql
+CREATE TABLE orders (
+    order_id BIGINT,
+    region   TEXT NOT NULL,
+    amount   NUMERIC
+) PARTITION BY LIST (region);
+
+CREATE TABLE orders_us PARTITION OF orders FOR VALUES IN ('US');
+CREATE TABLE orders_eu PARTITION OF orders FOR VALUES IN ('EU', 'UK');
+CREATE TABLE orders_apac PARTITION OF orders FOR VALUES IN ('JP', 'AU', 'SG');
+```
+
+### 5.3 Partition by Hash
+
+```sql
+-- Distribute evenly across N partitions:
+CREATE TABLE sessions (
+    session_id UUID,
+    user_id    INTEGER,
+    data       JSONB
+) PARTITION BY HASH (session_id);
+
+CREATE TABLE sessions_0 PARTITION OF sessions FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE sessions_1 PARTITION OF sessions FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE sessions_2 PARTITION OF sessions FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE sessions_3 PARTITION OF sessions FOR VALUES WITH (MODULUS 4, REMAINDER 3);
+```
+
+---
+
+## 📚 6. When to Use Database Logic vs Application Logic
+
+| Use Database Logic When | Use Application Logic When |
+|------------------------|---------------------------|
+| Enforcing data integrity (constraints, triggers) | Complex business rules that change frequently |
+| Audit logging (trigger-based, can't be bypassed) | Rules requiring external API calls |
+| Derived/denormalized data maintenance | Logic needing unit testing with mocks |
+| Recursive queries on hierarchical data | Presentation logic |
+| Bulk data transformations | Anything requiring horizontal scaling |
+| Cross-application consistency (multiple apps share DB) | Single-app scenarios with good ORM |
+
+**Rule of thumb:** Put data integrity in the database. Put business logic in the application. Put performance-critical aggregations in materialized views.
+
+---
+
+## 🧪 7. Worked Examples
+
+### Example 14.7.1 — Soft Delete with Trigger
+
+```sql
+-- Instead of deleting, mark as deleted and move to archive
+CREATE OR REPLACE FUNCTION soft_delete_trigger()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Insert into archive with deletion metadata
+    INSERT INTO employees_archive
+    SELECT OLD.*, NOW() AS deleted_at, current_user AS deleted_by;
+
+    -- Actually delete from main table
+    RETURN OLD;
+END;
+$$;
+
+CREATE TRIGGER employees_soft_delete
+    BEFORE DELETE ON employees
+    FOR EACH ROW EXECUTE FUNCTION soft_delete_trigger();
+```
+
+### Example 14.7.2 — Category Breadcrumb via Recursive CTE
+
+```sql
+-- Generate breadcrumb: "Electronics > Computers > Laptops > Gaming Laptops"
+WITH RECURSIVE breadcrumb AS (
+    SELECT category_id, name, parent_id, name AS path
+    FROM categories
+    WHERE category_id = 42  -- target category
+
+    UNION ALL
+
+    SELECT c.category_id, c.name, c.parent_id, c.name || ' > ' || b.path
+    FROM categories c
+    INNER JOIN breadcrumb b ON c.category_id = b.parent_id
+)
+SELECT path FROM breadcrumb WHERE parent_id IS NULL;
+```
+
+---
+
+## 🏋️ 8. Exercises
+
+1. Write a trigger that prevents deleting a department if it has employees.
+2. Create a recursive CTE to find all ancestors of a given category in a tree.
+3. Design an audit system that tracks who changed what and when, with before/after values.
+4. Implement a materialized view for "top 10 products by revenue per month" and schedule its refresh.
+5. Write a PL/pgSQL function that implements exponential backoff retry logic.
+
+---
+
+## 🔗 Cross-References
+
+- **Previous:** [14.6 - Transactions, ACID & Concurrency](14.6---Transactions,-ACID-&-Concurrency)
+- **Next:** [14.8 - Modern SQL - PostgreSQL, MySQL, SQLite, DuckDB & Python ORMs](14.8---Modern-SQL---PostgreSQL,-MySQL,-SQLite,-DuckDB-&-Python-ORMs)
+- **Graph algorithms:** [08.13 - Algorithms & Data Structures in Python](08.13---Algorithms-&-Data-Structures-in-Python) — BFS/DFS in Python
+- **Trigger patterns:** [14.4 - Schema Design & Normalization](14.4---Schema-Design-&-Normalization) — maintaining denormalized data
+
+---
+
+## 📖 Key Sources
+
+- PostgreSQL PL/pgSQL: https://www.postgresql.org/docs/current/plpgsql.html
+- PostgreSQL Triggers: https://www.postgresql.org/docs/current/trigger-definition.html
+- PostgreSQL Partitioning: https://www.postgresql.org/docs/current/ddl-partitioning.html
+- Celko, J. *SQL for Smarties* — recursive query patterns
+
+
+
+---
+
+## 📚 12. Deep Dive — Trigger Patterns, Full-Text Search & Graph Traversal
+
+### 12.1 Advanced Trigger Patterns
+
+**Pattern 1: Audit Trail (Complete Change History)**
+
+```sql
+-- Generic audit table:
+CREATE TABLE audit_log (
+    audit_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    table_name TEXT NOT NULL,
+    operation TEXT NOT NULL CHECK (operation IN ('INSERT', 'UPDATE', 'DELETE')),
+    row_id TEXT NOT NULL,
+    old_data JSONB,
+    new_data JSONB,
+    changed_by TEXT DEFAULT current_user,
+    changed_at TIMESTAMP DEFAULT NOW(),
+    app_context JSONB  -- application-level metadata
+);
+
+-- Generic audit trigger function (works for any table):
+CREATE OR REPLACE FUNCTION audit_trigger_func()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE
+    row_id_val TEXT;
+BEGIN
+    -- Get the primary key value (assumes first column is PK)
+    IF TG_OP = 'DELETE' THEN
+        row_id_val := OLD::text;  -- or extract specific PK column
+    ELSE
+        row_id_val := NEW::text;
+    END IF;
+
+    INSERT INTO audit_log (table_name, operation, row_id, old_data, new_data, app_context)
+    VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        row_id_val,
+        CASE WHEN TG_OP IN ('UPDATE', 'DELETE') THEN to_jsonb(OLD) END,
+        CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN to_jsonb(NEW) END,
+        current_setting('app.context', true)::jsonb  -- application context
+    );
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    ELSE
+        RETURN NEW;
+    END IF;
+END;
+$$;
+
+-- Apply to any table:
+CREATE TRIGGER audit_employees
+AFTER INSERT OR UPDATE OR DELETE ON employees
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+
+-- Set application context before operations:
+SET LOCAL app.context = '{"user_id": 42, "request_id": "req_abc123"}';
+UPDATE employees SET salary = 95000 WHERE emp_id = 1;
+```
+
+**Pattern 2: Soft Delete with Automatic Filtering**
+
+```sql
+-- Add soft-delete column:
+ALTER TABLE employees ADD COLUMN deleted_at TIMESTAMP;
+
+-- Create a view that hides deleted rows (application uses this):
+CREATE VIEW active_employees AS
+SELECT * FROM employees WHERE deleted_at IS NULL;
+
+-- Trigger: intercept DELETE and convert to soft-delete:
+CREATE OR REPLACE FUNCTION soft_delete_func()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    -- Instead of deleting, set deleted_at
+    UPDATE employees SET deleted_at = NOW() WHERE emp_id = OLD.emp_id;
+    RETURN NULL;  -- suppress the actual DELETE
+END;
+$$;
+
+CREATE TRIGGER soft_delete_employees
+BEFORE DELETE ON employees
+FOR EACH ROW EXECUTE FUNCTION soft_delete_func();
+
+-- Row-Level Security alternative (PostgreSQL):
+ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
+CREATE POLICY active_only ON employees
+    FOR SELECT USING (deleted_at IS NULL);
+-- Now even direct table access hides deleted rows (for non-superusers)
+```
+
+**Pattern 3: Denormalization Sync (Maintaining Computed Columns)**
+
+```sql
+-- Keep a denormalized "total_orders" count on customers table:
+CREATE OR REPLACE FUNCTION sync_customer_order_count()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE customers
+        SET total_orders = total_orders + 1,
+            last_order_date = NEW.order_date
+        WHERE customer_id = NEW.customer_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE customers
+        SET total_orders = total_orders - 1
+        WHERE customer_id = OLD.customer_id;
+    ELSIF TG_OP = 'UPDATE' AND OLD.customer_id != NEW.customer_id THEN
+        -- Order reassigned to different customer
+        UPDATE customers SET total_orders = total_orders - 1
+        WHERE customer_id = OLD.customer_id;
+        UPDATE customers SET total_orders = total_orders + 1
+        WHERE customer_id = NEW.customer_id;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER trg_sync_order_count
+AFTER INSERT OR UPDATE OR DELETE ON orders
+FOR EACH ROW EXECUTE FUNCTION sync_customer_order_count();
+```
+
+**Pattern 4: Constraint Trigger (Complex Business Rules)**
+
+```sql
+-- Ensure no more than 5 active projects per employee:
+CREATE OR REPLACE FUNCTION check_project_limit()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE
+    active_count INT;
+BEGIN
+    SELECT COUNT(*) INTO active_count
+    FROM project_assignments
+    WHERE emp_id = NEW.emp_id AND status = 'active';
+
+    IF active_count >= 5 THEN
+        RAISE EXCEPTION 'Employee % already has % active projects (max 5)',
+            NEW.emp_id, active_count;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE CONSTRAINT TRIGGER check_project_limit_trigger
+AFTER INSERT OR UPDATE ON project_assignments
+DEFERRABLE INITIALLY DEFERRED  -- checked at COMMIT time
+FOR EACH ROW
+WHEN (NEW.status = 'active')
+EXECUTE FUNCTION check_project_limit();
+```
+
+### 12.2 Stored Procedures — Pros, Cons & When to Use
+
+**Advantages:**
+- Reduced network round-trips (complex logic executes server-side)
+- Enforced business rules that can't be bypassed by any client
+- Transaction management within the procedure
+- Can be faster for batch operations (no client-server latency per row)
+
+**Disadvantages:**
+- Harder to test (no unit testing frameworks like application code)
+- Harder to version control and deploy (schema migrations needed)
+- Vendor lock-in (PL/pgSQL ≠ T-SQL ≠ PL/SQL)
+- Debugging is primitive compared to application debuggers
+- Horizontal scaling is harder (database is the bottleneck)
+
+**When to use stored procedures:**
+
+| Use Case | Recommendation |
+|----------|---------------|
+| Data integrity enforcement | ✅ Triggers/constraints |
+| Audit logging | ✅ Triggers (can't be bypassed) |
+| Complex batch ETL | ✅ Stored procedures |
+| Business logic | ❌ Application code (testable, deployable) |
+| API endpoint logic | ❌ Application code |
+| Report generation | ⚠️ Consider materialized views instead |
+
+### 12.3 Recursive CTE for Graph Traversal
+
+**Weighted Shortest Path (Dijkstra-like in SQL):**
+
+```sql
+-- Graph edges with weights:
+CREATE TABLE graph_edges (
+    source TEXT NOT NULL,
+    target TEXT NOT NULL,
+    weight NUMERIC NOT NULL CHECK (weight > 0),
+    PRIMARY KEY (source, target)
+);
+
+-- Find shortest path from 'A' to 'F':
+WITH RECURSIVE shortest_paths AS (
+    -- Anchor: start node with distance 0
+    SELECT
+        source AS node,
+        0::numeric AS total_distance,
+        ARRAY[source] AS path,
+        false AS arrived
+    FROM (VALUES ('A')) AS start(source)
+
+    UNION ALL
+
+    -- Recursive: explore neighbors
+    SELECT
+        e.target,
+        sp.total_distance + e.weight,
+        sp.path || e.target,
+        e.target = 'F'
+    FROM shortest_paths sp
+    JOIN graph_edges e ON e.source = sp.node
+    WHERE NOT sp.arrived
+      AND e.target != ALL(sp.path)  -- no cycles
+      AND sp.total_distance + e.weight < (
+          -- Prune: don't explore paths longer than best known
+          SELECT COALESCE(MIN(total_distance), 999999)
+          FROM shortest_paths WHERE arrived
+      )
+),
+-- Get the shortest arrived path:
+best_path AS (
+    SELECT path, total_distance
+    FROM shortest_paths
+    WHERE arrived
+    ORDER BY total_distance
+    LIMIT 1
+)
+SELECT * FROM best_path;
+```
+
+**Connected Components:**
+
+```sql
+-- Find all nodes reachable from a starting node:
+WITH RECURSIVE reachable AS (
+    SELECT 'A'::text AS node
+    UNION
+    SELECT e.target
+    FROM reachable r
+    JOIN graph_edges e ON e.source = r.node
+    WHERE e.target NOT IN (SELECT node FROM reachable)
+)
+SELECT * FROM reachable;
+```
+
+**Topological Sort (DAG only):**
+
+```sql
+-- Find execution order for tasks with dependencies:
+WITH RECURSIVE topo AS (
+    -- Start with nodes that have no incoming edges (no dependencies)
+    SELECT node, 0 AS level
+    FROM all_nodes n
+    WHERE NOT EXISTS (SELECT 1 FROM graph_edges e WHERE e.target = n.node)
+
+    UNION ALL
+
+    -- Add nodes whose dependencies are all satisfied
+    SELECT e.target, t.level + 1
+    FROM graph_edges e
+    JOIN topo t ON e.source = t.node
+    WHERE NOT EXISTS (
+        -- Check all incoming edges are from already-processed nodes
+        SELECT 1 FROM graph_edges e2
+        WHERE e2.target = e.target
+          AND e2.source NOT IN (SELECT node FROM topo)
+    )
+)
+SELECT DISTINCT ON (node) node, level
+FROM topo
+ORDER BY node, level;
+```
+
+### 12.4 Full-Text Search
+
+**PostgreSQL tsvector/tsquery:**
+
+```sql
+-- Create a text search configuration:
+-- (PostgreSQL has built-in configs for many languages)
+
+-- Add a tsvector column (pre-computed for performance):
+ALTER TABLE articles ADD COLUMN search_vector tsvector;
+
+-- Populate it:
+UPDATE articles SET search_vector =
+    setweight(to_tsvector('english', COALESCE(title, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(abstract, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(body, '')), 'C');
+
+-- Keep it updated via trigger:
+CREATE OR REPLACE FUNCTION articles_search_trigger()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.search_vector :=
+        setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(NEW.abstract, '')), 'B') ||
+        setweight(to_tsvector('english', COALESCE(NEW.body, '')), 'C');
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_articles_search
+BEFORE INSERT OR UPDATE OF title, abstract, body ON articles
+FOR EACH ROW EXECUTE FUNCTION articles_search_trigger();
+
+-- Create GIN index:
+CREATE INDEX idx_articles_search ON articles USING gin(search_vector);
+
+-- Search with ranking:
+SELECT
+    title,
+    ts_rank_cd(search_vector, query) AS rank,
+    ts_headline('english', body, query, 'MaxWords=50, MinWords=20') AS snippet
+FROM articles, plainto_tsquery('english', 'distributed database consistency') AS query
+WHERE search_vector @@ query
+ORDER BY rank DESC
+LIMIT 20;
+
+-- Phrase search:
+SELECT * FROM articles
+WHERE search_vector @@ phraseto_tsquery('english', 'machine learning');
+
+-- Prefix search:
+SELECT * FROM articles
+WHERE search_vector @@ to_tsquery('english', 'optim:*');  -- matches optimize, optimization, etc.
+```
+
+**SQLite FTS5:**
+
+```sql
+-- Create virtual table:
+CREATE VIRTUAL TABLE articles_fts USING fts5(
+    title, body, content=articles, content_rowid=article_id
+);
+
+-- Populate:
+INSERT INTO articles_fts(rowid, title, body)
+SELECT article_id, title, body FROM articles;
+
+-- Search:
+SELECT * FROM articles_fts WHERE articles_fts MATCH 'database AND optimization';
+
+-- Ranked results:
+SELECT *, rank FROM articles_fts WHERE articles_fts MATCH 'machine learning'
+ORDER BY rank;
+
+-- Highlight matches:
+SELECT highlight(articles_fts, 1, '<b>', '</b>') AS highlighted_body
+FROM articles_fts WHERE articles_fts MATCH 'neural network';
+```
+
+**MySQL FULLTEXT (MATCH AGAINST):**
+
+```sql
+-- Create fulltext index:
+ALTER TABLE articles ADD FULLTEXT INDEX ft_articles(title, body);
+
+-- Natural language search:
+SELECT *, MATCH(title, body) AGAINST('database optimization') AS relevance
+FROM articles
+WHERE MATCH(title, body) AGAINST('database optimization')
+ORDER BY relevance DESC;
+
+-- Boolean mode (AND, OR, NOT, phrase):
+SELECT * FROM articles
+WHERE MATCH(title, body) AGAINST('+database +optimization -mysql' IN BOOLEAN MODE);
+
+-- Query expansion (find related terms):
+SELECT * FROM articles
+WHERE MATCH(title, body) AGAINST('database' WITH QUERY EXPANSION);
+```
+
+---
+
+## 📚 13. Appendix — PL/pgSQL vs T-SQL vs PL/SQL & Function Volatility
+
+### 13.1 Language Comparison
+
+| Feature | PL/pgSQL (PostgreSQL) | T-SQL (SQL Server) | PL/SQL (Oracle) |
+|---------|----------------------|--------------------|--------------------|
+| Variable declaration | `DECLARE x INT := 0;` | `DECLARE @x INT = 0;` | `x NUMBER := 0;` |
+| Assignment | `x := 5;` | `SET @x = 5;` | `x := 5;` |
+| IF/ELSE | `IF ... THEN ... ELSIF ... END IF;` | `IF ... BEGIN ... END ELSE BEGIN ... END` | `IF ... THEN ... ELSIF ... END IF;` |
+| Loop | `FOR i IN 1..10 LOOP ... END LOOP;` | `WHILE @i <= 10 BEGIN ... SET @i = @i + 1 END` | `FOR i IN 1..10 LOOP ... END LOOP;` |
+| Cursor | `FOR rec IN SELECT ... LOOP` | `DECLARE cur CURSOR FOR SELECT ...` | `FOR rec IN (SELECT ...) LOOP` |
+| Exception handling | `EXCEPTION WHEN ... THEN` | `BEGIN TRY ... END TRY BEGIN CATCH ... END CATCH` | `EXCEPTION WHEN ... THEN` |
+| Return set | `RETURNS SETOF record` | Table-valued function | `RETURN SYS_REFCURSOR` |
+| Dynamic SQL | `EXECUTE format(...)` | `EXEC sp_executesql ...` | `EXECUTE IMMEDIATE ...` |
+| Temp tables | Regular tables or CTEs | `#temp` (session), `##temp` (global) | GTT (Global Temp Tables) |
+
+### 13.2 PL/pgSQL Patterns
+
+**Returning multiple result sets:**
+
+```sql
+-- Function returning a table:
+CREATE OR REPLACE FUNCTION get_dept_summary(p_dept_id INT)
+RETURNS TABLE (
+    metric_name TEXT,
+    metric_value NUMERIC
+) LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 'employee_count'::text, COUNT(*)::numeric
+    FROM employees WHERE dept_id = p_dept_id;
+
+    RETURN QUERY
+    SELECT 'avg_salary'::text, AVG(salary)::numeric
+    FROM employees WHERE dept_id = p_dept_id;
+
+    RETURN QUERY
+    SELECT 'total_salary'::text, SUM(salary)::numeric
+    FROM employees WHERE dept_id = p_dept_id;
+END;
+$$;
+
+SELECT * FROM get_dept_summary(5);
+```
+
+**Dynamic SQL with format() (SQL injection safe):**
+
+```sql
+CREATE OR REPLACE FUNCTION dynamic_search(
+    p_table TEXT,
+    p_column TEXT,
+    p_value TEXT
+) RETURNS SETOF RECORD LANGUAGE plpgsql AS $$
+BEGIN
+    -- format() with %I = identifier (quoted), %L = literal (escaped)
+    RETURN QUERY EXECUTE format(
+        'SELECT * FROM %I WHERE %I = %L',
+        p_table, p_column, p_value
+    );
+END;
+$$;
+```
+
+**Bulk operations with arrays:**
+
+```sql
+CREATE OR REPLACE FUNCTION bulk_update_salaries(
+    p_emp_ids INT[],
+    p_new_salaries NUMERIC[]
+) RETURNS INT LANGUAGE plpgsql AS $$
+DECLARE
+    updated_count INT := 0;
+BEGIN
+    FOR i IN 1..array_length(p_emp_ids, 1) LOOP
+        UPDATE employees SET salary = p_new_salaries[i]
+        WHERE emp_id = p_emp_ids[i];
+        updated_count := updated_count + 1;
+    END LOOP;
+    RETURN updated_count;
+END;
+$$;
+
+-- Better: use UNNEST for set-based operation:
+CREATE OR REPLACE FUNCTION bulk_update_salaries_v2(
+    p_emp_ids INT[],
+    p_new_salaries NUMERIC[]
+) RETURNS INT LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE employees e
+    SET salary = u.new_salary
+    FROM UNNEST(p_emp_ids, p_new_salaries) AS u(emp_id, new_salary)
+    WHERE e.emp_id = u.emp_id;
+    RETURN array_length(p_emp_ids, 1);
+END;
+$$;
+```
+
+### 13.3 Function Volatility Categories
+
+PostgreSQL classifies functions by their side effects, which affects optimization:
+
+| Category | Meaning | Optimizer Can |
+|----------|---------|---------------|
+| `IMMUTABLE` | Same inputs always produce same output. No side effects. No database reads. | Cache result, fold constants, use in indexes |
+| `STABLE` | Same inputs produce same output WITHIN a single statement. Reads database but doesn't modify. | Evaluate once per scan (not per row) |
+| `VOLATILE` (default) | May return different results on each call. May have side effects. | Must evaluate every time |
+
+```sql
+-- IMMUTABLE: pure computation
+CREATE FUNCTION circle_area(radius NUMERIC)
+RETURNS NUMERIC LANGUAGE sql IMMUTABLE AS $$
+    SELECT pi() * radius * radius;
+$$;
+-- Can be used in index expressions:
+CREATE INDEX idx_area ON circles(circle_area(radius));
+
+-- STABLE: reads database, consistent within statement
+CREATE FUNCTION get_exchange_rate(currency TEXT)
+RETURNS NUMERIC LANGUAGE sql STABLE AS $$
+    SELECT rate FROM exchange_rates WHERE code = currency;
+$$;
+-- Optimizer evaluates once, not per-row
+
+-- VOLATILE: different each call or has side effects
+CREATE FUNCTION next_sequence_val()
+RETURNS BIGINT LANGUAGE sql VOLATILE AS $$
+    SELECT nextval('my_sequence');
+$$;
+-- Must be called for every row
+
+-- WRONG: marking a volatile function as immutable
+-- This causes INCORRECT results (optimizer caches the first call):
+CREATE FUNCTION get_random() RETURNS FLOAT
+LANGUAGE sql IMMUTABLE AS $$ SELECT random(); $$;
+-- Every row gets the SAME "random" number! Bug!
+```
+
+**Impact on query planning:**
+
+```sql
+-- VOLATILE function in WHERE prevents index usage:
+SELECT * FROM users WHERE volatile_func(email) = 'result';
+-- → Seq Scan (must call function for every row)
+
+-- IMMUTABLE function in WHERE allows index:
+CREATE INDEX idx_lower_email ON users(LOWER(email));
+SELECT * FROM users WHERE LOWER(email) = 'alice@example.com';
+-- → Index Scan (LOWER is IMMUTABLE)
+```
+
+### 13.4 SECURITY DEFINER vs SECURITY INVOKER
+
+```sql
+-- SECURITY INVOKER (default): runs with caller's permissions
+CREATE FUNCTION get_my_salary()
+RETURNS NUMERIC LANGUAGE sql SECURITY INVOKER AS $$
+    SELECT salary FROM employees WHERE emp_id = current_user_id();
+$$;
+
+-- SECURITY DEFINER: runs with function OWNER's permissions
+-- Use for controlled access to restricted tables:
+CREATE FUNCTION get_employee_count(p_dept_id INT)
+RETURNS BIGINT LANGUAGE sql SECURITY DEFINER AS $$
+    SELECT COUNT(*) FROM employees WHERE dept_id = p_dept_id;
+$$;
+-- Users can call this even without SELECT permission on employees
+
+-- IMPORTANT: always set search_path for SECURITY DEFINER functions:
+CREATE FUNCTION secure_func()
+RETURNS VOID LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp  -- prevent search_path injection
+AS $$ BEGIN ... END; $$;
+```
+
+---
+
+## 📖 Additional Sources (Sections 12–13)
+
+- PostgreSQL PL/pgSQL: https://www.postgresql.org/docs/current/plpgsql.html
+- PostgreSQL Full-Text Search: https://www.postgresql.org/docs/current/textsearch.html
+- PostgreSQL Trigger Documentation: https://www.postgresql.org/docs/current/plpgsql-trigger.html
+- SQLite FTS5: https://www.sqlite.org/fts5.html
+- MySQL FULLTEXT: https://dev.mysql.com/doc/refman/8.0/en/fulltext-search.html
+- Celko, J. (2014). *Joe Celko's SQL for Smarties*. 5th ed. Morgan Kaufmann.

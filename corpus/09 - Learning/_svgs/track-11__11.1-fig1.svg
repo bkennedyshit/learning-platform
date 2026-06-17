@@ -1,0 +1,84 @@
+<svg viewBox="0 0 620 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="ca-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="ca-arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .layer-rect { stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 3; }
+    .layer-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .cell-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .io-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .arrow-io { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; stroke-dasharray: 6; animation: flow 2s linear infinite; }
+    .arrow-local { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; stroke-dasharray: 4 2; animation: flow 2s linear infinite reverse; }
+    .neuron-dot { fill: var(--text-accent, #79c0ff); r: 3; }
+    .pyramid { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .stellate { fill: none; stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; }
+    .layer-rect:hover { fill: var(--interactive-accent, #58a6ff); opacity: 0.08; }
+    @keyframes flow { to { stroke-dashoffset: -12; } }
+  </style>
+  <!-- Title -->
+  <text x="200" y="22" class="title-label" text-anchor="middle">Neocortical Laminar Architecture</text>
+  <!-- Pia mater surface -->
+  <line x1="40" y1="40" x2="360" y2="40" stroke="var(--text-muted, #8b949e)" stroke-width="2" stroke-dasharray="6 3"/>
+  <text x="370" y="44" class="cell-label">Pia mater (surface)</text>
+  <!-- Layer I: Molecular -->
+  <rect x="40" y="45" width="320" height="40" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.3"/>
+  <text x="50" y="70" class="layer-label">I — Molecular</text>
+  <text x="200" y="70" class="cell-label">Apical dendrites, few neurons, axon terminals</text>
+  <!-- Layer II: External Granular -->
+  <rect x="40" y="90" width="320" height="50" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.4"/>
+  <text x="50" y="115" class="layer-label">II — Ext. Granular</text>
+  <text x="210" y="115" class="cell-label">Small pyramidal + stellate cells</text>
+  <circle cx="310" cy="110" class="neuron-dot"/>
+  <circle cx="325" cy="118" class="neuron-dot"/>
+  <!-- Layer III: External Pyramidal -->
+  <rect x="40" y="145" width="320" height="60" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.5"/>
+  <text x="50" y="175" class="layer-label">III — Ext. Pyramidal</text>
+  <text x="215" y="175" class="cell-label">Medium pyramidal cells</text>
+  <!-- Pyramidal cell icon -->
+  <polygon points="300,155 310,185 290,185" class="pyramid"/>
+  <!-- Layer IV: Internal Granular -->
+  <rect x="40" y="210" width="320" height="55" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.6"/>
+  <text x="50" y="240" class="layer-label">IV — Int. Granular</text>
+  <text x="210" y="240" class="cell-label">Spiny stellate cells (thalamic input)</text>
+  <!-- Stellate cell icon -->
+  <circle cx="330" cy="235" r="8" class="stellate"/>
+  <line x1="330" y1="225" x2="330" y2="245" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+  <line x1="320" y1="235" x2="340" y2="235" stroke="var(--text-accent, #79c0ff)" stroke-width="1"/>
+  <!-- Layer V: Internal Pyramidal -->
+  <rect x="40" y="270" width="320" height="65" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.5"/>
+  <text x="50" y="305" class="layer-label">V — Int. Pyramidal</text>
+  <text x="210" y="305" class="cell-label">Large pyramidal (Betz cells in M1)</text>
+  <!-- Large pyramidal -->
+  <polygon points="310,275 325,320 295,320" class="pyramid"/>
+  <!-- Layer VI: Polymorphic -->
+  <rect x="40" y="340" width="320" height="55" class="layer-rect" fill="var(--background-secondary, #161b22)" opacity="0.4"/>
+  <text x="50" y="370" class="layer-label">VI — Polymorphic</text>
+  <text x="210" y="370" class="cell-label">Fusiform cells → thalamic feedback</text>
+  <!-- White matter -->
+  <rect x="40" y="400" width="320" height="30" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1" rx="3" opacity="0.2"/>
+  <text x="200" y="420" class="cell-label" text-anchor="middle">White Matter (myelinated axons)</text>
+  <!-- I/O Arrows -->
+  <!-- Thalamic input to Layer IV -->
+  <line x1="420" y1="237" x2="365" y2="237" class="arrow-io" marker-end="url(#ca-arrow)"/>
+  <text x="425" y="241" class="io-label">Thalamic afferents</text>
+  <!-- Cortico-cortical output from Layer III -->
+  <line x1="365" y1="170" x2="420" y2="170" class="arrow-io" marker-end="url(#ca-arrow)"/>
+  <text x="425" y="174" class="io-label">Cortico-cortical (ipsi/contra)</text>
+  <!-- Subcortical output from Layer V -->
+  <line x1="365" y1="300" x2="420" y2="300" class="arrow-io" marker-end="url(#ca-arrow)"/>
+  <text x="425" y="304" class="io-label">Subcortical output (spinal, brainstem)</text>
+  <!-- Thalamic feedback from Layer VI -->
+  <line x1="365" y1="365" x2="420" y2="365" class="arrow-io" marker-end="url(#ca-arrow)"/>
+  <text x="425" y="369" class="io-label">Thalamocortical feedback</text>
+  <!-- Local recurrence arrow -->
+  <path d="M 55 140 C 25 180 25 220 55 260" class="arrow-local" marker-end="url(#ca-arrow-muted)"/>
+  <text x="5" y="200" class="cell-label" writing-mode="tb">local</text>
+  <!-- Bottom annotation -->
+  <text x="200" y="460" class="cell-label" text-anchor="middle">Thickness: 1.5mm (V1) to 4.5mm (BA4 motor cortex) | ~16 billion cortical neurons</text>
+</svg>

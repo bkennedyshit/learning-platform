@@ -1,0 +1,76 @@
+<svg viewBox="0 0 650 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="pt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pt-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .pt-level0 { stroke: var(--text-muted, #8b949e); stroke-width: 2; stroke-dasharray: 6 3; }
+    .pt-level1 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; }
+    .pt-level2 { stroke: var(--text-accent, #79c0ff); stroke-width: 2; }
+    .pt-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .pt-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .pt-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .pt-shift {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      fill: none;
+      marker-end: url(#pt-arrow);
+      opacity: 0;
+      animation: fadeShift 2s ease-in forwards;
+    }
+    @keyframes fadeShift {
+      to { opacity: 1; }
+    }
+  </style>
+
+  <!-- Energy axis -->
+  <line x1="50" y1="320" x2="50" y2="30" class="pt-axis" marker-end="url(#pt-arrow)"/>
+  <text x="55" y="25" class="pt-label">E</text>
+
+  <!-- Unperturbed levels -->
+  <line x1="80" y1="280" x2="200" y2="280" class="pt-level0"/>
+  <text x="210" y="284" class="pt-label">E₀⁽⁰⁾</text>
+  <line x1="80" y1="200" x2="200" y2="200" class="pt-level0"/>
+  <text x="210" y="204" class="pt-label">E₁⁽⁰⁾</text>
+  <line x1="80" y1="120" x2="200" y2="120" class="pt-level0"/>
+  <text x="210" y="124" class="pt-label">E₂⁽⁰⁾</text>
+
+  <!-- First-order corrected -->
+  <line x1="280" y1="265" x2="400" y2="265" class="pt-level1">
+    <animate attributeName="y1" values="280; 265; 265" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="280; 265; 265" dur="3s" repeatCount="indefinite" />
+  </line>
+  <text x="410" y="269" class="pt-accent">E₀⁽⁰⁾ + E₀⁽¹⁾</text>
+  <line x1="280" y1="190" x2="400" y2="190" class="pt-level1">
+    <animate attributeName="y1" values="200; 190; 190" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="200; 190; 190" dur="3s" repeatCount="indefinite" />
+  </line>
+  <line x1="280" y1="130" x2="400" y2="130" class="pt-level1">
+    <animate attributeName="y1" values="120; 130; 130" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="120; 130; 130" dur="3s" repeatCount="indefinite" />
+  </line>
+
+  <!-- Shift arrows -->
+  <line x1="240" y1="280" x2="270" y2="265" class="pt-shift"/>
+  <line x1="240" y1="200" x2="270" y2="190" class="pt-shift"/>
+  <line x1="240" y1="120" x2="270" y2="130" class="pt-shift"/>
+
+  <!-- Second-order -->
+  <line x1="480" y1="258" x2="600" y2="258" class="pt-level2">
+    <animate attributeName="y1" values="280; 265; 258" keyTimes="0; 0.5; 1" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="280; 265; 258" keyTimes="0; 0.5; 1" dur="3s" repeatCount="indefinite" />
+  </line>
+  <text x="605" y="262" class="pt-label" fill="var(--text-accent, #79c0ff)">+ E₀⁽²⁾</text>
+
+  <!-- Labels -->
+  <text x="140" y="320" class="pt-label" text-anchor="middle">H₀ (exact)</text>
+  <text x="340" y="320" class="pt-accent" text-anchor="middle">1st order</text>
+  <text x="540" y="320" class="pt-label" text-anchor="middle" fill="var(--text-accent, #79c0ff)">2nd order</text>
+
+  <!-- Formula box -->
+  <rect x="350" y="40" width="280" height="70" class="pt-box"/>
+  <text x="490" y="65" class="pt-accent" text-anchor="middle">E_n = E_n⁽⁰⁾ + λ⟨n|H'|n⟩</text>
+  <text x="490" y="90" class="pt-label" text-anchor="middle">+ λ² Σ_{m≠n} |⟨m|H'|n⟩|²/(E_n⁽⁰⁾-E_m⁽⁰⁾)</text>
+</svg>

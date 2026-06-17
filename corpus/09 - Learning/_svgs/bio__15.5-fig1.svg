@@ -1,0 +1,42 @@
+<svg viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 500px; height: auto;">
+  <style>
+    .level { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+    .level:hover { filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); transform: scale(1.02); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .energy { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+  </style>
+  <text x="250" y="25" class="title" text-anchor="middle">Ecological Energy Pyramid — 10% Rule</text>
+  <!-- Tertiary consumers (top) -->
+  <polygon points="220,50 280,50 295,100 205,100" class="level" fill="#ff6b6b" fill-opacity="0.3"/>
+  <text x="250" y="80" class="label" text-anchor="middle">Tertiary (10 kJ)</text>
+  <text x="250" y="93" class="energy" text-anchor="middle">Eagles, sharks</text>
+  <!-- Secondary consumers -->
+  <polygon points="190,110 310,110 330,160 170,160" class="level" fill="#ffa94d" fill-opacity="0.3"/>
+  <text x="250" y="138" class="label" text-anchor="middle">Secondary (100 kJ)</text>
+  <text x="250" y="153" class="energy" text-anchor="middle">Foxes, snakes</text>
+  <!-- Primary consumers -->
+  <polygon points="150,170 350,170 380,220 120,220" class="level" fill="#69db7c" fill-opacity="0.3"/>
+  <text x="250" y="198" class="label" text-anchor="middle">Primary Consumers (1,000 kJ)</text>
+  <text x="250" y="213" class="energy" text-anchor="middle">Rabbits, insects, deer</text>
+  <!-- Producers -->
+  <polygon points="100,230 400,230 440,280 60,280" class="level" fill="#4dabf7" fill-opacity="0.3"/>
+  <text x="250" y="258" class="label" text-anchor="middle">Producers (10,000 kJ/m²/year)</text>
+  <text x="250" y="273" class="energy" text-anchor="middle">Plants, algae, phytoplankton</text>
+  <!-- Energy loss arrows -->
+  <text x="420" y="80" class="energy">~90% lost as</text>
+  <text x="420" y="93" class="energy">heat at each level</text>
+  <path d="M 330 135 Q 370 135 380 155" class="arrow"/>
+  <text x="385" y="150" class="energy">Heat</text>
+  <path d="M 380 195 Q 410 195 415 215" class="arrow"/>
+  <text x="420" y="210" class="energy">Heat</text>
+  <path d="M 440 255 Q 460 255 465 275" class="arrow"/>
+  <text x="470" y="270" class="energy">Heat</text>
+  <!-- Sun input -->
+  <text x="250" y="310" class="label" text-anchor="middle">☀️ Solar Energy Input</text>
+  <!-- Bottom annotation -->
+  <rect x="60" y="325" width="380" height="40" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="250" y="345" class="energy" text-anchor="middle">Only ~10% of energy transfers between trophic levels.</text>
+  <text x="250" y="358" class="energy" text-anchor="middle">This limits food chains to 4–5 levels and explains why apex predators are rare.</text>
+</svg>

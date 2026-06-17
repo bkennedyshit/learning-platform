@@ -1,0 +1,1442 @@
+---
+title: "11.1 — Setup, Cargo & Project Structure"
+subject: "Rust"
+catalog: advanced
+audience_tier: higher-education
+chapter: "11.1"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 11.1 — Setup, Cargo & Project Structure
+
+> *"Cargo is the reason Rust has a healthy ecosystem. It's not just a build tool — it's a community coordination mechanism."* — Steve Klabnik
+
+You know Python's `pip` + `venv` + `pyproject.toml` dance. Rust replaces all of that with a single tool: **Cargo**. It handles dependency resolution, building, testing, benchmarking, documentation generation, and publishing — all with zero configuration for simple projects.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Install and manage Rust toolchains via `rustup` (stable, nightly, cross-compilation targets).
+2. Create, build, test, and publish crates with Cargo.
+3. Structure multi-crate workspaces for real projects.
+4. Configure `clippy`, `rustfmt`, and `rust-analyzer` for a professional dev experience.
+5. Understand Rust editions (2015, 2018, 2021, 2024) and when they matter.
+
+---
+
+## 🖼️ Visual Anchor — Rust Toolchain Architecture
+
+![rust__14.1-fig1](rust__14.1-fig1.svg)
+
+---
+
+## 📚 1. Concepts
+
+### Concept 14.1.1 — The Rust Toolchain
+
+Unlike Python (where you install a single interpreter), Rust has a **toolchain** consisting of:
+
+| Component | Purpose | Python Equivalent |
+|-----------|---------|-------------------|
+| `rustc` | The compiler | `python` interpreter |
+| `cargo` | Build system + package manager | `pip` + `setuptools` + `make` |
+| `rustup` | Toolchain manager | `pyenv` |
+| `clippy` | Linter (opinionated) | `pylint` / `ruff` |
+| `rustfmt` | Code formatter | `black` |
+| `rust-analyzer` | LSP server | `pylsp` / `pyright` |
+
+### Concept 14.1.2 — Editions
+
+Rust uses **editions** (2015, 2018, 2021, 2024) to introduce breaking syntax changes without breaking existing code. Key facts:
+
+- Editions are opt-in per crate (set in `Cargo.toml`)
+- Crates of different editions interoperate freely
+- **Always use the latest edition** for new projects (2024 as of late 2024)
+- Edition changes are mostly syntactic sugar — the underlying semantics rarely break
+
+```toml
+[package]
+name = "my-project"
+version = "0.1.0"
+edition = "2024"  # Always use latest for new code
+```
+
+### Concept 14.1.3 — Crates vs Packages vs Workspaces
+
+```
+workspace/              ← Workspace (Cargo.toml with [workspace])
+├── Cargo.toml          ← Workspace root
+├── crates/
+│   ├── core/           ← Package (has its own Cargo.toml)
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   │       ├── lib.rs  ← Library crate root
+│   │       └── main.rs ← Binary crate root (optional)
+│   ├── cli/            ← Another package
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   │       └── main.rs
+│   └── shared/         ← Shared library package
+│       ├── Cargo.toml
+│       └── src/
+│           └── lib.rs
+└── target/             ← Build artifacts (shared across workspace)
+```
+
+**Terminology:**
+- **Crate**: A compilation unit (either a library or a binary). The smallest thing `rustc` compiles.
+- **Package**: A directory with a `Cargo.toml`. Contains one or more crates.
+- **Workspace**: A collection of packages that share a `Cargo.lock` and `target/` directory.
+
+---
+
+## 📐 2. Mental Models
+
+### Model 14.1.1 — Cargo as Your Build System Brain
+
+Think of Cargo as the **single source of truth** for your project. In Python, you juggle `requirements.txt`, `setup.py`, `pyproject.toml`, `Makefile`, and CI scripts. In Rust:
+
+```
+Cargo.toml = pyproject.toml + requirements.txt + Makefile + tox.ini
+```
+
+Everything flows from `Cargo.toml`. Dependencies, build scripts, feature flags, test configuration, benchmarks, documentation — all declared in one place.
+
+### Model 14.1.2 — The Module System as a Filesystem
+
+Rust's module system maps directly to the filesystem:
+
+```rust
+// src/lib.rs
+mod network;      // → src/network.rs OR src/network/mod.rs
+mod database;     // → src/database.rs OR src/database/mod.rs
+
+// src/network.rs (or src/network/mod.rs)
+pub mod tcp;      // → src/network/tcp.rs
+pub mod udp;      // → src/network/udp.rs
+```
+
+**The 2018+ convention** (preferred): Use `src/network.rs` + `src/network/` directory instead of `src/network/mod.rs`. Cleaner diffs, less nesting.
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Installation
+
+```bash
+# Install rustup (manages everything)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Windows: download rustup-init.exe from https://rustup.rs
+# (Requires Visual Studio C++ Build Tools)
+
+# Verify
+rustc --version    # rustc 1.82.0 (2024-10-17)
+cargo --version    # cargo 1.82.0
+rustup show        # Shows active toolchain + targets
+```
+
+### 3.2 — Toolchain Management
+
+```bash
+# Install nightly (for bleeding-edge features)
+rustup toolchain install nightly
+
+# Switch default
+rustup default stable
+
+# Per-project override (creates rust-toolchain.toml)
+rustup override set nightly
+
+# Add cross-compilation target
+rustup target add wasm32-unknown-unknown
+rustup target add thumbv7em-none-eabihf  # ARM Cortex-M4 (embedded)
+
+# Update everything
+rustup update
+```
+
+### 3.3 — Cargo Essentials
+
+```bash
+# Create new project
+cargo new my-app          # Binary (has main.rs)
+cargo new my-lib --lib    # Library (has lib.rs)
+
+# Build
+cargo build               # Debug build (fast compile, slow runtime)
+cargo build --release     # Release build (slow compile, fast runtime)
+
+# Run
+cargo run                 # Build + execute binary
+cargo run -- --flag arg   # Pass args to your binary
+
+# Test
+cargo test                # Run all tests
+cargo test test_name      # Run specific test
+cargo test -- --nocapture # Show println! output
+
+# Lint & Format
+cargo clippy              # Opinionated linter (FIX EVERYTHING IT SAYS)
+cargo fmt                 # Format code (non-negotiable in teams)
+
+# Documentation
+cargo doc --open          # Generate + open HTML docs for your crate + deps
+
+# Check (fast — no codegen)
+cargo check               # Type-check without producing binary (10x faster)
+```
+
+### 3.4 — Cargo.toml Deep Dive
+
+```toml
+[package]
+name = "llm-inference"
+version = "0.1.0"
+edition = "2024"
+authors = ["Bill <bill@example.com>"]
+description = "High-performance LLM inference engine"
+license = "MIT"
+repository = "https://github.com/bill/llm-inference"
+
+[dependencies]
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+
+[build-dependencies]
+cc = "1.0"  # For compiling C code in build scripts
+
+[features]
+default = ["gpu"]
+gpu = ["dep:cudarc"]
+cpu-only = []
+
+[bench](bench)
+name = "inference_bench"
+harness = false  # Use criterion instead of built-in bench
+
+[profile.release]
+lto = true        # Link-Time Optimization (slower build, faster binary)
+codegen-units = 1 # Single codegen unit (slower build, better optimization)
+strip = true      # Strip debug symbols (smaller binary)
+```
+
+### 3.5 — Workspace Configuration
+
+```toml
+# Root Cargo.toml
+[workspace]
+resolver = "2"  # Always use resolver 2
+members = [
+    "crates/core",
+    "crates/cli",
+    "crates/web",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+anyhow = "1.0"
+```
+
+```toml
+# crates/core/Cargo.toml
+[package]
+name = "llm-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+```
+
+### 3.6 — The Module System in Practice
+
+```rust
+// src/lib.rs — the crate root
+pub mod config;       // → src/config.rs
+pub mod inference;    // → src/inference.rs (or src/inference/mod.rs)
+mod internal;         // Private module — not exported
+
+// Re-export for ergonomic public API
+pub use config::Config;
+pub use inference::Engine;
+
+// src/inference.rs
+pub mod transformer;  // → src/inference/transformer.rs
+pub mod tokenizer;    // → src/inference/tokenizer.rs
+
+pub struct Engine {
+    // ...
+}
+
+// src/inference/transformer.rs
+use crate::config::Config;  // Absolute path from crate root
+use super::Engine;           // Relative path (parent module)
+
+pub struct TransformerBlock {
+    config: Config,
+}
+```
+
+### 3.7 — rust-analyzer Configuration (.vscode/settings.json)
+
+```json
+{
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.cargo.features": "all",
+    "rust-analyzer.inlayHints.typeHints.enable": true,
+    "rust-analyzer.inlayHints.parameterHints.enable": true,
+    "rust-analyzer.lens.run.enable": true,
+    "rust-analyzer.lens.debug.enable": true
+}
+```
+
+---
+
+## 💡 4. Worked Examples
+
+### Example 11.1.1 — From Zero to Running Binary
+
+```bash
+# Create project
+cargo new hello-rust && cd hello-rust
+
+# src/main.rs is auto-generated:
+```
+
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+```bash
+# Build and run
+cargo run
+# Compiling hello-rust v0.1.0
+# Running `target/debug/hello-rust`
+# Hello, world!
+
+# Check with linter
+cargo clippy
+# No warnings — clean!
+```
+
+### Example 11.1.2 — Adding Dependencies
+
+```bash
+# Add a dependency (cargo-edit style, built into cargo 1.62+)
+cargo add serde --features derive
+cargo add tokio --features full
+cargo add clap --features derive
+```
+
+```rust
+// src/main.rs
+use clap::Parser;
+
+/// A simple CLI tool
+#[derive(Parser, Debug)]
+#[command(author, version, about)]
+struct Args {
+    /// Name to greet
+    #[arg(short, long)]
+    name: String,
+
+    /// Number of times to greet
+    #[arg(short, long, default_value_t = 1)]
+    count: u8,
+}
+
+fn main() {
+    let args = Args::parse();
+    for _ in 0..args.count {
+        println!("Hello, {}!", args.name);
+    }
+}
+```
+
+```bash
+cargo run -- --name Bill --count 3
+# Hello, Bill!
+# Hello, Bill!
+# Hello, Bill!
+```
+
+### Example 11.1.3 — Multi-Crate Workspace
+
+```bash
+# Create workspace
+mkdir game-engine && cd game-engine
+```
+
+```toml
+# Cargo.toml (workspace root)
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+
+[workspace.dependencies]
+glam = "0.29"
+wgpu = "23.0"
+winit = "0.30"
+```
+
+```bash
+# Create member crates
+cargo new crates/engine-core --lib
+cargo new crates/renderer --lib
+cargo new crates/game --bin
+```
+
+```toml
+# crates/game/Cargo.toml
+[package]
+name = "game"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+engine-core = { path = "../engine-core" }
+renderer = { path = "../renderer" }
+glam.workspace = true
+winit.workspace = true
+```
+
+---
+
+## ⚠️ 5. Gotchas & Common Mistakes
+
+### Gotcha 14.1.1 — `cargo build` vs `cargo check`
+
+`cargo check` is **10x faster** than `cargo build` because it skips code generation. Use it during development:
+
+```bash
+# During development (fast feedback loop):
+cargo check        # ~1-3 seconds
+cargo clippy       # ~2-5 seconds (includes check)
+
+# Only when you need to run:
+cargo build        # ~10-30 seconds
+cargo run          # build + execute
+```
+
+### Gotcha 14.1.2 — Feature Flags Are Additive
+
+Features in Rust are **additive only** — you cannot disable a feature that a dependency enables. This means:
+
+```toml
+# If crate A enables tokio/full and crate B enables tokio/rt-multi-thread,
+# the final build gets tokio with ALL features from both.
+# You cannot subtract features.
+```
+
+Design your features as opt-in capabilities, never as mutually exclusive modes.
+
+### Gotcha 14.1.3 — The `target/` Directory Gets Huge
+
+```bash
+# target/ can easily reach 5-10 GB in a workspace
+# Add to .gitignore:
+/target
+
+# Clean when needed:
+cargo clean
+
+# Or use cargo-sweep to remove old artifacts:
+cargo install cargo-sweep
+cargo sweep --time 30  # Remove artifacts older than 30 days
+```
+
+### Gotcha 14.1.4 — Edition ≠ Version
+
+- **Edition** (2015, 2018, 2021, 2024): Syntax/semantics epoch. Set in `Cargo.toml`.
+- **Version** (1.82.0): The compiler release. Managed by `rustup`.
+
+You can use edition 2024 features with any compiler version that supports it (1.82+). Editions are backward-compatible at the binary level.
+
+---
+
+## 🔗 6. Cross-Links
+
+- **Next**: [11.2 - Ownership, Borrowing & Lifetimes](11.2---Ownership,-Borrowing-&-Lifetimes) — The core innovation
+- **Python parallel**: [08.1 - Setup, Tooling & Project Structure](08.1---Setup,-Tooling-&-Project-Structure) — Compare toolchain philosophies
+- **Build systems context**: [08.7 - Shell, Terminal & Cross-Platform CLI](08.7---Shell,-Terminal-&-Cross-Platform-CLI)
+- **Game dev workspace**: [11.8 - Production Rust - WebAssembly, FFI, Embedded & Game Dev (Bevy)](11.8---Production-Rust---WebAssembly,-FFI,-Embedded-&-Game-Dev-(Bevy))
+
+---
+
+## 📖 7. References
+
+- [The Rust Programming Language, Ch. 1–7](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
+- [Cargo Book](https://doc.rust-lang.org/cargo/)
+- [Rust Edition Guide](https://doc.rust-lang.org/edition-guide/)
+- [rust-analyzer Manual](https://rust-analyzer.github.io/manual.html)
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Cargo Workspace with Shared Dependencies, Feature Flags & Cross-Compilation
+
+**Problem:** You're building a production system with three crates: a core library, a CLI binary, and a WASM target. The workspace must share dependency versions, support feature flags for optional GPU acceleration, and cross-compile the WASM crate to `wasm32-unknown-unknown` while the CLI targets the host platform.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+// === Directory Structure ===
+// gpu-toolkit/
+// ├── Cargo.toml              (workspace root)
+// ├── rust-toolchain.toml     (pinned toolchain)
+// ├── .cargo/
+// │   └── config.toml         (per-project cargo config)
+// ├── crates/
+// │   ├── core/
+// │   │   ├── Cargo.toml
+// │   │   └── src/lib.rs
+// │   ├── cli/
+// │   │   ├── Cargo.toml
+// │   │   └── src/main.rs
+// │   └── wasm/
+// │       ├── Cargo.toml
+// │       └── src/lib.rs
+// └── target/                  (shared build artifacts)
+```
+
+```toml
+# === gpu-toolkit/Cargo.toml (workspace root) ===
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Bill <bill@example.com>"]
+repository = "https://github.com/bill/gpu-toolkit"
+
+[workspace.dependencies]
+# Shared dependency versions — single source of truth
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0.89"
+thiserror = "2.0"
+wasm-bindgen = "0.2.93"
+
+# Internal crate references
+gpu-core = { path = "crates/core" }
+```
+
+```toml
+# === crates/core/Cargo.toml ===
+[package]
+name = "gpu-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+gpu = ["dep:cudarc"]          # Optional GPU acceleration
+opencl = ["dep:opencl3"]      # Alternative GPU backend
+simd = []                      # Enable SIMD optimizations
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+# Optional GPU dependencies (only compiled when feature enabled)
+cudarc = { version = "0.12", optional = true }
+opencl3 = { version = "0.9", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.5"
+
+[bench](bench)
+name = "matrix_ops"
+harness = false
+```
+
+```rust
+// === crates/core/src/lib.rs ===
+//! GPU Toolkit Core Library
+//!
+//! Provides matrix operations with optional GPU acceleration.
+
+pub mod matrix;
+pub mod error;
+
+#[cfg(feature = "gpu")]
+pub mod cuda_backend;
+
+#[cfg(feature = "opencl")]
+pub mod opencl_backend;
+
+pub use error::CoreError;
+pub use matrix::Matrix;
+
+/// Compile-time feature report (useful for debugging builds)
+pub fn feature_report() -> &'static str {
+    concat!(
+        "gpu-core v", env!("CARGO_PKG_VERSION"),
+        " [features: ",
+        if cfg!(feature = "gpu") { "gpu " } else { "" },
+        if cfg!(feature = "opencl") { "opencl " } else { "" },
+        if cfg!(feature = "simd") { "simd " } else { "" },
+        "]"
+    )
+}
+```
+
+```toml
+# === crates/cli/Cargo.toml ===
+[package]
+name = "gpu-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+gpu-core = { workspace = true, features = ["gpu"] }  # CLI enables GPU
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+clap = { version = "4.5", features = ["derive"] }
+```
+
+```toml
+# === crates/wasm/Cargo.toml ===
+[package]
+name = "gpu-wasm"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+gpu-core = { workspace = true }  # No GPU feature for WASM (no CUDA in browser)
+wasm-bindgen.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+```
+
+```toml
+# === rust-toolchain.toml (pins the entire team to same toolchain) ===
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy", "rust-analyzer"]
+targets = ["wasm32-unknown-unknown"]
+```
+
+```toml
+# === .cargo/config.toml (project-level cargo configuration) ===
+[alias]
+# Custom cargo commands for this workspace
+xtask = "run --package xtask --"
+wasm-build = "build --package gpu-wasm --target wasm32-unknown-unknown --release"
+lint = "clippy --workspace --all-targets --all-features -- -D warnings"
+test-all = "test --workspace --all-features"
+
+[target.wasm32-unknown-unknown]
+# Use wasm-specific linker flags
+rustflags = ["-C", "link-arg=--max-memory=268435456"]
+
+[target.x86_64-unknown-linux-gnu]
+# Use mold linker for faster linking on Linux
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+
+[build]
+# Build jobs = CPU cores (default, but explicit for documentation)
+jobs = 0
+
+[net]
+# Retry downloads on flaky connections
+retry = 3
+```
+
+```bash
+# === Build Commands ===
+
+# Build entire workspace (debug)
+cargo build --workspace
+
+# Build CLI with GPU support
+cargo build --package gpu-cli --features gpu-core/gpu --release
+
+# Build WASM target
+cargo wasm-build
+# Equivalent to: cargo build --package gpu-wasm --target wasm32-unknown-unknown --release
+
+# Cross-compile for ARM Linux (e.g., Raspberry Pi)
+# First: cargo install cross
+cross build --package gpu-cli --target aarch64-unknown-linux-gnu --release
+
+# Run all tests across workspace
+cargo test-all
+
+# Generate documentation for entire workspace
+cargo doc --workspace --no-deps --open
+
+# Check all feature combinations compile
+cargo check --package gpu-core --no-default-features
+cargo check --package gpu-core --features gpu
+cargo check --package gpu-core --features opencl
+cargo check --package gpu-core --all-features
+```
+
+</details>
+
+### Example 8.2 — Cross-Compilation with `cross` for Multiple Targets
+
+**Problem:** You need to produce release binaries for Linux x86_64, Linux ARM64, Windows, and macOS from a single CI machine (Linux). Set up the project for reproducible cross-compilation.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```bash
+# Install cross (uses Docker containers with pre-configured toolchains)
+cargo install cross --git https://github.com/cross-rs/cross
+
+# Supported targets (partial list):
+# x86_64-unknown-linux-gnu       (Linux x86_64, glibc)
+# x86_64-unknown-linux-musl      (Linux x86_64, static binary)
+# aarch64-unknown-linux-gnu      (Linux ARM64)
+# x86_64-pc-windows-gnu          (Windows via MinGW)
+# x86_64-apple-darwin            (macOS — requires osxcross)
+# wasm32-unknown-unknown          (WebAssembly)
+# thumbv7em-none-eabihf          (ARM Cortex-M4, embedded)
+```
+
+```toml
+# === Cross.toml (cross-rs configuration) ===
+[build.env]
+passthrough = [
+    "RUST_LOG",
+    "CI",
+]
+
+[target.x86_64-unknown-linux-musl]
+# Static linking — produces a single binary with no dependencies
+image = "ghcr.io/cross-rs/x86_64-unknown-linux-musl:main"
+
+[target.aarch64-unknown-linux-gnu]
+image = "ghcr.io/cross-rs/aarch64-unknown-linux-gnu:main"
+
+[target.x86_64-pc-windows-gnu]
+image = "ghcr.io/cross-rs/x86_64-pc-windows-gnu:main"
+```
+
+```bash
+# === Build script (build-release.sh) ===
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="gpu-cli") | .version')
+TARGETS=(
+    "x86_64-unknown-linux-musl"
+    "aarch64-unknown-linux-gnu"
+    "x86_64-pc-windows-gnu"
+)
+
+echo "Building gpu-cli v${VERSION} for ${#TARGETS[@]} targets..."
+
+for target in "${TARGETS[@]}"; do
+    echo "→ Building for ${target}..."
+    cross build --package gpu-cli --release --target "${target}"
+    
+    # Package the binary
+    case "${target}" in
+        *windows*)
+            EXT=".exe"
+            ;;
+        *)
+            EXT=""
+            ;;
+    esac
+    
+    mkdir -p "dist/${target}"
+    cp "target/${target}/release/gpu-cli${EXT}" "dist/${target}/"
+    
+    # Create tarball
+    tar -czf "dist/gpu-cli-${VERSION}-${target}.tar.gz" \
+        -C "dist/${target}" "gpu-cli${EXT}"
+    
+    echo "  ✓ dist/gpu-cli-${VERSION}-${target}.tar.gz"
+done
+
+echo "Done! All binaries in dist/"
+ls -lh dist/*.tar.gz
+```
+
+```toml
+# === Cargo.toml profile for release builds ===
+[profile.release]
+opt-level = 3         # Maximum optimization
+lto = "fat"           # Full link-time optimization (cross-crate)
+codegen-units = 1     # Single codegen unit (better optimization, slower build)
+strip = true          # Strip debug symbols
+panic = "abort"       # No unwinding (smaller binary)
+
+[profile.release-debug]
+inherits = "release"
+strip = false         # Keep debug symbols for profiling
+debug = 1             # Line-level debug info
+
+# Use with: cargo build --profile release-debug
+```
+
+```rust
+// === Build script (build.rs) for embedding build metadata ===
+fn main() {
+    // Embed git hash into binary
+    let output = std::process::Command::new("git")
+        .args(["rev-parse", "--short", "HEAD"])
+        .output()
+        .expect("git not found");
+    
+    let git_hash = String::from_utf8(output.stdout)
+        .unwrap_or_default()
+        .trim()
+        .to_string();
+    
+    println!("cargo:rustc-env=GIT_HASH={git_hash}");
+    println!("cargo:rustc-env=BUILD_TARGET={}", std::env::var("TARGET").unwrap());
+    println!("cargo:rustc-env=BUILD_TIMESTAMP={}", chrono::Utc::now().to_rfc3339());
+    
+    // Re-run if git HEAD changes
+    println!("cargo:rerun-if-changed=.git/HEAD");
+}
+```
+
+```rust
+// === src/main.rs — using build metadata ===
+fn print_version() {
+    println!(
+        "gpu-cli {} ({} built for {} at {})",
+        env!("CARGO_PKG_VERSION"),
+        env!("GIT_HASH"),
+        env!("BUILD_TARGET"),
+        env!("BUILD_TIMESTAMP"),
+    );
+}
+```
+
+</details>
+
+### Example 8.3 — rust-analyzer Advanced Configuration & Custom Linting
+
+**Problem:** Configure rust-analyzer for a large workspace with conditional compilation, custom clippy lints, and per-crate settings. Also set up `rustfmt` for team-wide consistency.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```json
+// === .vscode/settings.json (comprehensive rust-analyzer config) ===
+{
+    // Use clippy instead of cargo check (catches more issues)
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.check.extraArgs": [
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-W", "clippy::pedantic",
+        "-W", "clippy::nursery",
+        "-A", "clippy::module_name_repetitions",
+        "-A", "clippy::must_use_candidate"
+    ],
+    
+    // Enable all features for analysis (sees all code paths)
+    "rust-analyzer.cargo.features": "all",
+    
+    // Workspace-wide settings
+    "rust-analyzer.cargo.buildScripts.enable": true,
+    "rust-analyzer.procMacro.enable": true,
+    
+    // Inlay hints (type annotations shown inline)
+    "rust-analyzer.inlayHints.typeHints.enable": true,
+    "rust-analyzer.inlayHints.parameterHints.enable": true,
+    "rust-analyzer.inlayHints.chainingHints.enable": true,
+    "rust-analyzer.inlayHints.closureReturnTypeHints.enable": "with_block",
+    "rust-analyzer.inlayHints.lifetimeElisionHints.enable": "skip_trivial",
+    
+    // Lens (run/debug buttons above functions)
+    "rust-analyzer.lens.run.enable": true,
+    "rust-analyzer.lens.debug.enable": true,
+    "rust-analyzer.lens.implementations.enable": true,
+    "rust-analyzer.lens.references.adt.enable": true,
+    "rust-analyzer.lens.references.method.enable": true,
+    
+    // Completion
+    "rust-analyzer.completion.autoimport.enable": true,
+    "rust-analyzer.completion.postfix.enable": true,
+    
+    // Diagnostics
+    "rust-analyzer.diagnostics.experimental.enable": true,
+    
+    // Format on save
+    "editor.formatOnSave": true,
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    }
+}
+```
+
+```toml
+# === rustfmt.toml (team-wide formatting rules) ===
+# Requires nightly rustfmt for some options:
+# rustup component add rustfmt --toolchain nightly
+
+edition = "2024"
+max_width = 100
+tab_spaces = 4
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# Import organization
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+reorder_imports = true
+
+# Function signatures
+fn_params_layout = "Tall"
+fn_single_line = false
+
+# Control flow
+match_arm_blocks = true
+match_block_trailing_comma = true
+
+# Comments
+wrap_comments = true
+normalize_comments = true
+comment_width = 80
+
+# Struct/enum formatting
+struct_field_align_threshold = 20
+enum_discrim_align_threshold = 20
+```
+
+```toml
+# === clippy.toml (workspace-level clippy configuration) ===
+# Maximum cognitive complexity for a function
+cognitive-complexity-threshold = 25
+
+# Maximum number of lines in a function
+too-many-lines-threshold = 100
+
+# Maximum number of function arguments
+too-many-arguments-threshold = 7
+
+# Types that are allowed to be used in type complexity warnings
+type-complexity-threshold = 250
+
+# Disallowed methods (team conventions)
+disallowed-methods = [
+    { path = "std::env::var", reason = "Use config crate instead" },
+    { path = "std::thread::sleep", reason = "Use tokio::time::sleep in async code" },
+]
+
+# Disallowed types
+disallowed-types = [
+    { path = "std::collections::LinkedList", reason = "Almost never the right choice — use VecDeque" },
+]
+```
+
+```toml
+# === .cargo/config.toml — workspace-wide rustflags ===
+[target.'cfg(all())']
+rustflags = [
+    # Enable all clippy lint groups
+    "-W", "clippy::all",
+    "-W", "clippy::correctness",
+    "-W", "clippy::suspicious",
+    "-W", "clippy::style",
+    "-W", "clippy::complexity",
+    "-W", "clippy::perf",
+    
+    # Deny specific dangerous patterns
+    "-D", "unsafe_code",              # No unsafe in this workspace
+    "-D", "unused_must_use",          # Must handle Results
+    "-W", "missing_docs",             # Warn on missing documentation
+]
+```
+
+</details>
+
+### Example 8.4 — Cargo Build Scripts and Code Generation
+
+**Problem:** Your project needs to: (1) compile a C library as part of the build, (2) generate Rust bindings from a `.proto` file, and (3) embed static assets at compile time.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```toml
+# === Cargo.toml ===
+[package]
+name = "hybrid-app"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[dependencies]
+prost = "0.13"          # Protocol Buffers runtime
+include_dir = "0.7"     # Embed directories at compile time
+
+[build-dependencies]
+cc = "1.1"              # Compile C/C++ code
+prost-build = "0.13"    # Generate Rust from .proto files
+```
+
+```rust
+// === build.rs ===
+fn main() {
+    // === Part 1: Compile C library ===
+    cc::Build::new()
+        .file("vendor/fast_hash.c")
+        .file("vendor/simd_utils.c")
+        .include("vendor/include")
+        .opt_level(3)
+        .flag("-march=native")  // Use host CPU features
+        .compile("fast_hash");  // Produces libfast_hash.a
+    
+    // Tell cargo to link it
+    println!("cargo:rustc-link-lib=static=fast_hash");
+    println!("cargo:rerun-if-changed=vendor/");
+
+    // === Part 2: Generate Rust from Protocol Buffers ===
+    prost_build::Config::new()
+        .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .compile_protos(
+            &["proto/messages.proto", "proto/services.proto"],
+            &["proto/"],
+        )
+        .expect("Failed to compile protobuf");
+    
+    println!("cargo:rerun-if-changed=proto/");
+
+    // === Part 3: Generate version info ===
+    let version = env!("CARGO_PKG_VERSION");
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let dest_path = std::path::Path::new(&out_dir).join("build_info.rs");
+    
+    std::fs::write(&dest_path, format!(
+        r#"
+        pub const VERSION: &str = "{version}";
+        pub const BUILD_PROFILE: &str = "{}";
+        "#,
+        if cfg!(debug_assertions) { "debug" } else { "release" }
+    )).unwrap();
+}
+```
+
+```rust
+// === src/lib.rs — using generated code ===
+
+// Include protobuf-generated code
+pub mod proto {
+    include!(concat!(env!("OUT_DIR"), "/messages.rs"));
+}
+
+// Include build info
+mod build_info {
+    include!(concat!(env!("OUT_DIR"), "/build_info.rs"));
+}
+
+// FFI bindings to the compiled C library
+extern "C" {
+    fn fast_hash_64(data: *const u8, len: usize, seed: u64) -> u64;
+}
+
+/// Safe wrapper around the C hash function
+pub fn hash_bytes(data: &[u8], seed: u64) -> u64 {
+    unsafe { fast_hash_64(data.as_ptr(), data.len(), seed) }
+}
+
+// Embed static assets at compile time
+use include_dir::{include_dir, Dir};
+static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
+
+pub fn get_template(name: &str) -> Option<&'static str> {
+    TEMPLATES.get_file(name)
+        .and_then(|f| f.contents_utf8())
+}
+```
+
+</details>
+
+### Example 8.5 — Conditional Compilation & Platform-Specific Code
+
+**Problem:** Write a library that uses platform-specific APIs (Windows registry, Linux procfs, macOS IOKit) behind a unified interface, with compile-time feature detection.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```rust
+// === src/platform/mod.rs ===
+//! Platform abstraction layer.
+//! Compile-time selection of platform-specific implementations.
+
+// Conditional module inclusion based on target OS
+#[cfg(target_os = "windows")]
+mod windows;
+#[cfg(target_os = "linux")]
+mod linux;
+#[cfg(target_os = "macos")]
+mod macos;
+
+// Re-export the platform-specific implementation as a unified type
+#[cfg(target_os = "windows")]
+pub use windows::PlatformInfo;
+#[cfg(target_os = "linux")]
+pub use linux::PlatformInfo;
+#[cfg(target_os = "macos")]
+pub use macos::PlatformInfo;
+
+// Fallback for unsupported platforms (compile error with helpful message)
+#[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+compile_error!("This crate only supports Windows, Linux, and macOS");
+
+/// Cross-platform trait that all implementations must satisfy
+pub trait SystemInfo {
+    fn cpu_count(&self) -> usize;
+    fn total_memory_bytes(&self) -> u64;
+    fn hostname(&self) -> String;
+    fn os_version(&self) -> String;
+}
+
+// === src/platform/linux.rs ===
+use super::SystemInfo;
+use std::fs;
+
+pub struct PlatformInfo;
+
+impl PlatformInfo {
+    pub fn new() -> Self { PlatformInfo }
+}
+
+impl SystemInfo for PlatformInfo {
+    fn cpu_count(&self) -> usize {
+        fs::read_to_string("/proc/cpuinfo")
+            .unwrap_or_default()
+            .matches("processor")
+            .count()
+    }
+
+    fn total_memory_bytes(&self) -> u64 {
+        let meminfo = fs::read_to_string("/proc/meminfo").unwrap_or_default();
+        meminfo.lines()
+            .find(|line| line.starts_with("MemTotal:"))
+            .and_then(|line| {
+                line.split_whitespace().nth(1)?.parse::<u64>().ok()
+            })
+            .map(|kb| kb * 1024)
+            .unwrap_or(0)
+    }
+
+    fn hostname(&self) -> String {
+        fs::read_to_string("/etc/hostname")
+            .unwrap_or_else(|_| "unknown".into())
+            .trim()
+            .to_string()
+    }
+
+    fn os_version(&self) -> String {
+        fs::read_to_string("/etc/os-release")
+            .unwrap_or_default()
+            .lines()
+            .find(|l| l.starts_with("PRETTY_NAME="))
+            .map(|l| l.trim_start_matches("PRETTY_NAME=").trim_matches('"').to_string())
+            .unwrap_or_else(|| "Linux (unknown)".into())
+    }
+}
+
+// === Conditional compilation attributes reference ===
+// #[cfg(target_os = "linux")]           — Operating system
+// #[cfg(target_arch = "x86_64")]        — CPU architecture
+// #[cfg(target_family = "unix")]        — OS family (unix or windows)
+// #[cfg(target_env = "musl")]           — C runtime (gnu, musl, msvc)
+// #[cfg(target_pointer_width = "64")]   — Pointer size
+// #[cfg(feature = "gpu")]               — Cargo feature flag
+// #[cfg(debug_assertions)]              — Debug vs release build
+// #[cfg(test)]                          — Only in test builds
+// #[cfg(all(unix, feature = "async"))]  — Logical AND
+// #[cfg(any(windows, target_os = "macos"))]  — Logical OR
+// #[cfg(not(target_arch = "wasm32"))]   — Logical NOT
+```
+
+</details>
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Cargo's Dependency Resolver: v1 vs v2 Semantics
+
+Cargo's dependency resolver determines which versions of crates to use when multiple crates in a workspace (or dependency tree) request different versions of the same crate. The resolver version fundamentally changes how **feature unification** works.
+
+**Resolver v1 (legacy, pre-2021 edition default):**
+
+In resolver v1, features are unified **globally** across the entire dependency graph. If crate A depends on `tokio` with feature `"rt"` and crate B depends on `tokio` with feature `"full"`, the final build compiles `tokio` with **both** `"rt"` and `"full"` features enabled — even if crate A only needs the minimal runtime.
+
+This causes problems:
+- **Dev-dependency feature leakage**: If your `[dev-dependencies]` enables a feature on a shared dependency, that feature is also enabled for your library's normal compilation. This means your library might accidentally rely on features that won't be available to downstream users.
+- **Platform-specific feature leakage**: Features enabled for a `[target.'cfg(windows)'.dependencies]` entry would also be enabled on Linux builds.
+- **Build-dependency contamination**: Features needed only by `build.rs` would propagate to the main crate.
+
+**Resolver v2 (default for edition 2021+, always use this):**
+
+Resolver v2 separates feature resolution into distinct contexts:
+1. **Normal dependencies** — features unified only among normal deps
+2. **Dev dependencies** — features for dev-deps don't leak into normal compilation
+3. **Build dependencies** — build script deps are resolved independently
+4. **Platform-specific deps** — only activated on matching platforms
+
+```toml
+# Always set resolver = "2" in workspace roots
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+```
+
+**Practical impact example:**
+
+```toml
+# crates/my-lib/Cargo.toml
+[dependencies]
+serde = "1.0"  # No features needed for the library itself
+
+[dev-dependencies]
+serde = { version = "1.0", features = ["derive"] }  # Need derive for tests
+```
+
+With resolver v1: `serde/derive` is enabled for the library build too (feature leakage).
+With resolver v2: `serde/derive` is only enabled when running tests. Library consumers get `serde` without `derive` unless they request it.
+
+**Migration note:** If you upgrade from v1 to v2 and your code stops compiling, it means you were accidentally relying on leaked features. The fix is to explicitly declare the features you need in `[dependencies]`.
+
+---
+
+### 9.2 Cargo.lock Semantics: When to Commit, When to Ignore
+
+The `Cargo.lock` file records the **exact versions** of every dependency resolved for your project. Its role differs fundamentally between libraries and applications:
+
+**For applications (binaries, services, deployments): ALWAYS commit Cargo.lock**
+
+```
+# .gitignore for a binary/application project:
+/target
+# Do NOT ignore Cargo.lock — it ensures reproducible builds
+```
+
+Rationale: When you deploy a binary, you want the exact same dependency versions that you tested with. `Cargo.lock` guarantees this. Without it, `cargo build` on a different machine (or at a different time) might resolve to newer patch versions that introduce bugs.
+
+**For libraries (crates published to crates.io): Historically ignored, now recommended to commit**
+
+The Rust community's guidance has evolved. The current recommendation (2024+) is to **commit Cargo.lock even for libraries**, because:
+1. It ensures CI reproducibility (your tests run against the same versions)
+2. `cargo publish` ignores `Cargo.lock` anyway — downstream users get their own resolution
+3. It helps with `cargo audit` (security vulnerability scanning)
+
+**How Cargo.lock resolution works internally:**
+
+```
+1. Parse all Cargo.toml files in the workspace
+2. Build a dependency graph with version requirements (semver ranges)
+3. For each crate, find the newest version satisfying ALL constraints
+4. If Cargo.lock exists and a resolution is compatible, reuse it (stability)
+5. If Cargo.lock is absent or incompatible, resolve fresh and write new lock
+6. Record exact versions + checksums in Cargo.lock
+```
+
+**Key commands:**
+
+```bash
+# Update all dependencies to latest compatible versions
+cargo update
+
+# Update a specific dependency
+cargo update -p tokio
+
+# Update a specific dependency to a specific version
+cargo update -p tokio --precise 1.39.0
+
+# Check for outdated dependencies
+cargo install cargo-outdated
+cargo outdated
+
+# Audit for security vulnerabilities
+cargo install cargo-audit
+cargo audit
+```
+
+**The SemVer contract in Cargo:**
+
+Cargo interprets version requirements as:
+- `"1.0"` → `>=1.0.0, <2.0.0` (any compatible 1.x)
+- `"1.0.5"` → `>=1.0.5, <2.0.0` (at least 1.0.5)
+- `"=1.0.5"` → exactly 1.0.5 (pinned)
+- `"~1.0.5"` → `>=1.0.5, <1.1.0` (patch-level updates only)
+- `">=1.0, <1.5"` → explicit range
+
+**Best practice for production:** Use `"1.0"` style (allow patches) in `Cargo.toml`, and let `Cargo.lock` pin the exact version. Run `cargo update` periodically in a dedicated PR to pick up security patches.
+
+---
+
+### 9.3 Rustup Toolchain Architecture: Components, Profiles & Proxies
+
+Rustup is more than a version manager — it's a **toolchain multiplexer** that manages multiple complete Rust installations and routes commands to the correct one based on context.
+
+**Toolchain identification:**
+
+A toolchain is identified by: `<channel>-<date>-<host-triple>`
+
+```bash
+# Examples:
+stable-x86_64-pc-windows-msvc       # Stable for Windows (MSVC)
+nightly-2024-10-15-x86_64-unknown-linux-gnu  # Specific nightly date
+1.82.0-x86_64-apple-darwin           # Specific version for macOS
+```
+
+**Component system:**
+
+Each toolchain consists of components that can be independently installed:
+
+| Component | Purpose | Required? |
+|-----------|---------|-----------|
+| `rustc` | The compiler | Yes |
+| `cargo` | Build system | Yes |
+| `rust-std` | Standard library (per target) | Yes (for each target) |
+| `rustfmt` | Code formatter | Profile-dependent |
+| `clippy` | Linter | Profile-dependent |
+| `rust-analyzer` | LSP server | Optional |
+| `rust-docs` | Offline documentation | Optional |
+| `rust-src` | Standard library source | Optional (needed for rust-analyzer) |
+| `miri` | Undefined behavior detector | Optional (nightly only) |
+| `llvm-tools` | LLVM utilities (objdump, etc.) | Optional |
+
+**Profiles (component presets):**
+
+```bash
+# Minimal: rustc, cargo, rust-std only
+rustup set profile minimal
+
+# Default: minimal + rustfmt, clippy
+rustup set profile default
+
+# Complete: everything available
+rustup set profile complete
+```
+
+**Toolchain override precedence (highest to lowest):**
+
+1. `RUSTUP_TOOLCHAIN` environment variable
+2. `rustup run <toolchain>` command prefix
+3. `rust-toolchain.toml` in project directory (or parent directories)
+4. `rustup override set` for the current directory
+5. `rustup default` global setting
+
+**The proxy mechanism:**
+
+When you type `cargo build`, you're actually running a **rustup proxy** binary. The proxy:
+1. Determines which toolchain to use (override precedence above)
+2. Finds the real `cargo` binary in `~/.rustup/toolchains/<name>/bin/`
+3. Executes it with the same arguments
+4. This is why `which cargo` shows `~/.cargo/bin/cargo` (the proxy) on all platforms
+
+```bash
+# See what's actually happening:
+rustup which cargo    # Shows the real cargo binary path
+rustup which rustc    # Shows the real rustc binary path
+rustup show           # Full toolchain status report
+```
+
+**Cross-compilation targets:**
+
+Adding a target installs the pre-compiled standard library for that platform:
+
+```bash
+# Each target adds ~30-50MB of pre-compiled std
+rustup target add wasm32-unknown-unknown
+rustup target add aarch64-unknown-linux-gnu
+rustup target add thumbv7em-none-eabihf
+
+# List installed targets
+rustup target list --installed
+
+# List ALL available targets
+rustup target list
+```
+
+The standard library is pre-compiled because compiling `std` from source requires the target's C library headers and a working cross-linker. For `no_std` targets (embedded), only `core` and `alloc` are provided.
+
+---
+
+### 9.4 Edition Migration: Automated Tooling & Breaking Changes
+
+Rust editions introduce breaking changes in a controlled way. The `cargo fix` tool automates migration:
+
+```bash
+# Migrate from 2021 to 2024 edition:
+cargo fix --edition
+
+# Preview what would change (dry run):
+cargo fix --edition --allow-dirty --allow-staged
+
+# After fixing, update Cargo.toml:
+# edition = "2024"
+```
+
+**Notable edition changes:**
+
+| Edition | Key Changes |
+|---------|-------------|
+| 2015 → 2018 | `dyn Trait` required (was optional), module path changes, NLL borrow checker |
+| 2018 → 2021 | Disjoint capture in closures, `IntoIterator` for arrays, panic format changes |
+| 2021 → 2024 | `gen` keyword reserved, lifetime capture rules in `impl Trait`, `unsafe_op_in_unsafe_fn` lint |
+
+**The critical guarantee:** Crates of different editions interoperate freely. A 2024-edition crate can depend on a 2015-edition crate and vice versa. Editions only affect syntax parsing and lint defaults within a single crate — the compiled output is compatible across all editions.
+
+---

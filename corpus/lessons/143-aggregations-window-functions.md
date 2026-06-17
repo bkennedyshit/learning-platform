@@ -1,0 +1,1224 @@
+---
+title: "14.3 — Aggregations & Window Functions"
+subject: "SQL"
+catalog: advanced
+audience_tier: higher-education
+chapter: "14.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 14.3 — Aggregations & Window Functions
+
+> *"Window functions are the most powerful feature added to SQL since the original standard. They let you compute analytics without collapsing your result set."* — Itzik Ben-Gan
+
+Aggregations collapse rows into summaries. Window functions compute analytics **across** rows without collapsing them. Together, they handle everything from simple totals to running averages, rankings, gap-and-island detection, and time-series analysis. If you're building ML data pipelines, window functions are how you engineer features from raw event data.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Use GROUP BY with multiple columns, ROLLUP, CUBE, and GROUPING SETS.
+2. Distinguish WHERE (row filter) from HAVING (group filter) and apply each correctly.
+3. Write window functions with PARTITION BY, ORDER BY, and explicit frame clauses.
+4. Apply ROW_NUMBER, RANK, DENSE_RANK, NTILE for ranking problems.
+5. Use LAG, LEAD, FIRST_VALUE, LAST_VALUE, NTH_VALUE for offset analytics.
+6. Define custom frames (ROWS, RANGE, GROUPS) for running totals and moving averages.
+
+---
+
+## 🖼️ Visual Anchor — Window Function Anatomy
+
+![sql-14__fig2](sql-14__fig2.svg)
+
+---
+
+## 📚 1. Aggregation Fundamentals
+
+### 1.1 GROUP BY Semantics
+
+`GROUP BY` partitions the result set into groups. Each group collapses to one output row. Non-aggregated columns in SELECT must appear in GROUP BY.
+
+```sql
+-- Total salary and headcount per department
+SELECT
+    dept_id,
+    COUNT(*) AS headcount,
+    SUM(salary) AS total_salary,
+    AVG(salary) AS avg_salary,
+    MIN(salary) AS min_salary,
+    MAX(salary) AS max_salary
+FROM employees
+GROUP BY dept_id;
+```
+
+**Logical processing order reminder:**
+1. FROM → 2. WHERE → 3. GROUP BY → 4. HAVING → 5. SELECT → 6. ORDER BY
+
+This is why you can't use a column alias from SELECT in HAVING — but you CAN reference aggregates in HAVING because HAVING runs after GROUP BY.
+
+### 1.2 HAVING vs WHERE
+
+| Clause | Filters | Runs | Can use aggregates? |
+|--------|---------|------|---------------------|
+| WHERE | Individual rows | Before GROUP BY | No |
+| HAVING | Groups | After GROUP BY | Yes |
+
+```sql
+-- Departments with more than 5 employees earning over 50k
+SELECT dept_id, COUNT(*) AS high_earners
+FROM employees
+WHERE salary > 50000        -- row filter: only consider high earners
+GROUP BY dept_id
+HAVING COUNT(*) > 5;        -- group filter: only departments with 5+ such employees
+```
+
+### 1.3 Aggregate Functions Reference
+
+| Function | Description | NULL handling |
+|----------|-------------|--------------|
+| `COUNT(*)` | Count all rows (including NULLs) | Counts NULLs |
+| `COUNT(col)` | Count non-NULL values | Ignores NULLs |
+| `COUNT(DISTINCT col)` | Count distinct non-NULL values | Ignores NULLs |
+| `SUM(col)` | Sum of values | Ignores NULLs |
+| `AVG(col)` | Average (SUM/COUNT) | Ignores NULLs |
+| `MIN(col)` / `MAX(col)` | Minimum / Maximum | Ignores NULLs |
+| `BOOL_AND(col)` | True if all true | PostgreSQL |
+| `BOOL_OR(col)` | True if any true | PostgreSQL |
+| `STRING_AGG(col, sep)` | Concatenate strings | PostgreSQL |
+| `ARRAY_AGG(col)` | Collect into array | PostgreSQL |
+| `JSON_AGG(col)` | Collect into JSON array | PostgreSQL |
+
+### 1.4 ROLLUP, CUBE, and GROUPING SETS
+
+For multi-dimensional aggregation (OLAP-style):
+
+```sql
+-- ROLLUP: hierarchical subtotals (dept → total)
+SELECT dept_id, job_title, SUM(salary)
+FROM employees
+GROUP BY ROLLUP (dept_id, job_title);
+-- Produces: (dept_id, job_title), (dept_id, NULL), (NULL, NULL)
+
+-- CUBE: all possible combinations
+SELECT dept_id, job_title, SUM(salary)
+FROM employees
+GROUP BY CUBE (dept_id, job_title);
+-- Produces: (dept, job), (dept, NULL), (NULL, job), (NULL, NULL)
+
+-- GROUPING SETS: explicit control
+SELECT dept_id, job_title, EXTRACT(YEAR FROM hire_date) AS hire_year, SUM(salary)
+FROM employees
+GROUP BY GROUPING SETS (
+    (dept_id, job_title),
+    (dept_id, hire_year),
+    (dept_id)
+);
+```
+
+Use `GROUPING(col)` to distinguish real NULLs from subtotal NULLs:
+
+```sql
+SELECT
+    dept_id,
+    job_title,
+    SUM(salary),
+    GROUPING(dept_id) AS is_dept_subtotal,
+    GROUPING(job_title) AS is_job_subtotal
+FROM employees
+GROUP BY ROLLUP (dept_id, job_title);
+```
+
+---
+
+## 📚 2. Window Functions — The Analytics Engine
+
+### 2.1 Window Function Syntax
+
+```sql
+function_name(args) OVER (
+    [PARTITION BY partition_expression, ...]
+    [ORDER BY sort_expression [ASC|DESC] [NULLS FIRST|LAST], ...]
+    [frame_clause]
+)
+```
+
+**Key insight:** Window functions compute a value for each row based on a "window" of related rows — but they do NOT collapse the result set. Every input row produces one output row.
+
+### 2.2 PARTITION BY — Defining Windows
+
+`PARTITION BY` divides rows into independent groups (like GROUP BY, but without collapsing):
+
+```sql
+-- Each employee's salary vs their department average
+SELECT
+    name,
+    dept_id,
+    salary,
+    AVG(salary) OVER (PARTITION BY dept_id) AS dept_avg,
+    salary - AVG(salary) OVER (PARTITION BY dept_id) AS diff_from_dept_avg
+FROM employees;
+```
+
+Without PARTITION BY, the window is the entire result set:
+
+```sql
+-- Each employee's salary as a percentage of total payroll
+SELECT
+    name,
+    salary,
+    salary / SUM(salary) OVER () * 100 AS pct_of_total
+FROM employees;
+```
+
+### 2.3 ORDER BY Within Windows
+
+Adding ORDER BY to the window creates a running computation:
+
+```sql
+-- Running total of salary (ordered by hire date)
+SELECT
+    name,
+    hire_date,
+    salary,
+    SUM(salary) OVER (ORDER BY hire_date) AS running_total
+FROM employees;
+```
+
+**Important:** When ORDER BY is specified without an explicit frame, the default frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` — which means the aggregate includes all rows from the start up to (and including) the current row's ORDER BY value.
+
+---
+
+## 📚 3. Ranking Functions
+
+### 3.1 ROW_NUMBER()
+
+Assigns a unique sequential integer to each row within its partition:
+
+```sql
+-- Rank employees by salary within each department
+SELECT
+    name, dept_id, salary,
+    ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rank_in_dept
+FROM employees;
+```
+
+**Use case — Top-N per group:**
+
+```sql
+-- Top 3 earners per department
+WITH ranked AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rn
+    FROM employees
+)
+SELECT name, dept_id, salary FROM ranked WHERE rn <= 3;
+```
+
+### 3.2 RANK() and DENSE_RANK()
+
+Handle ties differently:
+
+| Salaries | ROW_NUMBER | RANK | DENSE_RANK |
+|----------|-----------|------|------------|
+| 100k | 1 | 1 | 1 |
+| 90k | 2 | 2 | 2 |
+| 90k | 3 | 2 | 2 |
+| 80k | 4 | 4 | 3 |
+| 70k | 5 | 5 | 4 |
+
+- `ROW_NUMBER`: Always unique (arbitrary tiebreaker)
+- `RANK`: Ties get same rank, next rank skips (1,2,2,4,5)
+- `DENSE_RANK`: Ties get same rank, no gaps (1,2,2,3,4)
+
+```sql
+SELECT
+    name, salary,
+    ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num,
+    RANK()       OVER (ORDER BY salary DESC) AS rank,
+    DENSE_RANK() OVER (ORDER BY salary DESC) AS dense_rank
+FROM employees;
+```
+
+### 3.3 NTILE(n)
+
+Divides rows into `n` roughly equal buckets:
+
+```sql
+-- Divide employees into salary quartiles
+SELECT
+    name, salary,
+    NTILE(4) OVER (ORDER BY salary) AS salary_quartile
+FROM employees;
+```
+
+### 3.4 PERCENT_RANK() and CUME_DIST()
+
+```sql
+SELECT
+    name, salary,
+    PERCENT_RANK() OVER (ORDER BY salary) AS pct_rank,  -- (rank-1)/(total-1)
+    CUME_DIST()    OVER (ORDER BY salary) AS cume_dist   -- rows <= current / total
+FROM employees;
+```
+
+---
+
+## 📚 4. Offset Functions — LAG, LEAD, FIRST_VALUE, LAST_VALUE
+
+### 4.1 LAG and LEAD
+
+Access values from previous/next rows without self-joins:
+
+```sql
+-- Month-over-month revenue change
+SELECT
+    month,
+    revenue,
+    LAG(revenue, 1) OVER (ORDER BY month) AS prev_month_revenue,
+    revenue - LAG(revenue, 1) OVER (ORDER BY month) AS mom_change,
+    ROUND(
+        (revenue - LAG(revenue, 1) OVER (ORDER BY month))
+        / LAG(revenue, 1) OVER (ORDER BY month) * 100, 2
+    ) AS mom_pct_change
+FROM monthly_revenue;
+```
+
+**Syntax:** `LAG(column, offset, default)` / `LEAD(column, offset, default)`
+- `offset`: number of rows back/forward (default 1)
+- `default`: value when no row exists (default NULL)
+
+```sql
+-- Compare each sale to the previous and next sale
+SELECT
+    sale_date,
+    amount,
+    LAG(amount, 1, 0) OVER (ORDER BY sale_date) AS prev_sale,
+    LEAD(amount, 1, 0) OVER (ORDER BY sale_date) AS next_sale
+FROM sales;
+```
+
+### 4.2 FIRST_VALUE, LAST_VALUE, NTH_VALUE
+
+```sql
+-- Each employee compared to the highest and lowest earner in their department
+SELECT
+    name, dept_id, salary,
+    FIRST_VALUE(name) OVER w AS top_earner,
+    FIRST_VALUE(salary) OVER w AS top_salary,
+    LAST_VALUE(name) OVER w AS bottom_earner,
+    LAST_VALUE(salary) OVER w AS bottom_salary
+FROM employees
+WINDOW w AS (
+    PARTITION BY dept_id
+    ORDER BY salary DESC
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+);
+```
+
+**Critical:** `LAST_VALUE` requires `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` to see the entire partition. The default frame only goes to the current row!
+
+---
+
+## 📚 5. Frame Clauses — Precision Control
+
+### 5.1 Frame Syntax
+
+```sql
+{ROWS | RANGE | GROUPS} BETWEEN frame_start AND frame_end
+
+-- frame_start / frame_end options:
+UNBOUNDED PRECEDING    -- first row of partition
+N PRECEDING            -- N rows/values before current
+CURRENT ROW            -- current row
+N FOLLOWING            -- N rows/values after current
+UNBOUNDED FOLLOWING    -- last row of partition
+```
+
+### 5.2 ROWS vs RANGE vs GROUPS
+
+| Mode | Unit | Behavior with ties |
+|------|------|-------------------|
+| `ROWS` | Physical row positions | Each row is distinct |
+| `RANGE` | Logical value ranges | Ties (same ORDER BY value) treated as one unit |
+| `GROUPS` | Groups of tied rows | Like RANGE but counts groups |
+
+### 5.3 Practical Frame Examples
+
+```sql
+-- 7-day moving average of daily revenue
+SELECT
+    date,
+    revenue,
+    AVG(revenue) OVER (
+        ORDER BY date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_7d
+FROM daily_revenue;
+
+-- 3-row centered moving average
+SELECT
+    date,
+    value,
+    AVG(value) OVER (
+        ORDER BY date
+        ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    ) AS centered_avg
+FROM time_series;
+
+-- Cumulative sum (running total)
+SELECT
+    date,
+    amount,
+    SUM(amount) OVER (
+        ORDER BY date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS cumulative_total
+FROM transactions;
+
+-- Year-to-date total (resets each year)
+SELECT
+    date,
+    amount,
+    SUM(amount) OVER (
+        PARTITION BY EXTRACT(YEAR FROM date)
+        ORDER BY date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS ytd_total
+FROM transactions;
+```
+
+---
+
+## 📚 6. Named Windows (WINDOW Clause)
+
+Avoid repeating window definitions:
+
+```sql
+SELECT
+    name, dept_id, salary,
+    ROW_NUMBER() OVER w AS rn,
+    RANK()       OVER w AS rnk,
+    SUM(salary)  OVER w AS running_sum,
+    AVG(salary)  OVER w AS running_avg
+FROM employees
+WINDOW w AS (PARTITION BY dept_id ORDER BY salary DESC);
+```
+
+You can also extend named windows:
+
+```sql
+SELECT
+    name, salary,
+    SUM(salary) OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running,
+    AVG(salary) OVER (w ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS centered
+FROM employees
+WINDOW w AS (PARTITION BY dept_id ORDER BY hire_date);
+```
+
+---
+
+## 📚 7. Advanced Patterns
+
+### 14.1 Gap-and-Island Detection
+
+Find consecutive sequences in data:
+
+```sql
+-- Identify consecutive days an employee was present
+WITH attendance_groups AS (
+    SELECT
+        emp_id,
+        attendance_date,
+        attendance_date - (ROW_NUMBER() OVER (
+            PARTITION BY emp_id ORDER BY attendance_date
+        ))::int AS grp
+    FROM attendance
+)
+SELECT
+    emp_id,
+    MIN(attendance_date) AS streak_start,
+    MAX(attendance_date) AS streak_end,
+    COUNT(*) AS streak_length
+FROM attendance_groups
+GROUP BY emp_id, grp
+HAVING COUNT(*) >= 3  -- streaks of 3+ days
+ORDER BY emp_id, streak_start;
+```
+
+### 14.2 Running Distinct Count (Approximate)
+
+```sql
+-- Cumulative distinct customers over time
+SELECT
+    order_date,
+    COUNT(DISTINCT customer_id) OVER (
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS cumulative_customers  -- NOTE: not all engines support this!
+FROM orders;
+
+-- PostgreSQL workaround using a subquery:
+SELECT
+    o.order_date,
+    (SELECT COUNT(DISTINCT o2.customer_id)
+     FROM orders o2
+     WHERE o2.order_date <= o.order_date) AS cumulative_customers
+FROM orders o
+GROUP BY o.order_date
+ORDER BY o.order_date;
+```
+
+### 14.3 Sessionization (Web Analytics)
+
+```sql
+-- Group page views into sessions (30-minute inactivity gap)
+WITH time_gaps AS (
+    SELECT
+        user_id,
+        page_view_time,
+        CASE
+            WHEN page_view_time - LAG(page_view_time) OVER (
+                PARTITION BY user_id ORDER BY page_view_time
+            ) > INTERVAL '30 minutes'
+            THEN 1
+            ELSE 0
+        END AS new_session
+    FROM page_views
+),
+sessions AS (
+    SELECT
+        user_id,
+        page_view_time,
+        SUM(new_session) OVER (
+            PARTITION BY user_id ORDER BY page_view_time
+        ) AS session_id
+    FROM time_gaps
+)
+SELECT
+    user_id,
+    session_id,
+    MIN(page_view_time) AS session_start,
+    MAX(page_view_time) AS session_end,
+    COUNT(*) AS page_views
+FROM sessions
+GROUP BY user_id, session_id;
+```
+
+### 14.4 Pivoting with Window Functions + FILTER
+
+```sql
+-- Monthly revenue pivot (PostgreSQL FILTER syntax)
+SELECT
+    product_id,
+    SUM(amount) FILTER (WHERE EXTRACT(MONTH FROM sale_date) = 1) AS jan,
+    SUM(amount) FILTER (WHERE EXTRACT(MONTH FROM sale_date) = 2) AS feb,
+    SUM(amount) FILTER (WHERE EXTRACT(MONTH FROM sale_date) = 3) AS mar
+    -- ... etc
+FROM sales
+WHERE EXTRACT(YEAR FROM sale_date) = 2025
+GROUP BY product_id;
+```
+
+---
+
+## 🧪 8. Worked Examples for ML Data Pipelines
+
+### Example 14.3.1 — Feature Engineering for Time-Series ML
+
+```sql
+-- Generate features for a churn prediction model
+SELECT
+    customer_id,
+    event_date,
+    -- Recency features
+    event_date - LAG(event_date, 1) OVER w AS days_since_last_event,
+    event_date - FIRST_VALUE(event_date) OVER w AS days_since_first_event,
+
+    -- Frequency features
+    COUNT(*) OVER (PARTITION BY customer_id
+                   ORDER BY event_date
+                   RANGE BETWEEN INTERVAL '30 days' PRECEDING AND CURRENT ROW
+    ) AS events_last_30d,
+
+    -- Monetary features
+    SUM(amount) OVER (PARTITION BY customer_id
+                      ORDER BY event_date
+                      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS lifetime_spend,
+
+    AVG(amount) OVER (PARTITION BY customer_id
+                      ORDER BY event_date
+                      ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+    ) AS avg_last_5_transactions,
+
+    -- Trend features
+    amount - AVG(amount) OVER (PARTITION BY customer_id) AS diff_from_personal_avg
+
+FROM customer_events
+WINDOW w AS (PARTITION BY customer_id ORDER BY event_date);
+```
+
+### Example 14.3.2 — Funnel Analysis
+
+```sql
+-- Conversion funnel: signup → activation → purchase
+WITH funnel AS (
+    SELECT
+        user_id,
+        MIN(CASE WHEN event = 'signup' THEN event_time END) AS signup_time,
+        MIN(CASE WHEN event = 'activation' THEN event_time END) AS activation_time,
+        MIN(CASE WHEN event = 'purchase' THEN event_time END) AS purchase_time
+    FROM user_events
+    WHERE event_time >= '2025-01-01'
+    GROUP BY user_id
+)
+SELECT
+    COUNT(*) AS total_signups,
+    COUNT(activation_time) AS activated,
+    COUNT(purchase_time) AS purchased,
+    ROUND(COUNT(activation_time)::numeric / COUNT(*) * 100, 1) AS activation_rate,
+    ROUND(COUNT(purchase_time)::numeric / COUNT(activation_time) * 100, 1) AS purchase_rate
+FROM funnel;
+```
+
+---
+
+## 🏋️ 9. Exercises
+
+1. Write a query to compute a 7-day moving average of daily sales.
+2. Rank products by revenue within each category using DENSE_RANK.
+3. Detect gaps in a sequence of invoice numbers (gap-and-island).
+4. For each employee, show their salary percentile within their department.
+5. Compute month-over-month growth rate for each product.
+6. Sessionize clickstream data with a 15-minute inactivity threshold.
+
+---
+
+## 🔗 Cross-References
+
+- **Previous:** [14.2 - SELECT Mastery - Joins, Subqueries, CTEs](14.2---SELECT-Mastery---Joins,-Subqueries,-CTEs)
+- **Next:** [14.4 - Schema Design & Normalization](14.4---Schema-Design-&-Normalization)
+- **Performance:** [14.5 - Indexes & Query Performance](14.5---Indexes-&-Query-Performance) — indexing for window function queries
+- **Python integration:** [14.8 - Modern SQL - PostgreSQL, MySQL, SQLite, DuckDB & Python ORMs](14.8---Modern-SQL---PostgreSQL,-MySQL,-SQLite,-DuckDB-&-Python-ORMs) — DuckDB window functions
+- **Practice:** `python _practice/scripts/7.3_window_functions.py --count 16`
+
+---
+
+## 📖 Key Sources
+
+- PostgreSQL Window Functions: https://www.postgresql.org/docs/current/tutorial-window.html
+- Itzik Ben-Gan, *T-SQL Window Functions* (2019)
+- Mode Analytics Window Functions Tutorial: https://mode.com/sql-tutorial/sql-window-functions/
+
+
+
+---
+
+## 📚 12. Deep Dive — Full Window Function Taxonomy, Frame Clauses & QUALIFY
+
+### 12.1 Complete Window Function Classification
+
+Window functions fall into three categories, each with distinct semantics:
+
+**Category 1: Ranking Functions**
+
+| Function | Behavior | Ties | Gaps |
+|----------|----------|------|------|
+| `ROW_NUMBER()` | Unique sequential integer | Arbitrary tiebreak | No |
+| `RANK()` | Same rank for ties | Same value = same rank | Yes (skips) |
+| `DENSE_RANK()` | Same rank for ties | Same value = same rank | No (consecutive) |
+| `NTILE(n)` | Divides into n roughly-equal buckets | Distributed evenly | No |
+| `PERCENT_RANK()` | Relative rank as fraction: $(rank - 1) / (rows - 1)$ | 0.0 to 1.0 | — |
+| `CUME_DIST()` | Cumulative distribution: $\text{rows} \leq \text{current} / \text{total}$ | 0.0 to 1.0 | — |
+
+```sql
+SELECT
+    name, salary, dept_id,
+    ROW_NUMBER() OVER w AS rn,        -- 1, 2, 3, 4, 5
+    RANK()       OVER w AS rnk,       -- 1, 2, 2, 4, 5 (gap after tie)
+    DENSE_RANK() OVER w AS drnk,      -- 1, 2, 2, 3, 4 (no gap)
+    NTILE(3)     OVER w AS tercile,   -- 1, 1, 2, 2, 3
+    PERCENT_RANK() OVER w AS pct_rnk, -- 0.0, 0.25, 0.25, 0.75, 1.0
+    CUME_DIST()    OVER w AS cum_dist -- 0.2, 0.6, 0.6, 0.8, 1.0
+FROM employees
+WINDOW w AS (PARTITION BY dept_id ORDER BY salary DESC);
+```
+
+**Category 2: Value Functions (Offset/Navigation)**
+
+| Function | Returns |
+|----------|---------|
+| `LAG(expr, n, default)` | Value from n rows BEFORE current |
+| `LEAD(expr, n, default)` | Value from n rows AFTER current |
+| `FIRST_VALUE(expr)` | First value in the window frame |
+| `LAST_VALUE(expr)` | Last value in the window frame |
+| `NTH_VALUE(expr, n)` | Nth value in the window frame |
+
+```sql
+SELECT
+    order_date,
+    amount,
+    LAG(amount, 1, 0) OVER w AS prev_amount,
+    LEAD(amount, 1) OVER w AS next_amount,
+    FIRST_VALUE(amount) OVER w AS first_in_partition,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_in_partition,
+    NTH_VALUE(amount, 3) OVER w AS third_order_amount
+FROM orders
+WINDOW w AS (PARTITION BY customer_id ORDER BY order_date);
+```
+
+**Critical gotcha with LAST_VALUE:** The default frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, so `LAST_VALUE` returns the current row! You must explicitly set `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`.
+
+**Category 3: Aggregate Functions (Used as Window)**
+
+Any aggregate function can be used as a window function:
+
+```sql
+SELECT
+    order_date,
+    amount,
+    SUM(amount) OVER w AS running_total,
+    AVG(amount) OVER w AS running_avg,
+    COUNT(*) OVER w AS running_count,
+    MIN(amount) OVER w AS running_min,
+    MAX(amount) OVER w AS running_max,
+    ARRAY_AGG(amount) OVER w AS amounts_so_far,
+    STRING_AGG(product_name, ', ') OVER w AS products_so_far
+FROM orders
+WINDOW w AS (PARTITION BY customer_id ORDER BY order_date
+             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW);
+```
+
+### 12.2 Frame Clauses — ROWS vs RANGE vs GROUPS
+
+The frame clause defines which rows within the partition are visible to the window function for the current row.
+
+**Syntax:**
+
+```sql
+frame_clause ::=
+    { ROWS | RANGE | GROUPS }
+    BETWEEN frame_start AND frame_end
+
+frame_bound ::=
+    UNBOUNDED PRECEDING
+  | n PRECEDING
+  | CURRENT ROW
+  | n FOLLOWING
+  | UNBOUNDED FOLLOWING
+```
+
+**ROWS — Physical offset (row count):**
+
+```sql
+-- 7-day moving average (exactly 6 preceding rows + current)
+SELECT
+    date,
+    revenue,
+    AVG(revenue) OVER (
+        ORDER BY date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_7
+FROM daily_revenue;
+```
+
+ROWS counts literal rows regardless of value. If there are gaps in dates, "6 PRECEDING" still means 6 rows back, not 6 days back.
+
+**RANGE — Logical offset (value-based):**
+
+```sql
+-- True 7-day moving average (handles gaps correctly)
+SELECT
+    date,
+    revenue,
+    AVG(revenue) OVER (
+        ORDER BY date
+        RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW
+    ) AS true_7day_avg
+FROM daily_revenue;
+```
+
+RANGE uses the ORDER BY value to define boundaries. `INTERVAL '6 days' PRECEDING` means "all rows where `date >= current_date - 6`". This correctly handles missing dates.
+
+**GROUPS — Peer-group offset (SQL:2011):**
+
+```sql
+-- Average of current group and 2 preceding groups
+-- (a "group" = set of rows with the same ORDER BY value)
+SELECT
+    dept_id,
+    salary,
+    AVG(salary) OVER (
+        ORDER BY salary
+        GROUPS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS avg_nearby_salaries
+FROM employees;
+```
+
+GROUPS counts distinct ORDER BY values. If 5 employees share salary=50000, they form one group.
+
+**Comparison table:**
+
+| Frame Type | "1 PRECEDING" means | Handles ties | Handles gaps |
+|------------|---------------------|--------------|--------------|
+| ROWS | Exactly 1 row back | No (arbitrary within ties) | No |
+| RANGE | All rows within value-1 of current | Yes (includes all peers) | Yes |
+| GROUPS | All rows in the previous peer group | Yes | Yes |
+
+**Default frame (when ORDER BY is present):**
+
+```sql
+-- These are equivalent:
+SUM(x) OVER (ORDER BY y)
+SUM(x) OVER (ORDER BY y RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+-- NOT ROWS! This means all peers of current row are included.
+```
+
+**Exclusion clauses (SQL:2011, PostgreSQL 14+):**
+
+```sql
+-- Exclude current row from the frame:
+AVG(salary) OVER (
+    ORDER BY salary
+    ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING
+    EXCLUDE CURRENT ROW
+) AS avg_neighbors
+
+-- Exclude ties (peers):
+AVG(salary) OVER (
+    ORDER BY salary
+    GROUPS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    EXCLUDE TIES
+)
+
+-- Options: EXCLUDE NO OTHERS (default), EXCLUDE CURRENT ROW, EXCLUDE GROUP, EXCLUDE TIES
+```
+
+### 12.3 QUALIFY Clause (DuckDB, Snowflake, Databricks)
+
+`QUALIFY` filters the result of window functions — analogous to how `HAVING` filters after `GROUP BY`.
+
+**Without QUALIFY (standard SQL — requires subquery):**
+
+```sql
+-- Top 3 per department
+SELECT * FROM (
+    SELECT
+        name, dept_id, salary,
+        ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rn
+    FROM employees
+) sub
+WHERE rn <= 3;
+```
+
+**With QUALIFY (DuckDB/Snowflake — no subquery needed):**
+
+```sql
+-- Same query, cleaner:
+SELECT name, dept_id, salary
+FROM employees
+QUALIFY ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) <= 3;
+```
+
+**Execution order with QUALIFY:**
+
+```
+FROM → WHERE → GROUP BY → HAVING → WINDOW → QUALIFY → DISTINCT → ORDER BY → LIMIT
+```
+
+**More QUALIFY examples:**
+
+```sql
+-- Most recent order per customer:
+SELECT *
+FROM orders
+QUALIFY ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) = 1;
+
+-- Employees earning above their department average:
+SELECT name, salary, dept_id
+FROM employees
+QUALIFY salary > AVG(salary) OVER (PARTITION BY dept_id);
+
+-- Remove duplicates keeping the latest:
+SELECT *
+FROM raw_events
+QUALIFY ROW_NUMBER() OVER (PARTITION BY event_key ORDER BY ingested_at DESC) = 1;
+```
+
+**Emulating QUALIFY in PostgreSQL:**
+
+```sql
+-- PostgreSQL doesn't have QUALIFY, but you can use a CTE or subquery:
+WITH ranked AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) AS rn
+    FROM orders
+)
+SELECT * FROM ranked WHERE rn = 1;
+
+-- Or use DISTINCT ON (PostgreSQL-specific, very efficient):
+SELECT DISTINCT ON (customer_id) *
+FROM orders
+ORDER BY customer_id, order_date DESC;
+```
+
+---
+
+## 📚 13. Appendix — Gaps-and-Islands (4 Solutions) & Cumulative Patterns
+
+### 13.1 The Gaps-and-Islands Problem
+
+**Problem statement:** Given a sequence of events with dates, identify consecutive groups ("islands") and the gaps between them.
+
+**Sample data:**
+
+```sql
+CREATE TABLE logins (
+    user_id INT,
+    login_date DATE
+);
+
+INSERT INTO logins VALUES
+(1, '2025-01-01'), (1, '2025-01-02'), (1, '2025-01-03'),  -- island 1
+(1, '2025-01-06'), (1, '2025-01-07'),                      -- island 2 (gap: Jan 4-5)
+(1, '2025-01-10'),                                          -- island 3 (gap: Jan 8-9)
+(1, '2025-01-11'), (1, '2025-01-12'), (1, '2025-01-13');   -- island 4
+```
+
+### Solution 1: ROW_NUMBER Difference (Classic)
+
+The key insight: for consecutive dates, `date - ROW_NUMBER()` is constant.
+
+```sql
+WITH islands AS (
+    SELECT
+        user_id,
+        login_date,
+        login_date - (ROW_NUMBER() OVER (
+            PARTITION BY user_id ORDER BY login_date
+        ))::int AS island_id
+    FROM logins
+)
+SELECT
+    user_id,
+    island_id,
+    MIN(login_date) AS island_start,
+    MAX(login_date) AS island_end,
+    COUNT(*) AS consecutive_days
+FROM islands
+GROUP BY user_id, island_id
+ORDER BY island_start;
+```
+
+**Why it works:**
+- Row 1: Jan 1 - 1 = Dec 31 (island_id = Dec 31)
+- Row 2: Jan 2 - 2 = Dec 31 (same!)
+- Row 3: Jan 3 - 3 = Dec 31 (same!)
+- Row 4: Jan 6 - 4 = Jan 2 (different — new island!)
+
+### Solution 2: LAG-based Gap Detection
+
+```sql
+WITH gaps AS (
+    SELECT
+        user_id,
+        login_date,
+        CASE
+            WHEN login_date - LAG(login_date) OVER (
+                PARTITION BY user_id ORDER BY login_date
+            ) > 1
+            THEN 1
+            ELSE 0
+        END AS is_new_island
+    FROM logins
+),
+island_ids AS (
+    SELECT
+        user_id,
+        login_date,
+        SUM(is_new_island) OVER (
+            PARTITION BY user_id ORDER BY login_date
+        ) AS island_id
+    FROM gaps
+)
+SELECT
+    user_id,
+    island_id,
+    MIN(login_date) AS island_start,
+    MAX(login_date) AS island_end,
+    COUNT(*) AS consecutive_days
+FROM island_ids
+GROUP BY user_id, island_id
+ORDER BY island_start;
+```
+
+### Solution 3: Recursive CTE (Procedural Approach)
+
+```sql
+WITH RECURSIVE islands AS (
+    -- Anchor: first login for each user starts an island
+    SELECT
+        user_id,
+        login_date,
+        login_date AS island_start,
+        1 AS island_num
+    FROM (
+        SELECT user_id, login_date,
+               ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) AS rn
+        FROM logins
+    ) first_rows
+    WHERE rn = 1
+
+    UNION ALL
+
+    -- Recursive: extend island or start new one
+    SELECT
+        l.user_id,
+        l.login_date,
+        CASE
+            WHEN l.login_date = i.login_date + 1 THEN i.island_start
+            ELSE l.login_date
+        END,
+        CASE
+            WHEN l.login_date = i.login_date + 1 THEN i.island_num
+            ELSE i.island_num + 1
+        END
+    FROM logins l
+    INNER JOIN islands i ON l.user_id = i.user_id
+        AND l.login_date = (
+            SELECT MIN(login_date) FROM logins
+            WHERE user_id = l.user_id AND login_date > i.login_date
+        )
+)
+SELECT user_id, island_num, MIN(login_date) AS start_date, MAX(login_date) AS end_date, COUNT(*) AS days
+FROM islands
+GROUP BY user_id, island_num;
+```
+
+### Solution 4: MATCH_RECOGNIZE (Oracle, Snowflake — Pattern Matching)
+
+```sql
+-- Oracle/Snowflake MATCH_RECOGNIZE syntax:
+SELECT *
+FROM logins
+MATCH_RECOGNIZE (
+    PARTITION BY user_id
+    ORDER BY login_date
+    MEASURES
+        FIRST(login_date) AS island_start,
+        LAST(login_date) AS island_end,
+        COUNT(*) AS consecutive_days
+    ONE ROW PER MATCH
+    PATTERN (consecutive+)
+    DEFINE
+        consecutive AS login_date = PREV(login_date) + INTERVAL '1 day'
+            OR login_date = FIRST(login_date)  -- first row always matches
+);
+```
+
+### 13.2 Finding Gaps (Missing Values)
+
+```sql
+-- Find gaps in login dates:
+WITH boundaries AS (
+    SELECT
+        user_id,
+        login_date AS gap_start_after,
+        LEAD(login_date) OVER (PARTITION BY user_id ORDER BY login_date) AS next_login
+    FROM logins
+)
+SELECT
+    user_id,
+    gap_start_after + 1 AS gap_start,
+    next_login - 1 AS gap_end,
+    next_login - gap_start_after - 1 AS gap_days
+FROM boundaries
+WHERE next_login - gap_start_after > 1
+ORDER BY gap_start;
+```
+
+### 13.3 Running Totals vs Cumulative Aggregates
+
+**Running total (order-dependent, monotonically increasing):**
+
+```sql
+SELECT
+    transaction_date,
+    amount,
+    SUM(amount) OVER (
+        ORDER BY transaction_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM transactions;
+```
+
+**Cumulative distinct count (tricky — not directly supported in most engines):**
+
+```sql
+-- Method 1: Correlated subquery (slow but correct)
+SELECT DISTINCT
+    t.order_date,
+    (SELECT COUNT(DISTINCT t2.customer_id)
+     FROM orders t2
+     WHERE t2.order_date <= t.order_date) AS cumulative_customers
+FROM orders t
+ORDER BY t.order_date;
+
+-- Method 2: Self-join with array (PostgreSQL)
+WITH daily_new AS (
+    SELECT
+        order_date,
+        customer_id,
+        CASE WHEN ROW_NUMBER() OVER (
+            PARTITION BY customer_id ORDER BY order_date
+        ) = 1 THEN 1 ELSE 0 END AS is_new
+    FROM orders
+)
+SELECT
+    order_date,
+    SUM(is_new) OVER (ORDER BY order_date) AS cumulative_unique_customers
+FROM daily_new
+WHERE is_new = 1;
+```
+
+**Cumulative percentage:**
+
+```sql
+SELECT
+    product_id,
+    revenue,
+    SUM(revenue) OVER (ORDER BY revenue DESC) AS cumulative_revenue,
+    SUM(revenue) OVER (ORDER BY revenue DESC)::numeric /
+        SUM(revenue) OVER () * 100 AS cumulative_pct
+FROM product_revenue
+ORDER BY revenue DESC;
+-- This gives you Pareto analysis (80/20 rule identification)
+```
+
+### 13.4 Moving Averages with Gap Handling
+
+```sql
+-- Problem: daily_sales has missing dates. A 7-row moving average
+-- is NOT a 7-day moving average if dates are missing.
+
+-- Solution: generate full calendar, LEFT JOIN, use RANGE frame
+WITH calendar AS (
+    SELECT generate_series(
+        (SELECT MIN(sale_date) FROM daily_sales),
+        (SELECT MAX(sale_date) FROM daily_sales),
+        '1 day'::interval
+    )::date AS dt
+)
+SELECT
+    c.dt,
+    COALESCE(s.revenue, 0) AS revenue,
+    AVG(COALESCE(s.revenue, 0)) OVER (
+        ORDER BY c.dt
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_7day
+FROM calendar c
+LEFT JOIN daily_sales s ON c.dt = s.sale_date;
+```
+
+### 13.5 Exponential Moving Average (EMA)
+
+SQL doesn't have a built-in EMA, but you can compute it recursively:
+
+```sql
+-- EMA with smoothing factor α = 2/(N+1), where N = period
+-- EMA_today = α × value_today + (1 - α) × EMA_yesterday
+
+WITH RECURSIVE ema_calc AS (
+    -- Anchor: first value = first EMA
+    SELECT
+        sale_date,
+        revenue,
+        revenue::numeric AS ema_20
+    FROM daily_sales
+    WHERE sale_date = (SELECT MIN(sale_date) FROM daily_sales)
+
+    UNION ALL
+
+    SELECT
+        d.sale_date,
+        d.revenue,
+        (2.0 / 21.0) * d.revenue + (1.0 - 2.0 / 21.0) * e.ema_20
+    FROM daily_sales d
+    INNER JOIN ema_calc e ON d.sale_date = (
+        SELECT MIN(sale_date) FROM daily_sales WHERE sale_date > e.sale_date
+    )
+)
+SELECT sale_date, revenue, ROUND(ema_20, 2) AS ema_20
+FROM ema_calc
+ORDER BY sale_date;
+```
+
+### 13.6 Percentile and Median Calculations
+
+```sql
+-- Exact median (PostgreSQL):
+SELECT
+    dept_id,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary) AS median_salary,
+    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY salary) AS p25,
+    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY salary) AS p75,
+    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY salary) -
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY salary) AS iqr
+FROM employees
+GROUP BY dept_id;
+
+-- Percentile as window function (per-row):
+SELECT
+    name, salary, dept_id,
+    PERCENT_RANK() OVER (PARTITION BY dept_id ORDER BY salary) AS percentile,
+    CUME_DIST() OVER (PARTITION BY dept_id ORDER BY salary) AS cumulative_dist
+FROM employees;
+
+-- Approximate percentile (for huge datasets — DuckDB/Snowflake):
+SELECT APPROX_QUANTILE(salary, 0.5) AS approx_median FROM employees;
+```
+
+### 13.7 Window Functions for Change Detection
+
+```sql
+-- Detect state changes (e.g., subscription status changes)
+WITH changes AS (
+    SELECT
+        user_id,
+        status,
+        effective_date,
+        LAG(status) OVER (PARTITION BY user_id ORDER BY effective_date) AS prev_status
+    FROM subscription_history
+)
+SELECT *
+FROM changes
+WHERE status != prev_status OR prev_status IS NULL;
+
+-- Time spent in each state:
+SELECT
+    user_id,
+    status,
+    effective_date AS state_start,
+    LEAD(effective_date) OVER (PARTITION BY user_id ORDER BY effective_date) AS state_end,
+    LEAD(effective_date) OVER (PARTITION BY user_id ORDER BY effective_date) - effective_date AS duration
+FROM subscription_history;
+```
+
+---
+
+## 📖 Additional Sources (Sections 12–13)
+
+- Itzik Ben-Gan (2019). *T-SQL Window Functions*. Microsoft Press.
+- PostgreSQL Window Functions: https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
+- DuckDB QUALIFY: https://duckdb.org/docs/sql/query_syntax/qualify.html
+- Snowflake MATCH_RECOGNIZE: https://docs.snowflake.com/en/sql-reference/constructs/match_recognize
+- Kass, D. "Gaps and Islands in SQL" — SQLPerformance.com

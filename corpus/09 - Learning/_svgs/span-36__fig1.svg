@@ -1,0 +1,222 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title       { font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; fill: var(--text-normal, #c9d1d9); }
+    .subtitle    { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .grid-line   { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.3; fill: none; }
+    .border-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; opacity: 0.5; fill: none; }
+    .vowel-line  { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-linecap: round; }
+    .label       { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); font-weight: 600; }
+    .ipa-char    { font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: bold; fill: var(--text-normal, #c9d1d9); }
+    .vowel-pt    { stroke: var(--background-primary, #0d1117); stroke-width: 2; cursor: pointer; }
+    
+    /* Card Styles */
+    .card-bg     { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; opacity: 0.85; }
+    .card-title  { font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    .card-text   { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .card-muted  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+
+    /* Flowchart Styles */
+    .flow-bg     { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .flow-title  { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: bold; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .flow-text   { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .flow-accent { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .arrow       { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+  </style>
+
+  <defs>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="30" y="35" class="title">SPANISH PHONETIC SPACE &amp; ACCENT DECODER</text>
+  <text x="30" y="50" class="subtitle">Visualizing pure vowels, articulation coordinates, and syllable stress rules</text>
+
+  <!-- ================= LEFT: VOWEL TRAPEZOID ================= -->
+  <g transform="translate(10, 0)">
+    <!-- IPA Vowel Trapezoid Grid Lines -->
+    <!-- Horizontal grids (High, Mid, Low) -->
+    <line x1="80" y1="90" x2="280" y2="90" class="grid-line" />
+    <line x1="110" y1="170" x2="250" y2="170" class="grid-line" />
+    <line x1="180" y1="250" x2="180" y2="250" class="grid-line" />
+    
+    <!-- Slanted vertical grids (Front, Central, Back) -->
+    <line x1="80" y1="90" x2="180" y2="250" class="grid-line" />
+    <line x1="180" y1="90" x2="180" y2="250" class="grid-line" />
+    <line x1="280" y1="90" x2="180" y2="250" class="grid-line" />
+
+    <!-- Trapezoid Outer Boundary -->
+    <polygon points="80,90 280,90 250,170 180,250 110,170" class="border-line" />
+
+    <!-- Slanted Axis Labels -->
+    <text x="50" y="85" class="label">FRONT</text>
+    <text x="180" y="85" class="label" text-anchor="middle">CENTRAL</text>
+    <text x="310" y="85" class="label" text-anchor="end">BACK</text>
+    
+    <text x="45" y="100" class="label" transform="rotate(-30 45,100)">HIGH (Close)</text>
+    <text x="65" y="180" class="label" transform="rotate(-30 65,180)">MID (Open-Mid)</text>
+    <text x="115" y="260" class="label" transform="rotate(-30 115,260)">LOW (Open)</text>
+
+    <!-- Active Vowel scanning glow path (Sequential animation) -->
+    <path class="vowel-line" d="M 80 90 L 110 170 L 180 250 L 250 170 L 280 90 Z" stroke-dasharray="320">
+      <animate attributeName="stroke-dashoffset" values="320;0;320" dur="15s" repeatCount="indefinite" />
+    </path>
+
+    <!-- VOWEL POINTS -->
+    <!-- Point /i/ (Front-High) -->
+    <g>
+      <circle cx="80" cy="90" r="7" class="vowel-pt" fill="var(--text-normal, #c9d1d9)">
+        <animate attributeName="r" values="7;12;7" dur="15s" keyTimes="0;0.05;0.2;1" repeatCount="indefinite" />
+        <animate attributeName="fill" values="var(--text-normal, #c9d1d9);var(--interactive-accent, #58a6ff);var(--text-normal, #c9d1d9)" dur="15s" keyTimes="0;0.05;0.2;1" repeatCount="indefinite" />
+      </circle>
+      <text x="80" y="112" class="ipa-char" text-anchor="middle">i</text>
+    </g>
+
+    <!-- Point /e/ (Front-Mid) -->
+    <g>
+      <circle cx="110" cy="170" r="7" class="vowel-pt" fill="var(--text-normal, #c9d1d9)">
+        <animate attributeName="r" values="7;7;12;7;7" dur="15s" keyTimes="0;0.2;0.25;0.4;1" repeatCount="indefinite" />
+        <animate attributeName="fill" values="var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9);var(--interactive-accent, #58a6ff);var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9)" dur="15s" keyTimes="0;0.2;0.25;0.4;1" repeatCount="indefinite" />
+      </circle>
+      <text x="110" y="192" class="ipa-char" text-anchor="middle">e</text>
+    </g>
+
+    <!-- Point /a/ (Central-Low) -->
+    <g>
+      <circle cx="180" cy="250" r="7" class="vowel-pt" fill="var(--text-normal, #c9d1d9)">
+        <animate attributeName="r" values="7;7;12;7;7" dur="15s" keyTimes="0;0.4;0.45;0.6;1" repeatCount="indefinite" />
+        <animate attributeName="fill" values="var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9);var(--interactive-accent, #58a6ff);var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9)" dur="15s" keyTimes="0;0.4;0.45;0.6;1" repeatCount="indefinite" />
+      </circle>
+      <text x="180" y="272" class="ipa-char" text-anchor="middle">a</text>
+    </g>
+
+    <!-- Point /o/ (Back-Mid) -->
+    <g>
+      <circle cx="250" cy="170" r="7" class="vowel-pt" fill="var(--text-normal, #c9d1d9)">
+        <animate attributeName="r" values="7;7;12;7;7" dur="15s" keyTimes="0;0.6;0.65;0.8;1" repeatCount="indefinite" />
+        <animate attributeName="fill" values="var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9);var(--interactive-accent, #58a6ff);var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9)" dur="15s" keyTimes="0;0.6;0.65;0.8;1" repeatCount="indefinite" />
+      </circle>
+      <text x="250" y="192" class="ipa-char" text-anchor="middle">o</text>
+    </g>
+
+    <!-- Point /u/ (Back-High) -->
+    <g>
+      <circle cx="280" cy="90" r="7" class="vowel-pt" fill="var(--text-normal, #c9d1d9)">
+        <animate attributeName="r" values="7;7;12;7" dur="15s" keyTimes="0;0.8;0.85;1" repeatCount="indefinite" />
+        <animate attributeName="fill" values="var(--text-normal, #c9d1d9);var(--text-normal, #c9d1d9);var(--interactive-accent, #58a6ff);var(--text-normal, #c9d1d9)" dur="15s" keyTimes="0;0.8;0.85;1" repeatCount="indefinite" />
+      </circle>
+      <text x="280" y="112" class="ipa-char" text-anchor="middle">u</text>
+    </g>
+  </g>
+
+  <!-- ================= RIGHT: DYNAMIC ARTICULATION CARD ================= -->
+  <g transform="translate(340, 60)">
+    <!-- Base Card Frame -->
+    <rect x="0" y="0" width="230" height="210" rx="8" class="card-bg" />
+    
+    <!-- Inner Card Header -->
+    <path d="M 0 8 Q 0 0, 8 0 L 222 0 Q 230 0, 230 8 L 230 30 L 0 30 Z" fill="var(--background-secondary, #161b22)" opacity="0.5"/>
+    <text x="15" y="20" class="card-title" style="fill: var(--text-normal, #c9d1d9);">VOWEL ARTICULATION INFO</text>
+    <line x1="0" y1="30" x2="230" y2="30" stroke="var(--text-muted, #8b949e)" stroke-width="0.8" opacity="0.3"/>
+
+    <!-- /i/ Details (0.0s to 3.0s active) -->
+    <g opacity="1">
+      <animate attributeName="opacity" values="1;1;0;0;1" dur="15s" keyTimes="0;0.18;0.22;0.98;1" repeatCount="indefinite" />
+      <text x="15" y="55" class="card-title">Vowel I — High Front /i/</text>
+      <text x="15" y="75" class="card-text">Pure "ee" sound as in English "see".</text>
+      <text x="15" y="95" class="card-text">Spelling: ALWAYS "i" or "y" (as word).</text>
+      <text x="15" y="120" class="card-accent" fill="var(--text-accent, #79c0ff)" text-anchor="start">Example: sí (yes), mi (my)</text>
+      <rect x="15" y="135" width="200" height="60" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.4"/>
+      <text x="22" y="152" class="card-muted" font-weight="bold" fill="var(--text-accent, #79c0ff)">🚨 BAD ENGLISH HABIT TO AVOID:</text>
+      <text x="22" y="167" class="card-muted">Never reduce to the short English 'ih'</text>
+      <text x="22" y="182" class="card-muted">sound in "pin". Keep it pure and tense.</text>
+    </g>
+
+    <!-- /e/ Details (3.0s to 6.0s active) -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" dur="15s" keyTimes="0;0.18;0.22;0.38;0.42;1" repeatCount="indefinite" />
+      <text x="15" y="55" class="card-title">Vowel E — Mid Front /e/</text>
+      <text x="15" y="75" class="card-text">Pure "eh" sound as in English "bet".</text>
+      <text x="15" y="95" class="card-text">Spelling: ALWAYS "e". Never silent.</text>
+      <text x="15" y="120" class="card-accent" fill="var(--text-accent, #79c0ff)" text-anchor="start">Example: mesa (table), jefe (boss)</text>
+      <rect x="15" y="135" width="200" height="60" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.4"/>
+      <text x="22" y="152" class="card-muted" font-weight="bold" fill="var(--text-accent, #79c0ff)">🚨 BAD ENGLISH HABIT TO AVOID:</text>
+      <text x="22" y="167" class="card-muted">Do not glide into an 'ee' or 'ay' sound.</text>
+      <text x="22" y="182" class="card-muted">mesa ≠ "MAY-suh". Short &amp; clipped!</text>
+    </g>
+
+    <!-- /a/ Details (6.0s to 9.0s active) -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" dur="15s" keyTimes="0;0.38;0.42;0.58;0.62;1" repeatCount="indefinite" />
+      <text x="15" y="55" class="card-title">Vowel A — Low Central /a/</text>
+      <text x="15" y="75" class="card-text">Low open "ah" sound as in "father".</text>
+      <text x="15" y="95" class="card-text">Spelling: ALWAYS "a". Open mouth wide.</text>
+      <text x="15" y="120" class="card-accent" fill="var(--text-accent, #79c0ff)" text-anchor="start">Example: casa (house), cama (bed)</text>
+      <rect x="15" y="135" width="200" height="60" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.4"/>
+      <text x="22" y="152" class="card-muted" font-weight="bold" fill="var(--text-accent, #79c0ff)">🚨 BAD ENGLISH HABIT TO AVOID:</text>
+      <text x="22" y="167" class="card-muted">Do not reduce to "uh" (schwa) at ends.</text>
+      <text x="22" y="182" class="card-muted">cama ≠ "kay-muh". Both 'a's are identical!</text>
+    </g>
+
+    <!-- /o/ Details (9.0s to 12.0s active) -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" dur="15s" keyTimes="0;0.58;0.62;0.78;0.82;1" repeatCount="indefinite" />
+      <text x="15" y="55" class="card-title">Vowel O — Mid Back /o/</text>
+      <text x="15" y="75" class="card-text">Pure "oh" sound as in English "go".</text>
+      <text x="15" y="95" class="card-text">Spelling: ALWAYS "o". Keep lips rounded.</text>
+      <text x="15" y="120" class="card-accent" fill="var(--text-accent, #79c0ff)" text-anchor="start">Example: foto (photo), como (I eat)</text>
+      <rect x="15" y="135" width="200" height="60" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.4"/>
+      <text x="22" y="152" class="card-muted" font-weight="bold" fill="var(--text-accent, #79c0ff)">🚨 BAD ENGLISH HABIT TO AVOID:</text>
+      <text x="22" y="167" class="card-muted">Never draw out into a diphthong "oh-oo".</text>
+      <text x="22" y="182" class="card-muted">foto ≠ "FOH-toh-oo". Stop clean!</text>
+    </g>
+
+    <!-- /u/ Details (12.0s to 15.0s active) -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" dur="15s" keyTimes="0;0.78;0.82;0.98;1" repeatCount="indefinite" />
+      <text x="15" y="55" class="card-title">Vowel U — High Back /u/</text>
+      <text x="15" y="75" class="card-text">Pure "oo" sound as in English "moon".</text>
+      <text x="15" y="95" class="card-text">Spelling: ALWAYS "u". Silent after q, g (e/i).</text>
+      <text x="15" y="120" class="card-accent" fill="var(--text-accent, #79c0ff)" text-anchor="start">Example: mucho (much), luna (moon)</text>
+      <rect x="15" y="135" width="200" height="60" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.4"/>
+      <text x="22" y="152" class="card-muted" font-weight="bold" fill="var(--text-accent, #79c0ff)">🚨 BAD ENGLISH HABIT TO AVOID:</text>
+      <text x="22" y="167" class="card-muted">Do not reduce to "uh". Keep lips tight.</text>
+      <text x="22" y="182" class="card-muted">mucho ≠ "MOO-chuh". Say: "MOO-choh".</text>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM: STRESS RULES FLOW ================= -->
+  <g transform="translate(30, 280)">
+    <!-- Header -->
+    <line x1="0" y1="0" x2="540" y2="0" stroke="var(--text-muted, #8b949e)" stroke-width="1.2" opacity="0.3" />
+    <text x="0" y="18" class="title" style="font-size: 13px;">SPANISH STRESS RULES DECODER</text>
+    
+    <!-- Rule 1 Block -->
+    <g transform="translate(0, 30)">
+      <rect x="0" y="0" width="165" height="80" class="flow-bg" />
+      <text x="82" y="20" class="flow-title">RULE 1: Vowel, N, S</text>
+      <text x="82" y="38" class="flow-text">Stress penultimate syllable</text>
+      <text x="82" y="52" class="flow-text">2nd from end</text>
+      <text x="82" y="68" class="flow-accent">ca-SA  |  jo-VEN</text>
+    </g>
+
+    <!-- Rule 2 Block -->
+    <g transform="translate(187, 30)">
+      <rect x="0" y="0" width="165" height="80" class="flow-bg" />
+      <text x="82" y="20" class="flow-title">RULE 2: Other Consonants</text>
+      <text x="82" y="38" class="flow-text">Stress last syllable</text>
+      <text x="82" y="52" class="flow-text">End of the word</text>
+      <text x="82" y="68" class="flow-accent">ha-BLAR  |  ciu-DAD</text>
+    </g>
+
+    <!-- Rule 3 Block -->
+    <g transform="translate(375, 30)">
+      <rect x="0" y="0" width="165" height="80" class="flow-bg" fill="var(--background-secondary, #161b22)" stroke="var(--interactive-accent, #58a6ff)"/>
+      <text x="82" y="20" class="flow-title" style="fill: var(--interactive-accent, #58a6ff)">RULE 3: Written Accent (´)</text>
+      <text x="82" y="38" class="flow-text">Stress accented syllable</text>
+      <text x="82" y="52" class="flow-text">Overrides Rule 1 &amp; 2</text>
+      <text x="82" y="68" class="flow-accent" style="fill: var(--interactive-accent, #58a6ff)">ca-FÉ  |  MÉ-di-co</text>
+    </g>
+  </g>
+</svg>

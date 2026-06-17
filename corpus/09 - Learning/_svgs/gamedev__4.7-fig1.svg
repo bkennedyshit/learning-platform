@@ -1,0 +1,193 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .bar { transition: all 0.2s; cursor: pointer; }
+    .bar:hover { opacity: 1; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.3; }
+    .budget-line { stroke: #e74c3c; stroke-width: 2; stroke-dasharray: 6,4; }
+    .note { font-family: monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mem-block { stroke: var(--text-normal, #c9d1d9); stroke-width: 1; cursor: pointer; transition: all 0.2s; }
+    .mem-block:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    
+    /* Live Profiler Bar Animations */
+    @keyframes live-physics-1 {
+      0%, 100% { y: 150px; height: 50px; }
+      50% { y: 145px; height: 55px; }
+    }
+    @keyframes live-logic-1 {
+      0%, 100% { y: 120px; height: 30px; }
+      50% { y: 115px; height: 30px; }
+    }
+    @keyframes live-gpu-1 {
+      0%, 100% { y: 80px; height: 40px; }
+      50% { y: 85px; height: 30px; }
+    }
+    
+    @keyframes live-physics-2 {
+      0%, 100% { y: 155px; height: 45px; }
+      50% { y: 150px; height: 50px; }
+    }
+    @keyframes live-logic-2 {
+      0%, 100% { y: 120px; height: 35px; }
+      50% { y: 125px; height: 25px; }
+    }
+    @keyframes live-gpu-2 {
+      0%, 100% { y: 70px; height: 50px; }
+      50% { y: 75px; height: 50px; }
+    }
+    
+    @keyframes live-physics-3 {
+      0%, 100% { y: 150px; height: 50px; }
+      50% { y: 160px; height: 40px; }
+    }
+    @keyframes live-logic-3 {
+      0%, 100% { y: 100px; height: 50px; }
+      50% { y: 120px; height: 40px; }
+    }
+    @keyframes live-gpu-3 {
+      0%, 100% { y: 25px; height: 75px; }
+      50% { y: 90px; height: 30px; }
+    }
+    
+    @keyframes live-physics-4 {
+      0%, 100% { y: 160px; height: 40px; }
+      50% { y: 155px; height: 45px; }
+    }
+    @keyframes live-logic-4 {
+      0%, 100% { y: 120px; height: 40px; }
+      50% { y: 125px; height: 30px; }
+    }
+    @keyframes live-gpu-4 {
+      0%, 100% { y: 90px; height: 30px; }
+      50% { y: 95px; height: 30px; }
+    }
+    
+    @keyframes spike-flash {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #e74c3c); }
+      50% { opacity: 0; }
+    }
+    
+    .profiler-phys-1 { animation: live-physics-1 3s infinite ease-in-out; }
+    .profiler-logic-1 { animation: live-logic-1 3s infinite ease-in-out; }
+    .profiler-gpu-1 { animation: live-gpu-1 3s infinite ease-in-out; }
+    
+    .profiler-phys-2 { animation: live-physics-2 3s infinite ease-in-out; }
+    .profiler-logic-2 { animation: live-logic-2 3s infinite ease-in-out; }
+    .profiler-gpu-2 { animation: live-gpu-2 3s infinite ease-in-out; }
+    
+    .profiler-phys-3 { animation: live-physics-3 3s infinite ease-in-out; }
+    .profiler-logic-3 { animation: live-logic-3 3s infinite ease-in-out; }
+    .profiler-gpu-3 { animation: live-gpu-3 3s infinite ease-in-out; }
+    
+    .profiler-phys-4 { animation: live-physics-4 3s infinite ease-in-out; }
+    .profiler-logic-4 { animation: live-logic-4 3s infinite ease-in-out; }
+    .profiler-gpu-4 { animation: live-gpu-4 3s infinite ease-in-out; }
+    
+    .spike-text { animation: spike-flash 3s infinite ease-in-out; }
+    
+    /* Memory Layout Cache Sweep Animations */
+    @keyframes cache-sweep-soa {
+      0%, 40%, 100% { opacity: 0.3; stroke: var(--text-normal, #c9d1d9); filter: none; }
+      10%, 30% { opacity: 0.95; stroke: #2ecc71; stroke-width: 2; filter: drop-shadow(0 0 4px #2ecc71); }
+    }
+    @keyframes cache-sweep-aos-hit {
+      0%, 40%, 100% { opacity: 0.3; stroke: var(--text-normal, #c9d1d9); filter: none; }
+      10%, 20% { opacity: 0.95; stroke: #e74c3c; stroke-width: 2; filter: drop-shadow(0 0 4px #e74c3c); }
+    }
+    @keyframes cache-sweep-aos-miss {
+      0%, 40%, 100% { opacity: 0.3; stroke: var(--text-normal, #c9d1d9); filter: none; }
+      25%, 35% { opacity: 0.95; stroke: #e74c3c; stroke-width: 2; filter: drop-shadow(0 0 4px #e74c3c); }
+    }
+    
+    .soa-block-1 { animation: cache-sweep-soa 4s infinite 0.0s; }
+    .soa-block-2 { animation: cache-sweep-soa 4s infinite 0.1s; }
+    .soa-block-3 { animation: cache-sweep-soa 4s infinite 0.2s; }
+    .soa-block-4 { animation: cache-sweep-soa 4s infinite 0.3s; }
+    .soa-block-5 { animation: cache-sweep-soa 4s infinite 0.4s; }
+    .soa-block-6 { animation: cache-sweep-soa 4s infinite 0.5s; }
+    
+    .aos-block-red-1 { animation: cache-sweep-aos-hit 4s infinite 0.0s; }
+    .aos-block-red-2 { animation: cache-sweep-aos-miss 4s infinite 0.0s; } /* Staggered delayed check representing miss */
+  </style>
+  
+  <!-- Frame Budget Visualization -->
+  <text x="160" y="20" class="title">Frame Budget Breakdown (16.67ms @ 60fps)</text>
+  <!-- Y axis -->
+  <line x1="50" y1="40" x2="50" y2="200" class="axis"/>
+  <text x="45" y="45" class="label" text-anchor="end" font-size="9">16ms</text>
+  <text x="45" y="100" class="label" text-anchor="end" font-size="9">10ms</text>
+  <text x="45" y="160" class="label" text-anchor="end" font-size="9">4ms</text>
+  <text x="45" y="200" class="label" text-anchor="end" font-size="9">0ms</text>
+  <!-- Grid -->
+  <line x1="50" y1="40" x2="310" y2="40" class="grid"/>
+  <line x1="50" y1="100" x2="310" y2="100" class="grid"/>
+  <line x1="50" y1="160" x2="310" y2="160" class="grid"/>
+  <!-- Budget line -->
+  <line x1="50" y1="40" x2="310" y2="40" class="budget-line"/>
+  <text x="315" y="44" class="label" fill="#e74c3c" font-size="9">budget</text>
+  
+  <!-- Stacked bars with live simulation animations -->
+  <!-- Frame 1 (under budget) -->
+  <rect x="60" y="80" width="35" height="40" class="bar profiler-gpu-1" fill="#3498db" opacity="0.7"/>
+  <rect x="60" y="120" width="35" height="30" class="bar profiler-logic-1" fill="#2ecc71" opacity="0.7"/>
+  <rect x="60" y="150" width="35" height="50" class="bar profiler-phys-1" fill="#9b59b6" opacity="0.7"/>
+  
+  <!-- Frame 2 (under budget) -->
+  <rect x="105" y="70" width="35" height="50" class="bar profiler-gpu-2" fill="#3498db" opacity="0.7"/>
+  <rect x="105" y="120" width="35" height="35" class="bar profiler-logic-2" fill="#2ecc71" opacity="0.7"/>
+  <rect x="105" y="155" width="35" height="45" class="bar profiler-phys-2" fill="#9b59b6" opacity="0.7"/>
+  
+  <!-- Frame 3 (OVER budget!) -->
+  <rect x="150" y="25" width="35" height="75" class="bar profiler-gpu-3" fill="#3498db" opacity="0.7"/>
+  <rect x="150" y="100" width="35" height="50" class="bar profiler-logic-3" fill="#2ecc71" opacity="0.7"/>
+  <rect x="150" y="150" width="35" height="50" class="bar profiler-phys-3" fill="#9b59b6" opacity="0.7"/>
+  <text x="167" y="20" class="label spike-text" fill="#e74c3c" font-size="9">SPIKE!</text>
+  
+  <!-- Frame 4 -->
+  <rect x="195" y="90" width="35" height="30" class="bar profiler-gpu-4" fill="#3498db" opacity="0.7"/>
+  <rect x="195" y="120" width="35" height="40" class="bar profiler-logic-4" fill="#2ecc71" opacity="0.7"/>
+  <rect x="195" y="160" width="35" height="40" class="bar profiler-phys-4" fill="#9b59b6" opacity="0.7"/>
+  
+  <!-- Legend -->
+  <rect x="250" y="80" width="10" height="10" fill="#3498db" opacity="0.7"/>
+  <text x="265" y="89" class="label" font-size="9" text-anchor="start">GPU Render</text>
+  <rect x="250" y="95" width="10" height="10" fill="#2ecc71" opacity="0.7"/>
+  <text x="265" y="104" class="label" font-size="9" text-anchor="start">Game Logic</text>
+  <rect x="250" y="110" width="10" height="10" fill="#9b59b6" opacity="0.7"/>
+  <text x="265" y="119" class="label" font-size="9" text-anchor="start">Physics</text>
+  
+  <!-- Memory Layout Section -->
+  <text x="460" y="20" class="title">Memory: AoS vs SoA</text>
+  <!-- AoS (bad) -->
+  <text x="380" y="50" class="label" font-size="10" text-anchor="start">Array of Structs (cache-hostile):</text>
+  <rect x="350" y="55" width="30" height="20" class="mem-block aos-block-red-1" fill="#e74c3c" opacity="0.3"/>
+  <rect x="380" y="55" width="30" height="20" class="mem-block" fill="#3498db" opacity="0.3"/>
+  <rect x="410" y="55" width="30" height="20" class="mem-block" fill="#2ecc71" opacity="0.3"/>
+  
+  <rect x="450" y="55" width="30" height="20" class="mem-block aos-block-red-2" fill="#e74c3c" opacity="0.3"/>
+  <rect x="480" y="55" width="30" height="20" class="mem-block" fill="#3498db" opacity="0.3"/>
+  <rect x="510" y="55" width="30" height="20" class="mem-block" fill="#2ecc71" opacity="0.3"/>
+  
+  <text x="430" y="90" class="note" text-anchor="middle">[pos|vel|hp][pos|vel|hp]... scattered</text>
+  
+  <!-- SoA (good) -->
+  <text x="380" y="110" class="label" font-size="10" text-anchor="start">Struct of Arrays (cache-friendly):</text>
+  <rect x="350" y="115" width="30" height="20" class="mem-block soa-block-1" fill="#e74c3c" opacity="0.3"/>
+  <rect x="380" y="115" width="30" height="20" class="mem-block soa-block-2" fill="#e74c3c" opacity="0.3"/>
+  <rect x="410" y="115" width="30" height="20" class="mem-blockso soa-block-3" fill="#e74c3c" opacity="0.3"/>
+  <rect x="440" y="115" width="30" height="20" class="mem-block soa-block-4" fill="#e74c3c" opacity="0.3"/>
+  <rect x="470" y="115" width="30" height="20" class="mem-block soa-block-5" fill="#e74c3c" opacity="0.3"/>
+  <rect x="500" y="115" width="30" height="20" class="mem-block soa-block-6" fill="#e74c3c" opacity="0.3"/>
+  <text x="430" y="150" class="note" text-anchor="middle">[pos][pos][pos][pos]... contiguous → SIMD</text>
+  
+  <!-- Profiling workflow -->
+  <rect x="30" y="220" width="540" height="110" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="240" class="title">Profiling Workflow</text>
+  <text x="300" y="260" class="note" text-anchor="middle">1. Measure (don't guess) → Profiler shows WHERE time is spent</text>
+  <text x="300" y="278" class="note" text-anchor="middle">2. Identify bottleneck: CPU-bound (logic/physics) or GPU-bound (draw calls/shaders)?</text>
+  <text x="300" y="296" class="note" text-anchor="middle">3. Optimize the hottest path ONLY — Amdahl's Law applies</text>
+  <text x="300" y="314" class="note" text-anchor="middle">4. Re-measure — confirm improvement, check for regressions</text>
+  <text x="300" y="328" class="label" text-anchor="middle" fill="var(--text-accent, #79c0ff)" font-size="10">Tools: Unity Profiler | Unreal Insights | RenderDoc | Tracy | PIX</text>
+</svg>

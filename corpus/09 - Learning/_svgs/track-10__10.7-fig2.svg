@@ -1,0 +1,62 @@
+<svg viewBox="0 0 440 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px;height:auto;">
+  <style>
+    .gw-cell { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; }
+    .gw-goal { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.2; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; animation: goalPulse 1.5s infinite alternate; }
+    @keyframes goalPulse { from { fill-opacity: 0.1; } to { fill-opacity: 0.4; } }
+    .gw-lbl { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .gw-val { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .gw-arr { font-family: Inter, system-ui, sans-serif; font-size: 18px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+  </style>
+  <!-- Grid cells 4x4 -->
+  <rect x="20" y="20" width="100" height="100" class="gw-cell"/>
+  <rect x="120" y="20" width="100" height="100" class="gw-cell"/>
+  <rect x="220" y="20" width="100" height="100" class="gw-cell"/>
+  <rect x="320" y="20" width="100" height="100" class="gw-cell"/>
+  <rect x="20" y="120" width="100" height="100" class="gw-cell"/>
+  <rect x="120" y="120" width="100" height="100" class="gw-cell"/>
+  <rect x="220" y="120" width="100" height="100" class="gw-cell"/>
+  <rect x="320" y="120" width="100" height="100" class="gw-cell"/>
+  <rect x="20" y="220" width="100" height="100" class="gw-cell"/>
+  <rect x="120" y="220" width="100" height="100" class="gw-cell"/>
+  <rect x="220" y="220" width="100" height="100" class="gw-cell"/>
+  <rect x="320" y="220" width="100" height="100" class="gw-cell"/>
+  <rect x="20" y="320" width="100" height="100" class="gw-cell"/>
+  <rect x="120" y="320" width="100" height="100" class="gw-cell"/>
+  <rect x="220" y="320" width="100" height="100" class="gw-cell"/>
+  <rect x="320" y="320" width="100" height="100" class="gw-goal"/>
+  <!-- Goal label -->
+  <text x="370" y="375" class="gw-val">GOAL</text>
+  <!-- Optimal policy arrows -->
+  <text x="70" y="75" class="gw-arr">→</text>
+  <text x="170" y="75" class="gw-arr">→</text>
+  <text x="270" y="75" class="gw-arr">↓</text>
+  <text x="370" y="75" class="gw-arr">↓</text>
+  <text x="70" y="175" class="gw-arr">→</text>
+  <text x="170" y="175" class="gw-arr">→</text>
+  <text x="270" y="175" class="gw-arr">↓</text>
+  <text x="370" y="175" class="gw-arr">↓</text>
+  <text x="70" y="275" class="gw-arr">→</text>
+  <text x="170" y="275" class="gw-arr">→</text>
+  <text x="270" y="275" class="gw-arr">→</text>
+  <text x="370" y="275" class="gw-arr">↓</text>
+  <text x="70" y="375" class="gw-arr">→</text>
+  <text x="170" y="375" class="gw-arr">→</text>
+  <text x="270" y="375" class="gw-arr">→</text>
+  <!-- V* values -->
+  <text x="70" y="95" class="gw-val">V*=0.91</text>
+  <text x="170" y="95" class="gw-val">V*=0.93</text>
+  <text x="270" y="95" class="gw-val">V*=0.95</text>
+  <text x="370" y="95" class="gw-val">V*=0.96</text>
+  <text x="70" y="195" class="gw-val">V*=0.93</text>
+  <text x="170" y="195" class="gw-val">V*=0.95</text>
+  <text x="270" y="195" class="gw-val">V*=0.96</text>
+  <text x="370" y="195" class="gw-val">V*=0.97</text>
+  <text x="70" y="295" class="gw-val">V*=0.95</text>
+  <text x="170" y="295" class="gw-val">V*=0.96</text>
+  <text x="270" y="295" class="gw-val">V*=0.97</text>
+  <text x="370" y="295" class="gw-val">V*=0.99</text>
+  <text x="70" y="395" class="gw-val">V*=0.96</text>
+  <text x="170" y="395" class="gw-val">V*=0.97</text>
+  <text x="270" y="395" class="gw-val">V*=0.99</text>
+  <text x="370" y="395" class="gw-val">V*=1.00</text>
+</svg>

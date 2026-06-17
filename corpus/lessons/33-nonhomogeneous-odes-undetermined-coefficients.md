@@ -1,0 +1,921 @@
+---
+title: "Nonhomogeneous Odes Undetermined Coefficients"
+subject: "Ordinary & Partial Differential Equations"
+catalog: advanced
+audience_tier: higher-education
+chapter: "3.3"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 3.3 — Nonhomogeneous ODEs & Undetermined Coefficients
+
+> *"The particular solution carries the fingerprint of the forcing function — it is the system's steady-state response to external stimulus."* — Richard Courant
+
+When a driving force $g(x)$ appears on the right-hand side of a linear ODE, the solution splits into two parts: the **complementary (homogeneous) solution** $y_c$ that captures the system's natural modes, and the **particular solution** $y_p$ that responds to the forcing. This chapter develops two systematic methods for finding $y_p$: the method of **undetermined coefficients** (for polynomial, exponential, and trigonometric forcing) and **variation of parameters** (for arbitrary forcing functions).
+
+---
+
+## 🎯 Learning Objectives
+
+1. State the structure theorem: $y = y_c + y_p$ for nonhomogeneous linear ODEs.
+2. Apply the method of undetermined coefficients for $g(x) = $ polynomial, exponential, sine/cosine, or products thereof.
+3. Handle the resonance case where $g(x)$ duplicates a homogeneous solution (multiply by $x^s$).
+4. Derive and apply the variation of parameters formula for arbitrary $g(x)$.
+5. Solve forced oscillator problems and identify transient vs. steady-state response.
+6. Verify particular solutions by direct substitution.
+
+---
+
+## 🖼️ Visual Anchor — Superposition: Homogeneous + Particular
+
+![math-03__3.3-fig1](math-03__3.3-fig1.svg)
+
+---
+
+
+## 📚 1. Definitions
+
+### Definition 3.3.1 — Nonhomogeneous Linear ODE
+
+A **nonhomogeneous** second-order linear ODE has the form:
+
+$$
+y'' + p(x)y' + q(x)y = g(x), \quad g(x) \not\equiv 0.
+$$
+
+The function $g(x)$ is called the **forcing function** (or driving term, or input).
+
+### Definition 3.3.2 — Complementary Solution
+
+The **complementary solution** $y_c$ is the general solution of the associated homogeneous equation:
+
+$$
+y'' + p(x)y' + q(x)y = 0.
+$$
+
+By [Theorem 3.2.1](3.2---Second-Order-Linear-Homogeneous-ODEs), $y_c = c_1 y_1 + c_2 y_2$.
+
+### Definition 3.3.3 — Particular Solution
+
+A **particular solution** $y_p$ is any single function satisfying the full nonhomogeneous equation. It contains no arbitrary constants.
+
+### Definition 3.3.4 — Resonance (Duplication)
+
+**Resonance** occurs when the forcing function $g(x)$ (or a component of it) is itself a solution of the homogeneous equation. In this case, the standard undetermined-coefficients guess must be multiplied by $x^s$, where $s$ is the multiplicity of the duplicated root.
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 3.3.P1 (Structure Theorem):** The general solution of $L[y] = g(x)$ is:
+
+$$
+y = y_c + y_p,
+$$
+
+where $y_c$ is the general solution of $L[y] = 0$ and $y_p$ is any particular solution of $L[y] = g$.
+
+**Proof sketch:** If $y_1^*$ and $y_2^*$ are two solutions of $L[y] = g$, then $L[y_1^* - y_2^*] = g - g = 0$, so their difference is a homogeneous solution.
+
+**Postulate 3.3.P2 (Superposition for Forcing):** If $L[y_{p1}] = g_1(x)$ and $L[y_{p2}] = g_2(x)$, then $L[y_{p1} + y_{p2}] = g_1 + g_2$. This allows us to handle sums of forcing terms individually.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 3.3.1 — Undetermined Coefficients Guess Table
+
+For $ay'' + by' + cy = g(x)$ with constant coefficients, the form of $y_p$ depends on $g(x)$:
+
+| $g(x)$ | Trial $y_p$ |
+|---------|-------------|
+| $P_n(x)$ (degree-$n$ polynomial) | $A_n x^n + A_{n-1}x^{n-1} + \cdots + A_0$ |
+| $e^{\alpha x}$ | $Ae^{\alpha x}$ |
+| $\cos\beta x$ or $\sin\beta x$ | $A\cos\beta x + B\sin\beta x$ |
+| $e^{\alpha x}P_n(x)$ | $e^{\alpha x}(A_n x^n + \cdots + A_0)$ |
+| $e^{\alpha x}\cos\beta x$ | $e^{\alpha x}(A\cos\beta x + B\sin\beta x)$ |
+
+**Modification rule:** If any term in the trial $y_p$ is a solution of the homogeneous equation, multiply the entire trial by $x^s$ where $s$ is the smallest positive integer that eliminates duplication.
+
+### Lemma 3.3.2 — Variation of Parameters Formula
+
+For $y'' + p(x)y' + q(x)y = g(x)$ with fundamental set $\{y_1, y_2\}$:
+
+$$
+y_p = -y_1\int\frac{y_2\,g}{W}\,dx + y_2\int\frac{y_1\,g}{W}\,dx,
+$$
+
+where $W = W[y_1, y_2]$ is the Wronskian.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 3.3.1 — Variation of Parameters (Lagrange)
+
+Let $y_1, y_2$ be a fundamental set for $y'' + p(x)y' + q(x)y = 0$. Then a particular solution of $y'' + p(x)y' + q(x)y = g(x)$ is:
+
+$$
+y_p(x) = u_1(x)\,y_1(x) + u_2(x)\,y_2(x),
+$$
+
+where:
+
+$$
+u_1'(x) = -\frac{y_2(x)\,g(x)}{W[y_1,y_2](x)}, \qquad u_2'(x) = \frac{y_1(x)\,g(x)}{W[y_1,y_2](x)}.
+$$
+
+### Theorem 3.3.2 — Uniqueness of Particular Solution Form
+
+For constant-coefficient equations with forcing $g(x) = e^{\alpha x}P_n(x)\cos\beta x$ (or $\sin$), the method of undetermined coefficients produces the unique particular solution (up to the modification rule).
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of Variation of Parameters (Theorem 3.3.1)
+
+**Step 1.** Seek $y_p = u_1 y_1 + u_2 y_2$ where $u_1, u_2$ are unknown functions.
+
+**Step 2.** Compute $y_p'$:
+
+$$
+y_p' = u_1' y_1 + u_1 y_1' + u_2' y_2 + u_2 y_2'.
+$$
+
+**Step 3.** Impose the constraint $u_1' y_1 + u_2' y_2 = 0$ (this simplifies the second derivative):
+
+$$
+y_p' = u_1 y_1' + u_2 y_2'.
+$$
+
+**Step 4.** Compute $y_p''$:
+
+$$
+y_p'' = u_1' y_1' + u_1 y_1'' + u_2' y_2' + u_2 y_2''.
+$$
+
+**Step 5.** Substitute into $y_p'' + p y_p' + q y_p = g$:
+
+$$
+(u_1' y_1' + u_1 y_1'' + u_2' y_2' + u_2 y_2'') + p(u_1 y_1' + u_2 y_2') + q(u_1 y_1 + u_2 y_2) = g.
+$$
+
+**Step 6.** Group terms by $u_1$ and $u_2$:
+
+$$
+u_1\underbrace{(y_1'' + py_1' + qy_1)}_{=0} + u_2\underbrace{(y_2'' + py_2' + qy_2)}_{=0} + u_1'y_1' + u_2'y_2' = g.
+$$
+
+**Step 7.** The homogeneous terms vanish, leaving:
+
+$$
+u_1' y_1' + u_2' y_2' = g. \tag{I}
+$$
+
+Combined with the constraint from Step 3:
+
+$$
+u_1' y_1 + u_2' y_2 = 0. \tag{II}
+$$
+
+**Step 8.** Solve the $2\times 2$ system (I)–(II) using Cramer's rule ([2.5 - Determinants & Cramer's Rule](2.5---Determinants-&-Cramer's-Rule)):
+
+$$
+u_1' = \frac{\begin{vmatrix}0 & y_2 \\ g & y_2'\end{vmatrix}}{W} = \frac{-y_2 g}{W}, \qquad u_2' = \frac{\begin{vmatrix}y_1 & 0 \\ y_1' & g\end{vmatrix}}{W} = \frac{y_1 g}{W}. \quad \blacksquare
+$$
+
+### 5.2 Derivation: Why Resonance Requires Multiplication by $x^s$
+
+Consider $y'' + \omega^2 y = \cos\omega x$ (forcing at natural frequency).
+
+**Step 1.** Homogeneous solution: $y_c = c_1\cos\omega x + c_2\sin\omega x$.
+
+**Step 2.** Naive guess: $y_p = A\cos\omega x + B\sin\omega x$. But this is already in $y_c$!
+
+**Step 3.** Substitute the naive guess: $y_p'' + \omega^2 y_p = -A\omega^2\cos\omega x - B\omega^2\sin\omega x + A\omega^2\cos\omega x + B\omega^2\sin\omega x = 0 \neq \cos\omega x$.
+
+**Step 4.** The naive guess produces zero — it cannot match the forcing. We must modify.
+
+**Step 5.** Try $y_p = x(A\cos\omega x + B\sin\omega x)$. Compute:
+
+$$
+y_p' = A\cos\omega x + B\sin\omega x + x(-A\omega\sin\omega x + B\omega\cos\omega x).
+$$
+
+$$
+y_p'' = -2A\omega\sin\omega x + 2B\omega\cos\omega x + x(-A\omega^2\cos\omega x - B\omega^2\sin\omega x).
+$$
+
+**Step 6.** Substitute: $y_p'' + \omega^2 y_p = -2A\omega\sin\omega x + 2B\omega\cos\omega x = \cos\omega x$.
+
+**Step 7.** Match coefficients: $-2A\omega = 0 \Rightarrow A = 0$; $2B\omega = 1 \Rightarrow B = \frac{1}{2\omega}$.
+
+**Result:** $y_p = \frac{x}{2\omega}\sin\omega x$. The amplitude grows linearly with $x$ — this is **resonance**. $\blacksquare$
+
+---
+
+
+## 🧮 6. Worked Examples
+
+### Example 3.3.E1 — Polynomial Forcing
+
+**Solve:** $y'' - 3y' + 2y = 4x^2$.
+
+**Step 1.** Homogeneous: $r^2 - 3r + 2 = (r-1)(r-2) = 0$, so $y_c = c_1 e^x + c_2 e^{2x}$.
+
+**Step 2.** Guess $y_p = Ax^2 + Bx + C$ (degree-2 polynomial, no duplication with $y_c$).
+
+**Step 3.** Compute: $y_p' = 2Ax + B$, $y_p'' = 2A$.
+
+**Step 4.** Substitute: $2A - 3(2Ax + B) + 2(Ax^2 + Bx + C) = 4x^2$.
+
+$$
+2Ax^2 + (-6A + 2B)x + (2A - 3B + 2C) = 4x^2 + 0x + 0.
+$$
+
+**Step 5.** Match coefficients:
+- $x^2$: $2A = 4 \Rightarrow A = 2$.
+- $x^1$: $-6A + 2B = 0 \Rightarrow -12 + 2B = 0 \Rightarrow B = 6$.
+- $x^0$: $2A - 3B + 2C = 0 \Rightarrow 4 - 18 + 2C = 0 \Rightarrow C = 7$.
+
+**Solution:** $y = c_1 e^x + c_2 e^{2x} + 2x^2 + 6x + 7$.
+
+---
+
+### Example 3.3.E2 — Exponential Forcing with Duplication
+
+**Solve:** $y'' - 2y' + y = e^x$.
+
+**Step 1.** Characteristic equation: $(r-1)^2 = 0$, repeated root $r = 1$. So $y_c = (c_1 + c_2 x)e^x$.
+
+**Step 2.** The forcing $g(x) = e^x$ duplicates $y_1 = e^x$ (which has multiplicity $s = 2$ in the characteristic equation).
+
+**Step 3.** Modified guess: $y_p = Ax^2 e^x$ (multiply by $x^2$).
+
+**Step 4.** Compute derivatives:
+- $y_p = Ax^2 e^x$
+- $y_p' = A(2x + x^2)e^x$
+- $y_p'' = A(2 + 4x + x^2)e^x$
+
+**Step 5.** Substitute into $y'' - 2y' + y$:
+
+$$
+A(2 + 4x + x^2)e^x - 2A(2x + x^2)e^x + Ax^2 e^x = e^x.
+$$
+
+$$
+Ae^x[2 + 4x + x^2 - 4x - 2x^2 + x^2] = Ae^x[2] = e^x.
+$$
+
+**Step 6.** Solve: $2A = 1 \Rightarrow A = 1/2$.
+
+**Solution:** $y = (c_1 + c_2 x)e^x + \frac{1}{2}x^2 e^x$.
+
+---
+
+### Example 3.3.E3 — Trigonometric Forcing
+
+**Solve:** $y'' + 4y = \sin 3x$.
+
+**Step 1.** Homogeneous: $r^2 + 4 = 0$, $r = \pm 2i$. $y_c = c_1\cos 2x + c_2\sin 2x$.
+
+**Step 2.** Guess $y_p = A\cos 3x + B\sin 3x$ (no duplication since $\beta = 3 \neq 2$).
+
+**Step 3.** $y_p'' = -9A\cos 3x - 9B\sin 3x$.
+
+**Step 4.** Substitute: $(-9A + 4A)\cos 3x + (-9B + 4B)\sin 3x = \sin 3x$.
+
+$$
+-5A\cos 3x - 5B\sin 3x = 0\cdot\cos 3x + 1\cdot\sin 3x.
+$$
+
+**Step 5.** Match: $-5A = 0 \Rightarrow A = 0$; $-5B = 1 \Rightarrow B = -1/5$.
+
+**Solution:** $y = c_1\cos 2x + c_2\sin 2x - \frac{1}{5}\sin 3x$.
+
+---
+
+### Example 3.3.E4 — Variation of Parameters
+
+**Solve:** $y'' + y = \sec x$.
+
+**Step 1.** Homogeneous: $y_c = c_1\cos x + c_2\sin x$. Set $y_1 = \cos x$, $y_2 = \sin x$.
+
+**Step 2.** Wronskian: $W = \cos x\cdot\cos x - \sin x\cdot(-\sin x) = \cos^2 x + \sin^2 x = 1$.
+
+**Step 3.** Apply variation of parameters with $g(x) = \sec x$:
+
+$$
+u_1' = -\frac{y_2 g}{W} = -\frac{\sin x \cdot \sec x}{1} = -\frac{\sin x}{\cos x} = -\tan x.
+$$
+
+$$
+u_2' = \frac{y_1 g}{W} = \frac{\cos x \cdot \sec x}{1} = 1.
+$$
+
+**Step 4.** Integrate:
+
+$$
+u_1 = -\int\tan x\,dx = \ln|\cos x|.
+$$
+
+$$
+u_2 = \int 1\,dx = x.
+$$
+
+**Step 5.** Particular solution:
+
+$$
+y_p = \cos x\cdot\ln|\cos x| + x\sin x.
+$$
+
+**General solution:** $y = c_1\cos x + c_2\sin x + \cos x\ln|\cos x| + x\sin x$.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [3.2 - Second-Order Linear Homogeneous ODEs](3.2---Second-Order-Linear-Homogeneous-ODEs) — provides $y_c$
+- [3.6 - Laplace Transforms](3.6---Laplace-Transforms) — alternative method for nonhomogeneous IVPs
+- [2.5 - Determinants & Cramer's Rule](2.5---Determinants-&-Cramer's-Rule) — Cramer's rule used in variation of parameters derivation
+- [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space) — matrix exponential approach to forced systems
+
+### External References
+- **MIT OCW 18.03SC**, Unit II: Undetermined Coefficients and Variation of Parameters
+- **Jiří Lebl**, *Notes on Diffy Qs*, Ch. 2.5–2.6
+- **Professor Leonard**, Lectures 13–18 (step-by-step classroom examples)
+
+---
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Forced RLC Circuit with Sinusoidal Input
+
+A series RLC circuit with $R = 10\,\Omega$, $L = 1$ H, $C = 0.01$ F is driven by $V(t) = 100\cos(5t)$ V. The charge $q(t)$ satisfies:
+
+$$
+q'' + 10q' + 100q = 100\cos(5t).
+$$
+
+Find the steady-state response $q_p(t)$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Solve the homogeneous equation
+
+Characteristic equation: $r^2 + 10r + 100 = 0$.
+
+$$
+r = \frac{-10 \pm \sqrt{100 - 400}}{2} = \frac{-10 \pm \sqrt{-300}}{2} = -5 \pm 5i\sqrt{3}.
+$$
+
+So $y_c = e^{-5t}(C_1\cos 5\sqrt{3}\,t + C_2\sin 5\sqrt{3}\,t)$. This decays — the steady state is $q_p$.
+
+#### Step 2: Guess the particular solution form
+
+Since the forcing is $100\cos(5t)$ and $5i$ is NOT a root of the characteristic equation (the roots are $-5 \pm 5i\sqrt{3}$), we guess:
+
+$$
+q_p = A\cos(5t) + B\sin(5t).
+$$
+
+#### Step 3: Compute derivatives
+
+$$
+q_p' = -5A\sin(5t) + 5B\cos(5t).
+$$
+
+$$
+q_p'' = -25A\cos(5t) - 25B\sin(5t).
+$$
+
+#### Step 4: Substitute into the ODE
+
+$$
+(-25A\cos 5t - 25B\sin 5t) + 10(-5A\sin 5t + 5B\cos 5t) + 100(A\cos 5t + B\sin 5t) = 100\cos 5t.
+$$
+
+Collect $\cos(5t)$ terms:
+
+$$
+(-25A + 50B + 100A)\cos 5t = (75A + 50B)\cos 5t.
+$$
+
+Collect $\sin(5t)$ terms:
+
+$$
+(-25B - 50A + 100B)\sin 5t = (-50A + 75B)\sin 5t.
+$$
+
+#### Step 5: Set up the system
+
+$$
+75A + 50B = 100
+$$
+
+$$
+-50A + 75B = 0
+$$
+
+From the second equation: $B = \frac{50A}{75} = \frac{2A}{3}$.
+
+Substitute into the first: $75A + 50 \cdot \frac{2A}{3} = 75A + \frac{100A}{3} = \frac{225A + 100A}{3} = \frac{325A}{3} = 100$.
+
+$$
+A = \frac{300}{325} = \frac{12}{13}, \qquad B = \frac{2}{3} \cdot \frac{12}{13} = \frac{8}{13}.
+$$
+
+**Final Answer:**
+
+$$
+q_p(t) = \frac{12}{13}\cos(5t) + \frac{8}{13}\sin(5t).
+$$
+
+In amplitude-phase form: $q_p = \frac{\sqrt{144 + 64}}{13}\cos(5t - \phi) = \frac{\sqrt{208}}{13}\cos(5t - \phi) = \frac{4\sqrt{13}}{13}\cos(5t - \phi)$ where $\phi = \arctan(8/12) = \arctan(2/3) \approx 33.7°$.
+
+</details>
+
+### Example 8.2 — Resonance: Undetermined Coefficients with Modification Rule
+
+Solve $y'' + 9y = 6\cos(3t)$, $y(0) = 0$, $y'(0) = 0$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Homogeneous solution
+
+Characteristic equation: $r^2 + 9 = 0 \implies r = \pm 3i$.
+
+$$
+y_c = C_1\cos(3t) + C_2\sin(3t).
+$$
+
+#### Step 2: Identify the resonance problem
+
+The forcing $6\cos(3t)$ is itself a solution of the homogeneous equation (since $3i$ is a characteristic root). The standard guess $A\cos 3t + B\sin 3t$ would duplicate $y_c$.
+
+#### Step 3: Apply the modification rule — multiply by $t$
+
+Guess:
+
+$$
+y_p = t(A\cos 3t + B\sin 3t).
+$$
+
+#### Step 4: Compute derivatives
+
+$$
+y_p' = (A\cos 3t + B\sin 3t) + t(-3A\sin 3t + 3B\cos 3t).
+$$
+
+$$
+y_p'' = (-3A\sin 3t + 3B\cos 3t) + (-3A\sin 3t + 3B\cos 3t) + t(-9A\cos 3t - 9B\sin 3t).
+$$
+
+$$
+y_p'' = -6A\sin 3t + 6B\cos 3t - 9t(A\cos 3t + B\sin 3t).
+$$
+
+#### Step 5: Substitute into $y'' + 9y$
+
+$$
+y_p'' + 9y_p = -6A\sin 3t + 6B\cos 3t - 9t(A\cos 3t + B\sin 3t) + 9t(A\cos 3t + B\sin 3t).
+$$
+
+The $t$-terms cancel:
+
+$$
+y_p'' + 9y_p = -6A\sin 3t + 6B\cos 3t.
+$$
+
+#### Step 6: Match to the right-hand side $6\cos 3t$
+
+$$
+6B = 6 \implies B = 1, \qquad -6A = 0 \implies A = 0.
+$$
+
+So $y_p = t\sin(3t)$.
+
+#### Step 7: General solution and ICs
+
+$$
+y = C_1\cos 3t + C_2\sin 3t + t\sin 3t.
+$$
+
+$y(0) = C_1 = 0$.
+
+$y' = -3C_1\sin 3t + 3C_2\cos 3t + \sin 3t + 3t\cos 3t$.
+
+$y'(0) = 3C_2 = 0 \implies C_2 = 0$.
+
+**Final Answer:**
+
+$$
+y(t) = t\sin(3t).
+$$
+
+This exhibits **pure resonance** — the amplitude grows linearly without bound. Physically, this models an undamped oscillator driven at its natural frequency.
+
+</details>
+
+### Example 8.3 — Variation of Parameters with Non-Elementary Forcing
+
+Solve $y'' + y = \sec t$ on $(-\pi/2, \pi/2)$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Homogeneous solution
+
+$r^2 + 1 = 0 \implies r = \pm i$. So $y_1 = \cos t$, $y_2 = \sin t$.
+
+#### Step 2: Compute the Wronskian
+
+$$
+W = \begin{vmatrix} \cos t & \sin t \\ -\sin t & \cos t \end{vmatrix} = \cos^2 t + \sin^2 t = 1.
+$$
+
+#### Step 3: Variation of parameters formulas
+
+With $g(t) = \sec t$:
+
+$$
+u_1' = -\frac{y_2 \cdot g}{W} = -\frac{\sin t \cdot \sec t}{1} = -\frac{\sin t}{\cos t} = -\tan t.
+$$
+
+$$
+u_2' = \frac{y_1 \cdot g}{W} = \frac{\cos t \cdot \sec t}{1} = 1.
+$$
+
+#### Step 4: Integrate to find $u_1$ and $u_2$
+
+$$
+u_1 = \int -\tan t\,dt = \ln|\cos t|.
+$$
+
+$$
+u_2 = \int 1\,dt = t.
+$$
+
+#### Step 5: Form the particular solution
+
+$$
+y_p = u_1 y_1 + u_2 y_2 = \cos t \cdot \ln|\cos t| + t\sin t.
+$$
+
+**Final Answer:**
+
+$$
+y(t) = C_1\cos t + C_2\sin t + \cos t\ln|\cos t| + t\sin t.
+$$
+
+**Verification:** $y_p'' + y_p = \sec t$ can be checked by differentiating $y_p$ twice (lengthy but straightforward). The key insight is that undetermined coefficients cannot handle $\sec t$ since it's not a polynomial, exponential, sine, or cosine — variation of parameters is the universal method.
+
+</details>
+
+### Example 8.4 — Third-Order ODE with Polynomial Forcing
+
+Solve $y''' - 3y'' + 3y' - y = 4e^t$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Characteristic equation
+
+$$
+r^3 - 3r^2 + 3r - 1 = 0 \implies (r-1)^3 = 0.
+$$
+
+Triple root $r = 1$. Homogeneous solution:
+
+$$
+y_c = (C_1 + C_2 t + C_3 t^2)e^t.
+$$
+
+#### Step 2: Identify the modification needed
+
+The forcing is $4e^t$, and $e^t$ corresponds to $r = 1$, which is a root of multiplicity 3. We must multiply by $t^3$:
+
+$$
+y_p = At^3 e^t.
+$$
+
+#### Step 3: Compute derivatives of $y_p = At^3 e^t$
+
+Using the product rule repeatedly:
+
+$$
+y_p' = A(3t^2 + t^3)e^t = A(t^3 + 3t^2)e^t.
+$$
+
+$$
+y_p'' = A(3t^2 + 6t + t^3 + 3t^2)e^t = A(t^3 + 6t^2 + 6t)e^t.
+$$
+
+$$
+y_p''' = A(3t^2 + 12t + 6 + t^3 + 6t^2 + 6t)e^t = A(t^3 + 9t^2 + 18t + 6)e^t.
+$$
+
+#### Step 4: Substitute into $y''' - 3y'' + 3y' - y$
+
+$$
+y''' - 3y'' + 3y' - y = Ae^t[(t^3 + 9t^2 + 18t + 6) - 3(t^3 + 6t^2 + 6t) + 3(t^3 + 3t^2) - t^3].
+$$
+
+Expand the bracket:
+
+$$
+t^3 + 9t^2 + 18t + 6 - 3t^3 - 18t^2 - 18t + 3t^3 + 9t^2 - t^3.
+$$
+
+Collect by power of $t$:
+
+- $t^3$: $1 - 3 + 3 - 1 = 0$. ✓
+- $t^2$: $9 - 18 + 9 = 0$. ✓
+- $t^1$: $18 - 18 + 0 = 0$. ✓
+- $t^0$: $6$.
+
+So $y''' - 3y'' + 3y' - y = 6Ae^t$.
+
+#### Step 5: Solve for $A$
+
+$$
+6Ae^t = 4e^t \implies A = \frac{2}{3}.
+$$
+
+**Final Answer:**
+
+$$
+y(t) = (C_1 + C_2 t + C_3 t^2)e^t + \frac{2}{3}t^3 e^t.
+$$
+
+</details>
+
+
+
+### Example 8.5 — Superposition for Multiple Forcing Terms
+
+Solve $y'' + 4y = 3e^{2t} + 8\sin(2t)$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Homogeneous solution
+
+$r^2 + 4 = 0 \implies r = \pm 2i$. So $y_c = C_1\cos 2t + C_2\sin 2t$.
+
+#### Step 2: Particular solution for $3e^{2t}$
+
+Since $r = 2$ is not a characteristic root, guess $y_{p1} = Ae^{2t}$.
+
+$y_{p1}'' + 4y_{p1} = 4Ae^{2t} + 4Ae^{2t} = 8Ae^{2t} = 3e^{2t} \implies A = 3/8$.
+
+#### Step 3: Particular solution for $8\sin(2t)$
+
+Since $2i$ IS a characteristic root, we must multiply by $t$. Guess $y_{p2} = t(B\cos 2t + D\sin 2t)$.
+
+Compute $y_{p2}'' + 4y_{p2}$. From the resonance calculation (same as Example 8.2 pattern):
+
+$$
+y_{p2}'' = -4B\sin 2t + 4D\cos 2t - 4t(B\cos 2t + D\sin 2t).
+$$
+
+$$
+y_{p2}'' + 4y_{p2} = -4B\sin 2t + 4D\cos 2t.
+$$
+
+Set equal to $8\sin 2t$: $-4B = 8 \implies B = -2$, $4D = 0 \implies D = 0$.
+
+So $y_{p2} = -2t\cos 2t$.
+
+#### Step 4: Combine by superposition
+
+**Final Answer:**
+
+$$
+y(t) = C_1\cos 2t + C_2\sin 2t + \frac{3}{8}e^{2t} - 2t\cos 2t.
+$$
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Derivation of the Variation of Parameters Formula
+
+We derive the general formula for $y'' + p(t)y' + q(t)y = g(t)$ from first principles, explaining why the two conditions on $u_1', u_2'$ are imposed.
+
+**Setup.** Let $y_1, y_2$ be a fundamental set for the homogeneous equation. We seek $y_p = u_1(t)y_1(t) + u_2(t)y_2(t)$ where $u_1, u_2$ are unknown functions.
+
+**The first derivative:**
+
+$$
+y_p' = u_1'y_1 + u_1 y_1' + u_2'y_2 + u_2 y_2'.
+$$
+
+This has four terms but we have only one equation ($y_p'' + py_p' + qy_p = g$) to determine two unknowns $u_1, u_2$. We have freedom to impose one additional constraint. We choose:
+
+$$
+u_1'y_1 + u_2'y_2 = 0. \tag{Constraint}
+$$
+
+**Why this constraint?** It simplifies $y_p'$ to $y_p' = u_1 y_1' + u_2 y_2'$ (no $u_1', u_2'$ terms), which means $y_p''$ will contain $u_1', u_2'$ only linearly (not their second derivatives). This keeps the system algebraic rather than differential in $u_1', u_2'$.
+
+**The second derivative** (using the constraint):
+
+$$
+y_p'' = u_1'y_1' + u_1 y_1'' + u_2'y_2' + u_2 y_2''.
+$$
+
+**Substitute into the ODE:**
+
+$$
+(u_1'y_1' + u_1 y_1'' + u_2'y_2' + u_2 y_2'') + p(u_1 y_1' + u_2 y_2') + q(u_1 y_1 + u_2 y_2) = g.
+$$
+
+Regroup:
+
+$$
+u_1\underbrace{(y_1'' + py_1' + qy_1)}_{=0} + u_2\underbrace{(y_2'' + py_2' + qy_2)}_{=0} + u_1'y_1' + u_2'y_2' = g.
+$$
+
+So we obtain the second equation:
+
+$$
+u_1'y_1' + u_2'y_2' = g. \tag{ODE condition}
+$$
+
+**The $2 \times 2$ system.** Combining the constraint and ODE condition:
+
+$$
+\begin{pmatrix} y_1 & y_2 \\ y_1' & y_2' \end{pmatrix}\begin{pmatrix} u_1' \\ u_2' \end{pmatrix} = \begin{pmatrix} 0 \\ g \end{pmatrix}.
+$$
+
+The coefficient matrix is the Wronskian matrix, with determinant $W = y_1 y_2' - y_2 y_1' \neq 0$ (since $y_1, y_2$ are linearly independent). By Cramer's rule:
+
+$$
+u_1' = \frac{\begin{vmatrix} 0 & y_2 \\ g & y_2' \end{vmatrix}}{W} = \frac{-y_2 g}{W}, \qquad u_2' = \frac{\begin{vmatrix} y_1 & 0 \\ y_1' & g \end{vmatrix}}{W} = \frac{y_1 g}{W}.
+$$
+
+These are the standard variation of parameters formulas. The method works for ANY continuous $g(t)$ — no restriction to exponentials, polynomials, or sines.
+
+**Extension to $n$th-order equations.** For $y^{(n)} + p_{n-1}y^{(n-1)} + \cdots + p_0 y = g$, with fundamental set $\{y_1, \ldots, y_n\}$, we impose $n-1$ constraints (all "extra" terms from derivatives vanish) and get one equation from the ODE. The resulting $n \times n$ system has the Wronskian matrix as its coefficient matrix.
+
+*Reference: MIT OCW 18.03SC, Lecture 17; Boyce & DiPrima, §3.6.*
+
+### 9.2 The Annihilator Method — Operator Approach to Undetermined Coefficients
+
+The "guess table" for undetermined coefficients can be derived systematically using differential operators. The idea: if $g(t)$ is annihilated by a constant-coefficient operator $A(D)$ (where $D = d/dt$), then applying $A(D)$ to both sides of $L(D)y = g$ gives the homogeneous equation $A(D)L(D)y = 0$, whose solution space contains $y_p$.
+
+**Key annihilators:**
+
+| Forcing $g(t)$ | Annihilator $A(D)$ |
+|---|---|
+| $t^n$ | $(D)^{n+1}$ |
+| $e^{\alpha t}$ | $(D - \alpha)$ |
+| $t^n e^{\alpha t}$ | $(D - \alpha)^{n+1}$ |
+| $\cos(\beta t)$ or $\sin(\beta t)$ | $(D^2 + \beta^2)$ |
+| $t^n\cos(\beta t)$ or $t^n\sin(\beta t)$ | $(D^2 + \beta^2)^{n+1}$ |
+| $e^{\alpha t}\cos(\beta t)$ | $((D-\alpha)^2 + \beta^2)$ |
+
+**Example.** Solve $y'' - 3y' + 2y = 4t^2 e^t$.
+
+The annihilator of $4t^2 e^t$ is $(D-1)^3$. Apply it to both sides:
+
+$$
+(D-1)^3(D^2 - 3D + 2)y = 0 \implies (D-1)^3(D-1)(D-2)y = 0 \implies (D-1)^4(D-2)y = 0.
+$$
+
+The general solution of this 5th-order homogeneous equation is:
+
+$$
+y = (C_1 + C_2 t + C_3 t^2 + C_4 t^3)e^t + C_5 e^{2t}.
+$$
+
+The homogeneous solution of the original equation is $y_c = C_1 e^t + C_5 e^{2t}$. Subtracting, the particular solution must have the form:
+
+$$
+y_p = (At + Bt^2 + Ct^3)e^t.
+$$
+
+Note: the modification rule (multiplying by $t$) emerges automatically because $e^t$ is already in $y_c$. The annihilator method produces the correct guess without memorizing special cases.
+
+One then substitutes $y_p$ into the original ODE and solves for $A, B, C$ by matching coefficients of $te^t$, $t^2 e^t$, $t^3 e^t$.
+
+*Reference: Jiří Lebl, Notes on Diffy Qs, §2.5; Zill, Advanced Engineering Mathematics, §4.5.*
+
+### 9.3 Green's Function for Second-Order BVPs
+
+The variation of parameters formula can be repackaged as a **Green's function** — a kernel that converts any forcing $g(t)$ into the particular solution via an integral.
+
+For the IVP $y'' + p(t)y' + q(t)y = g(t)$ with $y(t_0) = y'(t_0) = 0$, the solution is:
+
+$$
+y_p(t) = \int_{t_0}^{t} G(t, s)\,g(s)\,ds,
+$$
+
+where the Green's function is:
+
+$$
+G(t, s) = \frac{y_1(s)y_2(t) - y_2(s)y_1(t)}{W(s)}.
+$$
+
+**Properties of $G(t,s)$:**
+1. For fixed $s$, $G(t,s)$ satisfies the homogeneous equation in $t$ for $t \neq s$.
+2. $G(s,s) = 0$ and $\frac{\partial G}{\partial t}\big|_{t=s} = 1$ (the "jump condition").
+3. $G$ is the response at time $t$ to a unit impulse at time $s$ — the impulse response function.
+
+**For constant-coefficient equations** $y'' + by' + cy = g(t)$ with characteristic roots $r_1, r_2$ (distinct):
+
+$$
+G(t,s) = \frac{e^{r_1(t-s)} - e^{r_2(t-s)}}{r_1 - r_2}, \quad t \geq s.
+$$
+
+This is the **causal Green's function** — it depends only on the time difference $t - s$, reflecting time-translation invariance of constant-coefficient systems. In engineering, this is the unit impulse response $h(t-s)$, and the solution integral becomes a **convolution**: $y_p = (h * g)(t)$.
+
+The connection to Laplace transforms (Chapter 3.6) is immediate: $\mathcal{L}\{h\}(s) = 1/L(s)$ where $L(s) = s^2 + bs + c$ is the characteristic polynomial evaluated at $s$. This is the transfer function of the system.
+
+*Reference: Strang, Differential Equations and Linear Algebra, §4.5; MIT OCW 18.03, Lecture 22.*
+
+---
+
+
+
+### 9.4 Resonance in Physical Systems — Why It Matters
+
+Resonance occurs when the forcing frequency matches a natural frequency of the system. The mathematical signature is the modification rule (multiplying by $t$), which produces solutions that grow without bound.
+
+**Mechanical resonance.** For $my'' + ky = F_0\cos(\omega t)$ with $\omega = \omega_n = \sqrt{k/m}$:
+
+$$
+y_p(t) = \frac{F_0}{2m\omega_n}t\sin(\omega_n t).
+$$
+
+The amplitude grows linearly with time. In practice, damping limits the growth, but near-resonance still produces dangerously large amplitudes. The Tacoma Narrows Bridge collapse (1940) and the Millennium Bridge wobble (2000) are famous examples.
+
+**With damping** ($my'' + by' + ky = F_0\cos(\omega t)$), the steady-state amplitude is:
+
+$$
+A(\omega) = \frac{F_0}{\sqrt{(k - m\omega^2)^2 + (b\omega)^2}}.
+$$
+
+This peaks at $\omega_r = \sqrt{\omega_n^2 - b^2/(2m^2)}$ (slightly below the natural frequency) with maximum amplitude $A_{\max} = F_0/(b\omega_r)$. The **quality factor** $Q = m\omega_n/b$ measures the sharpness of the resonance peak: high $Q$ means narrow, tall peak (lightly damped); low $Q$ means broad, short peak (heavily damped).
+
+**Electrical resonance.** In an RLC circuit driven at frequency $\omega$, the current amplitude peaks when $\omega = 1/\sqrt{LC}$ (the resonant frequency). The quality factor is $Q = \omega_n L/R = 1/(R\sqrt{C/L})$. Radio tuning exploits this: a variable capacitor adjusts the resonant frequency to select a desired station while rejecting others.
+
+**Avoiding resonance in engineering.** Structural engineers ensure that natural frequencies of buildings and bridges do not coincide with common forcing frequencies (wind gusts, pedestrian footfalls, seismic waves). This requires solving the eigenvalue problem for the structure — connecting directly to [3.2 - Second-Order Linear Homogeneous ODEs](3.2---Second-Order-Linear-Homogeneous-ODEs) and [3.4 - Systems of Linear ODEs & State Space](3.4---Systems-of-Linear-ODEs-&-State-Space).
+
+*Reference: MIT OCW 18.03SC, Lecture on Resonance; Den Hartog, Mechanical Vibrations (Dover, 1985), Ch. 2.*
+
+---
+
+
+
+### 9.5 The Method of Undetermined Coefficients — Complete Decision Algorithm
+
+The following algorithm determines the correct guess for $y_p$ given any forcing of the form $g(t) = t^n e^{\alpha t}\cos(\beta t)$ or $t^n e^{\alpha t}\sin(\beta t)$:
+
+**Input:** The forcing $g(t)$ and the characteristic polynomial $P(r)$ of the homogeneous equation.
+
+**Step 1:** Identify the "base" of $g(t)$. Write $g(t) = t^n e^{\alpha t}\cos\beta t$ (or $\sin$). The associated complex exponential is $e^{(\alpha + i\beta)t}$.
+
+**Step 2:** Determine the multiplicity $m$ of $r = \alpha + i\beta$ as a root of $P(r)$. If $\alpha + i\beta$ is not a root, $m = 0$.
+
+**Step 3:** The guess is:
+
+$$
+y_p = t^m\left(A_0 + A_1 t + \cdots + A_n t^n\right)e^{\alpha t}\cos\beta t + t^m\left(B_0 + B_1 t + \cdots + B_n t^n\right)e^{\alpha t}\sin\beta t.
+$$
+
+**Key points:**
+- The factor $t^m$ is the "modification" that avoids duplication with $y_c$.
+- Both $\cos$ and $\sin$ terms must be included even if only one appears in $g(t)$ (because they are coupled through differentiation).
+- If $\beta = 0$ (pure exponential/polynomial forcing), only the cosine part is needed (with $\cos(0) = 1$).
+
+**Example decision tree for $y'' + y = g(t)$** (characteristic roots $\pm i$):
+
+| $g(t)$ | $\alpha + i\beta$ | Root of $P$? | $m$ | Guess |
+|---|---|---|---|---|
+| $e^{2t}$ | $2$ | No | 0 | $Ae^{2t}$ |
+| $\cos t$ | $i$ | Yes (mult 1) | 1 | $t(A\cos t + B\sin t)$ |
+| $t\sin t$ | $i$ | Yes (mult 1) | 1 | $t(A_0 + A_1 t)\cos t + t(B_0 + B_1 t)\sin t$ |
+| $e^t\cos t$ | $1+i$ | No | 0 | $e^t(A\cos t + B\sin t)$ |
+
+This algorithm is mechanical and infallible — it replaces the need to memorize special cases.
+
+*Reference: Boyce & DiPrima, Elementary Differential Equations (Wiley, 2017), §3.5; Zill, Advanced Engineering Mathematics, §4.4.*
+
+---

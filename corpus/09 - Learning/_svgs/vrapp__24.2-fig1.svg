@@ -1,0 +1,187 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+
+    <!-- Grid Pattern for Engineering Aesthetic -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#30363d" opacity="0.4"/>
+    </pattern>
+
+    <!-- Standard Arrow Marker -->
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#8b949e"/>
+    </marker>
+
+    <!-- Active Accent Arrow Marker -->
+    <marker id="arrActive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#58a6ff"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: #c9d1d9; font-weight: bold; }
+    .header-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: #58a6ff; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #c9d1d9; font-weight: 500; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: #8b949e; }
+    
+    /* Interactive Cards */
+    .state-box { fill: #161b22; stroke: #30363d; stroke-width: 1.2; rx: 6; transition: all 0.3s ease; }
+    .state-box:hover { fill: #21262d; stroke: #8b949e; stroke-width: 1.5; }
+    .active-box { fill: #0d2a4a; stroke: #58a6ff; stroke-width: 1.5; rx: 6; transition: all 0.3s ease; }
+    .active-box:hover { fill: #0f355c; stroke: #79c0ff; stroke-width: 2px; }
+    
+    /* Vendor Specific styles */
+    .quest { fill: #1c3d5a; stroke: #4dabf7; stroke-width: 1.2; rx: 6; transition: all 0.3s ease; }
+    .quest:hover { fill: #244b6e; stroke: #74c0fc; stroke-width: 1.8px; }
+    .vision { fill: #2d1f3d; stroke: #c084fc; stroke-width: 1.2; rx: 6; transition: all 0.3s ease; }
+    .vision:hover { fill: #3b2852; stroke: #d8b4fe; stroke-width: 1.8px; }
+    .index { fill: #1a3322; stroke: #51cf66; stroke-width: 1.2; rx: 6; transition: all 0.3s ease; }
+    .index:hover { fill: #23452e; stroke: #8ce99a; stroke-width: 1.8px; }
+    
+    /* Lines */
+    .line-flow { stroke: #30363d; stroke-width: 1.5; fill: none; }
+    .line-active { stroke: #58a6ff; stroke-width: 1.5; fill: none; stroke-dasharray: 6, 4; animation: flow 2.5s linear infinite; }
+    
+    @keyframes flow {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+  </style>
+
+  <!-- Background Layer -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)"/>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="360" y="28" class="title" text-anchor="middle">OpenXR 1.1 Immersive Lifecycle &amp; Action Bindings</text>
+
+  <!-- ================= LEFT COLUMN: STATE MACHINE ================= -->
+  <text x="40" y="60" class="header-label">I. Session State Machine</text>
+
+  <!-- State Nodes -->
+  <!-- Instance Creation -->
+  <rect x="40" y="80" width="140" height="45" class="state-box"/>
+  <text x="110" y="98" class="label" text-anchor="middle">xrCreateInstance</text>
+  <text x="110" y="112" class="sublabel" text-anchor="middle">xrGetSystem</text>
+
+  <!-- IDLE State -->
+  <rect x="210" y="80" width="140" height="45" class="state-box"/>
+  <text x="280" y="98" class="label" text-anchor="middle">State: IDLE</text>
+  <text x="280" y="112" class="sublabel" text-anchor="middle">Session Created</text>
+
+  <!-- READY State -->
+  <rect x="380" y="80" width="140" height="45" class="state-box"/>
+  <text x="450" y="98" class="label" text-anchor="middle">State: READY</text>
+  <text x="450" y="112" class="sublabel" text-anchor="middle">xrBeginSession()</text>
+
+  <!-- SYNCHRONIZED State -->
+  <rect x="380" y="160" width="140" height="45" class="state-box"/>
+  <text x="450" y="178" class="label" text-anchor="middle">SYNCHRONIZED</text>
+  <text x="450" y="192" class="sublabel" text-anchor="middle">Frame Loop Starts</text>
+
+  <!-- VISIBLE State -->
+  <rect x="380" y="240" width="140" height="45" class="state-box"/>
+  <text x="450" y="258" class="label" text-anchor="middle">State: VISIBLE</text>
+  <text x="450" y="272" class="sublabel" text-anchor="middle">App Visible, No Focus</text>
+
+  <!-- FOCUSED State (Active Render/Input Loop) -->
+  <rect x="380" y="320" width="140" height="45" class="active-box"/>
+  <text x="450" y="338" class="label" text-anchor="middle" fill="#79c0ff" font-weight="bold">State: FOCUSED</text>
+  <text x="450" y="352" class="sublabel" text-anchor="middle" fill="#c9d1d9">Active Input &amp; Render</text>
+
+  <!-- STOPPING State -->
+  <rect x="210" y="160" width="140" height="45" class="state-box"/>
+  <text x="280" y="178" class="label" text-anchor="middle">State: STOPPING</text>
+  <text x="280" y="192" class="sublabel" text-anchor="middle">xrEndSession()</text>
+
+  <!-- Connectors (Static & Animated) -->
+  <!-- Instance -> IDLE -->
+  <path d="M 180 102.5 L 210 102.5" class="line-flow" marker-end="url(#arr)"/>
+  <!-- IDLE -> READY -->
+  <path d="M 350 102.5 L 380 102.5" class="line-flow" marker-end="url(#arr)"/>
+  <!-- READY -> SYNCHRONIZED -->
+  <path d="M 450 125 L 450 160" class="line-flow" marker-end="url(#arr)"/>
+  <!-- SYNCHRONIZED -> VISIBLE -->
+  <path d="M 450 205 L 450 240" class="line-flow" marker-end="url(#arr)"/>
+  
+  <!-- VISIBLE <-> FOCUSED (Active Loop) -->
+  <path d="M 435 285 L 435 320" class="line-active" marker-end="url(#arrActive)"/>
+  <path d="M 465 320 L 465 285" class="line-active" marker-end="url(#arrActive)"/>
+
+  <!-- VISIBLE -> STOPPING -->
+  <path d="M 380 262.5 L 280 262.5 L 280 205" class="line-flow" marker-end="url(#arr)"/>
+  <!-- STOPPING -> IDLE -->
+  <path d="M 280 160 L 280 125" class="line-flow" marker-end="url(#arr)"/>
+
+  <!-- ================= RIGHT COLUMN: ACTION BINDING ================= -->
+  <text x="540" y="60" class="header-label">II. Action Binding Model</text>
+
+  <!-- Semantic Action Layer -->
+  <rect x="540" y="80" width="140" height="45" class="active-box"/>
+  <text x="610" y="98" class="label" text-anchor="middle" fill="#79c0ff">Semantic Action</text>
+  <text x="610" y="112" class="sublabel" text-anchor="middle" fill="#c9d1d9">/actions/grab_object</text>
+
+  <!-- Binding Map Intermediary -->
+  <rect x="540" y="160" width="140" height="45" class="state-box"/>
+  <text x="610" y="178" class="label" text-anchor="middle">Binding Map</text>
+  <text x="610" y="192" class="sublabel" text-anchor="middle">Suggested Bindings</text>
+
+  <!-- Hardware Runtimes (Targets) -->
+  <!-- Meta Quest Touch -->
+  <rect x="540" y="240" width="140" height="45" class="quest"/>
+  <text x="610" y="258" class="label" text-anchor="middle">Meta Quest Touch</text>
+  <text x="610" y="272" class="sublabel" text-anchor="middle">.../input/trigger/value</text>
+
+  <!-- Apple Vision Pro -->
+  <rect x="540" y="295" width="140" height="45" class="vision"/>
+  <text x="610" y="313" class="label" text-anchor="middle">Apple Vision Pro</text>
+  <text x="610" y="327" class="sublabel" text-anchor="middle">.../input/pinch/value</text>
+
+  <!-- Valve Index Knuckles -->
+  <rect x="540" y="350" width="140" height="45" class="index"/>
+  <text x="610" y="368" class="label" text-anchor="middle">Valve Index Knuckles</text>
+  <text x="610" y="382" class="sublabel" text-anchor="middle">.../input/squeeze/value</text>
+
+  <!-- Connectors for Right Column -->
+  <path d="M 610 125 L 610 160" class="line-active" marker-end="url(#arrActive)"/>
+
+  <!-- Bus line for bindings -->
+  <path d="M 610 205 L 610 220 L 515 220 L 515 372.5 L 540 372.5" class="line-flow" />
+  <path d="M 515 262.5 L 540 262.5" class="line-flow" marker-end="url(#arr)"/>
+  <path d="M 515 317.5 L 540 317.5" class="line-flow" marker-end="url(#arr)"/>
+  <path d="M 515 372.5 L 540 372.5" class="line-flow" marker-end="url(#arr)"/>
+
+  <!-- ================= SMIL FLOW ANIMATIONS ================= -->
+  <!-- Session Loop Animation (Green dot traversing the session setup) -->
+  <circle r="3.5" fill="#51cf66">
+    <animateMotion dur="8s" repeatCount="indefinite" path="M 110 102.5 L 280 102.5 L 450 102.5 L 450 182.5 L 450 262.5" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Binding Dispatch Animation (Staggered dots traversing semantic binding down to hardware) -->
+  <!-- Quest Dispatch (Blue dot) -->
+  <circle r="3" fill="#4dabf7">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 610 102.5 L 610 220 L 515 220 L 515 262.5 L 540 262.5" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Apple Dispatch (Purple dot, staggered) -->
+  <circle r="3" fill="#c084fc">
+    <animateMotion dur="4s" begin="1.33s" repeatCount="indefinite" path="M 610 102.5 L 610 220 L 515 220 L 515 317.5 L 540 317.5" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="4s" begin="1.33s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Index Dispatch (Green dot, staggered) -->
+  <circle r="3" fill="#51cf66">
+    <animateMotion dur="4s" begin="2.66s" repeatCount="indefinite" path="M 610 102.5 L 610 220 L 515 220 L 515 372.5 L 540 372.5" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="4s" begin="2.66s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Footer text -->
+  <text x="360" y="415" class="sublabel" text-anchor="middle">OpenXR abstracts vendor-specific drivers, providing unified session states and semantic action mappings.</text>
+</svg>

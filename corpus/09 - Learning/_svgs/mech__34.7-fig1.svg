@@ -1,0 +1,168 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;transition:all 0.3s ease;}
+    .box:hover{stroke:var(--interactive-accent,#58a6ff);fill:rgba(88,166,255,0.02);filter:drop-shadow(0 0 4px rgba(88,166,255,0.15));}
+    .process{fill:var(--background-secondary,#161b22);stroke:var(--interactive-accent,#58a6ff);stroke-width:1.2;transition:all 0.3s ease;cursor:pointer;}
+    .process:hover{fill:rgba(88,166,255,0.08) !important;stroke-width:1.8px;filter:drop-shadow(0 0 4px var(--interactive-accent,#58a6ff));}
+    
+    /* Constraint dot pulsing */
+    @keyframes constr-glow {
+      0%, 100% { fill: #51cf66; transform: scale(1); filter: drop-shadow(0 0 1px #51cf66); }
+      50% { fill: #ffd93d; transform: scale(1.2); filter: drop-shadow(0 0 4px #ffd93d); }
+    }
+    .c-dot {
+      animation: constr-glow 3s infinite;
+      transform-origin: center;
+    }
+    .c-dot-1 { animation-delay: 0s; transform-origin: 300px 140px; }
+    .c-dot-2 { animation-delay: 1s; transform-origin: 440px 140px; }
+    .c-dot-3 { animation-delay: 2s; transform-origin: 370px 80px; }
+    
+    /* Sequential sketch steps animation */
+    @keyframes step-pulse {
+      0%, 100% { fill: rgba(88,166,255,0.04); stroke: var(--interactive-accent,#58a6ff); }
+      20%, 50% { fill: rgba(81,207,102,0.15); stroke: #51cf66; filter: drop-shadow(0 0 4px #51cf66); }
+      70% { fill: rgba(88,166,255,0.04); stroke: var(--interactive-accent,#58a6ff); }
+    }
+    .step-c { transition: all 0.3s ease; cursor: pointer; }
+    .step-c:hover { filter: brightness(1.4) drop-shadow(0 0 6px var(--interactive-accent,#58a6ff)) !important; stroke-width: 1.8px !important; }
+    .step-c1 { animation: step-pulse 12s infinite; }
+    .step-c2 { animation: step-pulse 12s infinite 2s; }
+    .step-c3 { animation: step-pulse 12s infinite 4s; }
+    .step-c4 { animation: step-pulse 12s infinite 6s; }
+    .step-c5 { animation: step-pulse 12s infinite 8s; }
+    .step-c6 { animation: step-pulse 12s infinite 10s; }
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">34.7 — FreeCAD &amp; Parametric Modelling: Workbench Workflows &amp; Sketches</text>
+  
+  <!-- FreeCAD Workbenches (Interactive list) -->
+  <rect x="20" y="35" width="220" height="215" class="box" rx="4"/>
+  <text x="130" y="52" class="label" text-anchor="middle" font-weight="bold">FreeCAD Workbenches</text>
+  
+  <rect x="30" y="60" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="74" class="sub" font-weight="bold" pointer-events="none">Part Design</text>
+  <text x="100" y="74" class="sub" pointer-events="none">— Sketched features (Pad/Pocket)</text>
+  
+  <rect x="30" y="86" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="100" class="sub" font-weight="bold" pointer-events="none">Part</text>
+  <text x="75" y="100" class="sub" pointer-events="none">— CSG primitives + Booleans</text>
+  
+  <rect x="30" y="112" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="126" class="sub" font-weight="bold" pointer-events="none">TechDraw</text>
+  <text x="100" y="126" class="sub" pointer-events="none">— 2D engineering drawings</text>
+  
+  <rect x="30" y="138" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="152" class="sub" font-weight="bold" pointer-events="none">Path</text>
+  <text x="75" y="152" class="sub" pointer-events="none">— CAM / G-code creation</text>
+  
+  <rect x="30" y="164" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="178" class="sub" font-weight="bold" pointer-events="none">FEM</text>
+  <text x="75" y="178" class="sub" pointer-events="none">— Finite Element / CalculiX FEA</text>
+  
+  <rect x="30" y="190" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="204" class="sub" font-weight="bold" pointer-events="none">Draft</text>
+  <text x="75" y="204" class="sub" pointer-events="none">— 2D drafting, lines, arcs</text>
+  
+  <rect x="30" y="216" width="200" height="22" class="process" rx="3" />
+  <text x="40" y="230" class="sub" font-weight="bold" pointer-events="none">Spreadsheet</text>
+  <text x="110" y="230" class="sub" pointer-events="none">— Global variables table</text>
+  
+  <!-- Sketch Constraints diagram -->
+  <rect x="255" y="35" width="230" height="215" class="box" rx="4"/>
+  <text x="370" y="52" class="label" text-anchor="middle" font-weight="bold">Parametric Solver &amp; Constraints</text>
+  
+  <!-- Triangle/Shape profile with glowing constraint dots -->
+  <polygon points="300,140 440,140 370,80" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <circle cx="300" cy="140" r="4" fill="#51cf66" class="c-dot c-dot-1"/>
+  <circle cx="440" cy="140" r="4" fill="#51cf66" class="c-dot c-dot-2"/>
+  <circle cx="370" cy="80" r="4" fill="#51cf66" class="c-dot c-dot-3"/>
+  
+  <!-- Constraint labels -->
+  <text x="370" y="152" class="mono" text-anchor="middle">Horizontal constraint: 140 mm</text>
+  <text x="370" y="164" class="mono" text-anchor="middle">Equal length: L₁ = L₂</text>
+  <text x="370" y="176" class="mono" text-anchor="middle">Degrees of Freedom remaining: 0</text>
+  
+  <!-- Solver status label with color pulse animation -->
+  <text x="370" y="196" class="mono" text-anchor="middle" font-weight="bold" fill="#51cf66">SOLVER STATUS: FULLY CONSTRAINED</text>
+  <text x="370" y="212" class="sub" text-anchor="middle">Over-constraint error (orange/red) = bad!</text>
+  <text x="370" y="226" class="sub" text-anchor="middle">Always resolve redundant constraints first.</text>
+  
+  <!-- Dynamic Spreadsheet/Variables -->
+  <rect x="500" y="35" width="200" height="215" class="box" rx="4"/>
+  <text x="600" y="52" class="label" text-anchor="middle" font-weight="bold">DD Spreadsheet Control</text>
+  <text x="510" y="70" class="sub" font-weight="bold">Global Parameters Table:</text>
+  
+  <rect x="510" y="78" width="180" height="15" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="515" y="89" class="mono">shaft_dia</text>
+  <text x="600" y="89" class="mono">|</text>
+  <text x="610" y="89" class="mono" style="fill:#ffd93d; font-weight:bold;">12.0 mm</text>
+  <text x="675" y="89" class="mono">A1</text>
+  
+  <rect x="510" y="96" width="180" height="15" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="515" y="107" class="mono">shaft_len</text>
+  <text x="600" y="107" class="mono">|</text>
+  <text x="610" y="107" class="mono" style="fill:#ffd93d; font-weight:bold;">45.0 mm</text>
+  <text x="675" y="107" class="mono">A2</text>
+  
+  <rect x="510" y="114" width="180" height="15" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="515" y="125" class="mono">flange_w</text>
+  <text x="600" y="125" class="mono">|</text>
+  <text x="610" y="125" class="mono" style="fill:#ffd93d; font-weight:bold;">5.0 mm</text>
+  <text x="675" y="125" class="mono">A3</text>
+  
+  <rect x="510" y="132" width="180" height="15" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="515" y="143" class="mono">hole_count</text>
+  <text x="600" y="143" class="mono">|</text>
+  <text x="610" y="143" class="mono" style="fill:#ffd93d; font-weight:bold;">6</text>
+  <text x="675" y="143" class="mono">A4</text>
+  
+  <text x="510" y="165" class="sub" font-weight="bold">Expression link in Sketcher:</text>
+  <text x="510" y="177" class="mono">Spreadsheet.shaft_dia</text>
+  <text x="510" y="189" class="mono">Spreadsheet.shaft_len + 2mm</text>
+  <text x="510" y="202" class="sub">Recompute (F5) cascades spreadsheet</text>
+  <text x="510" y="214" class="sub">edits across 3D part geometries.</text>
+  <text x="510" y="226" class="sub">Avoids topological naming issue!</text>
+  
+  <!-- Bottom: sketching workflow -->
+  <rect x="20" y="265" width="680" height="135" class="box" rx="4"/>
+  <text x="360" y="283" class="label" text-anchor="middle" font-weight="bold">Robust Sketching &amp; Modeling Best Practices Workflow</text>
+  
+  <rect x="30" y="293" width="100" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c1"/>
+  <text x="80" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">1. Map Datums</text>
+  <text x="80" y="322" class="sub" text-anchor="middle">Plane attachment</text>
+  
+  <rect x="145" y="293" width="100" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c2"/>
+  <text x="195" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">2. Rough profile</text>
+  <text x="195" y="322" class="sub" text-anchor="middle">Approx shape closed</text>
+  
+  <rect x="260" y="293" width="100" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c3"/>
+  <text x="310" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">3. Geo constraints</text>
+  <text x="310" y="322" class="sub" text-anchor="middle">horiz, vert, equal, tang</text>
+  
+  <rect x="375" y="293" width="100" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c4"/>
+  <text x="425" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">4. Dim constraints</text>
+  <text x="425" y="322" class="sub" text-anchor="middle">lengths, dias, angles</text>
+  
+  <rect x="490" y="293" width="100" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c5"/>
+  <text x="540" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">5. Pad / Pocket</text>
+  <text x="540" y="322" class="sub" text-anchor="middle">Extrude sketch 3D</text>
+  
+  <rect x="605" y="293" width="85" height="35" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3" class="step-c step-c6"/>
+  <text x="647" y="310" class="sub" text-anchor="middle" font-weight="bold" style="fill:var(--text-normal,#c9d1d9);">6. Dress up</text>
+  <text x="647" y="322" class="sub" text-anchor="middle">Fillets, chamfers last</text>
+  
+  <line x1="130" y1="310" x2="145" y2="310" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="245" y1="310" x2="260" y2="310" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="360" y1="310" x2="375" y2="310" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="475" y1="310" x2="490" y2="310" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="590" y1="310" x2="605" y2="310" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  
+  <text x="360" y="348" class="sub" text-anchor="middle">Topological Naming Issue (TNI): modifying early features alters internal face/edge IDs → breaks downstream features. Fix: attach sketches to coordinate planes, not part faces.</text>
+  <text x="360" y="362" class="sub" text-anchor="middle">Use Named Constraints: link dimension constraints to aliases in the spreadsheet to drive assembly dimensions parametrically.</text>
+  <text x="360" y="376" class="sub" text-anchor="middle">Always fully constrain sketches. An unconstrained sketch (white lines) can move unpredictably and break models during regenerations.</text>
+  <text x="360" y="390" class="sub" text-anchor="middle">Free tutorials: MangoJelly Solutions YouTube (excellent FreeCAD channel) · FreeCAD wiki (wiki.freecad.org)</text>
+</svg>

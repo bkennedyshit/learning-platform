@@ -1,0 +1,96 @@
+<svg viewBox="0 0 650 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="q-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="q-arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L8 5 L0 8z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <radialGradient id="sphere-grad">
+      <stop offset="20%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.02"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .q-sphere { fill: url(#sphere-grad); stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; }
+    .q-axis { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; }
+    .q-vec { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .q-vec-rot { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; stroke-dasharray: 6 3; }
+    .q-arc { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.7; stroke-dasharray: 200; animation: drawArc 3s ease-in-out infinite; }
+    @keyframes drawArc {
+      0% { stroke-dashoffset: 200; }
+      50% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 200; }
+    }
+    .q-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .q-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .q-formula { font-family: 'Courier New', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .q-dot { fill: var(--interactive-accent, #58a6ff); transition: r 0.2s; cursor: pointer; }
+    .q-dot:hover { r: 7; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .slerp-path { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawSlerp 3s ease-in-out infinite; }
+    @keyframes drawSlerp {
+      0% { stroke-dashoffset: 600; }
+      50% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -600; }
+    }
+  </style>
+
+  <!-- Left panel: Rotation visualization -->
+  <text x="160" y="20" class="q-accent" text-anchor="middle" font-size="13px">Quaternion Rotation: v' = qvq⁻¹</text>
+
+  <!-- Unit sphere (projected) -->
+  <ellipse cx="160" cy="200" rx="120" ry="120" class="q-sphere"/>
+  <ellipse cx="160" cy="200" rx="120" ry="40" class="q-sphere" stroke-dasharray="3 4"/>
+
+  <!-- Rotation axis k -->
+  <line x1="160" y1="320" x2="160" y2="70" class="q-axis" marker-end="url(#q-arrow-muted)"/>
+  <text x="170" y="68" class="q-label">k̂ (rotation axis)</text>
+
+  <!-- Original vector v -->
+  <line x1="160" y1="200" x2="260" y2="160" class="q-vec" marker-end="url(#q-arrow)"/>
+  <text x="265" y="155" class="q-accent">v</text>
+  <circle cx="260" cy="160" r="4" class="q-dot"/>
+
+  <!-- Rotated vector v' -->
+  <line x1="160" y1="200" x2="100" y2="140" class="q-vec-rot" marker-end="url(#q-arrow-muted)"/>
+  <text x="80" y="135" class="q-label" fill="var(--text-accent, #79c0ff)">v' = qvq⁻¹</text>
+  <circle cx="100" cy="140" r="4" fill="var(--text-accent, #79c0ff)"/>
+
+  <!-- Rotation arc (θ) -->
+  <path d="M 240 170 A 80 30 0 0 0 120 150" class="q-arc"/>
+  <text x="180" y="145" class="q-label" fill="var(--interactive-accent, #58a6ff)">θ</text>
+
+  <!-- Right panel: SLERP on S³ -->
+  <text x="480" y="20" class="q-accent" text-anchor="middle" font-size="13px">SLERP on S³ (projected)</text>
+
+  <!-- Great circle arc -->
+  <ellipse cx="480" cy="200" rx="110" ry="110" class="q-sphere"/>
+
+  <!-- q₀ and q₁ points -->
+  <circle cx="395" cy="145" r="5" class="q-dot"/>
+  <text x="375" y="140" class="q-accent">q₀</text>
+
+  <circle cx="565" cy="145" r="5" class="q-dot"/>
+  <text x="572" y="140" class="q-accent">q₁</text>
+
+  <!-- SLERP great-circle path -->
+  <path d="M 395 145 Q 480 100 565 145" class="slerp-path"/>
+
+  <!-- Interpolated point -->
+  <circle cx="480" cy="108" r="4" fill="var(--text-accent, #79c0ff)">
+    <animate attributeName="cx" values="395;480;565;480;395" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="145;108;145;108;145" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <text x="490" y="100" class="q-label" fill="var(--text-accent, #79c0ff)">slerp(q₀, q₁, t)</text>
+
+  <!-- Formula box -->
+  <rect x="350" y="270" width="270" height="90" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="485" y="295" class="q-formula" text-anchor="middle">q = cos(θ/2) + sin(θ/2)(uₓi + uᵧj + u_zk)</text>
+  <text x="485" y="315" class="q-formula" text-anchor="middle">|q| = 1  ⟹  q⁻¹ = q̄ = (w, -x, -y, -z)</text>
+  <text x="485" y="340" class="q-formula" text-anchor="middle">slerp(q₀,q₁,t) = q₀(q₀⁻¹q₁)^t</text>
+
+  <!-- Hamilton rules box -->
+  <rect x="20" y="330" width="250" height="45" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="145" y="350" class="q-formula" text-anchor="middle">i² = j² = k² = ijk = -1</text>
+  <text x="145" y="368" class="q-formula" text-anchor="middle">ij=k, jk=i, ki=j, ji=-k, kj=-i, ik=-j</text>
+</svg>

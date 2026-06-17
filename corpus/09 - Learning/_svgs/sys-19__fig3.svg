@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #1a202c; }
+      .text-title { font-family: 'Inter', sans-serif; font-weight: bold; font-size: 20px; fill: #ffffff; text-anchor: middle; }
+      .text-label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; fill: #ffffff; text-anchor: middle; }
+      .ring { fill: none; stroke: #4a5568; stroke-width: 6; }
+      .node { fill: #2b6cb0; stroke: #63b3ed; stroke-width: 2; }
+      .key { fill: #48bb78; }
+      .key-new { fill: #e53e3e; }
+      .arc { fill: none; stroke: #e53e3e; stroke-width: 4; stroke-dasharray: 4; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" class="bg" rx="12"/>
+  <text x="400" y="40" class="text-title">Consistent Hashing</text>
+  
+  <g transform="translate(400, 250)">
+    <!-- The Ring -->
+    <circle cx="0" cy="0" r="150" class="ring"/>
+    
+    <!-- Nodes (A, B, C) -->
+    <!-- Node A at 0 rad (right) -->
+    <circle cx="150" cy="0" r="12" class="node"/>
+    <text x="180" y="5" class="text-label">Node A</text>
+    
+    <!-- Node B at 120 deg (bottom left) -->
+    <circle cx="-75" cy="129.9" r="12" class="node"/>
+    <text x="-110" y="150" class="text-label">Node B</text>
+    
+    <!-- Node C at 240 deg (top left) -->
+    <circle cx="-75" cy="-129.9" r="12" class="node"/>
+    <text x="-110" y="-140" class="text-label">Node C</text>
+    
+    <!-- New Node D to be added at 60 deg (top right) -->
+    <g>
+      <circle cx="75" cy="-129.9" r="12" fill="#e53e3e" stroke="#fc8181" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;1;0" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <text x="110" y="-140" class="text-label" opacity="0">
+        <animate attributeName="opacity" values="0;1;1;0" dur="8s" repeatCount="indefinite"/>
+        Node D (New)
+      </text>
+    </g>
+    
+    <!-- Keys mapped to ring -->
+    <!-- Key 1 near top, pointing to A originally, then D -->
+    <g transform="translate(25.6, -147.8)">
+      <circle cx="0" cy="0" r="6" class="key"/>
+    </g>
+    
+    <!-- Key 2 bottom right, points to B -->
+    <g transform="translate(106, 106)">
+      <circle cx="0" cy="0" r="6" class="key"/>
+    </g>
+    
+    <!-- Key 3 far left, points to C -->
+    <g transform="translate(-147.8, -25.6)">
+      <circle cx="0" cy="0" r="6" class="key"/>
+    </g>
+    
+    <!-- Animated Arc showing remapping for Key 1 when D appears -->
+    <path d="M 25.6 -147.8 A 150 150 0 0 1 150 0" fill="none" stroke="#48bb78" stroke-width="3" opacity="1">
+       <animate attributeName="opacity" values="1;0;0;1" dur="8s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 25.6 -147.8 A 150 150 0 0 1 75 -129.9" fill="none" stroke="#e53e3e" stroke-width="3" stroke-dasharray="4" opacity="0">
+       <animate attributeName="opacity" values="0;1;1;0" dur="8s" repeatCount="indefinite"/>
+    </path>
+    
+  </g>
+  <text x="400" y="450" class="text-label" fill="#a0aec0" font-size="12">When a node is added, only keys in its immediate segment are remapped.</text>
+</svg>

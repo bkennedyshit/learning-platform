@@ -1,0 +1,183 @@
+---
+title: "29.2 — Immersive App Architectures: OpenXR, WebXR, Unity XR, Unreal XR"
+subject: "VR"
+catalog: advanced
+audience_tier: higher-education
+chapter: "29.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 29.2 — Immersive App Architectures: OpenXR, WebXR, Unity XR, Unreal XR
+
+> *"Same scene; four runtimes. Once you can ship that, you've graduated."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Understand the **OpenXR action-binding** model and apply it across vendors.
+2. Build a "grab a cube" demo in **Unity XR Interaction Toolkit (XRI)**.
+3. Build the same in **Unreal Engine VR Template**.
+4. Build the same in **WebXR** with **three.js + @react-three/xr**.
+5. Build the same in **RealityKit + SwiftUI** for visionOS.
+6. Pick the right runtime per project (cost, distribution, polish).
+7. Recognize the cross-platform architectural patterns: **portable scene graph**, **input abstraction**, **shared assets via USD/glTF**.
+
+---
+
+## 🖼️ Visual Anchor
+
+![vrapp__24.2-fig1](vrapp__24.2-fig1.svg)
+
+> *Picture / video reference (external):*
+> - 📺 [Khronos OpenXR overview videos](https://www.khronos.org/openxr/)
+> - 📺 [Unity XR Toolkit — Hand Interactions Demo](https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@latest/)
+> - 📺 [Apple WWDC visionOS sessions (free)](https://developer.apple.com/videos/visionos)
+> - 📺 [Meta OpenXR SDK 19 sample apps](https://developers.meta.com/horizon/documentation/native/native-openxr-sdk-sample/)
+
+---
+
+## 📚 1. The OpenXR Mental Model
+
+```
+App ──instances──▶ OpenXR Runtime ──drivers──▶ Headset + controllers
+   │
+   └─actions: select, squeeze, primary_button, palm_pose, …
+       │
+       └─bindings: depend on runtime  (Quest hands ≠ Index controllers ≠ Vision Pro pinch)
+```
+
+**Don't** code "if controller A button X". **Do** declare actions semantically and let the runtime bind them.
+
+> Source: [OpenXR Specification (Khronos)](https://www.khronos.org/openxr/) — content rephrased for compliance.
+
+---
+
+## 🟢 2. Unity XR Toolkit (XRI)
+
+```csharp
+public class GrabbableCube : MonoBehaviour
+{
+    [SerializeField] private XRGrabInteractable grab;
+    void OnEnable()  { grab.selectEntered.AddListener(OnSelectEntered); }
+    void OnDisable() { grab.selectEntered.RemoveListener(OnSelectEntered); }
+    void OnSelectEntered(SelectEnterEventArgs args) { Debug.Log("Picked up by " + args.interactorObject); }
+}
+```
+
+Pros: vast ecosystem, asset store, shipping path to Quest store + App Lab + SideQuest + Steam.
+Cons: render performance constraints; .NET runtime overhead.
+
+---
+
+## 🟣 3. Unreal Engine VR Template
+
+Unreal ships a polished **VR Template** with motion controller, teleport, snap-turn, and grab-actor BP out of the box. Migrate to OpenXR plugin (default in UE 5.5+).
+
+Pros: best-in-class fidelity (Lumen, Nanite-with-VR considerations), huge content pipeline.
+Cons: harder learning curve, fewer Quest-store-tuned shipping examples than Unity.
+
+---
+
+## 🌐 4. WebXR with three.js / @react-three/xr
+
+```tsx
+import { XR, Hands, Controllers } from '@react-three/xr';
+
+export function Scene() {
+  return (
+    <XR>
+      <Controllers />
+      <Hands />
+      <mesh position={[0, 1.5, -1]}>
+        <boxGeometry args={[0.2, 0.2, 0.2]} />
+        <meshStandardMaterial />
+      </mesh>
+    </XR>
+  );
+}
+```
+
+Pros: zero-install distribution, ideal for one-link client demos.
+Cons: performance cap (browser sandbox), less polish than native.
+
+---
+
+## 🍎 5. RealityKit + SwiftUI (visionOS)
+
+```swift
+import SwiftUI
+import RealityKit
+
+struct ImmersiveSpaceView: View {
+    var body: some View {
+        RealityView { content in
+            let cube = ModelEntity(mesh: .generateBox(size: 0.2),
+                                   materials: [SimpleMaterial(color: .red, isMetallic: false)])
+            cube.position = [0, 1.5, -1]
+            content.add(cube)
+        }
+    }
+}
+```
+
+Pros: tight integration with Vision Pro UX, USDZ-native, ARKit-grade scene understanding.
+Cons: Apple-only; less mature game-engine tooling.
+
+---
+
+## 🧩 6. Cross-Platform Architectural Patterns
+
+| Pattern | Why |
+|---|---|
+| **Portable scene graph** | Write data once (USD), render in any runtime. |
+| **Input abstraction** | Use OpenXR actions, not hardware-specific code. |
+| **Shared shader language** | Prefer engine-agnostic descriptions; PBR / Standard surface. |
+| **Runtime feature detection** | Don't assume hand-tracking exists; query the runtime. |
+| **Asset budgets per device** | Quest: 2–4M tris; Vision Pro: more flexible; Web: lighter still. |
+
+---
+
+## 🛠️ 7. Worked Example (skeleton) — One Scene, Four Builds
+
+Define the scene in USD: floor + cube + light. Then:
+1. Unity: Import via USD plugin → XRI → build to Quest.
+2. Unreal: Import via USD → VR Template → package for Quest / SteamVR.
+3. WebXR: load USD via three.js USDZLoader → @react-three/xr → host on a static site.
+4. visionOS: drop `.usdz` into Reality Composer Pro → SwiftUI app.
+
+By the end you have one canonical scene + four runnable builds.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [29.1 - VR Hardware Ecosystems & Standards](29.1---VR-Hardware-Ecosystems-&-Standards)
+- [9.5 - Game Engine Architectures - Unity & Unreal](9.5---Game-Engine-Architectures---Unity-&-Unreal)
+- [9.7 - Spatial Computing & Interaction Design](9.7---Spatial-Computing-&-Interaction-Design)
+- [20.8 - Pipelines, Interop & Productization - From Architecture to Business](20.8---Pipelines,-Interop-&-Productization---From-Architecture-to-Business)
+
+### External
+- [Khronos OpenXR](https://www.khronos.org/openxr/)
+- [Unity XR Interaction Toolkit](https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@latest/)
+- [Unreal Engine OpenXR](https://docs.unrealengine.com/5.5/en-US/openxr-in-unreal-engine/)
+- [Apple visionOS docs](https://developer.apple.com/visionos/)
+- [@react-three/xr](https://github.com/pmndrs/react-three-xr)
+- [A-Frame docs](https://aframe.io/docs/)
+- [Meta OpenXR SDK 19 samples](https://github.com/meta-quest/Meta-OpenXR-SDK)
+
+---
+
+## ⚠️ 9. Common Misconceptions
+
+- **"Pick the engine first."** Pick the use case + audience first; the engine follows.
+- **"Cross-platform = lowest common denominator."** With OpenXR + USD it's now a productivity multiplier, not a quality compromise.
+- **"WebXR isn't real VR."** It is — for many use cases (client review, marketing, demos) it's the preferred channel because there's no install.
+- **"Vision Pro requires rebuilding everything."** USDZ + RealityKit lets you reuse most of your USD content.

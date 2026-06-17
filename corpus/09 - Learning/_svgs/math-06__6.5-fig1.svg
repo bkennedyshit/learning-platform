@@ -1,0 +1,85 @@
+<svg viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="dim-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; marker-end: url(#dim-arrow); color: var(--text-normal, #c9d1d9); }
+    .regime-creep { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; }
+    .regime-laminar { fill: var(--interactive-accent, #58a6ff); opacity: 0.25; }
+    .regime-trans { fill: var(--text-accent, #79c0ff); opacity: 0.2; }
+    .regime-turb { fill: var(--text-accent, #79c0ff); opacity: 0.35; }
+    .regime-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .tick-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .title-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .divider { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 5 3; }
+    .flow-sketch { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; }
+    .turb-sketch { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; }
+    @keyframes wiggle { 0%,100% { d: path("M 420 180 Q 440 170 460 180 Q 480 190 500 180"); } 50% { d: path("M 420 180 Q 440 190 460 180 Q 480 170 500 180"); } }
+  </style>
+
+  <!-- Axes -->
+  <line x1="80" y1="320" x2="530" y2="320" class="axis"/>
+  <line x1="80" y1="320" x2="80" y2="40" class="axis"/>
+  <text x="300" y="355" class="title-label" text-anchor="middle">Reynolds Number (log scale)</text>
+  <text x="30" y="180" class="title-label" text-anchor="middle" transform="rotate(-90, 30, 180)">Flow Type</text>
+
+  <!-- Regime zones -->
+  <rect x="80" y="60" width="100" height="260" class="regime-creep" rx="5"/>
+  <rect x="180" y="60" width="140" height="260" class="regime-laminar" rx="5"/>
+  <rect x="320" y="60" width="80" height="260" class="regime-trans" rx="5"/>
+  <rect x="400" y="60" width="130" height="260" class="regime-turb" rx="5"/>
+
+  <!-- Regime labels -->
+  <text x="130" y="85" class="regime-label" text-anchor="middle">Creeping</text>
+  <text x="130" y="100" class="regime-label" text-anchor="middle">(Stokes)</text>
+  <text x="250" y="85" class="regime-label" text-anchor="middle">Laminar</text>
+  <text x="360" y="85" class="regime-label" text-anchor="middle">Transition</text>
+  <text x="465" y="85" class="regime-label" text-anchor="middle">Turbulent</text>
+
+  <!-- Re tick marks -->
+  <line x1="180" y1="315" x2="180" y2="325" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="180" y="340" class="tick-label" text-anchor="middle">Re ~ 1</text>
+  <line x1="320" y1="315" x2="320" y2="325" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="320" y="340" class="tick-label" text-anchor="middle">Re ~ 2300</text>
+  <line x1="400" y1="315" x2="400" y2="325" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+  <text x="400" y="340" class="tick-label" text-anchor="middle">Re ~ 4000</text>
+
+  <!-- Divider lines -->
+  <line x1="180" y1="60" x2="180" y2="320" class="divider"/>
+  <line x1="320" y1="60" x2="320" y2="320" class="divider"/>
+  <line x1="400" y1="60" x2="400" y2="320" class="divider"/>
+
+  <!-- Flow sketches: laminar streamlines -->
+  <path d="M 200 180 L 300 180" class="flow-sketch">
+    <animateTransform attributeName="transform" type="translate" values="-5,0; 5,0; -5,0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 200 200 L 300 200" class="flow-sketch">
+    <animateTransform attributeName="transform" type="translate" values="-5,0; 5,0; -5,0" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+  </path>
+  <path d="M 200 220 L 300 220" class="flow-sketch">
+    <animateTransform attributeName="transform" type="translate" values="-5,0; 5,0; -5,0" dur="2s" repeatCount="indefinite" begin="1s"/>
+  </path>
+
+  <!-- Turbulent eddies -->
+  <path d="M 420 180 Q 440 170 460 180 Q 480 190 500 180" class="turb-sketch">
+    <animate attributeName="d" values="M 420 180 Q 440 170 460 180 Q 480 190 500 180; M 420 180 Q 440 190 460 180 Q 480 170 500 180; M 420 180 Q 440 170 460 180 Q 480 190 500 180" dur="0.8s" repeatCount="indefinite" />
+  </path>
+  <path d="M 420 200 Q 435 210 450 195 Q 470 205 500 200" class="turb-sketch">
+    <animate attributeName="d" values="M 420 200 Q 435 210 450 195 Q 470 205 500 200; M 420 200 Q 435 190 450 205 Q 470 195 500 200; M 420 200 Q 435 210 450 195 Q 470 205 500 200" dur="0.6s" repeatCount="indefinite" />
+  </path>
+  <path d="M 420 220 Q 445 230 460 215 Q 480 225 500 220" class="turb-sketch">
+    <animate attributeName="d" values="M 420 220 Q 445 230 460 215 Q 480 225 500 220; M 420 220 Q 445 210 460 225 Q 480 215 500 220; M 420 220 Q 445 230 460 215 Q 480 225 500 220" dur="0.9s" repeatCount="indefinite" />
+  </path>
+
+  <!-- Sphere in creeping flow -->
+  <circle cx="130" cy="200" r="15" stroke="var(--text-normal, #c9d1d9)" stroke-width="2" fill="var(--background-secondary, #161b22)"/>
+  <path d="M 145 200 Q 160 195 175 200" class="flow-sketch" style="opacity: 0.7;">
+    <animateTransform attributeName="transform" type="translate" values="-3,0; 3,0; -3,0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 145 200 Q 160 205 175 200" class="flow-sketch" style="opacity: 0.7;">
+    <animateTransform attributeName="transform" type="translate" values="-3,0; 3,0; -3,0" dur="2s" repeatCount="indefinite" begin="1s"/>
+  </path>
+</svg>

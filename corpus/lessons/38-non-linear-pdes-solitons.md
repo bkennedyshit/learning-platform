@@ -1,0 +1,746 @@
+---
+title: "Non Linear Pdes Solitons"
+subject: "Ordinary & Partial Differential Equations"
+catalog: advanced
+audience_tier: higher-education
+chapter: "3.8"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 3.8 — Non-linear PDEs & Solitons
+
+> *"I was observing the motion of a boat which was rapidly drawn along a narrow channel by a pair of horses, when the boat suddenly stopped — not so the mass of water in the channel which it had put in motion; it accumulated round the prow of the vessel in a state of violent agitation, then suddenly leaving it behind, rolled forward with great velocity, assuming the form of a large solitary elevation."* — John Scott Russell (1834)
+
+When nonlinearity enters a PDE, superposition fails and entirely new phenomena emerge: **shock waves** (discontinuities forming from smooth data), **solitons** (localized waves that interact elastically), and **turbulence**. This chapter introduces the key nonlinear PDEs — Burgers' equation, the Korteweg-de Vries (KdV) equation, and the nonlinear Schrödinger equation — along with solution techniques including the method of characteristics, Cole-Hopf transformation, and the inverse scattering transform.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Identify nonlinear terms in PDEs and explain why superposition fails.
+2. Solve first-order nonlinear PDEs via the method of characteristics.
+3. Derive and interpret shock formation in Burgers' equation.
+4. Apply the Cole-Hopf transformation to linearize Burgers' equation.
+5. State the KdV equation and verify the soliton solution $u = A\,\text{sech}^2$.
+6. Understand the balance between nonlinear steepening and dispersion.
+7. Describe the inverse scattering transform conceptually.
+
+---
+
+## 🖼️ Visual Anchor — Soliton Propagation & Collision
+
+![math-03__3.8-fig1](math-03__3.8-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 3.8.1 — Nonlinear PDE
+
+A PDE is **nonlinear** if it contains products of the unknown function $u$ with itself or its derivatives (e.g., $u\,u_x$, $u^2$, $(u_x)^2$). Superposition does not hold.
+
+### Definition 3.8.2 — Burgers' Equation
+
+The **viscous Burgers' equation** is:
+
+$$
+u_t + u\,u_x = \nu\,u_{xx}, \quad \nu > 0.
+$$
+
+The **inviscid** case ($\nu = 0$): $u_t + u\,u_x = 0$ is the simplest model for shock formation.
+
+### Definition 3.8.3 — Korteweg-de Vries (KdV) Equation
+
+$$
+u_t + 6u\,u_x + u_{xxx} = 0.
+$$
+
+The term $6u\,u_x$ provides nonlinear steepening; $u_{xxx}$ provides dispersion. Their balance permits soliton solutions.
+
+### Definition 3.8.4 — Soliton
+
+A **soliton** is a localized, shape-preserving traveling wave solution of a nonlinear dispersive PDE that emerges unchanged (except for a phase shift) from collisions with other solitons.
+
+### Definition 3.8.5 — Method of Characteristics
+
+For a first-order PDE $u_t + c(u)u_x = 0$, the **characteristics** are curves $x(t)$ in the $(x,t)$-plane along which $u$ is constant:
+
+$$
+\frac{dx}{dt} = c(u), \quad u(x(t), t) = \text{const along characteristic}.
+$$
+
+### Definition 3.8.6 — Shock Wave
+
+A **shock** is a discontinuity in the solution that forms when characteristics cross. The shock speed satisfies the **Rankine-Hugoniot condition**:
+
+$$
+s = \frac{f(u_R) - f(u_L)}{u_R - u_L},
+$$
+
+where $f$ is the flux function and $u_L, u_R$ are the states on either side.
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 3.8.P1 (Failure of Superposition):** For nonlinear equations, if $u_1$ and $u_2$ are solutions, $u_1 + u_2$ is generally NOT a solution. Each solution must be found individually.
+
+**Postulate 3.8.P2 (Weak Solutions):** When classical (smooth) solutions break down (shocks), we admit **weak solutions** satisfying the PDE in integral (distributional) form.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 3.8.1 — Cole-Hopf Transformation
+
+The substitution $u = -2\nu\,\frac{\phi_x}{\phi}$ transforms the viscous Burgers' equation $u_t + uu_x = \nu u_{xx}$ into the linear heat equation:
+
+$$
+\phi_t = \nu\,\phi_{xx}.
+$$
+
+**Proof.** Let $u = -2\nu(\ln\phi)_x = -2\nu\phi_x/\phi$. Compute:
+
+$$
+u_t = -2\nu\frac{\phi_{xt}\phi - \phi_x\phi_t}{\phi^2}, \quad u_x = -2\nu\frac{\phi_{xx}\phi - \phi_x^2}{\phi^2}.
+$$
+
+$$
+u_{xx} = -2\nu\frac{d}{dx}\left[\frac{\phi_{xx}\phi - \phi_x^2}{\phi^2}\right].
+$$
+
+Substituting into Burgers' equation and simplifying (using $\phi_t = \nu\phi_{xx}$ as the target), all terms cancel if and only if $\phi$ satisfies the heat equation. $\blacksquare$
+
+### Lemma 3.8.2 — KdV Soliton Verification
+
+The function:
+
+$$
+u(x,t) = \frac{c}{2}\,\text{sech}^2\left(\frac{\sqrt{c}}{2}(x - ct - x_0)\right)
+$$
+
+is a solution of $u_t + 6uu_x + u_{xxx} = 0$ for any $c > 0$.
+
+**Proof sketch.** Let $\xi = x - ct$. Then $u(\xi) = (c/2)\text{sech}^2(\sqrt{c}\,\xi/2)$. Substitute into the ODE $-cu' + 6uu' + u''' = 0$ (where $' = d/d\xi$). Using $\frac{d}{d\xi}\text{sech}^2 = -2\text{sech}^2\tanh$ and $\frac{d^3}{d\xi^3}\text{sech}^2 = \text{sech}^2(...)$, all terms combine to zero. $\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 3.8.1 — Characteristic Curves for Inviscid Burgers
+
+For $u_t + uu_x = 0$ with $u(x,0) = f(x)$, the solution is implicitly defined by:
+
+$$
+u = f(x - ut), \quad \text{i.e., } u(x,t) = f(\xi) \text{ where } x = \xi + f(\xi)t.
+$$
+
+Characteristics are straight lines $x = \xi + f(\xi)t$ in the $(x,t)$-plane.
+
+### Theorem 3.8.2 — Shock Formation Time
+
+For inviscid Burgers' equation with initial data $u(x,0) = f(x)$, the first shock forms at time:
+
+$$
+t_s = \frac{-1}{\min_x f'(x)},
+$$
+
+provided $\min f' < 0$ (i.e., the initial profile has a region of decreasing slope).
+
+### Theorem 3.8.3 — KdV Conservation Laws
+
+The KdV equation has infinitely many conservation laws. The first three are:
+
+$$
+\frac{d}{dt}\int u\,dx = 0, \quad \frac{d}{dt}\int u^2\,dx = 0, \quad \frac{d}{dt}\int\left(u^3 - \frac{1}{2}u_x^2\right)dx = 0.
+$$
+
+These correspond to conservation of mass, momentum, and energy.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Method of Characteristics for Inviscid Burgers
+
+**Step 1.** Write $u_t + uu_x = 0$. Along a curve $x = x(t)$ with $dx/dt = u$:
+
+$$
+\frac{du}{dt} = u_t + u_x\frac{dx}{dt} = u_t + uu_x = 0.
+$$
+
+So $u$ is constant along characteristics.
+
+**Step 2.** Since $u$ is constant along $x(t)$ and $dx/dt = u = \text{const}$, characteristics are straight lines:
+
+$$
+x(t) = \xi + f(\xi)\,t,
+$$
+
+where $\xi = x(0)$ is the initial position and $u = f(\xi)$ along this line.
+
+**Step 3.** Characteristics cross when $\partial x/\partial\xi = 0$:
+
+$$
+1 + f'(\xi)t = 0 \implies t = -1/f'(\xi).
+$$
+
+The earliest crossing (shock formation) occurs at $t_s = -1/\min f'(\xi)$. $\blacksquare$
+
+### 5.2 Derivation of Rankine-Hugoniot Condition
+
+**Step 1.** Write the conservation law form: $u_t + f(u)_x = 0$ where $f(u) = u^2/2$ for Burgers.
+
+**Step 2.** Integrate over a control volume $[x_1, x_2]$ containing the shock at position $x_s(t)$:
+
+$$
+\frac{d}{dt}\int_{x_1}^{x_2}u\,dx + f(u(x_2)) - f(u(x_1)) = 0.
+$$
+
+**Step 3.** Split the integral at the shock: as $x_1 \to x_s^-$ and $x_2 \to x_s^+$:
+
+$$
+-s(u_R - u_L) + f(u_R) - f(u_L) = 0,
+$$
+
+where $s = dx_s/dt$ is the shock speed. Solving:
+
+$$
+s = \frac{f(u_R) - f(u_L)}{u_R - u_L}. \quad \blacksquare
+$$
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 3.8.E1 — Inviscid Burgers with Linear IC
+
+**Solve:** $u_t + uu_x = 0$, $u(x,0) = 1 - x$ for $0 \leq x \leq 1$.
+
+**Step 1.** Characteristics: $x = \xi + (1-\xi)t = \xi(1-t) + t$.
+
+**Step 2.** Solve for $\xi$: $\xi = (x-t)/(1-t)$.
+
+**Step 3.** Solution: $u(x,t) = f(\xi) = 1 - \xi = 1 - (x-t)/(1-t) = (1-x)/(1-t)$.
+
+**Step 4.** Shock time: $f'(\xi) = -1$ everywhere, so $t_s = -1/(-1) = 1$.
+
+At $t = 1$, all characteristics converge to $x = 1$ and a shock forms.
+
+---
+
+### Example 3.8.E2 — KdV Soliton
+
+**Verify** that $u(x,t) = 2\,\text{sech}^2(x - 4t)$ solves $u_t + 6uu_x + u_{xxx} = 0$.
+
+**Step 1.** Here $c = 4$, so $c/2 = 2$ and $\sqrt{c}/2 = 1$. The soliton travels at speed 4.
+
+**Step 2.** Let $\xi = x - 4t$. Then $u = 2\text{sech}^2\xi$.
+
+**Step 3.** Compute: $u' = -4\text{sech}^2\xi\tanh\xi$, $u''' = -8\text{sech}^2\xi + 16\text{sech}^4\xi\cdot(...)$.
+
+**Step 4.** $u_t = -4u' = 16\text{sech}^2\tanh$. $6uu_x = 6(2\text{sech}^2)(-4\text{sech}^2\tanh) = -48\text{sech}^4\tanh$.
+
+**Step 5.** $u_{xxx}$: after computation, $u_{xxx} = -16\text{sech}^2\tanh + 48\text{sech}^4\tanh$.
+
+**Step 6.** Sum: $u_t + 6uu_x + u_{xxx} = 16\text{sech}^2\tanh - 48\text{sech}^4\tanh - 16\text{sech}^2\tanh + 48\text{sech}^4\tanh = 0$. ✓
+
+---
+
+### Example 3.8.E3 — Cole-Hopf Linearization
+
+**Solve** viscous Burgers $u_t + uu_x = u_{xx}$ ($\nu = 1$) with $u(x,0) = 2\text{sech}^2 x$.
+
+**Step 1.** Cole-Hopf: $u = -2\phi_x/\phi$. Need $\phi(x,0)$ such that $-2\phi_x/\phi = 2\text{sech}^2 x$.
+
+**Step 2.** $\phi_x/\phi = -\text{sech}^2 x$, so $\ln\phi = -\tanh x + C$, giving $\phi(x,0) = e^{-\tanh x}$.
+
+**Step 3.** Solve the heat equation $\phi_t = \phi_{xx}$ with this initial data (via Green's function or Fourier transform), then recover $u = -2\phi_x/\phi$.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+- [3.7 - The Heat & Wave PDEs - Separation of Variables](3.7---The-Heat-&-Wave-PDEs---Separation-of-Variables) — linear PDE methods that break down here
+- [3.1 - First-Order ODEs - Separable & Exact](3.1---First-Order-ODEs---Separable-&-Exact) — method of characteristics is an ODE technique
+- [3.5 - Fourier Series & Boundary Value Problems](3.5---Fourier-Series-&-Boundary-Value-Problems) — Fourier analysis of linearized perturbations
+
+### External References
+- **P. G. Drazin & R. S. Johnson**, *Solitons: An Introduction* (Cambridge, 1989)
+- **G. B. Whitham**, *Linear and Nonlinear Waves* (Wiley, 1974)
+- **MIT OCW 18.306** — Introduction to Partial Differential Equations (advanced)
+- **3Blue1Brown** — "Turbulence" (visual exploration of nonlinear phenomena)
+- **John Scott Russell's** original 1844 report on the "Wave of Translation"
+
+---
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Method of Characteristics: Inviscid Burgers' Equation
+
+Solve the inviscid Burgers' equation $u_t + u\,u_x = 0$ with initial condition $u(x,0) = 1/(1+x^2)$ for $x \in \mathbb{R}$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Write the characteristic equations
+
+The PDE $u_t + u\,u_x = 0$ has characteristics defined by:
+
+$$
+\frac{dt}{1} = \frac{dx}{u} = \frac{du}{0}.
+$$
+
+From $du = 0$: $u$ is constant along characteristics. So $u = u_0 = f(x_0) = 1/(1+x_0^2)$ along each characteristic.
+
+From $dx/dt = u = u_0$ (constant): the characteristics are straight lines:
+
+$$
+x = x_0 + u_0\,t = x_0 + \frac{t}{1+x_0^2}.
+$$
+
+#### Step 2: Implicit solution
+
+The solution is given implicitly by:
+
+$$
+u = \frac{1}{1 + (x - ut)^2}.
+$$
+
+This is obtained by substituting $x_0 = x - ut$ into $u = 1/(1+x_0^2)$.
+
+#### Step 3: Determine the breaking time (shock formation)
+
+Characteristics cross when $\partial x/\partial x_0 = 0$ (at fixed $t$):
+
+$$
+\frac{\partial x}{\partial x_0} = 1 + t\,f'(x_0) = 1 + t\cdot\frac{-2x_0}{(1+x_0^2)^2} = 0.
+$$
+
+The minimum of $f'(x_0) = -2x_0/(1+x_0^2)^2$ occurs at $x_0 = 1/\sqrt{3}$ (found by setting $f'' = 0$):
+
+$$
+f'(1/\sqrt{3}) = \frac{-2/\sqrt{3}}{(1+1/3)^2} = \frac{-2/\sqrt{3}}{16/9} = \frac{-9}{8\sqrt{3}} = -\frac{3\sqrt{3}}{8}.
+$$
+
+The breaking time is:
+
+$$
+t_b = \frac{-1}{\min f'(x_0)} = \frac{8}{3\sqrt{3}} = \frac{8\sqrt{3}}{9} \approx 1.54.
+$$
+
+**Final Answer:**
+
+$$
+u(x,t) = \frac{1}{1+(x-ut)^2} \quad \text{(implicit), valid for } t \lt  \frac{8\sqrt{3}}{9}.
+$$
+
+After $t_b$, a shock wave forms and the solution requires the Rankine–Hugoniot jump condition.
+
+</details>
+
+### Example 8.2 — Traveling Wave Solution of the Fisher–KPP Equation
+
+The Fisher equation $u_t = u_{xx} + u(1-u)$ models population spreading. Find a traveling wave solution $u(x,t) = \phi(\xi)$ where $\xi = x - ct$.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Substitute the traveling wave ansatz
+
+With $u = \phi(\xi)$, $\xi = x - ct$:
+
+$$
+u_t = -c\phi', \quad u_x = \phi', \quad u_{xx} = \phi''.
+$$
+
+The PDE becomes:
+
+$$
+-c\phi' = \phi'' + \phi(1-\phi).
+$$
+
+Rearranging:
+
+$$
+\phi'' + c\phi' + \phi(1-\phi) = 0.
+$$
+
+#### Step 2: Phase plane analysis
+
+Let $\psi = \phi'$. The system becomes:
+
+$$
+\phi' = \psi, \qquad \psi' = -c\psi - \phi(1-\phi).
+$$
+
+**Equilibria:** $(\phi, \psi) = (0, 0)$ and $(1, 0)$.
+
+We seek a **heteroclinic orbit** connecting $(1, 0)$ (as $\xi \to -\infty$, the populated region) to $(0, 0)$ (as $\xi \to +\infty$, the unpopulated region).
+
+#### Step 3: Linearize at $(0, 0)$
+
+Jacobian at $(0,0)$:
+
+$$
+J = \begin{pmatrix} 0 & 1 \\ -1 & -c \end{pmatrix}.
+$$
+
+Eigenvalues: $\lambda = \frac{-c \pm \sqrt{c^2 - 4}}{2}$.
+
+For the trajectory to approach $(0,0)$ without oscillation (since $\phi$ represents a population, it must stay non-negative), we need real eigenvalues: $c^2 \geq 4$, i.e., $c \geq 2$.
+
+#### Step 4: The minimum wave speed
+
+The minimum speed for a monotone front is $c_{\min} = 2$.
+
+#### Step 5: Exact solution at $c = 5/\sqrt{6}$ (special case)
+
+For certain speeds, exact solutions exist. At $c = 5/\sqrt{6}$, the solution is:
+
+$$
+\phi(\xi) = \frac{1}{\left(1 + Ae^{\xi/\sqrt{6}}\right)^2},
+$$
+
+where $A \gt  0$ is a translation parameter.
+
+**Final Answer:**
+
+$$
+u(x,t) = \frac{1}{\left(1 + Ae^{(x-ct)/\sqrt{6}}\right)^2}, \quad c = \frac{5}{\sqrt{6}}.
+$$
+
+For the minimum speed $c = 2$, no closed-form solution exists, but the front has the asymptotic behavior $\phi(\xi) \sim C\xi e^{-\xi}$ as $\xi \to +\infty$ (algebraic correction to exponential decay — a signature of the critical speed).
+
+</details>
+
+### Example 8.3 — One-Soliton Solution of the KdV Equation
+
+Derive the single-soliton solution of the Korteweg–de Vries equation:
+
+$$
+u_t + 6uu_x + u_{xxx} = 0.
+$$
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Traveling wave ansatz
+
+Let $u(x,t) = \phi(\xi)$ with $\xi = x - ct$. Substituting:
+
+$$
+-c\phi' + 6\phi\phi' + \phi''' = 0.
+$$
+
+#### Step 2: Integrate once
+
+$$
+-c\phi + 3\phi^2 + \phi'' = A \quad \text{(constant of integration)}.
+$$
+
+For a localized soliton ($\phi \to 0$ as $\xi \to \pm\infty$), set $A = 0$:
+
+$$
+\phi'' = c\phi - 3\phi^2.
+$$
+
+#### Step 3: Multiply by $\phi'$ and integrate (energy method)
+
+$$
+\phi'\phi'' = c\phi\phi' - 3\phi^2\phi' \implies \frac{1}{2}(\phi')^2 = \frac{c}{2}\phi^2 - \phi^3 + B.
+$$
+
+With $\phi, \phi' \to 0$ as $\xi \to \pm\infty$: $B = 0$.
+
+$$
+(\phi')^2 = c\phi^2 - 2\phi^3 = \phi^2(c - 2\phi).
+$$
+
+#### Step 4: Separate variables
+
+$$
+\frac{d\phi}{\phi\sqrt{c - 2\phi}} = \pm d\xi.
+$$
+
+Substitute $\phi = \frac{c}{2}\text{sech}^2(\theta)$, then $c - 2\phi = c(1 - \text{sech}^2\theta) = c\tanh^2\theta$. After working through the substitution (or by direct verification):
+
+$$
+\phi(\xi) = \frac{c}{2}\text{sech}^2\left(\frac{\sqrt{c}}{2}(\xi - \xi_0)\right).
+$$
+
+#### Step 5: Write the full solution
+
+**Final Answer:**
+
+$$
+u(x,t) = \frac{c}{2}\,\text{sech}^2\left(\frac{\sqrt{c}}{2}(x - ct - \xi_0)\right).
+$$
+
+**Key properties:**
+- Amplitude $= c/2$ (taller solitons travel faster).
+- Width $\sim 2/\sqrt{c}$ (taller solitons are narrower).
+- The amplitude-speed relation $c = 2A$ is the hallmark of KdV solitons.
+- The soliton preserves its shape indefinitely — the nonlinear steepening ($6uu_x$) exactly balances the dispersive spreading ($u_{xxx}$).
+
+</details>
+
+### Example 8.4 — Shock Speed from Rankine–Hugoniot Condition
+
+For the conservation law $u_t + (u^2/2)_x = 0$ (Burgers' equation in conservation form), a shock connects $u_L = 2$ (left state) to $u_R = 0$ (right state). Find the shock speed.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: State the Rankine–Hugoniot condition
+
+For a conservation law $u_t + f(u)_x = 0$ with flux $f(u)$, a discontinuity (shock) propagating at speed $s$ satisfies:
+
+$$
+s = \frac{f(u_L) - f(u_R)}{u_L - u_R} = \frac{[f]}{[u]}.
+$$
+
+#### Step 2: Identify the flux
+
+Here $f(u) = u^2/2$.
+
+#### Step 3: Compute the shock speed
+
+$$
+s = \frac{f(2) - f(0)}{2 - 0} = \frac{2 - 0}{2} = 1.
+$$
+
+#### Step 4: Verify the entropy condition (Lax condition)
+
+For a physically admissible shock: $f'(u_L) \gt  s \gt  f'(u_R)$.
+
+$f'(u) = u$, so: $f'(u_L) = 2 \gt  1 \gt  0 = f'(u_R)$. ✓
+
+The characteristics on the left ($dx/dt = 2$) run into the shock, and those on the right ($dx/dt = 0$) are slower — information is being "consumed" by the shock. This is the entropy condition.
+
+**Final Answer:**
+
+$$
+s = 1, \quad u(x,t) = \begin{cases} 2 & x \lt  t, \\ 0 & x \gt  t. \end{cases}
+$$
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 The Inverse Scattering Transform — Solving KdV Exactly
+
+The Korteweg–de Vries equation $u_t + 6uu_x + u_{xxx} = 0$ is integrable: it can be solved exactly for arbitrary (sufficiently decaying) initial data via the **Inverse Scattering Transform (IST)**, discovered by Gardner, Greene, Kruskal, and Miura (1967). This is the nonlinear analogue of the Fourier transform.
+
+**The Lax pair.** The key insight is that KdV can be written as the compatibility condition for two linear problems (the Lax pair):
+
+$$
+L\psi = \lambda\psi, \qquad \psi_t = B\psi,
+$$
+
+where $L = -\partial_{xx} + u(x,t)$ is the Schrödinger operator and $B = -4\partial_{xxx} + 6u\partial_x + 3u_x$ is the time-evolution operator. The condition $\frac{dL}{dt} = [B, L]$ (Lax equation) is equivalent to the KdV equation.
+
+**The IST algorithm (three steps):**
+
+**Step 1: Direct scattering (at $t = 0$).** Solve the Schrödinger eigenvalue problem $-\psi_{xx} + u(x,0)\psi = \lambda\psi$ on $(-\infty, \infty)$. Extract the scattering data:
+- Discrete eigenvalues $\lambda_n = -\kappa_n^2 < 0$ (bound states) — these correspond to solitons.
+- Norming constants $c_n(0)$ for each bound state.
+- Reflection coefficient $R(k, 0)$ for the continuous spectrum ($\lambda = k^2 > 0$) — this corresponds to the dispersive radiation.
+
+**Step 2: Time evolution of scattering data.** The remarkable fact: under KdV evolution, the scattering data evolves trivially:
+- Eigenvalues $\kappa_n$ are time-independent (isospectral flow!).
+- $c_n(t) = c_n(0)\,e^{4\kappa_n^3 t}$.
+- $R(k, t) = R(k, 0)\,e^{8ik^3 t}$.
+
+**Step 3: Inverse scattering (reconstruct $u$ at time $t$).** Solve the Gel'fand–Levitan–Marchenko integral equation:
+
+$$
+K(x, y; t) + F(x+y; t) + \int_x^{\infty} K(x, z; t)\,F(z+y; t)\,dz = 0,
+$$
+
+where $F(x; t) = \sum_n c_n^2(t)\,e^{-\kappa_n x} + \frac{1}{2\pi}\int_{-\infty}^{\infty}R(k,t)\,e^{ikx}\,dk$.
+
+Then $u(x,t) = -2\frac{d}{dx}K(x, x; t)$.
+
+**The reflectionless case ($R = 0$).** When the initial data produces no radiation (pure soliton content), the Marchenko equation reduces to a finite linear system. For $N$ solitons, the solution is:
+
+$$
+u(x,t) = -2\frac{\partial^2}{\partial x^2}\ln\det(I + A(x,t)),
+$$
+
+where $A$ is an $N \times N$ matrix with entries $A_{mn} = \frac{c_m(t)c_n(t)}{\kappa_m + \kappa_n}e^{-(\kappa_m + \kappa_n)x}$.
+
+For $N = 1$: this gives the single soliton $u = \frac{c}{2}\text{sech}^2(\frac{\sqrt{c}}{2}(x - ct))$.
+
+For $N = 2$: the two-soliton solution exhibits the famous **phase shift** — after collision, each soliton emerges unchanged in shape and speed, but shifted in position.
+
+*Reference: Drazin & Johnson, Solitons: An Introduction (Cambridge, 1989), Ch. 3–4; Ablowitz & Clarkson, Solitons, Nonlinear Evolution Equations and Inverse Scattering (Cambridge, 1991).*
+
+### 9.2 Viscous Burgers' Equation and the Cole–Hopf Transform
+
+The viscous Burgers' equation $u_t + uu_x = \nu u_{xx}$ ($\nu > 0$) is one of the few nonlinear PDEs solvable in closed form, via the **Cole–Hopf transformation** (1950–51).
+
+**The transformation.** Let $u = -2\nu\frac{\phi_x}{\phi}$ for some function $\phi(x,t) > 0$. Then:
+
+$$
+u_x = -2\nu\frac{\phi_{xx}\phi - \phi_x^2}{\phi^2} = -2\nu\frac{\phi_{xx}}{\phi} + 2\nu\frac{\phi_x^2}{\phi^2} = -2\nu\frac{\phi_{xx}}{\phi} + \frac{u^2}{2\nu}\cdot\frac{1}{1}...
+$$
+
+More directly, substitute $u = -2\nu(\ln\phi)_x$ into Burgers' equation. After computation (using $u_t = -2\nu(\ln\phi)_{xt}$, $uu_x = -2\nu(\ln\phi)_x \cdot (-2\nu)(\ln\phi)_{xx}$, etc.), the nonlinear terms cancel and one obtains:
+
+$$
+\phi_t = \nu\phi_{xx}.
+$$
+
+This is the **linear heat equation**! The nonlinear Burgers' equation has been exactly linearized.
+
+**Solution procedure:**
+1. Given initial data $u(x,0) = f(x)$, compute $\phi(x,0) = \exp\left(-\frac{1}{2\nu}\int_0^x f(s)\,ds\right)$.
+2. Solve the heat equation for $\phi(x,t)$ using the Green's function:
+
+$$
+\phi(x,t) = \frac{1}{\sqrt{4\pi\nu t}}\int_{-\infty}^{\infty}\phi(y,0)\,\exp\left(-\frac{(x-y)^2}{4\nu t}\right)dy.
+$$
+
+3. Recover $u(x,t) = -2\nu\phi_x/\phi$.
+
+**The limit $\nu \to 0$ (vanishing viscosity).** As $\nu \to 0^+$, the solution of viscous Burgers' converges to the entropy solution of inviscid Burgers' (with shocks selected by the Lax entropy condition). The Cole–Hopf formula becomes dominated by a saddle-point approximation, and the shock location emerges from the competition between exponentials. This provides a rigorous justification for the entropy condition.
+
+**Physical significance.** Burgers' equation models:
+- Nonlinear acoustics (weak shock waves in gases).
+- Traffic flow (density waves with viscous smoothing).
+- The simplest model of turbulence (Burgers turbulence).
+
+The Cole–Hopf transform shows that all "turbulent" behavior in Burgers' equation is ultimately reducible to linear diffusion — a remarkable simplification that does NOT extend to Navier–Stokes.
+
+*Reference: Whitham, Linear and Nonlinear Waves (Wiley, 1974), §4.1–4.3; Tong, Lectures on Kinetic Theory (Cambridge), §2.3.*
+
+### 9.3 Conservation Laws and Noether's Theorem for PDEs
+
+A **conservation law** for a PDE is a relation of the form:
+
+$$
+\frac{\partial \rho}{\partial t} + \frac{\partial J}{\partial x} = 0,
+$$
+
+where $\rho$ is the conserved density and $J$ is the flux. Integrating over all space (assuming decay at infinity):
+
+$$
+\frac{d}{dt}\int_{-\infty}^{\infty}\rho\,dx = 0.
+$$
+
+**KdV has infinitely many conservation laws.** The first three are:
+
+1. **Mass:** $\rho_1 = u$, $J_1 = 3u^2 + u_{xx}$. Conserved quantity: $\int u\,dx$.
+2. **Momentum:** $\rho_2 = u^2$, $J_2 = 4u^3 + 2uu_{xx} - u_x^2$. Conserved quantity: $\int u^2\,dx$.
+3. **Energy:** $\rho_3 = u^3 - \frac{1}{2}u_x^2$, $J_3 = \ldots$ (complicated). Conserved quantity: $\int(u^3 - \frac{1}{2}u_x^2)\,dx$.
+
+The existence of infinitely many conservation laws is the hallmark of **complete integrability** — it is equivalent to the existence of a Lax pair and solvability by IST.
+
+**Noether's theorem (informal statement for PDEs).** Every continuous symmetry of the action functional (Lagrangian) gives rise to a conservation law:
+- Time-translation invariance → energy conservation.
+- Space-translation invariance → momentum conservation.
+- Galilean invariance → center-of-mass motion.
+- Scale invariance → virial-type identities.
+
+For the KdV equation, the infinite family of conservation laws corresponds to an infinite-dimensional symmetry group (the KdV hierarchy), generated by the recursion operator $\mathcal{R} = \partial_{xx} + \frac{2}{3}u + \frac{1}{3}u_x\partial_x^{-1}$.
+
+**Practical use.** Conservation laws provide:
+1. A priori estimates for proving existence/uniqueness of solutions.
+2. Constraints that numerical schemes must respect (symplectic integrators).
+3. Physical invariants that characterize soliton interactions (the $N$-soliton solution conserves all $\int \rho_k\,dx$ individually).
+
+*Reference: Drazin & Johnson, Solitons (Cambridge, 1989), Ch. 5; Olver, Applications of Lie Groups to Differential Equations (Springer, 1993), Ch. 4.*
+
+---
+
+
+
+### 9.4 The Nonlinear Schrödinger Equation and Optical Solitons
+
+The **Nonlinear Schrödinger Equation (NLS)**:
+
+$$
+i\psi_t + \psi_{xx} + 2|\psi|^2\psi = 0
+$$
+
+governs the envelope of waves in dispersive nonlinear media. It is integrable (solvable by IST) and supports soliton solutions.
+
+**Physical contexts:**
+- **Fiber optics:** $\psi$ is the slowly-varying envelope of the electric field in an optical fiber. The $\psi_{xx}$ term represents group velocity dispersion (GVD), and $|\psi|^2\psi$ is the Kerr nonlinearity (intensity-dependent refractive index). Optical solitons propagate without distortion over thousands of kilometers — the basis of modern long-haul telecommunications.
+- **Water waves:** Deep-water wave packets (Benjamin–Feir instability).
+- **Bose–Einstein condensates:** The Gross–Pitaevskii equation is NLS with a trapping potential.
+
+**The bright soliton solution.** For the focusing NLS ($+$ sign on the nonlinear term):
+
+$$
+\psi(x,t) = A\,\text{sech}(A(x - vt))\,\exp\left(i\frac{v}{2}x - i\frac{v^2 - 4A^2}{4}t\right),
+$$
+
+where $A$ is the amplitude and $v$ is the velocity. The envelope $|\psi| = A\,\text{sech}(A(x-vt))$ is a localized pulse that propagates without changing shape — the balance between dispersion (spreading) and nonlinearity (self-focusing) is exact.
+
+**Comparison with KdV solitons:**
+
+| Property | KdV soliton | NLS soliton |
+|---|---|---|
+| Field | Real-valued $u(x,t)$ | Complex-valued $\psi(x,t)$ |
+| Profile | $\text{sech}^2$ | $\text{sech}$ (envelope) |
+| Amplitude-speed relation | $c = 2A$ (faster = taller) | Speed $v$ independent of amplitude |
+| Physical context | Shallow water, ion-acoustic | Deep water, optics, BEC |
+| Interaction | Phase shift only | Phase shift + possible amplitude exchange |
+
+Both are integrable, support $N$-soliton solutions, and have infinitely many conservation laws. The IST machinery applies to both, though the scattering problem for NLS is a $2 \times 2$ matrix system (Zakharov–Shabat) rather than the scalar Schrödinger equation used for KdV.
+
+*Reference: Ablowitz & Segur, Solitons and the Inverse Scattering Transform (SIAM, 1981), Ch. 4; Agrawal, Nonlinear Fiber Optics (Academic Press, 2019), Ch. 5.*
+
+---
+
+
+
+### 9.5 Weak Solutions and the Entropy Condition
+
+For nonlinear conservation laws $u_t + f(u)_x = 0$, classical (smooth) solutions break down at shock formation. The concept of **weak solutions** extends the solution past the shock.
+
+**Definition (Weak Solution).** A bounded measurable function $u(x,t)$ is a weak solution of $u_t + f(u)_x = 0$ if for every smooth test function $\phi(x,t)$ with compact support:
+
+$$
+\int_0^{\infty}\int_{-\infty}^{\infty}\left[u\phi_t + f(u)\phi_x\right]dx\,dt + \int_{-\infty}^{\infty}u(x,0)\phi(x,0)\,dx = 0.
+$$
+
+This is obtained by multiplying the PDE by $\phi$, integrating by parts, and transferring all derivatives to $\phi$ (which is smooth).
+
+**The non-uniqueness problem.** Weak solutions are not unique! Multiple weak solutions can satisfy the same initial data. The physically correct one is selected by an **entropy condition**.
+
+**Lax entropy condition.** A shock connecting $u_L$ to $u_R$ with speed $s$ is admissible if:
+
+$$
+f'(u_L) > s > f'(u_R).
+$$
+
+Geometrically: characteristics run INTO the shock from both sides (information is lost, entropy increases).
+
+**Oleinik's condition (for convex $f$).** For all $u$ between $u_L$ and $u_R$:
+
+$$
+\frac{f(u) - f(u_L)}{u - u_L} \geq s \geq \frac{f(u) - f(u_R)}{u - u_R}.
+$$
+
+**Viscous regularization.** The entropy solution is the unique limit of solutions to the viscous equation $u_t + f(u)_x = \epsilon u_{xx}$ as $\epsilon \to 0^+$. This is the vanishing viscosity method — it selects the physically relevant solution by adding a small amount of dissipation and then removing it.
+
+*Reference: Evans, Partial Differential Equations (AMS, 2010), §3.4; LeVeque, Numerical Methods for Conservation Laws (Birkhäuser, 1992), Ch. 8.*
+
+---

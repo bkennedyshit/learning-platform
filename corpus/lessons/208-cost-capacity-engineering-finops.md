@@ -1,0 +1,229 @@
+---
+title: "20.8 — Cost & Capacity Engineering — FinOps"
+subject: "DevOps & SRE"
+catalog: advanced
+audience_tier: higher-education
+chapter: "20.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 20.8 — Cost & Capacity Engineering — FinOps
+
+> *"The cheapest watt is the one you don't burn. The cheapest CPU is the one you don't provision."*
+
+This chapter is the **economics layer**. Reliability ([20.5 - SLOs, SLAs, Error Budgets & Incident Response](20.5---SLOs,-SLAs,-Error-Budgets-&-Incident-Response)) and resilience ([20.6 - Chaos Engineering & Resilience](20.6---Chaos-Engineering-&-Resilience)) without cost discipline becomes a slow-motion bankruptcy. The 2026 reality: FinOps practice has spread to roughly 85% of enterprises, but only ~28% have closed the loop with **automated** optimization — and cloud waste sits at 27–35% of spend. That gap is your opportunity.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Define the **FinOps Framework** phases — Inform → Optimize → Operate (a.k.a. Crawl / Walk / Run).
+2. Run **autoscaling** properly: **HPA**, **VPA**, **KEDA** (event-driven), **Karpenter** (node autoscaling).
+3. **Right-size** — read actual usage from Prometheus and adjust requests/limits.
+4. Use **spot / preemptible** instances safely with disruption budgets and node pools.
+5. Apply **savings plans / reserved instances / committed-use** for steady baselines.
+6. Enforce **cost-allocation tags** via OPA / policy at IaC time.
+7. Pick a cost dashboard: **OpenCost**, **Kubecost**, **Vantage**, **CloudHealth**, **CAST AI**, **Sedai**.
+
+---
+
+## 🖼️ Visual Anchor
+
+> *Picture / video reference (external):*
+> - 📺 [FinOps Foundation Framework](https://www.finops.org/framework/)
+> - 📺 [OpenCost docs](https://www.opencost.io/docs/)
+> - 📺 [KEDA docs](https://keda.sh/docs/latest/)
+> - 📺 [Karpenter docs](https://karpenter.sh/docs/)
+> - 📺 [turbogeek — CI/CD Cost Gates 2026](https://www.turbogeek.co.uk/finops-devops-cloud-cost-2026/)
+
+---
+
+## 📚 1. The FinOps Framework
+
+The FinOps Foundation organizes practice into three phases (Crawl / Walk / Run):
+
+| Phase | Goal | Looks like |
+|---|---|---|
+| **Inform** | Visibility | Tagging policy enforced; per-team / per-service spend dashboards |
+| **Optimize** | Action | Right-sizing, autoscaling, spot adoption, RI / SP coverage |
+| **Operate** | Continuous | Policy + automation closing the loop without humans in every ticket |
+
+**The 2026 problem:** most orgs are stuck at Inform. Even with mature FinOps, organizations often waste close to 29% of cloud spend; the gap is between knowing what to optimize and actually executing those changes in production. (paraphrased from [sedai — FinOps RACI 2026](https://sedai.io/blog/finops-raci) and [usage.ai — Best Cloud Cost Optimization Tools](https://www.usage.ai/blogs/finops/tools/best-cloud-cost-optimization-tools-usa/), rephrased for compliance)
+
+The strongest 2026 tools execute **autonomous optimization** — continuously tuning resources against live application behavior with safety controls that prevent SLO regressions. (paraphrased from [sedai — 18 Essential FinOps Platforms and Tools](https://sedai.io/blog/18-essential-finops-platforms-and-tools), rephrased for compliance)
+
+---
+
+## ⚖️ 2. Autoscaling on Kubernetes
+
+| Scaler | Scope | Signal | When to use |
+|---|---|---|---|
+| **HPA (Horizontal Pod Autoscaler)** | Replicas of one Deployment | CPU, memory, custom metrics | Steady request-driven services |
+| **VPA (Vertical Pod Autoscaler)** | Per-pod CPU/mem requests | Historical usage | Right-size requests automatically (often **recommend mode** in prod) |
+| **KEDA** | Replicas (incl. scale-to-zero) | 60+ event sources (Kafka lag, SQS depth, cron, HTTP, …) | Bursty / event-driven |
+| **Cluster Autoscaler / Karpenter** | Cluster-level node count | Pending pods | Add nodes for unschedulable workloads |
+
+### KEDA scale-to-zero example
+
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata: { name: orders-worker-scaler }
+spec:
+  scaleTargetRef: { name: orders-worker }
+  minReplicaCount: 0
+  maxReplicaCount: 50
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.kafka:9092
+      consumerGroup: orders-worker
+      topic: orders.events
+      lagThreshold: "100"
+```
+
+When the topic is idle, replicas drop to 0 — you stop paying for nothing. When 1000 events backlog, KEDA spins up replicas based on lag. Karpenter then provisions nodes if the existing ones can't fit them.
+
+### Karpenter — node autoscaler
+
+Karpenter (AWS-originated, now multi-cloud) provisions right-sized nodes per pending workload, replacing `Cluster Autoscaler` for many EKS users. Combined with **spot instances** + disruption budgets, you get cluster scale that follows workload shape, not a pre-baked node-group ladder.
+
+---
+
+## 📉 3. Right-Sizing — The Cheapest Optimization
+
+The core trick: reads CPU/memory usage from Prometheus over a representative window (e.g., 14 days) and sets `requests` near p95 actual usage and `limits` somewhat above.
+
+```promql
+# p95 CPU usage of orders-api over 14 days (cores)
+quantile_over_time(0.95,
+  rate(container_cpu_usage_seconds_total{pod=~"orders-api-.*", container="web"}[5m])[14d:1h])
+```
+
+If the answer is `0.18 cores` and your current request is `1 core`, you're paying ~5× too much for that pod and the scheduler can't pack as many onto a node.
+
+**Important:** never right-size a workload that hasn't been observed across its real seasonality. A 14-day window won't catch a Black Friday or month-end spike. Pair right-sizing with **observability** ([20.4 - Observability - Logs, Metrics, Traces](20.4---Observability---Logs,-Metrics,-Traces)) and **chaos** ([20.6 - Chaos Engineering & Resilience](20.6---Chaos-Engineering-&-Resilience)) to verify resilience.
+
+---
+
+## 🌗 4. Spot / Preemptible — When and How
+
+Spot (AWS), preemptible (GCP), Spot VMs (Azure) can cut compute costs 60–90%. The trade-off: the cloud can reclaim them on minutes notice.
+
+**Safe to run on spot:**
+- Stateless workers (queue consumers, batch jobs)
+- Build / CI agents
+- Stateless front-ends with multi-AZ + sufficient on-demand fallback
+- ML training (with checkpointing) and inference behind autoscaling
+
+**Avoid spot for:**
+- Single-replica stateful databases
+- Anything with > a few minutes of cold-start cost and no checkpointing
+
+Pattern: use **two node pools** — one on-demand for baseline, one spot for burst — with `nodeAffinity` directing each Deployment.
+
+---
+
+## 💰 5. Commitments — Savings Plans & Reservations
+
+For your steady baseline (the floor of demand that's always there), commit:
+- **AWS Savings Plans / Reserved Instances** — 1- or 3-year, up to ~72% discount.
+- **GCP Committed Use Discounts** — flexible across instance families.
+- **Azure Reservations / Savings Plans** — analogous.
+
+Heuristic: cover ~70–80% of your *steady baseline* with commitments, run the rest on-demand + spot. Don't over-commit; an unused commitment is a coupon you forgot to use.
+
+---
+
+## 🏷️ 6. Tag Discipline (Enforced via Policy)
+
+Cost-allocation tags are how you split a cloud bill across teams / products / customers. They only work if they're **enforced** — manual tagging fails. Enforce at IaC time with an OPA / Checkov / Sentinel policy:
+
+```rego
+package terraform.cost_tags
+required := {"env", "owner", "service", "cost_center"}
+deny[msg] {
+  resource := input.resource_changes[_]
+  resource.change.actions[_] != "delete"
+  missing := required - {tag | tag := resource.change.after.tags[_]}
+  count(missing) > 0
+  msg := sprintf("%s missing required tags: %v", [resource.address, missing])
+}
+```
+
+A PR adding an untagged resource fails CI. After three months of enforcement, cost dashboards become useful instead of aspirational.
+
+---
+
+## 📊 7. Cost Dashboards — The Tool Map
+
+| Tool | Sweet spot | Notes |
+|---|---|---|
+| **OpenCost** | Open source, Kubernetes-native | CNCF; foundation under Kubecost |
+| **Kubecost** | OpenCost + UI + commercial extensions | Best for k8s deep-dive |
+| **Vantage** | Multi-cloud cost dashboard SaaS | Strong UX for engineering teams |
+| **CloudHealth (VMware)** | Enterprise multi-cloud | Strongly enterprise-flavoured |
+| **Cloudability (Apptio / IBM)** | Enterprise governance | Heavy on showback / chargeback |
+| **CAST AI** | Automated k8s rightsizing + spot | Aggressive automation |
+| **Sedai** | Autonomous optimization | Goes past dashboards into action |
+| **Usage.ai** | Cost + AI/GPU workload focus | Recent 2026 entrant |
+
+Pick the smallest tool that supports your Crawl-phase visibility, then add an automation tool (CAST AI / Sedai) when you reach Operate.
+
+---
+
+## 🛠️ 8. Worked Example — A Cost Cutting Sprint
+
+Two-week sprint to cut ~30% off an EKS bill while preserving SLOs:
+
+1. **Week 1, Day 1–2 — Inform.** Install OpenCost / Kubecost. Tag policy via OPA. Generate a per-namespace spend report.
+2. **Day 3–4 — Right-size.** For the top 10 workloads by spend, query Prometheus for p95 CPU/mem (last 14 days). Cut requests where p95 is < 50% of current. Watch SLO burn rate ([20.5 - SLOs, SLAs, Error Budgets & Incident Response](20.5---SLOs,-SLAs,-Error-Budgets-&-Incident-Response)) for 24 hours after each batch.
+3. **Day 5 — Autoscale.** Add HPA on top-traffic services with custom metrics (RPS, queue depth). Add KEDA scale-to-zero on idle workers.
+4. **Week 2, Day 6–7 — Spot.** Move build agents and batch jobs to spot via a dedicated node pool with Karpenter.
+5. **Day 8–9 — Commit.** Compute steady baseline; buy a 1-year SP for ~70% of it.
+6. **Day 10 — Verify.** Compare daily spend before / after. Validate SLO hasn't budged. Publish an internal post explaining what changed.
+
+Real teams routinely report 30–50% reductions on this playbook. (paraphrased from [graygroupintl — How to Save 40% on Your Cloud Bill in 2026](https://www.graygroupintl.com/blog/cloud-computing-cost-optimization), rephrased for compliance)
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal
+- [20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration) — where these autoscalers live
+- [20.4 - Observability - Logs, Metrics, Traces](20.4---Observability---Logs,-Metrics,-Traces) — the metrics that drive autoscaling and right-sizing
+- [20.5 - SLOs, SLAs, Error Budgets & Incident Response](20.5---SLOs,-SLAs,-Error-Budgets-&-Incident-Response) — guardrail against over-aggressive cost cuts
+- [20.6 - Chaos Engineering & Resilience](20.6---Chaos-Engineering-&-Resilience) — verifies workloads survive spot terminations
+- [Subject_Plan](Subject_Plan) — the cloud APIs that bill you
+
+### External
+- [FinOps Framework](https://www.finops.org/framework/)
+- [OpenCost](https://www.opencost.io/) · [Kubecost](https://www.kubecost.com/)
+- [KEDA](https://keda.sh/) · [Karpenter](https://karpenter.sh/)
+- [Vantage](https://www.vantage.sh/) · [CloudHealth](https://cloudhealth.vmware.com/) · [Cloudability](https://www.apptio.com/products/cloudability/) · [CAST AI](https://cast.ai/) · [Sedai](https://sedai.io/) · [Usage.ai](https://www.usage.ai/)
+- [sedai — 18 Essential FinOps Platforms](https://sedai.io/blog/18-essential-finops-platforms-and-tools)
+- [usage.ai — Best Cloud Cost Optimization Tools](https://www.usage.ai/blogs/finops/tools/best-cloud-cost-optimization-tools-usa/)
+- [turbogeek — FinOps + DevOps + Cloud Cost 2026](https://www.turbogeek.co.uk/finops-devops-cloud-cost-2026/)
+- [techcircle — Cloud cost engineering FinOps in practice](https://www.techcircle.in/2026/05/06/cloud-cost-engineering-finops-in-practice-automating-optimization-across-kubernetes-and-cloud-native-workloads)
+- [tasrieit — Serverless vs Kubernetes 2026](https://tasrieit.com/blog/serverless-vs-kubernetes-decision-framework-2026)
+- [bitslovers — Kubernetes vs Serverless decision framework](https://www.bitslovers.com/kubernetes-vs-serverless-decision-framework/)
+
+---
+
+## ⚠️ 10. Common Misconceptions
+
+- **"Bigger requests = more reliable."** Oversized requests waste money *and* hurt scheduling density. The signal you want is p95 actual usage + headroom for spikes.
+- **"Spot saves 90% always."** Only on workloads you've engineered to tolerate sudden eviction. Untolerant workloads on spot create incidents that cost more than they save.
+- **"FinOps is finance's problem."** It is engineering's problem. Engineers make architecture choices that move the bill by orders of magnitude. (paraphrased from [akava — FinOps for Founders](https://akava.io/blog/finops-for-founders-cutting-cloud-waste), rephrased for compliance)
+- **"Serverless is always cheaper."** Serverless is cheaper at low or bursty volume; Kubernetes is cheaper at sustained load. The crossover often happens earlier than people expect — measure your specific workload. (paraphrased from [tasrieit — Serverless vs Kubernetes 2026](https://tasrieit.com/blog/serverless-vs-kubernetes-decision-framework-2026), rephrased for compliance)
+- **"Dashboards solve the problem."** Visibility without execution doesn't move the bill. Operate phase requires automation closing the loop. (paraphrased from [usage.ai](https://www.usage.ai/blogs/finops/tools/best-cloud-cost-optimization-tools-usa/), rephrased for compliance)
+
+---
+
+*End of track.* Return to [Subject_Plan](Subject_Plan) · go cross-track to [Subject_Plan](Subject_Plan) · [Subject_Plan](Subject_Plan) · [Subject_Plan](Subject_Plan) · or zoom out to [BUILDING_AT_SCALE](BUILDING_AT_SCALE).

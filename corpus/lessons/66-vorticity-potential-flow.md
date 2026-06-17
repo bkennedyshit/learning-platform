@@ -1,0 +1,886 @@
+---
+title: "Vorticity Potential Flow"
+subject: "Fluid Dynamics & Continuum Mechanics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "6.6"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 6.6 — Vorticity & Potential Flow
+
+> *"The vortex is the sinew and muscle of the fluid — it is the vortex that makes the weather, drives the ocean currents, and creates the lift on an airplane wing."* — paraphrased from Küchemann, *The Aerodynamic Design of Aircraft* (1978).
+
+Vorticity $\boldsymbol{\omega} = \nabla \times \mathbf{v}$ is the local measure of fluid rotation. Where vorticity is zero, the flow is irrotational and can be described by a scalar velocity potential — reducing the vector Navier-Stokes equations to a single scalar Laplace equation. This chapter develops the vorticity equation, proves Helmholtz's vortex theorems, constructs potential flow solutions by superposition, and shows how circulation generates aerodynamic lift (the Kutta-Joukowski theorem).
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Derive the vorticity transport equation from the Navier-Stokes equations.
+2. State and prove Helmholtz's three vortex theorems for inviscid flow.
+3. Define the velocity potential $\phi$ and show it satisfies Laplace's equation for incompressible irrotational flow.
+4. Construct potential flow solutions: uniform flow, source/sink, vortex, doublet.
+5. Superpose elementary solutions to model flow past a cylinder (with and without circulation).
+6. Derive and apply the Kutta-Joukowski lift theorem.
+7. Explain d'Alembert's paradox and its resolution through viscous effects.
+
+---
+
+## 🖼️ Visual Anchor — Potential Flow Past a Cylinder with Circulation
+
+Streamlines around a circular cylinder with added circulation — the asymmetry generates lift (Magnus effect).
+
+![math-06__6.6-fig1](math-06__6.6-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 6.6.1 — Vorticity
+
+The **vorticity** $\boldsymbol{\omega}$ is the curl of the velocity field:
+
+$$
+\boldsymbol{\omega} = \nabla \times \mathbf{v}, \qquad \omega_i = \epsilon_{ijk}\frac{\partial v_k}{\partial x_j}.
+$$
+
+Vorticity equals twice the local angular velocity of a fluid element: $\boldsymbol{\omega} = 2\boldsymbol{\Omega}_{\text{local}}$.
+
+### Definition 6.6.2 — Irrotational Flow
+
+A flow is **irrotational** if $\boldsymbol{\omega} = \nabla \times \mathbf{v} = \mathbf{0}$ everywhere in the domain.
+
+### Definition 6.6.3 — Velocity Potential
+
+For an irrotational flow ($\nabla \times \mathbf{v} = 0$) in a simply-connected domain, there exists a scalar **velocity potential** $\phi$ such that:
+
+$$
+\mathbf{v} = \nabla \phi, \qquad v_i = \frac{\partial \phi}{\partial x_i}.
+$$
+
+### Definition 6.6.4 — Complex Potential (2D)
+
+For 2D incompressible irrotational flow, define the **complex potential**:
+
+$$
+w(z) = \phi(x,y) + i\psi(x,y),
+$$
+
+where $z = x + iy$, $\phi$ is the velocity potential, and $\psi$ is the streamfunction. The function $w(z)$ is analytic (holomorphic), and the complex velocity is:
+
+$$
+\frac{dw}{dz} = v_x - iv_y.
+$$
+
+### Definition 6.6.5 — Vortex Line, Vortex Tube, Vortex Filament
+
+A **vortex line** is a curve everywhere tangent to the vorticity vector $\boldsymbol{\omega}$. A **vortex tube** is the surface formed by all vortex lines passing through a closed curve. A **vortex filament** is a vortex tube of infinitesimal cross-section.
+
+### Definition 6.6.6 — Elementary Potential Flow Solutions
+
+| Flow | Complex Potential $w(z)$ | Velocity Field |
+|------|--------------------------|----------------|
+| Uniform flow | $w = U z$ | $\mathbf{v} = (U, 0)$ |
+| Source (strength $m$) | $w = \frac{m}{2\pi}\ln z$ | $v_r = m/(2\pi r)$ |
+| Vortex (circulation $\Gamma$) | $w = -\frac{i\Gamma}{2\pi}\ln z$ | $v_\theta = \Gamma/(2\pi r)$ |
+| Doublet (strength $\kappa$) | $w = \frac{\kappa}{2\pi z}$ | Dipole field |
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 6.6.A — Inviscid Flow for Vortex Dynamics
+
+Helmholtz's theorems and Kelvin's theorem apply to inviscid, barotropic flow with conservative body forces (same assumptions as [6.3 - Inviscid Fluids - Euler's Equation](6.3---Inviscid-Fluids---Euler's-Equation), Axiom 6.3.C).
+
+### Axiom 6.6.B — Simply-Connected Domain for Potential Existence
+
+The existence of a single-valued velocity potential requires the domain to be simply connected. For multiply-connected domains (e.g., flow around a cylinder), the potential may be multi-valued, and circulation is quantified by the jump in $\phi$ around the body.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 6.6.1 — Velocity Potential Satisfies Laplace's Equation
+
+**Statement.** For incompressible irrotational flow, the velocity potential satisfies:
+
+$$
+\nabla^2 \phi = 0.
+$$
+
+**Proof.** Incompressibility: $\nabla \cdot \mathbf{v} = 0$. Irrotationality: $\mathbf{v} = \nabla \phi$. Substitute:
+
+$$
+\nabla \cdot (\nabla \phi) = \nabla^2 \phi = 0. \quad \blacksquare
+$$
+
+### Lemma 6.6.2 — Streamfunction Also Satisfies Laplace's Equation
+
+**Statement.** For 2D incompressible irrotational flow, $\nabla^2 \psi = 0$.
+
+**Proof.** Irrotationality in 2D: $\frac{\partial v_y}{\partial x} - \frac{\partial v_x}{\partial y} = 0$.
+
+Substitute $v_x = \partial \psi / \partial y$ and $v_y = -\partial \psi / \partial x$:
+
+$$
+\frac{\partial}{\partial x}\left(-\frac{\partial \psi}{\partial x}\right) - \frac{\partial}{\partial y}\left(\frac{\partial \psi}{\partial y}\right) = -\frac{\partial^2 \psi}{\partial x^2} - \frac{\partial^2 \psi}{\partial y^2} = -\nabla^2 \psi = 0.
+$$
+
+Therefore $\nabla^2 \psi = 0$. $\blacksquare$
+
+### Lemma 6.6.3 — Cauchy-Riemann Equations for Complex Potential
+
+**Statement.** The real and imaginary parts of the complex potential $w = \phi + i\psi$ satisfy the Cauchy-Riemann equations:
+
+$$
+\frac{\partial \phi}{\partial x} = \frac{\partial \psi}{\partial y}, \qquad \frac{\partial \phi}{\partial y} = -\frac{\partial \psi}{\partial x}.
+$$
+
+**Proof.** From the definitions: $v_x = \partial \phi / \partial x = \partial \psi / \partial y$ and $v_y = \partial \phi / \partial y = -\partial \psi / \partial x$. These are precisely the Cauchy-Riemann equations, confirming $w(z)$ is analytic. $\blacksquare$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 6.6.1 — Vorticity Transport Equation (Incompressible)
+
+For an incompressible Newtonian fluid:
+
+$$
+\frac{D\boldsymbol{\omega}}{Dt} = (\boldsymbol{\omega} \cdot \nabla)\mathbf{v} + \nu\, \nabla^2 \boldsymbol{\omega}.
+$$
+
+**Term interpretation:**
+- $D\boldsymbol{\omega}/Dt$: rate of change of vorticity following a fluid particle.
+- $(\boldsymbol{\omega} \cdot \nabla)\mathbf{v}$: **vortex stretching** — amplification of vorticity by velocity gradients along the vortex axis. (This term vanishes in 2D.)
+- $\nu \nabla^2 \boldsymbol{\omega}$: viscous diffusion of vorticity.
+
+### Theorem 6.6.2 — Helmholtz's First Vortex Theorem
+
+In an inviscid barotropic fluid with conservative body forces, the strength (circulation) of a vortex tube is constant along its length and constant in time.
+
+### Theorem 6.6.3 — Helmholtz's Second Vortex Theorem
+
+Vortex lines move with the fluid — they are material lines. A fluid particle that is initially on a vortex line remains on a vortex line for all time.
+
+### Theorem 6.6.4 — Kutta-Joukowski Lift Theorem
+
+For steady, 2D, incompressible, irrotational flow past a body with circulation $\Gamma$, the lift force per unit span is:
+
+$$
+L' = \rho U_\infty \Gamma,
+$$
+
+directed perpendicular to the free-stream velocity $U_\infty$. The drag is zero (d'Alembert's paradox).
+
+### Theorem 6.6.5 — D'Alembert's Paradox
+
+A body in steady, incompressible, irrotational potential flow experiences zero drag. This contradicts physical experience and is resolved by recognizing that real flows have viscous boundary layers and wakes that produce drag (see [6.7 - Boundary Layer Theory - Blasius Solution](6.7---Boundary-Layer-Theory---Blasius-Solution)).
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### Proof 5.1 — Derivation of the Vorticity Transport Equation (Theorem 6.6.1)
+
+**Goal:** Take the curl of the Navier-Stokes equations to obtain the vorticity equation.
+
+**Step 1: Start from the N-S equations in convective form.**
+
+$$
+\frac{\partial \mathbf{v}}{\partial t} + (\mathbf{v} \cdot \nabla)\mathbf{v} = -\frac{1}{\rho}\nabla p + \nu \nabla^2 \mathbf{v}.
+$$
+
+**Step 2: Apply Lamb's identity to rewrite the convective term.**
+
+$$
+\frac{\partial \mathbf{v}}{\partial t} + \nabla\left(\frac{v^2}{2}\right) + \boldsymbol{\omega} \times \mathbf{v} = -\frac{1}{\rho}\nabla p + \nu \nabla^2 \mathbf{v}.
+$$
+
+**Step 3: Take the curl of both sides.**
+
+$$
+\frac{\partial \boldsymbol{\omega}}{\partial t} + \nabla \times (\boldsymbol{\omega} \times \mathbf{v}) = \nu \nabla^2 \boldsymbol{\omega}.
+$$
+
+(The curl of a gradient vanishes: $\nabla \times \nabla(v^2/2) = 0$ and $\nabla \times \nabla p = 0$ for barotropic flow.)
+
+**Step 4: Expand $\nabla \times (\boldsymbol{\omega} \times \mathbf{v})$ using the vector identity:**
+
+$$
+\nabla \times (\mathbf{A} \times \mathbf{B}) = \mathbf{A}(\nabla \cdot \mathbf{B}) - \mathbf{B}(\nabla \cdot \mathbf{A}) + (\mathbf{B} \cdot \nabla)\mathbf{A} - (\mathbf{A} \cdot \nabla)\mathbf{B}.
+$$
+
+With $\mathbf{A} = \boldsymbol{\omega}$, $\mathbf{B} = \mathbf{v}$:
+
+$$
+\nabla \times (\boldsymbol{\omega} \times \mathbf{v}) = \boldsymbol{\omega}(\nabla \cdot \mathbf{v}) - \mathbf{v}(\nabla \cdot \boldsymbol{\omega}) + (\mathbf{v} \cdot \nabla)\boldsymbol{\omega} - (\boldsymbol{\omega} \cdot \nabla)\mathbf{v}.
+$$
+
+**Step 5: Simplify using:**
+- $\nabla \cdot \mathbf{v} = 0$ (incompressible): first term vanishes.
+- $\nabla \cdot \boldsymbol{\omega} = \nabla \cdot (\nabla \times \mathbf{v}) = 0$ (divergence of curl is always zero): second term vanishes.
+
+$$
+\nabla \times (\boldsymbol{\omega} \times \mathbf{v}) = (\mathbf{v} \cdot \nabla)\boldsymbol{\omega} - (\boldsymbol{\omega} \cdot \nabla)\mathbf{v}.
+$$
+
+**Step 6: Substitute back.**
+
+$$
+\frac{\partial \boldsymbol{\omega}}{\partial t} + (\mathbf{v} \cdot \nabla)\boldsymbol{\omega} - (\boldsymbol{\omega} \cdot \nabla)\mathbf{v} = \nu \nabla^2 \boldsymbol{\omega}.
+$$
+
+$$
+\underbrace{\frac{\partial \boldsymbol{\omega}}{\partial t} + (\mathbf{v} \cdot \nabla)\boldsymbol{\omega}}_{D\boldsymbol{\omega}/Dt} = (\boldsymbol{\omega} \cdot \nabla)\mathbf{v} + \nu \nabla^2 \boldsymbol{\omega}. \quad \blacksquare
+$$
+
+### Proof 5.2 — Kutta-Joukowski Theorem (Theorem 6.6.4)
+
+**Goal:** Show that lift per unit span equals $L' = \rho U_\infty \Gamma$.
+
+**Step 1: Consider a 2D body in a uniform stream $U_\infty$ with circulation $\Gamma$.**
+
+The complex potential far from the body behaves as:
+
+$$
+w(z) \approx U_\infty z + \frac{m}{2\pi}\ln z - \frac{i\Gamma}{2\pi}\ln z + \frac{\text{doublet}}{z} + \cdots
+$$
+
+For a closed body (no net source), $m = 0$.
+
+**Step 2: The force on the body is given by the Blasius integral theorem.**
+
+$$
+F_x - iF_y = \frac{i\rho}{2}\oint_C \left(\frac{dw}{dz}\right)^2 dz,
+$$
+
+where $C$ is any contour enclosing the body.
+
+**Step 3: Far from the body, $dw/dz \approx U_\infty - \frac{i\Gamma}{2\pi z}$.**
+
+$$
+\left(\frac{dw}{dz}\right)^2 \approx U_\infty^2 - \frac{2U_\infty i\Gamma}{2\pi z} + O(1/z^2) = U_\infty^2 - \frac{iU_\infty \Gamma}{\pi z} + \cdots
+$$
+
+**Step 4: Apply the residue theorem.** Only the $1/z$ term contributes to the contour integral:
+
+$$
+\oint_C \left(\frac{dw}{dz}\right)^2 dz = 2\pi i \cdot \text{Res}_{z=0}\left[-\frac{iU_\infty \Gamma}{\pi z}\right] = 2\pi i \cdot \left(-\frac{iU_\infty \Gamma}{\pi}\right) = 2U_\infty \Gamma.
+$$
+
+**Step 5: Compute the force.**
+
+$$
+F_x - iF_y = \frac{i\rho}{2} \cdot 2U_\infty \Gamma = i\rho U_\infty \Gamma.
+$$
+
+Therefore: $F_x = 0$ (zero drag — d'Alembert's paradox) and $F_y = -\rho U_\infty \Gamma$.
+
+The lift (upward force) is $L' = -F_y = \rho U_\infty \Gamma$ (with appropriate sign convention for $\Gamma$). $\blacksquare$
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 6.6.1 — Flow Past a Cylinder Without Circulation
+
+**Problem.** Find the velocity field and pressure distribution for potential flow past a cylinder of radius $a$ in a uniform stream $U$.
+
+**Solution.**
+
+**Step 1:** The complex potential is uniform flow + doublet:
+
+$$
+w(z) = U\left(z + \frac{a^2}{z}\right).
+$$
+
+**Step 2:** Complex velocity:
+
+$$
+\frac{dw}{dz} = U\left(1 - \frac{a^2}{z^2}\right).
+$$
+
+**Step 3:** On the cylinder surface $z = ae^{i\theta}$:
+
+$$
+\frac{dw}{dz}\bigg|_{r=a} = U(1 - e^{-2i\theta}) = U(1 - \cos 2\theta + i\sin 2\theta).
+$$
+
+The speed on the surface: $|dw/dz| = 2U|\sin\theta|$.
+
+**Step 4:** Pressure from Bernoulli:
+
+$$
+p(\theta) = p_\infty + \frac{1}{2}\rho U^2 - \frac{1}{2}\rho(2U\sin\theta)^2 = p_\infty + \frac{1}{2}\rho U^2(1 - 4\sin^2\theta).
+$$
+
+**Step 5:** The pressure distribution is symmetric fore-and-aft, confirming zero drag (d'Alembert's paradox).
+
+---
+
+### Example 6.6.2 — Vorticity in Poiseuille Flow
+
+**Problem.** Compute the vorticity field for plane Poiseuille flow $u(y) = \frac{G}{2\mu}y(h-y)$, $v = 0$.
+
+**Solution.**
+
+**Step 1:** In 2D, vorticity has only a $z$-component:
+
+$$
+\omega_z = \frac{\partial v}{\partial x} - \frac{\partial u}{\partial y} = 0 - \frac{G}{2\mu}(h - 2y) = -\frac{G}{2\mu}(h - 2y).
+$$
+
+**Step 2:** At the walls: $\omega_z(0) = -\frac{Gh}{2\mu}$, $\omega_z(h) = \frac{Gh}{2\mu}$.
+
+At the centerline ($y = h/2$): $\omega_z = 0$.
+
+**Step 3:** The vorticity is generated at the walls (where shear is maximum) and is zero at the centerline (where the velocity profile has zero slope). This is consistent with the vorticity being the negative of the velocity gradient for this 1D flow.
+
+---
+
+### Example 6.6.3 — Superposition: Source + Uniform Flow (Rankine Half-Body)
+
+**Problem.** A source of strength $m$ is placed at the origin in a uniform stream $U$. Find the stagnation point and the dividing streamline.
+
+**Solution.**
+
+**Step 1:** Complex potential: $w(z) = Uz + \frac{m}{2\pi}\ln z$.
+
+**Step 2:** Stagnation point where $dw/dz = 0$:
+
+$$
+U + \frac{m}{2\pi z} = 0 \implies z = -\frac{m}{2\pi U}.
+$$
+
+The stagnation point is at $x = -m/(2\pi U)$, $y = 0$ (upstream of the source).
+
+**Step 3:** The streamfunction: $\psi = Uy + \frac{m}{2\pi}\theta$ (where $\theta = \arctan(y/x)$).
+
+At the stagnation point: $\psi_s = 0 + \frac{m}{2\pi}\pi = \frac{m}{2}$.
+
+**Step 4:** The dividing streamline (body contour) is $\psi = m/2$:
+
+$$
+Uy + \frac{m\theta}{2\pi} = \frac{m}{2} \implies y = \frac{m}{2U}\left(1 - \frac{\theta}{\pi}\right).
+$$
+
+As $x \to \infty$: $\theta \to 0$, so $y \to m/(2U)$. The half-body has asymptotic half-width $m/(2U)$.
+
+---
+
+### Example 6.6.4 — D'Alembert's Paradox Verification
+
+**Problem.** Show explicitly that the pressure distribution on a cylinder in potential flow (without circulation) produces zero net drag.
+
+**Solution.**
+
+**Step 1:** From Example 6.6.1, the pressure on the cylinder surface is:
+
+$$
+p(\theta) = p_\infty + \frac{1}{2}\rho U^2(1 - 4\sin^2\theta).
+$$
+
+**Step 2:** The drag force (per unit span) is the integral of pressure in the flow direction:
+
+$$
+F_D = -\oint p\cos\theta\, a\, d\theta = -a\int_0^{2\pi} p(\theta)\cos\theta\, d\theta.
+$$
+
+**Step 3:** Substitute the pressure:
+
+$$
+F_D = -a\int_0^{2\pi}\left[p_\infty + \frac{1}{2}\rho U^2(1 - 4\sin^2\theta)\right]\cos\theta\, d\theta.
+$$
+
+**Step 4:** Evaluate each term:
+- $\int_0^{2\pi} \cos\theta\, d\theta = 0$.
+- $\int_0^{2\pi} \cos\theta\, d\theta = 0$ (same).
+- $\int_0^{2\pi} \sin^2\theta\cos\theta\, d\theta = \int_0^{2\pi} \sin^2\theta\, d(\sin\theta) = [\sin^3\theta/3]_0^{2\pi} = 0$.
+
+**Step 5:** Therefore $F_D = 0$. This is d'Alembert's paradox — potential flow predicts zero drag on any body, contradicting physical experience. The resolution is that real flows have viscous boundary layers that separate, creating a wake with low pressure behind the body.
+
+---
+
+### Example 6.6.5 — Helmholtz Theorem Application: Vortex Ring Propagation
+
+**Problem.** A thin vortex ring of radius $R$ and circulation $\Gamma$ propagates through an inviscid fluid. Explain why the ring maintains its strength and estimate its propagation speed.
+
+**Solution.**
+
+**Step 1:** By Helmholtz's First Theorem, the circulation $\Gamma$ of the vortex ring is constant in time (inviscid, barotropic flow).
+
+**Step 2:** By Helmholtz's Second Theorem, the vortex ring moves with the fluid — it is a material structure.
+
+**Step 3:** The self-induced velocity of a thin vortex ring (core radius $a \ll R$) is given by the Kelvin formula:
+
+$$
+V = \frac{\Gamma}{4\pi R}\left(\ln\frac{8R}{a} - \frac{1}{4}\right).
+$$
+
+**Step 4:** For $R = 0.1$ m, $a = 0.005$ m, $\Gamma = 1$ m²/s:
+
+$$
+V = \frac{1}{4\pi(0.1)}\left(\ln\frac{0.8}{0.005} - 0.25\right) = \frac{1}{1.257}(\ln 160 - 0.25) = \frac{1}{1.257}(5.075 - 0.25) = 3.84\;\text{m/s}.
+$$
+
+The ring propagates forward at this speed, maintaining its circulation indefinitely (in the inviscid limit).
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Prerequisites:** [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl) (curl, divergence, Stokes' theorem), [6.3 - Inviscid Fluids - Euler's Equation](6.3---Inviscid-Fluids---Euler's-Equation) (Kelvin's theorem), [6.2 - Mass Conservation - The Continuity Equation](6.2---Mass-Conservation---The-Continuity-Equation) (streamfunction)
+- **Applications:** [6.7 - Boundary Layer Theory - Blasius Solution](6.7---Boundary-Layer-Theory---Blasius-Solution) (resolves d'Alembert's paradox), [6.8 - Compressible Flow & Shock Waves](6.8---Compressible-Flow-&-Shock-Waves) (compressible potential flow)
+- **Mathematical tools:** [3.5 - Laplace's Equation & Harmonic Functions](3.5---Laplace's-Equation-&-Harmonic-Functions) (Laplace equation solutions), complex analysis
+
+### External Resources
+- Helmholtz, H., "Über Integrale der hydrodynamischen Gleichungen" (1858) — the vortex theorems.
+- Milne-Thomson, L.M., *Theoretical Hydrodynamics*, 5th ed. — comprehensive potential flow theory.
+- Batchelor, *An Introduction to Fluid Dynamics*, Ch. 6 — Irrotational Flow Theory.
+- NCFMF Film: *Vorticity* — stunning visualization of vortex dynamics.
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Potential Flow Over a Cylinder with Circulation: The Magnus Effect
+
+**Problem.** A circular cylinder of radius $R$ is placed in a uniform stream of velocity $U$ (in the $x$-direction). A circulation $\Gamma$ is imposed around the cylinder (e.g., by spinning it). Using potential flow theory: (a) Write the complex potential. (b) Find the velocity field. (c) Locate the stagnation points. (d) Compute the lift force per unit span (Kutta-Joukowski theorem).
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Complex Potential
+
+The complex potential for uniform flow + doublet (cylinder) + point vortex is:
+
+$$
+w(z) = U\left(z + \frac{R^2}{z}\right) + \frac{i\Gamma}{2\pi}\ln z,
+$$
+
+where $z = x + iy$ is the complex coordinate. The three terms represent:
+- $Uz$: uniform stream.
+- $UR^2/z$: doublet that creates the cylinder (ensures $|z| = R$ is a streamline).
+- $(i\Gamma/2\pi)\ln z$: point vortex at the origin providing circulation.
+
+#### Step 2: Complex Velocity
+
+$$
+\frac{dw}{dz} = U\left(1 - \frac{R^2}{z^2}\right) + \frac{i\Gamma}{2\pi z}.
+$$
+
+On the cylinder surface, $z = Re^{i\theta}$:
+
+$$
+\frac{dw}{dz}\bigg|_{z=Re^{i\theta}} = U(1 - e^{-2i\theta}) + \frac{i\Gamma}{2\pi R}e^{-i\theta}.
+$$
+
+The velocity components in polar coordinates on the surface:
+
+$$
+v_r = 0 \quad (\text{no penetration}), \qquad v_\theta = -2U\sin\theta - \frac{\Gamma}{2\pi R}.
+$$
+
+(The tangential velocity on the cylinder surface.)
+
+#### Step 3: Stagnation Points
+
+Stagnation points occur where $dw/dz = 0$. On the cylinder ($|z| = R$), set $v_\theta = 0$:
+
+$$
+-2U\sin\theta - \frac{\Gamma}{2\pi R} = 0 \implies \sin\theta = -\frac{\Gamma}{4\pi R U}.
+$$
+
+Define $\alpha = \Gamma/(4\pi RU)$:
+
+- If $|\alpha| \lt  1$: two stagnation points on the cylinder at $\theta = -\arcsin(\alpha)$ and $\theta = \pi + \arcsin(\alpha)$.
+- If $|\alpha| = 1$: the two stagnation points merge at $\theta = -\pi/2$ (bottom of cylinder for $\Gamma \gt  0$).
+- If $|\alpha| \gt  1$: no stagnation points on the cylinder surface — they move off into the flow field.
+
+#### Step 4: Pressure Distribution (Bernoulli)
+
+$$
+p(\theta) = p_\infty + \frac{1}{2}\rho U^2 - \frac{1}{2}\rho v_\theta^2 = p_\infty + \frac{1}{2}\rho U^2\left[1 - \left(2\sin\theta + \frac{\Gamma}{2\pi RU}\right)^2\right].
+$$
+
+#### Step 5: Lift Force (Kutta-Joukowski Theorem)
+
+The lift per unit span is obtained by integrating the pressure around the cylinder:
+
+$$
+L = -\oint p \sin\theta\, R\, d\theta.
+$$
+
+After substitution and integration (using $\int_0^{2\pi} \sin^2\theta\, d\theta = \pi$, $\int_0^{2\pi} \sin\theta\, d\theta = 0$):
+
+$$
+L = \rho U \Gamma.
+$$
+
+This is the **Kutta-Joukowski theorem** — the lift per unit span equals $\rho U \Gamma$, regardless of the body shape (for any 2D potential flow with circulation).
+
+#### Step 6: Drag Force
+
+$$
+D = -\oint p \cos\theta\, R\, d\theta = 0.
+$$
+
+The drag is zero — this is **d'Alembert's paradox**. In potential flow (inviscid, irrotational), there is no drag on any body. Real drag arises from viscous effects (boundary layers, separation, wake).
+
+#### Step 7: Physical Interpretation — Magnus Effect
+
+The circulation $\Gamma$ creates an asymmetry: the flow is faster on one side of the cylinder (where the circulation adds to the freestream) and slower on the other. By Bernoulli, faster flow → lower pressure. The pressure difference creates a net force perpendicular to the flow — this is the **Magnus effect**.
+
+Applications: spinning baseballs (curve balls), Flettner rotors (ship propulsion), golf ball backspin (lift).
+
+**Final Answer:**
+
+$$
+L = \rho U \Gamma, \qquad D = 0 \quad \text{(d'Alembert's paradox)}.
+$$
+
+</details>
+
+### Example 8.2 — Kelvin's Circulation Theorem: Starting Vortex
+
+**Problem.** An airfoil starts from rest in a fluid initially at rest. Using Kelvin's circulation theorem, explain why a starting vortex must be shed and determine its strength.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Initial Condition
+
+At $t = 0$, the fluid is at rest everywhere: $\mathbf{v} = 0$. Consider a large material loop $C$ that encloses the region where the airfoil will be. The initial circulation is:
+
+$$
+\Gamma_0 = \oint_C \mathbf{v} \cdot d\mathbf{l} = 0.
+$$
+
+#### Step 2: Apply Kelvin's Theorem
+
+For inviscid, barotropic flow with conservative body forces, Kelvin's theorem states:
+
+$$
+\frac{D\Gamma}{Dt} = 0 \implies \Gamma(t) = \Gamma_0 = 0 \quad \text{for all } t.
+$$
+
+The total circulation around any material loop remains zero for all time.
+
+#### Step 3: After the Airfoil Starts Moving
+
+Once the airfoil is in motion and the Kutta condition is satisfied at the trailing edge, the airfoil develops a bound circulation $\Gamma_b$ (which produces lift via Kutta-Joukowski). But the total circulation around the large material loop must remain zero!
+
+#### Step 4: The Starting Vortex
+
+To maintain $\Gamma_{\text{total}} = 0$, a **starting vortex** of equal and opposite circulation $\Gamma_s = -\Gamma_b$ must be shed from the trailing edge. This vortex is left behind as the airfoil moves forward.
+
+$$
+\Gamma_{\text{total}} = \Gamma_b + \Gamma_s = \Gamma_b + (-\Gamma_b) = 0. \quad \checkmark
+$$
+
+#### Step 5: Quantitative Relationship
+
+If the airfoil eventually reaches steady-state lift $L = \rho U \Gamma_b$, then the starting vortex has circulation:
+
+$$
+|\Gamma_s| = |\Gamma_b| = \frac{L}{\rho U}.
+$$
+
+For a typical aircraft wing: $L = \frac{1}{2}\rho U^2 c \cdot C_L$ (where $c$ is chord), so:
+
+$$
+\Gamma_b = \frac{L}{\rho U} = \frac{1}{2}U c\, C_L.
+$$
+
+#### Step 6: Experimental Verification
+
+The starting vortex is readily observed in flow visualization experiments (smoke or dye). When an airfoil is impulsively started, a clear vortex rolls up at the trailing edge and is convected downstream. This was first observed by Prandtl (1904) and provides direct experimental confirmation of Kelvin's theorem.
+
+**Final Answer:**
+
+$$
+\Gamma_{\text{starting vortex}} = -\Gamma_{\text{bound}} = -\frac{L}{\rho U}.
+$$
+
+</details>
+
+### Example 8.3 — Superposition of Elementary Potential Flows: Rankine Half-Body
+
+**Problem.** A uniform stream $U$ in the $x$-direction is combined with a point source of strength $m$ at the origin. (a) Find the stream function. (b) Locate the stagnation point. (c) Find the equation of the dividing streamline (Rankine half-body shape). (d) Determine the half-body's maximum half-width.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Stream Functions of Individual Flows
+
+- Uniform stream: $\psi_{\text{stream}} = Uy = Ur\sin\theta$.
+- Point source of strength $m$ (volume flow rate per unit depth): $\psi_{\text{source}} = \frac{m}{2\pi}\theta$.
+
+#### Step 2: Combined Stream Function
+
+$$
+\psi(r, \theta) = Ur\sin\theta + \frac{m}{2\pi}\theta.
+$$
+
+#### Step 3: Stagnation Point
+
+At a stagnation point, both velocity components vanish:
+
+$$
+v_r = \frac{1}{r}\frac{\partial \psi}{\partial \theta} = U\cos\theta + \frac{m}{2\pi r} = 0,
+$$
+
+$$
+v_\theta = -\frac{\partial \psi}{\partial r} = -U\sin\theta = 0.
+$$
+
+From $v_\theta = 0$: $\sin\theta = 0 \implies \theta = 0$ or $\theta = \pi$.
+
+From $v_r = 0$ with $\theta = \pi$: $U\cos\pi + \frac{m}{2\pi r} = -U + \frac{m}{2\pi r} = 0$.
+
+$$
+r_s = \frac{m}{2\pi U}.
+$$
+
+The stagnation point is at $(r, \theta) = (m/(2\pi U),\; \pi)$, i.e., upstream of the source at distance $m/(2\pi U)$.
+
+#### Step 4: Dividing Streamline
+
+The dividing streamline passes through the stagnation point. Its stream function value is:
+
+$$
+\psi_s = U \cdot \frac{m}{2\pi U} \cdot \sin\pi + \frac{m}{2\pi}\pi = 0 + \frac{m}{2} = \frac{m}{2}.
+$$
+
+The dividing streamline equation is $\psi = m/2$:
+
+$$
+Ur\sin\theta + \frac{m\theta}{2\pi} = \frac{m}{2}.
+$$
+
+Solving for $r$:
+
+$$
+r(\theta) = \frac{m(\pi - \theta)}{2\pi U \sin\theta}.
+$$
+
+This is the shape of the **Rankine half-body** — a semi-infinite body that replaces the source.
+
+#### Step 5: Maximum Half-Width
+
+As $\theta \to 0^+$ (far downstream), use L'Hôpital or the small-angle limit:
+
+$$
+\lim_{\theta \to 0} r\sin\theta = \lim_{\theta \to 0} \frac{m(\pi - \theta)}{2\pi U} = \frac{m}{2U}.
+$$
+
+But $y = r\sin\theta$, so the maximum half-width (as $x \to \infty$) is:
+
+$$
+y_{\max} = \frac{m}{2U}.
+$$
+
+The full asymptotic width of the half-body is $2y_{\max} = m/U$.
+
+**Final Answer:**
+
+$$
+r(\theta) = \frac{m(\pi - \theta)}{2\pi U \sin\theta}, \qquad y_{\max} = \frac{m}{2U}.
+$$
+
+</details>
+
+### Example 8.4 — Vortex Sheet and Induced Velocity
+
+**Problem.** A flat vortex sheet of strength $\gamma(x) = \gamma_0 = \text{const}$ extends from $x = -a$ to $x = +a$ along the $x$-axis. Compute the velocity induced at the point $(0, h)$ directly above the center of the sheet.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Biot-Savart Law for a Vortex Sheet
+
+A vortex sheet element at position $(x', 0)$ with strength $\gamma_0\, dx'$ induces a velocity at point $(0, h)$:
+
+$$
+d\mathbf{v} = \frac{\gamma_0\, dx'}{2\pi} \cdot \frac{\hat{k} \times (\mathbf{r} - \mathbf{r}')}{|\mathbf{r} - \mathbf{r}'|^2},
+$$
+
+where $\mathbf{r} - \mathbf{r}' = (0 - x')\hat{x} + (h - 0)\hat{y} = (-x', h)$ and $|\mathbf{r} - \mathbf{r}'|^2 = x'^2 + h^2$.
+
+For a 2D vortex element (vortex line in the $z$-direction), the induced velocity is:
+
+$$
+du = -\frac{\gamma_0}{2\pi} \cdot \frac{h}{x'^2 + h^2}\, dx', \qquad dv = -\frac{\gamma_0}{2\pi} \cdot \frac{x'}{x'^2 + h^2}\, dx'.
+$$
+
+Wait — let me use the standard 2D point vortex formula. A point vortex of circulation $d\Gamma = \gamma_0\, dx'$ at $(x', 0)$ induces at $(0, h)$:
+
+$$
+du = -\frac{d\Gamma}{2\pi} \cdot \frac{h - 0}{(0-x')^2 + h^2} \cdot \frac{(0-x')}{|(0-x', h)|} \cdot ...
+$$
+
+Let me use the clean formula: a 2D point vortex at position $\mathbf{r}_0$ with circulation $\Gamma$ induces velocity:
+
+$$
+\mathbf{v}(\mathbf{r}) = \frac{\Gamma}{2\pi}\frac{\hat{z} \times (\mathbf{r} - \mathbf{r}_0)}{|\mathbf{r} - \mathbf{r}_0|^2}.
+$$
+
+Here $\mathbf{r} - \mathbf{r}_0 = (-x', h)$, $\hat{z} \times (-x', h) = (-h, -x')$... 
+
+Actually: $\hat{z} \times (a\hat{x} + b\hat{y}) = a\hat{y} - b\hat{x} = (-b, a)$. So $\hat{z} \times (-x', h) = (-h, -x')$.
+
+Hmm, let me be more careful. $\hat{z} \times \hat{x} = \hat{y}$ and $\hat{z} \times \hat{y} = -\hat{x}$. So:
+
+$$
+\hat{z} \times (-x'\hat{x} + h\hat{y}) = -x'(\hat{z}\times\hat{x}) + h(\hat{z}\times\hat{y}) = -x'\hat{y} + h(-\hat{x}) = -h\hat{x} - x'\hat{y}.
+$$
+
+Therefore:
+
+$$
+d\mathbf{v} = \frac{\gamma_0\, dx'}{2\pi(x'^2 + h^2)}(-h\hat{x} - x'\hat{y}).
+$$
+
+#### Step 2: Integrate Over the Sheet
+
+**$x$-component (horizontal velocity):**
+
+$$
+u = -\frac{\gamma_0 h}{2\pi}\int_{-a}^{a} \frac{dx'}{x'^2 + h^2} = -\frac{\gamma_0 h}{2\pi}\left[\frac{1}{h}\arctan\frac{x'}{h}\right]_{-a}^{a} = -\frac{\gamma_0}{2\pi}\left[2\arctan\frac{a}{h}\right].
+$$
+
+$$
+u = -\frac{\gamma_0}{\pi}\arctan\frac{a}{h}.
+$$
+
+**$y$-component (vertical velocity):**
+
+$$
+v = -\frac{\gamma_0}{2\pi}\int_{-a}^{a} \frac{x'\, dx'}{x'^2 + h^2} = -\frac{\gamma_0}{2\pi}\left[\frac{1}{2}\ln(x'^2 + h^2)\right]_{-a}^{a} = 0,
+$$
+
+since the integrand is odd and the limits are symmetric.
+
+#### Step 3: Limiting Cases
+
+- **Infinite sheet** ($a \to \infty$): $u = -\frac{\gamma_0}{\pi} \cdot \frac{\pi}{2} = -\frac{\gamma_0}{2}$. This is the well-known result: a vortex sheet induces a velocity jump of $\gamma_0$ across it, with $\pm\gamma_0/2$ on each side.
+- **Far field** ($h \gg a$): $\arctan(a/h) \approx a/h$, so $u \approx -\gamma_0 a/(\pi h)$. The sheet looks like a point vortex of total circulation $\Gamma = 2a\gamma_0$, giving $u \approx -\Gamma/(2\pi h)$. ✓
+
+**Final Answer:**
+
+$$
+u = -\frac{\gamma_0}{\pi}\arctan\frac{a}{h}, \qquad v = 0.
+$$
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Helmholtz Vortex Theorems — Proof of Vortex Line Conservation
+
+Helmholtz (1858) established three fundamental theorems about vortex lines in inviscid, barotropic fluids with conservative body forces. These are consequences of Kelvin's circulation theorem and the vorticity equation.
+
+**Theorem I (Strength of a vortex tube).** The circulation $\Gamma$ around a vortex tube is constant along its length and constant in time.
+
+**Proof.** Consider a vortex tube — a tube-shaped surface formed by vortex lines. Take two cross-sections $S_1$ and $S_2$ of the tube, and close the surface with the tube wall $S_w$.
+
+By the divergence theorem applied to $\boldsymbol{\omega} = \nabla \times \mathbf{v}$:
+
+$$
+\oint_S \boldsymbol{\omega} \cdot \hat{\mathbf{n}}\, dA = \int_V \nabla \cdot \boldsymbol{\omega}\, dV = 0,
+$$
+
+since $\nabla \cdot (\nabla \times \mathbf{v}) = 0$ identically (Theorem 1.6.3 from [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl)).
+
+On the tube wall $S_w$, $\boldsymbol{\omega}$ is tangent to the surface (by definition of vortex lines), so $\boldsymbol{\omega} \cdot \hat{\mathbf{n}} = 0$ on $S_w$. Therefore:
+
+$$
+\int_{S_1} \boldsymbol{\omega} \cdot \hat{\mathbf{n}}_1\, dA + \int_{S_2} \boldsymbol{\omega} \cdot \hat{\mathbf{n}}_2\, dA = 0.
+$$
+
+With consistent orientation (outward normals), $\hat{\mathbf{n}}_1$ points into the tube and $\hat{\mathbf{n}}_2$ points out, so:
+
+$$
+\int_{S_2} \boldsymbol{\omega} \cdot \hat{\mathbf{n}}\, dA = \int_{S_1} \boldsymbol{\omega} \cdot \hat{\mathbf{n}}\, dA.
+$$
+
+By Stokes' theorem, $\int_S \boldsymbol{\omega} \cdot \hat{\mathbf{n}}\, dA = \oint_C \mathbf{v} \cdot d\mathbf{l} = \Gamma$. So the circulation is the same through any cross-section. $\blacksquare$
+
+**Theorem II (Material vortex lines).** Vortex lines move with the fluid — a material line that is initially a vortex line remains a vortex line for all time.
+
+**Proof.** This follows directly from Kelvin's circulation theorem. Consider a small material loop $C(t)$ that initially lies in a surface perpendicular to a vortex line, encircling it. The circulation $\Gamma = \oint_C \mathbf{v} \cdot d\mathbf{l}$ is conserved. By Stokes' theorem, $\Gamma = \int_S \boldsymbol{\omega} \cdot \hat{\mathbf{n}}\, dA$. Since $\Gamma$ is conserved for every such material loop, the vorticity flux through any material surface is conserved. This means vortex lines are "frozen into" the fluid — they are material lines.
+
+More rigorously: the vorticity equation for inviscid barotropic flow is:
+
+$$
+\frac{D\boldsymbol{\omega}}{Dt} = (\boldsymbol{\omega} \cdot \nabla)\mathbf{v}.
+$$
+
+This has the same form as the equation for an infinitesimal material line element $d\mathbf{l}$:
+
+$$
+\frac{D(d\mathbf{l})}{Dt} = (d\mathbf{l} \cdot \nabla)\mathbf{v}.
+$$
+
+Therefore, if $\boldsymbol{\omega}$ is initially parallel to $d\mathbf{l}$ (i.e., the material line is a vortex line), it remains parallel for all time. $\blacksquare$
+
+**Theorem III (No creation/destruction).** A vortex line cannot begin or end in the interior of the fluid — it must either form a closed loop or extend to the boundaries (or to infinity).
+
+**Proof.** This follows from $\nabla \cdot \boldsymbol{\omega} = 0$: vortex lines have no sources or sinks, just like magnetic field lines ($\nabla \cdot \mathbf{B} = 0$). If a vortex line ended at an interior point, the divergence of $\boldsymbol{\omega}$ would be nonzero there — a contradiction. $\blacksquare$
+
+**Physical consequences:**
+- Smoke rings maintain their identity because vortex lines are material and cannot break (in inviscid flow).
+- Tornadoes must connect to a boundary (the ground and the cloud base) — they cannot simply end in mid-air.
+- In viscous flow, these theorems are violated: viscosity can create, destroy, and diffuse vorticity (vortex reconnection in turbulence).
+
+**References:** Helmholtz (1858); Batchelor, §5.2–5.3; Saffman, *Vortex Dynamics* (1992), Ch. 1.
+
+### 9.2 The Stream Function–Vorticity Formulation
+
+For 2D incompressible flow, the velocity field can be completely described by a single scalar: the stream function $\psi$. Combined with the vorticity $\omega = \nabla^2\psi$, this gives a powerful formulation for both analytical and computational work.
+
+**Derivation.** For 2D incompressible flow, continuity $\partial u/\partial x + \partial v/\partial y = 0$ is automatically satisfied by defining:
+
+$$
+u = \frac{\partial \psi}{\partial y}, \qquad v = -\frac{\partial \psi}{\partial x}.
+$$
+
+The vorticity (scalar in 2D) is:
+
+$$
+\omega = \frac{\partial v}{\partial x} - \frac{\partial u}{\partial y} = -\frac{\partial^2 \psi}{\partial x^2} - \frac{\partial^2 \psi}{\partial y^2} = -\nabla^2 \psi.
+$$
+
+So $\nabla^2 \psi = -\omega$ — this is a Poisson equation relating the stream function to the vorticity.
+
+The vorticity transport equation (from the curl of N-S) in 2D is:
+
+$$
+\frac{\partial \omega}{\partial t} + u\frac{\partial \omega}{\partial x} + v\frac{\partial \omega}{\partial y} = \nu \nabla^2 \omega.
+$$
+
+Together, $\nabla^2\psi = -\omega$ and the vorticity transport equation form a closed system — the **stream function–vorticity formulation**. This eliminates pressure entirely and reduces the problem from three unknowns ($u, v, p$) to two ($\psi, \omega$).
+
+For inviscid flow ($\nu = 0$), the vorticity is simply advected: $D\omega/Dt = 0$. For irrotational flow ($\omega = 0$), we get Laplace's equation $\nabla^2\psi = 0$ — the foundation of potential flow theory.
+
+**References:** Batchelor, §4.2; Kundu & Cohen, §6.8; Tong's Cambridge fluid dynamics notes, §3.
+
+---

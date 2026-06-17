@@ -1,0 +1,121 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sub   { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .ws    { fill: #1a3a3d; stroke: #4dabf7; stroke-width: 1.5; }
+    .sse   { fill: #3d3a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .rtc   { fill: #1a3d1a; stroke: #51cf66; stroke-width: 1.5; }
+    .stun  { fill: #2d1a3d; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .arr   { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; marker-end: url(#a); }
+    .barr  { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#ba); }
+    .garr  { stroke: #51cf66; stroke-width: 1.5; fill: none; marker-end: url(#ga); }
+  </style>
+  <defs>
+    <marker id="a"  viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/></marker>
+    <marker id="ba" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/></marker>
+    <marker id="ga" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#51cf66"/></marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">WebSocket Upgrade · SSE · WebRTC ICE / STUN / TURN / SDP Offer-Answer</text>
+
+  <!-- WebSocket upgrade left -->
+  <text x="130" y="44" class="label" text-anchor="middle" font-weight="bold">WebSocket Upgrade Handshake</text>
+  <rect x="20" y="52" width="240" height="180" rx="3" class="ws"/>
+  <text x="30" y="70" class="mono">GET /chat HTTP/1.1</text>
+  <text x="30" y="82" class="mono">Host: example.com</text>
+  <text x="30" y="94" class="mono">Upgrade: websocket</text>
+  <text x="30" y="106" class="mono">Connection: Upgrade</text>
+  <text x="30" y="118" class="mono">Sec-WebSocket-Key: dGhlc2Fs...</text>
+  <text x="30" y="130" class="mono">Sec-WebSocket-Version: 13</text>
+  <line x1="30" y1="140" x2="256" y2="140" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <text x="30" y="154" class="mono">HTTP/1.1 101 Switching Protocols</text>
+  <text x="30" y="166" class="mono">Upgrade: websocket</text>
+  <text x="30" y="178" class="mono">Sec-WebSocket-Accept: s3pPLMBi...</text>
+  <text x="30" y="196" class="sub">Now a full-duplex TCP stream</text>
+  <text x="30" y="208" class="sub">Frame: FIN|RSV|Opcode|MASK|PayloadLen|Data</text>
+  <text x="30" y="220" class="sub">Opcodes: 0x1=text 0x2=binary 0x8=close 0x9=ping 0xA=pong</text>
+
+  <!-- SSE panel -->
+  <text x="390" y="44" class="label" text-anchor="middle" font-weight="bold">Server-Sent Events (SSE)</text>
+  <rect x="272" y="52" width="238" height="180" rx="3" class="sse"/>
+  <text x="282" y="70" class="mono">GET /events HTTP/1.1</text>
+  <text x="282" y="82" class="mono">Accept: text/event-stream</text>
+  <line x1="282" y1="92" x2="506" y2="92" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <text x="282" y="106" class="mono">HTTP/1.1 200 OK</text>
+  <text x="282" y="118" class="mono">Content-Type: text/event-stream</text>
+  <text x="282" y="130" class="mono">Cache-Control: no-cache</text>
+  <line x1="282" y1="140" x2="506" y2="140" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <text x="282" y="154" class="mono">data: {"price": 42.1}\n\n</text>
+  <text x="282" y="168" class="mono">id: 1001\nevent: update\n</text>
+  <text x="282" y="182" class="mono">data: {"price": 42.3}\n\n</text>
+  <text x="282" y="196" class="sub">Unidirectional server→client</text>
+  <text x="282" y="208" class="sub">Auto-reconnect via Last-Event-ID</text>
+  <text x="282" y="220" class="sub">Works through HTTP proxies, CDNs</text>
+
+  <!-- WebRTC ICE / STUN / TURN right -->
+  <text x="630" y="44" class="label" text-anchor="middle" font-weight="bold">WebRTC ICE / STUN / TURN</text>
+  <rect x="522" y="52" width="188" height="180" rx="3" class="rtc"/>
+  <!-- Peer A -->
+  <rect x="530" y="62" width="50" height="24" rx="3" fill="#1a2a3d" stroke="#4dabf7" stroke-width="1"/>
+  <text x="555" y="78" class="sub" text-anchor="middle">Peer A</text>
+  <!-- STUN server -->
+  <rect x="620" y="62" width="50" height="24" rx="3" class="stun"/>
+  <text x="645" y="78" class="sub" text-anchor="middle">STUN srv</text>
+  <!-- arrows -->
+  <line x1="580" y1="74" x2="620" y2="74" class="barr"/>
+  <text x="600" y="70" class="mono" text-anchor="middle">Binding Req</text>
+  <line x1="620" y1="82" x2="580" y2="82" class="garr"/>
+  <text x="600" y="92" class="mono" text-anchor="middle">XOR-MAPPED-ADDR</text>
+  <!-- ICE candidates -->
+  <text x="530" y="110" class="sub">ICE candidates gathered:</text>
+  <text x="530" y="122" class="mono">host: 192.168.1.5:50001</text>
+  <text x="530" y="134" class="mono">srflx: 203.0.113.5:50001 (STUN)</text>
+  <text x="530" y="146" class="mono">relay: 198.51.100.1:3478 (TURN)</text>
+  <!-- SDP exchange -->
+  <text x="530" y="162" class="sub" font-weight="bold">SDP Offer-Answer:</text>
+  <text x="530" y="174" class="sub">Offerer → SDP Offer (via signaling)</text>
+  <text x="530" y="186" class="sub">Answerer → SDP Answer</text>
+  <text x="530" y="198" class="sub">ICE connectivity checks → DTLS-SRTP</text>
+  <text x="530" y="210" class="sub">Audio/video/data over UDP (DTLS)</text>
+
+  <!-- Bottom comparison & use-case matrix -->
+  <rect x="20" y="246" width="680" height="160" rx="3" class="box"/>
+  <text x="360" y="264" class="label" text-anchor="middle" font-weight="bold">Protocol Decision Matrix</text>
+
+  <text x="40"  y="284" class="sub" font-weight="bold">Protocol</text>
+  <text x="180" y="284" class="sub" font-weight="bold">Direction</text>
+  <text x="310" y="284" class="sub" font-weight="bold">Transport</text>
+  <text x="440" y="284" class="sub" font-weight="bold">Best for</text>
+  <text x="620" y="284" class="sub" font-weight="bold">Latency</text>
+
+  <text x="40"  y="300" class="mono">WebSocket</text>
+  <text x="180" y="300" class="sub">Bidirectional</text>
+  <text x="310" y="300" class="mono">TCP (HTTP upgrade)</text>
+  <text x="440" y="300" class="sub">Chat, game netcode, collab editing</text>
+  <text x="620" y="300" class="sub">~1 ms in DC</text>
+
+  <text x="40"  y="316" class="mono">SSE</text>
+  <text x="180" y="316" class="sub">Server → Client</text>
+  <text x="310" y="316" class="mono">HTTP/1.1 or HTTP/2</text>
+  <text x="440" y="316" class="sub">Live feeds, notifications, LLM tokens</text>
+  <text x="620" y="316" class="sub">~5–50 ms</text>
+
+  <text x="40"  y="332" class="mono">WebRTC</text>
+  <text x="180" y="332" class="sub">P2P Bidirectional</text>
+  <text x="310" y="332" class="mono">UDP (DTLS-SRTP)</text>
+  <text x="440" y="332" class="sub">Video/audio calls, P2P data, VR</text>
+  <text x="620" y="332" class="sub">&lt;100 ms</text>
+
+  <text x="40"  y="348" class="mono">Long-poll</text>
+  <text x="180" y="348" class="sub">Server → Client</text>
+  <text x="310" y="348" class="mono">HTTP/1.1</text>
+  <text x="440" y="348" class="sub">Legacy fallback only</text>
+  <text x="620" y="348" class="sub">variable</text>
+
+  <text x="40"  y="368" class="sub" font-weight="bold">Game netcode note:</text>
+  <text x="40"  y="382" class="sub">WebSocket for reliable events (join/leave/chat) · WebRTC DataChannel unreliable for position updates (SCTP partial reliability) · UDP raw if native client</text>
+  <text x="40"  y="396" class="sub">VR streaming: WebRTC video track (H.264/VP8/AV1) with hardware decode · target &lt;20 ms glass-to-glass for presence</text>
+</svg>

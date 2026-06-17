@@ -1,0 +1,150 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .decision { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .yes-path { fill: #1a4a3a; stroke: #51cf66; stroke-width: 1.5; }
+    .no-path { fill: #3a1a1a; stroke: #ff6b6b; stroke-width: 1.5; }
+    .llc-box { fill: #1a4a3a; stroke: #51cf66; stroke-width: 1.5; animation: llcPulse 4s infinite ease-in-out 2s; }
+    .corp-box { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: corpPulse 4s infinite ease-in-out; }
+    .warning { fill: #4a2a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .checklist-done { fill: #1a4a3a; stroke: #51cf66; stroke-width: 0.5; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .yes-arrow { stroke: #51cf66; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .no-arrow { stroke: #ff6b6b; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+
+    @keyframes corpPulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes llcPulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 5px #51cf66); }
+    }
+    @keyframes flowArrows {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz7-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="biz7-yes" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#51cf66"/>
+    </marker>
+    <marker id="biz7-no" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ff6b6b"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">Legal Entity Decision Tree + IP Assignment &amp; Vesting Flow</text>
+
+  <!-- Decision tree — Entity type -->
+  <!-- Start -->
+  <rect x="280" y="30" width="160" height="42" rx="4" class="decision"/>
+  <text x="360" y="50" class="bold" text-anchor="middle">Starting a company?</text>
+  <text x="360" y="63" class="sublabel" text-anchor="middle">First decision: what entity?</text>
+
+  <!-- Q1 -->
+  <line x1="360" y1="72" x2="360" y2="92" class="arrow" marker-end="url(#biz7-arr)"/>
+  <polygon points="360,92 430,112 360,132 290,112" fill="#1a3a5c" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.2"/>
+  <text x="360" y="110" class="sublabel" text-anchor="middle">Will you raise VC</text>
+  <text x="360" y="122" class="sublabel" text-anchor="middle">or issue stock options?</text>
+
+  <!-- YES → C-Corp -->
+  <line x1="430" y1="112" x2="520" y2="112" class="yes-arrow" marker-end="url(#biz7-yes)"/>
+  <text x="475" y="108" class="sublabel" fill="#51cf66">YES</text>
+  <rect x="522" y="88" width="188" height="48" rx="4" class="corp-box"/>
+  <text x="616" y="107" class="bold" text-anchor="middle">Delaware C-Corp</text>
+  <text x="530" y="120" class="sublabel">• Multi-class shares · VCs require it</text>
+  <text x="530" y="130" class="sublabel">• Issue ISOs to employees · Stripe Atlas $500</text>
+
+  <!-- NO → Q2 -->
+  <line x1="360" y1="132" x2="360" y2="152" class="no-arrow" marker-end="url(#biz7-no)"/>
+  <text x="365" y="145" class="sublabel" fill="#ff6b6b">NO</text>
+  <polygon points="360,152 430,172 360,192 290,172" fill="#1a4a3a" stroke="#51cf66" stroke-width="1.2"/>
+  <text x="360" y="168" class="sublabel" text-anchor="middle">Bootstrapping only?</text>
+  <text x="360" y="180" class="sublabel" text-anchor="middle">No employee equity?</text>
+
+  <!-- YES → LLC -->
+  <line x1="290" y1="172" x2="200" y2="172" class="yes-arrow" marker-end="url(#biz7-yes)"/>
+  <text x="245" y="168" class="sublabel" fill="#51cf66">YES</text>
+  <rect x="10" y="148" width="188" height="48" rx="4" class="llc-box"/>
+  <text x="104" y="167" class="bold" text-anchor="middle">LLC (Delaware or Wyoming)</text>
+  <text x="18" y="182" class="sublabel">• Pass-through tax · flexible · simpler</text>
+  <text x="18" y="192" class="sublabel">• Content brand, consulting, bootstrap SaaS</text>
+
+  <!-- NO → Both possible -->
+  <line x1="360" y1="192" x2="360" y2="210" class="arrow" marker-end="url(#biz7-arr)"/>
+  <rect x="280" y="212" width="160" height="34" rx="4" class="warning"/>
+  <text x="360" y="227" class="sublabel" text-anchor="middle">Consult an attorney</text>
+  <text x="360" y="238" class="sublabel" text-anchor="middle">S-Corp or mixed structure may apply</text>
+
+  <!-- RIGHT SIDE: Vesting Schedule Visual -->
+  <rect x="360" y="148" width="350" height="100" class="box" rx="4" style="display:block"/>
+
+  <!-- override — put vesting below entity tree -->
+  <rect x="10" y="258" width="330" height="148" class="box" rx="4"/>
+  <text x="175" y="276" class="bold" text-anchor="middle">4-Year / 1-Year Cliff Vesting Schedule</text>
+
+  <!-- Vesting timeline bar -->
+  <text x="20" y="295" class="sublabel">Equity earned:</text>
+  <!-- Year line -->
+  <line x1="20" y1="310" x2="330" y2="310" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="20" y="323" class="sublabel">0</text>
+  <text x="93" y="323" class="sublabel">1 yr (cliff)</text>
+  <text x="175" y="323" class="sublabel">2 yr</text>
+  <text x="250" y="323" class="sublabel">3 yr</text>
+  <text x="318" y="323" class="sublabel">4 yr</text>
+
+  <!-- Cliff bar -->
+  <rect x="20" y="298" width="78" height="10" fill="#ff6b6b" opacity="0.4" rx="2"/>
+  <text x="59" y="308" class="sublabel" text-anchor="middle" fill="#ff6b6b">0% — cliff</text>
+
+  <!-- Vesting bars post-cliff -->
+  <rect x="100" y="298" width="78" height="10" fill="#ffd93d" opacity="0.6" rx="2"/>
+  <text x="139" y="308" class="sublabel" text-anchor="middle">25%</text>
+  <rect x="180" y="298" width="78" height="10" fill="#51cf66" opacity="0.5" rx="2"/>
+  <text x="219" y="308" class="sublabel" text-anchor="middle">50%</text>
+  <rect x="260" y="298" width="65" height="10" fill="var(--interactive-accent, #58a6ff)" opacity="0.7" rx="2"/>
+  <text x="292" y="308" class="sublabel" text-anchor="middle">75–100%</text>
+
+  <text x="18" y="342" class="sublabel">• Cliff = if you leave before 1 year, you get nothing</text>
+  <text x="18" y="355" class="sublabel">• After cliff: 25% vests immediately, then monthly for 3 years</text>
+  <text x="18" y="368" class="sublabel">• Both co-founders vest from Day 1 — no exceptions</text>
+  <text x="18" y="381" class="sublabel">• Repurchase right: company buys back unvested at cost if founder leaves</text>
+  <text x="18" y="394" class="sublabel">• 83(b) election: FILE WITHIN 30 DAYS of restricted stock grant (US)</text>
+
+  <!-- RIGHT BOTTOM: IP Assignment + Pre-fundraise Checklist -->
+  <rect x="350" y="258" width="360" height="148" class="box" rx="4"/>
+  <text x="530" y="276" class="bold" text-anchor="middle">IP Assignment Flow + Pre-Fundraise Checklist</text>
+
+  <!-- IP flow -->
+  <text x="358" y="292" class="bold">IP Assignment Must-Haves:</text>
+  <text x="358" y="304" class="sublabel">1. Founders → Company: assign all pre-formation + future work-related IP</text>
+  <text x="358" y="316" class="sublabel">2. Employees → Company: signed at hiring (invention assignment + NDA)</text>
+  <text x="358" y="328" class="sublabel">3. Contractors → Company: work-for-hire clause BEFORE work begins</text>
+  <text x="358" y="340" class="sublabel">   (Copyright law default: contractor owns their work — must override in contract)</text>
+
+  <line x1="358" y1="346" x2="700" y2="346" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="358" y="358" class="bold">Pre-Fundraise Checklist:</text>
+  <text x="358" y="370" class="sublabel">☑ Delaware C-Corp formed · ☑ EIN obtained · ☑ Business bank account</text>
+  <text x="358" y="382" class="sublabel">☑ All founders signed IP assignment · ☑ Vesting agreements in place</text>
+  <text x="358" y="394" class="sublabel">☑ 83(b) elections filed · ☑ Prior employer IP agreements reviewed</text>
+  <text x="358" y="406" class="sublabel">☑ Contractor agreements with work-for-hire · ☑ TOS + Privacy Policy live</text>
+
+  <!-- contractor vs employee callout -->
+  <rect x="360" y="148" width="350" height="104" class="box" rx="4"/>
+  <text x="535" y="166" class="bold" text-anchor="middle">Contractor (1099) vs Employee (W-2)</text>
+  <text x="368" y="182" class="sublabel">Contractor: controls their own methods · uses own tools · works for multiple clients</text>
+  <text x="368" y="194" class="sublabel">Employee: follows company processes · uses company tools · works exclusively for you</text>
+  <line x1="368" y1="200" x2="700" y2="200" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="368" y="213" class="sublabel" fill="#ff6b6b">⚠ Misclassification risk: treating contractor like employee = back taxes + penalties</text>
+  <text x="368" y="226" class="sublabel">If full-time, exclusive, follows your processes → they're legally an employee regardless of contract</text>
+  <text x="368" y="238" class="sublabel">Contractor agreement must include: scope · deliverables · IP assignment · no employment acknowledgment</text>
+  <text x="368" y="250" class="sublabel">Use Gusto / Rippling for payroll when you make your first W-2 hire</text>
+</svg>

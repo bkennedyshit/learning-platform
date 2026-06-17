@@ -1,0 +1,897 @@
+---
+title: "08.11 — Computer Networks Essentials"
+subject: "Python"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.11"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 08.11 — Computer Networks Essentials
+
+> *"The Internet is not a big truck. It's a series of tubes."* — Ted Stevens (unintentionally correct about packet switching)
+
+Every distributed system — from API calls to multi-GPU training — runs on networks. Understanding TCP/IP, HTTP semantics, and DNS resolution transforms networking from magic into predictable engineering.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Trace a packet from application to wire and back (TCP/IP stack).
+2. Explain TCP's three-way handshake, flow control, and congestion control.
+3. Write socket-level code in Python for both TCP and UDP.
+4. Understand HTTP/1.1, HTTP/2, and HTTP/3 semantics.
+5. Debug network issues with `tcpdump`, `curl`, and Python's `socket` module.
+6. Explain DNS resolution and why it matters for distributed training (NCCL).
+
+---
+
+## 🖼️ Visual Anchor — TCP/IP Network Stack
+
+![python__1.11-fig1](python__1.11-fig1.svg)
+
+---
+
+## 📚 1. Definitions / Concepts
+
+### Definition 08.11.1 — TCP (Transmission Control Protocol)
+
+Reliable, ordered, byte-stream protocol. Guarantees delivery via:
+- **Three-way handshake**: SYN → SYN-ACK → ACK
+- **Sequence numbers**: Detect reordering and loss
+- **Acknowledgments**: Confirm receipt
+- **Retransmission**: Resend lost packets
+- **Flow control**: Receiver advertises window size
+- **Congestion control**: Slow start, AIMD
+
+### Definition 08.11.2 — HTTP Semantics
+
+| Method | Semantics | Idempotent | Safe |
+|--------|-----------|-----------|------|
+| GET | Retrieve resource | Yes | Yes |
+| POST | Create/submit | No | No |
+| PUT | Replace resource | Yes | No |
+| PATCH | Partial update | No | No |
+| DELETE | Remove resource | Yes | No |
+
+### Definition 08.11.3 — DNS (Domain Name System)
+
+Hierarchical distributed database mapping names to IP addresses:
+```
+api.example.com → 93.184.216.34
+```
+Resolution chain: Local cache → Recursive resolver → Root → TLD (.com) → Authoritative
+
+---
+
+## 📐 2. Mental Models / Principles
+
+### Principle 1.11.1 — Latency Budget
+
+For a typical API call:
+- DNS lookup: 1-50ms (cached: 0ms)
+- TCP handshake: 1 RTT (~10-100ms)
+- TLS handshake: 1-2 RTT (~20-200ms)
+- Request/response: 1 RTT + server processing
+- **Total: 50-500ms** for a single HTTPS request
+
+This is why connection pooling, HTTP/2 multiplexing, and keep-alive matter.
+
+### Principle 1.11.2 — Bandwidth vs Latency
+
+- **Bandwidth**: How much data per second (throughput)
+- **Latency**: How long until the first byte arrives (delay)
+
+For ML: Transferring model weights between GPUs is bandwidth-bound. Coordinating gradient sync is latency-bound. NCCL optimizes both.
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Socket Programming in Python
+
+```python
+import socket
+
+# TCP Server
+def tcp_server(host: str = "0.0.0.0", port: int = 8080):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((host, port))
+        s.listen(5)
+        print(f"Listening on {host}:{port}")
+        while True:
+            conn, addr = s.accept()
+            with conn:
+                data = conn.recv(4096)
+                conn.sendall(b"HTTP/1.1 200 OK\r\n\r\nHello!")
+
+# TCP Client
+def tcp_client(host: str, port: int, message: bytes) -> bytes:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.sendall(message)
+        return s.recv(4096)
+```
+
+### 3.2 — HTTP with httpx (Modern Python HTTP)
+
+```python
+import httpx
+
+# Synchronous
+resp = httpx.get("https://api.example.com/users", params={"page": 1})
+resp.raise_for_status()
+users = resp.json()
+
+# Async with connection pooling
+async with httpx.AsyncClient(
+    base_url="https://api.example.com",
+    timeout=10.0,
+    limits=httpx.Limits(max_connections=100),
+) as client:
+    resp = await client.get("/users")
+```
+
+### 3.3 — DNS Resolution
+
+```python
+import socket
+
+# Resolve hostname
+addrs = socket.getaddrinfo("api.example.com", 443, socket.AF_INET)
+for family, socktype, proto, canonname, sockaddr in addrs:
+    print(f"{sockaddr[0]}:{sockaddr[1]}")
+
+# Reverse DNS
+hostname, _, _ = socket.gethostbyaddr("93.184.216.34")
+```
+
+---
+
+## ✍️ 4. Derivations & Worked Examples
+
+### Example 08.11.1 — Building a Simple HTTP Server
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```python
+import asyncio
+from dataclasses import dataclass
+
+@dataclass
+class Request:
+    method: str
+    path: str
+    headers: dict[str, str]
+    body: bytes
+
+async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    data = await reader.read(4096)
+    lines = data.decode().split("\r\n")
+    method, path, _ = lines[0].split(" ")
+
+    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nYou requested: {path}"
+    writer.write(response.encode())
+    await writer.drain()
+    writer.close()
+
+async def main():
+    server = await asyncio.start_server(handle_client, "0.0.0.0", 8080)
+    async with server:
+        await server.serve_forever()
+
+asyncio.run(main())
+```
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 1.11.1 — Not Handling Partial Reads
+
+TCP is a byte stream, not a message stream. `recv(4096)` might return 1 byte or 4096 bytes. Always loop until you have a complete message.
+
+### Gotcha 1.11.2 — DNS Caching
+
+Python's `socket.getaddrinfo()` doesn't cache by default. In high-throughput systems, DNS resolution can become a bottleneck. Use connection pooling or explicit caching.
+
+---
+
+## 🧮 7. Hands-On Lab
+
+```bash
+python _practice/scripts/1.11_networks.py --out _practice/1.11_lab_report.md
+```
+
+Tests DNS resolution, measures latency to common endpoints, and validates your network stack.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+- Previous: [08.10 - Operating Systems Essentials](08.10---Operating-Systems-Essentials)
+- Next: [08.12 - Computer Architecture - Performance Intuition](08.12---Computer-Architecture---Performance-Intuition)
+- Distributed training networking: [08.16 - Distributed Systems & Multi-GPU Training](08.16---Distributed-Systems-&-Multi-GPU-Training)
+- Existing: [Working with APIs in Python](Working-with-APIs-in-Python)
+- [Beej's Guide to Network Programming (free)](https://beej.us/guide/bgnet/)
+- [Computer Networking: A Top-Down Approach (Kurose & Ross)](https://gaia.cs.umass.edu/kurose_ross/online_lectures.htm)
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — Socket Programming: Building a Concurrent Echo Server
+
+**Problem:** Build a TCP echo server from raw sockets that handles multiple concurrent clients. Implement three versions: blocking with threads, non-blocking with `select`, and async with `asyncio`. Compare their performance characteristics.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Version 1 — Blocking Sockets with Threading
+
+```python
+import socket
+import threading
+
+def handle_client(conn: socket.socket, addr: tuple):
+    """Handle one client connection (runs in its own thread)."""
+    print(f"[+] Connected: {addr}")
+    try:
+        while True:
+            data = conn.recv(4096)  # Blocks until data arrives
+            if not data:
+                break  # Client disconnected
+            conn.sendall(data)  # Echo back
+    except (ConnectionResetError, BrokenPipeError):
+        pass
+    finally:
+        conn.close()
+        print(f"[-] Disconnected: {addr}")
+
+
+def threaded_echo_server(host: str = "0.0.0.0", port: int = 9000):
+    """
+    One thread per client. Simple but doesn't scale.
+    Limit: ~1000 concurrent connections (thread overhead).
+    """
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((host, port))
+    server.listen(128)  # Backlog queue size
+    print(f"Threaded server listening on {host}:{port}")
+
+    try:
+        while True:
+            conn, addr = server.accept()  # Blocks until new connection
+            thread = threading.Thread(target=handle_client, args=(conn, addr))
+            thread.daemon = True
+            thread.start()
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+    finally:
+        server.close()
+```
+
+#### Step 2: Version 2 — Non-Blocking with selectors
+
+```python
+import socket
+import selectors
+from typing import Optional
+
+def selector_echo_server(host: str = "0.0.0.0", port: int = 9000):
+    """
+    Single-threaded, event-driven. Uses OS-level I/O multiplexing.
+    Scales to 10,000+ concurrent connections on one thread.
+    """
+    sel = selectors.DefaultSelector()
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((host, port))
+    server.listen(1024)
+    server.setblocking(False)  # Non-blocking: accept() returns immediately
+
+    def accept_handler(server_sock: socket.socket):
+        conn, addr = server_sock.accept()
+        conn.setblocking(False)
+        # Register new connection for READ events
+        sel.register(conn, selectors.EVENT_READ, data=echo_handler)
+        print(f"[+] Connected: {addr}")
+
+    def echo_handler(conn: socket.socket):
+        try:
+            data = conn.recv(4096)
+            if data:
+                conn.sendall(data)  # In production: buffer writes too
+            else:
+                sel.unregister(conn)
+                conn.close()
+        except (ConnectionResetError, BrokenPipeError):
+            sel.unregister(conn)
+            conn.close()
+
+    # Register server socket for new connections
+    sel.register(server, selectors.EVENT_READ, data=accept_handler)
+    print(f"Selector server listening on {host}:{port}")
+
+    try:
+        while True:
+            # Block until at least one FD is ready (or timeout)
+            events = sel.select(timeout=08.0)
+            for key, mask in events:
+                callback = key.data
+                callback(key.fileobj)
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+    finally:
+        sel.close()
+        server.close()
+```
+
+#### Step 3: Version 3 — asyncio (Production-Grade)
+
+```python
+import asyncio
+
+async def handle_client_async(
+    reader: asyncio.StreamReader,
+    writer: asyncio.StreamWriter
+):
+    """Handle one client using asyncio streams."""
+    addr = writer.get_extra_info("peername")
+    print(f"[+] Connected: {addr}")
+
+    try:
+        while True:
+            data = await reader.read(4096)
+            if not data:
+                break
+            writer.write(data)
+            await writer.drain()  # Ensure data is sent (backpressure)
+    except (ConnectionResetError, asyncio.IncompleteReadError):
+        pass
+    finally:
+        writer.close()
+        await writer.wait_closed()
+        print(f"[-] Disconnected: {addr}")
+
+
+async def asyncio_echo_server(host: str = "0.0.0.0", port: int = 9000):
+    """
+    asyncio server. Same performance as selector version but
+    much cleaner code (no manual callback management).
+    """
+    server = await asyncio.start_server(
+        handle_client_async, host, port,
+        reuse_address=True,
+        backlog=1024,
+    )
+    print(f"Asyncio server listening on {host}:{port}")
+
+    async with server:
+        await server.serve_forever()
+
+# asyncio.run(asyncio_echo_server())
+```
+
+#### Step 4: Performance Comparison
+
+```python
+# Benchmark: 1000 concurrent clients, each sending 100 messages
+#
+# | Version        | Connections/sec | Latency (p99) | Memory (1K clients) |
+# |----------------|----------------|---------------|---------------------|
+# | Threaded       | 8,000          | 5ms           | 800 MB (1K threads) |
+# | Selector       | 45,000         | 0.8ms         | 50 MB               |
+# | asyncio        | 42,000         | 0.9ms         | 55 MB               |
+# | asyncio+uvloop | 65,000         | 0.5ms         | 55 MB               |
+#
+# Key insight: selector and asyncio have similar performance because
+# asyncio IS a selector loop with a nicer API on top.
+# uvloop replaces asyncio's event loop with a libuv-based one (C, faster).
+```
+
+**Final Answer:**
+
+```python
+# Socket server decision:
+# - Learning/prototyping: threaded (simplest to understand)
+# - Production Python: asyncio (clean code, good performance)
+# - Maximum performance: asyncio + uvloop
+# - C10K+ problem: any non-blocking approach (selector or asyncio)
+# - Never in production: one-thread-per-client (doesn't scale)
+```
+
+</details>
+
+### Example 9.2 — TLS Handshake Walkthrough: What Happens Before HTTPS
+
+**Problem:** Trace every step of a TLS 08.3 handshake, from the client's first packet to the first encrypted application data. Show how to inspect this in Python and identify common certificate errors.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: TLS 08.3 Handshake Overview
+
+```python
+# TLS 08.3 handshake (1-RTT, the common case):
+#
+# Client                                    Server
+#   |                                         |
+#   |--- ClientHello ----------------------->|  (1)
+#   |    - Supported cipher suites            |
+#   |    - Key share (ECDHE public key)       |
+#   |    - Supported versions (TLS 08.3)       |
+#   |    - SNI (server name indication)       |
+#   |                                         |
+#   |<-- ServerHello + EncryptedExtensions --|  (2)
+#   |    - Chosen cipher suite                |
+#   |    - Server key share                   |
+#   |    - Certificate                        |
+#   |    - CertificateVerify (signature)      |
+#   |    - Finished (MAC)                     |
+#   |                                         |
+#   |--- Finished --------------------------->|  (3)
+#   |    - Client MAC                         |
+#   |                                         |
+#   |<== Application Data (encrypted) ======>|  (4)
+#
+# Total: 1 round trip (1-RTT) before encrypted data flows.
+# TLS 08.2 required 2 round trips (2-RTT).
+```
+
+#### Step 2: Inspecting TLS in Python
+
+```python
+import ssl
+import socket
+import pprint
+
+def inspect_tls_connection(hostname: str, port: int = 443):
+    """Connect to a server and inspect the TLS handshake details."""
+    
+    # Create SSL context with system CA certificates
+    context = ssl.create_default_context()
+    
+    # For debugging: enable all protocols and ciphers
+    # context.check_hostname = False
+    # context.verify_mode = ssl.CERT_NONE
+    
+    with socket.create_connection((hostname, port), timeout=10) as sock:
+        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+            print(f"=== TLS Connection to {hostname}:{port} ===")
+            print(f"Protocol: {ssock.version()}")  # TLSv1.3
+            print(f"Cipher: {ssock.cipher()}")     # ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+            
+            # Certificate details
+            cert = ssock.getpeercert()
+            print(f"\n=== Server Certificate ===")
+            print(f"Subject: {dict(x[0] for x in cert['subject'])}")
+            print(f"Issuer: {dict(x[0] for x in cert['issuer'])}")
+            print(f"Valid from: {cert['notBefore']}")
+            print(f"Valid until: {cert['notAfter']}")
+            print(f"SANs: {cert.get('subjectAltName', [])}")
+            print(f"Serial: {cert['serialNumber']}")
+            
+            # Negotiated parameters
+            print(f"\n=== Negotiated Parameters ===")
+            print(f"ALPN protocol: {ssock.selected_alpn_protocol()}")  # h2, http/1.1
+            print(f"Compression: {ssock.compression()}")  # None (disabled for security)
+            
+            return cert
+
+# inspect_tls_connection("github.com")
+```
+
+#### Step 3: Common Certificate Errors and Fixes
+
+```python
+import ssl
+import certifi
+
+def demonstrate_cert_errors():
+    """Show common TLS errors and their solutions."""
+    
+    # Error 1: Certificate verification failed (self-signed or expired)
+    # ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED]
+    # Fix: Use proper CA bundle or add custom CA
+    context = ssl.create_default_context(cafile=certifi.where())
+    
+    # Error 2: Hostname mismatch
+    # ssl.SSLCertVerificationError: hostname mismatch
+    # The cert is for *.example.com but you connected to api.internal.example.com
+    # Fix: Ensure SNI matches certificate's SAN entries
+    
+    # Error 3: Certificate expired
+    # Fix: Renew the certificate (Let's Encrypt auto-renewal)
+    
+    # Error 4: Incomplete certificate chain
+    # Server sends leaf cert but not intermediate CA
+    # Fix: Configure server to send full chain (leaf + intermediate)
+    
+    # For development/testing ONLY (never in production):
+    insecure_context = ssl.create_default_context()
+    insecure_context.check_hostname = False
+    insecure_context.verify_mode = ssl.CERT_NONE
+    # ⚠️ This disables ALL security — vulnerable to MITM attacks
+
+# Using with httpx/requests:
+# import httpx
+# client = httpx.Client(verify="/path/to/custom-ca-bundle.pem")
+# response = client.get("https://internal-service.company.com")
+```
+
+#### Step 4: TLS 08.3 Key Exchange (Simplified Math)
+
+The key exchange uses Elliptic Curve Diffie-Hellman Ephemeral (ECDHE):
+
+$$
+\text{Client generates: } a \text{ (private)}, \quad A = a \cdot G \text{ (public, sent in ClientHello)}
+$$
+
+$$
+\text{Server generates: } b \text{ (private)}, \quad B = b \cdot G \text{ (public, sent in ServerHello)}
+$$
+
+$$
+\text{Shared secret: } S = a \cdot B = b \cdot A = ab \cdot G
+$$
+
+Both sides compute the same point $S$ on the elliptic curve. An eavesdropper sees $A$ and $B$ but cannot compute $S$ without knowing $a$ or $b$ (Elliptic Curve Discrete Logarithm Problem).
+
+The shared secret $S$ is then fed into HKDF (HMAC-based Key Derivation Function) to produce the actual encryption keys.
+
+**Final Answer:**
+
+```python
+# TLS 08.3 key points:
+# - 1-RTT handshake (faster than TLS 08.2's 2-RTT)
+# - Forward secrecy by default (ephemeral keys, new per connection)
+# - Only 5 cipher suites (all strong, no negotiation weakness)
+# - 0-RTT resumption available (but replay-vulnerable, use carefully)
+# - Certificate is encrypted (SNI still visible in ClientHello though)
+#
+# Python TLS best practices:
+# - Always use ssl.create_default_context() (secure defaults)
+# - Never disable certificate verification in production
+# - Use certifi for up-to-date CA bundle
+# - Pin certificates for high-security internal services
+```
+
+</details>
+
+### Example 9.3 — HTTP/3 over QUIC: The Next Protocol Layer
+
+**Problem:** HTTP/3 replaces TCP with QUIC (UDP-based). Explain why, demonstrate the connection establishment difference, and show how to use HTTP/3 in Python.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Why QUIC Replaces TCP for HTTP
+
+```python
+# Problem with TCP + TLS for HTTP/2:
+# 1. Head-of-line blocking: One lost packet blocks ALL streams on the connection
+# 2. Handshake latency: TCP handshake (1 RTT) + TLS handshake (1 RTT) = 2 RTT minimum
+# 3. Connection migration: Changing networks (WiFi→cellular) kills TCP connections
+#    (TCP connections are identified by 4-tuple: src_ip, src_port, dst_ip, dst_port)
+
+# QUIC solves all three:
+# 1. Independent streams: Lost packet only blocks its own stream
+# 2. 0-RTT or 1-RTT: TLS 08.3 integrated into QUIC handshake
+# 3. Connection IDs: Connection survives network changes (identified by ID, not IP)
+```
+
+#### Step 2: Connection Establishment Comparison
+
+```python
+# TCP + TLS 08.3 (HTTP/2):
+# Client → Server: SYN                          (RTT 1 start)
+# Server → Client: SYN-ACK                      (RTT 1 end)
+# Client → Server: ACK + ClientHello            (RTT 2 start)
+# Server → Client: ServerHello + Cert + Finished (RTT 2 end)
+# Client → Server: Finished + First HTTP request (RTT 3 start)
+# Total: 2 RTT before first HTTP request
+
+# QUIC (HTTP/3):
+# Client → Server: Initial (ClientHello + first HTTP request)  (RTT 1 start)
+# Server → Client: Initial (ServerHello + Cert) + response     (RTT 1 end)
+# Total: 1 RTT (or 0-RTT for resumed connections!)
+
+# For a 100ms RTT connection:
+# HTTP/2: 200ms before first byte
+# HTTP/3: 100ms before first byte (or 0ms for 0-RTT!)
+```
+
+#### Step 3: Using HTTP/3 in Python
+
+```python
+# httpx with HTTP/3 support (via httpcore + aioquic):
+# pip install httpx[http2] httpx-http3
+
+import httpx
+
+async def fetch_with_http3():
+    """Demonstrate HTTP/3 request."""
+    # httpx doesn't natively support HTTP/3 yet (as of 2025)
+    # Use the aioquic library directly:
+    pass
+
+# Using aioquic (low-level QUIC implementation):
+# pip install aioquic
+
+import asyncio
+from aioquic.asyncio import connect
+from aioquic.quic.configuration import QuicConfiguration
+from aioquic.h3.connection import H3_ALPN, H3Connection
+from aioquic.h3.events import HeadersReceived, DataReceived
+
+async def http3_request(url: str):
+    """Make an HTTP/3 request using aioquic."""
+    configuration = QuicConfiguration(
+        is_client=True,
+        alpn_protocols=H3_ALPN,  # ["h3"]
+    )
+    # Load system CA certificates
+    configuration.load_verify_locations(certifi.where())
+
+    host = "www.google.com"
+    port = 443
+
+    async with connect(host, port, configuration=configuration) as protocol:
+        # Create HTTP/3 connection over QUIC
+        h3_conn = H3Connection(protocol._quic)
+
+        # Send request
+        stream_id = protocol._quic.get_next_available_stream_id()
+        h3_conn.send_headers(
+            stream_id=stream_id,
+            headers=[
+                (b":method", b"GET"),
+                (b":scheme", b"https"),
+                (b":authority", host.encode()),
+                (b":path", b"/"),
+            ],
+        )
+
+        # Process response events
+        # ... (event loop to receive headers and data)
+
+# asyncio.run(http3_request("https://www.google.com"))
+```
+
+**Final Answer:**
+
+```python
+# HTTP/3 summary:
+# - Transport: QUIC (UDP-based, built-in encryption)
+# - Handshake: 1-RTT (vs 2-RTT for HTTP/2 over TCP+TLS)
+# - Multiplexing: No head-of-line blocking (independent streams)
+# - Migration: Survives network changes (connection ID based)
+# - Adoption: Google, Cloudflare, Facebook serve HTTP/3 today
+#
+# Python support (2025):
+# - aioquic: Full QUIC + HTTP/3 implementation (production-ready)
+# - httpx: HTTP/2 native, HTTP/3 via plugins
+# - curl: Supports HTTP/3 (--http3 flag)
+# - Most Python web frameworks: Not yet (still HTTP/1.1 or HTTP/2)
+```
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 10.1 Wireshark Filtering for Python Developers
+
+Wireshark (and its CLI counterpart `tshark`) is the definitive tool for debugging network issues. These filters help Python developers diagnose connection problems, slow APIs, and protocol errors.
+
+**Display Filters (applied after capture):**
+
+```bash
+# Filter by IP address
+ip.addr == 192.168.1.100          # Traffic to/from this IP
+ip.src == 10.0.0.1                # Only traffic FROM this IP
+ip.dst == 10.0.0.1                # Only traffic TO this IP
+
+# Filter by port (your Python service)
+tcp.port == 8000                   # Traffic on port 8000
+tcp.dstport == 5432                # Traffic TO PostgreSQL
+udp.port == 53                     # DNS queries
+
+# Filter by protocol
+http                               # All HTTP traffic
+http2                              # HTTP/2 frames
+tls                                # TLS handshakes and encrypted data
+dns                                # DNS queries and responses
+tcp.flags.syn == 1                 # TCP SYN packets (new connections)
+tcp.flags.rst == 1                 # TCP RST packets (connection resets)
+
+# Filter by HTTP content
+http.request.method == "POST"      # Only POST requests
+http.response.code >= 400          # Only error responses
+http.host contains "api.example"   # Requests to specific host
+
+# Combine filters
+ip.addr == 10.0.0.1 && tcp.port == 8000 && http.response.code == 500
+
+# TLS debugging
+tls.handshake.type == 1            # ClientHello messages
+tls.handshake.type == 2            # ServerHello messages
+tls.alert_message                  # TLS alerts (errors)
+```
+
+**CLI with tshark (scriptable):**
+
+```bash
+# Capture HTTP requests to your service:
+tshark -i eth0 -f "tcp port 8000" -Y "http.request" -T fields \
+    -e http.request.method -e http.request.uri -e http.response.code
+
+# Capture DNS resolution for debugging slow connections:
+tshark -i any -f "udp port 53" -Y "dns.qr == 0" -T fields \
+    -e dns.qry.name -e dns.time
+
+# Measure TLS handshake time:
+tshark -i eth0 -f "tcp port 443" -Y "tls.handshake" -T fields \
+    -e frame.time_relative -e tls.handshake.type -e ip.dst
+```
+
+### 10.2 DNS Resolution Path — From Domain Name to IP Address
+
+When your Python code calls `httpx.get("https://api.example.com/data")`, the DNS resolution follows a specific path before any TCP connection is made.
+
+**The Resolution Chain:**
+
+```python
+# 1. Application calls getaddrinfo("api.example.com")
+# 2. C library checks /etc/hosts (or Windows hosts file)
+# 3. C library checks /etc/nsswitch.conf for resolution order
+# 4. C library queries the configured resolver (from /etc/resolv.conf)
+# 5. Resolver (e.g., 8.8.8.8) performs recursive resolution:
+#    a. Query root server (.) → "com is at ns1.verisign.com"
+#    b. Query .com TLD server → "example.com is at ns1.example.com"
+#    c. Query example.com authoritative server → "api.example.com = 93.184.216.34"
+# 6. Resolver caches result (TTL from DNS record)
+# 7. Application receives IP address, proceeds with TCP connection
+```
+
+**DNS Caching Layers:**
+
+```python
+# Layer 1: Application-level cache (httpx connection pool, requests Session)
+# Layer 2: OS resolver cache (systemd-resolved, nscd, or Windows DNS Client)
+# Layer 3: Network resolver cache (router, ISP DNS, 8.8.8.8)
+# Layer 4: Authoritative server TTL
+
+# Python DNS debugging:
+import socket
+
+def resolve_with_details(hostname: str):
+    """Show all resolved addresses and address families."""
+    results = socket.getaddrinfo(
+        hostname, 443,
+        family=socket.AF_UNSPEC,  # Both IPv4 and IPv6
+        type=socket.SOCK_STREAM,  # TCP
+    )
+    for family, type_, proto, canonname, sockaddr in results:
+        family_name = "IPv4" if family == socket.AF_INET else "IPv6"
+        print(f"  {family_name}: {sockaddr[0]}:{sockaddr[1]}")
+
+resolve_with_details("github.com")
+# IPv4: 140.82.121.3:443
+# IPv6: 2606:50c0:8000::3:443
+```
+
+**Common DNS Issues in Python Applications:**
+
+1. **DNS resolution blocking the event loop:** `socket.getaddrinfo()` is synchronous. In asyncio, use `loop.getaddrinfo()` or configure a thread pool.
+
+2. **DNS caching causing stale IPs:** Python's `socket` module doesn't cache DNS. But connection pools (httpx, aiohttp) reuse connections, effectively caching the resolved IP. Set `pool_connections` timeout appropriately.
+
+3. **DNS over HTTPS (DoH):** For privacy-sensitive applications, resolve via HTTPS to prevent ISP snooping:
+
+```python
+import httpx
+
+async def dns_over_https(domain: str) -> list[str]:
+    """Resolve domain using Cloudflare's DoH endpoint."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            "https://cloudflare-dns.com/dns-query",
+            params={"name": domain, "type": "A"},
+            headers={"Accept": "application/dns-json"},
+        )
+        data = resp.json()
+        return [answer["data"] for answer in data.get("Answer", [])]
+```
+
+---
+
+
+
+### 10.3 TCP Connection States and the TIME_WAIT Problem
+
+Python developers running high-throughput HTTP services often encounter "address already in use" errors or connection exhaustion. Understanding TCP connection states explains why.
+
+**The TCP State Machine (Simplified):**
+
+```bash
+# Connection establishment (3-way handshake):
+# Client: CLOSED → SYN_SENT → ESTABLISHED
+# Server: LISTEN → SYN_RECEIVED → ESTABLISHED
+
+# Connection termination (4-way handshake):
+# Initiator: ESTABLISHED → FIN_WAIT_1 → FIN_WAIT_2 → TIME_WAIT → CLOSED
+# Responder: ESTABLISHED → CLOSE_WAIT → LAST_ACK → CLOSED
+
+# TIME_WAIT: The initiator of close waits 2×MSL (Maximum Segment Lifetime)
+# Default MSL = 60s on Linux → TIME_WAIT lasts 120 seconds!
+```
+
+**Why TIME_WAIT Causes Problems:**
+
+Each TCP connection is identified by (src_ip, src_port, dst_ip, dst_port). During TIME_WAIT, this 4-tuple is reserved — no new connection can use it. On a busy server making many short-lived outbound connections:
+
+```python
+# Problem scenario: Python service making HTTP requests to an API
+# Each request: connect → send → receive → close
+# After close: connection enters TIME_WAIT for 120 seconds
+# At 1000 requests/second: 120,000 connections in TIME_WAIT!
+# Linux default ephemeral port range: 32768-60999 (28,231 ports)
+# Result: port exhaustion → "Cannot assign requested address"
+```
+
+**Solutions:**
+
+```python
+import httpx
+
+# Solution 1: Connection pooling (reuse connections, avoid TIME_WAIT)
+client = httpx.Client(
+    http2=True,           # HTTP/2 multiplexes requests on one connection
+    limits=httpx.Limits(
+        max_connections=100,
+        max_keepalive_connections=20,
+    ),
+)
+# Reuse this client for all requests — connections stay ESTABLISHED
+
+# Solution 2: SO_REUSEADDR (for servers)
+import socket
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+# Allows binding to a port that's in TIME_WAIT
+
+# Solution 3: Reduce TIME_WAIT duration (Linux sysctl)
+# net.ipv4.tcp_fin_timeout = 30  (reduce from 60 to 30 seconds)
+# net.ipv4.tcp_tw_reuse = 1      (allow reusing TIME_WAIT connections)
+```
+
+**Monitoring:**
+
+```bash
+# Count connections by state:
+ss -tan | awk '{print $1}' | sort | uniq -c | sort -rn
+# 45000 TIME-WAIT    ← problem!
+# 200   ESTABLISHED
+# 5     LISTEN
+```
+
+---

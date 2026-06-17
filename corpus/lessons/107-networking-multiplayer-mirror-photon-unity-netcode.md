@@ -1,0 +1,1292 @@
+---
+title: "10.7 — Networking & Multiplayer: Mirror, Photon & Unity Netcode"
+subject: "C#"
+catalog: advanced
+audience_tier: higher-education
+chapter: "10.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 10.7 — Networking & Multiplayer: Mirror, Photon & Unity Netcode
+
+> *"The network is a liar, a cheat, and a thief. Your job is to make the player not notice."* — Glenn Fiedler
+
+Multiplayer is where game development gets genuinely hard. You're fighting physics — the speed of light introduces latency, packets get lost, and players on different continents must see a consistent world. This chapter covers the three major Unity networking frameworks, the core patterns (client prediction, server reconciliation, lag compensation), and how to choose between them for your co-op farming game.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Understand client-server vs peer-to-peer architectures.
+2. Implement client-side prediction and server reconciliation.
+3. Write RPCs (Remote Procedure Calls) for game actions.
+4. Synchronize state with SyncVars and NetworkVariables.
+5. Compare Mirror, Photon, and Unity Netcode for GameObjects.
+6. Implement lag compensation for time-sensitive interactions.
+7. Design network-aware game systems (authority, ownership, interest management).
+
+---
+
+## 🖼️ Visual Anchor — Client Prediction & Reconciliation
+
+![csharp__3.7-fig1](csharp__3.7-fig1.svg)
+
+---
+
+## 📚 1. Concepts
+
+### Concept 3.7.1 — Network Architecture Models
+
+| Model | How It Works | Pros | Cons |
+|-------|-------------|------|------|
+| **Dedicated Server** | Server runs game logic, clients send input | Cheat-resistant, authoritative | Server cost, latency |
+| **Listen Server** | One player is host + server | Free hosting, low latency for host | Host advantage, host leaves = game over |
+| **Peer-to-Peer** | All clients simulate, sync state | No server needed | Cheat-vulnerable, desyncs, NAT issues |
+| **Relay Server** | Thin relay forwards packets | NAT traversal solved | Still needs authority model |
+
+**For a co-op farm game:** Listen server (one player hosts) or relay-based (Photon/Unity Relay) is ideal. Competitive games need dedicated servers.
+
+### Concept 3.7.2 — Client Prediction & Server Reconciliation
+
+The fundamental problem: 100ms round-trip latency means the player's input takes 50ms to reach the server and 50ms for the result to come back. Without prediction, movement feels like controlling a puppet through mud.
+
+**Solution:**
+1. **Client predicts** — Apply input locally immediately (feels responsive).
+2. **Client sends input** to server with a sequence number.
+3. **Server simulates** authoritatively, sends back confirmed state + sequence number.
+4. **Client reconciles** — Compare predicted state with server state. If they match, great. If not, snap to server state and re-simulate all unconfirmed inputs.
+
+```
+Client Timeline:
+  Input #1 → Predict → Input #2 → Predict → Input #3 → Predict
+                                                          ↑
+Server confirms Input #1 ─────────────────────────────────┘
+  "Your position after Input #1 should be X"
+  Client: "I predicted X too, we agree!" (or: snap + re-predict #2, #3)
+```
+
+### Concept 3.7.3 — RPC Patterns
+
+| RPC Type | Direction | Use Case |
+|----------|-----------|----------|
+| **ServerRpc** (Command) | Client → Server | "I want to attack", "I want to plant" |
+| **ClientRpc** | Server → All Clients | "Explosion happened at X", "Day changed" |
+| **TargetRpc** | Server → Specific Client | "Your quest updated", "Trade offer" |
+
+```csharp
+// The golden rule: NEVER trust the client
+// Client says "I want to attack enemy #5"
+// Server validates: Is enemy #5 in range? Does player have a weapon? Is cooldown ready?
+```
+
+### Concept 3.7.4 — State Synchronization
+
+Two approaches:
+1. **Snapshot interpolation**: Server sends full world state N times/sec. Clients interpolate between snapshots. Simple, bandwidth-heavy.
+2. **Delta compression**: Only send what changed. Complex, bandwidth-efficient.
+
+For a farming game (low-frequency updates, cooperative):
+- Crop growth: Sync on state change (planted, watered, grew, harvested)
+- Player position: Sync at 10-20 Hz with interpolation
+- Inventory: Sync on change (item added/removed)
+- Time of day: Sync once per game-minute
+
+### Concept 3.7.5 — Lag Compensation (Server-Side Rewind)
+
+For time-sensitive actions (hitting an enemy, catching a fish):
+
+1. Client fires at time T (sees enemy at position X).
+2. Server receives at time T + latency.
+3. Server **rewinds** the world to time T (where was the enemy when client fired?).
+4. Server checks hit against rewound positions.
+5. If hit: apply damage. If miss: reject.
+
+This makes the game feel fair for the shooter despite latency.
+
+
+---
+
+## 📐 2. Framework Comparison
+
+### Mirror vs Photon vs Unity Netcode
+
+| Feature | Mirror | Photon PUN/Fusion | Unity Netcode for GO |
+|---------|--------|-------------------|---------------------|
+| **Cost** | Free (MIT) | Free tier (20 CCU), paid plans | Free |
+| **Architecture** | Client-server (self-hosted) | Cloud relay + rooms | Client-server (self/relay) |
+| **Hosting** | You provide server | Photon cloud | Unity Relay or self-host |
+| **Maturity** | Very mature (fork of UNET) | Production-proven | Newer, improving rapidly |
+| **Documentation** | Excellent | Excellent | Good, growing |
+| **Max Players** | Unlimited (your server) | 20 (PUN), 200 (Fusion) | Depends on transport |
+| **Ease of Use** | Medium | Easy (PUN), Medium (Fusion) | Medium |
+| **Transport** | KCP, WebSocket, Steam | Photon protocol | Unity Transport (UDP) |
+| **Best For** | Self-hosted, full control | Quick prototype, cloud-hosted | Official Unity ecosystem |
+| **Co-op Farm** | ✓ Great choice | ✓ Easiest setup | ✓ Good if staying in Unity ecosystem |
+
+### Recommendation for Stardew-Like Co-op:
+- **Prototype**: Photon PUN (fastest to get running, free for small player count)
+- **Production**: Mirror (free, full control, can self-host) or Unity Netcode + Relay (official, integrated)
+
+---
+
+## 🔑 3. Mechanics — Mirror Implementation
+
+### 10.1 — Basic Networked Player (Mirror)
+
+```csharp
+using Mirror;
+using UnityEngine;
+
+public class NetworkedPlayer : NetworkBehaviour
+{
+    [SyncVar(hook = nameof(OnNameChanged))]
+    public string playerName;
+
+    [SyncVar]
+    public int gold;
+
+    [SerializeField] private float moveSpeed = 5f;
+
+    // Only runs on the owning client
+    void Update()
+    {
+        if (!isLocalPlayer) return;  // Don't control other players!
+
+        var input = new Vector2(
+            Input.GetAxisRaw("Horizontal"),
+            Input.GetAxisRaw("Vertical")
+        ).normalized;
+
+        if (input.sqrMagnitude > 0.01f)
+        {
+            CmdMove(input);  // Send input to server
+            // Client prediction: move locally immediately
+            transform.Translate(input * moveSpeed * Time.deltaTime);
+        }
+    }
+
+    // SERVER: Validates and applies movement
+    [Command]  // Client → Server RPC
+    private void CmdMove(Vector2 input)
+    {
+        // Server-side validation
+        if (input.sqrMagnitude > 1.1f) return;  // Cheat check: normalized should be ≤ 1
+
+        transform.Translate(input * moveSpeed * Time.fixedDeltaTime);
+        // Mirror auto-syncs transform via NetworkTransform component
+    }
+
+    // SERVER → ALL CLIENTS: Plant a crop
+    [Command]
+    public void CmdPlantCrop(Vector2Int tile, string cropId)
+    {
+        // Validate on server
+        if (!farmGrid.IsTileEmpty(tile)) return;
+        if (!inventory.HasItem(cropId + "_seed")) return;
+
+        // Apply
+        farmGrid.PlantCrop(tile, cropId);
+        inventory.RemoveItem(cropId + "_seed", 1);
+
+        // Notify all clients
+        RpcCropPlanted(tile, cropId);
+    }
+
+    [ClientRpc]  // Server → All Clients
+    private void RpcCropPlanted(Vector2Int tile, string cropId)
+    {
+        // Visual feedback on all clients
+        var visual = Instantiate(cropVisualPrefab, (Vector3Int)tile, Quaternion.identity);
+        visual.SetCrop(cropId);
+        AudioManager.Play("plant_seed");
+    }
+
+    // Hook: called on all clients when SyncVar changes
+    private void OnNameChanged(string oldName, string newName)
+    {
+        nameLabel.text = newName;
+    }
+}
+```
+
+### 10.2 — Synced Farm State (Mirror)
+
+```csharp
+public class NetworkedFarm : NetworkBehaviour
+{
+    // SyncDictionary: automatically synced across all clients
+    private readonly SyncDictionary<Vector2Int, CropState> _crops = new();
+
+    public struct CropState
+    {
+        public string CropId;
+        public float Growth;
+        public bool Watered;
+        public int DayPlanted;
+    }
+
+    void Start()
+    {
+        // Subscribe to sync callbacks
+        _crops.OnChange += OnCropChanged;
+    }
+
+    // Only server modifies state
+    [Server]
+    public void WaterCrop(Vector2Int tile)
+    {
+        if (_crops.TryGetValue(tile, out var state))
+        {
+            state.Watered = true;
+            _crops[tile] = state;  // Triggers sync to all clients
+        }
+    }
+
+    [Server]
+    public void AdvanceDay()
+    {
+        foreach (var kvp in _crops.ToList())
+        {
+            var state = kvp.Value;
+            if (state.Watered)
+            {
+                state.Growth += GetGrowthRate(state.CropId);
+                state.Watered = false;
+            }
+            _crops[kvp.Key] = state;
+        }
+    }
+
+    // Called on ALL clients when dictionary changes
+    private void OnCropChanged(SyncDictionary<Vector2Int, CropState>.Operation op,
+                                Vector2Int key, CropState value)
+    {
+        switch (op)
+        {
+            case SyncDictionary<Vector2Int, CropState>.Operation.OP_ADD:
+                SpawnCropVisual(key, value);
+                break;
+            case SyncDictionary<Vector2Int, CropState>.Operation.OP_SET:
+                UpdateCropVisual(key, value);
+                break;
+            case SyncDictionary<Vector2Int, CropState>.Operation.OP_REMOVE:
+                DestroyCropVisual(key);
+                break;
+        }
+    }
+}
+```
+
+---
+
+## 🔑 4. Mechanics — Unity Netcode for GameObjects
+
+### 4.1 — Basic Setup
+
+```csharp
+using Unity.Netcode;
+using UnityEngine;
+
+public class NetcodePlayer : NetworkBehaviour
+{
+    // NetworkVariable: server-authoritative synced state
+    private NetworkVariable<int> _gold = new(
+        value: 0,
+        readPerm: NetworkVariableReadPermission.Everyone,
+        writePerm: NetworkVariableWritePermission.Server
+    );
+
+    private NetworkVariable<Vector2> _moveInput = new();
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            // Setup local player
+            Camera.main.GetComponent<CameraFollow>().SetTarget(transform);
+        }
+
+        _gold.OnValueChanged += (prev, curr) =>
+        {
+            if (IsOwner) UpdateGoldUI(curr);
+        };
+    }
+
+    void Update()
+    {
+        if (!IsOwner) return;
+
+        var input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        MoveServerRpc(input);
+
+        // Client prediction
+        transform.Translate(input.normalized * 5f * Time.deltaTime);
+    }
+
+    [ServerRpc]
+    private void MoveServerRpc(Vector2 input)
+    {
+        // Server validates and applies
+        var clamped = Vector2.ClampMagnitude(input, 1f);
+        transform.Translate(clamped * 5f * Time.fixedDeltaTime);
+    }
+
+    [ServerRpc]
+    public void PlantCropServerRpc(Vector2Int tile, string cropId)
+    {
+        if (!ValidatePlanting(tile, cropId)) return;
+
+        ApplyPlanting(tile, cropId);
+        PlantedClientRpc(tile, cropId);
+    }
+
+    [ClientRpc]
+    private void PlantedClientRpc(Vector2Int tile, string cropId)
+    {
+        SpawnCropVisual(tile, cropId);
+    }
+}
+```
+
+
+---
+
+## 🔑 5. Mechanics — Photon PUN2
+
+### 5.1 — Quick Setup
+
+```csharp
+using Photon.Pun;
+using Photon.Realtime;
+
+public class PhotonLauncher : MonoBehaviourPunCallbacks
+{
+    void Start()
+    {
+        PhotonNetwork.ConnectUsingSettings();  // Uses PhotonServerSettings asset
+    }
+
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.JoinOrCreateRoom("FarmRoom", new RoomOptions
+        {
+            MaxPlayers = 4,
+            IsVisible = true
+        }, TypedLobby.Default);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        // Spawn player
+        PhotonNetwork.Instantiate("PlayerPrefab", spawnPoint, Quaternion.identity);
+    }
+}
+
+public class PhotonPlayer : MonoBehaviourPun, IPunObservable
+{
+    private Vector3 _networkPosition;
+    private float _networkSmoothing = 10f;
+
+    void Update()
+    {
+        if (photonView.IsMine)
+        {
+            // Local player: move normally
+            var input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            transform.Translate(input.normalized * 5f * Time.deltaTime);
+        }
+        else
+        {
+            // Remote player: interpolate to network position
+            transform.position = Vector3.Lerp(
+                transform.position, _networkPosition, Time.deltaTime * _networkSmoothing);
+        }
+    }
+
+    // Photon serialization (called ~10 times/sec)
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(transform.position);
+        }
+        else
+        {
+            _networkPosition = (Vector3)stream.ReceiveNext();
+        }
+    }
+
+    // RPC example
+    [PunRPC]
+    public void PlantCrop(Vector2Int tile, string cropId, PhotonMessageInfo info)
+    {
+        // info.Sender tells us who called this
+        if (!PhotonNetwork.IsMasterClient) return;  // Only host validates
+
+        farmGrid.PlantCrop(tile, cropId);
+        // All clients receive this RPC, so all see the crop
+    }
+
+    public void RequestPlant(Vector2Int tile, string cropId)
+    {
+        photonView.RPC("PlantCrop", RpcTarget.All, tile, cropId);
+    }
+}
+```
+
+---
+
+## 🔑 6. Mechanics — Client Prediction Implementation
+
+### 6.1 — Full Prediction + Reconciliation
+
+```csharp
+public class PredictedMovement : NetworkBehaviour
+{
+    [SerializeField] private float moveSpeed = 5f;
+
+    // Input buffer for reconciliation
+    private struct InputFrame
+    {
+        public uint Tick;
+        public Vector2 Input;
+        public Vector3 PredictedPosition;
+    }
+
+    private readonly Queue<InputFrame> _pendingInputs = new();
+    private uint _currentTick;
+
+    void Update()
+    {
+        if (!IsOwner) return;
+
+        _currentTick++;
+        var input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+
+        // 1. Predict locally
+        Vector3 movement = new Vector3(input.x, input.y, 0) * moveSpeed * Time.fixedDeltaTime;
+        transform.position += movement;
+
+        // 2. Store prediction for later reconciliation
+        _pendingInputs.Enqueue(new InputFrame
+        {
+            Tick = _currentTick,
+            Input = input,
+            PredictedPosition = transform.position
+        });
+
+        // 3. Send to server
+        SendInputServerRpc(_currentTick, input);
+    }
+
+    [ServerRpc]
+    private void SendInputServerRpc(uint tick, Vector2 input)
+    {
+        // Server applies movement authoritatively
+        var clamped = Vector2.ClampMagnitude(input, 1f);
+        Vector3 movement = new Vector3(clamped.x, clamped.y, 0) * moveSpeed * Time.fixedDeltaTime;
+        transform.position += movement;
+
+        // Send confirmed state back to client
+        ConfirmStateClientRpc(tick, transform.position);
+    }
+
+    [ClientRpc]
+    private void ConfirmStateClientRpc(uint confirmedTick, Vector3 confirmedPosition)
+    {
+        if (!IsOwner) return;
+
+        // Remove all inputs up to confirmed tick
+        while (_pendingInputs.Count > 0 && _pendingInputs.Peek().Tick <= confirmedTick)
+        {
+            _pendingInputs.Dequeue();
+        }
+
+        // Check if prediction was correct
+        float error = Vector3.Distance(transform.position, confirmedPosition);
+        if (error > 0.01f)  // Threshold for correction
+        {
+            // RECONCILE: Snap to server position, re-apply pending inputs
+            transform.position = confirmedPosition;
+
+            foreach (var frame in _pendingInputs)
+            {
+                Vector3 movement = new Vector3(frame.Input.x, frame.Input.y, 0)
+                    * moveSpeed * Time.fixedDeltaTime;
+                transform.position += movement;
+            }
+        }
+    }
+}
+```
+
+### 6.2 — Interest Management (Don't Sync Everything)
+
+```csharp
+// Only sync objects relevant to each player (reduces bandwidth)
+public class FarmInterestManager : NetworkBehaviour
+{
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestChunkServerRpc(Vector2Int chunkPos, ServerRpcParams rpcParams = default)
+    {
+        var clientId = rpcParams.Receive.SenderClientId;
+
+        // Only send crop data for chunks near the requesting player
+        var crops = GetCropsInChunk(chunkPos);
+        SendChunkDataClientRpc(chunkPos, crops,
+            new ClientRpcParams { Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new[] { clientId }
+            }});
+    }
+}
+```
+
+---
+
+## ⚠️ 7. Gotchas
+
+### Gotcha 3.7.1 — Never Trust Client Input
+```csharp
+// ❌ Client says "I have 999 gold, buy everything"
+[ServerRpc]
+void BuyItemServerRpc(string itemId, int quantity)
+{
+    // ✓ Server checks actual state
+    var price = itemDatabase.GetPrice(itemId) * quantity;
+    if (_gold.Value < price) return;  // Rejected!
+    if (quantity < 0) return;          // Nice try, hacker
+
+    _gold.Value -= price;
+    AddItemToInventory(itemId, quantity);
+}
+```
+
+### Gotcha 3.7.2 — NetworkObject Spawning Order
+```csharp
+// ❌ Assuming objects exist on client when server spawns them
+[ClientRpc]
+void SetupFarmClientRpc(ulong farmNetworkId)
+{
+    // The farm object might not have spawned on this client yet!
+    var farm = NetworkManager.SpawnManager.SpawnedObjects[farmNetworkId];  // May throw!
+}
+
+// ✓ Use OnNetworkSpawn or wait for spawn
+public override void OnNetworkSpawn()
+{
+    // Guaranteed: this object is fully spawned and ready
+}
+```
+
+### Gotcha 3.7.3 — Bandwidth in Co-op Farming
+```csharp
+// ❌ Syncing every crop's growth every frame
+// 5000 crops × 4 bytes × 60 fps = 1.2 MB/s upstream!
+
+// ✓ Event-driven sync: only send changes
+[ServerRpc]
+void WaterCropServerRpc(Vector2Int tile)
+{
+    crops[tile].Watered = true;
+    CropWateredClientRpc(tile);  // One-time event, not continuous
+}
+
+// ✓ Batch updates: send day-end summary
+[ClientRpc]
+void DayEndSyncClientRpc(CropUpdate[] updates)
+{
+    foreach (var update in updates)
+        ApplyCropUpdate(update);
+}
+```
+
+### Gotcha 3.7.4 — Host Migration
+```csharp
+// If the host disconnects in a listen-server model, the game dies.
+// Solutions:
+// 1. Photon: Built-in host migration (MasterClient transfer)
+// 2. Mirror: No built-in solution — save state, reconnect to new host
+// 3. Unity Netcode + Relay: Relay persists, but authority must transfer
+
+// For a co-op farm game: auto-save frequently, allow rejoin
+```
+
+---
+
+## 🔗 8. Cross-References
+
+- **Next**: [10.8 - Production Patterns - DI, Save Systems, Addressables](10.8---Production-Patterns---DI,-Save-Systems,-Addressables)
+- **Previous**: [10.6 - Unity Specifics - MonoBehaviour, Coroutines, ScriptableObjects, ECS](10.6---Unity-Specifics---MonoBehaviour,-Coroutines,-ScriptableObjects,-ECS)
+- **Game Networking Theory**: [26.6 - Multiplayer & Networking](26.6---Multiplayer-&-Networking) — Transport layer, protocols
+- **Engine Context**: [28.5 - Game Engine Architectures - Unity & Unreal](28.5---Game-Engine-Architectures---Unity-&-Unreal) — Frame budgets for netcode
+- **Async Patterns**: [10.4 - Async, Await, Tasks & Threading](10.4---Async,-Await,-Tasks-&-Threading) — Network I/O
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Client-Side Prediction: Full Implementation
+
+**Problem:** In a networked game, waiting for server confirmation before moving the player creates unacceptable input lag (50–200ms RTT). Client-side prediction lets the player move immediately while the server remains authoritative.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// ═══════════════════════════════════════════════════════════════
+// SHARED: Input and state structures (used by both client and server)
+// ═══════════════════════════════════════════════════════════════
+
+public struct PlayerInput
+{
+    public uint Tick;           // Which simulation tick this input is for
+    public float Horizontal;   // -1 to 1
+    public float Vertical;     // -1 to 1
+    public bool Jump;
+    public float DeltaTime;    // Client's dt for this tick
+}
+
+public struct PlayerState
+{
+    public uint Tick;
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public bool IsGrounded;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED: Deterministic movement simulation
+// ═══════════════════════════════════════════════════════════════
+
+public static class PlayerSimulation
+{
+    private const float MoveSpeed = 7f;
+    private const float JumpForce = 10f;
+    private const float Gravity = -20f;
+
+    // PURE FUNCTION: Same input + state = same output (deterministic)
+    public static PlayerState Simulate(PlayerState current, PlayerInput input)
+    {
+        var next = current;
+        next.Tick = input.Tick;
+
+        // Horizontal movement
+        Vector3 moveDir = new Vector3(input.Horizontal, 0, input.Vertical).normalized;
+        next.Velocity.x = moveDir.x * MoveSpeed;
+        next.Velocity.z = moveDir.z * MoveSpeed;
+
+        // Gravity
+        if (!current.IsGrounded)
+            next.Velocity.y += Gravity * input.DeltaTime;
+
+        // Jump
+        if (input.Jump && current.IsGrounded)
+        {
+            next.Velocity.y = JumpForce;
+            next.IsGrounded = false;
+        }
+
+        // Apply velocity
+        next.Position += next.Velocity * input.DeltaTime;
+
+        // Ground check (simplified)
+        if (next.Position.y <= 0f)
+        {
+            next.Position.y = 0f;
+            next.Velocity.y = 0f;
+            next.IsGrounded = true;
+        }
+
+        return next;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENT: Prediction + Reconciliation
+// ═══════════════════════════════════════════════════════════════
+
+public class PredictedPlayerController : MonoBehaviour
+{
+    // Circular buffer of inputs sent to server (for reconciliation)
+    private readonly PlayerInput[] _inputHistory = new PlayerInput[128];
+    private readonly PlayerState[] _stateHistory = new PlayerState[128];
+    
+    private uint _currentTick;
+    private PlayerState _currentState;
+    private uint _lastServerTick; // Last tick confirmed by server
+
+    private void FixedUpdate()
+    {
+        // 1. SAMPLE INPUT
+        var input = new PlayerInput
+        {
+            Tick = _currentTick,
+            Horizontal = Input.GetAxisRaw("Horizontal"),
+            Vertical = Input.GetAxisRaw("Vertical"),
+            Jump = Input.GetButtonDown("Jump"),
+            DeltaTime = Time.fixedDeltaTime
+        };
+
+        // 2. STORE INPUT (for reconciliation later)
+        int bufferIndex = (int)(_currentTick % 128);
+        _inputHistory[bufferIndex] = input;
+
+        // 3. PREDICT: Apply input locally (immediate response)
+        _currentState = PlayerSimulation.Simulate(_currentState, input);
+        _stateHistory[bufferIndex] = _currentState;
+
+        // 4. APPLY: Move the visual representation
+        transform.position = _currentState.Position;
+
+        // 5. SEND: Send input to server
+        SendInputToServer(input);
+
+        _currentTick++;
+    }
+
+    // Called when server sends back authoritative state
+    public void OnServerStateReceived(PlayerState serverState)
+    {
+        // 6. RECONCILE: Check if our prediction was correct
+        int serverBufferIndex = (int)(serverState.Tick % 128);
+        PlayerState predictedState = _stateHistory[serverBufferIndex];
+
+        // Compare predicted vs authoritative
+        float posError = Vector3.Distance(predictedState.Position, serverState.Position);
+
+        if (posError > 0.01f) // Threshold for correction
+        {
+            // 7. REWIND: Accept server state
+            _currentState = serverState;
+
+            // 8. REPLAY: Re-simulate all inputs AFTER the server tick
+            for (uint tick = serverState.Tick + 1; tick < _currentTick; tick++)
+            {
+                int idx = (int)(tick % 128);
+                _currentState = PlayerSimulation.Simulate(_currentState, _inputHistory[idx]);
+                _stateHistory[idx] = _currentState; // Update predictions
+            }
+
+            // 9. APPLY corrected position (optionally smooth/lerp)
+            transform.position = _currentState.Position;
+        }
+
+        _lastServerTick = serverState.Tick;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SERVER: Authoritative simulation
+// ═══════════════════════════════════════════════════════════════
+
+public class ServerPlayerHandler
+{
+    private PlayerState _state;
+    private readonly Queue<PlayerInput> _inputQueue = new();
+
+    public void ReceiveInput(PlayerInput input)
+    {
+        _inputQueue.Enqueue(input);
+    }
+
+    public PlayerState Tick()
+    {
+        // Process all queued inputs (may be multiple if client is ahead)
+        while (_inputQueue.TryDequeue(out var input))
+        {
+            _state = PlayerSimulation.Simulate(_state, input);
+        }
+
+        // Broadcast authoritative state to all clients
+        return _state;
+    }
+}
+```
+
+</details>
+
+### Example 8.2 — Lag Compensation with Rewind
+
+**Problem:** Player A shoots at Player B's position on their screen, but due to latency, Player B has already moved on the server. Lag compensation "rewinds" the server to validate the shot at the time Player A fired.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// ═══════════════════════════════════════════════════════════════
+// SERVER: Position history buffer for all entities
+// ═══════════════════════════════════════════════════════════════
+
+public class PositionHistory
+{
+    private readonly struct Snapshot
+    {
+        public readonly float Timestamp;
+        public readonly Vector3 Position;
+        public readonly Quaternion Rotation;
+        public readonly Vector3 HitboxExtents;
+
+        public Snapshot(float time, Vector3 pos, Quaternion rot, Vector3 extents)
+        {
+            Timestamp = time; Position = pos; Rotation = rot; HitboxExtents = extents;
+        }
+    }
+
+    private readonly Snapshot[] _buffer = new Snapshot[128]; // ~2 seconds at 60 tick
+    private int _writeIndex;
+
+    public void Record(float time, Vector3 pos, Quaternion rot, Vector3 extents)
+    {
+        _buffer[_writeIndex % 128] = new Snapshot(time, pos, rot, extents);
+        _writeIndex++;
+    }
+
+    // Interpolate between two snapshots to get position at exact timestamp
+    public (Vector3 position, Quaternion rotation, Vector3 extents) GetStateAt(float timestamp)
+    {
+        // Find the two snapshots bracketing the requested time
+        Snapshot before = default, after = default;
+        bool found = false;
+
+        for (int i = 0; i < 128; i++)
+        {
+            int idx = (_writeIndex - 1 - i + 128) % 128;
+            if (_buffer[idx].Timestamp <= timestamp)
+            {
+                before = _buffer[idx];
+                after = _buffer[(idx + 1) % 128];
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) return (_buffer[(_writeIndex - 1) % 128].Position, 
+                           _buffer[(_writeIndex - 1) % 128].Rotation,
+                           _buffer[(_writeIndex - 1) % 128].HitboxExtents);
+
+        // Lerp between snapshots
+        float t = (timestamp - before.Timestamp) / (after.Timestamp - before.Timestamp);
+        t = Mathf.Clamp01(t);
+
+        return (
+            Vector3.Lerp(before.Position, after.Position, t),
+            Quaternion.Slerp(before.Rotation, after.Rotation, t),
+            Vector3.Lerp(before.HitboxExtents, after.HitboxExtents, t)
+        );
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SERVER: Lag-compensated hit detection
+// ═══════════════════════════════════════════════════════════════
+
+public class LagCompensationSystem
+{
+    private readonly Dictionary<int, PositionHistory> _histories = new();
+
+    public bool ValidateShot(int shooterId, float shooterRtt, 
+        Vector3 shotOrigin, Vector3 shotDirection, int targetId)
+    {
+        // 1. Calculate when the shooter SAW the target
+        float rewindTime = Time.time - (shooterRtt / 2f); // Half RTT approximation
+        
+        // Clamp rewind to prevent abuse (max 200ms rewind)
+        float maxRewind = 0.2f;
+        rewindTime = Mathf.Max(rewindTime, Time.time - maxRewind);
+
+        // 2. Get target's position at that historical time
+        if (!_histories.TryGetValue(targetId, out var history))
+            return false;
+
+        var (historicalPos, historicalRot, hitboxExtents) = history.GetStateAt(rewindTime);
+
+        // 3. Perform hit detection against historical position
+        Bounds historicalBounds = new Bounds(historicalPos, hitboxExtents * 2f);
+        Ray shotRay = new Ray(shotOrigin, shotDirection);
+
+        bool hit = historicalBounds.IntersectRay(shotRay, out float distance);
+        
+        // 4. Validate distance (prevent impossible shots)
+        if (hit && distance > 100f) hit = false; // Max weapon range
+
+        return hit;
+    }
+}
+```
+
+</details>
+
+### Example 8.3 — Entity Interpolation for Smooth Remote Players
+
+**Problem:** Remote players update at the server tick rate (20–60 Hz) but you render at 60–144 fps. Without interpolation, remote entities appear to teleport between positions.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// ═══════════════════════════════════════════════════════════════
+// INTERPOLATION BUFFER: Smooth rendering of remote entities
+// ═══════════════════════════════════════════════════════════════
+
+public class NetworkInterpolation : MonoBehaviour
+{
+    [SerializeField] private float _interpolationDelay = 0.1f; // 100ms buffer
+
+    private readonly struct StateSnapshot
+    {
+        public readonly float Timestamp;
+        public readonly Vector3 Position;
+        public readonly Quaternion Rotation;
+
+        public StateSnapshot(float time, Vector3 pos, Quaternion rot)
+        {
+            Timestamp = time; Position = pos; Rotation = rot;
+        }
+    }
+
+    private readonly List<StateSnapshot> _buffer = new(32);
+
+    // Called when server sends a state update for this entity
+    public void AddSnapshot(float serverTime, Vector3 position, Quaternion rotation)
+    {
+        _buffer.Add(new StateSnapshot(serverTime, position, rotation));
+
+        // Keep buffer bounded (remove old snapshots)
+        while (_buffer.Count > 30)
+            _buffer.RemoveAt(0);
+    }
+
+    private void Update()
+    {
+        if (_buffer.Count < 2) return;
+
+        // Render time = current time - interpolation delay
+        // This means we're always rendering slightly in the PAST
+        float renderTime = Time.time - _interpolationDelay;
+
+        // Find the two snapshots bracketing render time
+        for (int i = 0; i < _buffer.Count - 1; i++)
+        {
+            if (_buffer[i].Timestamp <= renderTime && _buffer[i + 1].Timestamp >= renderTime)
+            {
+                // Interpolate between these two snapshots
+                float t = (renderTime - _buffer[i].Timestamp) /
+                          (_buffer[i + 1].Timestamp - _buffer[i].Timestamp);
+
+                transform.position = Vector3.Lerp(
+                    _buffer[i].Position, _buffer[i + 1].Position, t);
+                transform.rotation = Quaternion.Slerp(
+                    _buffer[i].Rotation, _buffer[i + 1].Rotation, t);
+                return;
+            }
+        }
+
+        // If render time is ahead of all snapshots, extrapolate (risky)
+        if (renderTime > _buffer[^1].Timestamp)
+        {
+            // Simple linear extrapolation from last two snapshots
+            var last = _buffer[^1];
+            var prev = _buffer[^2];
+            float dt = last.Timestamp - prev.Timestamp;
+            float extrapolateTime = renderTime - last.Timestamp;
+
+            // Clamp extrapolation to prevent wild predictions
+            extrapolateTime = Mathf.Min(extrapolateTime, dt * 2f);
+
+            Vector3 velocity = (last.Position - prev.Position) / dt;
+            transform.position = last.Position + velocity * extrapolateTime;
+            transform.rotation = last.Rotation;
+        }
+    }
+}
+```
+
+</details>
+
+### Example 8.4 — Framework Comparison: Mirror vs Photon Fusion vs Unity NGO
+
+<details>
+<summary>🔍 Full comparison</summary>
+
+#### Mirror (Free, Open Source)
+
+```csharp
+// Mirror: Simple, mature, great for indie games
+// Architecture: Client-authoritative or server-authoritative
+// Transport: KCP (reliable UDP), WebSocket, Steam
+
+using Mirror;
+
+public class MirrorPlayer : NetworkBehaviour
+{
+    [SyncVar(hook = nameof(OnHealthChanged))]
+    private int _health = 100;
+
+    [Command] // Client → Server RPC
+    public void CmdTakeDamage(int amount)
+    {
+        _health -= amount; // Server modifies, auto-syncs to all clients
+    }
+
+    [ClientRpc] // Server → All Clients RPC
+    private void RpcPlayHitEffect(Vector3 position)
+    {
+        Instantiate(_hitEffectPrefab, position, Quaternion.identity);
+    }
+
+    private void OnHealthChanged(int oldValue, int newValue)
+    {
+        _healthBar.fillAmount = newValue / 100f;
+    }
+}
+```
+
+**Pros:** Free, simple API, large community, many transports, works with any hosting.
+**Cons:** No built-in matchmaking, no relay servers, manual lag compensation.
+
+#### Photon Fusion (Paid, Enterprise)
+
+```csharp
+// Fusion: Tick-based, built-in prediction, state synchronization
+// Architecture: Server-authoritative with client prediction
+// Transport: Photon Cloud (relay + matchmaking included)
+
+using Fusion;
+
+public class FusionPlayer : NetworkBehaviour
+{
+    [Networked] private int Health { get; set; } = 100;
+    [Networked] private Vector3 Velocity { get; set; }
+
+    // Runs on ALL peers (predicted on client, authoritative on server)
+    public override void FixedUpdateNetwork()
+    {
+        if (GetInput(out NetworkInputData input))
+        {
+            Velocity = new Vector3(input.Horizontal, 0, input.Vertical) * 7f;
+            transform.position += Velocity * Runner.DeltaTime;
+        }
+    }
+
+    // Fusion handles prediction + reconciliation automatically!
+    // [Networked] properties are automatically rolled back and re-simulated
+}
+```
+
+**Pros:** Built-in prediction/reconciliation, tick-accurate, Photon Cloud infrastructure.
+**Cons:** Expensive at scale ($), vendor lock-in, complex API.
+
+#### Unity Netcode for GameObjects (NGO) (Free, Unity Official)
+
+```csharp
+// NGO: Unity's official solution, integrates with Unity services
+// Architecture: Server-authoritative
+// Transport: Unity Transport (UDP), Unity Relay
+
+using Unity.Netcode;
+
+public class NgoPlayer : NetworkBehaviour
+{
+    private NetworkVariable<int> _health = new(100, 
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    public override void OnNetworkSpawn()
+    {
+        _health.OnValueChanged += OnHealthChanged;
+    }
+
+    [ServerRpc] // Client → Server
+    public void TakeDamageServerRpc(int amount)
+    {
+        _health.Value -= amount;
+    }
+
+    [ClientRpc] // Server → Clients
+    public void PlayEffectClientRpc(Vector3 position)
+    {
+        Instantiate(_effectPrefab, position, Quaternion.identity);
+    }
+}
+```
+
+**Pros:** Free, official Unity support, integrates with Unity Gaming Services.
+**Cons:** Less mature than Mirror/Fusion, no built-in prediction, verbose API.
+
+#### Decision Matrix
+
+| Feature | Mirror | Photon Fusion | Unity NGO |
+|---------|:------:|:-------------:|:---------:|
+| Cost | Free | $$$ | Free |
+| Prediction | Manual | Built-in | Manual |
+| Matchmaking | Manual | Included | Unity Services |
+| Max Players | Unlimited* | 200 | 100 |
+| Tick-based | Optional | Yes | Optional |
+| Relay Servers | Manual | Included | Unity Relay |
+| Complexity | Low | High | Medium |
+| Best For | Indie/Small | Competitive | Unity ecosystem |
+
+</details>
+
+---
+
+## 📖 9. Appendix: Extended Derivations & Special Cases
+
+### Appendix 9.1 — Deterministic Lockstep vs Snapshot Interpolation
+
+#### Deterministic Lockstep
+
+```
+How it works:
+1. All clients simulate the SAME game state
+2. Only INPUTS are sent over the network (tiny packets)
+3. Every client runs the exact same simulation
+4. If simulations diverge → desync (game-breaking bug)
+
+Requirements:
+- Perfectly deterministic simulation (same input → same output on ALL platforms)
+- No floating-point differences between platforms
+- Fixed-point math or IEEE 754 strict compliance
+- Same random seed, same execution order
+
+Timeline:
+Tick 1: Client A sends input, Client B sends input
+Tick 2: Both clients have BOTH inputs → simulate tick 1
+Tick 3: Both clients have tick 2 inputs → simulate tick 2
+(Always rendering 1+ ticks behind — input delay)
+
+Advantages:
+- Minimal bandwidth (only inputs, ~50 bytes/tick/player)
+- Perfect for RTS (1000s of units, only player commands sent)
+- Replays are trivial (just store inputs)
+- Scales to many entities (bandwidth independent of entity count)
+
+Disadvantages:
+- Input delay (must wait for all players' inputs before simulating)
+- One slow player delays everyone
+- Determinism is EXTREMELY hard to achieve in Unity (floating point!)
+- Desync bugs are nightmarish to debug
+- Late joiners must replay entire game history
+
+Used by: StarCraft, Age of Empires, fighting games, Factorio
+```
+
+#### Snapshot Interpolation (State Sync)
+
+```
+How it works:
+1. Server simulates the authoritative game state
+2. Server sends FULL STATE snapshots to all clients (20-60 Hz)
+3. Clients interpolate between received snapshots for smooth rendering
+4. Clients predict their own player (client-side prediction)
+
+Timeline:
+Server Tick 1: Simulate → send snapshot to all clients
+Server Tick 2: Simulate → send snapshot
+Client renders: Interpolates between tick 1 and tick 2 positions
+(Always rendering ~100ms in the past for smooth interpolation)
+
+Advantages:
+- No determinism requirement (server is authoritative)
+- Late joiners just receive current state
+- Tolerant of packet loss (just skip to next snapshot)
+- Easier to implement correctly
+- Works with Unity's non-deterministic physics
+
+Disadvantages:
+- Higher bandwidth (full state × players × tick rate)
+- Scales poorly with entity count (more entities = bigger snapshots)
+- Requires delta compression for efficiency
+- 100ms+ visual delay for remote entities
+
+Used by: Overwatch, Valorant, Fortnite, most FPS games
+```
+
+#### Hybrid Approaches
+
+```csharp
+// DELTA COMPRESSION: Only send what changed
+public struct EntityDelta
+{
+    public int EntityId;
+    public DirtyFlags Changed; // Bitmask of which fields changed
+    
+    // Only include fields that actually changed
+    public Vector3? Position;  // null = unchanged
+    public float? Health;      // null = unchanged
+    public byte? AnimState;    // null = unchanged
+}
+
+// INTEREST MANAGEMENT: Only send entities the client can see
+public class InterestManager
+{
+    public List<int> GetRelevantEntities(int clientId)
+    {
+        var clientPos = GetClientPosition(clientId);
+        return _allEntities
+            .Where(e => Vector3.Distance(e.Position, clientPos) < 100f)
+            .Select(e => e.Id)
+            .ToList();
+    }
+}
+
+// QUANTIZATION: Reduce precision to save bandwidth
+public static class Quantize
+{
+    // Position: 3 floats (12 bytes) → 3 shorts (6 bytes)
+    public static (short x, short y, short z) PackPosition(Vector3 pos, float worldSize)
+    {
+        return (
+            (short)(pos.x / worldSize * short.MaxValue),
+            (short)(pos.y / worldSize * short.MaxValue),
+            (short)(pos.z / worldSize * short.MaxValue)
+        );
+    }
+
+    // Rotation: Quaternion (16 bytes) → smallest-three (4 bytes)
+    public static uint PackQuaternion(Quaternion q)
+    {
+        // Find largest component, encode the other 3 with 10 bits each
+        // + 2 bits for which component was dropped
+        // Total: 32 bits instead of 128 bits
+        int largest = 0;
+        float largestValue = Mathf.Abs(q.x);
+        // ... (standard smallest-three encoding)
+        return packed;
+    }
+}
+```
+
+### Appendix 9.2 — Network Tick Rate and Bandwidth Budgets
+
+```
+Typical configurations:
+
+| Game Type    | Server Tick | Client Send | Snapshot Size | Bandwidth/Player |
+|-------------|-------------|-------------|---------------|------------------|
+| FPS (comp)  | 128 Hz      | 128 Hz      | ~200 bytes    | ~200 Kbps        |
+| FPS (casual)| 60 Hz       | 60 Hz       | ~150 bytes    | ~70 Kbps         |
+| Battle Royal| 20 Hz       | 20 Hz       | ~100 bytes    | ~15 Kbps         |
+| MMO         | 10 Hz       | 10 Hz       | ~50 bytes     | ~4 Kbps          |
+| RTS         | 10 Hz       | 10 Hz       | ~30 bytes     | ~2 Kbps          |
+| Turn-based  | On-demand   | On-demand   | ~500 bytes    | ~1 Kbps          |
+
+Budget calculation for 100-player battle royale:
+- 100 players × 100 bytes/snapshot × 20 snapshots/sec = 200 KB/sec per client
+- With delta compression: ~50 KB/sec per client
+- With interest management (only nearby 20 players): ~10 KB/sec per client
+- Server total outbound: 10 KB × 100 clients = 1 MB/sec (8 Mbps) — manageable
+```
+
+---
+
+## 🔄 Maintenance
+- **Created**: 2026-05-24
+- **Last Updated**: 2026-05-24

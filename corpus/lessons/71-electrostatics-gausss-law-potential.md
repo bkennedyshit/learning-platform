@@ -1,0 +1,1299 @@
+---
+title: "Electrostatics Gausss Law Potential"
+subject: "Electrodynamics & Classical Field Theory"
+catalog: advanced
+audience_tier: higher-education
+chapter: "7.1"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 7.1 — Electrostatics: Gauss's Law & Potential
+
+> *"We may regard the present state of the universe as the effect of its past and the cause of its future. An intellect which at a certain moment would know all forces that set nature in motion… nothing would be uncertain and the future just as the past would be present before its eyes."* — Pierre-Simon Laplace
+>
+> *"The electric field is not merely a mathematical device; it is a physical entity that carries energy and momentum."* — David J. Griffiths, *Introduction to Electrodynamics*
+
+Electrostatics is the study of electric fields and potentials produced by **stationary** charge distributions. The entire edifice rests on two pillars: **Coulomb's Law** (the empirical force law between point charges) and **Gauss's Law** (the divergence equation that encodes how charge sources create electric flux). From these, we derive the scalar potential $\phi$, prove its uniqueness, and establish the mathematical machinery that feeds directly into Laplace and Poisson equations (Chapter 7.2).
+
+This chapter assumes mastery of [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl) and [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems). Every integral identity used here was proven there.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. State Coulomb's Law in vector form and derive the electric field of arbitrary discrete and continuous charge distributions.
+2. Derive Gauss's Law in both integral and differential form from Coulomb's Law.
+3. Apply Gauss's Law to compute $\mathbf{E}$ for symmetric charge distributions (spherical, cylindrical, planar).
+4. Define the electrostatic potential $\phi$ and prove that $\mathbf{E} = -\nabla\phi$.
+5. Compute $\phi$ from both the field (line integral) and directly from the charge distribution (superposition integral).
+6. Derive the energy stored in an electrostatic field configuration.
+7. State and prove the boundary conditions on $\mathbf{E}$ and $\phi$ at a surface charge distribution.
+8. Recognize the connection between Gauss's Law and the Divergence Theorem from [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems).
+
+---
+
+## 🖼️ Visual Anchor — Electric Field of a Dipole
+
+![math-07__7.1-fig1](math-07__7.1-fig1.svg)
+
+**Interpretation:** Field lines originate on positive charges and terminate on negative charges. The density of field lines encodes the field magnitude $|\mathbf{E}|$. Equipotential surfaces (dashed) are everywhere perpendicular to field lines. The midplane $\phi = 0$ is an equipotential by symmetry.
+
+---
+
+## 📚 1. Definitions
+
+### Definition 7.1.1 — Electric Charge
+
+Electric charge $q$ is a fundamental scalar property of matter that determines the strength of electromagnetic interactions. In SI units, charge is measured in **coulombs** (C). The elementary charge is $e = 1.602 \times 10^{-19}$ C.
+
+**Key properties:**
+- **Quantization:** All observed charges are integer multiples of $e$ (or $e/3$ for quarks).
+- **Conservation:** The total charge in any isolated system is constant: $\frac{dQ_{\text{total}}}{dt} = 0$.
+- **Additivity:** The total charge of a system is the algebraic sum of individual charges.
+- **Invariance:** Charge is a Lorentz scalar — it does not depend on the reference frame (this becomes crucial in [7.7 - Relativistic Electrodynamics & Four-Vectors](7.7---Relativistic-Electrodynamics-&-Four-Vectors)).
+
+### Definition 7.1.2 — Coulomb's Law (Vector Form)
+
+The electrostatic force exerted by a point charge $q_1$ at position $\mathbf{r}_1$ on a point charge $q_2$ at position $\mathbf{r}_2$ is:
+
+$$
+\mathbf{F}_{12} = \frac{1}{4\pi\varepsilon_0} \frac{q_1 q_2}{|\mathbf{r}_2 - \mathbf{r}_1|^2} \hat{\mathbf{r}}_{12}
+$$
+
+where $\hat{\mathbf{r}}_{12} = \frac{\mathbf{r}_2 - \mathbf{r}_1}{|\mathbf{r}_2 - \mathbf{r}_1|}$ is the unit vector from $q_1$ to $q_2$, and $\varepsilon_0 = 8.854 \times 10^{-12}$ F/m is the **permittivity of free space**.
+
+The separation vector is $\boldsymbol{\scriptr} \equiv \mathbf{r} - \mathbf{r}'$, where $\mathbf{r}$ is the **field point** and $\mathbf{r}'$ is the **source point**. This notation (following Griffiths) will be used throughout.
+
+### Definition 7.1.3 — Electric Field
+
+The **electric field** $\mathbf{E}(\mathbf{r})$ at a point $\mathbf{r}$ is defined as the force per unit positive test charge:
+
+$$
+\mathbf{E}(\mathbf{r}) \equiv \lim_{q_0 \to 0} \frac{\mathbf{F}}{q_0}
+$$
+
+For a point charge $q$ at the origin:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0} \frac{q}{r^2} \hat{\mathbf{r}}
+$$
+
+For a collection of $N$ point charges $\{q_i\}$ at positions $\{\mathbf{r}_i'\}$, the **superposition principle** gives:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0} \sum_{i=1}^{N} \frac{q_i}{|\mathbf{r} - \mathbf{r}_i'|^2} \hat{\boldsymbol{\scriptr}}_i
+$$
+
+### Definition 7.1.4 — Continuous Charge Distributions
+
+For continuous distributions, the sum becomes an integral. Define:
+
+| Distribution | Symbol | Units | Field Formula |
+|:---|:---|:---|:---|
+| Volume charge density | $\rho(\mathbf{r}')$ | C/m³ | $\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_V \frac{\rho(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^2}\hat{\boldsymbol{\scriptr}}\,d\tau'$ |
+| Surface charge density | $\sigma(\mathbf{r}')$ | C/m² | $\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_S \frac{\sigma(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^2}\hat{\boldsymbol{\scriptr}}\,da'$ |
+| Line charge density | $\lambda(\mathbf{r}')$ | C/m | $\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_{\mathcal{L}} \frac{\lambda(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^2}\hat{\boldsymbol{\scriptr}}\,dl'$ |
+
+Here $d\tau'$ is the volume element, $da'$ the area element, and $dl'$ the line element, all integrated over the **source** coordinates.
+
+### Definition 7.1.5 — Electric Flux
+
+The **electric flux** through a surface $S$ is:
+
+$$
+\Phi_E = \oint_S \mathbf{E} \cdot d\mathbf{a}
+$$
+
+where $d\mathbf{a} = \hat{\mathbf{n}}\,da$ is the outward-directed area element. Flux measures the "number of field lines" passing through $S$ (made precise by Gauss's Law).
+
+### Definition 7.1.6 — Electrostatic Potential
+
+Since $\nabla \times \mathbf{E} = 0$ in electrostatics (proven below), $\mathbf{E}$ is a **conservative** vector field. Therefore there exists a scalar function $\phi(\mathbf{r})$ such that:
+
+$$
+\mathbf{E} = -\nabla\phi
+$$
+
+The potential at point $\mathbf{r}$ relative to a reference point $\mathcal{O}$ is:
+
+$$
+\phi(\mathbf{r}) = -\int_{\mathcal{O}}^{\mathbf{r}} \mathbf{E} \cdot d\mathbf{l}
+$$
+
+The negative sign ensures that $\mathbf{E}$ points from high potential to low potential (downhill on the potential landscape).
+
+For a point charge $q$ at the origin (with $\phi \to 0$ as $r \to \infty$):
+
+$$
+\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0} \frac{q}{r}
+$$
+
+For a continuous volume distribution:
+
+$$
+\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0} \int_V \frac{\rho(\mathbf{r}')}{|\mathbf{r} - \mathbf{r}'|}\,d\tau'
+$$
+
+Note the crucial difference: the potential integral has $1/|\mathbf{r}-\mathbf{r}'|$ (not squared), making it a scalar integral — far simpler to evaluate than the vector field integral.
+
+### Definition 7.1.7 — Electrostatic Energy
+
+The energy required to assemble a configuration of $N$ point charges from infinity:
+
+$$
+W = \frac{1}{2}\sum_{i=1}^{N}\sum_{\substack{j=1\\j\neq i}}^{N} \frac{1}{4\pi\varepsilon_0}\frac{q_i q_j}{|\mathbf{r}_i - \mathbf{r}_j|}
+$$
+
+The factor $\frac{1}{2}$ corrects for double-counting. For continuous distributions:
+
+$$
+W = \frac{1}{2}\int_V \rho(\mathbf{r})\,\phi(\mathbf{r})\,d\tau = \frac{\varepsilon_0}{2}\int_{\text{all space}} |\mathbf{E}|^2\,d\tau
+$$
+
+The second form reveals that energy is stored **in the field itself**, with energy density $u = \frac{\varepsilon_0}{2}|\mathbf{E}|^2$ (J/m³).
+
+### Definition 7.1.8 — Electric Dipole Moment
+
+For two equal and opposite charges $\pm q$ separated by displacement $\mathbf{d}$ (from $-q$ to $+q$):
+
+$$
+\mathbf{p} = q\mathbf{d}
+$$
+
+For a continuous distribution with total charge zero:
+
+$$
+\mathbf{p} = \int_V \mathbf{r}'\,\rho(\mathbf{r}')\,d\tau'
+$$
+
+The potential of a pure dipole at large distances ($r \gg d$):
+
+$$
+\phi_{\text{dip}}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\frac{\mathbf{p}\cdot\hat{\mathbf{r}}}{r^2} = \frac{1}{4\pi\varepsilon_0}\frac{p\cos\theta}{r^2}
+$$
+
+The corresponding electric field (in spherical coordinates):
+
+$$
+\mathbf{E}_{\text{dip}} = \frac{p}{4\pi\varepsilon_0 r^3}\left(2\cos\theta\,\hat{\mathbf{r}} + \sin\theta\,\hat{\boldsymbol{\theta}}\right)
+$$
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 7.1.1 — The Superposition Principle
+
+The total electromagnetic force on a charge $q$ due to a collection of other charges is the **vector sum** of the individual Coulomb forces:
+
+$$
+\mathbf{F}_{\text{total}} = \sum_{i} \mathbf{F}_i = q\sum_i \mathbf{E}_i = q\,\mathbf{E}_{\text{total}}
+$$
+
+This is an empirical fact — not derivable from more fundamental principles within classical electrodynamics. It holds to extraordinary precision in all tested regimes (deviations would signal nonlinear electrodynamics, as in Born-Infeld theory).
+
+**Consequence:** The electric field of any charge distribution is obtained by integrating (summing) the contributions from each infinitesimal charge element independently.
+
+### Axiom 7.1.2 — Coulomb's Law as the Fundamental Force Law
+
+The force between two stationary point charges is:
+1. Proportional to the product of their charges.
+2. Inversely proportional to the square of their separation.
+3. Directed along the line joining them.
+4. Repulsive for like charges, attractive for unlike charges.
+
+$$
+\mathbf{F}_{12} = \frac{1}{4\pi\varepsilon_0}\frac{q_1 q_2}{\scriptr^2}\hat{\boldsymbol{\scriptr}}
+$$
+
+This is the electrostatic analog of Newton's gravitational law, with the crucial difference that charge can be positive or negative (gravity is always attractive).
+
+### Axiom 7.1.3 — Charge Conservation
+
+In any physical process, the total electric charge of an isolated system remains constant. Expressed as a **continuity equation**:
+
+$$
+\frac{\partial \rho}{\partial t} + \nabla \cdot \mathbf{J} = 0
+$$
+
+where $\mathbf{J}$ is the current density. In electrostatics ($\partial/\partial t = 0$), this reduces to $\nabla \cdot \mathbf{J} = 0$ — steady currents have zero divergence.
+
+### Axiom 7.1.4 — The Electrostatic Condition
+
+All charges are **stationary** ($\mathbf{v} = 0$, $\partial\rho/\partial t = 0$). This implies:
+- No magnetic fields are produced by the charges.
+- $\nabla \times \mathbf{E} = 0$ (no time-varying $\mathbf{B}$ to induce curl in $\mathbf{E}$).
+- The system has reached equilibrium.
+
+This axiom defines the domain of validity for this chapter. Relaxing it leads to magnetostatics (Chapter 7.3) and full electrodynamics (Chapter 7.4).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 7.1.1 — The Divergence of the Coulomb Field
+
+**Statement:** For a point charge $q$ at the origin:
+
+$$
+\nabla \cdot \mathbf{E} = \frac{q}{\varepsilon_0}\,\delta^3(\mathbf{r})
+$$
+
+where $\delta^3(\mathbf{r})$ is the three-dimensional Dirac delta function.
+
+<details>
+<summary>🔍 Proof of Lemma 7.1.1</summary>
+
+**Step 1:** Write the electric field of a point charge at the origin:
+
+$$
+\mathbf{E} = \frac{q}{4\pi\varepsilon_0}\frac{\hat{\mathbf{r}}}{r^2}
+$$
+
+**Step 2:** Compute $\nabla \cdot \left(\frac{\hat{\mathbf{r}}}{r^2}\right)$ in spherical coordinates. The divergence in spherical coordinates is:
+
+$$
+\nabla \cdot \mathbf{F} = \frac{1}{r^2}\frac{\partial}{\partial r}\left(r^2 F_r\right) + \frac{1}{r\sin\theta}\frac{\partial}{\partial\theta}\left(\sin\theta\,F_\theta\right) + \frac{1}{r\sin\theta}\frac{\partial F_\phi}{\partial\phi}
+$$
+
+**Step 3:** For $\mathbf{F} = \frac{\hat{\mathbf{r}}}{r^2}$, we have $F_r = 1/r^2$, $F_\theta = 0$, $F_\phi = 0$. Therefore:
+
+$$
+\nabla \cdot \left(\frac{\hat{\mathbf{r}}}{r^2}\right) = \frac{1}{r^2}\frac{\partial}{\partial r}\left(r^2 \cdot \frac{1}{r^2}\right) = \frac{1}{r^2}\frac{\partial}{\partial r}(1) = 0
+$$
+
+**Step 4:** This result holds for all $r \neq 0$. At $r = 0$, the field is singular. To determine the behavior there, apply the Divergence Theorem (from [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems)) over a sphere $S_R$ of radius $R$ centered at the origin:
+
+$$
+\int_V \nabla \cdot \left(\frac{\hat{\mathbf{r}}}{r^2}\right) d\tau = \oint_{S_R} \frac{\hat{\mathbf{r}}}{r^2} \cdot d\mathbf{a}
+$$
+
+**Step 5:** On the sphere, $d\mathbf{a} = \hat{\mathbf{r}}\,R^2\sin\theta\,d\theta\,d\phi$, so:
+
+$$
+\oint_{S_R} \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} = \oint_{S_R} \frac{1}{R^2}\,R^2\sin\theta\,d\theta\,d\phi = \int_0^{2\pi}\int_0^{\pi}\sin\theta\,d\theta\,d\phi = 4\pi
+$$
+
+**Step 6:** The divergence is zero everywhere except at the origin, yet its volume integral is $4\pi$. The only distribution with this property is $4\pi\,\delta^3(\mathbf{r})$. Therefore:
+
+$$
+\nabla \cdot \left(\frac{\hat{\mathbf{r}}}{r^2}\right) = 4\pi\,\delta^3(\mathbf{r})
+$$
+
+**Step 7:** Multiplying by $\frac{q}{4\pi\varepsilon_0}$:
+
+$$
+\nabla \cdot \mathbf{E} = \frac{q}{4\pi\varepsilon_0}\cdot 4\pi\,\delta^3(\mathbf{r}) = \frac{q}{\varepsilon_0}\,\delta^3(\mathbf{r})
+$$
+
+$\blacksquare$
+
+</details>
+
+### Lemma 7.1.2 — The Curl of the Coulomb Field Vanishes
+
+**Statement:** For any electrostatic field:
+
+$$
+\nabla \times \mathbf{E} = 0
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 7.1.2</summary>
+
+**Step 1:** Consider the electric field of a point charge $q$ at position $\mathbf{r}'$:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{q}{4\pi\varepsilon_0}\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|^3}
+$$
+
+**Step 2:** We need to show $\nabla \times \left(\frac{\hat{\boldsymbol{\scriptr}}}{\scriptr^2}\right) = 0$ where $\boldsymbol{\scriptr} = \mathbf{r} - \mathbf{r}'$.
+
+**Step 3:** Observe that $\frac{\hat{\boldsymbol{\scriptr}}}{\scriptr^2} = -\nabla\left(\frac{1}{\scriptr}\right)$. To verify this, compute in Cartesian coordinates. Let $\scriptr = \sqrt{(x-x')^2 + (y-y')^2 + (z-z')^2}$. Then:
+
+$$
+\frac{\partial}{\partial x}\left(\frac{1}{\scriptr}\right) = -\frac{x - x'}{\scriptr^3}
+$$
+
+and similarly for $y$ and $z$ components. Therefore:
+
+$$
+\nabla\left(\frac{1}{\scriptr}\right) = -\frac{\boldsymbol{\scriptr}}{\scriptr^3} = -\frac{\hat{\boldsymbol{\scriptr}}}{\scriptr^2}
+$$
+
+**Step 4:** Since $\mathbf{E} = -\frac{q}{4\pi\varepsilon_0}\nabla\left(\frac{1}{\scriptr}\right)$, and the curl of any gradient is identically zero (this is the vector identity $\nabla \times (\nabla f) = 0$ for any twice-differentiable scalar $f$, proven in [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl)):
+
+$$
+\nabla \times \mathbf{E} = -\frac{q}{4\pi\varepsilon_0}\nabla \times \nabla\left(\frac{1}{\scriptr}\right) = 0
+$$
+
+**Step 5:** By the superposition principle (Axiom 7.1.1), the total field of any charge distribution is a sum/integral of Coulomb fields. Since curl is a linear operator:
+
+$$
+\nabla \times \mathbf{E}_{\text{total}} = \sum_i \nabla \times \mathbf{E}_i = \sum_i 0 = 0
+$$
+
+$\blacksquare$
+
+</details>
+
+**Physical consequence:** Since $\nabla \times \mathbf{E} = 0$, the line integral of $\mathbf{E}$ around any closed loop vanishes:
+
+$$
+\oint \mathbf{E} \cdot d\mathbf{l} = 0
+$$
+
+(by Stokes' Theorem from [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems)). This means the work done by the electrostatic force is **path-independent**, and we can define a potential energy.
+
+### Lemma 7.1.3 — Solid Angle Subtended by a Surface
+
+**Statement:** The flux of $\hat{\mathbf{r}}/r^2$ through any closed surface $S$ enclosing the origin equals $4\pi$; through any closed surface not enclosing the origin, it equals $0$.
+
+$$
+\oint_S \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} = \begin{cases} 4\pi & \text{if origin inside } S \\ 0 & \text{if origin outside } S \end{cases}
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 7.1.3</summary>
+
+**Case 1 (origin inside $S$):**
+
+**Step 1:** Construct a small sphere $S_\epsilon$ of radius $\epsilon$ centered at the origin, entirely contained within $S$. Let $V$ be the volume between $S$ and $S_\epsilon$.
+
+**Step 2:** In $V$, the field $\hat{\mathbf{r}}/r^2$ is smooth and its divergence is zero (from Lemma 7.1.1, the divergence vanishes away from the origin). By the Divergence Theorem:
+
+$$
+\int_V \nabla \cdot \left(\frac{\hat{\mathbf{r}}}{r^2}\right) d\tau = \oint_S \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} - \oint_{S_\epsilon} \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a}_{\text{out}} = 0
+$$
+
+The minus sign on $S_\epsilon$ arises because the outward normal of $V$ on $S_\epsilon$ points **inward** (toward the origin).
+
+**Step 3:** On $S_\epsilon$, the outward normal (away from origin) gives $d\mathbf{a}_{\text{out}} = \hat{\mathbf{r}}\,\epsilon^2\sin\theta\,d\theta\,d\phi$. The integral over $S_\epsilon$ with outward normal pointing away from origin:
+
+$$
+\oint_{S_\epsilon} \frac{\hat{\mathbf{r}}}{r^2}\cdot\hat{\mathbf{r}}\,\epsilon^2\sin\theta\,d\theta\,d\phi = \oint_{S_\epsilon}\frac{1}{\epsilon^2}\cdot\epsilon^2\sin\theta\,d\theta\,d\phi = 4\pi
+$$
+
+**Step 4:** Since the outward normal of $V$ on $S_\epsilon$ points inward, the contribution from $S_\epsilon$ to the divergence theorem is $-4\pi$. Therefore:
+
+$$
+\oint_S \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} + (-4\pi) = 0 \implies \oint_S \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} = 4\pi
+$$
+
+**Case 2 (origin outside $S$):**
+
+**Step 5:** The field $\hat{\mathbf{r}}/r^2$ is smooth throughout the entire volume enclosed by $S$. Its divergence is zero everywhere in this volume. By the Divergence Theorem:
+
+$$
+\oint_S \frac{\hat{\mathbf{r}}}{r^2}\cdot d\mathbf{a} = \int_V \nabla\cdot\left(\frac{\hat{\mathbf{r}}}{r^2}\right)d\tau = \int_V 0\,d\tau = 0
+$$
+
+$\blacksquare$
+
+</details>
+
+### Lemma 7.1.4 — Gradient of $1/|\mathbf{r} - \mathbf{r}'|$
+
+**Statement:** The gradient with respect to the field point $\mathbf{r}$ of the function $1/|\mathbf{r} - \mathbf{r}'|$ is:
+
+$$
+\nabla\left(\frac{1}{|\mathbf{r} - \mathbf{r}'|}\right) = -\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|^3}
+$$
+
+and the Laplacian is:
+
+$$
+\nabla^2\left(\frac{1}{|\mathbf{r} - \mathbf{r}'|}\right) = -4\pi\,\delta^3(\mathbf{r} - \mathbf{r}')
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 7.1.4</summary>
+
+**Step 1:** Let $\boldsymbol{\scriptr} = \mathbf{r} - \mathbf{r}'$ and $\scriptr = |\boldsymbol{\scriptr}|$. In Cartesian coordinates with $\scriptr = \sqrt{(x-x')^2 + (y-y')^2 + (z-z')^2}$:
+
+$$
+\frac{\partial \scriptr}{\partial x} = \frac{x - x'}{\scriptr}
+$$
+
+**Step 2:** Apply the chain rule:
+
+$$
+\frac{\partial}{\partial x}\left(\frac{1}{\scriptr}\right) = -\frac{1}{\scriptr^2}\cdot\frac{\partial\scriptr}{\partial x} = -\frac{x-x'}{\scriptr^3}
+$$
+
+**Step 3:** Assembling all three components:
+
+$$
+\nabla\left(\frac{1}{\scriptr}\right) = -\frac{(x-x')\hat{\mathbf{x}} + (y-y')\hat{\mathbf{y}} + (z-z')\hat{\mathbf{z}}}{\scriptr^3} = -\frac{\boldsymbol{\scriptr}}{\scriptr^3}
+$$
+
+**Step 4:** For the Laplacian, $\nabla^2(1/\scriptr) = \nabla \cdot \nabla(1/\scriptr) = -\nabla \cdot (\hat{\boldsymbol{\scriptr}}/\scriptr^2)$. From Lemma 7.1.1, $\nabla \cdot (\hat{\boldsymbol{\scriptr}}/\scriptr^2) = 4\pi\delta^3(\boldsymbol{\scriptr})$. Therefore:
+
+$$
+\nabla^2\left(\frac{1}{\scriptr}\right) = -4\pi\,\delta^3(\mathbf{r} - \mathbf{r}')
+$$
+
+$\blacksquare$
+
+</details>
+
+This lemma is the mathematical engine behind the Poisson equation $\nabla^2\phi = -\rho/\varepsilon_0$ (Chapter [7.2 - Laplace & Poisson Equations](7.2---Laplace-&-Poisson-Equations)).
+
+### Lemma 7.1.5 — Boundary Conditions on $\mathbf{E}$ at a Surface Charge
+
+**Statement:** At a surface carrying charge density $\sigma$, the electric field has a discontinuity in its normal component:
+
+$$
+E_{\perp,\text{above}} - E_{\perp,\text{below}} = \frac{\sigma}{\varepsilon_0}
+$$
+
+while the tangential component is continuous:
+
+$$
+E_{\parallel,\text{above}} = E_{\parallel,\text{below}}
+$$
+
+<details>
+<summary>🔍 Proof of Lemma 7.1.5</summary>
+
+**Normal component:**
+
+**Step 1:** Construct a thin Gaussian pillbox straddling the surface. The pillbox has top face area $A$ just above the surface and bottom face area $A$ just below. The height $h \to 0$.
+
+**Step 2:** Apply Gauss's Law (integral form) to the pillbox:
+
+$$
+\oint \mathbf{E}\cdot d\mathbf{a} = \frac{Q_{\text{enc}}}{\varepsilon_0}
+$$
+
+**Step 3:** As $h \to 0$, the flux through the sides vanishes (area $\to 0$). The top contributes $E_{\perp,\text{above}}\cdot A$ and the bottom contributes $-E_{\perp,\text{below}}\cdot A$ (the outward normal on the bottom face points opposite to the surface normal). The enclosed charge is $\sigma A$.
+
+$$
+E_{\perp,\text{above}}\cdot A - E_{\perp,\text{below}}\cdot A = \frac{\sigma A}{\varepsilon_0}
+$$
+
+**Step 4:** Dividing by $A$:
+
+$$
+E_{\perp,\text{above}} - E_{\perp,\text{below}} = \frac{\sigma}{\varepsilon_0}
+$$
+
+**Tangential component:**
+
+**Step 5:** Construct a thin rectangular Amperian loop straddling the surface, with sides of length $l$ parallel to the surface (one above, one below) and height $h \to 0$.
+
+**Step 6:** Since $\nabla \times \mathbf{E} = 0$ in electrostatics, Stokes' theorem gives $\oint \mathbf{E}\cdot d\mathbf{l} = 0$ around any closed loop.
+
+**Step 7:** As $h \to 0$, the contributions from the vertical sides vanish. The horizontal sides give:
+
+$$
+E_{\parallel,\text{above}}\cdot l - E_{\parallel,\text{below}}\cdot l = 0
+$$
+
+**Step 8:** Dividing by $l$:
+
+$$
+E_{\parallel,\text{above}} = E_{\parallel,\text{below}}
+$$
+
+$\blacksquare$
+
+</details>
+
+
+
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 7.1.1 — Gauss's Law (Integral Form)
+
+The total electric flux through any closed surface $S$ equals the enclosed charge divided by $\varepsilon_0$:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \frac{Q_{\text{enc}}}{\varepsilon_0} = \frac{1}{\varepsilon_0}\int_V \rho\,d\tau
+$$
+
+where $V$ is the volume enclosed by $S$.
+
+### Theorem 7.1.2 — Gauss's Law (Differential Form)
+
+$$
+\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+$$
+
+This is the **first of Maxwell's equations** (in the electrostatic limit). It states that electric charge is the source of electric field lines: positive charges are sources (divergence > 0), negative charges are sinks (divergence < 0).
+
+### Theorem 7.1.3 — Existence and Uniqueness of the Electrostatic Potential
+
+Given $\nabla \times \mathbf{E} = 0$ in a simply connected domain, there exists a scalar potential $\phi$ unique up to an additive constant such that $\mathbf{E} = -\nabla\phi$.
+
+### Theorem 7.1.4 — Poisson's Equation for the Potential
+
+Combining $\mathbf{E} = -\nabla\phi$ with Gauss's Law $\nabla\cdot\mathbf{E} = \rho/\varepsilon_0$:
+
+$$
+\nabla^2\phi = -\frac{\rho}{\varepsilon_0}
+$$
+
+In regions free of charge ($\rho = 0$), this reduces to **Laplace's equation** $\nabla^2\phi = 0$ (the subject of [7.2 - Laplace & Poisson Equations](7.2---Laplace-&-Poisson-Equations)).
+
+### Theorem 7.1.5 — Earnshaw's Theorem
+
+A charged particle cannot be held in stable equilibrium by electrostatic forces alone.
+
+**Formal statement:** If $\nabla^2\phi = 0$ in a charge-free region, then $\phi$ has no local maxima or minima in that region (only saddle points). Therefore, there is no point where a test charge experiences a restoring force in all directions.
+
+### Theorem 7.1.6 — Shell Theorem (Electrostatic)
+
+1. A uniformly charged spherical shell produces a field **identical to a point charge** $Q$ at its center for all points outside the shell.
+2. The field **inside** the shell is exactly zero.
+
+$$
+\mathbf{E}(r) = \begin{cases} \frac{Q}{4\pi\varepsilon_0 r^2}\hat{\mathbf{r}} & r > R \\ 0 & r < R \end{cases}
+$$
+
+### Theorem 7.1.7 — Energy in Terms of Field
+
+The total electrostatic energy of a charge configuration can be expressed as a volume integral over all space:
+
+$$
+W = \frac{\varepsilon_0}{2}\int_{\text{all space}} |\mathbf{E}|^2\,d\tau
+$$
+
+This is always non-negative, confirming that energy is stored in the field.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### Derivation 7.1.1 — Gauss's Law from Coulomb's Law
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Goal:** Derive $\oint_S \mathbf{E}\cdot d\mathbf{a} = Q_{\text{enc}}/\varepsilon_0$ from Coulomb's Law and the superposition principle.
+
+**Step 1:** Consider a single point charge $q$ at position $\mathbf{r}'$ inside a closed surface $S$. The electric field at field point $\mathbf{r}$ is:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{q}{4\pi\varepsilon_0}\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|^3}
+$$
+
+**Step 2:** Compute the flux through $S$:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \frac{q}{4\pi\varepsilon_0}\oint_S \frac{(\mathbf{r} - \mathbf{r}')}{|\mathbf{r} - \mathbf{r}'|^3}\cdot d\mathbf{a}
+$$
+
+**Step 3:** Shift the origin to $\mathbf{r}'$. Define $\boldsymbol{\scriptr} = \mathbf{r} - \mathbf{r}'$. The integral becomes:
+
+$$
+\frac{q}{4\pi\varepsilon_0}\oint_S \frac{\hat{\boldsymbol{\scriptr}}}{\scriptr^2}\cdot d\mathbf{a}
+$$
+
+**Step 4:** By Lemma 7.1.3, since $\mathbf{r}'$ (the origin of $\boldsymbol{\scriptr}$) is inside $S$:
+
+$$
+\oint_S \frac{\hat{\boldsymbol{\scriptr}}}{\scriptr^2}\cdot d\mathbf{a} = 4\pi
+$$
+
+**Step 5:** Therefore:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \frac{q}{4\pi\varepsilon_0}\cdot 4\pi = \frac{q}{\varepsilon_0}
+$$
+
+**Step 6:** If the charge is **outside** $S$, Lemma 7.1.3 gives zero flux. Therefore, only enclosed charges contribute.
+
+**Step 7:** For multiple charges $\{q_i\}$, apply superposition:
+
+$$
+\oint_S \mathbf{E}_{\text{total}}\cdot d\mathbf{a} = \sum_i \oint_S \mathbf{E}_i\cdot d\mathbf{a} = \sum_{i\,\text{inside}} \frac{q_i}{\varepsilon_0} = \frac{Q_{\text{enc}}}{\varepsilon_0}
+$$
+
+**Step 8:** For a continuous distribution $\rho(\mathbf{r}')$, replace the sum with an integral:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \frac{1}{\varepsilon_0}\int_V \rho(\mathbf{r}')\,d\tau'
+$$
+
+This is Gauss's Law in integral form. $\blacksquare$
+
+</details>
+
+### Derivation 7.1.2 — Differential Form from Integral Form
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** Start with Gauss's Law in integral form:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \frac{1}{\varepsilon_0}\int_V \rho\,d\tau
+$$
+
+**Step 2:** Apply the Divergence Theorem (from [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems)) to the left side:
+
+$$
+\oint_S \mathbf{E}\cdot d\mathbf{a} = \int_V (\nabla\cdot\mathbf{E})\,d\tau
+$$
+
+**Step 3:** Equate the two volume integrals:
+
+$$
+\int_V (\nabla\cdot\mathbf{E})\,d\tau = \frac{1}{\varepsilon_0}\int_V \rho\,d\tau
+$$
+
+**Step 4:** Since this must hold for **any** volume $V$ (no matter how small), the integrands must be equal at every point:
+
+$$
+\nabla\cdot\mathbf{E} = \frac{\rho}{\varepsilon_0}
+$$
+
+This is the differential form of Gauss's Law. $\blacksquare$
+
+**Note:** The step from "integrals equal for all $V$" to "integrands equal" requires the integrands to be continuous. If $\rho$ has discontinuities (e.g., surface charges), the differential form holds in the distributional sense.
+
+</details>
+
+### Derivation 7.1.3 — The Potential from Coulomb's Law
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Goal:** Show that $\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int \frac{\rho(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\,d\tau'$ satisfies $\mathbf{E} = -\nabla\phi$.
+
+**Step 1:** Write the electric field from Coulomb's Law:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_V \frac{\rho(\mathbf{r}')(\mathbf{r}-\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|^3}\,d\tau'
+$$
+
+**Step 2:** From Lemma 7.1.4, we know that:
+
+$$
+\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|^3} = -\nabla\left(\frac{1}{|\mathbf{r}-\mathbf{r}'|}\right)
+$$
+
+where the gradient is with respect to $\mathbf{r}$ (the field point).
+
+**Step 3:** Substitute into the field expression:
+
+$$
+\mathbf{E}(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_V \rho(\mathbf{r}')\left[-\nabla\left(\frac{1}{|\mathbf{r}-\mathbf{r}'|}\right)\right]d\tau'
+$$
+
+**Step 4:** Since $\nabla$ acts on $\mathbf{r}$ and the integration is over $\mathbf{r}'$, pull the gradient outside the integral:
+
+$$
+\mathbf{E}(\mathbf{r}) = -\nabla\left[\frac{1}{4\pi\varepsilon_0}\int_V \frac{\rho(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\,d\tau'\right]
+$$
+
+**Step 5:** Define:
+
+$$
+\phi(\mathbf{r}) \equiv \frac{1}{4\pi\varepsilon_0}\int_V \frac{\rho(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\,d\tau'
+$$
+
+Then $\mathbf{E} = -\nabla\phi$, as required. $\blacksquare$
+
+</details>
+
+### Derivation 7.1.4 — Poisson's Equation
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** Start with the two fundamental equations of electrostatics:
+
+$$
+\nabla\cdot\mathbf{E} = \frac{\rho}{\varepsilon_0} \quad \text{and} \quad \mathbf{E} = -\nabla\phi
+$$
+
+**Step 2:** Substitute the second into the first:
+
+$$
+\nabla\cdot(-\nabla\phi) = \frac{\rho}{\varepsilon_0}
+$$
+
+**Step 3:** The divergence of the gradient is the Laplacian:
+
+$$
+-\nabla^2\phi = \frac{\rho}{\varepsilon_0}
+$$
+
+**Step 4:** Rearranging:
+
+$$
+\nabla^2\phi = -\frac{\rho}{\varepsilon_0}
+$$
+
+This is **Poisson's equation**. In charge-free regions ($\rho = 0$):
+
+$$
+\nabla^2\phi = 0
+$$
+
+which is **Laplace's equation**. $\blacksquare$
+
+</details>
+
+### Derivation 7.1.5 — Verification via the Delta Function
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Goal:** Verify that $\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int \frac{\rho(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}\,d\tau'$ satisfies Poisson's equation.
+
+**Step 1:** Apply the Laplacian $\nabla^2$ (with respect to $\mathbf{r}$) to $\phi$:
+
+$$
+\nabla^2\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_V \rho(\mathbf{r}')\,\nabla^2\left(\frac{1}{|\mathbf{r}-\mathbf{r}'|}\right)d\tau'
+$$
+
+**Step 2:** From Lemma 7.1.4:
+
+$$
+\nabla^2\left(\frac{1}{|\mathbf{r}-\mathbf{r}'|}\right) = -4\pi\,\delta^3(\mathbf{r}-\mathbf{r}')
+$$
+
+**Step 3:** Substitute:
+
+$$
+\nabla^2\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\int_V \rho(\mathbf{r}')\left[-4\pi\,\delta^3(\mathbf{r}-\mathbf{r}')\right]d\tau'
+$$
+
+**Step 4:** Apply the sifting property of the delta function ($\int f(\mathbf{r}')\delta^3(\mathbf{r}-\mathbf{r}')d\tau' = f(\mathbf{r})$):
+
+$$
+\nabla^2\phi(\mathbf{r}) = \frac{1}{4\pi\varepsilon_0}\cdot(-4\pi)\cdot\rho(\mathbf{r}) = -\frac{\rho(\mathbf{r})}{\varepsilon_0}
+$$
+
+This confirms Poisson's equation. $\blacksquare$
+
+</details>
+
+### Derivation 7.1.6 — Earnshaw's Theorem
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Goal:** Prove that no stable equilibrium exists for a charge in a charge-free region.
+
+**Step 1:** Suppose a test charge $q \gt  0$ is at position $\mathbf{r}_0$ in a region where $\rho = 0$. For stable equilibrium, we need $\phi(\mathbf{r}_0)$ to be a local **minimum** (so the charge sits in a potential well and experiences restoring forces in all directions).
+
+**Step 2:** A local minimum requires $\nabla^2\phi(\mathbf{r}_0) \gt  0$ (the Laplacian is positive at a minimum in 3D — the function curves upward in all directions on average).
+
+**Step 3:** However, in the charge-free region, Laplace's equation holds:
+
+$$
+\nabla^2\phi = 0
+$$
+
+**Step 4:** This means $\phi$ is a **harmonic function**. By the mean-value property of harmonic functions, the value of $\phi$ at any point equals the average of $\phi$ over any sphere centered at that point:
+
+$$
+\phi(\mathbf{r}_0) = \frac{1}{4\pi R^2}\oint_{S_R}\phi\,da
+$$
+
+**Step 5:** A function equal to its spherical average cannot have a strict local maximum or minimum (if it were a minimum, the average over a small sphere would exceed the center value, contradicting the mean-value property).
+
+**Step 6:** Therefore $\phi$ has no local minima (or maxima) in a charge-free region. The equilibrium point $\mathbf{r}_0$ must be a **saddle point**: stable in some directions but unstable in at least one direction.
+
+**Step 7:** For a negative test charge $q \lt  0$, we would need a local maximum of $\phi$, which is equally forbidden. $\blacksquare$
+
+**Physical implication:** You cannot levitate a charged particle using static electric fields alone. This is why Paul traps use oscillating fields and Penning traps add a magnetic field.
+
+</details>
+
+### Derivation 7.1.7 — Shell Theorem via Gauss's Law
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Setup:** A spherical shell of radius $R$ carries total charge $Q$ uniformly distributed on its surface ($\sigma = Q/(4\pi R^2)$).
+
+**Step 1 (Symmetry argument):** The charge distribution has spherical symmetry. Therefore, the electric field must be radial: $\mathbf{E} = E_r(r)\hat{\mathbf{r}}$, depending only on the distance $r$ from the center.
+
+**Step 2 (Gaussian surface):** Choose a concentric spherical Gaussian surface $S_r$ of radius $r$.
+
+**Step 3 (Flux calculation):** On $S_r$, $\mathbf{E}\cdot d\mathbf{a} = E_r(r)\,da$ (since $\mathbf{E} \parallel d\mathbf{a}$ everywhere on the sphere). The total flux is:
+
+$$
+\oint_{S_r}\mathbf{E}\cdot d\mathbf{a} = E_r(r)\cdot 4\pi r^2
+$$
+
+**Step 4 (Case $r \gt  R$):** The Gaussian surface encloses the entire shell, so $Q_{\text{enc}} = Q$. By Gauss's Law:
+
+$$
+E_r(r)\cdot 4\pi r^2 = \frac{Q}{\varepsilon_0}
+$$
+
+$$
+E_r(r) = \frac{Q}{4\pi\varepsilon_0 r^2}
+$$
+
+This is identical to the field of a point charge $Q$ at the center.
+
+**Step 5 (Case $r \lt  R$):** The Gaussian surface encloses no charge ($Q_{\text{enc}} = 0$). By Gauss's Law:
+
+$$
+E_r(r)\cdot 4\pi r^2 = 0 \implies E_r(r) = 0
+$$
+
+The field inside a uniformly charged spherical shell is exactly zero.
+
+**Step 6 (Potential):** Integrating $\mathbf{E} = -\nabla\phi$ with boundary condition $\phi \to 0$ as $r \to \infty$:
+
+$$
+\phi(r) = \begin{cases} \frac{Q}{4\pi\varepsilon_0 r} & r \gt  R \\[6pt] \frac{Q}{4\pi\varepsilon_0 R} & r \leq R \end{cases}
+$$
+
+Inside the shell, the potential is constant (equal to the surface value), consistent with $\mathbf{E} = 0$. $\blacksquare$
+
+</details>
+
+### Derivation 7.1.8 — Energy Stored in the Electric Field
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Goal:** Show that $W = \frac{\varepsilon_0}{2}\int |\mathbf{E}|^2\,d\tau$.
+
+**Step 1:** Start with the energy of a continuous charge distribution:
+
+$$
+W = \frac{1}{2}\int_V \rho\,\phi\,d\tau
+$$
+
+**Step 2:** Substitute Gauss's Law $\rho = \varepsilon_0\,\nabla\cdot\mathbf{E}$:
+
+$$
+W = \frac{\varepsilon_0}{2}\int_V (\nabla\cdot\mathbf{E})\,\phi\,d\tau
+$$
+
+**Step 3:** Use the product rule for divergence: $\nabla\cdot(\phi\mathbf{E}) = (\nabla\phi)\cdot\mathbf{E} + \phi(\nabla\cdot\mathbf{E})$. Therefore:
+
+$$
+\phi(\nabla\cdot\mathbf{E}) = \nabla\cdot(\phi\mathbf{E}) - (\nabla\phi)\cdot\mathbf{E}
+$$
+
+**Step 4:** Substitute $\nabla\phi = -\mathbf{E}$:
+
+$$
+\phi(\nabla\cdot\mathbf{E}) = \nabla\cdot(\phi\mathbf{E}) + |\mathbf{E}|^2
+$$
+
+**Step 5:** Insert into the energy integral:
+
+$$
+W = \frac{\varepsilon_0}{2}\int_V \left[\nabla\cdot(\phi\mathbf{E}) + |\mathbf{E}|^2\right]d\tau
+$$
+
+**Step 6:** Apply the Divergence Theorem to the first term:
+
+$$
+\int_V \nabla\cdot(\phi\mathbf{E})\,d\tau = \oint_S \phi\mathbf{E}\cdot d\mathbf{a}
+$$
+
+**Step 7:** Expand the integration volume to all space ($V \to \mathbb{R}^3$). As $r \to \infty$, for any localized charge distribution: $\phi \sim 1/r$ and $|\mathbf{E}| \sim 1/r^2$, so $\phi\mathbf{E}\cdot d\mathbf{a} \sim (1/r)(1/r^2)(r^2) = 1/r \to 0$. The surface integral vanishes.
+
+**Step 8:** Therefore:
+
+$$
+W = \frac{\varepsilon_0}{2}\int_{\text{all space}} |\mathbf{E}|^2\,d\tau
+$$
+
+$\blacksquare$
+
+**Interpretation:** The energy density is $u = \frac{\varepsilon_0}{2}|\mathbf{E}|^2$ (joules per cubic meter). Energy is stored in the field itself, not "at" the charges. This perspective becomes essential in electrodynamics where fields carry energy and momentum independently of their sources.
+
+</details>
+
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 7.1.1 — Electric Field of a Uniformly Charged Sphere
+
+**Problem:** A solid sphere of radius $R$ carries a uniform volume charge density $\rho_0$. Find $\mathbf{E}$ everywhere.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1 (Symmetry):** The charge distribution has spherical symmetry, so $\mathbf{E} = E_r(r)\hat{\mathbf{r}}$.
+
+**Step 2 (Gaussian surface):** Use a concentric sphere of radius $r$.
+
+**Case 1: $r \gt  R$ (outside the sphere)**
+
+**Step 3:** The enclosed charge is the total charge:
+
+$$
+Q_{\text{enc}} = \rho_0 \cdot \frac{4}{3}\pi R^3
+$$
+
+**Step 4:** Gauss's Law:
+
+$$
+E_r(r)\cdot 4\pi r^2 = \frac{\rho_0 \cdot \frac{4}{3}\pi R^3}{\varepsilon_0}
+$$
+
+**Step 5:** Solving for $E_r$:
+
+$$
+E_r(r) = \frac{\rho_0 R^3}{3\varepsilon_0 r^2} = \frac{Q}{4\pi\varepsilon_0 r^2}
+$$
+
+where $Q = \frac{4}{3}\pi R^3 \rho_0$ is the total charge. The field outside is identical to that of a point charge $Q$ at the center.
+
+**Case 2: $r \lt  R$ (inside the sphere)**
+
+**Step 6:** The enclosed charge is only the charge within radius $r$:
+
+$$
+Q_{\text{enc}} = \rho_0 \cdot \frac{4}{3}\pi r^3
+$$
+
+**Step 7:** Gauss's Law:
+
+$$
+E_r(r)\cdot 4\pi r^2 = \frac{\rho_0 \cdot \frac{4}{3}\pi r^3}{\varepsilon_0}
+$$
+
+**Step 8:** Solving:
+
+$$
+E_r(r) = \frac{\rho_0\,r}{3\varepsilon_0}
+$$
+
+The field **inside** grows linearly with $r$.
+
+**Summary:**
+
+$$
+\mathbf{E}(r) = \begin{cases} \dfrac{\rho_0\,r}{3\varepsilon_0}\,\hat{\mathbf{r}} & r \leq R \\[10pt] \dfrac{\rho_0 R^3}{3\varepsilon_0 r^2}\,\hat{\mathbf{r}} & r \gt  R \end{cases}
+$$
+
+**Verification:** At $r = R$, both expressions give $E_r = \rho_0 R/(3\varepsilon_0)$, confirming continuity (no surface charge at $r = R$ for a volume distribution).
+
+</details>
+
+---
+
+### Example 7.1.2 — Infinite Line Charge
+
+**Problem:** An infinitely long straight wire carries uniform line charge density $\lambda$. Find $\mathbf{E}$ at distance $s$ from the wire.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1 (Symmetry):** The charge distribution has cylindrical symmetry about the wire (take it along the $z$-axis). The field must be radial in the $\hat{\mathbf{s}}$ direction (perpendicular to the wire) and depend only on $s$:
+
+$$
+\mathbf{E} = E_s(s)\,\hat{\mathbf{s}}
+$$
+
+**Step 2 (Gaussian surface):** Choose a coaxial cylindrical surface of radius $s$ and length $L$.
+
+**Step 3 (Flux through the cylinder):** The flux through the two end caps is zero (since $\mathbf{E} \perp d\mathbf{a}$ on the caps). The flux through the curved surface:
+
+$$
+\oint \mathbf{E}\cdot d\mathbf{a} = E_s(s)\cdot 2\pi s L
+$$
+
+**Step 4 (Enclosed charge):**
+
+$$
+Q_{\text{enc}} = \lambda L
+$$
+
+**Step 5 (Gauss's Law):**
+
+$$
+E_s(s)\cdot 2\pi s L = \frac{\lambda L}{\varepsilon_0}
+$$
+
+**Step 6 (Solve):**
+
+$$
+E_s(s) = \frac{\lambda}{2\pi\varepsilon_0 s}
+$$
+
+$$
+\mathbf{E} = \frac{\lambda}{2\pi\varepsilon_0 s}\,\hat{\mathbf{s}}
+$$
+
+**Step 7 (Potential):** Integrating from reference distance $s_0$ to $s$:
+
+$$
+\phi(s) = -\int_{s_0}^{s} E_s\,ds' = -\frac{\lambda}{2\pi\varepsilon_0}\ln\left(\frac{s}{s_0}\right)
+$$
+
+Note: For an infinite line charge, we cannot set $\phi(\infty) = 0$ (the integral diverges logarithmically). We must use a finite reference point $s_0$.
+
+</details>
+
+---
+
+### Example 7.1.3 — Infinite Plane of Charge
+
+**Problem:** An infinite plane carries uniform surface charge density $\sigma$. Find $\mathbf{E}$ on both sides.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1 (Symmetry):** By the planar symmetry, $\mathbf{E}$ must be perpendicular to the plane everywhere. Let the plane be at $z = 0$. Then:
+
+$$
+\mathbf{E} = \begin{cases} E_0\,\hat{\mathbf{z}} & z \gt  0 \\ -E_0\,\hat{\mathbf{z}} & z \lt  0 \end{cases}
+$$
+
+for some constant $E_0$ (the field points away from the plane for $\sigma \gt  0$).
+
+**Step 2 (Gaussian surface):** Use a rectangular pillbox straddling the plane, with top and bottom faces of area $A$ at heights $+h$ and $-h$.
+
+**Step 3 (Flux):** The flux through the sides is zero ($\mathbf{E} \perp d\mathbf{a}$ on the sides). The top face contributes $E_0 A$ and the bottom face contributes $E_0 A$ (the field points outward through both faces):
+
+$$
+\oint \mathbf{E}\cdot d\mathbf{a} = E_0 A + E_0 A = 2E_0 A
+$$
+
+**Step 4 (Enclosed charge):**
+
+$$
+Q_{\text{enc}} = \sigma A
+$$
+
+**Step 5 (Gauss's Law):**
+
+$$
+2E_0 A = \frac{\sigma A}{\varepsilon_0}
+$$
+
+**Step 6 (Solve):**
+
+$$
+E_0 = \frac{\sigma}{2\varepsilon_0}
+$$
+
+$$
+\mathbf{E} = \frac{\sigma}{2\varepsilon_0}\hat{\mathbf{n}}
+$$
+
+where $\hat{\mathbf{n}}$ points away from the plane on each side.
+
+**Key observation:** The field is **uniform** — it does not depend on distance from the plane. This is a consequence of the infinite extent of the charge distribution.
+
+</details>
+
+---
+
+### Example 7.1.4 — Potential of a Uniformly Charged Disk
+
+**Problem:** A disk of radius $R$ carries uniform surface charge density $\sigma$. Find the potential on the axis of the disk at height $z$ above the center.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1 (Setup):** Place the disk in the $xy$-plane centered at the origin. A point on the axis is at position $(0, 0, z)$. A source element on the disk at radius $r'$ and angle $\phi'$ has position $(r'\cos\phi', r'\sin\phi', 0)$.
+
+**Step 2 (Distance from source to field point):**
+
+$$
+|\mathbf{r} - \mathbf{r}'| = \sqrt{r'^2 + z^2}
+$$
+
+(by the Pythagorean theorem, since the field point is on the axis).
+
+**Step 3 (Potential integral):**
+
+$$
+\phi(z) = \frac{1}{4\pi\varepsilon_0}\int_{\text{disk}} \frac{\sigma}{|\mathbf{r}-\mathbf{r}'|}\,da'
+$$
+
+**Step 4 (Convert to polar coordinates):** $da' = r'\,dr'\,d\phi'$, with $r'$ from $0$ to $R$ and $\phi'$ from $0$ to $2\pi$:
+
+$$
+\phi(z) = \frac{\sigma}{4\pi\varepsilon_0}\int_0^{2\pi}\int_0^R \frac{r'\,dr'\,d\phi'}{\sqrt{r'^2 + z^2}}
+$$
+
+**Step 5 (Integrate over $\phi'$):** The integrand is independent of $\phi'$, so:
+
+$$
+\phi(z) = \frac{\sigma}{4\pi\varepsilon_0}\cdot 2\pi \int_0^R \frac{r'\,dr'}{\sqrt{r'^2 + z^2}}
+$$
+
+$$
+\phi(z) = \frac{\sigma}{2\varepsilon_0}\int_0^R \frac{r'\,dr'}{\sqrt{r'^2 + z^2}}
+$$
+
+**Step 6 (Evaluate the integral):** Use the substitution $u = r'^2 + z^2$, $du = 2r'\,dr'$:
+
+$$
+\int_0^R \frac{r'\,dr'}{\sqrt{r'^2 + z^2}} = \left[\sqrt{r'^2 + z^2}\right]_0^R = \sqrt{R^2 + z^2} - |z|
+$$
+
+**Step 7 (Final result):**
+
+$$
+\phi(z) = \frac{\sigma}{2\varepsilon_0}\left(\sqrt{R^2 + z^2} - |z|\right)
+$$
+
+**Step 8 (Verification — electric field on axis):**
+
+$$
+E_z = -\frac{\partial\phi}{\partial z} = -\frac{\sigma}{2\varepsilon_0}\left(\frac{z}{\sqrt{R^2+z^2}} - \text{sgn}(z)\right) = \frac{\sigma}{2\varepsilon_0}\left(1 - \frac{z}{\sqrt{R^2+z^2}}\right) \quad (z \gt  0)
+$$
+
+**Step 9 (Limiting cases):**
+- As $R \to \infty$: $\phi \to \frac{\sigma}{2\varepsilon_0}(\sqrt{R^2+z^2} - z) \approx \frac{\sigma}{2\varepsilon_0}(R - z)$ and $E_z \to \frac{\sigma}{2\varepsilon_0}$, recovering the infinite plane result.
+- As $z \gg R$: $\sqrt{R^2+z^2} \approx z + \frac{R^2}{2z}$, so $\phi \approx \frac{\sigma R^2}{4\varepsilon_0 z} = \frac{Q}{4\pi\varepsilon_0 z}$ where $Q = \sigma\pi R^2$, recovering the point-charge potential.
+
+</details>
+
+---
+
+### Example 7.1.5 — Energy of a Uniformly Charged Sphere
+
+**Problem:** Calculate the total electrostatic energy stored in the field of a uniformly charged solid sphere of radius $R$ and total charge $Q$.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Method 1: Field energy integral**
+
+**Step 1:** From Example 7.1.1, the electric field is:
+
+$$
+E(r) = \begin{cases} \frac{Qr}{4\pi\varepsilon_0 R^3} & r \leq R \\ \frac{Q}{4\pi\varepsilon_0 r^2} & r \gt  R \end{cases}
+$$
+
+(using $\rho_0 = 3Q/(4\pi R^3)$).
+
+**Step 2:** The energy is:
+
+$$
+W = \frac{\varepsilon_0}{2}\int_{\text{all space}} E^2\,d\tau = \frac{\varepsilon_0}{2}\left[\int_0^R E_{\text{in}}^2\cdot 4\pi r^2\,dr + \int_R^\infty E_{\text{out}}^2\cdot 4\pi r^2\,dr\right]
+$$
+
+**Step 3 (Inside contribution):**
+
+$$
+W_{\text{in}} = \frac{\varepsilon_0}{2}\cdot 4\pi\int_0^R \left(\frac{Qr}{4\pi\varepsilon_0 R^3}\right)^2 r^2\,dr
+$$
+
+$$
+= \frac{\varepsilon_0}{2}\cdot 4\pi\cdot\frac{Q^2}{16\pi^2\varepsilon_0^2 R^6}\int_0^R r^4\,dr
+$$
+
+$$
+= \frac{Q^2}{8\pi\varepsilon_0 R^6}\cdot\frac{R^5}{5} = \frac{Q^2}{40\pi\varepsilon_0 R}
+$$
+
+**Step 4 (Outside contribution):**
+
+$$
+W_{\text{out}} = \frac{\varepsilon_0}{2}\cdot 4\pi\int_R^\infty \left(\frac{Q}{4\pi\varepsilon_0 r^2}\right)^2 r^2\,dr
+$$
+
+$$
+= \frac{\varepsilon_0}{2}\cdot 4\pi\cdot\frac{Q^2}{16\pi^2\varepsilon_0^2}\int_R^\infty \frac{1}{r^2}\,dr
+$$
+
+$$
+= \frac{Q^2}{8\pi\varepsilon_0}\cdot\frac{1}{R} = \frac{Q^2}{8\pi\varepsilon_0 R}
+$$
+
+**Step 5 (Total):**
+
+$$
+W = W_{\text{in}} + W_{\text{out}} = \frac{Q^2}{40\pi\varepsilon_0 R} + \frac{Q^2}{8\pi\varepsilon_0 R}
+$$
+
+$$
+= \frac{Q^2}{8\pi\varepsilon_0 R}\left(\frac{1}{5} + 1\right) = \frac{Q^2}{8\pi\varepsilon_0 R}\cdot\frac{6}{5}
+$$
+
+$$
+W = \frac{3Q^2}{20\pi\varepsilon_0 R} = \frac{3}{5}\cdot\frac{Q^2}{4\pi\varepsilon_0 R}
+$$
+
+**Method 2: Assembly energy (verification)**
+
+**Step 6:** Build the sphere shell by shell. When the sphere has been built up to radius $r$ (with charge $q(r) = Q(r/R)^3$), the potential at its surface is:
+
+$$
+\phi(r) = \frac{q(r)}{4\pi\varepsilon_0 r} = \frac{Qr^2}{4\pi\varepsilon_0 R^3}
+$$
+
+**Step 7:** The energy to bring the next shell of charge $dq = \rho_0\cdot 4\pi r^2\,dr = \frac{3Q}{R^3}\,r^2\,dr$ from infinity:
+
+$$
+dW = \phi(r)\,dq = \frac{Qr^2}{4\pi\varepsilon_0 R^3}\cdot\frac{3Q}{R^3}\,r^2\,dr = \frac{3Q^2}{4\pi\varepsilon_0 R^6}\,r^4\,dr
+$$
+
+**Step 8:** Integrate from $0$ to $R$:
+
+$$
+W = \frac{3Q^2}{4\pi\varepsilon_0 R^6}\int_0^R r^4\,dr = \frac{3Q^2}{4\pi\varepsilon_0 R^6}\cdot\frac{R^5}{5} = \frac{3Q^2}{20\pi\varepsilon_0 R}
+$$
+
+Both methods agree. $\blacksquare$
+
+**Physical note:** This "self-energy" diverges as $R \to 0$ (point charge), which is the classical electron self-energy problem — one of the motivations for quantum electrodynamics.
+
+</details>
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+
+| Topic | Link | Relevance |
+|:---|:---|:---|
+| Vector calculus foundations | [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl) | Divergence, curl, gradient operators used throughout |
+| Integral theorems | [1.7 - Green's Stokes' and Divergence Theorems](1.7---Green's-Stokes'-and-Divergence-Theorems) | Gauss's Law is the Divergence Theorem applied to $\mathbf{E}$ |
+| Boundary value problems | [7.2 - Laplace & Poisson Equations](7.2---Laplace-&-Poisson-Equations) | Direct continuation: solving $\nabla^2\phi = -\rho/\varepsilon_0$ |
+| Magnetic analog | [7.3 - Magnetostatics - Biot-Savart & Ampere's Law](7.3---Magnetostatics---Biot-Savart-&-Ampere's-Law) | Parallel development for $\mathbf{B}$ fields |
+| Full Maxwell theory | [7.4 - Electrodynamics - Induction & Maxwell's Equations](7.4---Electrodynamics---Induction-&-Maxwell's-Equations) | Relaxing the static assumption |
+| Relativistic formulation | [7.7 - Relativistic Electrodynamics & Four-Vectors](7.7---Relativistic-Electrodynamics-&-Four-Vectors) | $\phi$ becomes part of the four-potential $A^\mu$ |
+| Differential equations | [3.1 - First-Order ODEs](3.1---First-Order-ODEs) | Techniques for solving field equations |
+
+### Authoritative External Resources
+
+1. **Griffiths, D.J.** — *Introduction to Electrodynamics*, 4th ed., Chapters 2–3. The standard undergraduate treatment.
+2. **Jackson, J.D.** — *Classical Electrodynamics*, 3rd ed., Chapters 1–2. Graduate-level rigor with boundary value problems.
+3. **Purcell, E.M. & Morin, D.J.** — *Electricity and Magnetism* (Berkeley Physics Course Vol. 2), 3rd ed. Exceptional physical intuition.
+4. **MIT OCW 8.02** — [Electricity and Magnetism](https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2019/). Walter Lewin's legendary demonstrations.
+5. **Susskind, L.** — [Stanford Theoretical Minimum: Classical Electrodynamics](https://www.youtube.com/playlist?list=PL470E1C92B5F75D27). Field-theoretic perspective from the start.
+
+### Key Equations Summary
+
+| Name | Equation | Number |
+|:---|:---|:---|
+| Coulomb's Law | $\mathbf{F} = \frac{1}{4\pi\varepsilon_0}\frac{q_1 q_2}{\scriptr^2}\hat{\boldsymbol{\scriptr}}$ | (7.1.1) |
+| Electric field (continuous) | $\mathbf{E} = \frac{1}{4\pi\varepsilon_0}\int\frac{\rho\,\hat{\boldsymbol{\scriptr}}}{\scriptr^2}\,d\tau'$ | (7.1.2) |
+| Gauss's Law (integral) | $\oint\mathbf{E}\cdot d\mathbf{a} = Q_{\text{enc}}/\varepsilon_0$ | (7.1.3) |
+| Gauss's Law (differential) | $\nabla\cdot\mathbf{E} = \rho/\varepsilon_0$ | (7.1.4) |
+| Curl-free condition | $\nabla\times\mathbf{E} = 0$ | (7.1.5) |
+| Potential definition | $\mathbf{E} = -\nabla\phi$ | (7.1.6) |
+| Poisson's equation | $\nabla^2\phi = -\rho/\varepsilon_0$ | (7.1.7) |
+| Field energy density | $u = \frac{\varepsilon_0}{2}|\mathbf{E}|^2$ | (7.1.8) |
+

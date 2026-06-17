@@ -1,0 +1,63 @@
+<svg viewBox="0 0 560 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="st-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="st-norm" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .surf  { fill: var(--interactive-accent, #58a6ff); opacity:0.13; stroke: var(--text-muted, #8b949e); stroke-width:1; }
+    .bnd   { stroke: var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; }
+    .nrm   { stroke: var(--text-muted, #8b949e); stroke-width:1.5; fill:none; }
+    .lab   { font-family: Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); }
+    .math  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px; fill:var(--interactive-accent, #58a6ff); }
+    .muted { font-family: Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-muted, #8b949e); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Surface S (drawn as curved quad) -->
+  <path d="M 120 260 C 160 200, 220 140, 280 120 C 340 100, 400 130, 440 180 C 460 210, 460 250, 440 270 C 400 300, 300 310, 200 300 Z" class="surf"/>
+  <!-- Normal vectors (dashed lines pointing up-left) -->
+  <line x1="240" y1="195" x2="215" y2="148" class="nrm" stroke-dasharray="4 3" marker-end="url(#st-norm)"/>
+  <line x1="320" y1="175" x2="300" y2="128" class="nrm" stroke-dasharray="4 3" marker-end="url(#st-norm)"/>
+  <line x1="380" y1="210" x2="365" y2="165" class="nrm" stroke-dasharray="4 3" marker-end="url(#st-norm)"/>
+  <!-- Boundary curve ∂S with CCW arrows -->
+  <path d="M 120 260 C 160 200, 220 140, 280 120 C 340 100, 400 130, 440 180 C 460 210, 460 250, 440 270 C 400 300, 300 310, 200 300 Z" class="bnd"/>
+  <!-- Arrow markers on boundary -->
+  <line x1="200" y1="140" x2="240" y2="128" stroke="var(--interactive-accent, #58a6ff)" stroke-width="0" marker-end="url(#st-arr)"/>
+  <line x1="380" y1="115" x2="420" y2="148" stroke="var(--interactive-accent, #58a6ff)" stroke-width="0" marker-end="url(#st-arr)"/>
+  <line x1="448" y1="255" x2="420" y2="288" stroke="var(--interactive-accent, #58a6ff)" stroke-width="0" marker-end="url(#st-arr)"/>
+  <line x1="190" y1="302" x2="150" y2="282" stroke="var(--interactive-accent, #58a6ff)" stroke-width="0" marker-end="url(#st-arr)"/>
+  <!-- Labels -->
+  <text x="285" y="225" class="math" text-anchor="middle">S</text>
+  <text x="475" y="200" class="math">∂S</text>
+  <text x="205" y="136" class="math">n̂</text>
+  <!-- Right-hand rule note -->
+  <rect x="20" y="20" width="220" height="55" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="130" y="40" class="lab" text-anchor="middle" font-weight="bold">Right-Hand Rule</text>
+  <text x="130" y="57" class="muted" text-anchor="middle">Curl right-hand fingers</text>
+  <text x="130" y="70" class="muted" text-anchor="middle">along ∂S → thumb = n̂</text>
+  <!-- curl F label -->
+  <text x="300" y="285" class="muted" text-anchor="middle">(∇×F)·n̂ integrated over S</text>
+  <text x="300" y="300" class="muted" text-anchor="middle">= F·dr integrated around ∂S</text>
+</svg>

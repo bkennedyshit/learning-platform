@@ -1,0 +1,69 @@
+<svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="app-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .app-box{fill:var(--background-secondary, #161b22);stroke:var(--text-normal, #c9d1d9);stroke-width:2;rx:10;transition:all 0.3s}
+    .app-box:hover{fill:var(--background-secondary, #161b22);stroke:var(--interactive-accent, #58a6ff);filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .app-flow{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none;stroke-dasharray:8,4;animation:appFlow 1.5s linear infinite}
+    .app-lbl{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-normal, #c9d1d9)}
+    .app-acc{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .app-data{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none;stroke-dasharray:12,6;animation:dataFlow 1.5s linear infinite;filter:drop-shadow(0 0 3px var(--text-accent, #79c0ff))}
+    
+    .app-mobile-box {
+      animation: appPulse 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes dataFlow{to{stroke-dashoffset:-36}}
+    @keyframes appFlow {
+      to { stroke-dashoffset: -12; }
+    }
+    @keyframes appPulse {
+      0% { filter: drop-shadow(0 0 2px var(--interactive-accent, #58a6ff)); stroke: var(--interactive-accent, #58a6ff); }
+      100% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); stroke: var(--text-accent, #79c0ff); }
+    }
+  </style>
+  <!-- Layer 1: Sensors -->
+  <rect x="20" y="30" width="120" height="80" class="app-box"/>
+  <text x="80" y="60" class="app-acc" text-anchor="middle">HR Sensor</text>
+  <text x="80" y="78" class="app-lbl" text-anchor="middle">BLE GATT</text>
+  <text x="80" y="93" class="app-lbl" text-anchor="middle">Heart Rate Service</text>
+  <rect x="20" y="140" width="120" height="80" class="app-box"/>
+  <text x="80" y="170" class="app-acc" text-anchor="middle">IMU Sensor</text>
+  <text x="80" y="188" class="app-lbl" text-anchor="middle">6-axis accel+gyro</text>
+  <text x="80" y="203" class="app-lbl" text-anchor="middle">BLE or phone built-in</text>
+  <!-- Layer 2: Mobile App -->
+  <rect x="200" y="50" width="160" height="200" class="app-box app-mobile-box"/>
+  <text x="280" y="75" class="app-acc" text-anchor="middle">Mobile App (Flutter)</text>
+  <text x="280" y="100" class="app-lbl" text-anchor="middle">BLE Manager</text>
+  <text x="280" y="118" class="app-lbl" text-anchor="middle">Real-time Processing</text>
+  <text x="280" y="136" class="app-lbl" text-anchor="middle">HRV Computation</text>
+  <text x="280" y="154" class="app-lbl" text-anchor="middle">Sensor Fusion</text>
+  <text x="280" y="172" class="app-lbl" text-anchor="middle">Local DB (SQLite)</text>
+  <text x="280" y="190" class="app-lbl" text-anchor="middle">UI (MVVM)</text>
+  <text x="280" y="208" class="app-lbl" text-anchor="middle">Export (CSV/JSON)</text>
+  <text x="280" y="235" class="app-lbl" text-anchor="middle">Offline-first sync</text>
+  <!-- Layer 3: Cloud -->
+  <rect x="420" y="80" width="130" height="140" class="app-box"/>
+  <text x="485" y="105" class="app-acc" text-anchor="middle">Cloud Backend</text>
+  <text x="485" y="128" class="app-lbl" text-anchor="middle">REST API</text>
+  <text x="485" y="146" class="app-lbl" text-anchor="middle">Time-series DB</text>
+  <text x="485" y="164" class="app-lbl" text-anchor="middle">User Auth</text>
+  <text x="485" y="182" class="app-lbl" text-anchor="middle">ML Models</text>
+  <text x="485" y="200" class="app-lbl" text-anchor="middle">Push Notifications</text>
+  <!-- Layer 4: Analytics -->
+  <rect x="560" y="280" width="110" height="90" class="app-box"/>
+  <text x="615" y="305" class="app-acc" text-anchor="middle">Analytics</text>
+  <text x="615" y="325" class="app-lbl" text-anchor="middle">Python/Pandas</text>
+  <text x="615" y="343" class="app-lbl" text-anchor="middle">Matplotlib</text>
+  <text x="615" y="361" class="app-lbl" text-anchor="middle">Trend Analysis</text>
+  <!-- Data flow arrows -->
+  <line x1="140" y1="70" x2="198" y2="90" class="app-flow" marker-end="url(#app-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="140" y1="180" x2="198" y2="160" class="app-flow" marker-end="url(#app-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="360" y1="150" x2="418" y2="150" class="app-flow" marker-end="url(#app-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <line x1="485" y1="220" x2="560" y2="300" class="app-flow" marker-end="url(#app-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <!-- BLE data stream animation -->
+  <path d="M140 70 Q170 80 198 90" class="app-data"/>
+</svg>

@@ -1,0 +1,74 @@
+<svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;height:auto;">
+  <style>
+    .ax    { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.4; fill: none; }
+    .rect  { fill: var(--text-accent, #79c0ff); opacity: 0.22; stroke: var(--text-accent, #79c0ff); stroke-width: 1.6; }
+    .para  { fill: var(--interactive-accent, #58a6ff); opacity: 0.22; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; }
+    .vec   { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.0; fill: none; }
+    .vecm  { stroke: var(--text-accent, #79c0ff); stroke-width: 2.0; fill: none; }
+    .arrow { fill: var(--text-muted, #8b949e); }
+    .lab   { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .math  { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .arrow-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted, #8b949e); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <defs>
+    <marker id="ja1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+    <marker id="ja2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <!-- LEFT: (u,v) space -->
+  <line x1="30" y1="240" x2="270" y2="240" class="ax" marker-end="url(#ja1)"/>
+  <line x1="40" y1="250" x2="40" y2="40"  class="ax" marker-end="url(#ja1)"/>
+  <text x="274" y="244" class="math">u</text>
+  <text x="28"  y="38"  class="math">v</text>
+  <text x="150" y="268" class="title" text-anchor="middle">(u, v)–space</text>
+  <!-- Rectangle: corners at (80,180),(80,120),(160,120),(160,180) -->
+  <rect x="80" y="120" width="80" height="60" class="rect"/>
+  <!-- Vectors eu and ev -->
+  <line x1="80" y1="180" x2="160" y2="180" class="vecm" marker-end="url(#ja2)"/>
+  <line x1="80" y1="180" x2="80"  y2="120" class="vecm" marker-end="url(#ja2)"/>
+  <text x="118" y="198" class="math">du</text>
+  <text x="60"  y="152" class="math">dv</text>
+  <text x="105" y="155" class="lab" font-size="11">Area = du·dv</text>
+  <!-- Arrow in middle -->
+  <text x="310" y="145" class="arrow-label" text-anchor="middle">T</text>
+  <line x1="280" y1="155" x2="355" y2="155" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" marker-end="url(#ja1)"/>
+  <text x="316" y="172" class="arrow-label" text-anchor="middle">⟶ parallelogram</text>
+  <!-- RIGHT: (x,y) space -->
+  <line x1="370" y1="240" x2="620" y2="240" class="ax" marker-end="url(#ja1)"/>
+  <line x1="380" y1="250" x2="380" y2="40"  class="ax" marker-end="url(#ja1)"/>
+  <text x="624" y="244" class="math">x</text>
+  <text x="368" y="38"  class="math">y</text>
+  <text x="500" y="268" class="title" text-anchor="middle">(x, y)–space</text>
+  <!-- Parallelogram mapped from rectangle; eu=(100,20), ev=(15,70) approx -->
+  <polygon points="420,200 520,180 535,110 435,130" class="para"/>
+  <!-- Two edge vectors of parallelogram -->
+  <line x1="420" y1="200" x2="520" y2="180" class="vec" marker-end="url(#ja2)"/>
+  <line x1="420" y1="200" x2="435" y2="130" class="vec" marker-end="url(#ja2)"/>
+  <text x="468" y="215" class="math">∂x/∂u · du</text>
+  <text x="392" y="165" class="math">∂x/∂v · dv</text>
+  <text x="478" y="155" class="lab" font-size="11">Area = |J| du·dv</text>
+</svg>

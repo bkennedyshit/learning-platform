@@ -1,0 +1,82 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 4; }
+    .stack-box { fill: var(--background-secondary, #161b22); stroke: #4CAF50; stroke-width: 2; rx: 4; }
+    .heap-box { fill: var(--background-secondary, #161b22); stroke: #FF9800; stroke-width: 2; rx: 4; }
+    .gen-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .stack-label { fill: #4CAF50; }
+    .heap-label { fill: #FF9800; }
+    .note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .cell { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .cell-active { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+  </style>
+
+  <text x="350" y="22" class="title">.NET Memory Layout — Stack, Heap &amp; GC Generations</text>
+
+  <!-- Stack section -->
+  <text x="100" y="50" class="section-label stack-label">stack (fast, no GC)</text>
+  <rect x="30" y="58" width="200" height="150" class="stack-box"/>
+
+  <!-- Stack cells -->
+  <rect x="40" y="65" width="180" height="22" class="cell-active"/>
+  <text x="130" y="80" class="label">int x = 42</text>
+  <rect x="40" y="89" width="180" height="22" class="cell-active"/>
+  <text x="130" y="104" class="label">float speed = 5.0f</text>
+  <rect x="40" y="113" width="180" height="22" class="cell-active"/>
+  <text x="130" y="128" class="label">Vector3 pos (12 bytes)</text>
+  <rect x="40" y="137" width="180" height="22" class="cell-active"/>
+  <text x="130" y="152" class="label">Span&lt;int&gt; slice (ref+len)</text>
+  <rect x="40" y="161" width="180" height="22" class="cell"/>
+  <text x="130" y="176" class="label">stackalloc int[32]</text>
+
+  <text x="130" y="200" class="note">LIFO, freed on method return</text>
+
+  <!-- Heap section -->
+  <text x="480" y="50" class="section-label heap-label">managed heap (GC tracked)</text>
+  <rect x="280" y="58" width="400" height="200" class="heap-box"/>
+
+  <!-- Gen 0 -->
+  <rect x="290" y="68" width="120" height="80" class="gen-box"/>
+  <text x="350" y="82" class="label">Gen 0</text>
+  <text x="310" y="98" class="note">New objects</text>
+  <text x="310" y="110" class="note">Collected often</text>
+  <text x="310" y="122" class="note">~1ms pause</text>
+  <rect x="295" y="128" width="110" height="14" class="cell-active"/>
+  <text x="350" y="139" class="label">new List&lt;T&gt;()</text>
+
+  <!-- Gen 1 -->
+  <rect x="420" y="68" width="120" height="80" class="gen-box"/>
+  <text x="480" y="82" class="label">Gen 1</text>
+  <text x="440" y="98" class="note">Survived Gen 0</text>
+  <text x="440" y="110" class="note">Medium frequency</text>
+  <text x="440" y="122" class="note">~5ms pause</text>
+  <rect x="425" y="128" width="110" height="14" class="cell"/>
+  <text x="480" y="139" class="label">cached objects</text>
+
+  <!-- Gen 2 -->
+  <rect x="550" y="68" width="120" height="80" class="gen-box"/>
+  <text x="610" y="82" class="label">Gen 2</text>
+  <text x="570" y="98" class="note">Long-lived</text>
+  <text x="570" y="110" class="note">Rare collection</text>
+  <text x="570" y="122" class="note">10-100ms! ⚠️</text>
+  <rect x="555" y="128" width="110" height="14" class="cell"/>
+  <text x="610" y="139" class="label">singletons, pools</text>
+
+  <!-- LOH -->
+  <rect x="290" y="160" width="380" height="35" class="gen-box"/>
+  <text x="480" y="178" class="label">Large Object Heap (LOH) — objects &gt; 85KB — Gen 2 collection only</text>
+  <text x="480" y="192" class="note">Arrays, large buffers — avoid allocating these in gameplay!</text>
+
+  <!-- Game impact -->
+  <rect x="30" y="270" width="640" height="110" class="box"/>
+  <text x="350" y="290" class="title" style="font-size: 12px;">Impact on Games (60fps = 16.6ms budget)</text>
+
+  <text x="50" y="312" class="note">✓ Struct (value type): No allocation, no GC, inline in arrays → cache-friendly</text>
+  <text x="50" y="328" class="note">✓ Object Pool: Pre-allocate, reuse → zero runtime allocation</text>
+  <text x="50" y="344" class="note">✓ Span&lt;T&gt;: View into existing memory → zero-copy slicing</text>
+  <text x="50" y="360" class="note">❌ new object() in Update: Fills Gen 0 → triggers GC → frame spike → stutter</text>
+  <text x="50" y="376" class="note">❌ LINQ in hot path: Allocates closure + iterator → GC pressure every frame</text>
+</svg>

@@ -1,0 +1,153 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .grid-line { stroke: var(--text-muted, #8b949e); stroke-dasharray: 2 2; stroke-width: 0.8; fill: none; }
+    .panel-edge { stroke: #58a6ff; stroke-width: 2; fill: none; }
+    .truss-edge { stroke: #ffd93d; stroke-width: 1.5; stroke-dasharray: 4 2; fill: none; }
+    
+    @keyframes pulse-point {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 1px #ff6b6b); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 8px #ff6b6b); }
+    }
+    .pulsing-node {
+      animation: pulse-point 3s infinite ease-in-out;
+      transform-origin: 380px 150px;
+    }
+  </style>
+  <defs>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0.3" />
+    </linearGradient>
+    <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#51cf66" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#51cf66" stop-opacity="0.15" />
+    </linearGradient>
+  </defs>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Advanced Revit — Adaptive Components &amp; Divided Surfaces</text>
+
+  <!-- LEFT: Divided Surface Conceptual Mass -->
+  <rect x="20" y="50" width="280" height="340" class="box"/>
+  <text x="160" y="75" class="label" text-anchor="middle" font-weight="bold">Conceptual Mass (Divided Surface)</text>
+
+  <!-- UV Grid representation -->
+  <g opacity="0.6">
+    <!-- Horizontal Grid Curves -->
+    <path d="M 40,140 Q 100,100 160,120 T 280,100" class="grid-line" stroke-width="1.2"/>
+    <path d="M 40,190 Q 100,150 160,170 T 280,150" class="grid-line" stroke-width="1.2"/>
+    <path d="M 40,240 Q 100,200 160,220 T 280,200" class="grid-line" stroke-width="1.2"/>
+    <path d="M 40,290 Q 100,250 160,270 T 280,250" class="grid-line" stroke-width="1.2"/>
+    <path d="M 40,340 Q 100,300 160,320 T 280,300" class="grid-line" stroke-width="1.2"/>
+
+    <!-- Vertical Grid Lines (Intersections) -->
+    <path d="M 40,140 L 40,340" class="grid-line"/>
+    <path d="M 80,128 Q 100,228 80,328" class="grid-line"/>
+    <path d="M 120,120 Q 140,220 120,320" class="grid-line"/>
+    <path d="M 160,120 Q 180,220 160,320" class="grid-line"/>
+    <path d="M 200,113 Q 220,213 200,313" class="grid-line"/>
+    <path d="M 240,107 Q 260,207 240,307" class="grid-line"/>
+    <path d="M 280,100 L 280,300" class="grid-line"/>
+  </g>
+
+  <!-- Conforming panels nested on Divided Surface -->
+  <!-- Panel A -->
+  <polygon points="120,170 160,170 160,220 120,220" fill="url(#gridGrad)" stroke="#51cf66" stroke-width="1" opacity="0.7"/>
+  <!-- Panel B -->
+  <polygon points="160,170 200,163 200,213 160,220" fill="url(#gridGrad)" stroke="#51cf66" stroke-width="1" opacity="0.7"/>
+  <!-- Panel C -->
+  <polygon points="120,220 160,220 160,270 120,270" fill="url(#gridGrad)" stroke="#51cf66" stroke-width="1" opacity="0.7"/>
+  <!-- Panel D -->
+  <polygon points="160,220 200,213 200,263 160,270" fill="url(#gridGrad)" stroke="#51cf66" stroke-width="1" opacity="0.7"/>
+
+  <text x="160" y="325" class="sublabel" text-anchor="middle">UV Grid divisions map adaptive panels</text>
+  <text x="160" y="340" class="sublabel" text-anchor="middle">flexibly across double-curved massing.</text>
+
+  <path d="M 200,213 L 340,180" stroke="#8b949e" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <circle cx="200" cy="213" r="3" fill="#51cf66"/>
+
+  <!-- RIGHT: Detailed Adaptive Component Flexing -->
+  <rect x="320" y="50" width="360" height="340" class="box"/>
+  <text x="500" y="75" class="label" text-anchor="middle" font-weight="bold">4-Point Adaptive Component Flexing</text>
+
+  <!-- Dynamic Conforming Panel -->
+  <g>
+    <path fill="url(#panelGrad)" stroke="#58a6ff" stroke-width="2.5">
+      <animate attributeName="d"
+        values="M 420,280 L 620,250 L 580,120 L 400,160 Z;
+                M 420,280 L 620,250 L 580,120 L 350,130 Z;
+                M 420,280 L 620,250 L 580,120 L 380,210 Z;
+                M 420,280 L 620,250 L 580,120 L 440,170 Z;
+                M 420,280 L 620,250 L 580,120 L 400,160 Z"
+        dur="8s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Structural Diagonals (Truss System) -->
+    <!-- Diagonal 1 (Static-to-Static) -->
+    <line x1="420" y1="280" x2="580" y2="120" stroke="#ffd93d" stroke-dasharray="4 2" stroke-width="1.5"/>
+    
+    <!-- Diagonal 2 (Static-to-Dynamic) -->
+    <line x1="620" y1="250" stroke="#ffd93d" stroke-dasharray="4 2" stroke-width="1.5">
+      <animate attributeName="x2" values="400; 350; 380; 440; 400" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="160; 130; 210; 170; 160" dur="8s" repeatCount="indefinite"/>
+    </line>
+
+    <!-- Boundary Dimension Vectors -->
+    <path d="M 400,160 M 350,130" stroke="#ff6b6b" stroke-width="0.8" stroke-dasharray="2 2" fill="none">
+      <animate attributeName="d"
+        values="M 400,160 Q 370,120 400,160;
+                M 400,160 Q 360,110 350,130;
+                M 400,160 Q 340,160 380,210;
+                M 400,160 Q 430,190 440,170;
+                M 400,160 Q 370,120 400,160"
+        dur="8s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Static Adaptive Nodes -->
+    <!-- Point 1 -->
+    <circle cx="420" cy="280" r="7.5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+    <text x="420" y="283" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">1</text>
+    <text x="420" y="300" class="sublabel" text-anchor="middle">(Host Pt)</text>
+
+    <!-- Point 2 -->
+    <circle cx="620" cy="250" r="7.5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+    <text x="620" y="253" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">2</text>
+    <text x="620" y="270" class="sublabel" text-anchor="middle">(Host Pt)</text>
+
+    <!-- Point 3 -->
+    <circle cx="580" cy="120" r="7.5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+    <text x="580" y="123" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">3</text>
+    <text x="580" y="107" class="sublabel" text-anchor="middle">(Host Pt)</text>
+
+    <!-- Dynamic/Moving Adaptive Node -->
+    <!-- Point 4 -->
+    <g class="pulsing-node">
+      <circle r="7.5" fill="#ff6b6b" stroke="#161b22" stroke-width="2">
+        <animate attributeName="cx" values="400; 350; 380; 440; 400" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="160; 130; 210; 170; 160" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <text font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">
+        <animate attributeName="x" values="400; 350; 380; 440; 400" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="163; 133; 213; 173; 163" dur="8s" repeatCount="indefinite"/>
+        4
+      </text>
+      <!-- Pointer to show movement -->
+      <path d="M 400,160 L 370,120" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="2 1" fill="none">
+        <animate attributeName="d"
+          values="M 400,160 L 400,160;
+                  M 350,130 L 400,160;
+                  M 380,210 L 400,160;
+                  M 440,170 L 400,160;
+                  M 400,160 L 400,160"
+          dur="8s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+
+  <text x="500" y="325" class="sublabel" text-anchor="middle">As Point [4] shifts in 3D space, the parametric truss geometry</text>
+  <text x="500" y="340" class="sublabel" text-anchor="middle">deforms non-destructively, preserving structural node relations.</text>
+  <text x="500" y="360" class="label" fill="#ffd93d" text-anchor="middle" font-weight="bold">M_local = f(Pt1, Pt2, Pt3, Pt4)</text>
+</svg>

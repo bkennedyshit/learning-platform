@@ -1,0 +1,73 @@
+<svg viewBox="0 0 580 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="sf-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .sf-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.25; }
+    .sf-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .sf-tick { stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .sf-slope { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; stroke-linecap: round; transition: all 0.2s ease; cursor: pointer; }
+    .sf-slope:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .sf-curve { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.8; fill: none; stroke-linecap: round; }
+    .sf-curve2 { stroke: var(--text-accent, #79c0ff); stroke-width: 2.2; fill: none; stroke-dasharray: 6 3; }
+    .sf-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .sf-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .sf-particle { fill: var(--interactive-accent, #58a6ff); }
+    .sf-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+  </style>
+  <!-- Grid -->
+  <path class="sf-grid" d="M 60 0 V 380 M 120 0 V 380 M 180 0 V 380 M 240 0 V 380 M 300 0 V 380 M 360 0 V 380 M 420 0 V 380 M 480 0 V 380 M 540 0 V 380"/>
+  <path class="sf-grid" d="M 0 40 H 580 M 0 100 H 580 M 0 160 H 580 M 0 220 H 580 M 0 280 H 580 M 0 340 H 580"/>
+  <!-- Axes -->
+  <line x1="60" y1="220" x2="550" y2="220" class="sf-axis" marker-end="url(#sf-arrow)"/>
+  <line x1="300" y1="360" x2="300" y2="20" class="sf-axis" marker-end="url(#sf-arrow)"/>
+  <text x="555" y="235" class="sf-label">x</text>
+  <text x="305" y="15" class="sf-label">y</text>
+  <!-- Slope field segments for dy/dx = x - y -->
+  <line x1="115" y1="95" x2="125" y2="85" class="sf-slope"/>
+  <line x1="175" y1="95" x2="185" y2="80" class="sf-slope"/>
+  <line x1="235" y1="95" x2="245" y2="78" class="sf-slope"/>
+  <line x1="115" y1="155" x2="125" y2="148" class="sf-slope"/>
+  <line x1="175" y1="155" x2="185" y2="145" class="sf-slope"/>
+  <line x1="235" y1="155" x2="245" y2="140" class="sf-slope"/>
+  <line x1="355" y1="95" x2="365" y2="92" class="sf-slope"/>
+  <line x1="415" y1="95" x2="425" y2="95" class="sf-slope"/>
+  <line x1="475" y1="95" x2="485" y2="100" class="sf-slope"/>
+  <line x1="355" y1="155" x2="365" y2="155" class="sf-slope"/>
+  <line x1="415" y1="155" x2="425" y2="158" class="sf-slope"/>
+  <line x1="475" y1="155" x2="485" y2="163" class="sf-slope"/>
+  <line x1="115" y1="220" x2="125" y2="215" class="sf-slope"/>
+  <line x1="175" y1="220" x2="185" y2="212" class="sf-slope"/>
+  <line x1="235" y1="220" x2="245" y2="210" class="sf-slope"/>
+  <line x1="355" y1="220" x2="365" y2="218" class="sf-slope"/>
+  <line x1="415" y1="220" x2="425" y2="220" class="sf-slope"/>
+  <line x1="475" y1="220" x2="485" y2="225" class="sf-slope"/>
+  <line x1="115" y1="280" x2="125" y2="278" class="sf-slope"/>
+  <line x1="175" y1="280" x2="185" y2="275" class="sf-slope"/>
+  <line x1="355" y1="280" x2="365" y2="280" class="sf-slope"/>
+  <line x1="415" y1="280" x2="425" y2="285" class="sf-slope"/>
+  <line x1="475" y1="280" x2="485" y2="292" class="sf-slope"/>
+  <line x1="115" y1="340" x2="125" y2="340" class="sf-slope"/>
+  <line x1="175" y1="340" x2="185" y2="338" class="sf-slope"/>
+  <line x1="355" y1="340" x2="365" y2="345" class="sf-slope"/>
+  <line x1="415" y1="340" x2="425" y2="350" class="sf-slope"/>
+  <!-- Solution curve 1 -->
+  <path d="M 80 60 Q 180 100 300 180 Q 400 240 520 260" class="sf-curve" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="5s" repeatCount="indefinite" />
+  </path>
+  <!-- Solution curve 2 -->
+  <path d="M 80 300 Q 200 310 300 280 Q 420 240 520 230" class="sf-curve2" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="5s" repeatCount="indefinite" />
+  </path>
+  <!-- Animated particle along curve 1 -->
+  <circle r="5" class="sf-particle">
+    <animateMotion dur="5s" repeatCount="indefinite" path="M 80 60 Q 180 100 300 180 Q 400 240 520 260"/>
+  </circle>
+  <!-- Info box -->
+  <rect x="360" y="290" width="200" height="70" rx="6" class="sf-box"/>
+  <text x="460" y="312" class="sf-accent" text-anchor="middle">dy/dx = f(x, y)</text>
+  <text x="460" y="332" class="sf-label" text-anchor="middle">Slope field shows dy/dx</text>
+  <text x="460" y="352" class="sf-label" text-anchor="middle">at every point (x, y)</text>
+</svg>

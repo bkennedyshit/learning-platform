@@ -1,0 +1,180 @@
+<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .node { fill: #51cf66; stroke: #30363d; stroke-width: 1; }
+    .factor-line { stroke: #ff6b6b; stroke-width: 1.5; stroke-dasharray: 3,3; }
+    .robot-path { fill: none; stroke: #51cf66; stroke-width: 3; stroke-linecap: round; }
+    .local-path { fill: none; stroke: #58a6ff; stroke-width: 1.5; stroke-dasharray: 2,2; }
+    .obstacle { fill: #7928ca; fill-opacity: 0.7; stroke: #a277ff; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <radialGradient id="inflationGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd93d" stop-opacity="0.5"/>
+      <stop offset="30%" stop-color="#ff923d" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ff923d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <text x="360" y="24" class="title" text-anchor="middle">Robotics Ch. 6 — SLAM Loop Closure &amp; Nav2 Autonomous Navigation</text>
+
+  <!-- LEFT: Graph SLAM & Loop Closure -->
+  <rect x="20" y="50" width="330" height="360" class="box"/>
+  <text x="185" y="75" class="label" text-anchor="middle" font-weight="bold">Graph SLAM &amp; Loop Closure Optimization</text>
+
+  <!-- Ground Truth Map (Behind the scenes) -->
+  <rect x="40" y="100" width="290" height="230" fill="#0d1117" stroke="#21262d" stroke-width="1" rx="4"/>
+  <!-- Static Obstacles -->
+  <rect x="100" y="140" width="30" height="50" fill="#21262d" rx="2"/>
+  <rect x="220" y="220" width="40" height="30" fill="#21262d" rx="2"/>
+  
+  <!-- Dynamic SLAM Trajectory (Morphing to show optimization snap!) -->
+  <path fill="none" stroke="#8b949e" stroke-width="2.5" stroke-dasharray="3,3" opacity="0.6">
+    <animate attributeName="d" 
+             values="M 90,260 C 130,120 270,120 270,230 C 270,300 130,300 120,270;
+                     M 90,260 C 130,120 270,120 270,230 C 270,300 130,290 90,260;
+                     M 90,260 C 130,120 270,120 270,230 C 270,300 130,300 120,270" 
+             dur="8s" repeatCount="indefinite"/>
+  </path>
+  
+  <path fill="none" stroke="#51cf66" stroke-width="2.5" stroke-linecap="round">
+    <animate attributeName="d" 
+             values="M 90,260 C 130,120 270,120 270,230 C 270,300 130,300 120,270;
+                     M 90,260 C 130,120 270,120 270,230 C 270,300 130,290 90,260;
+                     M 90,260 C 130,120 270,120 270,230 C 270,300 130,300 120,270" 
+             dur="8s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Loop Closure Constraint Line (triggers visual loop closing!) -->
+  <line x1="90" y1="260" class="factor-line">
+    <animate attributeName="x2" values="120; 90; 120" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="270; 260; 270" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="stroke" values="#ff6b6b; #51cf66; #ff6b6b" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-width" values="2; 0.5; 2" dur="8s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Trajectory Pose Nodes (Keys) -->
+  <g>
+    <!-- Start node -->
+    <circle cx="90" cy="260" r="5" class="node" fill="#58a6ff"/>
+    <text x="80" y="250" class="sublabel" fill="#58a6ff">x₀</text>
+
+    <!-- Midway nodes -->
+    <circle cx="110" cy="190" r="4" class="node"/>
+    <circle cx="160" cy="130" r="4" class="node"/>
+    <circle cx="225" cy="140" r="4" class="node"/>
+    <circle cx="270" cy="210" r="4" class="node"/>
+    <circle cx="240" cy="275" r="4" class="node"/>
+    
+    <!-- Drifted/Optimized end node -->
+    <circle r="5" class="node" fill="#ff6b6b">
+      <animate attributeName="cx" values="120; 90; 120" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="270; 260; 270" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="fill" values="#ff6b6b; #51cf66; #ff6b6b" dur="8s" repeatCount="indefinite"/>
+    </circle>
+    <text class="sublabel" font-weight="bold">
+      <animate attributeName="x" values="130; 75; 130" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="282; 275; 282" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="fill" values="#ff6b6b; #51cf66; #ff6b6b" dur="8s" repeatCount="indefinite"/>
+      x_N
+    </text>
+  </g>
+
+  <!-- Loop Closure Scan Matching Effect -->
+  <circle r="22" fill="none" stroke="#ff6b6b" stroke-width="1.5" opacity="0.8" stroke-dasharray="2,2">
+    <animate attributeName="cx" values="120; 90; 120" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="270; 260; 270" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="0; 25; 0" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1; 0; 1" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Mathematical explanation inside box -->
+  <rect x="35" y="325" width="300" height="40" rx="4" fill="#161b22" stroke="#30363d" stroke-width="0.8"/>
+  <text x="45" y="340" class="sublabel" font-weight="bold" fill="#ff6b6b">Constraint Factor: e_ij(x_i, x_j) = z_ij - h(x_i, x_j)</text>
+  <text x="45" y="355" class="sublabel">Pose graph optimization solves: min ∑ e_ijᵀ Ω_ij e_ij</text>
+
+  <!-- Status indicators (Animated Opacity) -->
+  <g transform="translate(185, 385)">
+    <text class="sublabel" fill="#ff6b6b" text-anchor="middle" font-weight="bold">
+      <animate attributeName="opacity" values="1; 0; 1" dur="8s" repeatCount="indefinite"/>
+      Accumulating Odometry Drift (Open Loop)
+    </text>
+    <text class="sublabel" fill="#51cf66" text-anchor="middle" font-weight="bold" opacity="0">
+      <animate attributeName="opacity" values="0; 1; 0" dur="8s" repeatCount="indefinite"/>
+      Loop Closed! Pose Graph Optimized (g2o)
+    </text>
+  </g>
+
+
+  <!-- RIGHT: Nav2 Navigation & Costmap -->
+  <rect x="370" y="50" width="330" height="360" class="box"/>
+  <text x="535" y="75" class="label" text-anchor="middle" font-weight="bold">Nav2 Costmap Layers &amp; Path Planning</text>
+
+  <!-- The Map Canvas -->
+  <rect x="390" y="100" width="290" height="230" fill="#0d1117" stroke="#21262d" stroke-width="1" rx="4"/>
+
+  <!-- Static Map Obstacles with Costmap Inflation Gradients -->
+  <g>
+    <!-- Obstacle 1 -->
+    <circle cx="480" cy="180" r="35" fill="url(#inflationGrad)"/>
+    <circle cx="480" cy="180" r="14" class="obstacle"/>
+    
+    <!-- Obstacle 2 -->
+    <circle cx="580" cy="230" r="30" fill="url(#inflationGrad)"/>
+    <circle cx="580" cy="230" r="10" class="obstacle"/>
+
+    <text x="480" y="184" class="sublabel" fill="#c9d1d9" text-anchor="middle" font-size="8px" font-weight="bold">Lethal</text>
+    <text x="480" y="210" class="sublabel" fill="#ffd93d" text-anchor="middle" font-size="8px">Inflation</text>
+  </g>
+
+  <!-- Start & Goal Poses -->
+  <circle cx="420" cy="300" r="6" fill="#51cf66" fill-opacity="0.3" stroke="#51cf66" stroke-width="1.5"/>
+  <text x="420" y="303" class="sublabel" fill="#51cf66" text-anchor="middle" font-weight="bold">S</text>
+
+  <circle cx="620" cy="130" r="6" fill="#ff6b6b" fill-opacity="0.3" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="620" y="133" class="sublabel" fill="#ff6b6b" text-anchor="middle" font-weight="bold">G</text>
+  
+  <!-- Global Path (Planned by Smac / NavFn) -->
+  <path id="global-path" d="M 420,300 C 440,240 520,240 540,180 C 555,140 600,140 620,130" class="robot-path"/>
+  <text x="465" y="275" class="sublabel" fill="#51cf66" font-weight="bold">Global Plan</text>
+
+  <!-- Local Rollout branches (MPPI / DWB Predictive Rollouts) -->
+  <path d="M 480,225 C 475,210 470,210 460,205" class="local-path"/>
+  <path d="M 480,225 C 485,210 495,200 505,198" class="local-path"/>
+  <!-- Chosen Local Trajectory -->
+  <path d="M 480,225 C 483,218 488,212 494,206" class="local-path" stroke="#51cf66" stroke-width="2" stroke-dasharray="none"/>
+  <text x="515" y="215" class="sublabel" fill="#58a6ff" font-weight="bold">Local Rollouts (MPPI)</text>
+
+  <!-- Animated Robot Driving the Path with Lidar Scan Sweep -->
+  <g>
+    <animateMotion path="M 420,300 C 440,240 520,240 540,180 C 555,140 600,140 620,130" dur="10s" repeatCount="indefinite" rotate="auto"/>
+    
+    <!-- Robot Base Chassis -->
+    <rect x="-10" y="-12" width="20" height="24" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" rx="3"/>
+    <!-- Wheels -->
+    <rect x="-12" y="-9" width="2" height="6" fill="#8b949e"/>
+    <rect x="10" y="-9" width="2" height="6" fill="#8b949e"/>
+    <!-- Lidar Housing -->
+    <circle cx="0" cy="0" r="5" fill="#21262d" stroke="#58a6ff" stroke-width="1"/>
+    <!-- Heading indicator line -->
+    <line x1="0" y1="0" x2="8" y2="0" stroke="#ffd93d" stroke-width="1.5"/>
+
+    <!-- Lidar Scan Sweeping Beams -->
+    <path d="M 0,0 L 25,-15 A 30,30 0 0,1 25,15 Z" fill="#ffd93d" fill-opacity="0.12" stroke="none">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="2s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Nav2 Architecture note -->
+  <rect x="385" y="340" width="300" height="25" rx="3" fill="#161b22" stroke="#30363d" stroke-width="0.8"/>
+  <text x="535" y="356" class="sublabel" text-anchor="middle">Nav2 Controller: <tspan fill="#58a6ff">Predictive MPC (MPPI)</tspan> at 20 Hz</text>
+  
+  <text x="535" y="390" class="sublabel" text-anchor="middle" fill="#8b949e">
+    Costmap = Static Layer + Inflation + Voxel Obstacles
+  </text>
+</svg>

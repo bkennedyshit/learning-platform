@@ -1,0 +1,83 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.2 — Functionalism, Physicalism &amp; Dualism: Mind-Body Positions Map</text>
+  <!-- Position hierarchy tree -->
+  <rect x="20" y="35" width="680" height="370" class="box" rx="4"/>
+  <text x="360" y="52" class="label" text-anchor="middle" font-weight="bold">Positions on the Mind-Body Problem</text>
+  <!-- Root -->
+  <rect x="295" y="62" width="130" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" rx="3"/>
+  <text x="360" y="82" class="label" text-anchor="middle">Mind-Body Problem</text>
+  <!-- Dualism branch -->
+  <rect x="50" y="118" width="130" height="30" fill="none" stroke="#ffd93d" stroke-width="1.2" rx="3"/>
+  <text x="115" y="138" class="sub" text-anchor="middle" fill="#ffd93d">Dualism</text>
+  <line x1="295" y1="92" x2="115" y2="118" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <!-- Dualism children -->
+  <rect x="25" y="175" width="100" height="40" fill="none" stroke="#ffd93d" stroke-width="1" rx="2"/>
+  <text x="75" y="192" class="sub" text-anchor="middle">Substance dualism</text>
+  <text x="75" y="204" class="sub" text-anchor="middle">(Descartes) mind≠body</text>
+  <line x1="115" y1="148" x2="75" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <rect x="140" y="175" width="100" height="40" fill="none" stroke="#ffd93d" stroke-width="1" rx="2"/>
+  <text x="190" y="192" class="sub" text-anchor="middle">Property dualism</text>
+  <text x="190" y="204" class="sub" text-anchor="middle">(one substance, 2 props)</text>
+  <line x1="115" y1="148" x2="190" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <!-- Physicalism branch -->
+  <rect x="295" y="118" width="130" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="3"/>
+  <text x="360" y="138" class="sub" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">Physicalism / Monism</text>
+  <line x1="360" y1="92" x2="360" y2="118" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <!-- Physicalism children -->
+  <rect x="250" y="175" width="95" height="40" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="2"/>
+  <text x="297" y="192" class="sub" text-anchor="middle">Identity theory</text>
+  <text x="297" y="204" class="sub" text-anchor="middle">mind = brain state</text>
+  <line x1="360" y1="148" x2="297" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <rect x="355" y="175" width="95" height="40" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="2"/>
+  <text x="402" y="192" class="sub" text-anchor="middle">Eliminativism</text>
+  <text x="402" y="204" class="sub" text-anchor="middle">folk psych will go</text>
+  <line x1="360" y1="148" x2="402" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <!-- Functionalism branch -->
+  <rect x="540" y="118" width="130" height="30" fill="none" stroke="#51cf66" stroke-width="1.2" rx="3"/>
+  <text x="605" y="138" class="sub" text-anchor="middle" fill="#51cf66">Functionalism</text>
+  <line x1="360" y1="92" x2="605" y2="118" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <!-- Functionalism children -->
+  <rect x="465" y="175" width="110" height="40" fill="none" stroke="#51cf66" stroke-width="1" rx="2"/>
+  <text x="520" y="192" class="sub" text-anchor="middle">Causal/functional role</text>
+  <text x="520" y="204" class="sub" text-anchor="middle">(Putnam, Lewis)</text>
+  <line x1="605" y1="148" x2="520" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <rect x="590" y="175" width="110" height="40" fill="none" stroke="#51cf66" stroke-width="1" rx="2"/>
+  <text x="645" y="192" class="sub" text-anchor="middle">Multiple realizability</text>
+  <text x="645" y="204" class="sub" text-anchor="middle">mind on silicon ok?</text>
+  <line x1="605" y1="148" x2="645" y2="175" stroke="var(--text-muted,#8b949e)" stroke-width="0.6"/>
+  <!-- Detail boxes -->
+  <rect x="25" y="235" width="200" height="80" fill="#1a1a0a" stroke="#ffd93d" stroke-width="0.8" rx="3"/>
+  <text x="125" y="250" class="sub" text-anchor="middle" font-weight="bold">Substance Dualism critique:</text>
+  <text x="35" y="264" class="sub">How does immaterial mind cause</text>
+  <text x="35" y="276" class="sub">physical body to move? (Causal</text>
+  <text x="35" y="288" class="sub">interaction problem). Modern</text>
+  <text x="35" y="300" class="sub">neuroscience: no evidence for</text>
+  <text x="35" y="312" class="sub">non-physical causal agent.</text>
+  <rect x="255" y="235" width="210" height="80" fill="#0a1a2a" stroke="var(--interactive-accent,#58a6ff)" stroke-width="0.8" rx="3"/>
+  <text x="360" y="250" class="sub" text-anchor="middle" font-weight="bold">Identity Theory critique:</text>
+  <text x="265" y="264" class="sub">Type identity: pain = C-fibre firing</text>
+  <text x="265" y="276" class="sub">Problem: pain seems realizable in</text>
+  <text x="265" y="288" class="sub">many substrates (octopus, alien?).</text>
+  <text x="265" y="300" class="sub">Token identity: this pain token =</text>
+  <text x="265" y="312" class="sub">this particular neural event. OK.</text>
+  <rect x="490" y="235" width="210" height="80" fill="#0a1a0a" stroke="#51cf66" stroke-width="0.8" rx="3"/>
+  <text x="595" y="250" class="sub" text-anchor="middle" font-weight="bold">Functionalism critique:</text>
+  <text x="500" y="264" class="sub">Chinese Room (Searle): syntax ≠</text>
+  <text x="500" y="276" class="sub">semantics. Running the function</text>
+  <text x="500" y="288" class="sub">of understanding ≠ understanding.</text>
+  <text x="500" y="300" class="sub">Inverted qualia: could two systems</text>
+  <text x="500" y="312" class="sub">be functionally identical but have</text>
+  <text x="500" y="312" class="sub">different experiences?</text>
+  <!-- Bottom summary -->
+  <text x="360" y="345" class="sub" text-anchor="middle" font-weight="bold">For AI alignment: Functionalism is the optimistic view (substrate-independent mind → AI could be conscious).</text>
+  <text x="360" y="360" class="sub" text-anchor="middle">Property dualism: computation may never generate qualia regardless of complexity. Physicalism without functionalism: consciousness unique to biology.</text>
+  <text x="360" y="376" class="sub" text-anchor="middle">Key thinkers: Descartes (substance dualism) · Smart/Armstrong (identity) · Churchland (eliminativist) · Putnam/Lewis (functionalism) · Chalmers (property dualist).</text>
+  <text x="360" y="392" class="sub" text-anchor="middle">SEP: plato.stanford.edu/entries/functionalism/ · plato.stanford.edu/entries/physicalism/ · plato.stanford.edu/entries/dualism/ — all free, peer-reviewed.</text>
+</svg>

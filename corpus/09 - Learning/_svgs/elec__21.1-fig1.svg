@@ -1,0 +1,250 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .wire { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.6; fill: none; }
+    .v-source { stroke: #ffd93d; stroke-width: 1.6; fill: none; animation: battery-pulse 2s ease-in-out infinite alternate; }
+    .res { stroke: #ff6b6b; stroke-width: 2; fill: none; animation: res-glow 3s ease-in-out infinite alternate; }
+    .cap { stroke: #4dabf7; stroke-width: 2; fill: none; }
+    .ind { stroke: #51cf66; stroke-width: 2; fill: none; animation: ind-glow 2.5s ease-in-out infinite alternate; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.4; fill: none; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+    .ladder-step { fill: var(--interactive-accent, #58a6ff); opacity: 0.18; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .arrow-marker { fill: var(--interactive-accent, #58a6ff); }
+    
+    /* Animations */
+    @keyframes battery-pulse {
+      0% { stroke: #ffd93d; filter: drop-shadow(0 0 1px #ffd93d); }
+      100% { stroke: #ffeb3b; filter: drop-shadow(0 0 4px #ffd93d); }
+    }
+    @keyframes res-glow {
+      0% { stroke: #ff6b6b; filter: drop-shadow(0 0 1px #ff6b6b); }
+      100% { stroke: #ff8787; filter: drop-shadow(0 0 3px #ff6b6b); }
+    }
+    @keyframes ind-glow {
+      0% { stroke: #51cf66; filter: drop-shadow(0 0 1px #51cf66); }
+      100% { stroke: #69db7c; filter: drop-shadow(0 0 3px #51cf66); }
+    }
+    
+    .current-flow {
+      stroke: #58a6ff;
+      stroke-width: 1.8;
+      stroke-dasharray: 6 12;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0.85;
+      animation: flow-anim 1.5s linear infinite;
+    }
+    @keyframes flow-anim {
+      to {
+        stroke-dashoffset: -18;
+      }
+    }
+    
+    .cap-field {
+      animation: field-pulse 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes field-pulse {
+      0% { opacity: 0.15; }
+      100% { opacity: 0.85; }
+    }
+    
+    .diode-pulse {
+      animation: diode-glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes diode-glow {
+      0% { fill: #c084fc; stroke: #c084fc; filter: drop-shadow(0 0 1px #c084fc); }
+      100% { fill: #d8b4fe; stroke: #d8b4fe; filter: drop-shadow(0 0 4px #c084fc); }
+    }
+    
+    .trans-arrow {
+      animation: trans-pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes trans-pulse {
+      0% { fill: var(--text-normal, #c9d1d9); }
+      100% { fill: #58a6ff; filter: drop-shadow(0 0 2px #58a6ff); }
+    }
+
+    /* Sequential sweep for the climbing stack */
+    @keyframes ladder-sweep {
+      0%, 100% { opacity: 0.12; }
+      50% { opacity: 0.42; }
+    }
+    .step-7 { animation: ladder-sweep 4s infinite 0.0s; }
+    .step-6 { animation: ladder-sweep 4s infinite 0.5s; }
+    .step-5 { animation: ladder-sweep 4s infinite 1.0s; }
+    .step-4 { animation: ladder-sweep 4s infinite 1.5s; }
+    .step-3 { animation: ladder-sweep 4s infinite 2.0s; }
+    .step-2 { animation: ladder-sweep 4s infinite 2.5s; }
+    .step-1 { animation: ladder-sweep 4s infinite 3.0s; }
+    
+    .ladder-step:hover {
+      opacity: 0.6;
+      filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff));
+      cursor: pointer;
+    }
+    
+    .bus-trace {
+      stroke: #58a6ff;
+      stroke-width: 1.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 10 30;
+      animation: bus-flow 2s linear infinite;
+    }
+    @keyframes bus-flow {
+      to {
+        stroke-dashoffset: -40;
+      }
+    }
+    
+    .uart-flow { animation-duration: 1.2s; }
+    .i2c-flow { animation-duration: 1.8s; }
+    .spi-flow { animation-duration: 0.8s; }
+    .can-flow { animation-duration: 1.5s; }
+  </style>
+  <defs>
+    <marker id="arrEl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" class="arrow-marker"/>
+    </marker>
+  </defs>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Electronics — From Electrons to Robots</text>
+
+  <!-- LEFT: A simple circuit -->
+  <rect x="20" y="50" width="240" height="200" class="box"/>
+  <text x="140" y="72" class="label" text-anchor="middle" font-weight="bold">The Atom of Electronics</text>
+
+  <!-- Battery -->
+  <line x1="60" y1="110" x2="60" y2="170" class="v-source"/>
+  <line x1="50" y1="115" x2="70" y2="115" class="v-source"/>
+  <line x1="55" y1="125" x2="65" y2="125" class="v-source"/>
+  <line x1="50" y1="135" x2="70" y2="135" class="v-source"/>
+  <line x1="55" y1="145" x2="65" y2="145" class="v-source"/>
+  <text x="40" y="118" class="sublabel" fill="#ffd93d">+</text>
+  <text x="40" y="148" class="sublabel" fill="#ffd93d">−</text>
+  <text x="40" y="180" class="sublabel">V</text>
+
+  <!-- Wires forming a loop -->
+  <line x1="60"  y1="110" x2="60"  y2="90"  class="wire"/>
+  <line x1="60"  y1="90"  x2="220" y2="90"  class="wire"/>
+  <line x1="220" y1="90"  x2="220" y2="115" class="wire"/>
+  <line x1="220" y1="170" x2="220" y2="200" class="wire"/>
+  <line x1="220" y1="200" x2="60"  y2="200" class="wire"/>
+  <line x1="60"  y1="200" x2="60"  y2="170" class="wire"/>
+
+  <!-- Resistor (zigzag) -->
+  <polyline points="220,115 213,120 227,128 213,136 227,144 213,152 227,160 220,165" class="res"/>
+  <text x="240" y="142" class="sublabel" fill="#ff6b6b">R</text>
+
+  <!-- Animated current flow path -->
+  <path class="current-flow" d="M 60 110 L 60 90 L 220 90 L 220 115 L 213 120 L 227 128 L 213 136 L 227 144 L 213 152 L 227 160 L 220 165 L 220 200 L 60 200 L 60 170" />
+
+  <!-- Current arrow -->
+  <line x1="100" y1="86" x2="180" y2="86" class="arrow" marker-end="url(#arrEl)"/>
+  <text x="140" y="80" class="sublabel" fill="#58a6ff">I = V / R</text>
+
+  <text x="140" y="225" class="sublabel" text-anchor="middle">Ohm's Law: V = I·R</text>
+  <text x="140" y="240" class="sublabel" text-anchor="middle">KVL: ΣV = 0  ·  KCL: ΣI(node) = 0</text>
+
+  <!-- MIDDLE: Components legend -->
+  <rect x="280" y="50" width="170" height="200" class="box"/>
+  <text x="365" y="72" class="label" text-anchor="middle" font-weight="bold">Building Blocks</text>
+
+  <!-- Resistor -->
+  <polyline points="295,95 305,90 315,100 325,90 335,100 345,95" class="res"/>
+  <text x="365" y="100" class="sublabel">R — V = I·R</text>
+
+  <!-- Capacitor -->
+  <line x1="305" y1="125" x2="320" y2="125" class="cap"/>
+  <line x1="320" y1="115" x2="320" y2="135" class="cap"/>
+  <line x1="328" y1="115" x2="328" y2="135" class="cap"/>
+  <line x1="328" y1="125" x2="345" y2="125" class="cap"/>
+  <!-- Capacitor E-field lines -->
+  <g class="cap-field">
+    <line x1="321" y1="120" x2="327" y2="120" stroke="#4dabf7" stroke-width="1" stroke-dasharray="1 1"/>
+    <line x1="321" y1="125" x2="327" y2="125" stroke="#4dabf7" stroke-width="1" stroke-dasharray="1 1"/>
+    <line x1="321" y1="130" x2="327" y2="130" stroke="#4dabf7" stroke-width="1" stroke-dasharray="1 1"/>
+  </g>
+  <text x="365" y="130" class="sublabel">C — i = C·dv/dt</text>
+
+  <!-- Inductor -->
+  <path d="M 295 155 q 5 -10 10 0 q 5 -10 10 0 q 5 -10 10 0 q 5 -10 10 0" class="ind"/>
+  <text x="365" y="160" class="sublabel">L — v = L·di/dt</text>
+
+  <!-- Diode -->
+  <polygon points="305,180 315,175 315,185" class="diode-pulse"/>
+  <line x1="315" y1="173" x2="315" y2="187" stroke="#c084fc" stroke-width="2" class="diode-pulse"/>
+  <line x1="295" y1="180" x2="305" y2="180" class="wire"/>
+  <line x1="315" y1="180" x2="345" y2="180" class="wire"/>
+  <text x="365" y="185" class="sublabel">Diode — one-way</text>
+
+  <!-- Transistor (BJT NPN) -->
+  <line x1="295" y1="215" x2="310" y2="215" class="wire"/>
+  <line x1="310" y1="205" x2="310" y2="225" class="wire" stroke-width="2"/>
+  <line x1="310" y1="210" x2="325" y2="200" class="wire"/>
+  <line x1="310" y1="220" x2="325" y2="230" class="wire"/>
+  <polygon points="320,228 325,230 322,224" class="trans-arrow"/>
+  <text x="365" y="220" class="sublabel">BJT — current valve</text>
+
+  <!-- RIGHT: Layered ladder -->
+  <rect x="470" y="50" width="210" height="200" class="box"/>
+  <text x="575" y="72" class="label" text-anchor="middle" font-weight="bold">The Stack You'll Climb</text>
+
+  <rect x="485" y="85"  width="180" height="20" class="ladder-step step-1"/>
+  <text x="575" y="99"  class="sublabel" text-anchor="middle">21.8 Bridge to Robotics</text>
+
+  <rect x="485" y="110" width="180" height="20" class="ladder-step step-2"/>
+  <text x="575" y="124" class="sublabel" text-anchor="middle">21.7 Power Electronics + Motors</text>
+
+  <rect x="485" y="135" width="180" height="20" class="ladder-step step-3"/>
+  <text x="575" y="149" class="sublabel" text-anchor="middle">21.6 Motherboards + CPU Arch</text>
+
+  <rect x="485" y="160" width="180" height="20" class="ladder-step step-4"/>
+  <text x="575" y="174" class="sublabel" text-anchor="middle">21.5 Microcontrollers</text>
+
+  <rect x="485" y="185" width="180" height="20" class="ladder-step step-5"/>
+  <text x="575" y="199" class="sublabel" text-anchor="middle">21.4 Digital Logic + FSMs</text>
+
+  <rect x="485" y="210" width="180" height="20" class="ladder-step step-6"/>
+  <text x="575" y="224" class="sublabel" text-anchor="middle">21.3 Semiconductors</text>
+
+  <rect x="485" y="235" width="180" height="20" class="ladder-step step-7"/>
+  <text x="575" y="249" class="sublabel" text-anchor="middle">21.2 Passive Components</text>
+
+  <!-- BOTTOM: Bus protocols teaser -->
+  <rect x="20" y="275" width="660" height="115" class="box"/>
+  <text x="350" y="297" class="label" text-anchor="middle" font-weight="bold">21.8 — Robotics Bus Protocols</text>
+
+  <!-- UART -->
+  <rect x="40"  y="315" width="120" height="40" class="ladder-step"/>
+  <path class="bus-trace uart-flow" d="M 45 320 L 155 320" />
+  <text x="100" y="338" class="label" text-anchor="middle">UART</text>
+  <text x="100" y="352" class="sublabel" text-anchor="middle">2 wires · async</text>
+
+  <!-- I2C -->
+  <rect x="180" y="315" width="120" height="40" class="ladder-step"/>
+  <path class="bus-trace i2c-flow" d="M 185 320 L 295 320" />
+  <path class="bus-trace i2c-flow" d="M 185 323 L 295 323" />
+  <text x="240" y="338" class="label" text-anchor="middle">I²C</text>
+  <text x="240" y="352" class="sublabel" text-anchor="middle">2 wires · multi-drop</text>
+
+  <!-- SPI -->
+  <rect x="320" y="315" width="120" height="40" class="ladder-step"/>
+  <path class="bus-trace spi-flow" d="M 325 318 L 435 318" />
+  <path class="bus-trace spi-flow" d="M 325 321 L 435 321" />
+  <path class="bus-trace spi-flow" d="M 325 324 L 435 324" />
+  <path class="bus-trace spi-flow" d="M 325 327 L 435 327" />
+  <text x="380" y="338" class="label" text-anchor="middle">SPI</text>
+  <text x="380" y="352" class="sublabel" text-anchor="middle">4 wires · fast</text>
+
+  <!-- CAN -->
+  <rect x="460" y="315" width="120" height="40" class="ladder-step"/>
+  <path class="bus-trace can-flow" d="M 465 320 L 575 320" />
+  <path class="bus-trace can-flow" d="M 465 324 L 575 324" style="animation-delay: -0.75s;" />
+  <text x="520" y="338" class="label" text-anchor="middle">CAN</text>
+  <text x="520" y="352" class="sublabel" text-anchor="middle">2 wires · differential, robust</text>
+
+  <text x="350" y="378" class="sublabel" text-anchor="middle">Pick the right bus and a robot's nervous system practically wires itself.</text>
+</svg>

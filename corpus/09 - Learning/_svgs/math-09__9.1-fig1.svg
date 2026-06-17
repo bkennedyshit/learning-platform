@@ -1,0 +1,99 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="qm-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .qm-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .qm-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.3; }
+    .qm-wave-real { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .qm-wave-imag { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 6 3; }
+    .qm-prob { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .qm-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .qm-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .qm-formula { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); }
+    .qm-envelope {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 300;
+      stroke-dashoffset: 300;
+      animation: drawWave 3s ease-in-out infinite alternate;
+    }
+    @keyframes drawWave {
+      0% { stroke-dashoffset: 300; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .qm-particle {
+      fill: var(--interactive-accent, #58a6ff);
+      opacity: 0.8;
+    }
+    .qm-particle-glow {
+      fill: var(--interactive-accent, #58a6ff);
+      opacity: 0.3;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { r: 4; opacity: 0.3; }
+      50% { r: 8; opacity: 0.1; }
+    }
+    .qm-wave-real {
+      transform-origin: center 200px;
+      animation: waveOscillate 4s ease-in-out infinite alternate;
+    }
+    .qm-wave-imag {
+      transform-origin: center 200px;
+      animation: waveOscillate 4s ease-in-out infinite alternate;
+      animation-delay: 2s;
+    }
+    @keyframes waveOscillate {
+      0% { transform: scaleY(1); }
+      100% { transform: scaleY(-1); }
+    }
+    .qm-prob {
+      animation: probPulse 2s ease-in-out infinite alternate;
+    }
+    @keyframes probPulse {
+      0% { opacity: 0.15; }
+      100% { opacity: 0.25; }
+    }
+  </style>
+
+  <!-- Grid -->
+  <path class="qm-grid" d="M 80 0 V 400 M 160 0 V 400 M 240 0 V 400 M 320 0 V 400 M 400 0 V 400 M 480 0 V 400 M 560 0 V 400 M 640 0 V 400"/>
+  <path class="qm-grid" d="M 0 80 H 700 M 0 160 H 700 M 0 240 H 700 M 0 320 H 700"/>
+
+  <!-- Axes -->
+  <line x1="50" y1="200" x2="670" y2="200" class="qm-axis" marker-end="url(#qm-arrow)"/>
+  <line x1="50" y1="380" x2="50" y2="30" class="qm-axis" marker-end="url(#qm-arrow)"/>
+  <text x="680" y="205" class="qm-label">x</text>
+  <text x="55" y="25" class="qm-label">Ψ, |Ψ|²</text>
+
+  <!-- Probability density |Ψ|² (Gaussian envelope, shaded) -->
+  <path d="M 50 200 Q 150 200 200 195 Q 250 180 300 140 Q 350 80 380 60 Q 410 80 440 140 Q 490 180 540 195 Q 590 200 650 200 Z" class="qm-prob"/>
+
+  <!-- Real part of Ψ (oscillating inside envelope) -->
+  <path d="M 150 200 Q 180 170 210 150 Q 240 130 270 160 Q 300 190 330 120 Q 360 50 390 80 Q 420 110 450 160 Q 480 190 510 170 Q 540 150 570 180 Q 600 200 630 200" class="qm-wave-real"/>
+
+  <!-- Imaginary part of Ψ (phase-shifted) -->
+  <path d="M 150 200 Q 180 220 210 180 Q 240 140 270 120 Q 300 100 330 140 Q 360 180 390 60 Q 420 140 450 180 Q 480 200 510 190 Q 540 180 570 195 Q 600 200 630 200" class="qm-wave-imag"/>
+
+  <!-- Animated envelope trace -->
+  <path d="M 200 195 Q 300 140 380 60 Q 460 140 540 195" class="qm-envelope"/>
+
+  <!-- Peak probability particle -->
+  <circle cx="380" cy="60" r="4" class="qm-particle"/>
+  <circle cx="380" cy="60" r="4" class="qm-particle-glow"/>
+
+  <!-- Labels -->
+  <text x="390" y="50" class="qm-accent">|Ψ|² peak</text>
+  <text x="200" y="135" class="qm-label" fill="var(--interactive-accent, #58a6ff)">Re(Ψ)</text>
+  <text x="200" y="115" class="qm-label" fill="var(--text-accent, #79c0ff)">Im(Ψ)</text>
+
+  <!-- Formula box -->
+  <rect x="440" y="270" width="240" height="80" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="560" y="300" class="qm-formula" text-anchor="middle">iℏ ∂Ψ/∂t = ĤΨ</text>
+  <text x="560" y="325" class="qm-label" text-anchor="middle">Time-Dependent Schrödinger Eq.</text>
+  <text x="560" y="342" class="qm-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">P(x,t) = |Ψ(x,t)|²</text>
+</svg>

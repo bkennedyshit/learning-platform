@@ -1,0 +1,64 @@
+<svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="rlhf-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 2 L7 5 L0 8z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .rlhf-title { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .rlhf-label { font-family:Inter,system-ui,sans-serif; font-size:10px; fill:var(--text-normal, #c9d1d9); }
+    .rlhf-accent { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .rlhf-stage { fill:var(--background-secondary, #161b22); stroke:var(--interactive-accent, #58a6ff); stroke-width:2; rx:8; transition: transform 0.3s; }
+    .rlhf-stage:hover { transform: scale(1.02); }
+    .rlhf-human { fill:#2ecc71; opacity:0.15; stroke:#2ecc71; stroke-width:2; rx:8; animation: pulseHuman 3s infinite alternate; }
+    .rlhf-flow { stroke:var(--interactive-accent, #58a6ff); stroke-width:2; fill:none; stroke-dasharray: 8 4; animation: flowMove 1s linear infinite; }
+    .rlhf-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:5; }
+    @keyframes flowMove { to { stroke-dashoffset: -12; } }
+    @keyframes pulseHuman { from { opacity: 0.1; } to { opacity: 0.25; } }
+  </style>
+  <!-- Stage 1: SFT -->
+  <rect x="20" y="30" width="140" height="100" class="rlhf-stage"/>
+  <text x="90" y="55" class="rlhf-title" text-anchor="middle">Stage 1: SFT</text>
+  <text x="90" y="75" class="rlhf-label" text-anchor="middle">Supervised Fine-Tuning</text>
+  <text x="90" y="92" class="rlhf-label" text-anchor="middle">Human demonstrations</text>
+  <text x="90" y="108" class="rlhf-label" text-anchor="middle">π_SFT(y|x)</text>
+  <text x="90" y="122" class="rlhf-accent" text-anchor="middle">Imitation Learning</text>
+  <!-- Arrow 1→2 -->
+  <line x1="165" y1="80" x2="195" y2="80" class="rlhf-flow" marker-end="url(#rlhf-arr)"/>
+  <!-- Stage 2: Reward Model -->
+  <rect x="200" y="30" width="160" height="100" class="rlhf-stage"/>
+  <text x="280" y="55" class="rlhf-title" text-anchor="middle">Stage 2: Reward Model</text>
+  <text x="280" y="75" class="rlhf-label" text-anchor="middle">Train r(x,y) from preferences</text>
+  <text x="280" y="92" class="rlhf-label" text-anchor="middle">Bradley-Terry model</text>
+  <text x="280" y="108" class="rlhf-label" text-anchor="middle">L = −log σ(r(y_w) − r(y_l))</text>
+  <text x="280" y="122" class="rlhf-accent" text-anchor="middle">Preference Learning</text>
+  <!-- Arrow 2→3 -->
+  <line x1="365" y1="80" x2="395" y2="80" class="rlhf-flow" marker-end="url(#rlhf-arr)"/>
+  <!-- Stage 3: PPO -->
+  <rect x="400" y="30" width="160" height="100" class="rlhf-stage"/>
+  <text x="480" y="55" class="rlhf-title" text-anchor="middle">Stage 3: PPO</text>
+  <text x="480" y="75" class="rlhf-label" text-anchor="middle">Optimize π against r(x,y)</text>
+  <text x="480" y="92" class="rlhf-label" text-anchor="middle">Clipped surrogate objective</text>
+  <text x="480" y="108" class="rlhf-label" text-anchor="middle">+ KL penalty from π_SFT</text>
+  <text x="480" y="122" class="rlhf-accent" text-anchor="middle">Policy Optimization</text>
+  <!-- Human feedback loop -->
+  <rect x="200" y="160" width="160" height="70" class="rlhf-human"/>
+  <text x="280" y="185" class="rlhf-title" text-anchor="middle" fill="#2ecc71">Human Evaluator</text>
+  <text x="280" y="205" class="rlhf-label" text-anchor="middle">Compares y_A vs y_B</text>
+  <text x="280" y="220" class="rlhf-label" text-anchor="middle">Provides preference: y_A ≻ y_B</text>
+  <line x1="280" y1="160" x2="280" y2="135" class="rlhf-flow" marker-end="url(#rlhf-arr)"/>
+  <!-- Co-regulation parallel -->
+  <rect x="20" y="260" width="680" height="100" class="rlhf-box"/>
+  <text x="360" y="285" class="rlhf-title" text-anchor="middle">Biological Parallel: Co-Regulation as RLHF</text>
+  <text x="40" y="310" class="rlhf-label">AI Model (π) = Dysregulated nervous system</text>
+  <text x="40" y="328" class="rlhf-label">Human Evaluator = Co-regulating partner (calm nervous system)</text>
+  <text x="40" y="346" class="rlhf-label">Preference signal (y_w ≻ y_l) = Prosodic voice, facial cues signaling "this behavior is safe/good"</text>
+  <text x="380" y="310" class="rlhf-label">Reward Model = Internalized sense of "what others approve of"</text>
+  <text x="380" y="328" class="rlhf-label">KL penalty = Don't deviate too far from your core self</text>
+  <text x="380" y="346" class="rlhf-label">PPO clipping = Window of tolerance (bounded updates)</text>
+  <!-- Output arrow -->
+  <line x1="565" y1="80" x2="620" y2="80" class="rlhf-flow" marker-end="url(#rlhf-arr)"/>
+  <rect x="625" y="55" width="80" height="50" rx="6" fill="var(--interactive-accent, #58a6ff)" opacity="0.2" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="665" y="78" class="rlhf-accent" text-anchor="middle">Aligned</text>
+  <text x="665" y="95" class="rlhf-accent" text-anchor="middle">Model π*</text>
+</svg>

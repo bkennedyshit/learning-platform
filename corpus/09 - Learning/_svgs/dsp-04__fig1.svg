@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <style>
+      .text { font-family: sans-serif; fill: #333; }
+      .box { fill: #f9f9f9; stroke: #333; stroke-width: 2; rx: 5; }
+      .line { fill: none; stroke: #333; stroke-width: 2; }
+      .arrow { fill: #333; }
+      .signal { fill: none; stroke: #007acc; stroke-width: 3; }
+      .sample { fill: #d9534f; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" class="arrow" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="40" class="text" font-size="22" font-weight="bold" text-anchor="middle">ADC to DAC Signal Chain</text>
+
+  <!-- Blocks -->
+  <rect x="50" y="150" width="120" height="80" class="box" />
+  <text x="110" y="195" class="text" font-size="14" text-anchor="middle" font-weight="bold">Anti-Alias LPF</text>
+  <text x="110" y="215" class="text" font-size="12" text-anchor="middle">fc &lt; fs/2</text>
+
+  <rect x="220" y="150" width="100" height="80" class="box" />
+  <text x="270" y="195" class="text" font-size="14" text-anchor="middle" font-weight="bold">Sampler</text>
+  <text x="270" y="215" class="text" font-size="12" text-anchor="middle">T = 1/fs</text>
+
+  <rect x="370" y="150" width="100" height="80" class="box" />
+  <text x="420" y="195" class="text" font-size="14" text-anchor="middle" font-weight="bold">Quantizer</text>
+  <text x="420" y="215" class="text" font-size="12" text-anchor="middle">N bits</text>
+
+  <rect x="520" y="150" width="100" height="80" class="box" />
+  <text x="570" y="195" class="text" font-size="14" text-anchor="middle" font-weight="bold">DSP</text>
+
+  <rect x="670" y="150" width="100" height="80" class="box" />
+  <text x="720" y="195" class="text" font-size="14" text-anchor="middle" font-weight="bold">DAC &amp; LPF</text>
+
+  <!-- Connections -->
+  <path d="M 10 190 L 40 190" class="line" marker-end="url(#arrow)" />
+  <path d="M 170 190 L 210 190" class="line" marker-end="url(#arrow)" />
+  <path d="M 320 190 L 360 190" class="line" marker-end="url(#arrow)" />
+  <path d="M 470 190 L 510 190" class="line" marker-end="url(#arrow)" />
+  <path d="M 620 190 L 660 190" class="line" marker-end="url(#arrow)" />
+  <path d="M 770 190 L 790 190" class="line" marker-end="url(#arrow)" />
+
+  <text x="25" y="180" class="text" font-size="14">x(t)</text>
+  <text x="340" y="180" class="text" font-size="14">x[n]</text>
+  <text x="640" y="180" class="text" font-size="14">y[n]</text>
+  <text x="780" y="180" class="text" font-size="14">y(t)</text>
+
+  <!-- Continuous Signal -->
+  <g transform="translate(70, 260)">
+    <path d="M 0 50 L 80 50" class="line" stroke="#aaa" />
+    <path d="M 0 50 Q 20 10 40 50 T 80 50" class="signal" />
+    <text x="40" y="90" class="text" font-size="14" text-anchor="middle">Continuous x(t)</text>
+  </g>
+
+  <!-- Sampled Signal -->
+  <g transform="translate(230, 260)">
+    <path d="M 0 50 L 80 50" class="line" stroke="#aaa" />
+    <path d="M 0 50 Q 20 10 40 50 T 80 50" class="signal" stroke-dasharray="2,4" opacity="0.4" />
+    <line x1="10" y1="50" x2="10" y2="30" class="line" stroke="#d9534f" /> <circle cx="10" cy="30" r="3" class="sample" />
+    <line x1="20" y1="50" x2="20" y2="15" class="line" stroke="#d9534f" /> <circle cx="20" cy="15" r="3" class="sample" />
+    <line x1="30" y1="50" x2="30" y2="25" class="line" stroke="#d9534f" /> <circle cx="30" cy="25" r="3" class="sample" />
+    <line x1="40" y1="50" x2="40" y2="50" class="line" stroke="#d9534f" /> <circle cx="40" cy="50" r="3" class="sample" />
+    <line x1="50" y1="50" x2="50" y2="70" class="line" stroke="#d9534f" /> <circle cx="50" cy="70" r="3" class="sample" />
+    <text x="40" y="90" class="text" font-size="14" text-anchor="middle">Discrete x[n]</text>
+  </g>
+
+  <!-- Quantized Signal -->
+  <g transform="translate(380, 260)">
+    <path d="M 0 50 L 80 50" class="line" stroke="#aaa" />
+    <!-- Horizontal quantised lines -->
+    <path d="M 0 15 L 80 15" stroke="#ccc" stroke-dasharray="2,2" />
+    <path d="M 0 30 L 80 30" stroke="#ccc" stroke-dasharray="2,2" />
+    <path d="M 0 70 L 80 70" stroke="#ccc" stroke-dasharray="2,2" />
+    
+    <path d="M 0 30 L 10 30 L 10 15 L 20 15 L 20 30 L 30 30 L 30 50 L 40 50 L 40 70 L 50 70 L 50 50 L 60 50" class="signal" stroke="#5cb85c" fill="none" stroke-width="2" />
+    <text x="40" y="90" class="text" font-size="14" text-anchor="middle">Quantized x[n]</text>
+  </g>
+
+  <!-- DAC Output -->
+  <g transform="translate(680, 260)">
+    <path d="M 0 50 L 80 50" class="line" stroke="#aaa" />
+    <path d="M 0 50 Q 20 10 40 50 T 80 50" class="signal" stroke="#e67e22" />
+    <text x="40" y="90" class="text" font-size="14" text-anchor="middle">Reconstructed y(t)</text>
+  </g>
+
+  <!-- Animated packet -->
+  <circle cx="10" cy="190" r="6" fill="#e74c3c">
+    <animate attributeName="cx" values="10;40;170;210;320;360;470;510;620;660;770;790;790" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="1;1;1;1;1;1;1;1;1;1;1;1;0" dur="4s" repeatCount="indefinite" />
+  </circle>
+</svg>

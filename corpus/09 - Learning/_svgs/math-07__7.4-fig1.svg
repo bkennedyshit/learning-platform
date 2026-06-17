@@ -1,0 +1,81 @@
+<svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="mx-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .eq-box {
+      fill: var(--background-secondary, #161b22);
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      rx: 10;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .eq-box:hover {
+      stroke-width: 3;
+      filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff));
+    }
+    .eq-text { font-family: 'Latin Modern Math', serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .eq-name { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .connector { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 5,3; animation: flowConnector 1s linear infinite; }
+    @keyframes flowConnector {
+      to { stroke-dashoffset: -8; }
+    }
+    .category { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    @keyframes glow {
+      0%, 100% { filter: none; }
+      50% { filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    .glow-box { animation: glow 3s ease-in-out infinite; }
+  </style>
+
+  <text x="350" y="30" class="title">Maxwell's Equations — The Complete Classical Theory</text>
+
+  <!-- Category labels -->
+  <text x="200" y="65" class="category">DIVERGENCE (Sources)</text>
+  <text x="530" y="65" class="category">CURL (Dynamics)</text>
+
+  <!-- Gauss's Law for E -->
+  <rect x="50" y="80" width="300" height="70" class="eq-box"/>
+  <text x="200" y="110" class="eq-text">∇ · E = ρ/ε₀</text>
+  <text x="200" y="135" class="eq-name">Gauss's Law — charge creates E flux</text>
+
+  <!-- Gauss's Law for B -->
+  <rect x="50" y="180" width="300" height="70" class="eq-box"/>
+  <text x="200" y="210" class="eq-text">∇ · B = 0</text>
+  <text x="200" y="235" class="eq-name">No magnetic monopoles — B lines are closed</text>
+
+  <!-- Faraday's Law -->
+  <rect x="380" y="80" width="300" height="70" class="eq-box glow-box"/>
+  <text x="530" y="110" class="eq-text">∇ × E = −∂B/∂t</text>
+  <text x="530" y="135" class="eq-name">Faraday's Law — changing B creates E</text>
+
+  <!-- Ampere-Maxwell -->
+  <rect x="380" y="180" width="300" height="70" class="eq-box glow-box"/>
+  <text x="530" y="210" class="eq-text">∇ × B = μ₀J + μ₀ε₀∂E/∂t</text>
+  <text x="530" y="235" class="eq-name">Ampère-Maxwell — current + changing E create B</text>
+
+  <!-- Coupling arrows -->
+  <path d="M 530 150 C 530 165, 530 165, 530 180" class="connector" marker-end="url(#mx-arrow)"/>
+  <path d="M 480 150 C 400 165, 400 165, 480 180" class="connector" marker-end="url(#mx-arrow)"/>
+
+  <!-- Bottom: Integral forms -->
+  <rect x="50" y="300" width="300" height="80" class="eq-box"/>
+  <text x="200" y="325" class="eq-text" font-size="14">∮ E·da = Q_enc/ε₀</text>
+  <text x="200" y="350" class="eq-text" font-size="14">∮ B·da = 0</text>
+  <text x="200" y="370" class="eq-name">Integral forms (Divergence Theorem)</text>
+
+  <rect x="380" y="300" width="300" height="80" class="eq-box"/>
+  <text x="530" y="325" class="eq-text" font-size="14">∮ E·dl = −dΦ_B/dt</text>
+  <text x="530" y="350" class="eq-text" font-size="14">∮ B·dl = μ₀I + μ₀ε₀dΦ_E/dt</text>
+  <text x="530" y="370" class="eq-name">Integral forms (Stokes' Theorem)</text>
+
+  <!-- Consequence box -->
+  <rect x="180" y="420" width="340" height="60" rx="8" fill="var(--background-secondary, #161b22)" stroke="var(--text-accent, #79c0ff)" stroke-width="2"/>
+  <text x="350" y="445" class="eq-text" fill="var(--text-accent, #79c0ff)">→ Electromagnetic Waves: c = 1/√(μ₀ε₀)</text>
+  <text x="350" y="468" class="eq-name">Light is an electromagnetic phenomenon!</text>
+</svg>

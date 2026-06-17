@@ -1,0 +1,53 @@
+<svg viewBox="0 0 580 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="stdp-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .stdp-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .stdp-ltp { stroke: #27ae60; stroke-width: 3; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 4s ease-out infinite; }
+    .stdp-ltd { stroke: #e74c3c; stroke-width: 3; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 4s ease-out infinite; }
+    .stdp-zero { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 5 3; }
+    .stdp-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .stdp-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .stdp-region { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: bold; }
+    @keyframes draw { 50%, 100% { stroke-dashoffset: 0; } }
+  </style>
+  <!-- Title -->
+  <text x="290" y="20" class="stdp-title" text-anchor="middle">Spike-Timing-Dependent Plasticity (STDP) Window</text>
+  <!-- Axes -->
+  <line x1="50" y1="180" x2="550" y2="180" class="stdp-axis" marker-end="url(#stdp-arr)"/>
+  <line x1="290" y1="310" x2="290" y2="30" class="stdp-axis" marker-end="url(#stdp-arr)"/>
+  <!-- Labels -->
+  <text x="555" y="195" class="stdp-label">Δt = t_post − t_pre (ms)</text>
+  <text x="295" y="28" class="stdp-label">Δw</text>
+  <text x="290" y="195" class="stdp-label" text-anchor="middle">0</text>
+  <!-- Tick marks -->
+  <text x="150" y="198" class="stdp-label" text-anchor="middle">−40</text>
+  <text x="220" y="198" class="stdp-label" text-anchor="middle">−20</text>
+  <text x="360" y="198" class="stdp-label" text-anchor="middle">+20</text>
+  <text x="430" y="198" class="stdp-label" text-anchor="middle">+40</text>
+  <!-- Zero line -->
+  <line x1="50" y1="180" x2="550" y2="180" class="stdp-zero"/>
+  <!-- LTP curve (Δt > 0: pre before post → potentiation) -->
+  <path d="M 290 180 C 310 80 350 55 380 65 C 420 80 460 140 530 175" class="stdp-ltp"/>
+  <text x="400" y="50" class="stdp-region" fill="#27ae60">LTP (Δw > 0)</text>
+  <text x="400" y="65" class="stdp-label" fill="#27ae60">Pre → Post (causal)</text>
+  <!-- LTD curve (Δt < 0: post before pre → depression) -->
+  <path d="M 290 180 C 270 260 230 290 200 280 C 160 265 120 220 60 185" class="stdp-ltd"/>
+  <text x="120" y="300" class="stdp-region" fill="#e74c3c">LTD (Δw < 0)</text>
+  <text x="120" y="315" class="stdp-label" fill="#e74c3c">Post → Pre (acausal)</text>
+  <!-- Exponential decay annotations -->
+  <text x="450" y="130" class="stdp-label" fill="var(--text-muted, #8b949e)">A₊ exp(−Δt/τ₊)</text>
+  <text x="80" y="245" class="stdp-label" fill="var(--text-muted, #8b949e)">−A₋ exp(Δt/τ₋)</text>
+  <!-- Time constant annotations -->
+  <line x1="290" y1="85" x2="380" y2="85" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="335" y="80" class="stdp-label" fill="var(--text-muted, #8b949e)">τ₊ ≈ 20ms</text>
+  <!-- Info box -->
+  <rect x="380" y="220" width="180" height="80" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="470" y="240" class="stdp-label" text-anchor="middle" font-weight="bold">STDP Rule:</text>
+  <text x="470" y="258" class="stdp-label" text-anchor="middle">Δt > 0 → LTP (strengthen)</text>
+  <text x="470" y="276" class="stdp-label" text-anchor="middle">Δt < 0 → LTD (weaken)</text>
+  <text x="470" y="294" class="stdp-label" text-anchor="middle">|Δt| > 40ms → no change</text>
+</svg>

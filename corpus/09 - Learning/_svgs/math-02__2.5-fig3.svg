@@ -1,0 +1,42 @@
+<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;height:auto;">
+  <style>
+    .csq { stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .cpl { fill:var(--interactive-accent, #58a6ff); animation: pulsePlus 3s ease-in-out infinite; }
+    .cmi { fill:var(--text-accent, #79c0ff); animation: pulseMinus 3s ease-in-out infinite; }
+    @keyframes pulsePlus { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.4; } }
+    @keyframes pulseMinus { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.1; } }
+    .ctx { font-family:Inter,system-ui,sans-serif; font-size:18px; text-anchor:middle; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .clf { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-muted, #8b949e); text-anchor:middle; }
+  </style>
+  <!-- 3x3 grid -->
+  <g transform="translate(40,20)">
+    <!-- Row 0 -->
+    <rect x="0"   y="0"   width="80" height="60" class="csq cpl"/>
+    <text x="40"  y="38"  class="ctx">+</text>
+    <rect x="80"  y="0"   width="80" height="60" class="csq cmi"/>
+    <text x="120" y="38"  class="ctx">−</text>
+    <rect x="160" y="0"   width="80" height="60" class="csq cpl"/>
+    <text x="200" y="38"  class="ctx">+</text>
+    <!-- Row 1 -->
+    <rect x="0"   y="60"  width="80" height="60" class="csq cmi"/>
+    <text x="40"  y="98"  class="ctx">−</text>
+    <rect x="80"  y="60"  width="80" height="60" class="csq cpl"/>
+    <text x="120" y="98"  class="ctx">+</text>
+    <rect x="160" y="60"  width="80" height="60" class="csq cmi"/>
+    <text x="200" y="98"  class="ctx">−</text>
+    <!-- Row 2 -->
+    <rect x="0"   y="120" width="80" height="60" class="csq cpl"/>
+    <text x="40"  y="158" class="ctx">+</text>
+    <rect x="80"  y="120" width="80" height="60" class="csq cmi"/>
+    <text x="120" y="158" class="ctx">−</text>
+    <rect x="160" y="120" width="80" height="60" class="csq cpl"/>
+    <text x="200" y="158" class="ctx">+</text>
+    <!-- Grid lines -->
+    <rect x="0" y="0" width="240" height="180" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1.5"/>
+    <line x1="80"  y1="0" x2="80"  y2="180" class="csq"/>
+    <line x1="160" y1="0" x2="160" y2="180" class="csq"/>
+    <line x1="0" y1="60"  x2="240" y2="60"  class="csq"/>
+    <line x1="0" y1="120" x2="240" y2="120" class="csq"/>
+  </g>
+  <text x="200" y="195" class="clf">Sign pattern: C_{ij} = (−1)^{i+j} · det(M_{ij})</text>
+</svg>

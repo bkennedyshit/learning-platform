@@ -1,0 +1,200 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    
+    /* Node Styles */
+    .node-bg { fill: #21262d; stroke: #30363d; stroke-width: 1.5; rx: 5; }
+    .node-header { stroke: none; rx: 5; }
+    .node-header-input { fill: #c084fc; }
+    .node-header-mesh { fill: #51cf66; }
+    .node-header-instance { fill: #58a6ff; }
+    .node-header-output { fill: #ff6b6b; }
+    
+    .socket { fill: #30363d; stroke: #8b949e; stroke-width: 1; }
+    .socket-active { fill: #58a6ff; stroke: #fff; }
+    .socket-mesh { fill: #51cf66; stroke: #fff; }
+  </style>
+
+  <text x="350" y="24" class="title" text-anchor="middle">Blender 4.4 — Procedural Assemblies with Geometry Nodes</text>
+
+  <!-- LEFT: Geometry Nodes Graph Editor -->
+  <g>
+    <rect x="20" y="50" width="370" height="340" class="box"/>
+    <text x="205" y="75" class="label" text-anchor="middle" font-weight="bold">Geometry Node Editor (Procedural Wires)</text>
+
+    <!-- Node 1: Group Input -->
+    <g transform="translate(35, 95)">
+      <rect x="0" y="0" width="100" height="65" class="node-bg"/>
+      <path d="M 0,5 L 100,5 A 5,5 0 0 1 100,20 L 0,20 Z" class="node-header node-header-input"/>
+      <text x="50" y="15" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">Group Input</text>
+      <!-- Sockets -->
+      <circle cx="95" cy="35" r="3.5" class="socket socket-active"/>
+      <text x="85" y="38" font-family="Inter, sans-serif" font-size="8" fill="#8b949e" text-anchor="end">Geometry</text>
+    </g>
+
+    <!-- Node 2: Mesh Line -->
+    <g transform="translate(35, 185)">
+      <rect x="0" y="0" width="105" height="90" class="node-bg"/>
+      <path d="M 0,5 L 105,5 A 5,5 0 0 1 105,20 L 0,20 Z" class="node-header node-header-mesh"/>
+      <text x="52" y="15" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">Mesh Line</text>
+      
+      <!-- Multi-text trick to display pulsing Count -->
+      <g>
+        <text x="95" y="45" font-family="Inter, sans-serif" font-size="9" fill="#ffd93d" font-weight="bold" text-anchor="end" opacity="0">
+          <animate attributeName="opacity" values="1; 0; 0; 0; 0; 0; 0; 1; 1" dur="8s" repeatCount="indefinite"/>Count: 2
+        </text>
+        <text x="95" y="45" font-family="Inter, sans-serif" font-size="9" fill="#ffd93d" font-weight="bold" text-anchor="end" opacity="0">
+          <animate attributeName="opacity" values="0; 1; 0; 0; 0; 0; 1; 0; 0" dur="8s" repeatCount="indefinite"/>Count: 4
+        </text>
+        <text x="95" y="45" font-family="Inter, sans-serif" font-size="9" fill="#ffd93d" font-weight="bold" text-anchor="end" opacity="0">
+          <animate attributeName="opacity" values="0; 0; 1; 0; 0; 1; 0; 0; 0" dur="8s" repeatCount="indefinite"/>Count: 6
+        </text>
+        <text x="95" y="45" font-family="Inter, sans-serif" font-size="9" fill="#ffd93d" font-weight="bold" text-anchor="end" opacity="0">
+          <animate attributeName="opacity" values="0; 0; 0; 1; 1; 0; 0; 0; 0" dur="8s" repeatCount="indefinite"/>Count: 8
+        </text>
+      </g>
+
+      <text x="15" y="65" font-family="Inter, sans-serif" font-size="8" fill="#8b949e">Offset: 3.5 m</text>
+      <!-- Output -->
+      <circle cx="100" cy="72" r="3.5" class="socket socket-mesh"/>
+      <text x="90" y="75" font-family="Inter, sans-serif" font-size="8" fill="#8b949e" text-anchor="end">Mesh</text>
+    </g>
+
+    <!-- Node 3: Instance on Points -->
+    <g transform="translate(175, 130)">
+      <rect x="0" y="10" width="115" height="100" class="node-bg"/>
+      <path d="M 0,15 L 115,15 A 5,5 0 0 1 115,30 L 0,30 Z" class="node-header node-header-instance"/>
+      <text x="57" y="25" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">Instance on Points</text>
+      
+      <!-- Inputs -->
+      <circle cx="5" cy="50" r="3.5" class="socket socket-mesh"/>
+      <text x="15" y="53" font-family="Inter, sans-serif" font-size="8" fill="#8b949e">Points</text>
+
+      <circle cx="5" cy="70" r="3.5" class="socket socket-active"/>
+      <text x="15" y="73" font-family="Inter, sans-serif" font-size="8" fill="#8b949e">Instance</text>
+      
+      <circle cx="5" cy="90" r="3.5" class="socket"/>
+      <text x="15" y="93" font-family="Inter, sans-serif" font-size="8" fill="#8b949e">Pick Instance</text>
+
+      <!-- Output -->
+      <circle cx="110" cy="50" r="3.5" class="socket socket-active"/>
+      <text x="100" y="53" font-family="Inter, sans-serif" font-size="8" fill="#8b949e" text-anchor="end">Instances</text>
+    </g>
+
+    <!-- Node 4: Group Output -->
+    <g transform="translate(310, 140)">
+      <rect x="0" y="10" width="70" height="60" class="node-bg"/>
+      <path d="M 0,15 L 70,15 A 5,5 0 0 1 70,30 L 0,30 Z" class="node-header node-header-output"/>
+      <text x="35" y="25" font-family="Inter, sans-serif" font-size="9" fill="#161b22" text-anchor="middle" font-weight="bold">Group Output</text>
+      <!-- Input -->
+      <circle cx="5" cy="45" r="3.5" class="socket socket-active"/>
+      <text x="15" y="48" font-family="Inter, sans-serif" font-size="8" fill="#8b949e">Geometry</text>
+    </g>
+
+    <!-- Node-to-Node Data Wires with flowing energy signals -->
+    <!-- Mesh Line -> Points (green wire) -->
+    <path id="wireMesh" d="M 140,257 C 160,257 155,180 180,180" fill="none" stroke="#51cf66" stroke-width="2"/>
+    <circle r="3" fill="#fff">
+      <animateMotion dur="2.5s" repeatCount="indefinite">
+        <mpath href="#wireMesh"/>
+      </animateMotion>
+    </circle>
+
+    <!-- Instance -> Group Output (blue wire) -->
+    <path id="wireOut" d="M 285,180 C 300,180 295,185 315,185" fill="none" stroke="#58a6ff" stroke-width="2"/>
+    <circle r="3" fill="#fff">
+      <animateMotion dur="1.8s" repeatCount="indefinite" begin="0.6s">
+        <mpath href="#wireOut"/>
+      </animateMotion>
+    </circle>
+
+    <text x="205" y="348" class="sublabel" text-anchor="middle" fill="#ffd93d">Procedural graphs execute logic non-destructively.</text>
+    <text x="205" y="363" class="sublabel" text-anchor="middle" fill="#58a6ff">Modifying fields immediately re-computes meshes in real-time.</text>
+  </g>
+
+  <!-- RIGHT: Procedural Viewport 3D -->
+  <g>
+    <rect x="410" y="50" width="270" height="340" class="box"/>
+    <text x="545" y="75" class="label" text-anchor="middle" font-weight="bold">3D Viewport (Procedural Result)</text>
+
+    <!-- 3D Grid Platform -->
+    <g stroke="#30363d" stroke-width="0.8" opacity="0.6" fill="none">
+      <path d="M 440,340 L 545,290 L 650,340 L 545,390 Z"/>
+      <path d="M 466,328 L 571,378"/>
+      <path d="M 492,315 L 597,365"/>
+      <path d="M 518,302 L 623,352"/>
+      <path d="M 492,365 L 597,315"/>
+      <path d="M 466,352 L 571,302"/>
+      <path d="M 518,378 L 623,328"/>
+    </g>
+
+    <!-- Procedural 3D Stack (Floors/Slabs) -->
+    <!-- SLAB 1 (Base - Yellow - Always on) -->
+    <g id="procedural_slab1">
+      <polygon points="490,320 545,308 600,320 545,332" fill="#ffd93d" opacity="0.95" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,320 545,332 545,342 490,330" fill="#cca51b" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,332 600,320 600,330 545,342" fill="#997b10" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 2 (Upper floor - Always on (Count >= 2)) -->
+    <g id="procedural_slab2">
+      <polygon points="490,290 545,278 600,290 545,302" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,290 545,302 545,312 490,300" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,302 600,290 600,300 545,312" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 3 (Count >= 3) -->
+    <g id="procedural_slab3">
+      <animate attributeName="opacity" values="0; 1; 1; 1; 1; 1; 1; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,260 545,248 600,260 545,272" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,260 545,272 545,282 490,270" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,272 600,260 600,270 545,282" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 4 (Count >= 4) -->
+    <g id="procedural_slab4">
+      <animate attributeName="opacity" values="0; 1; 1; 1; 1; 1; 1; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,230 545,218 600,230 545,242" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,230 545,242 545,252 490,240" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,242 600,230 600,240 545,252" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 5 (Count >= 5) -->
+    <g id="procedural_slab5">
+      <animate attributeName="opacity" values="0; 0; 1; 1; 1; 1; 0; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,200 545,188 600,200 545,202" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,200 545,202 545,212 490,210" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,202 600,200 600,210 545,212" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 6 (Count >= 6) -->
+    <g id="procedural_slab6">
+      <animate attributeName="opacity" values="0; 0; 1; 1; 1; 1; 0; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,170 545,158 600,170 545,172" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,170 545,172 545,182 490,180" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,172 600,170 600,180 545,182" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 7 (Count >= 7) -->
+    <g id="procedural_slab7">
+      <animate attributeName="opacity" values="0; 0; 0; 1; 1; 0; 0; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,140 545,128 600,140 545,142" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,140 545,142 545,152 490,150" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,142 600,140 600,150 545,152" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <!-- SLAB 8 (Count >= 8) -->
+    <g id="procedural_slab8">
+      <animate attributeName="opacity" values="0; 0; 0; 1; 1; 0; 0; 0; 0" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" repeatCount="indefinite" />
+      <polygon points="490,110 545,98 600,110 545,112" fill="#58a6ff" opacity="0.9" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="490,110 545,112 545,122 490,120" fill="#388bfd" stroke="#161b22" stroke-width="0.5"/>
+      <polygon points="545,112 600,110 600,120 545,122" fill="#1f6feb" stroke="#161b22" stroke-width="0.5"/>
+    </g>
+
+    <text x="545" y="360" class="sublabel" text-anchor="middle">Upper modular components scale or multiply</text>
+    <text x="545" y="375" class="sublabel" text-anchor="middle">live based on the 'Mesh Line' input count.</text>
+  </g>
+</svg>

@@ -1,0 +1,1034 @@
+---
+title: "08.6 — The Standard Library & Ecosystem Tour"
+subject: "Python"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.6"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 08.6 — The Standard Library & Ecosystem Tour
+
+> *"Python's standard library is where modules go to be immortal."* — Brett Cannon
+
+Python ships with 200+ modules. Knowing what's available prevents you from reinventing wheels and adding unnecessary dependencies. This chapter maps the most important stdlib modules by category, with production patterns for each.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Navigate the stdlib by category: data, I/O, networking, concurrency, math, dev tools.
+2. Use `itertools`, `functools`, and `collections` for elegant data processing.
+3. Use `pathlib` for all filesystem operations (replacing `os.path`).
+4. Use `typing` for production-grade type annotations.
+5. Evaluate third-party packages critically (when to pip install vs. use stdlib).
+
+---
+
+## 🖼️ Visual Anchor — Standard Library Module Galaxy
+
+![python__1.6-fig1](python__1.6-fig1.svg)
+
+---
+
+## 📚 1. Definitions / Concepts
+
+### Definition 08.6.1 — The "Batteries Included" Philosophy
+
+Python's stdlib provides production-ready implementations for common tasks. The rule: **check stdlib first, pip install second.** Every dependency is a liability (supply chain risk, version conflicts, maintenance burden).
+
+### Definition 08.6.2 — Key Module Categories
+
+| Category | Modules | Use Case |
+|----------|---------|----------|
+| Data Structures | `collections`, `heapq`, `bisect`, `array` | Specialized containers beyond list/dict |
+| Functional | `itertools`, `functools`, `operator` | Lazy pipelines, caching, composition |
+| File/Path | `pathlib`, `shutil`, `tempfile`, `glob` | Cross-platform filesystem ops |
+| Serialization | `json`, `csv`, `pickle`, `struct` | Data interchange formats |
+| Networking | `socket`, `http`, `urllib`, `email` | Low-level network programming |
+| Concurrency | `asyncio`, `threading`, `multiprocessing` | See [Chapter 08.4](08.4---Concurrency---asyncio,-threading,-multiprocessing-&-the-GIL) |
+| Text | `re`, `string`, `textwrap`, `difflib` | Pattern matching, formatting |
+| Math | `math`, `statistics`, `decimal`, `fractions` | Numeric computation |
+| Dev Tools | `typing`, `abc`, `dataclasses`, `contextlib` | Code quality infrastructure |
+
+---
+
+## 📐 2. Mental Models / Principles
+
+### Principle 1.6.1 — itertools as Lazy Algebra
+
+`itertools` provides combinatorial building blocks that compose like algebraic operations on sequences — all lazy (O(1) memory):
+
+```python
+from itertools import chain, islice, groupby, product, combinations, accumulate
+
+# chain: concatenate iterables without materializing
+all_items = chain(list_a, list_b, list_c)
+
+# islice: slice any iterable (even infinite ones)
+first_10 = islice(fibonacci(), 10)
+
+# groupby: group consecutive elements by key
+for key, group in groupby(sorted(records, key=lambda r: r.category), key=lambda r: r.category):
+    print(f"{key}: {list(group)}")
+
+# product: cartesian product (replaces nested loops)
+for x, y, z in product(range(10), range(10), range(10)):
+    ...
+
+# accumulate: running totals / prefix sums
+prefix_sums = list(accumulate([1, 2, 3, 4, 5]))  # [1, 3, 6, 10, 15]
+```
+
+### Principle 1.6.2 — functools for Higher-Order Patterns
+
+```python
+from functools import lru_cache, reduce, partial, singledispatch, cache
+
+# lru_cache: memoization with bounded memory
+@lru_cache(maxsize=256)
+def expensive_computation(n: int) -> int:
+    return sum(i**2 for i in range(n))
+
+# cache: unbounded memoization (Python 3.9+)
+@cache
+def fibonacci(n: int) -> int:
+    if n < 2: return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# partial: fix some arguments
+from operator import mul
+double = partial(mul, 2)
+double(5)  # 10
+
+# singledispatch: function overloading by type
+@singledispatch
+def serialize(obj) -> str:
+    raise TypeError(f"Cannot serialize {type(obj)}")
+
+@serialize.register(int)
+def _(obj: int) -> str:
+    return str(obj)
+
+@serialize.register(list)
+def _(obj: list) -> str:
+    return json.dumps(obj)
+```
+
+### Principle 1.6.3 — collections Beyond dict/list
+
+```python
+from collections import defaultdict, Counter, deque, namedtuple, OrderedDict
+
+# defaultdict: auto-initialize missing keys
+graph: defaultdict[str, list[str]] = defaultdict(list)
+graph["A"].append("B")  # No KeyError
+
+# Counter: frequency counting
+words = Counter("the quick brown fox jumps over the lazy dog".split())
+words.most_common(3)  # [('the', 2), ('quick', 1), ('brown', 1)]
+
+# deque: O(1) append/pop from both ends
+buffer: deque[str] = deque(maxlen=1000)  # Circular buffer
+
+# namedtuple: lightweight immutable records
+Point = namedtuple("Point", ["x", "y"])
+p = Point(3, 4)
+p.x  # 3 (attribute access, not just index)
+```
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — pathlib (The Modern Filesystem API)
+
+```python
+from pathlib import Path
+
+# Construction (cross-platform)
+project = Path.cwd() / "src" / "my_package"
+config = Path.home() / ".config" / "myapp" / "settings.toml"
+
+# Reading/writing
+text = config.read_text(encoding="utf-8")
+config.write_text("key = value\n", encoding="utf-8")
+data = Path("image.png").read_bytes()
+
+# Traversal
+for py_file in project.rglob("*.py"):
+    print(py_file.relative_to(project))
+
+# Properties
+path = Path("/home/bill/projects/nepa/src/main.py")
+path.stem      # "main"
+path.suffix    # ".py"
+path.parent    # Path("/home/bill/projects/nepa/src")
+path.parts     # ('/', 'home', 'bill', 'projects', 'nepa', 'src', 'main.py')
+path.exists()  # True/False
+path.is_file() # True/False
+```
+
+### 3.2 — typing (Production Type Annotations)
+
+```python
+from typing import TypeVar, Generic, Protocol, TypeAlias, Literal, TypeGuard, overload
+from collections.abc import Callable, Iterator, Mapping
+
+# Type aliases
+JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
+Handler: TypeAlias = Callable[[str, int], bool]
+
+# Generic classes
+T = TypeVar("T")
+class Stack(Generic[T]):
+    def __init__(self) -> None:
+        self._items: list[T] = []
+    def push(self, item: T) -> None:
+        self._items.append(item)
+    def pop(self) -> T:
+        return self._items.pop()
+
+# Literal types (restrict to specific values)
+def set_mode(mode: Literal["train", "eval", "export"]) -> None: ...
+
+# TypeGuard (narrow types in conditionals)
+def is_string_list(val: list[object]) -> TypeGuard[list[str]]:
+    return all(isinstance(x, str) for x in val)
+```
+
+---
+
+## ✍️ 4. Derivations & Worked Examples
+
+### Example 08.6.1 — Building a File Watcher with stdlib Only
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```python
+import time
+from pathlib import Path
+from dataclasses import dataclass, field
+
+@dataclass
+class FileState:
+    path: Path
+    mtime: float
+    size: int
+
+def scan_directory(root: Path, pattern: str = "**/*.py") -> dict[Path, FileState]:
+    return {
+        p: FileState(p, p.stat().st_mtime, p.stat().st_size)
+        for p in root.rglob(pattern) if p.is_file()
+    }
+
+def watch(root: Path, interval: float = 08.0):
+    """Watch for file changes, yield (event, path) tuples."""
+    prev = scan_directory(root)
+    while True:
+        time.sleep(interval)
+        curr = scan_directory(root)
+        for path in curr.keys() - prev.keys():
+            yield ("created", path)
+        for path in prev.keys() - curr.keys():
+            yield ("deleted", path)
+        for path in curr.keys() & prev.keys():
+            if curr[path].mtime != prev[path].mtime:
+                yield ("modified", path)
+        prev = curr
+
+# Usage:
+for event, path in watch(Path("./src")):
+    print(f"{event}: {path}")
+```
+
+</details>
+
+---
+
+## 💻 5. Code Patterns & Idioms
+
+### Pattern 1.6.1 — contextlib Utilities
+
+```python
+from contextlib import suppress, redirect_stdout, ExitStack
+from io import StringIO
+
+# suppress: ignore specific exceptions
+with suppress(FileNotFoundError):
+    Path("maybe_missing.txt").unlink()
+
+# redirect_stdout: capture print output
+buffer = StringIO()
+with redirect_stdout(buffer):
+    print("captured")
+output = buffer.getvalue()  # "captured\n"
+
+# ExitStack: dynamic number of context managers
+with ExitStack() as stack:
+    files = [stack.enter_context(open(f)) for f in file_list]
+    # All files closed on exit
+```
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 1.6.1 — pickle Is Not Safe
+
+Never unpickle data from untrusted sources. `pickle.loads()` can execute arbitrary code. Use `json` for data interchange.
+
+### Gotcha 1.6.2 — os.path vs pathlib
+
+Don't mix them. Use `pathlib` exclusively in new code. `os.path.join()` returns strings; `Path / "sub"` returns Path objects with methods.
+
+---
+
+## 🧮 7. Hands-On Lab
+
+```bash
+python _practice/scripts/1.6_stdlib_tour.py --demo
+```
+
+Explores stdlib modules interactively, benchmarks itertools vs naive loops, and generates a report of your Python installation's available modules.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+- Previous: [08.5 - Testing, Debugging & Logging](08.5---Testing,-Debugging-&-Logging)
+- Next: [08.7 - Shell, Terminal & Cross-Platform CLI](08.7---Shell,-Terminal-&-Cross-Platform-CLI)
+- Existing: [Python File IO Essentials](Python-File-IO-Essentials), [Working with APIs in Python](Working-with-APIs-in-Python)
+- [Python Module of the Week (PyMOTW-3)](https://pymotw.com/3/)
+- [Python stdlib docs](https://docs.python.org/3/library/)
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — pathlib vs os.path: Complete Migration Guide
+
+**Problem:** Migrate a file-processing utility from `os.path` to `pathlib`, covering every common operation. Show the exact equivalents, demonstrate where `pathlib` is superior, and identify the few cases where `os.path` is still needed.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: The os.path Legacy Code
+
+```python
+import os
+import os.path
+import shutil
+import glob as glob_module
+
+def process_project_legacy(project_dir: str) -> dict:
+    """Legacy code using os.path everywhere."""
+    results = {}
+    
+    # Join paths
+    src_dir = os.path.join(project_dir, "src")
+    config_file = os.path.join(project_dir, "config", "settings.yaml")
+    
+    # Check existence
+    if not os.path.exists(src_dir):
+        os.makedirs(src_dir)  # Create with parents
+    
+    # Get file info
+    if os.path.isfile(config_file):
+        size = os.path.getsize(config_file)
+        mtime = os.path.getmtime(config_file)
+        results["config_size"] = size
+    
+    # Glob for Python files
+    py_files = glob_module.glob(os.path.join(src_dir, "**", "*.py"), recursive=True)
+    
+    # Path manipulation
+    for f in py_files:
+        basename = os.path.basename(f)           # "module.py"
+        stem = os.path.splitext(basename)[0]     # "module"
+        ext = os.path.splitext(basename)[1]      # ".py"
+        parent = os.path.dirname(f)              # "/path/to/src/pkg"
+        relative = os.path.relpath(f, project_dir)  # "src/pkg/module.py"
+        absolute = os.path.abspath(f)
+        
+    # Read file
+    with open(config_file, "r") as fh:
+        content = fh.read()
+    
+    # Rename/move
+    old_path = os.path.join(src_dir, "old_name.py")
+    new_path = os.path.join(src_dir, "new_name.py")
+    if os.path.exists(old_path):
+        os.rename(old_path, new_path)
+    
+    return results
+```
+
+#### Step 2: The pathlib Migration
+
+```python
+from pathlib import Path
+
+def process_project_modern(project_dir: str | Path) -> dict:
+    """Modern code using pathlib — cleaner, more readable, type-safe."""
+    project = Path(project_dir)  # Convert string to Path object
+    results = {}
+    
+    # Join paths — use / operator (overloaded __truediv__)
+    src_dir = project / "src"
+    config_file = project / "config" / "settings.yaml"
+    
+    # Check existence and create
+    src_dir.mkdir(parents=True, exist_ok=True)  # Replaces os.makedirs
+    
+    # Get file info
+    if config_file.is_file():
+        stat = config_file.stat()
+        results["config_size"] = stat.st_size
+        results["config_mtime"] = stat.st_mtime
+    
+    # Glob for Python files (built-in, no import needed)
+    py_files = list(src_dir.rglob("*.py"))  # rglob = recursive glob
+    
+    # Path manipulation — all are properties/methods on Path
+    for f in py_files:
+        basename = f.name          # "module.py"
+        stem = f.stem              # "module"
+        ext = f.suffix             # ".py"
+        suffixes = f.suffixes      # [".tar", ".gz"] for "archive.tar.gz"
+        parent = f.parent          # Path("/path/to/src/pkg")
+        relative = f.relative_to(project)  # Path("src/pkg/module.py")
+        absolute = f.resolve()     # Resolves symlinks too
+        
+    # Read file — one-liner methods
+    content = config_file.read_text(encoding="utf-8")
+    # Also: .read_bytes(), .write_text(), .write_bytes()
+    
+    # Rename/move
+    old_path = src_dir / "old_name.py"
+    new_path = src_dir / "new_name.py"
+    if old_path.exists():
+        old_path.rename(new_path)  # Returns the new Path
+    
+    return results
+```
+
+#### Step 3: Complete Equivalence Table
+
+```python
+# | os.path / os                    | pathlib equivalent              |
+# |---------------------------------|---------------------------------|
+# | os.path.join(a, b)              | Path(a) / b                    |
+# | os.path.exists(p)               | Path(p).exists()                |
+# | os.path.isfile(p)               | Path(p).is_file()               |
+# | os.path.isdir(p)                | Path(p).is_dir()                |
+# | os.path.basename(p)             | Path(p).name                    |
+# | os.path.dirname(p)              | Path(p).parent                  |
+# | os.path.splitext(p)             | Path(p).stem, Path(p).suffix    |
+# | os.path.abspath(p)              | Path(p).resolve()               |
+# | os.path.relpath(p, base)        | Path(p).relative_to(base)       |
+# | os.path.expanduser("~")         | Path.home()                     |
+# | os.path.getsize(p)              | Path(p).stat().st_size          |
+# | os.getcwd()                     | Path.cwd()                      |
+# | os.makedirs(p, exist_ok=True)   | Path(p).mkdir(parents=True, exist_ok=True) |
+# | os.listdir(p)                   | list(Path(p).iterdir())         |
+# | os.remove(p)                    | Path(p).unlink()                |
+# | os.rmdir(p)                     | Path(p).rmdir()                 |
+# | shutil.rmtree(p)                | shutil.rmtree(p) (no pathlib)   |
+# | glob.glob("**/*.py")            | Path(".").rglob("*.py")         |
+# | open(p, "r")                    | Path(p).open("r") or .read_text() |
+# | os.rename(old, new)             | Path(old).rename(new)           |
+# | os.path.samefile(a, b)          | Path(a).samefile(b)             |
+```
+
+#### Step 4: Where os.path Is Still Needed
+
+```python
+# 1. shutil operations (rmtree, copytree, move) — accept Path but live in shutil
+import shutil
+shutil.rmtree(Path("build/"))  # Works — shutil accepts Path objects
+
+# 2. os.walk — no pathlib equivalent (but rglob covers most cases)
+# For complex directory traversal with skip logic:
+for root, dirs, files in os.walk(project):
+    dirs[:] = [d for d in dirs if d != "__pycache__"]  # Prune in-place
+    # ... pathlib can't do this pruning trick
+
+# 3. File descriptor operations (os.open, os.read with flags)
+# Low-level I/O that needs O_NONBLOCK, O_CREAT, etc.
+
+# 4. os.path.commonpath / os.path.commonprefix
+# No direct pathlib equivalent (but easy to implement)
+```
+
+#### Step 5: Performance Note
+
+```python
+# pathlib creates Path objects for every operation — slight overhead.
+# For processing millions of paths in a tight loop:
+import timeit
+
+paths = [f"/data/file_{i}.txt" for i in range(100_000)]
+
+# os.path: ~15ms (string operations, no object creation)
+timeit.timeit(lambda: [os.path.basename(p) for p in paths], number=10)
+
+# pathlib: ~45ms (creates Path objects)
+timeit.timeit(lambda: [Path(p).name for p in paths], number=10)
+
+# For 99% of code, the difference is irrelevant.
+# Only optimize if profiling shows path manipulation as a bottleneck.
+```
+
+**Final Answer:**
+
+```python
+# Migration strategy:
+# 1. New code: Always use pathlib
+# 2. Existing code: Migrate when touching the file (boy scout rule)
+# 3. Accept both: def func(path: str | Path) → Path(path) at entry
+# 4. Keep os.path for: os.walk with pruning, millions of paths in hot loops
+# 5. Type hints: Use Path in signatures, not str
+```
+
+</details>
+
+### Example 9.2 — concurrent.futures Patterns: Robust Parallel Execution
+
+**Problem:** Build a production-grade parallel web scraper using `concurrent.futures` that handles: timeouts per task, graceful shutdown on Ctrl+C, progress reporting, retry logic, and result ordering.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Basic Pattern — ThreadPoolExecutor with as_completed
+
+```python
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    ProcessPoolExecutor,
+    as_completed,
+    Future,
+    TimeoutError as FuturesTimeoutError,
+)
+import time
+import signal
+import sys
+from dataclasses import dataclass
+from typing import Callable, TypeVar, Generic
+
+T = TypeVar("T")
+
+
+@dataclass
+class TaskResult(Generic[T]):
+    """Wrapper for task results with metadata."""
+    url: str
+    result: T | None
+    error: Exception | None
+    duration: float
+    attempts: int
+
+    @property
+    def success(self) -> bool:
+        return self.error is None
+
+
+def fetch_url(url: str, timeout: float = 10.0) -> str:
+    """Simulate fetching a URL (replace with httpx in production)."""
+    import urllib.request
+    with urllib.request.urlopen(url, timeout=timeout) as resp:
+        return resp.read().decode("utf-8")[:1000]
+```
+
+#### Step 2: Production Pattern with Retry and Progress
+
+```python
+def parallel_fetch(
+    urls: list[str],
+    max_workers: int = 10,
+    timeout_per_task: float = 30.0,
+    max_retries: int = 3,
+    retry_delay: float = 08.0,
+) -> list[TaskResult[str]]:
+    """
+    Fetch URLs in parallel with:
+    - Per-task timeout
+    - Retry with exponential backoff
+    - Progress reporting
+    - Graceful Ctrl+C handling
+    - Ordered results (same order as input)
+    """
+    results: dict[str, TaskResult[str]] = {}
+    shutdown_requested = False
+
+    def _fetch_with_retry(url: str) -> TaskResult[str]:
+        """Fetch a single URL with retry logic."""
+        start = time.perf_counter()
+        last_error = None
+
+        for attempt in range(1, max_retries + 1):
+            if shutdown_requested:
+                return TaskResult(url, None, InterruptedError("shutdown"), 0, attempt)
+            try:
+                content = fetch_url(url, timeout=timeout_per_task)
+                duration = time.perf_counter() - start
+                return TaskResult(url, content, None, duration, attempt)
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries:
+                    time.sleep(retry_delay * (2 ** (attempt - 1)))  # Exponential backoff
+
+        duration = time.perf_counter() - start
+        return TaskResult(url, None, last_error, duration, max_retries)
+
+    # Graceful shutdown handler
+    original_handler = signal.getsignal(signal.SIGINT)
+
+    def shutdown_handler(signum, frame):
+        nonlocal shutdown_requested
+        shutdown_requested = True
+        print("\n⚠️ Shutdown requested — waiting for active tasks...")
+
+    signal.signal(signal.SIGINT, shutdown_handler)
+
+    try:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks — returns Future objects
+            future_to_url: dict[Future, str] = {
+                executor.submit(_fetch_with_retry, url): url
+                for url in urls
+            }
+
+            completed = 0
+            total = len(urls)
+
+            # Process results as they complete (not in submission order)
+            for future in as_completed(future_to_url):
+                url = future_to_url[future]
+                try:
+                    result = future.result(timeout=timeout_per_task + 5)
+                    results[url] = result
+                except Exception as e:
+                    results[url] = TaskResult(url, None, e, 0, 0)
+
+                completed += 1
+                status = "✅" if results[url].success else "❌"
+                print(f"  [{completed}/{total}] {status} {url[:50]}")
+
+                if shutdown_requested:
+                    # Cancel pending futures
+                    for f in future_to_url:
+                        f.cancel()
+                    break
+
+    finally:
+        signal.signal(signal.SIGINT, original_handler)
+
+    # Return in original order
+    return [results.get(url, TaskResult(url, None, None, 0, 0)) for url in urls]
+```
+
+#### Step 3: ProcessPoolExecutor for CPU-Bound Work
+
+```python
+def parallel_cpu_work(
+    items: list[dict],
+    process_func: Callable,
+    max_workers: int | None = None,  # Defaults to CPU count
+) -> list:
+    """
+    Process CPU-bound work in parallel using processes.
+    
+    Key differences from ThreadPoolExecutor:
+    - Each worker is a separate process (bypasses GIL)
+    - Arguments must be picklable (no lambdas, no open files)
+    - Higher startup cost (~50ms per process)
+    - Use for: image processing, data transformation, ML inference
+    """
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # executor.map preserves order (unlike as_completed)
+        results = list(executor.map(
+            process_func,
+            items,
+            timeout=60,  # Total timeout for all tasks
+            chunksize=max(1, len(items) // (max_workers or 4)),  # Reduce IPC
+        ))
+    return results
+```
+
+**Final Answer:**
+
+```python
+# concurrent.futures decision matrix:
+#
+# ThreadPoolExecutor:
+#   - I/O-bound work (HTTP requests, file I/O, database queries)
+#   - Shared memory (can share objects between tasks)
+#   - Low overhead (~100μs per task)
+#
+# ProcessPoolExecutor:
+#   - CPU-bound work (image processing, data crunching)
+#   - Bypasses GIL (true parallelism)
+#   - Higher overhead (~50ms startup, pickle serialization)
+#
+# Key patterns:
+#   - as_completed(): Process results as they arrive (fastest overall)
+#   - executor.map(): Preserve input order (simpler API)
+#   - future.result(timeout=N): Per-task timeout
+#   - future.cancel(): Cancel pending work on shutdown
+```
+
+</details>
+
+### Example 9.3 — functools Deep Dive: cache, lru_cache, and Custom Memoization
+
+**Problem:** Compare `functools.cache`, `functools.lru_cache`, and a custom memoization decorator. Show when each is appropriate, demonstrate cache invalidation strategies, and build a thread-safe TTL cache.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: functools.cache vs lru_cache
+
+```python
+import functools
+import time
+from typing import Any
+
+# functools.cache (Python 3.9+) — unbounded cache
+@functools.cache
+def fibonacci_cached(n: int) -> int:
+    """Unbounded cache — stores ALL results forever."""
+    if n < 2:
+        return n
+    return fibonacci_cached(n - 1) + fibonacci_cached(n - 2)
+
+# functools.lru_cache — bounded cache with LRU eviction
+@functools.lru_cache(maxsize=128)
+def fibonacci_lru(n: int) -> int:
+    """Bounded cache — evicts least recently used when full."""
+    if n < 2:
+        return n
+    return fibonacci_lru(n - 1) + fibonacci_lru(n - 2)
+
+# Key differences:
+# | Feature          | cache          | lru_cache(maxsize=N) |
+# |------------------|----------------|----------------------|
+# | Memory           | Unbounded      | Bounded (N entries)  |
+# | Eviction         | Never          | LRU                  |
+# | Thread-safe      | Yes (lock)     | Yes (lock)           |
+# | cache_info()     | Yes            | Yes                  |
+# | cache_clear()    | Yes            | Yes                  |
+# | Typed (1 vs 08.0) | No             | typed=True option    |
+# | Use case         | Pure functions | Repeated calls       |
+#                    | with finite    | with bounded         |
+#                    | input space    | working set          |
+```
+
+#### Step 2: Custom TTL Cache with Thread Safety
+
+```python
+import threading
+from collections import OrderedDict
+from functools import wraps
+
+
+def ttl_cache(maxsize: int = 128, ttl: float = 60.0):
+    """
+    Thread-safe LRU cache with time-to-live expiration.
+    
+    - Entries expire after `ttl` seconds
+    - LRU eviction when cache exceeds `maxsize`
+    - Thread-safe via threading.Lock
+    """
+    def decorator(func):
+        cache: OrderedDict[Any, tuple[Any, float]] = OrderedDict()
+        lock = threading.Lock()
+        hits = 0
+        misses = 0
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal hits, misses
+            # Create hashable key from args + kwargs
+            key = (args, tuple(sorted(kwargs.items())))
+            now = time.time()
+
+            with lock:
+                if key in cache:
+                    value, timestamp = cache[key]
+                    if now - timestamp < ttl:
+                        # Cache hit — move to end (most recently used)
+                        cache.move_to_end(key)
+                        hits += 1
+                        return value
+                    else:
+                        # Expired — remove
+                        del cache[key]
+
+            # Cache miss — compute value (outside lock for concurrency)
+            misses += 1
+            result = func(*args, **kwargs)
+
+            with lock:
+                # Evict LRU if at capacity
+                while len(cache) >= maxsize:
+                    cache.popitem(last=False)
+                cache[key] = (result, time.time())
+
+            return result
+
+        def cache_info():
+            with lock:
+                return {
+                    "hits": hits,
+                    "misses": misses,
+                    "size": len(cache),
+                    "maxsize": maxsize,
+                    "ttl": ttl,
+                }
+
+        def cache_clear():
+            nonlocal hits, misses
+            with lock:
+                cache.clear()
+                hits = misses = 0
+
+        wrapper.cache_info = cache_info
+        wrapper.cache_clear = cache_clear
+        return wrapper
+
+    return decorator
+
+
+# Usage:
+@ttl_cache(maxsize=100, ttl=30.0)
+def get_user_profile(user_id: int) -> dict:
+    """Expensive database/API call — cache for 30 seconds."""
+    # Simulate slow call
+    time.sleep(0.5)
+    return {"id": user_id, "name": f"User {user_id}"}
+
+# First call: 500ms (cache miss)
+profile = get_user_profile(42)
+
+# Second call: <1ms (cache hit)
+profile = get_user_profile(42)
+
+# After 30 seconds: 500ms again (expired, re-fetched)
+print(get_user_profile.cache_info())
+# {'hits': 1, 'misses': 1, 'size': 1, 'maxsize': 100, 'ttl': 30.0}
+```
+
+#### Step 3: Cache Invalidation Patterns
+
+```python
+# Pattern 1: Manual invalidation via cache_clear()
+@functools.lru_cache(maxsize=256)
+def get_config(key: str) -> str:
+    """Cache config values. Clear on config reload."""
+    return load_from_database(key)
+
+def reload_config():
+    """Called when config changes."""
+    get_config.cache_clear()  # Invalidate all entries
+
+
+# Pattern 2: Key-based invalidation (custom)
+class SelectiveCache:
+    """Cache with per-key invalidation."""
+    
+    def __init__(self):
+        self._cache: dict[str, Any] = {}
+        self._lock = threading.Lock()
+    
+    def get_or_compute(self, key: str, compute_func: Callable) -> Any:
+        with self._lock:
+            if key in self._cache:
+                return self._cache[key]
+        
+        value = compute_func()
+        with self._lock:
+            self._cache[key] = value
+        return value
+    
+    def invalidate(self, key: str) -> None:
+        """Remove a specific key."""
+        with self._lock:
+            self._cache.pop(key, None)
+    
+    def invalidate_pattern(self, prefix: str) -> int:
+        """Remove all keys matching a prefix."""
+        with self._lock:
+            keys_to_remove = [k for k in self._cache if k.startswith(prefix)]
+            for k in keys_to_remove:
+                del self._cache[k]
+            return len(keys_to_remove)
+```
+
+**Final Answer:**
+
+```python
+# Memoization decision tree:
+#
+# Pure function, finite inputs → functools.cache (unbounded, simplest)
+# Pure function, large input space → functools.lru_cache(maxsize=N)
+# Need TTL expiration → Custom ttl_cache or cachetools library
+# Need per-key invalidation → Custom cache class
+# Need distributed cache → Redis/Memcached (not in-process)
+#
+# NEVER cache:
+# - Functions with side effects
+# - Functions reading mutable state (time, random, database)
+# - Functions with unhashable arguments (unless you handle key creation)
+```
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 10.1 functools.cache vs lru_cache vs Custom Memoization — Internal Implementation
+
+**How lru_cache Works Internally (CPython):**
+
+CPython implements `lru_cache` in C (`_functoolsmodule.c`) for performance. The internal data structure is a **doubly-linked list** (for O(1) LRU eviction) combined with a **hash table** (for O(1) lookup):
+
+```python
+# Conceptual internal structure:
+# 
+# hash_table: dict[key, node]
+# linked_list: head ←→ node1 ←→ node2 ←→ ... ←→ tail
+#                      (LRU)                      (MRU)
+#
+# On cache hit:
+#   1. Find node via hash_table[key]  — O(1)
+#   2. Move node to tail (most recently used) — O(1) pointer swap
+#   3. Return node.value
+#
+# On cache miss:
+#   1. Compute value
+#   2. If at capacity: remove head (LRU), delete from hash_table
+#   3. Create new node at tail, add to hash_table
+#
+# Thread safety: a single threading.Lock protects all operations
+# This means lru_cache has lock contention under high concurrency
+```
+
+**The `typed` Parameter:**
+
+```python
+@functools.lru_cache(maxsize=128, typed=True)
+def compute(x):
+    return x * 2
+
+# Without typed=True: compute(1) and compute(08.0) share cache entry
+# With typed=True: they're separate entries (int vs float)
+# This matters for functions where type affects behavior
+```
+
+**Memory Overhead per Entry:**
+
+Each cached entry costs approximately:
+- Key tuple: 56 bytes (for single-arg) to 200+ bytes (multi-arg)
+- Linked list node: 64 bytes (prev/next pointers, key ref, value ref)
+- Hash table entry: 72 bytes (CPython dict overhead)
+- **Total: ~200 bytes per entry** (plus the cached value itself)
+
+For `maxsize=10000`, the cache infrastructure alone costs ~2 MB before storing any values.
+
+### 10.2 The itertools Module — Combinatorial Explosion and Lazy Evaluation
+
+`itertools` provides memory-efficient tools for working with iterators. The key insight: these functions produce items **one at a time** (lazy evaluation), so even infinite sequences use O(1) memory.
+
+**The Three Categories:**
+
+1. **Infinite iterators:** `count()`, `cycle()`, `repeat()`
+2. **Terminating iterators:** `chain()`, `compress()`, `islice()`, `groupby()`, `starmap()`
+3. **Combinatorial iterators:** `product()`, `permutations()`, `combinations()`
+
+**Combinatorial Explosion Warning:**
+
+```python
+from itertools import product, permutations, combinations
+import math
+
+# product: n^k elements (Cartesian product)
+# For 5 options × 5 positions: 5^5 = 3,125 combinations
+list(product(range(5), repeat=5))  # 3,125 tuples
+
+# permutations: n! / (n-r)! elements
+# For 10 items, choose 5: 10! / 5! = 30,240
+len(list(permutations(range(10), 5)))  # 30,240
+
+# combinations: n! / (r! × (n-r)!) elements
+# For 52 cards, choose 5: 2,598,960 poker hands
+math.comb(52, 5)  # 2,598,960
+
+# DANGER: permutations(range(20)) = 20! = 2.4 × 10^18 elements
+# This would take millions of years to iterate!
+# Always compute the size BEFORE iterating:
+n, r = 20, 20
+print(f"permutations({n}, {r}) = {math.perm(n, r):,} elements")
+```
+
+**The `groupby` Gotcha:**
+
+```python
+from itertools import groupby
+
+# groupby requires SORTED input (groups consecutive equal elements)
+data = [("a", 1), ("b", 2), ("a", 3), ("b", 4)]
+
+# WRONG — data not sorted by key:
+for key, group in groupby(data, key=lambda x: x[0]):
+    print(key, list(group))
+# Output: a [(a,1)], b [(b,2)], a [(a,3)], b [(b,4)]  — 4 groups!
+
+# CORRECT — sort first:
+data_sorted = sorted(data, key=lambda x: x[0])
+for key, group in groupby(data_sorted, key=lambda x: x[0]):
+    print(key, list(group))
+# Output: a [(a,1),(a,3)], b [(b,2),(b,4)]  — 2 groups ✓
+```
+
+**Recipe: Chunked Iteration (not in stdlib but commonly needed):**
+
+```python
+from itertools import islice
+from typing import Iterator, TypeVar
+
+T = TypeVar("T")
+
+def chunked(iterable: Iterator[T], size: int) -> Iterator[list[T]]:
+    """
+    Split an iterator into chunks of `size` elements.
+    Last chunk may be smaller. O(1) memory.
+    
+    >>> list(chunked(range(7), 3))
+    [0, 1, 2], [3, 4, 5], [6](0,-1,-2],-[3,-4,-5],-[6)
+    """
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, size))
+        if not chunk:
+            break
+        yield chunk
+
+# Use case: batch database inserts
+for batch in chunked(million_records, size=1000):
+    db.bulk_insert(batch)  # Insert 1000 at a time
+```
+
+---

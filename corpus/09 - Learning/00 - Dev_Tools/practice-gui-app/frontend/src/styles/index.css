@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #30363d #0d1117;
+  }
+}
+
+/* Prose styling for chapter content */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-gh-text font-semibold mt-6 mb-3;
+}
+.prose h1 { @apply text-2xl; }
+.prose h2 { @apply text-xl; }
+.prose h3 { @apply text-lg; }
+.prose p { @apply mb-4 leading-relaxed; }
+.prose ul, .prose ol { @apply mb-4 pl-6; }
+.prose li { @apply mb-1; }
+.prose blockquote {
+  @apply border-l-4 border-gh-accent pl-4 italic text-gh-muted my-4;
+}
+.prose a { @apply text-gh-accent hover:underline; }
+.prose hr { @apply border-gh-border my-6; }
+.prose table {
+  @apply w-full border-collapse my-4;
+}
+.prose th, .prose td {
+  @apply border border-gh-border px-3 py-2 text-sm;
+}
+.prose th { @apply bg-gh-panel font-semibold; }
+
+/* Code blocks */
+.prose pre {
+  @apply bg-gh-panel border border-gh-border rounded-lg p-4 overflow-x-auto my-4 font-mono text-sm;
+}
+.prose code {
+  @apply bg-gh-panel px-1.5 py-0.5 rounded text-sm font-mono;
+}
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Details/spoiler blocks */
+.prose details {
+  @apply border border-gh-border rounded-lg my-4 overflow-hidden;
+}
+.prose details summary {
+  @apply px-4 py-3 cursor-pointer font-semibold bg-gh-panel hover:bg-gh-border/30 select-none;
+}
+.prose details[open] summary {
+  @apply border-b border-gh-border;
+}
+.prose details > :not(summary) {
+  @apply px-4 py-3;
+}
+
+/* KaTeX overrides for dark mode */
+.katex { color: #c9d1d9; }

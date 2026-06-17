@@ -1,0 +1,168 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title       { font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; fill: var(--text-normal, #c9d1d9); }
+    .subtitle    { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .section-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    
+    /* Left Panel Styles */
+    .info-box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .info-title  { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    .info-text   { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .info-accent { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+
+    /* Grid Styles */
+    .cell-bg     { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 0.5; rx: 4; opacity: 0.4; }
+    .cell-bg-out { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 0.5; rx: 4; opacity: 0.15; }
+    .pronoun-lbl { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; fill: var(--text-muted, #8b949e); }
+    .verb-txt    { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .stem-chg    { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    .regular-chg { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <!-- Title -->
+  <text x="30" y="35" class="title">SPANISH PRESENT CONJUGATION &amp; "BOOT" VERBS</text>
+  <text x="30" y="50" class="subtitle">Visualizing stem-changing patterns: the boot boundary isolates Nosotros and Vosotros</text>
+
+  <!-- ================= LEFT COLUMN: VERB STEM RULE GUIDE ================= -->
+  <text x="30" y="85" class="section-lbl">1. THE PRESENT STEM-CHANGING RULES</text>
+  <g transform="translate(30, 95)">
+    <rect x="0" y="0" width="230" height="290" class="info-box" />
+
+    <!-- Intro -->
+    <text x="15" y="25" class="info-title" style="font-size: 12px;">The "Boot Verb" Mechanics</text>
+    <text x="15" y="45" class="info-text">Stem-changing verbs alter their stem vowel in all</text>
+    <text x="15" y="58" class="info-text">singular forms and the 3rd person plural.</text>
+    <text x="15" y="75" class="info-accent">Nosotros &amp; Vosotros NEVER change stem.</text>
+
+    <!-- Divider -->
+    <line x1="15" y1="88" x2="215" y2="88" stroke="var(--text-muted, #8b949e)" stroke-width="0.8" opacity="0.3"/>
+
+    <!-- Rule 1: E -> IE -->
+    <g transform="translate(15, 100)">
+      <rect x="0" y="0" width="200" height="40" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.5"/>
+      <text x="10" y="15" class="info-title" style="font-size: 10px;">TYPE 1: E → IE (High Frequency)</text>
+      <text x="10" y="30" class="info-text">querer → qu<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ie</tspan>ro  |  pensar → p<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ie</tspan>nso  |  sentir → s<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ie</tspan>nto</text>
+    </g>
+
+    <!-- Rule 2: O -> UE -->
+    <g transform="translate(15, 150)">
+      <rect x="0" y="0" width="200" height="40" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.5"/>
+      <text x="10" y="15" class="info-title" style="font-size: 10px;">TYPE 2: O → UE</text>
+      <text x="10" y="30" class="info-text">poder → p<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ue</tspan>do  |  dormir → d<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ue</tspan>rmo  |  volver → v<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">ue</tspan>lvo</text>
+    </g>
+
+    <!-- Rule 3: E -> I -->
+    <g transform="translate(15, 200)">
+      <rect x="0" y="0" width="200" height="40" rx="4" fill="var(--background-primary, #0d1117)" opacity="0.5"/>
+      <text x="10" y="15" class="info-title" style="font-size: 10px;">TYPE 3: E → I (-IR Verbs Only)</text>
+      <text x="10" y="30" class="info-text">pedir → p<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">i</tspan>do  |  decir → d<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">i</tspan>go  |  servir → s<tspan fill="var(--text-accent, #79c0ff)" font-weight="bold">i</tspan>rvo</text>
+    </g>
+
+    <!-- Tip box -->
+    <g transform="translate(15, 250)">
+      <text x="0" y="12" class="info-text" style="font-style: italic; fill: var(--text-muted, #8b949e);">Tip: Visualizing the conjugation grid as a boot</text>
+      <text x="0" y="25" class="info-text" style="font-style: italic; fill: var(--text-muted, #8b949e);">shows exactly which verb forms undergo changes.</text>
+    </g>
+  </g>
+
+  <!-- ================= RIGHT COLUMN: CONJUGATION MATRIX ================= -->
+  <text x="285" y="85" class="section-lbl">2. CONJUGATION MATRIX (Example: QUERER)</text>
+  
+  <g transform="translate(0, 5)">
+    <!-- GRID CELL BACKINGS -->
+    <!-- Singular (Yo, Tú, Él) - INSIDE BOOT -->
+    <rect x="285" y="90" width="140" height="70" class="cell-bg" />
+    <rect x="285" y="170" width="140" height="70" class="cell-bg" />
+    <rect x="285" y="250" width="140" height="70" class="cell-bg" />
+
+    <!-- Plural (Nosotros, Vosotros) - OUTSIDE BOOT -->
+    <rect x="445" y="90" width="140" height="70" class="cell-bg-out" />
+    <rect x="445" y="170" width="140" height="70" class="cell-bg-out" />
+    
+    <!-- Plural (Ellos/Uds) - INSIDE BOOT -->
+    <rect x="445" y="250" width="140" height="70" class="cell-bg" />
+
+    <!-- ================= THE GLOWING BOOT PATH ================= -->
+    <path d="M 278 80 
+             L 432 80 
+             C 438 80, 438 90, 438 95 
+             L 438 235 
+             C 438 242, 444 242, 450 242 
+             L 590 242 
+             C 596 242, 598 248, 598 255 
+             L 598 322 
+             C 598 327, 592 327, 580 327 
+             L 288 327 
+             C 278 327, 278 322, 278 315 Z" 
+          fill="var(--interactive-accent, #58a6ff)" fill-opacity="0.06" 
+          stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5" stroke-dasharray="6 3">
+      <animate attributeName="stroke-dashoffset" values="0;36" dur="5s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Legend for the Boot outline -->
+    <text x="360" y="342" class="info-title" style="font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle;">STEM VOWEL SHIFTS INSIDE THE BOOT</text>
+
+    <!-- CELL CONTENTS -->
+    <!-- Yo (Inside Boot) -->
+    <g transform="translate(285, 90)">
+      <text x="10" y="20" class="pronoun-lbl">yo (1st Sg)</text>
+      <!-- qu - ie - ro -->
+      <text x="70" y="45" class="verb-txt">
+        qu<tspan class="stem-chg">ie
+          <animate attributeName="fill" values="var(--text-accent, #79c0ff);var(--interactive-accent, #58a6ff);var(--text-accent, #79c0ff)" dur="2s" repeatCount="indefinite" />
+        </tspan>r-o
+      </text>
+    </g>
+
+    <!-- Nosotros (Outside Boot) -->
+    <g transform="translate(445, 90)">
+      <text x="10" y="20" class="pronoun-lbl">nosotros (1st Pl)</text>
+      <!-- quer - emos (regular) -->
+      <text x="70" y="45" class="verb-txt" style="fill: var(--text-muted, #8b949e);">
+        quer-emos
+      </text>
+    </g>
+
+    <!-- Tú (Inside Boot) -->
+    <g transform="translate(285, 170)">
+      <text x="10" y="20" class="pronoun-lbl">tú (2nd Sg informal)</text>
+      <!-- qu - ie - res -->
+      <text x="70" y="45" class="verb-txt">
+        qu<tspan class="stem-chg">ie
+          <animate attributeName="fill" values="var(--text-accent, #79c0ff);var(--interactive-accent, #58a6ff);var(--text-accent, #79c0ff)" dur="2s" repeatCount="indefinite" />
+        </tspan>r-es
+      </text>
+    </g>
+
+    <!-- Vosotros (Outside Boot) -->
+    <g transform="translate(445, 170)">
+      <text x="10" y="20" class="pronoun-lbl">vosotros (2nd Pl Spain)</text>
+      <!-- quer - éis (regular) -->
+      <text x="70" y="45" class="verb-txt" style="fill: var(--text-muted, #8b949e);">
+        quer-éis
+      </text>
+    </g>
+
+    <!-- Él/Ella/Ud (Inside Boot) -->
+    <g transform="translate(285, 250)">
+      <text x="10" y="20" class="pronoun-lbl">él / ella / Ud (3rd Sg)</text>
+      <!-- qu - ie - re -->
+      <text x="70" y="45" class="verb-txt">
+        qu<tspan class="stem-chg">ie
+          <animate attributeName="fill" values="var(--text-accent, #79c0ff);var(--interactive-accent, #58a6ff);var(--text-accent, #79c0ff)" dur="2s" repeatCount="indefinite" />
+        </tspan>r-e
+      </text>
+    </g>
+
+    <!-- Ellos/Ellas/Uds (Inside Boot) -->
+    <g transform="translate(445, 250)">
+      <text x="10" y="20" class="pronoun-lbl">ellos / ellas / Uds (3rd Pl)</text>
+      <!-- qu - ie - ren -->
+      <text x="70" y="45" class="verb-txt">
+        qu<tspan class="stem-chg">ie
+          <animate attributeName="fill" values="var(--text-accent, #79c0ff);var(--interactive-accent, #58a6ff);var(--text-accent, #79c0ff)" dur="2s" repeatCount="indefinite" />
+        </tspan>r-en
+      </text>
+    </g>
+  </g>
+</svg>

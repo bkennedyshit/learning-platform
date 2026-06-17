@@ -1,0 +1,108 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sub    { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .client { fill: #1a3d1a; stroke: #51cf66; stroke-width: 1.5; }
+    .server { fill: #1a3a3d; stroke: #4dabf7; stroke-width: 1.5; }
+    .ca     { fill: #3d3a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .hs     { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#b); }
+    .hs2    { stroke: #51cf66; stroke-width: 1.5; fill: none; marker-end: url(#g); }
+    .enc    { stroke: #ffd93d; stroke-width: 1.2; stroke-dasharray: 5 3; fill: none; marker-end: url(#y); }
+  </style>
+  <defs>
+    <marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#51cf66"/></marker>
+    <marker id="y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ffd93d"/></marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">TLS 1.3 Handshake · Certificate Chain · mTLS for Service Mesh · PKI</text>
+
+  <!-- TLS 1.3 Handshake (1-RTT) left -->
+  <text x="200" y="44" class="label" text-anchor="middle" font-weight="bold">TLS 1.3 — 1-RTT Handshake</text>
+  <rect x="20" y="52" width="380" height="260" rx="3" class="box"/>
+
+  <rect x="30"  y="62" width="70" height="24" rx="4" class="client"/>
+  <text x="65"  y="78" class="label" text-anchor="middle">Client</text>
+  <rect x="320" y="62" width="70" height="24" rx="4" class="server"/>
+  <text x="355" y="78" class="label" text-anchor="middle">Server</text>
+
+  <!-- Flight 1: ClientHello -->
+  <line x1="100" y1="100" x2="320" y2="114" class="hs"/>
+  <text x="210" y="100" class="sub" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">ClientHello</text>
+  <text x="210" y="110" class="mono" text-anchor="middle">supported_versions, cipher_suites, key_share (ECDH pub key), session_ticket?</text>
+
+  <!-- Flight 2: ServerHello + Cert + Finished -->
+  <line x1="320" y1="130" x2="100" y2="145" class="hs2"/>
+  <text x="210" y="130" class="sub" text-anchor="middle" fill="#51cf66">ServerHello</text>
+  <text x="210" y="140" class="mono" text-anchor="middle">chosen cipher, key_share (server ECDH pub key)</text>
+
+  <line x1="320" y1="155" x2="100" y2="170" class="hs2"/>
+  <text x="210" y="158" class="sub" text-anchor="middle" fill="#51cf66">{EncryptedExtensions} [encrypted from here]</text>
+
+  <line x1="320" y1="175" x2="100" y2="188" class="hs2"/>
+  <text x="210" y="178" class="sub" text-anchor="middle" fill="#51cf66">{Certificate}  ←  server's X.509 cert + chain</text>
+
+  <line x1="320" y1="196" x2="100" y2="210" class="hs2"/>
+  <text x="210" y="198" class="sub" text-anchor="middle" fill="#51cf66">{CertificateVerify}  ←  sign(handshake_hash)</text>
+
+  <line x1="320" y1="218" x2="100" y2="230" class="hs2"/>
+  <text x="210" y="222" class="sub" text-anchor="middle" fill="#51cf66">{Finished}  HMAC of transcript</text>
+
+  <!-- Flight 3: Client Finished -->
+  <line x1="100" y1="244" x2="320" y2="256" class="hs"/>
+  <text x="210" y="248" class="sub" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">{Finished}  ←  client HMAC  [handshake complete — 1 RTT]</text>
+
+  <!-- Application data -->
+  <line x1="100" y1="268" x2="320" y2="268" class="enc"/>
+  <text x="210" y="282" class="sub" text-anchor="middle" fill="#ffd93d">[Application Data — AEAD encrypted]</text>
+
+  <!-- Key derivation note -->
+  <text x="30" y="300" class="mono">Key schedule: ECDHE shared secret → HKDF-Extract → Handshake/App traffic keys</text>
+  <text x="30" y="312" class="mono">Cipher: TLS_AES_128_GCM_SHA256 or TLS_CHACHA20_POLY1305_SHA256</text>
+
+  <!-- Certificate chain right -->
+  <text x="560" y="44" class="label" text-anchor="middle" font-weight="bold">Certificate Chain &amp; mTLS</text>
+  <rect x="410" y="52" width="290" height="330" rx="3" class="box"/>
+
+  <!-- PKI chain -->
+  <rect x="500" y="62" width="110" height="34" rx="4" class="ca"/>
+  <text x="555" y="78" class="label" text-anchor="middle">Root CA</text>
+  <text x="555" y="90" class="sub" text-anchor="middle">self-signed · in trust store</text>
+
+  <line x1="555" y1="96" x2="555" y2="108" stroke="#ffd93d" stroke-width="1.5"/>
+
+  <rect x="500" y="108" width="110" height="34" rx="4" fill="#3d2a1a" stroke="#ffa94d" stroke-width="1.5"/>
+  <text x="555" y="124" class="label" text-anchor="middle">Intermediate CA</text>
+  <text x="555" y="136" class="sub" text-anchor="middle">signs leaf certs</text>
+
+  <line x1="555" y1="142" x2="555" y2="154" stroke="#ffa94d" stroke-width="1.5"/>
+
+  <rect x="490" y="154" width="130" height="34" rx="4" fill="#2d1a3d" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="555" y="170" class="label" text-anchor="middle">Leaf / End-Entity Cert</text>
+  <text x="555" y="182" class="sub" text-anchor="middle">CN=api.example.com · SAN</text>
+
+  <!-- Verification -->
+  <text x="420" y="208" class="sub" font-weight="bold">Verification steps:</text>
+  <text x="420" y="222" class="mono">1. Check sig(leaf) using intermediate pubkey</text>
+  <text x="420" y="234" class="mono">2. Check sig(intermediate) using root pubkey</text>
+  <text x="420" y="246" class="mono">3. Root in OS/browser trust store?</text>
+  <text x="420" y="258" class="mono">4. SAN matches hostname?</text>
+  <text x="420" y="270" class="mono">5. notBefore ≤ now ≤ notAfter?</text>
+  <text x="420" y="282" class="mono">6. OCSP / CRL: not revoked?</text>
+
+  <!-- mTLS -->
+  <rect x="420" y="294" width="264" height="56" rx="4" fill="#1a1a3d" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="552" y="312" class="label" text-anchor="middle" font-weight="bold">mTLS — Mutual TLS</text>
+  <text x="430" y="328" class="sub">Client also presents a cert  →  server verifies it</text>
+  <text x="430" y="340" class="sub">Both sides prove identity before any data flows</text>
+  <text x="430" y="352" class="sub">Used by: Istio/Linkerd sidecar mesh, internal gRPC, K8s API</text>
+
+  <!-- 0-RTT note -->
+  <rect x="20" y="318" width="380" height="52" rx="3" fill="#1a2a1a" stroke="#51cf66" stroke-width="1.2"/>
+  <text x="210" y="334" class="label" text-anchor="middle" font-weight="bold">TLS 1.3 — 0-RTT Resumption (PSK)</text>
+  <text x="30"  y="350" class="sub">Client sends early_data with ClientHello using pre-shared key from previous session</text>
+  <text x="30"  y="362" class="sub">⚠ Replay risk — only safe for idempotent GET-like requests · server opts in via max_early_data_size</text>
+</svg>

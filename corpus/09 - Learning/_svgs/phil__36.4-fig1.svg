@@ -1,0 +1,76 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.4 — Perception, Qualia &amp; Phenomenology: The Structure of Experience</text>
+  <!-- Inverted spectrum / qualia -->
+  <rect x="20" y="35" width="250" height="185" class="box" rx="4"/>
+  <text x="145" y="52" class="label" text-anchor="middle" font-weight="bold">Qualia &amp; The Inverted Spectrum</text>
+  <!-- Spectrum box person 1 -->
+  <rect x="35" y="65" width="90" height="40" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="2"/>
+  <rect x="38" y="68" width="12" height="34" fill="#ff6b6b" opacity="0.8" rx="1"/>
+  <rect x="52" y="68" width="12" height="34" fill="#ffd93d" opacity="0.8" rx="1"/>
+  <rect x="66" y="68" width="12" height="34" fill="#51cf66" opacity="0.8" rx="1"/>
+  <rect x="80" y="68" width="12" height="34" fill="var(--interactive-accent,#58a6ff)" opacity="0.8" rx="1"/>
+  <text x="80" y="118" class="sub" text-anchor="middle">Person A</text>
+  <!-- Spectrum box person 2 (inverted) -->
+  <rect x="150" y="65" width="90" height="40" fill="none" stroke="#ffd93d" stroke-width="1.2" rx="2"/>
+  <rect x="153" y="68" width="12" height="34" fill="var(--interactive-accent,#58a6ff)" opacity="0.8" rx="1"/>
+  <rect x="167" y="68" width="12" height="34" fill="#51cf66" opacity="0.8" rx="1"/>
+  <rect x="181" y="68" width="12" height="34" fill="#ffd93d" opacity="0.8" rx="1"/>
+  <rect x="195" y="68" width="12" height="34" fill="#ff6b6b" opacity="0.8" rx="1"/>
+  <text x="195" y="118" class="sub" text-anchor="middle">Person B</text>
+  <text x="145" y="138" class="sub" text-anchor="middle">Both say "red" for red —</text>
+  <text x="145" y="150" class="sub" text-anchor="middle">but experience may be inverted.</text>
+  <text x="145" y="165" class="sub" text-anchor="middle">Qualia: the redness of red,</text>
+  <text x="145" y="178" class="sub" text-anchor="middle">the painfulness of pain.</text>
+  <text x="145" y="192" class="sub" text-anchor="middle">Mary's Room: could know all</text>
+  <text x="145" y="205" class="sub" text-anchor="middle">colour physics — then sees red:</text>
+  <text x="145" y="217" class="sub" text-anchor="middle">does she learn something new?</text>
+  <!-- Phenomenology -->
+  <rect x="285" y="35" width="250" height="185" class="box" rx="4"/>
+  <text x="410" y="52" class="label" text-anchor="middle" font-weight="bold">Phenomenology</text>
+  <text x="295" y="68" class="sub" font-weight="bold">Husserl — Intentionality:</text>
+  <text x="295" y="82" class="sub">Consciousness is always consciousness</text>
+  <text x="295" y="94" class="sub">OF something. Never "naked" awareness.</text>
+  <text x="295" y="108" class="sub" font-weight="bold">Noema / Noesis:</text>
+  <text x="295" y="122" class="sub">Noesis: act of intending (mental act)</text>
+  <text x="295" y="134" class="sub">Noema: content/object of the act</text>
+  <text x="295" y="150" class="sub" font-weight="bold">Heidegger — Being-in-the-world:</text>
+  <text x="295" y="164" class="sub">Consciousness not a inner theatre</text>
+  <text x="295" y="176" class="sub">but embodied engagement w/ world</text>
+  <text x="295" y="192" class="sub" font-weight="bold">Merleau-Ponty — Embodiment:</text>
+  <text x="295" y="204" class="sub">Perception shaped by bodily capacities</text>
+  <text x="295" y="216" class="sub">The body as subject, not just object</text>
+  <!-- Perception models -->
+  <rect x="550" y="35" width="150" height="185" class="box" rx="4"/>
+  <text x="625" y="52" class="label" text-anchor="middle" font-weight="bold">Perception Models</text>
+  <text x="560" y="68" class="sub" font-weight="bold">Direct realism:</text>
+  <text x="560" y="82" class="sub">We perceive objects directly</text>
+  <text x="560" y="96" class="sub" font-weight="bold">Indirect realism:</text>
+  <text x="560" y="110" class="sub">We perceive representations</text>
+  <text x="560" y="124" class="sub">(sense-data) of objects</text>
+  <text x="560" y="138" class="sub" font-weight="bold">Idealism (Berkeley):</text>
+  <text x="560" y="152" class="sub">Objects ARE perceptions</text>
+  <text x="560" y="166" class="sub">"Esse est percipi"</text>
+  <text x="560" y="180" class="sub" font-weight="bold">Constructivism (Helmholtz):</text>
+  <text x="560" y="194" class="sub">Perception = unconscious</text>
+  <text x="560" y="208" class="sub">inference + prior knowledge</text>
+  <!-- Bottom: spectrum of theories -->
+  <rect x="20" y="235" width="680" height="168" class="box" rx="4"/>
+  <text x="360" y="252" class="label" text-anchor="middle" font-weight="bold">The Knowledge Argument, Mary's Room &amp; Phenomenal Concepts</text>
+  <text x="30" y="268" class="sub" font-weight="bold">Jackson's Knowledge Argument:</text>
+  <text x="30" y="283" class="sub">Mary is a colour scientist who has lived in a black-and-white room. She knows every physical fact about colour vision.</text>
+  <text x="30" y="298" class="sub">When she leaves and sees red for the first time — does she learn something new?</text>
+  <text x="30" y="313" class="sub">If YES → physicalism is false (there are non-physical facts: the quale of red).</text>
+  <text x="30" y="330" class="sub" font-weight="bold">Physicalist responses:</text>
+  <text x="30" y="344" class="sub">1. Ability hypothesis (Lewis/Nemirow): she gains an ability (to recognise red), not new propositional knowledge.</text>
+  <text x="30" y="358" class="sub">2. Phenomenal concepts strategy: she already knew the physical fact, but now has a new way of conceptualising it.</text>
+  <text x="30" y="372" class="sub">3. Representationalism: qualia ARE representational contents — no explanatory gap once representation is understood.</text>
+  <text x="30" y="388" class="sub">Neuroscience tie: V4 (colour processing) lesions produce achromatopsia — no experience of colour despite intact wavelength detection. This supports inverted-spectrum scenarios.</text>
+  <text x="360" y="400" class="sub" text-anchor="middle">Free texts: Jackson "Epiphenomenal Qualia" · Chalmers "Absent and Inverted Qualia" (both at consc.net) · SEP plato.stanford.edu/entries/qualia/</text>
+</svg>

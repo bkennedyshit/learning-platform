@@ -1,0 +1,84 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="qf-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .qf-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; }
+    .qf-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .qf-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .qf-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#qf-arrow); }
+    .qf-osc { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .qf-wave { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .qf-particle { fill: var(--interactive-accent, #58a6ff); animation: popPart 2s infinite alternate; }
+    @keyframes popPart { 0% { r: 0; opacity: 0; } 100% { r: 4; opacity: 1; } }
+    .qf-field-anim {
+      stroke: var(--interactive-accent, #58a6ff);
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: fieldDraw 4s linear infinite;
+    }
+    @keyframes fieldDraw {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+
+  <!-- Left: Individual oscillators -->
+  <text x="100" y="25" class="qf-accent" text-anchor="middle">Mode Decomposition</text>
+  <rect x="20" y="40" width="160" height="280" class="qf-box"/>
+  
+  <!-- Oscillator springs -->
+  <path d="M 50 80 Q 60 70 70 80 Q 80 90 90 80 Q 100 70 110 80" class="qf-osc">
+    <animate attributeName="d" values="M 50 80 Q 60 70 70 80 Q 80 90 90 80 Q 100 70 110 80; M 50 80 Q 60 60 70 80 Q 80 100 90 80 Q 100 60 110 80; M 50 80 Q 60 70 70 80 Q 80 90 90 80 Q 100 70 110 80" dur="1.5s" repeatCount="indefinite"/>
+  </path>
+  <text x="130" y="85" class="qf-label">k₁: â₁†â₁</text>
+  
+  <path d="M 50 130 Q 60 120 70 130 Q 80 140 90 130 Q 100 120 110 130" class="qf-osc">
+    <animate attributeName="d" values="M 50 130 Q 60 120 70 130 Q 80 140 90 130 Q 100 120 110 130; M 50 130 Q 60 110 70 130 Q 80 150 90 130 Q 100 110 110 130; M 50 130 Q 60 120 70 130 Q 80 140 90 130 Q 100 120 110 130" dur="1s" repeatCount="indefinite"/>
+  </path>
+  <text x="130" y="135" class="qf-label">k₂: â₂†â₂</text>
+  
+  <path d="M 50 180 Q 60 170 70 180 Q 80 190 90 180 Q 100 170 110 180" class="qf-osc">
+    <animate attributeName="d" values="M 50 180 Q 60 170 70 180 Q 80 190 90 180 Q 100 170 110 180; M 50 180 Q 60 160 70 180 Q 80 200 90 180 Q 100 160 110 180; M 50 180 Q 60 170 70 180 Q 80 190 90 180 Q 100 170 110 180" dur="0.8s" repeatCount="indefinite"/>
+  </path>
+  <text x="130" y="185" class="qf-label">k₃: â₃†â₃</text>
+  
+  <text x="100" y="230" class="qf-label" text-anchor="middle">⋮</text>
+  <text x="100" y="260" class="qf-label" text-anchor="middle">Each mode = QHO</text>
+  <text x="100" y="280" class="qf-label" text-anchor="middle">[â_k, â†_k'] = δ(k-k')</text>
+
+  <!-- Arrow -->
+  <line x1="195" y1="175" x2="240" y2="175" class="qf-arrow"/>
+  <text x="218" y="165" class="qf-accent">Σ</text>
+
+  <!-- Center: Quantum field -->
+  <rect x="250" y="40" width="200" height="280" class="qf-box" stroke="var(--interactive-accent, #58a6ff)"/>
+  <text x="350" y="70" class="qf-accent" text-anchor="middle">Quantum Field φ̂(x,t)</text>
+  
+  <!-- Animated field wave -->
+  <path d="M 270 175 Q 290 130 310 175 Q 330 220 350 175 Q 370 130 390 175 Q 410 220 430 175" class="qf-field-anim"/>
+  
+  <text x="350" y="250" class="qf-label" text-anchor="middle">φ̂ = ∫d³k/(2π)³ 1/√(2ω)</text>
+  <text x="350" y="270" class="qf-label" text-anchor="middle">× (â_k e^{-ikx} + â†_k e^{ikx})</text>
+  <text x="350" y="300" class="qf-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">Operator-valued distribution</text>
+
+  <!-- Arrow -->
+  <line x1="465" y1="175" x2="510" y2="175" class="qf-arrow"/>
+
+  <!-- Right: Fock space -->
+  <rect x="520" y="40" width="160" height="280" class="qf-box"/>
+  <text x="600" y="70" class="qf-accent" text-anchor="middle">Fock Space</text>
+  
+  <text x="600" y="110" class="qf-label" text-anchor="middle">|0⟩ vacuum</text>
+  <circle cx="600" cy="140" r="4" class="qf-particle"/>
+  <text x="600" y="160" class="qf-label" text-anchor="middle">â†_k|0⟩ = |1_k⟩</text>
+  <circle cx="585" cy="185" r="4" class="qf-particle"/>
+  <circle cx="615" cy="185" r="4" class="qf-particle"/>
+  <text x="600" y="210" class="qf-label" text-anchor="middle">â†_k â†_p|0⟩ = |1_k,1_p⟩</text>
+  
+  <text x="600" y="260" class="qf-label" text-anchor="middle">Particles = field quanta</text>
+  <text x="600" y="285" class="qf-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">N̂ = ∫d³k â†_k â_k</text>
+</svg>

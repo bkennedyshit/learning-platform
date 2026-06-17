@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <style>
+      .text { fill: var(--text-normal, #e0e0e0); font-family: sans-serif; }
+      .accent { stroke: var(--interactive-accent, #4a90e2); }
+      .orbit { stroke: var(--text-muted, #555); fill: none; stroke-width: 1.5; stroke-dasharray: 4 4; }
+      .nucleus { fill: var(--color-red, #e74c3c); }
+      .electron { fill: var(--interactive-accent, #4a90e2); }
+      .lobe-pos { fill: var(--interactive-accent, #4a90e2); opacity: 0.5; }
+      .lobe-neg { fill: var(--color-red, #e74c3c); opacity: 0.5; }
+      .axis { stroke: var(--text-muted, #555); stroke-width: 1; stroke-dasharray: 2 2; }
+    </style>
+  </defs>
+  
+  <text x="400" y="40" text-anchor="middle" font-size="24" class="text" font-weight="bold">Atomic Structure: Bohr vs Quantum Model</text>
+
+  <!-- Left: Bohr Model -->
+  <g transform="translate(200, 220)">
+    <circle cx="0" cy="0" r="8" class="nucleus" />
+    <circle cx="0" cy="0" r="50" class="orbit" />
+    <circle cx="0" cy="0" r="90" class="orbit" />
+    <circle cx="0" cy="0" r="130" class="orbit" />
+    
+    <g>
+      <circle cx="50" cy="0" r="6" class="electron" />
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="2s" repeatCount="indefinite" />
+    </g>
+    <g>
+      <circle cx="-50" cy="0" r="6" class="electron" />
+      <animateTransform attributeName="transform" type="rotate" from="180" to="540" dur="2s" repeatCount="indefinite" />
+    </g>
+    <g>
+      <circle cx="90" cy="0" r="6" class="electron" />
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
+    </g>
+    <g>
+      <circle cx="-90" cy="0" r="6" class="electron" />
+      <animateTransform attributeName="transform" type="rotate" from="180" to="540" dur="4s" repeatCount="indefinite" />
+    </g>
+    <g>
+      <circle cx="0" cy="90" r="6" class="electron" />
+      <animateTransform attributeName="transform" type="rotate" from="90" to="450" dur="4s" repeatCount="indefinite" />
+    </g>
+    
+    <text x="0" y="160" text-anchor="middle" class="text" font-size="16">Bohr Model (Particle Orbits)</text>
+  </g>
+  
+  <!-- Right: Quantum Model -->
+  <g transform="translate(600, 220)">
+    <!-- Axes -->
+    <line x1="-120" y1="0" x2="120" y2="0" class="axis" />
+    <line x1="0" y1="-120" x2="0" y2="120" class="axis" />
+    <line x1="-80" y1="-80" x2="80" y2="80" class="axis" />
+
+    <!-- 1s -->
+    <circle cx="0" cy="0" r="30" class="lobe-pos">
+       <animate attributeName="r" values="28; 32; 28" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- 2px -->
+    <path d="M 0 0 C 30 -40, 110 -40, 110 0 C 110 40, 30 40, 0 0" class="lobe-pos">
+       <animate attributeName="opacity" values="0.3; 0.6; 0.3" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 0 0 C -30 -40, -110 -40, -110 0 C -110 40, -30 40, 0 0" class="lobe-neg">
+       <animate attributeName="opacity" values="0.3; 0.6; 0.3" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <!-- 2py -->
+    <path d="M 0 0 C -40 -30, -40 -110, 0 -110 C 40 -110, 40 -30, 0 0" class="lobe-pos">
+       <animate attributeName="opacity" values="0.3; 0.6; 0.3" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 0 0 C -40 30, -40 110, 0 110 C 40 110, 40 30, 0 0" class="lobe-neg">
+       <animate attributeName="opacity" values="0.3; 0.6; 0.3" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+
+    <circle cx="0" cy="0" r="4" class="nucleus" />
+    <text x="0" y="160" text-anchor="middle" class="text" font-size="16">Quantum Model (Probability Density)</text>
+  </g>
+</svg>

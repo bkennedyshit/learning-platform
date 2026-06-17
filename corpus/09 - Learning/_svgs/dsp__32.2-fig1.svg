@@ -1,0 +1,144 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .math   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10.5px; fill: var(--interactive-accent, #58a6ff); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .panel  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.2; }
+    .axis   { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+    .wave440 { stroke: #51cf66; stroke-width: 2; fill: none; }
+    .wave880 { stroke: #ffd93d; stroke-width: 2; fill: none; }
+    .wavemix { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; }
+    .spike  { stroke: #51cf66; stroke-width: 3; fill: none; }
+    .spike2 { stroke: #ffd93d; stroke-width: 3; fill: none; }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Fourier Series &amp; Transform — Spectrum of 440 Hz + 880 Hz</text>
+
+  <!-- ===== LEFT: Fourier Series formula panel ===== -->
+  <rect x="16" y="36" width="220" height="170" rx="5" class="panel"/>
+  <text x="126" y="54" class="label" text-anchor="middle" font-weight="bold">Fourier Series</text>
+  <text x="26"  y="72" class="small">Any periodic f(t) = sum of sinusoids:</text>
+  <text x="26"  y="90" class="math">f(t) = Σ cₙ e^{j2πnt/T}</text>
+  <text x="26"  y="108" class="small">Coefficients:</text>
+  <text x="26"  y="124" class="math">cₙ = (1/T)∫ f(t)e^{-j2πnt/T} dt</text>
+  <text x="26"  y="142" class="small">Convergence (Dirichlet conditions):</text>
+  <text x="26"  y="156" class="small">• finite discontinuities</text>
+  <text x="26"  y="168" class="small">• finite number of extrema</text>
+  <text x="26"  y="180" class="small">• absolutely integrable</text>
+  <text x="26"  y="196" class="small">Gibbs phenomenon at jumps → overshoot ≈9%</text>
+
+  <!-- ===== MIDDLE: FT formula panel ===== -->
+  <rect x="250" y="36" width="220" height="170" rx="5" class="panel"/>
+  <text x="360" y="54" class="label" text-anchor="middle" font-weight="bold">Fourier Transform</text>
+  <text x="260" y="72" class="math">F(ω) = ∫₋∞^∞ f(t) e^{-jωt} dt</text>
+  <text x="260" y="90" class="math">f(t)  = (1/2π)∫ F(ω) e^{jωt} dω</text>
+  <text x="260" y="110" class="small">Key pairs (t → f domain):</text>
+  <text x="260" y="126" class="math">rect(t)   ↔  sinc(f)</text>
+  <text x="260" y="142" class="math">Gauss(t)  ↔  Gauss(f)</text>
+  <text x="260" y="158" class="math">δ(t)      ↔  1  (flat spectrum)</text>
+  <text x="260" y="174" class="math">e^{jω₀t}  ↔  δ(ω − ω₀)</text>
+  <text x="260" y="190" class="small">Parseval: ∫|f(t)|²dt = (1/2π)∫|F(ω)|²dω</text>
+
+  <!-- ===== RIGHT: Convolution theorem ===== -->
+  <rect x="484" y="36" width="220" height="170" rx="5" class="panel"/>
+  <text x="594" y="54" class="label" text-anchor="middle" font-weight="bold">Convolution Theorem</text>
+  <text x="494" y="72" class="small">Multiplication in time =</text>
+  <text x="494" y="84" class="small">   convolution in frequency:</text>
+  <text x="494" y="100" class="math">x(t)·y(t)  ↔  X(f) * Y(f)</text>
+  <text x="494" y="118" class="small">Convolution in time =</text>
+  <text x="494" y="130" class="small">   multiplication in frequency:</text>
+  <text x="494" y="146" class="math">x(t) * y(t)  ↔  X(f)·Y(f)</text>
+  <text x="494" y="164" class="small">This is why filtering = multiply in freq domain!</text>
+  <text x="494" y="178" class="small">FIR convolution O(N²) time vs O(N log N) FFT</text>
+  <text x="494" y="196" class="small">→ overlap-add algorithm uses this trick</text>
+
+  <!-- ===== BOTTOM LEFT: Time domain 440+880 ===== -->
+  <rect x="16" y="222" width="330" height="182" rx="4" class="box"/>
+  <text x="181" y="240" class="label" text-anchor="middle" font-weight="bold">Time Domain: 440 Hz + 880 Hz</text>
+
+  <!-- x-axis -->
+  <line x1="30" y1="350" x2="335" y2="350" class="axis" marker-end="url(#a2)"/>
+  <text x="338" y="354" class="small">t</text>
+  <!-- y-axis -->
+  <line x1="50" y1="390" x2="50" y2="250" class="axis" marker-end="url(#a2)"/>
+  <text x="52" y="248" class="small">x(t)</text>
+
+  <!-- 440 Hz sine wave (slower, larger amplitude) -->
+  <path d="M 50 350
+    C 72 310, 94 310, 116 350
+    C 138 390, 160 390, 182 350
+    C 204 310, 226 310, 248 350
+    C 270 390, 292 390, 314 350" class="wave440"/>
+
+  <!-- 880 Hz sine wave (faster, smaller amplitude) -->
+  <path d="M 50 350
+    C 61 330, 72 330, 83 350
+    C 94 370, 105 370, 116 350
+    C 127 330, 138 330, 149 350
+    C 160 370, 171 370, 182 350
+    C 193 330, 204 330, 215 350
+    C 226 370, 237 370, 248 350
+    C 259 330, 270 330, 281 350
+    C 292 370, 303 370, 314 350" class="wave880"/>
+
+  <!-- Mixed signal (sum) -->
+  <path d="M 50 350
+    C 61 318, 72 308, 83 336
+    C 94 368, 105 376, 116 350
+    C 127 318, 138 308, 149 336
+    C 160 368, 171 376, 182 350
+    C 193 318, 204 308, 215 336
+    C 226 368, 237 376, 248 350
+    C 259 318, 270 308, 281 336
+    C 292 368, 303 376, 314 350" class="wavemix" opacity="0.6"/>
+
+  <!-- Legend -->
+  <line x1="56"  y1="378" x2="76"  y2="378" class="wave440"/>
+  <text x="80"  y="382" class="small">440 Hz</text>
+  <line x1="120" y1="378" x2="140" y2="378" class="wave880"/>
+  <text x="144" y="382" class="small">880 Hz</text>
+  <line x1="188" y1="378" x2="208" y2="378" class="wavemix"/>
+  <text x="212" y="382" class="small">Mixed</text>
+
+  <!-- ===== BOTTOM RIGHT: Frequency domain spikes ===== -->
+  <rect x="360" y="222" width="344" height="182" rx="4" class="box"/>
+  <text x="532" y="240" class="label" text-anchor="middle" font-weight="bold">Frequency Domain: Magnitude Spectrum |X(f)|</text>
+
+  <!-- x-axis -->
+  <line x1="380" y1="360" x2="692" y2="360" class="axis" marker-end="url(#a2)"/>
+  <text x="695" y="364" class="small">f (Hz)</text>
+  <!-- y-axis -->
+  <line x1="390" y1="390" x2="390" y2="248" class="axis" marker-end="url(#a2)"/>
+  <text x="392" y="246" class="small">|X|</text>
+
+  <!-- f labels -->
+  <text x="440" y="375" class="small" text-anchor="middle">440</text>
+  <text x="540" y="375" class="small" text-anchor="middle">880</text>
+  <text x="610" y="375" class="small" text-anchor="middle">f →</text>
+
+  <!-- Frequency spikes -->
+  <line x1="440" y1="360" x2="440" y2="280" class="spike"/>
+  <circle cx="440" cy="278" r="4" fill="#51cf66"/>
+  <text x="440" y="272" class="small" text-anchor="middle" fill="#51cf66">A₄₄₀</text>
+
+  <line x1="540" y1="360" x2="540" y2="310" class="spike2"/>
+  <circle cx="540" cy="308" r="4" fill="#ffd93d"/>
+  <text x="540" y="302" class="small" text-anchor="middle" fill="#ffd93d">A₈₈₀ = A₄₄₀/2</text>
+
+  <!-- Negative freq mirror (grayed) -->
+  <line x1="440" y1="360" x2="340" y2="280" stroke="#51cf66" stroke-width="1" opacity="0.25" stroke-dasharray="3 3"/>
+  <text x="340" y="274" class="small" text-anchor="middle" fill="#51cf66" opacity="0.4">−440</text>
+
+  <!-- annotation -->
+  <text x="532" y="390" class="small" text-anchor="middle">Two pure spikes — FT reveals frequency content</text>
+  <text x="532" y="400" class="small" text-anchor="middle">Parseval: energy is conserved across domains</text>
+</svg>

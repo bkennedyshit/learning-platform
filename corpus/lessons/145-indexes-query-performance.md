@@ -1,0 +1,1039 @@
+---
+title: "14.5 — Indexes & Query Performance"
+subject: "SQL"
+catalog: advanced
+audience_tier: higher-education
+chapter: "14.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 14.5 — Indexes & Query Performance
+
+> *"The key to database performance is not faster hardware — it's avoiding unnecessary work. An index lets the database skip the 99% of data it doesn't need."* — Markus Winand, *Use The Index, Luke!*
+
+Indexes are the single most impactful tool for query performance. A missing index can turn a 5ms query into a 5-minute table scan. But indexes aren't free — they consume storage, slow writes, and the wrong index can actually make queries slower. This chapter teaches you to think like the query optimizer: understand what data structures underlie each index type, read execution plans fluently, and make informed decisions about when and where to index.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Explain B-tree structure and why it's the default index type.
+2. Choose between B-tree, hash, GIN, GiST, and BRIN indexes based on workload.
+3. Read and interpret EXPLAIN ANALYZE output to diagnose performance issues.
+4. Identify common anti-patterns (missing indexes, over-indexing, non-sargable predicates).
+5. Design composite indexes with correct column ordering.
+6. Use covering indexes (INCLUDE) to enable index-only scans.
+
+---
+
+## 🖼️ Visual Anchor — B-tree Index Structure
+
+![sql-14__fig3](sql-14__fig3.svg)
+
+---
+
+## 📚 1. Why Indexes Exist
+
+Without an index, every query requires a **sequential scan** — reading every row in the table. For a table with 10 million rows, that means reading 10 million rows even if you only need 1.
+
+An index is a **separate data structure** that maps column values to row locations (tuple IDs / ctids in PostgreSQL). It's like a book's index — instead of reading every page to find "B-tree," you look up "B-tree" in the index and jump directly to page 247.
+
+**The fundamental trade-off:**
+- Indexes speed up reads (SELECT, WHERE, JOIN, ORDER BY)
+- Indexes slow down writes (INSERT, UPDATE, DELETE must maintain the index)
+- Indexes consume disk space (often 10-30% of table size per index)
+
+---
+
+## 📚 2. Index Types
+
+### 2.1 B-tree (Default)
+
+The **B-tree** (balanced tree) is the default and most versatile index type. It supports:
+- Equality: `WHERE x = 5`
+- Range: `WHERE x > 5`, `WHERE x BETWEEN 1 AND 10`
+- Sorting: `ORDER BY x`
+- Prefix matching: `WHERE name LIKE 'Joh%'` (but NOT `LIKE '%ohn'`)
+
+**Structure:**
+- Balanced tree with $O(\log n)$ lookup
+- Internal nodes contain keys and pointers to child nodes
+- Leaf nodes contain keys and pointers to heap tuples (rows)
+- Leaf nodes are linked in a doubly-linked list (enables range scans)
+- Typical depth: 3-4 levels for millions of rows (branching factor ~200-500)
+
+```sql
+-- Create a B-tree index (default type):
+CREATE INDEX idx_emp_salary ON employees(salary);
+
+-- Composite B-tree (leftmost prefix rule applies):
+CREATE INDEX idx_emp_dept_salary ON employees(dept_id, salary);
+-- This index supports:
+--   WHERE dept_id = 5                    ✓ (uses first column)
+--   WHERE dept_id = 5 AND salary > 80k   ✓ (uses both columns)
+--   WHERE salary > 80k                   ✗ (can't skip first column!)
+--   ORDER BY dept_id, salary             ✓
+--   ORDER BY dept_id ASC, salary DESC    ✗ (mixed sort directions need separate index)
+```
+
+**Cross-link:** For B-tree implementation details (node splitting, rebalancing), see [08.13 - Algorithms & Data Structures in Python](08.13---Algorithms-&-Data-Structures-in-Python).
+
+### 2.2 Hash Index
+
+Supports **only equality** comparisons. Faster than B-tree for pure equality lookups but cannot handle ranges or sorting.
+
+```sql
+CREATE INDEX idx_emp_email_hash ON employees USING hash (email);
+
+-- Useful for: WHERE email = 'alice@example.com'
+-- Useless for: WHERE email LIKE 'alice%', ORDER BY email
+```
+
+**When to use:** Large tables where you only ever do exact-match lookups (e.g., session tokens, UUIDs). In practice, B-tree is almost always preferred because it's more versatile with minimal overhead.
+
+**PostgreSQL note:** Hash indexes became crash-safe and WAL-logged in PostgreSQL 10. Before that, they were unreliable.
+
+### 2.3 GIN (Generalized Inverted Index)
+
+Designed for **composite values** — arrays, JSONB, full-text search, trigrams. Maps each element/key to the set of rows containing it.
+
+```sql
+-- Full-text search:
+CREATE INDEX idx_articles_fts ON articles USING gin (to_tsvector('english', body));
+
+SELECT * FROM articles
+WHERE to_tsvector('english', body) @@ to_tsquery('database & optimization');
+
+-- JSONB containment:
+CREATE INDEX idx_events_data ON events USING gin (metadata jsonb_path_ops);
+
+SELECT * FROM events WHERE metadata @> '{"type": "purchase", "amount_gt": 100}';
+
+-- Array containment:
+CREATE INDEX idx_posts_tags ON posts USING gin (tags);
+
+SELECT * FROM posts WHERE tags @> ARRAY['sql', 'performance'];
+```
+
+**Trade-offs:** GIN indexes are expensive to build and update (each inserted row may add many index entries). Excellent for read-heavy workloads with complex containment queries.
+
+### 2.4 GiST (Generalized Search Tree)
+
+Supports **geometric, range, and proximity** queries. Used for PostGIS spatial data, range types, and nearest-neighbor searches.
+
+```sql
+-- Spatial index (PostGIS):
+CREATE INDEX idx_locations_geom ON locations USING gist (geom);
+
+SELECT * FROM locations
+WHERE ST_DWithin(geom, ST_MakePoint(-73.99, 40.73)::geography, 1000);  -- within 1km
+
+-- Range overlap (e.g., scheduling):
+CREATE INDEX idx_bookings_period ON bookings USING gist (
+    tsrange(start_time, end_time)
+);
+
+SELECT * FROM bookings
+WHERE tsrange(start_time, end_time) && tsrange('2026-01-01', '2026-01-31');
+
+-- Nearest-neighbor (KNN):
+SELECT * FROM locations
+ORDER BY geom <-> ST_MakePoint(-73.99, 40.73)::geometry
+LIMIT 10;
+```
+
+### 2.5 BRIN (Block Range Index)
+
+Stores **min/max values per block** of physical pages. Extremely compact (tiny index size) but only useful when data is **physically ordered** on disk (e.g., append-only time-series data).
+
+```sql
+-- Perfect for time-series data inserted in chronological order:
+CREATE INDEX idx_events_time_brin ON events USING brin (event_time);
+
+-- BRIN is tiny: a table with 100M rows might have a 100KB BRIN index
+-- vs a 2GB B-tree index. But it only helps if the data is physically sorted.
+```
+
+**When to use:** Large append-only tables (logs, events, IoT sensor data) where rows are naturally ordered by a timestamp column.
+
+### 2.6 Index Type Decision Matrix
+
+| Query Pattern | Best Index | Example |
+|---------------|-----------|---------|
+| Equality (`=`) | B-tree or Hash | `WHERE id = 42` |
+| Range (`<`, `>`, `BETWEEN`) | B-tree | `WHERE date > '2025-01-01'` |
+| Sorting (`ORDER BY`) | B-tree | `ORDER BY created_at DESC` |
+| Pattern prefix (`LIKE 'abc%'`) | B-tree | `WHERE name LIKE 'Joh%'` |
+| Full-text search | GIN | `WHERE body @@ 'query'` |
+| JSONB containment | GIN | `WHERE data @> '{...}'` |
+| Array operations | GIN | `WHERE tags @> ARRAY[...]` |
+| Geometric/spatial | GiST | `WHERE ST_DWithin(...)` |
+| Range overlap | GiST | `WHERE tsrange && tsrange` |
+| Time-series (ordered) | BRIN | `WHERE ts > '2025-01-01'` |
+
+---
+
+## 📚 3. EXPLAIN ANALYZE — Reading Execution Plans
+
+### 3.1 Basic Usage
+
+```sql
+EXPLAIN ANALYZE
+SELECT e.name, d.dept_name
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.salary > 80000
+ORDER BY e.salary DESC;
+```
+
+### 3.2 Key Plan Nodes
+
+| Node | What It Does | When Chosen |
+|------|-------------|-------------|
+| **Seq Scan** | Reads entire table | No useful index, or table is small |
+| **Index Scan** | Traverses index, fetches heap rows | Selective predicate with matching index |
+| **Index Only Scan** | Answers from index alone | All needed columns are in the index |
+| **Bitmap Index Scan** | Builds bitmap of matching pages | Medium selectivity (too many for index scan, too few for seq scan) |
+| **Bitmap Heap Scan** | Fetches pages identified by bitmap | Follows Bitmap Index Scan |
+| **Nested Loop** | For each outer row, scan inner | Small outer set, indexed inner |
+| **Hash Join** | Hash smaller table, probe with larger | Large tables, no useful sort order |
+| **Merge Join** | Merge two sorted inputs | Both inputs sorted on join key |
+| **Sort** | Sort rows | ORDER BY, or input to Merge Join |
+| **Aggregate** | Compute SUM, COUNT, etc. | GROUP BY or aggregate functions |
+| **WindowAgg** | Compute window functions | Window function in query |
+
+### 3.3 Reading Costs and Timing
+
+```
+Sort  (cost=150.20..152.70 rows=1000 width=64) (actual time=1.2..1.5 rows=950 loops=1)
+  Sort Key: salary DESC
+  Sort Method: quicksort  Memory: 100kB
+  ->  Index Scan using idx_emp_salary on employees  (cost=0.29..120.50 rows=1000 width=64) (actual time=0.02..0.8 rows=950 loops=1)
+        Index Cond: (salary > 80000)
+```
+
+- **cost=start..total:** Estimated cost in arbitrary units (sequential page reads)
+- **rows:** Estimated row count (vs actual)
+- **actual time=start..total:** Real milliseconds
+- **loops:** How many times this node executed (important for nested loops)
+- **width:** Average row size in bytes
+
+### 3.4 Diagnosing Problems
+
+**Problem 1: Seq Scan on large table with a WHERE clause**
+```
+Seq Scan on orders  (cost=0.00..250000.00 rows=100 width=48) (actual time=3200..3200 rows=95 loops=1)
+  Filter: (customer_id = 42)
+  Rows Removed by Filter: 9999905
+```
+**Fix:** Create an index on `customer_id`.
+
+**Problem 2: Index exists but not used**
+Possible causes:
+- Predicate is non-sargable (function on indexed column)
+- Statistics are stale (`ANALYZE` the table)
+- Optimizer estimates seq scan is cheaper (small table)
+- Type mismatch (comparing varchar to integer)
+
+```sql
+-- NON-SARGABLE (can't use index):
+WHERE LOWER(email) = 'alice@example.com'  -- function wraps column
+WHERE salary + bonus > 100000              -- expression on column
+WHERE EXTRACT(YEAR FROM hire_date) = 2025  -- function on column
+
+-- SARGABLE (can use index):
+WHERE email = 'alice@example.com'          -- direct comparison
+WHERE salary > 100000 - bonus              -- expression on constant side
+WHERE hire_date >= '2025-01-01' AND hire_date < '2026-01-01'  -- range
+```
+
+**Problem 3: Nested Loop with large inner table**
+```
+Nested Loop  (cost=... rows=1000000 ...) (actual time=... loops=10000)
+  ->  Seq Scan on big_table  (actual rows=10000 loops=1)
+  ->  Seq Scan on other_big_table  (actual rows=100 loops=10000)  -- 10000 full scans!
+```
+**Fix:** Add index on join column of inner table, or let optimizer choose Hash Join.
+
+---
+
+## 📚 4. Composite Indexes & Column Ordering
+
+### 4.1 The Leftmost Prefix Rule
+
+A composite index `(a, b, c)` can satisfy queries on:
+- `(a)` ✓
+- `(a, b)` ✓
+- `(a, b, c)` ✓
+- `(b)` ✗ (can't skip leading column)
+- `(a, c)` — partially (uses `a`, then scans for `c`)
+
+### 4.2 Column Order Strategy
+
+**Rule of thumb:** Put the most selective (highest cardinality) equality column first, then range columns last.
+
+```sql
+-- Query: WHERE status = 'active' AND created_at > '2025-01-01'
+-- status has 3 distinct values, created_at has millions
+
+-- GOOD: equality column first, range column second
+CREATE INDEX idx_orders_status_date ON orders(status, created_at);
+
+-- BAD: range column first (scans too many index entries)
+CREATE INDEX idx_orders_date_status ON orders(created_at, status);
+```
+
+### 4.3 Covering Indexes (INCLUDE)
+
+Add non-key columns to the index to enable **index-only scans** (no heap access):
+
+```sql
+-- Query: SELECT name, salary FROM employees WHERE dept_id = 5
+-- Without INCLUDE: index scan on dept_id, then heap fetch for name, salary
+-- With INCLUDE: index-only scan (all data in the index)
+
+CREATE INDEX idx_emp_dept_covering ON employees(dept_id) INCLUDE (name, salary);
+```
+
+The INCLUDE columns are stored in leaf nodes but not used for searching/sorting.
+
+---
+
+## 📚 5. Partial and Expression Indexes
+
+### 5.1 Partial Indexes
+
+Index only a subset of rows:
+
+```sql
+-- Only index active orders (90% of queries filter on active)
+CREATE INDEX idx_orders_active ON orders(customer_id, order_date)
+WHERE status = 'active';
+
+-- Only index non-null emails
+CREATE INDEX idx_users_email ON users(email) WHERE email IS NOT NULL;
+```
+
+Smaller index = faster lookups + less storage + faster writes.
+
+### 5.2 Expression Indexes
+
+Index the result of an expression:
+
+```sql
+-- Index for case-insensitive email lookup:
+CREATE INDEX idx_users_email_lower ON users(LOWER(email));
+
+-- Now this query uses the index:
+SELECT * FROM users WHERE LOWER(email) = 'alice@example.com';
+
+-- Index for JSONB field extraction:
+CREATE INDEX idx_events_type ON events((metadata->>'event_type'));
+```
+
+---
+
+## 📚 6. Index Maintenance
+
+### 6.1 Bloat and REINDEX
+
+Indexes accumulate dead entries from UPDATEs and DELETEs. PostgreSQL's VACUUM removes dead heap tuples but index bloat requires REINDEX:
+
+```sql
+-- Check index bloat (approximate):
+SELECT
+    schemaname, tablename, indexname,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
+FROM pg_stat_user_indexes
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- Rebuild without locking (PostgreSQL 12+):
+REINDEX INDEX CONCURRENTLY idx_emp_salary;
+```
+
+### 6.2 Statistics and ANALYZE
+
+The optimizer relies on table statistics to estimate row counts and choose plans:
+
+```sql
+-- Update statistics for a table:
+ANALYZE employees;
+
+-- Check statistics:
+SELECT attname, n_distinct, most_common_vals, histogram_bounds
+FROM pg_stats
+WHERE tablename = 'employees';
+```
+
+Stale statistics → bad plans → slow queries. Autovacuum handles this automatically, but after bulk loads, run ANALYZE manually.
+
+### 6.3 When NOT to Index
+
+- **Small tables** (< 1000 rows): Seq scan is faster than index overhead
+- **High-write, low-read tables** (audit logs): Index maintenance cost > read benefit
+- **Low-selectivity columns** (boolean, status with 3 values): Index scan reads too many rows
+- **Columns rarely in WHERE/JOIN/ORDER BY**: Wasted space
+
+---
+
+## 📚 7. Query Optimization Patterns
+
+### 14.1 Pagination
+
+```sql
+-- OFFSET-based (simple but slow for deep pages):
+SELECT * FROM products ORDER BY product_id LIMIT 20 OFFSET 10000;
+-- Must scan and discard 10000 rows!
+
+-- Keyset pagination (fast for any page depth):
+SELECT * FROM products
+WHERE product_id > 10000  -- last seen ID
+ORDER BY product_id
+LIMIT 20;
+-- Uses index scan, starts directly at the right position
+```
+
+### 14.2 Batch Processing
+
+```sql
+-- Process large table in chunks (avoid locking entire table):
+DO $$
+DECLARE
+    batch_size INT := 10000;
+    last_id BIGINT := 0;
+    affected INT;
+BEGIN
+    LOOP
+        UPDATE orders
+        SET status = 'archived'
+        WHERE order_id > last_id
+          AND order_id <= last_id + batch_size
+          AND order_date < '2020-01-01'
+          AND status = 'delivered';
+
+        GET DIAGNOSTICS affected = ROW_COUNT;
+        last_id := last_id + batch_size;
+        EXIT WHEN affected = 0 AND last_id > (SELECT MAX(order_id) FROM orders);
+        COMMIT;
+    END LOOP;
+END $$;
+```
+
+### 14.3 Avoiding N+1 Queries (Application Layer)
+
+```python
+# BAD: N+1 queries (1 query + N queries for related data)
+orders = db.execute("SELECT * FROM orders WHERE customer_id = 42")
+for order in orders:
+    items = db.execute(f"SELECT * FROM order_items WHERE order_id = {order.id}")
+
+# GOOD: Single query with JOIN
+results = db.execute("""
+    SELECT o.*, oi.*
+    FROM orders o
+    JOIN order_items oi ON o.order_id = oi.order_id
+    WHERE o.customer_id = 42
+""")
+```
+
+---
+
+## 🧪 8. EXPLAIN ANALYZE Walkthrough
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT d.dept_name, COUNT(*) AS emp_count, AVG(e.salary) AS avg_salary
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.hire_date > '2020-01-01'
+GROUP BY d.dept_name
+HAVING COUNT(*) > 5
+ORDER BY avg_salary DESC;
+```
+
+**Reading the output (bottom-up):**
+
+```
+Sort  (cost=45.20..45.45 rows=5 width=48) (actual time=0.85..0.86 rows=3 loops=1)
+  Sort Key: (avg(e.salary)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=12
+  ->  HashAggregate  (cost=44.00..44.75 rows=5 width=48) (actual time=0.80..0.82 rows=3 loops=1)
+        Group Key: d.dept_name
+        Filter: (count(*) > 5)
+        Rows Removed by Filter: 2
+        ->  Hash Join  (cost=1.25..42.00 rows=200 width=20) (actual time=0.05..0.60 rows=180 loops=1)
+              Hash Cond: (e.dept_id = d.dept_id)
+              ->  Seq Scan on employees e  (cost=0.00..38.00 rows=200 width=12) (actual time=0.01..0.40 rows=180 loops=1)
+                    Filter: (hire_date > '2020-01-01')
+                    Rows Removed by Filter: 120
+              ->  Hash  (cost=1.10..1.10 rows=10 width=12) (actual time=0.02..0.02 rows=10 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                    ->  Seq Scan on departments d  (cost=0.00..1.10 rows=10 width=12)
+```
+
+**Analysis:**
+1. Departments table is small (10 rows) → Seq Scan is optimal, built into hash table
+2. Employees filtered by hire_date (removed 120 of 300 rows) → consider index on hire_date if this query is frequent
+3. Hash Join chosen (appropriate for this size)
+4. HashAggregate groups by dept_name, HAVING removes 2 groups
+5. Final sort on avg_salary (tiny result set, in-memory quicksort)
+6. `Buffers: shared hit=12` — all data was in shared buffer cache (no disk I/O)
+
+---
+
+## 🏋️ 9. Exercises
+
+1. A query `SELECT * FROM orders WHERE customer_id = 42 AND status = 'pending'` is slow. Design the optimal index.
+2. Explain why `WHERE YEAR(created_at) = 2025` can't use a B-tree index on `created_at`. Rewrite it to be sargable.
+3. Given a table with 50M rows and a query that returns 100 rows, would you expect an Index Scan or Bitmap Index Scan? Why?
+4. Design a covering index for: `SELECT name, email FROM users WHERE active = true ORDER BY created_at DESC LIMIT 10`.
+5. Read an EXPLAIN ANALYZE output and identify the bottleneck node.
+
+---
+
+## 🔗 Cross-References
+
+- **Previous:** [14.4 - Schema Design & Normalization](14.4---Schema-Design-&-Normalization)
+- **Next:** [14.6 - Transactions, ACID & Concurrency](14.6---Transactions,-ACID-&-Concurrency)
+- **B-tree internals:** [08.13 - Algorithms & Data Structures in Python](08.13---Algorithms-&-Data-Structures-in-Python)
+- **Practice:** `python _practice/scripts/7.5_query_plans.py --count 12`
+- **Deep dive:** https://use-the-index-luke.com/
+
+---
+
+## 📖 Key Sources
+
+- Winand, M. *SQL Performance Explained* (Use The Index, Luke!): https://use-the-index-luke.com/
+- PostgreSQL Index Types: https://www.postgresql.org/docs/current/indexes-types.html
+- PostgreSQL EXPLAIN: https://www.postgresql.org/docs/current/using-explain.html
+- Pavlo, A. CMU 15-445 Lectures 7-8: Tree Indexes, Hash Indexes
+
+
+
+---
+
+## 📚 12. Deep Dive — B-tree vs LSM-tree, Specialized Index Types & Advanced Indexing
+
+### 12.1 B-tree Internals (PostgreSQL, MySQL InnoDB)
+
+A B-tree (technically B+tree in most databases) is a balanced tree where:
+- Internal nodes contain keys and pointers to child pages
+- Leaf nodes contain keys and pointers to heap tuples (or the row data itself in InnoDB)
+- All leaves are at the same depth
+- Leaves are linked in a doubly-linked list for range scans
+
+**PostgreSQL B-tree structure:**
+
+```
+Root Page (level 2)
+├── [key < 100] → Internal Page A
+├── [100 ≤ key < 500] → Internal Page B
+└── [key ≥ 500] → Internal Page C
+
+Internal Page B (level 1)
+├── [100 ≤ key < 200] → Leaf Page X
+├── [200 ≤ key < 300] → Leaf Page Y
+└── [300 ≤ key < 500] → Leaf Page Z
+
+Leaf Page Y (level 0)
+├── key=201 → (ctid: page 45, offset 3)
+├── key=215 → (ctid: page 12, offset 7)
+├── key=250 → (ctid: page 88, offset 1)
+└── → next leaf: Leaf Page Z
+```
+
+**Key properties:**
+- Lookup: $O(\log_B N)$ where $B$ = branching factor (~200-500 for 8KB pages)
+- Range scan: $O(\log_B N + K)$ where $K$ = number of matching rows
+- Insert/Delete: $O(\log_B N)$ with page splits/merges
+- Space: ~2-3x the indexed data size
+
+```sql
+-- Inspect B-tree structure (PostgreSQL):
+CREATE EXTENSION IF NOT EXISTS pageinspect;
+
+-- View root page:
+SELECT * FROM bt_metap('idx_employees_salary');
+-- Returns: root page number, level (height), fast_root, etc.
+
+-- View entries in a specific page:
+SELECT * FROM bt_page_items('idx_employees_salary', 1);
+-- Returns: itemoffset, ctid, data (key value)
+
+-- Index size and bloat:
+SELECT
+    indexrelname,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+    idx_scan AS times_used,
+    idx_tup_read AS tuples_read,
+    idx_tup_fetch AS tuples_fetched
+FROM pg_stat_user_indexes
+WHERE schemaname = 'public'
+ORDER BY pg_relation_size(indexrelid) DESC;
+```
+
+**InnoDB Clustered Index (MySQL):**
+
+In InnoDB, the primary key IS the table — data is stored in primary key order (clustered index). Secondary indexes store the primary key value as a pointer (not a physical row address).
+
+```sql
+-- InnoDB: secondary index lookup requires TWO tree traversals:
+-- 1. Traverse secondary index → find primary key value
+-- 2. Traverse primary key index → find actual row data
+
+-- This is why covering indexes are even MORE important in MySQL:
+CREATE INDEX idx_covering ON orders(customer_id, order_date, total)
+-- If the query only needs these columns, step 2 is skipped entirely
+```
+
+### 12.2 LSM-tree (Log-Structured Merge Tree)
+
+LSM-trees optimize for **write-heavy** workloads by converting random writes into sequential writes.
+
+**How it works:**
+1. Writes go to an in-memory buffer (memtable) — O(1) amortized
+2. When memtable is full, flush to disk as a sorted immutable file (SSTable/L0)
+3. Background compaction merges SSTables into larger sorted files (L1, L2, ...)
+4. Reads check memtable first, then each level (bloom filters skip empty levels)
+
+**Comparison:**
+
+| Property | B-tree | LSM-tree |
+|----------|--------|----------|
+| Write throughput | Moderate (random I/O) | High (sequential I/O) |
+| Read latency | Low (single tree traversal) | Higher (check multiple levels) |
+| Space amplification | Low (~1.5x) | Higher (multiple copies during compaction) |
+| Write amplification | Low (1 write per insert) | Higher (data rewritten during compaction) |
+| Range scan | Excellent (linked leaves) | Good (merge sorted runs) |
+| Best for | OLTP, read-heavy | Write-heavy, time-series, logs |
+
+**Databases using LSM-trees:** RocksDB, LevelDB, Cassandra, ScyllaDB, CockroachDB (hybrid), TiKV
+
+**PostgreSQL BRIN (Block Range INdex):**
+
+BRIN is not an LSM-tree but shares the philosophy of trading read precision for write efficiency. It stores min/max values per block range (e.g., per 128 pages).
+
+```sql
+-- BRIN is ideal for naturally-ordered data (timestamps, auto-increment IDs):
+CREATE INDEX idx_events_time_brin ON events USING brin(created_at)
+    WITH (pages_per_range = 128);
+
+-- Size comparison on 100M rows:
+-- B-tree on created_at: ~2.1 GB
+-- BRIN on created_at: ~48 KB (!!!)
+
+-- BRIN works because timestamps are naturally correlated with physical order.
+-- If data is randomly ordered, BRIN is useless (every range contains all values).
+
+-- Check correlation (should be close to 1.0 or -1.0 for BRIN to help):
+SELECT correlation FROM pg_stats
+WHERE tablename = 'events' AND attname = 'created_at';
+```
+
+### 12.3 GIN (Generalized Inverted Index)
+
+GIN indexes map values to the set of rows containing them — perfect for multi-valued data.
+
+```sql
+-- Full-text search:
+CREATE INDEX idx_articles_fts ON articles USING gin(to_tsvector('english', body));
+
+SELECT title, ts_rank(to_tsvector('english', body), query) AS rank
+FROM articles, plainto_tsquery('english', 'database optimization') AS query
+WHERE to_tsvector('english', body) @@ query
+ORDER BY rank DESC;
+
+-- JSONB containment queries:
+CREATE INDEX idx_events_payload ON events USING gin(payload jsonb_path_ops);
+
+SELECT * FROM events
+WHERE payload @> '{"action": "purchase", "category": "electronics"}';
+
+-- Array containment:
+CREATE INDEX idx_posts_tags ON posts USING gin(tags);
+
+SELECT * FROM posts WHERE tags @> ARRAY['sql', 'performance'];
+
+-- Trigram similarity (fuzzy search):
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_products_name_trgm ON products USING gin(name gin_trgm_ops);
+
+SELECT name, similarity(name, 'postgre') AS sim
+FROM products
+WHERE name % 'postgre'  -- similarity > threshold
+ORDER BY sim DESC;
+```
+
+### 12.4 GiST (Generalized Search Tree)
+
+GiST supports arbitrary data types with custom operators — geometric, range, and full-text data.
+
+```sql
+-- Range types (overlapping intervals):
+CREATE INDEX idx_reservations_period ON reservations
+    USING gist(daterange(check_in, check_out));
+
+-- Find overlapping reservations:
+SELECT * FROM reservations
+WHERE daterange(check_in, check_out) && daterange('2025-07-01', '2025-07-15');
+
+-- Geometric data (nearest neighbor):
+CREATE INDEX idx_locations_point ON locations USING gist(coordinates);
+
+-- Find 10 nearest restaurants:
+SELECT name, coordinates <-> point(40.7128, -74.0060) AS distance
+FROM locations
+WHERE type = 'restaurant'
+ORDER BY coordinates <-> point(40.7128, -74.0060)
+LIMIT 10;
+
+-- Exclusion constraints (prevent overlapping bookings):
+CREATE TABLE room_bookings (
+    booking_id SERIAL PRIMARY KEY,
+    room_id INT NOT NULL,
+    during TSRANGE NOT NULL,
+    EXCLUDE USING gist (room_id WITH =, during WITH &&)
+);
+```
+
+### 12.5 Hash Indexes
+
+Hash indexes provide O(1) equality lookups but don't support range queries or ordering.
+
+```sql
+-- Only useful for exact equality on large values:
+CREATE INDEX idx_sessions_token ON sessions USING hash(session_token);
+
+-- Good for: WHERE session_token = 'abc123...'
+-- Useless for: WHERE session_token > 'abc', ORDER BY session_token
+```
+
+**When to use hash over B-tree:**
+- Column has very long values (UUIDs, tokens, hashes)
+- Only equality lookups needed
+- PostgreSQL 10+ (earlier versions didn't WAL-log hash indexes — crash-unsafe)
+
+### 12.6 Covering Indexes (INCLUDE)
+
+A covering index contains all columns needed by a query, enabling **Index-Only Scans** (no heap access).
+
+```sql
+-- Query: SELECT name, email FROM users WHERE active = true ORDER BY created_at DESC LIMIT 10
+
+-- Non-covering index (requires heap lookup for name, email):
+CREATE INDEX idx_users_active_created ON users(active, created_at DESC);
+
+-- Covering index (all needed columns included):
+CREATE INDEX idx_users_active_created_covering ON users(active, created_at DESC)
+    INCLUDE (name, email);
+-- Now: Index Only Scan — never touches the heap!
+
+-- MySQL equivalent (all columns in the index):
+CREATE INDEX idx_covering ON users(active, created_at DESC, name, email);
+-- MySQL doesn't have INCLUDE; you put everything in the key (affects sort order)
+```
+
+**Trade-off:** Covering indexes are larger and slower to update, but eliminate heap I/O for covered queries.
+
+### 12.7 Partial Indexes (Filtered Indexes)
+
+Index only a subset of rows — smaller, faster, more targeted.
+
+```sql
+-- Only index active users (90% of queries filter on active=true):
+CREATE INDEX idx_users_active ON users(email) WHERE active = true;
+-- Size: ~10% of a full index if only 10% of users are active
+
+-- Only index unprocessed orders:
+CREATE INDEX idx_orders_pending ON orders(created_at)
+    WHERE status = 'pending';
+-- As orders are processed, they leave the index — it stays small!
+
+-- Unique constraint on a subset:
+CREATE UNIQUE INDEX idx_one_active_email ON users(email)
+    WHERE active = true;
+-- Allows multiple inactive rows with the same email, but only one active
+```
+
+### 12.8 Expression Indexes (Functional Indexes)
+
+Index the result of a function or expression:
+
+```sql
+-- Case-insensitive search:
+CREATE INDEX idx_users_email_lower ON users(LOWER(email));
+SELECT * FROM users WHERE LOWER(email) = 'alice@example.com';
+
+-- Date extraction:
+CREATE INDEX idx_orders_year_month ON orders(
+    EXTRACT(YEAR FROM order_date),
+    EXTRACT(MONTH FROM order_date)
+);
+
+-- JSONB field extraction:
+CREATE INDEX idx_events_action ON events((payload->>'action'));
+SELECT * FROM events WHERE payload->>'action' = 'purchase';
+
+-- Computed column:
+CREATE INDEX idx_orders_total ON order_items((quantity * unit_price));
+```
+
+---
+
+## 📚 13. Appendix — TPC-H Query Analysis & Cardinality Estimation
+
+### 13.1 TPC-H Benchmark Overview
+
+TPC-H is the standard benchmark for analytical (OLAP) query performance. It defines:
+- 8 tables (lineitem, orders, customer, supplier, part, partsupp, nation, region)
+- 22 queries of varying complexity
+- Scale factors (SF1 = ~1GB, SF10 = ~10GB, SF100 = ~100GB)
+
+**Key tables and their sizes at SF1:**
+
+| Table | Rows | Key Indexes |
+|-------|------|-------------|
+| lineitem | 6M | (l_orderkey, l_linenumber), l_shipdate |
+| orders | 1.5M | o_orderkey, o_custkey, o_orderdate |
+| customer | 150K | c_custkey, c_nationkey |
+| part | 200K | p_partkey |
+| supplier | 10K | s_suppkey, s_nationkey |
+| partsupp | 800K | (ps_partkey, ps_suppkey) |
+| nation | 25 | n_nationkey |
+| region | 5 | r_regionkey |
+
+### 13.2 TPC-H Q1 — Pricing Summary Report (Aggregation Stress Test)
+
+```sql
+-- TPC-H Query 1: Full table scan + heavy aggregation
+-- Tests: sequential scan speed, aggregation performance, sort
+SELECT
+    l_returnflag,
+    l_linestatus,
+    SUM(l_quantity) AS sum_qty,
+    SUM(l_extendedprice) AS sum_base_price,
+    SUM(l_extendedprice * (1 - l_discount)) AS sum_disc_price,
+    SUM(l_extendedprice * (1 - l_discount) * (1 + l_tax)) AS sum_charge,
+    AVG(l_quantity) AS avg_qty,
+    AVG(l_extendedprice) AS avg_price,
+    AVG(l_discount) AS avg_disc,
+    COUNT(*) AS count_order
+FROM lineitem
+WHERE l_shipdate <= DATE '1998-12-01' - INTERVAL '90 days'
+GROUP BY l_returnflag, l_linestatus
+ORDER BY l_returnflag, l_linestatus;
+```
+
+**Optimization strategies:**
+- BRIN index on l_shipdate (naturally ordered)
+- Parallel sequential scan (PostgreSQL `max_parallel_workers_per_gather`)
+- Columnar storage (DuckDB, Citus columnar) — only reads needed columns
+- Partial aggregation with parallel workers
+
+### 13.3 TPC-H Q3 — Shipping Priority (Join + Filter + Sort)
+
+```sql
+-- Tests: multi-table join, predicate push-down, top-N sort
+SELECT
+    l.l_orderkey,
+    SUM(l.l_extendedprice * (1 - l.l_discount)) AS revenue,
+    o.o_orderdate,
+    o.o_shippriority
+FROM customer c
+JOIN orders o ON c.c_custkey = o.o_custkey
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+WHERE c.c_mktsegment = 'BUILDING'
+  AND o.o_orderdate < DATE '1995-03-15'
+  AND l.l_shipdate > DATE '1995-03-15'
+GROUP BY l.l_orderkey, o.o_orderdate, o.o_shippriority
+ORDER BY revenue DESC, o.o_orderdate
+LIMIT 10;
+```
+
+**Optimal index strategy:**
+
+```sql
+-- Push customer filter early:
+CREATE INDEX idx_customer_segment ON customer(c_mktsegment);
+-- Push order date filter:
+CREATE INDEX idx_orders_custkey_date ON orders(o_custkey, o_orderdate);
+-- Push lineitem filter:
+CREATE INDEX idx_lineitem_orderkey_shipdate ON lineitem(l_orderkey, l_shipdate);
+```
+
+### 13.4 TPC-H Q9 — Product Type Profit (Complex Multi-Join)
+
+```sql
+-- Tests: 6-table join, expression evaluation, grouping
+SELECT
+    nation,
+    o_year,
+    SUM(amount) AS sum_profit
+FROM (
+    SELECT
+        n.n_name AS nation,
+        EXTRACT(YEAR FROM o.o_orderdate) AS o_year,
+        l.l_extendedprice * (1 - l.l_discount) - ps.ps_supplycost * l.l_quantity AS amount
+    FROM part p
+    JOIN lineitem l ON p.p_partkey = l.l_partkey
+    JOIN supplier s ON l.l_suppkey = s.s_suppkey
+    JOIN partsupp ps ON l.l_suppkey = ps.ps_suppkey AND l.l_partkey = ps.ps_partkey
+    JOIN orders o ON l.l_orderkey = o.o_orderkey
+    JOIN nation n ON s.s_nationkey = n.n_nationkey
+    WHERE p.p_name LIKE '%green%'
+) profit
+GROUP BY nation, o_year
+ORDER BY nation, o_year DESC;
+```
+
+**Optimizer decisions here:**
+- Start with the most selective filter (`p_name LIKE '%green%'` — ~2% of parts)
+- Hash join part → lineitem (large table, equality condition)
+- Hash join lineitem → partsupp (composite key match)
+- Nested loop for small dimension tables (supplier, nation)
+
+### 13.5 Cardinality Estimation Algorithms
+
+The optimizer's biggest challenge: estimating how many rows each operation produces.
+
+**Histogram-based estimation:**
+
+PostgreSQL maintains equi-depth histograms (default 100 buckets) for each column:
+
+```sql
+-- View histogram for a column:
+SELECT
+    attname,
+    array_length(histogram_bounds, 1) AS num_buckets,
+    histogram_bounds[1:5] AS first_5_bounds,
+    n_distinct,
+    null_frac
+FROM pg_stats
+WHERE tablename = 'lineitem' AND attname = 'l_shipdate';
+```
+
+**Selectivity estimation for predicates:**
+
+| Predicate Type | Estimation Method |
+|----------------|-------------------|
+| `col = value` | 1/n_distinct (uniform) or MCV frequency |
+| `col > value` | Fraction of histogram above value |
+| `col LIKE 'prefix%'` | Range estimation on prefix bounds |
+| `col IN (v1, v2, ...)` | Sum of individual selectivities |
+| `col1 = x AND col2 = y` | Product of selectivities (independence assumption) |
+
+**The independence assumption problem:**
+
+```sql
+-- PostgreSQL assumes columns are independent:
+-- P(city='NYC' AND state='NY') = P(city='NYC') × P(state='NY')
+-- Reality: P(city='NYC' AND state='NY') ≈ P(city='NYC') (they're correlated!)
+
+-- Fix: extended statistics (PostgreSQL 10+)
+CREATE STATISTICS stat_city_state (dependencies) ON city, state FROM addresses;
+ANALYZE addresses;
+-- Now the optimizer knows city and state are correlated
+```
+
+### 13.6 HyperLogLog for Approximate Distinct Counts
+
+For cardinality estimation on very large datasets, exact COUNT(DISTINCT) is expensive (requires sorting or hash table). HyperLogLog (HLL) provides approximate counts with ~2% error using minimal memory.
+
+```sql
+-- PostgreSQL: postgresql-hll extension
+CREATE EXTENSION IF NOT EXISTS hll;
+
+-- Create an HLL column for approximate distinct counting:
+CREATE TABLE daily_visitors (
+    visit_date DATE PRIMARY KEY,
+    visitor_hll hll NOT NULL DEFAULT hll_empty()
+);
+
+-- Add visitors throughout the day:
+UPDATE daily_visitors
+SET visitor_hll = hll_add(visitor_hll, hll_hash_text(visitor_id))
+WHERE visit_date = CURRENT_DATE;
+
+-- Get approximate distinct count:
+SELECT visit_date, hll_cardinality(visitor_hll)::bigint AS approx_unique_visitors
+FROM daily_visitors
+ORDER BY visit_date DESC;
+
+-- Union HLLs for date ranges (without re-scanning raw data!):
+SELECT hll_cardinality(hll_union_agg(visitor_hll))::bigint AS unique_visitors_this_month
+FROM daily_visitors
+WHERE visit_date >= '2025-07-01' AND visit_date < '2025-08-01';
+```
+
+**How HLL works (simplified):**
+1. Hash each value to a uniform random bit string
+2. Count the position of the leftmost 1-bit (the "run of zeros")
+3. The maximum run of zeros across all values estimates $\log_2(n)$
+4. Use multiple "registers" (sub-streams) and harmonic mean for accuracy
+
+**Memory usage:** ~1.2 KB for 2^14 registers → ~2% standard error on billions of values.
+
+### 13.7 Query Performance Checklist
+
+```sql
+-- 1. Check for missing indexes on filtered/joined columns:
+SELECT
+    schemaname, relname, seq_scan, seq_tup_read,
+    idx_scan, idx_tup_fetch,
+    seq_scan - idx_scan AS too_many_seq_scans
+FROM pg_stat_user_tables
+WHERE seq_scan > idx_scan AND seq_tup_read > 10000
+ORDER BY seq_tup_read DESC;
+
+-- 2. Find unused indexes (candidates for removal):
+SELECT
+    indexrelname, idx_scan,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0 AND indexrelname NOT LIKE '%pkey%'
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- 3. Check table bloat (dead tuples from MVCC):
+SELECT
+    relname,
+    n_live_tup,
+    n_dead_tup,
+    ROUND(n_dead_tup::numeric / GREATEST(n_live_tup, 1) * 100, 1) AS dead_pct,
+    last_autovacuum
+FROM pg_stat_user_tables
+WHERE n_dead_tup > 1000
+ORDER BY n_dead_tup DESC;
+
+-- 4. Identify slow queries (pg_stat_statements):
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+SELECT
+    LEFT(query, 80) AS query_preview,
+    calls,
+    ROUND(total_exec_time::numeric / 1000, 2) AS total_sec,
+    ROUND(mean_exec_time::numeric, 2) AS avg_ms,
+    rows
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 20;
+```
+
+---
+
+## 📖 Additional Sources (Sections 12–13)
+
+- Winand, M. *SQL Performance Explained*: https://use-the-index-luke.com/
+- PostgreSQL Index Types: https://www.postgresql.org/docs/current/indexes-types.html
+- O'Neil, P. et al. (1996). "The Log-Structured Merge-Tree (LSM-Tree)." *Acta Informatica*.
+- TPC-H Specification: https://www.tpc.org/tpch/
+- Flajolet, P. et al. (2007). "HyperLogLog: the analysis of a near-optimal cardinality estimation algorithm."
+- PostgreSQL Extended Statistics: https://www.postgresql.org/docs/current/planner-stats.html#PLANNER-STATS-EXTENDED

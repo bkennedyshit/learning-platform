@@ -1,0 +1,102 @@
+<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="rot-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rot-body{fill:var(--background-secondary, #161b22);stroke:var(--text-normal, #c9d1d9);stroke-width:2;opacity:0.85}
+    .rot-wheel{fill:none;stroke:var(--text-normal, #c9d1d9);stroke-width:2.5}
+    .rot-vec{stroke:var(--interactive-accent, #58a6ff);stroke-width:3;fill:none;stroke-dasharray:6,4;animation:rotVecFlow 1.2s linear infinite}
+    .rot-omega{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none;stroke-dasharray:150;stroke-dashoffset:150;animation:rotSpin 2.5s linear infinite}
+    .rot-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .rot-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .rot-rider{stroke:var(--text-normal, #c9d1d9);stroke-width:3;stroke-linecap:round;fill:none;transition:stroke 0.3s}
+    .rot-rider:hover{stroke:var(--interactive-accent, #58a6ff);filter:drop-shadow(0 0 5px var(--interactive-accent, #58a6ff))}
+    
+    /* Backflip and wheel spin animations */
+    .rot-rider-group {
+      transform-origin: 325px 210px;
+      animation: backFlip 8s linear infinite;
+    }
+    .rot-wheel-spin {
+      transform-origin: -40px 0px;
+      animation: wheelRotate 1s linear infinite;
+    }
+    .rot-wheel-spin2 {
+      transform-origin: 40px 0px;
+      animation: wheelRotate 1s linear infinite;
+    }
+    .rot-grf-pulse {
+      animation: grfPulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes rotSpin{to{stroke-dashoffset:0}}
+    @keyframes rotVecFlow{to{stroke-dashoffset:-10}}
+    @keyframes wheelRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes backFlip {
+      from { transform: translate(325px, 210px) rotate(0deg) translate(-325px, -210px); }
+      to { transform: translate(325px, 210px) rotate(360deg) translate(-325px, -210px); }
+    }
+    @keyframes grfPulse {
+      0% { opacity: 0.6; transform: scaleY(0.9); }
+      100% { opacity: 1; transform: scaleY(1.1); }
+    }
+  </style>
+  <!-- Rotation arc showing full 360 -->
+  <path d="M325 380 A160 160 0 1 1 324 380" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4,4"/>
+  
+  <!-- Rider performing backflip centered at (325, 210) -->
+  <g class="rot-rider-group">
+    <g transform="translate(325,210) rotate(135)">
+      <!-- Bike frame -->
+      <line x1="-40" y1="0" x2="40" y2="0" class="rot-rider"/>
+      
+      <!-- Wheels with rotating spokes -->
+      <g class="rot-wheel-spin">
+        <circle cx="-40" cy="0" r="18" class="rot-wheel"/>
+        <line x1="-58" y1="0" x2="-22" y2="0" stroke="var(--text-normal, #c9d1d9)" stroke-width="1" opacity="0.6"/>
+        <line x1="-40" y1="-18" x2="-40" y2="18" stroke="var(--text-normal, #c9d1d9)" stroke-width="1" opacity="0.6"/>
+      </g>
+      <g class="rot-wheel-spin2">
+        <circle cx="40" cy="0" r="18" class="rot-wheel"/>
+        <line x1="22" y1="0" x2="58" y2="0" stroke="var(--text-normal, #c9d1d9)" stroke-width="1" opacity="0.6"/>
+        <line x1="40" y1="-18" x2="40" y2="18" stroke="var(--text-normal, #c9d1d9)" stroke-width="1" opacity="0.6"/>
+      </g>
+      
+      <!-- Rider body (simplified) -->
+      <line x1="-5" y1="0" x2="-5" y2="-35" class="rot-rider"/>
+      <!-- Head -->
+      <circle cx="-5" cy="-42" r="7" fill="var(--text-accent, #79c0ff)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+      <!-- Arms tucked -->
+      <line x1="-5" y1="-20" x2="-20" y2="-10" class="rot-rider"/>
+      <line x1="-5" y1="-20" x2="10" y2="-10" class="rot-rider"/>
+    </g>
+  </g>
+  
+  <!-- Angular momentum vector L (constant, pointing out of page) -->
+  <line x1="325" y1="210" x2="325" y2="60" class="rot-vec" marker-end="url(#rot-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="335" y="55" class="rot-acc">L (conserved)</text>
+  <!-- Angular velocity omega arc -->
+  <path d="M360 180 A50 50 0 0 1 340 240" class="rot-omega"/>
+  <text x="370" y="215" class="rot-lbl" fill="var(--text-accent, #79c0ff)" font-weight="bold">ω</text>
+  <!-- Moment of inertia annotation -->
+  <rect x="460" y="80" width="175" height="160" rx="7" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="547" y="105" class="rot-acc" text-anchor="middle">Conservation Law</text>
+  <text x="547" y="130" class="rot-lbl" text-anchor="middle">L = Iω = const</text>
+  <text x="547" y="155" class="rot-lbl" text-anchor="middle">I_tucked ≈ 3.5 kg·m²</text>
+  <text x="547" y="175" class="rot-lbl" text-anchor="middle">I_extended ≈ 14 kg·m²</text>
+  <text x="547" y="200" class="rot-lbl" text-anchor="middle">ω_tucked/ω_ext = 4×</text>
+  <text x="547" y="230" class="rot-acc" text-anchor="middle">τ = dL/dt</text>
+  <!-- Takeoff torque arrow -->
+  <g class="rot-grf-pulse" style="transform-origin: 160px 380px;">
+    <line x1="160" y1="380" x2="160" y2="310" class="rot-vec" marker-end="url(#rot-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+    <text x="100" y="345" class="rot-acc">τ_takeoff</text>
+    <!-- Ground reaction -->
+    <line x1="160" y1="400" x2="160" y2="380" stroke="var(--text-muted, #8b949e)" stroke-width="2"/>
+    <text x="130" y="415" class="rot-lbl">GRF</text>
+  </g>
+</svg>

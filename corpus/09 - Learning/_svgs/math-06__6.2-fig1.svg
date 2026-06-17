@@ -1,0 +1,72 @@
+<svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="flux-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .cv-boundary { stroke: var(--text-normal, #c9d1d9); stroke-width: 2.5; fill: var(--background-secondary, #161b22); opacity: 0.8; stroke-dasharray: 8 4; }
+    .flux-in { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#flux-arrow); color: var(--interactive-accent, #58a6ff); transition: all 0.2s; cursor: pointer; }
+    .flux-in:hover { stroke-width: 4; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .flux-out { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; marker-end: url(#flux-arrow); color: var(--text-accent, #79c0ff); transition: all 0.2s; cursor: pointer; }
+    .flux-out:hover { stroke-width: 4; filter: drop-shadow(0 0 4px var(--text-accent, #79c0ff)); }
+    .streamline { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 200; stroke-dashoffset: 200; animation: flowStream 3s linear infinite; }
+    @keyframes flowStream { to { stroke-dashoffset: 0; } }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .normal-vec { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#flux-arrow); color: var(--text-muted, #8b949e); stroke-dasharray: 4 3; }
+    .rho-text { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-style: italic; }
+  </style>
+
+  <!-- Control volume (rounded rectangle) -->
+  <rect x="160" y="100" width="240" height="200" rx="20" class="cv-boundary"/>
+  <text x="280" y="210" class="rho-text" text-anchor="middle">ρ(x, t)</text>
+  <text x="280" y="235" class="label" text-anchor="middle">Control Volume V</text>
+
+  <!-- Incoming flux arrows (left side) -->
+  <line x1="60" y1="150" x2="155" y2="150" class="flux-in">
+    <animate attributeName="x1" values="60; 70; 60" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="155; 165; 155" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="60" y1="200" x2="155" y2="200" class="flux-in">
+    <animate attributeName="x1" values="60; 70; 60" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="155; 165; 155" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="60" y1="250" x2="155" y2="250" class="flux-in">
+    <animate attributeName="x1" values="60; 70; 60" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="155; 165; 155" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <text x="40" y="200" class="label-accent" text-anchor="end">ρv·n̂ dA</text>
+
+  <!-- Outgoing flux arrows (right side) -->
+  <line x1="405" y1="150" x2="500" y2="150" class="flux-out">
+    <animate attributeName="x1" values="405; 415; 405" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="500; 510; 500" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="405" y1="200" x2="500" y2="200" class="flux-out">
+    <animate attributeName="x1" values="405; 415; 405" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="500; 510; 500" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="405" y1="250" x2="500" y2="250" class="flux-out">
+    <animate attributeName="x1" values="405; 415; 405" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="500; 510; 500" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <text x="520" y="200" class="label" style="fill: var(--text-accent, #79c0ff); font-weight: bold;" text-anchor="start">ρv·n̂ dA</text>
+
+  <!-- Outward normals -->
+  <line x1="160" y1="170" x2="130" y2="170" class="normal-vec"/>
+  <text x="120" y="165" class="label" style="fill: var(--text-muted, #8b949e);">-n̂</text>
+  <line x1="400" y1="170" x2="430" y2="170" class="normal-vec"/>
+  <text x="435" y="165" class="label" style="fill: var(--text-muted, #8b949e);">+n̂</text>
+
+  <!-- Animated streamlines passing through -->
+  <path d="M 50 140 Q 200 130 280 160 Q 360 190 510 140" class="streamline"/>
+  <path d="M 50 200 Q 200 195 280 200 Q 360 205 510 200" class="streamline" style="animation-delay: 0.5s;"/>
+  <path d="M 50 260 Q 200 270 280 240 Q 360 210 510 260" class="streamline" style="animation-delay: 1s;"/>
+
+  <!-- Equation label -->
+  <text x="280" y="360" class="label-title" text-anchor="middle">∂ρ/∂t + ∇·(ρv) = 0</text>
+  <text x="280" y="385" class="label" text-anchor="middle">Mass in − Mass out = Rate of mass accumulation</text>
+</svg>

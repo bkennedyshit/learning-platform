@@ -1,0 +1,63 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="crispr-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .dna-strand { stroke: var(--text-normal, #c9d1d9); stroke-width: 2.5; fill: none; }
+    .guide-rna { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; }
+    .cas9 { fill: var(--background-secondary, #161b22); stroke: var(--text-accent, #79c0ff); stroke-width: 2; cursor: pointer; transition: all 0.2s; }
+    .cas9:hover { filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .cut-mark { stroke: #ff6b6b; stroke-width: 3; }
+    .pam { fill: #ff6b6b; fill-opacity: 0.3; stroke: #ff6b6b; stroke-width: 1; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .step { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+  </style>
+  <text x="300" y="22" class="title" text-anchor="middle">CRISPR-Cas9 Gene Editing Mechanism</text>
+  <!-- DNA double strand -->
+  <line x1="50" y1="120" x2="550" y2="120" class="dna-strand"/>
+  <line x1="50" y1="140" x2="550" y2="140" class="dna-strand"/>
+  <text x="30" y="124" class="label">5'</text>
+  <text x="560" y="124" class="label">3'</text>
+  <text x="30" y="144" class="label">3'</text>
+  <text x="560" y="144" class="label">5'</text>
+  <!-- PAM sequence highlight -->
+  <rect x="380" y="112" width="40" height="36" class="pam" rx="3"/>
+  <text x="400" y="108" class="label" text-anchor="middle" fill="#ff6b6b" font-weight="bold">PAM</text>
+  <text x="400" y="165" class="step" text-anchor="middle">NGG</text>
+  <!-- Target sequence -->
+  <rect x="220" y="115" width="160" height="10" fill="var(--interactive-accent, #58a6ff)" fill-opacity="0.2" rx="2"/>
+  <text x="300" y="112" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">20 nt target</text>
+  <!-- Guide RNA -->
+  <path d="M 220 100 Q 250 80 300 80 Q 350 80 380 100" class="guide-rna"/>
+  <path d="M 380 100 Q 400 90 420 70 Q 440 50 430 40" class="guide-rna"/>
+  <text x="300" y="72" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)" font-weight="bold">sgRNA</text>
+  <text x="445" y="45" class="label" fill="var(--interactive-accent, #58a6ff)">tracrRNA scaffold</text>
+  <!-- Cas9 protein (ellipse) -->
+  <ellipse cx="320" cy="130" rx="90" ry="45" class="cas9"/>
+  <text x="320" y="125" class="label" text-anchor="middle" font-weight="bold" fill="var(--text-accent, #79c0ff)">Cas9</text>
+  <text x="320" y="140" class="step" text-anchor="middle">Nuclease</text>
+  <!-- Cut marks (scissors) -->
+  <line x1="370" y1="110" x2="370" y2="150" class="cut-mark"/>
+  <text x="370" y="175" class="label" text-anchor="middle" fill="#ff6b6b">✂ DSB</text>
+  <!-- Repair pathways -->
+  <rect x="50" y="210" width="220" height="120" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="160" y="230" class="label" text-anchor="middle" font-weight="bold">NHEJ (Error-prone)</text>
+  <text x="160" y="250" class="step" text-anchor="middle">• Direct ligation of broken ends</text>
+  <text x="160" y="265" class="step" text-anchor="middle">• Random insertions/deletions</text>
+  <text x="160" y="280" class="step" text-anchor="middle">• Frameshift → Gene KNOCKOUT</text>
+  <text x="160" y="300" class="step" text-anchor="middle">• Default pathway (most cells)</text>
+  <text x="160" y="320" class="step" text-anchor="middle">• No template needed</text>
+  <rect x="320" y="210" width="230" height="120" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="435" y="230" class="label" text-anchor="middle" font-weight="bold">HDR (Precise)</text>
+  <text x="435" y="250" class="step" text-anchor="middle">• Uses donor DNA template</text>
+  <text x="435" y="265" class="step" text-anchor="middle">• Precise insertion/correction</text>
+  <text x="435" y="280" class="step" text-anchor="middle">• Gene KNOCK-IN or correction</text>
+  <text x="435" y="300" class="step" text-anchor="middle">• Only in S/G2 phase (~5–20% eff.)</text>
+  <text x="435" y="320" class="step" text-anchor="middle">• Requires homology arms</text>
+  <!-- Arrows to repair -->
+  <line x1="250" y1="175" x2="160" y2="210" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" marker-end="url(#crispr-arrow)"/>
+  <line x1="370" y1="175" x2="435" y2="210" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" marker-end="url(#crispr-arrow)"/>
+</svg>

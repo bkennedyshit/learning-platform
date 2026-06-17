@@ -1,0 +1,81 @@
+<svg viewBox="0 0 680 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;height:auto;">
+  <defs>
+    <marker id="tor-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .shaft-body { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; opacity: 0.8; }
+    .shaft-outline { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .torque-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; cursor: pointer; transition: all 0.2s; }
+    .torque-arrow:hover { stroke-width: 4; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .shear-dist { stroke: #e74c3c; stroke-width: 2; fill: #e74c3c; fill-opacity: 0.1; }
+    .radius-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-red { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: #e74c3c; font-weight: bold; }
+    .deform-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; stroke-dasharray: 6 3; fill: none; }
+    .angle-arc { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; }
+    .info-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+  </style>
+
+  <!-- Shaft body (cylinder side view) -->
+  <rect x="150" y="100" width="380" height="80" rx="5" class="shaft-body"/>
+  <!-- Top and bottom lines -->
+  <line x1="150" y1="100" x2="530" y2="100" class="shaft-outline"/>
+  <line x1="150" y1="180" x2="530" y2="180" class="shaft-outline"/>
+
+  <!-- Left end (fixed) -->
+  <rect x="130" y="85" width="20" height="110" fill="var(--text-muted, #8b949e)" opacity="0.3" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+  <!-- Hatching for wall -->
+  <line x1="130" y1="90" x2="125" y2="95" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="105" x2="125" y2="110" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="120" x2="125" y2="125" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="135" x2="125" y2="140" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="150" x2="125" y2="155" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="165" x2="125" y2="170" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="130" y1="180" x2="125" y2="185" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+
+  <!-- Torque arrow at free end (curved arrow) -->
+  <path d="M 555 120 A 30 30 0 0 1 555 160" class="torque-arrow" marker-end="url(#tor-arrow)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="575" y="145" class="label-accent">T</text>
+
+  <!-- Deformed generator line (showing twist) -->
+  <line x1="150" y1="140" x2="530" y2="140" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="150" y1="140" x2="530" y2="125" class="deform-line">
+    <animate attributeName="y2" values="140; 125; 140" dur="2s" repeatCount="indefinite" />
+  </line>
+
+  <!-- Angle of twist annotation -->
+  <path d="M 520 140 A 15 15 0 0 0 520 130" class="angle-arc"/>
+  <text x="505" y="122" class="label-accent">φ</text>
+
+  <!-- Cross-section view (right side) -->
+  <circle cx="80" cy="270" r="45" fill="var(--background-secondary, #161b22)" stroke="var(--text-normal, #c9d1d9)" stroke-width="2"/>
+  <!-- Shear stress distribution (linear from center) -->
+  <line x1="80" y1="270" x2="125" y2="270" class="radius-line"/>
+  <text x="105" y="262" class="label">ρ</text>
+  <!-- Shear stress arrows (increasing with radius) -->
+  <g>
+    <animate attributeName="opacity" values="0.3; 1; 0.3" dur="2s" repeatCount="indefinite" />
+    <line x1="90" y1="268" x2="90" y2="260" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#tor-arrow)" style="color:#e74c3c"/>
+    <line x1="100" y1="268" x2="100" y2="255" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#tor-arrow)" style="color:#e74c3c"/>
+    <line x1="110" y1="268" x2="110" y2="248" stroke="#e74c3c" stroke-width="2" marker-end="url(#tor-arrow)" style="color:#e74c3c"/>
+    <line x1="120" y1="268" x2="120" y2="240" stroke="#e74c3c" stroke-width="2" marker-end="url(#tor-arrow)" style="color:#e74c3c"/>
+  </g>
+  <text x="128" y="242" class="label-red">τ_max</text>
+  <text x="80" y="330" class="label" text-anchor="middle">τ = Tρ/J (linear)</text>
+
+  <!-- Dimension line for L -->
+  <line x1="150" y1="210" x2="530" y2="210" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="150" y1="205" x2="150" y2="215" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <line x1="530" y1="205" x2="530" y2="215" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="340" y="228" class="label" text-anchor="middle">L</text>
+
+  <!-- Info box -->
+  <rect x="380" y="240" width="280" height="95" rx="6" class="info-box"/>
+  <text x="520" y="262" class="label" text-anchor="middle" font-weight="bold">Torsion Formulas</text>
+  <text x="520" y="282" class="label-accent" text-anchor="middle">τ_max = Tc/J</text>
+  <text x="520" y="302" class="label-accent" text-anchor="middle">φ = TL/(GJ)</text>
+  <text x="520" y="322" class="label" text-anchor="middle">J = πc⁴/2 (solid), π(c₀⁴−cᵢ⁴)/2 (hollow)</text>
+</svg>

@@ -1,0 +1,166 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .accent { fill: var(--interactive-accent, #58a6ff); opacity: 0.15; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .warn   { fill: #ff6b6b; opacity: 0.15; stroke: #ff6b6b; stroke-width: 1.5; }
+    .axis   { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; }
+    .sig    { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; }
+    .alias  { stroke: #ff6b6b; stroke-width: 2; fill: none; stroke-dasharray: 5 3; }
+    .sample { fill: var(--interactive-accent, #58a6ff); }
+    .arr    { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" class="title" text-anchor="middle">Signals, Systems &amp; Sampling Theory — The ADC/DAC Chain &amp; Nyquist–Shannon</text>
+
+  <!-- ===== TOP ROW: Analog → Digital chain ===== -->
+  <!-- ADC chain boxes -->
+  <rect x="20"  y="38" width="90"  height="44" rx="5" class="box"/>
+  <text x="65"  y="56" class="label" text-anchor="middle">Microphone</text>
+  <text x="65"  y="70" class="small" text-anchor="middle">continuous x(t)</text>
+
+  <rect x="130" y="38" width="90"  height="44" rx="5" class="accent"/>
+  <text x="175" y="56" class="label" text-anchor="middle">Anti-alias</text>
+  <text x="175" y="70" class="small" text-anchor="middle">LPF  f &lt; fs/2</text>
+
+  <rect x="240" y="38" width="90"  height="44" rx="5" class="box"/>
+  <text x="285" y="56" class="label" text-anchor="middle">Sampler</text>
+  <text x="285" y="70" class="small" text-anchor="middle">T = 1/fs</text>
+
+  <rect x="350" y="38" width="90"  height="44" rx="5" class="box"/>
+  <text x="395" y="56" class="label" text-anchor="middle">Quantizer</text>
+  <text x="395" y="70" class="small" text-anchor="middle">N bits → 2ᴺ levels</text>
+
+  <rect x="460" y="38" width="90"  height="44" rx="5" class="box"/>
+  <text x="505" y="56" class="label" text-anchor="middle">DSP Core</text>
+  <text x="505" y="70" class="small" text-anchor="middle">x[n] discrete</text>
+
+  <rect x="570" y="38" width="90"  height="44" rx="5" class="accent"/>
+  <text x="615" y="56" class="label" text-anchor="middle">DAC + LPF</text>
+  <text x="615" y="70" class="small" text-anchor="middle">reconstruct y(t)</text>
+
+  <!-- Arrows between boxes -->
+  <line x1="110" y1="60" x2="130" y2="60" class="arr" marker-end="url(#arr)"/>
+  <line x1="220" y1="60" x2="240" y2="60" class="arr" marker-end="url(#arr)"/>
+  <line x1="330" y1="60" x2="350" y2="60" class="arr" marker-end="url(#arr)"/>
+  <line x1="440" y1="60" x2="460" y2="60" class="arr" marker-end="url(#arr)"/>
+  <line x1="550" y1="60" x2="570" y2="60" class="arr" marker-end="url(#arr)"/>
+
+  <!-- ===== LEFT PANEL: Clean sampling (fs ≥ 2*fmax) ===== -->
+  <rect x="20" y="106" width="210" height="148" rx="4" class="box"/>
+  <text x="125" y="124" class="label" text-anchor="middle" font-weight="bold">Proper Sampling  (fs ≥ 2·fmax)</text>
+
+  <!-- analog continuous wave -->
+  <g>
+    <path d="M 30 180
+      C 40 158, 50 158, 60 180
+      C 70 202, 80 202, 90 180
+      C 100 158, 110 158, 120 180
+      C 130 202, 140 202, 150 180
+      C 160 158, 170 158, 180 180
+      C 190 202, 200 202, 210 180
+      C 220 158, 230 158, 220 180" class="sig"/>
+    <!-- sample stems -->
+    <line x1="30"  y1="180" x2="30"  y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="60"  y1="180" x2="60"  y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="90"  y1="180" x2="90"  y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="120" y1="180" x2="120" y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="150" y1="180" x2="150" y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="180" y1="180" x2="180" y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="210" y1="180" x2="210" y2="232" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" stroke-dasharray="2 2"/>
+    <!-- sample dots -->
+    <circle cx="30"  cy="180" r="3.5" class="sample"/>
+    <circle cx="60"  cy="180" r="3.5" class="sample"/>
+    <circle cx="90"  cy="180" r="3.5" class="sample"/>
+    <circle cx="120" cy="180" r="3.5" class="sample"/>
+    <circle cx="150" cy="180" r="3.5" class="sample"/>
+    <circle cx="180" cy="180" r="3.5" class="sample"/>
+    <circle cx="210" cy="180" r="3.5" class="sample"/>
+  </g>
+  <text x="125" y="245" class="small" text-anchor="middle">Reconstructable → original signal recoverable</text>
+
+  <!-- ===== MIDDLE PANEL: Aliasing (fs &lt; 2*fmax) ===== -->
+  <rect x="250" y="106" width="210" height="148" rx="4" class="warn"/>
+  <text x="355" y="124" class="label" text-anchor="middle" font-weight="bold" fill="#ff6b6b">Aliasing  (fs &lt; 2·fmax)</text>
+
+  <!-- high freq analog -->
+  <path d="M 260 180
+    C 268 160, 274 160, 280 180
+    C 286 200, 292 200, 298 180
+    C 304 160, 310 160, 316 180
+    C 322 200, 328 200, 334 180
+    C 340 160, 346 160, 352 180
+    C 358 200, 364 200, 370 180
+    C 376 160, 382 160, 388 180
+    C 394 200, 400 200, 406 180
+    C 412 160, 418 160, 424 180
+    C 430 200, 436 200, 442 180
+    C 448 160, 454 160, 460 180" class="sig"/>
+  <!-- too-sparse samples -->
+  <circle cx="260" cy="180" r="3.5" class="sample"/>
+  <circle cx="310" cy="180" r="3.5" class="sample"/>
+  <circle cx="360" cy="180" r="3.5" class="sample"/>
+  <circle cx="410" cy="180" r="3.5" class="sample"/>
+  <circle cx="460" cy="180" r="3.5" class="sample"/>
+  <!-- alias (wrong low-freq) -->
+  <path d="M 260 180 C 310 155, 360 205, 410 180 C 435 168, 460 180, 460 180" class="alias"/>
+  <text x="355" y="218" class="small" text-anchor="middle" fill="#ff6b6b">Ghost low-freq (alias) appears!</text>
+  <text x="355" y="232" class="small" text-anchor="middle">Samples are ambiguous</text>
+  <text x="355" y="246" class="small" text-anchor="middle">— original unrecoverable</text>
+
+  <!-- ===== RIGHT PANEL: Key numbers ===== -->
+  <rect x="480" y="106" width="220" height="148" rx="4" class="box"/>
+  <text x="590" y="124" class="label" text-anchor="middle" font-weight="bold">Key Numbers &amp; Definitions</text>
+  <text x="495" y="142" class="mono">Nyquist criterion:  fs ≥ 2·fmax</text>
+  <text x="495" y="158" class="mono">Nyquist freq:       fn = fs / 2</text>
+  <text x="495" y="174" class="mono">Sample period:      T  = 1 / fs</text>
+  <text x="495" y="190" class="mono">CD audio:  fs=44100 Hz  16-bit</text>
+  <text x="495" y="206" class="mono">Studio:    fs=96000 Hz  24-bit</text>
+  <text x="495" y="222" class="mono">QUANT noise ≈ −6.02·N dB  SQNR</text>
+  <text x="495" y="238" class="mono">N bits → 2ᴺ amplitude levels</text>
+  <text x="495" y="246" class="small" text-anchor="middle">16-bit → 65 536 levels → 96 dB SNR</text>
+
+  <!-- ===== BOTTOM: Signal taxonomy table ===== -->
+  <rect x="20" y="272" width="680" height="128" rx="4" class="box"/>
+  <text x="360" y="290" class="label" text-anchor="middle" font-weight="bold">Signal Taxonomy — Four Categories at a Glance</text>
+
+  <!-- Headers -->
+  <text x="90"  y="308" class="label" text-anchor="middle" font-weight="bold">Type</text>
+  <text x="230" y="308" class="label" text-anchor="middle" font-weight="bold">Time</text>
+  <text x="370" y="308" class="label" text-anchor="middle" font-weight="bold">Amplitude</text>
+  <text x="510" y="308" class="label" text-anchor="middle" font-weight="bold">Example</text>
+  <text x="650" y="308" class="label" text-anchor="middle" font-weight="bold">Tools</text>
+  <line x1="30" y1="313" x2="692" y2="313" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+
+  <text x="90"  y="330" class="small" text-anchor="middle">Continuous-time</text>
+  <text x="230" y="330" class="small" text-anchor="middle">Continuous</text>
+  <text x="370" y="330" class="small" text-anchor="middle">Continuous</text>
+  <text x="510" y="330" class="small" text-anchor="middle">Microphone voltage</text>
+  <text x="650" y="330" class="small" text-anchor="middle">Laplace, CTFT</text>
+
+  <text x="90"  y="348" class="small" text-anchor="middle">Discrete-time</text>
+  <text x="230" y="348" class="small" text-anchor="middle">Discrete n</text>
+  <text x="370" y="348" class="small" text-anchor="middle">Continuous</text>
+  <text x="510" y="348" class="small" text-anchor="middle">Sampled audio x[n]</text>
+  <text x="650" y="348" class="small" text-anchor="middle">DTFT, z-transform</text>
+
+  <text x="90"  y="366" class="small" text-anchor="middle">Quantized</text>
+  <text x="230" y="366" class="small" text-anchor="middle">Continuous</text>
+  <text x="370" y="366" class="small" text-anchor="middle">Discrete levels</text>
+  <text x="510" y="366" class="small" text-anchor="middle">DAC staircase output</text>
+  <text x="650" y="366" class="small" text-anchor="middle">PCM, dithering</text>
+
+  <text x="90"  y="384" class="small" text-anchor="middle">Digital (PCM)</text>
+  <text x="230" y="384" class="small" text-anchor="middle">Discrete n</text>
+  <text x="370" y="384" class="small" text-anchor="middle">Discrete levels</text>
+  <text x="510" y="384" class="small" text-anchor="middle">WAV file samples</text>
+  <text x="650" y="384" class="small" text-anchor="middle">DFT, FFT, filters</text>
+</svg>

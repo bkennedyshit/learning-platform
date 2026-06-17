@@ -1,0 +1,72 @@
+<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-dotnet" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .accent-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .flow-arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#arrow-dotnet); }
+    .accent-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arrow-dotnet); }
+    .note { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+  </style>
+
+  <text x="350" y="22" class="title">.NET Toolchain &amp; Compilation Pipeline</text>
+
+  <!-- Source layer -->
+  <text x="80" y="52" class="section-label">source</text>
+  <rect x="30" y="58" width="120" height="40" class="accent-box"/>
+  <text x="90" y="82" class="label">Program.cs</text>
+
+  <rect x="170" y="58" width="120" height="40" class="box"/>
+  <text x="230" y="82" class="label">.csproj</text>
+
+  <rect x="310" y="58" width="120" height="40" class="box"/>
+  <text x="370" y="82" class="label">NuGet Packages</text>
+
+  <!-- Compiler -->
+  <path d="M 90 98 L 90 130" class="accent-arrow"/>
+  <path d="M 230 98 L 170 130" class="flow-arrow"/>
+  <path d="M 370 98 L 200 130" class="flow-arrow"/>
+
+  <text x="350" y="125" class="section-label">compilation</text>
+  <rect x="60" y="132" width="180" height="45" class="accent-box"/>
+  <text x="150" y="152" class="label">Roslyn Compiler</text>
+  <text x="150" y="167" class="note">C# → IL (Intermediate Language)</text>
+
+  <!-- IL output -->
+  <path d="M 150 177 L 150 210" class="accent-arrow"/>
+  <rect x="80" y="212" width="140" height="35" class="box"/>
+  <text x="150" y="234" class="label">.dll / .exe (IL code)</text>
+
+  <!-- Runtime split -->
+  <text x="500" y="195" class="section-label">runtime</text>
+  <path d="M 220 230 L 330 260" class="flow-arrow"/>
+  <path d="M 220 230 L 330 320" class="flow-arrow"/>
+
+  <!-- JIT path -->
+  <rect x="330" y="245" width="160" height="40" class="box"/>
+  <text x="410" y="262" class="label">JIT Compiler</text>
+  <text x="410" y="277" class="note">Runtime → Native (method by method)</text>
+
+  <path d="M 490 265 L 550 265" class="flow-arrow"/>
+  <rect x="550" y="248" width="130" height="35" class="accent-box"/>
+  <text x="615" y="270" class="label">Desktop / Server</text>
+
+  <!-- AOT path -->
+  <rect x="330" y="305" width="160" height="40" class="box"/>
+  <text x="410" y="322" class="label">IL2CPP (AOT)</text>
+  <text x="410" y="337" class="note">Build-time → C++ → Native</text>
+
+  <path d="M 490 325 L 550 325" class="flow-arrow"/>
+  <rect x="550" y="308" width="130" height="35" class="accent-box"/>
+  <text x="615" y="330" class="label">Unity Builds</text>
+
+  <!-- Legend -->
+  <text x="80" y="380" class="note">dotnet build → Roslyn → IL → JIT (dev) or IL2CPP (release)</text>
+</svg>

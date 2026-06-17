@@ -1,0 +1,77 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="pt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pt-sphere { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1.5; }
+    .pt-path { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .pt-vector { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; marker-end: url(#pt-arrow); }
+    .pt-initial { stroke: #ff6b6b; stroke-width: 2.5; fill: none; marker-end: url(#pt-arrow); }
+    .pt-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .pt-math { font-family: 'Latin Modern Math', serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-style: italic; }
+    .pt-title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .pt-dot { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .pt-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .pt-angle { fill: var(--interactive-accent, #58a6ff); opacity: 0.2; }
+    
+    /* Animations */
+    .pt-path-solid { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-dasharray: 300; stroke-dashoffset: 300; animation: drawTransport 6s infinite ease-in-out; }
+    @keyframes drawTransport { 0%, 10% { stroke-dashoffset: 300; } 60%, 100% { stroke-dashoffset: 0; } }
+    .pt-vector { animation: vectorGlow 2s infinite alternate; }
+    @keyframes vectorGlow { 
+      from { filter: drop-shadow(0 0 1px var(--text-accent, #79c0ff)); } 
+      to { filter: drop-shadow(0 0 8px var(--text-accent, #79c0ff)); } 
+    }
+  </style>
+
+  <!-- Sphere outline -->
+  <ellipse cx="220" cy="200" rx="160" ry="160" class="pt-sphere"/>
+  <ellipse cx="220" cy="200" rx="160" ry="50" class="pt-sphere" stroke-dasharray="5,5"/>
+
+  <!-- Triangle path on sphere (N pole → equator → equator → N pole) -->
+  <path d="M 220 40 L 100 280 L 340 280 Z" class="pt-path" stroke-dasharray="8,4"/>
+  
+  <!-- Solid path segments -->
+  <line x1="220" y1="40" x2="100" y2="280" class="pt-path-solid"/>
+  <line x1="100" y1="280" x2="340" y2="280" class="pt-path-solid"/>
+  <line x1="340" y1="280" x2="220" y2="40" class="pt-path-solid"/>
+
+  <!-- Vertices -->
+  <circle cx="220" cy="40" r="5" class="pt-dot"/>
+  <circle cx="100" cy="280" r="5" class="pt-dot"/>
+  <circle cx="340" cy="280" r="5" class="pt-dot"/>
+  <text x="220" y="30" class="pt-label" text-anchor="middle">N (North Pole)</text>
+  <text x="75" y="295" class="pt-label">A</text>
+  <text x="350" y="295" class="pt-label">B</text>
+
+  <!-- Parallel-transported vectors along the path -->
+  <!-- At N: pointing "east" -->
+  <line x1="220" y1="40" x2="260" y2="40" class="pt-initial"/>
+  <text x="268" y="38" class="pt-label" fill="#ff6b6b">V (start)</text>
+  
+  <!-- At A: still pointing "east" after transport down meridian -->
+  <line x1="100" y1="280" x2="140" y2="280" class="pt-vector"/>
+  
+  <!-- At B: after transport along equator -->
+  <line x1="340" y1="280" x2="340" y2="240" class="pt-vector"/>
+  
+  <!-- Back at N: rotated! -->
+  <line x1="220" y1="40" x2="220" y2="80" class="pt-vector"/>
+  <text x="228" y="88" class="pt-label" fill="var(--text-accent, #79c0ff)">V (end)</text>
+
+  <!-- Angle indicator -->
+  <path d="M 245 40 A 25 25 0 0 1 220 65" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" fill="none"/>
+  <text x="250" y="60" class="pt-math">Δθ = 90°</text>
+
+  <!-- Formula box -->
+  <rect x="400" y="40" width="190" height="180" class="pt-box"/>
+  <text x="495" y="65" class="pt-title">Parallel Transport</text>
+  <text x="495" y="90" class="pt-math" text-anchor="middle">∇_U V = 0</text>
+  <text x="415" y="115" class="pt-label">dV^μ/dλ + Γ^μ_αβ U^α V^β = 0</text>
+  <text x="415" y="145" class="pt-label">Rotation angle after</text>
+  <text x="415" y="162" class="pt-label">closed loop = curvature!</text>
+  <text x="415" y="190" class="pt-math">Δθ = ∫∫ R dA</text>
+  <text x="415" y="210" class="pt-label">(Gauss-Bonnet theorem)</text>
+</svg>

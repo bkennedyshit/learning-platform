@@ -1,0 +1,90 @@
+<svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <defs>
+    <marker id="rot-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .vf-axis   { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .vf-grid   { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.3; }
+    .vf-vec    { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.6; fill: none;
+                 marker-end: url(#rot-arrow); }
+    .vf-origin { fill: var(--interactive-accent, #58a6ff); }
+    .vf-label  { font-family: Inter, system-ui, sans-serif; font-size: 13px;
+                 fill: var(--text-normal, #c9d1d9); }
+    .vf-title  { font-family: Inter, system-ui, sans-serif; font-size: 14px;
+                 fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .vf-circle { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 0.8;
+                 stroke-dasharray: 3 3; opacity: 0.5; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Grid -->
+  <g class="vf-grid">
+    <line x1="260" y1="10" x2="260" y2="510"/>
+    <line x1="10" y1="260" x2="510" y2="260"/>
+  </g>
+  <!-- Dashed reference circles -->
+  <circle cx="260" cy="260" r="70"  class="vf-circle"/>
+  <circle cx="260" cy="260" r="140" class="vf-circle"/>
+  <circle cx="260" cy="260" r="210" class="vf-circle"/>
+  <!-- Axes -->
+  <line x1="20" y1="260" x2="500" y2="260" class="vf-axis"/>
+  <line x1="260" y1="500" x2="260" y2="20"  class="vf-axis"/>
+  <text x="505" y="264" class="vf-label">x</text>
+  <text x="252" y="15"  class="vf-label">y</text>
+  <!-- Vectors F=(-y,x): at (x0,y0) draw arrow in direction (-y0,x0) scaled -->
+  <!-- Scale factor s=0.28 for visual clarity -->
+  <!-- Row 1: y = -2 (screen y = 260+140=400) -->
+  <line x1="120" y1="400" x2="120" y2="361" class="vf-vec"/>
+  <line x1="190" y1="400" x2="190" y2="372" class="vf-vec"/>
+  <line x1="260" y1="400" x2="299" y2="400" class="vf-vec"/>
+  <line x1="330" y1="400" x2="369" y2="372" class="vf-vec"/>
+  <line x1="400" y1="400" x2="400" y2="361" class="vf-vec"/>
+  <!-- Row 2: y = -1 (screen y=330) -->
+  <line x1="120" y1="330" x2="120" y2="310" class="vf-vec"/>
+  <line x1="190" y1="330" x2="204" y2="316" class="vf-vec"/>
+  <line x1="260" y1="330" x2="279" y2="330" class="vf-vec"/>
+  <line x1="330" y1="330" x2="344" y2="316" class="vf-vec"/>
+  <line x1="400" y1="330" x2="400" y2="310" class="vf-vec"/>
+  <!-- Row 3: y = 0 (screen y=260) -->
+  <line x1="120" y1="260" x2="120" y2="221" class="vf-vec"/>
+  <line x1="190" y1="260" x2="190" y2="232" class="vf-vec"/>
+  <line x1="330" y1="260" x2="330" y2="288" class="vf-vec"/>
+  <line x1="400" y1="260" x2="400" y2="299" class="vf-vec"/>
+  <!-- Row 4: y = 1 (screen y=190) -->
+  <line x1="120" y1="190" x2="120" y2="170" class="vf-vec"/>
+  <line x1="190" y1="190" x2="176" y2="204" class="vf-vec"/>
+  <line x1="260" y1="190" x2="241" y2="190" class="vf-vec"/>
+  <line x1="330" y1="190" x2="316" y2="204" class="vf-vec"/>
+  <line x1="400" y1="190" x2="400" y2="170" class="vf-vec"/>
+  <!-- Row 5: y = 2 (screen y=120) -->
+  <line x1="120" y1="120" x2="120" y2="81"  class="vf-vec"/>
+  <line x1="190" y1="120" x2="190" y2="148" class="vf-vec"/>
+  <line x1="260" y1="120" x2="221" y2="120" class="vf-vec"/>
+  <line x1="330" y1="120" x2="330" y2="148" class="vf-vec"/>
+  <line x1="400" y1="120" x2="400" y2="81"  class="vf-vec"/>
+  <!-- Origin dot -->
+  <circle cx="260" cy="260" r="5" class="vf-origin"/>
+  <!-- Title -->
+  <text x="260" y="490" class="vf-title" text-anchor="middle">F = (−y, x) — pure counter-clockwise rotation</text>
+</svg>

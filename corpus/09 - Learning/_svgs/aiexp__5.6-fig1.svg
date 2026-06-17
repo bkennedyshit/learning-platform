@@ -1,0 +1,150 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-voice" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .voice-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; cursor: pointer; transition: all 0.3s ease; }
+    .voice-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.12; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+    
+    /* Flow Animations */
+    .flow { 
+      stroke: var(--text-normal, #c9d1d9); 
+      stroke-width: 1.5; 
+      stroke-dasharray: 6,4; 
+      fill: none; 
+      animation: voice-flow-move 2s linear infinite; 
+    }
+    .flow-main { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-width: 2.5; 
+      stroke-dasharray: 5,3; 
+      fill: none; 
+      animation: voice-flow-move 0.8s linear infinite; 
+    }
+    
+    @keyframes voice-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Waveform Animation */
+    .wave { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-width: 2; 
+      fill: none; 
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: wave-draw 3s ease-in-out infinite;
+    }
+    
+    @keyframes wave-draw {
+      0%, 100% { stroke-dashoffset: 100; opacity: 0.3; }
+      50% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* Active components */
+    .vad-active {
+      animation: vad-glow 2.5s ease-in-out infinite;
+    }
+    .asr-active {
+      animation: asr-glow 3s ease-in-out infinite;
+    }
+    .llm-active {
+      animation: llm-glow 3.5s ease-in-out infinite;
+    }
+    .tts-active {
+      stroke: #ff7b72;
+      animation: tts-glow 2.8s ease-in-out infinite;
+    }
+
+    @keyframes vad-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: #3fb950; fill: rgba(63, 185, 80, 0.05); }
+    }
+    
+    @keyframes asr-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; }
+      50% { stroke: var(--text-accent, #79c0ff); stroke-width: 3.5; fill: rgba(121, 192, 255, 0.08); filter: drop-shadow(0 0 6px rgba(121, 192, 255, 0.4)); }
+    }
+
+    @keyframes llm-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.05); }
+    }
+
+    @keyframes tts-glow {
+      0%, 100% { stroke: #ff7b72; stroke-width: 3; }
+      50% { stroke: #ff9e96; stroke-width: 3.5; fill: rgba(255, 123, 114, 0.08); filter: drop-shadow(0 0 6px rgba(255, 123, 114, 0.4)); }
+    }
+  </style>
+
+  <text x="350" y="25" class="title" text-anchor="middle">Voice Assistant Pipeline: ASR → LLM → TTS</text>
+
+  <!-- Audio waveform input -->
+  <path d="M 30 80 Q 40 60 50 80 Q 60 100 70 80 Q 80 60 90 80 Q 100 100 110 80 Q 120 60 130 80" class="wave"/>
+  <text x="80" y="110" class="label" text-anchor="middle">Audio Input</text>
+  <text x="80" y="125" class="sublabel" text-anchor="middle">16kHz mono WAV</text>
+
+  <!-- VAD -->
+  <rect x="150" y="60" width="80" height="45" class="voice-box vad-active"/>
+  <text x="190" y="80" class="label" text-anchor="middle" font-weight="bold">VAD</text>
+  <text x="190" y="95" class="sublabel" text-anchor="middle">webrtcvad</text>
+  <line x1="130" y1="80" x2="150" y2="80" class="flow" marker-end="url(#arrow-voice)"/>
+
+  <!-- Whisper ASR -->
+  <rect x="250" y="55" width="120" height="55" class="voice-box asr-active" stroke-width="3"/>
+  <text x="310" y="77" class="label" text-anchor="middle" font-weight="bold">Whisper ASR</text>
+  <text x="310" y="93" class="sublabel" text-anchor="middle">large-v3 | 70× RT</text>
+  <text x="310" y="105" class="sublabel" text-anchor="middle">word timestamps</text>
+  <line x1="230" y1="82" x2="250" y2="82" class="flow-main" marker-end="url(#arrow-voice)"/>
+
+  <!-- Text output from ASR -->
+  <rect x="395" y="60" width="90" height="40" class="voice-box"/>
+  <text x="440" y="80" class="label" text-anchor="middle" font-weight="bold">Text</text>
+  <text x="440" y="93" class="sublabel" text-anchor="middle">"Hello, how..."</text>
+  <line x1="370" y1="82" x2="395" y2="80" class="flow-main" marker-end="url(#arrow-voice)"/>
+
+  <!-- LLM -->
+  <rect x="380" y="140" width="130" height="55" class="voice-box llm-active" stroke-width="3"/>
+  <text x="445" y="162" class="label" text-anchor="middle" font-weight="bold">LLM</text>
+  <text x="445" y="178" class="sublabel" text-anchor="middle">Llama-3 / Qwen2.5</text>
+  <text x="445" y="190" class="sublabel" text-anchor="middle">reasoning + response</text>
+  <line x1="440" y1="100" x2="440" y2="140" class="flow-main" marker-end="url(#arrow-voice)"/>
+
+  <!-- TTS -->
+  <rect x="380" y="225" width="130" height="55" class="voice-box tts-active" stroke-width="3"/>
+  <text x="445" y="247" class="label" text-anchor="middle" font-weight="bold">TTS Engine</text>
+  <text x="445" y="263" class="sublabel" text-anchor="middle">XTTS-v2 / F5-TTS</text>
+  <text x="445" y="275" class="sublabel" text-anchor="middle">voice cloning</text>
+  <line x1="445" y1="195" x2="445" y2="225" class="flow-main" marker-end="url(#arrow-voice)"/>
+
+  <!-- Speaker reference -->
+  <rect x="540" y="230" width="100" height="40" class="voice-box" stroke-dasharray="4,2"/>
+  <text x="590" y="248" class="label" text-anchor="middle">Voice Ref</text>
+  <text x="590" y="263" class="sublabel" text-anchor="middle">10-30s clip</text>
+  <line x1="540" y1="250" x2="510" y2="250" class="flow" marker-end="url(#arrow-voice)"/>
+
+  <!-- Output waveform -->
+  <path d="M 540 170 Q 555 150 570 170 Q 585 190 600 170 Q 615 150 630 170 Q 645 190 660 170" class="wave"/>
+  <text x="600" y="200" class="label" text-anchor="middle">Audio Output</text>
+  <text x="600" y="215" class="sublabel" text-anchor="middle">24kHz synthesized</text>
+  <line x1="510" y1="167" x2="540" y2="170" class="flow-main" marker-end="url(#arrow-voice)"/>
+
+  <!-- Diarization branch -->
+  <rect x="250" y="140" width="100" height="40" class="voice-box" stroke-dasharray="4,2"/>
+  <text x="300" y="158" class="label" text-anchor="middle">Diarization</text>
+  <text x="300" y="173" class="sublabel" text-anchor="middle">pyannote 3.1</text>
+  <line x1="310" y1="110" x2="300" y2="140" class="flow" marker-end="url(#arrow-voice)"/>
+
+  <!-- Metrics -->
+  <rect x="30" y="200" width="180" height="80" rx="6" stroke="var(--text-muted, #8b949e)" stroke-width="1" fill="none"/>
+  <text x="120" y="220" class="label" text-anchor="middle" font-weight="bold">Performance Targets</text>
+  <text x="120" y="240" class="sublabel" text-anchor="middle">ASR: WER &lt; 3% (large-v3)</text>
+  <text x="120" y="255" class="sublabel" text-anchor="middle">TTS: MOS &gt; 4.0/5</text>
+  <text x="120" y="270" class="sublabel" text-anchor="middle">E2E latency: &lt; 2s</text>
+</svg>

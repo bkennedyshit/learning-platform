@@ -1,0 +1,86 @@
+<svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="eng-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L8 5 L0 8z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .eng-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; transition: all 0.2s; }
+    .eng-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .eng-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .eng-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .eng-sub { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .eng-conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 4 4; animation: engFlow 1.5s linear infinite; }
+    @keyframes engFlow { to { stroke-dashoffset: -16; } }
+    .eng-phase { fill: var(--interactive-accent, #58a6ff); opacity: 0.1; rx: 4; }
+  </style>
+
+  <!-- Unity Column -->
+  <text x="175" y="20" class="eng-title">Unity (C#)</text>
+  <rect x="20" y="30" width="310" height="320" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 3" rx="8"/>
+
+  <!-- Unity lifecycle boxes -->
+  <rect x="40" y="45" width="80" height="30" class="eng-box"/>
+  <text x="80" y="64" class="eng-label">Awake()</text>
+
+  <rect x="140" y="45" width="80" height="30" class="eng-box"/>
+  <text x="180" y="64" class="eng-label">Start()</text>
+
+  <rect x="40" y="95" width="80" height="30" class="eng-box"/>
+  <text x="80" y="114" class="eng-label">Update()</text>
+
+  <rect x="140" y="95" width="100" height="30" class="eng-box"/>
+  <text x="190" y="114" class="eng-label">FixedUpdate()</text>
+
+  <rect x="40" y="145" width="100" height="30" class="eng-box"/>
+  <text x="90" y="164" class="eng-label">LateUpdate()</text>
+
+  <line x1="120" y1="60" x2="140" y2="60" class="eng-conn" marker-end="url(#eng-arrow)"/>
+  <line x1="80" y1="75" x2="80" y2="95" class="eng-conn" marker-end="url(#eng-arrow)"/>
+
+  <!-- Unity architecture -->
+  <rect x="40" y="195" width="270" height="70" class="eng-box"/>
+  <text x="175" y="215" class="eng-label" font-weight="bold">Component Architecture</text>
+  <text x="175" y="232" class="eng-sub">GameObject + [Transform, MeshRenderer,</text>
+  <text x="175" y="245" class="eng-sub">Collider, Rigidbody, MonoBehaviour...]</text>
+  <text x="175" y="258" class="eng-sub">Composition over Inheritance</text>
+
+  <rect x="40" y="280" width="270" height="55" class="eng-box"/>
+  <text x="175" y="298" class="eng-label" font-weight="bold">Rendering Pipelines</text>
+  <text x="175" y="313" class="eng-sub">URP (mobile/VR) | HDRP (high-end) | Custom SRP</text>
+  <text x="175" y="328" class="eng-sub">DOTS/ECS for data-oriented performance</text>
+
+  <!-- Unreal Column -->
+  <text x="525" y="20" class="eng-title">Unreal Engine (C++)</text>
+  <rect x="370" y="30" width="310" height="320" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 3" rx="8"/>
+
+  <rect x="390" y="45" width="100" height="30" class="eng-box"/>
+  <text x="440" y="64" class="eng-label">Constructor</text>
+
+  <rect x="510" y="45" width="100" height="30" class="eng-box"/>
+  <text x="560" y="64" class="eng-label">BeginPlay()</text>
+
+  <rect x="390" y="95" width="80" height="30" class="eng-box"/>
+  <text x="430" y="114" class="eng-label">Tick()</text>
+
+  <rect x="490" y="95" width="100" height="30" class="eng-box"/>
+  <text x="540" y="114" class="eng-label">EndPlay()</text>
+
+  <rect x="390" y="145" width="100" height="30" class="eng-box"/>
+  <text x="440" y="164" class="eng-label">Destroyed()</text>
+
+  <line x1="490" y1="60" x2="510" y2="60" class="eng-conn" marker-end="url(#eng-arrow)"/>
+  <line x1="430" y1="75" x2="430" y2="95" class="eng-conn" marker-end="url(#eng-arrow)"/>
+
+  <!-- Unreal architecture -->
+  <rect x="390" y="195" width="270" height="70" class="eng-box"/>
+  <text x="525" y="215" class="eng-label" font-weight="bold">UObject Hierarchy</text>
+  <text x="525" y="232" class="eng-sub">UObject → AActor → APawn → ACharacter</text>
+  <text x="525" y="245" class="eng-sub">ActorComponents attached to Actors</text>
+  <text x="525" y="258" class="eng-sub">Inheritance + Composition hybrid</text>
+
+  <rect x="390" y="280" width="270" height="55" class="eng-box"/>
+  <text x="525" y="298" class="eng-label" font-weight="bold">Rendering Features</text>
+  <text x="525" y="313" class="eng-sub">Nanite (virtualized geometry) | Lumen (GI)</text>
+  <text x="525" y="328" class="eng-sub">Blueprints (visual) + C++ (performance)</text>
+</svg>

@@ -1,0 +1,583 @@
+---
+title: "Eigenvalues Eigenvectors Diagonalization"
+subject: "Linear Algebra & Matrix Theory"
+catalog: advanced
+audience_tier: higher-education
+chapter: "2.6"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 2.6 — Eigenvalues, Eigenvectors & Diagonalization
+
+> *"Eigenvectors are the natural coordinate axes of a linear transformation — the directions that the matrix merely stretches or compresses, never bending."*
+
+Every matrix has a **preferred set of directions** it acts on in the simplest possible way: pure scaling. These are the eigenvectors. When you can choose a basis made entirely of eigenvectors, the matrix becomes diagonal — the most computationally tractable form. This chapter builds that machinery from scratch: finding eigenvalues, constructing eigenvectors, and diagonalizing matrices, culminating in the Spectral Theorem and the Cayley-Hamilton theorem.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Compute eigenvalues from the characteristic polynomial $\det(A - \lambda I) = 0$.
+2. Find eigenvectors and eigenspaces for each eigenvalue.
+3. Distinguish **algebraic multiplicity** from **geometric multiplicity** and understand when they differ.
+4. Diagonalize $A = SDS^{-1}$ when it has $n$ linearly independent eigenvectors.
+5. Compute $A^k = SD^kS^{-1}$ efficiently via diagonalization.
+6. State and apply the **Spectral Theorem** for symmetric matrices.
+7. Verify the **Cayley-Hamilton theorem**: $p(A) = 0$ where $p$ is $A$'s characteristic polynomial.
+
+---
+
+## 🖼️ Visual Anchor — Eigenvector as Invariant Direction
+
+![math-02__2.6-fig1](math-02__2.6-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 2.6.1 — Eigenvalue and Eigenvector
+
+Let $A \in M_{n\times n}(\mathbb{F})$. A scalar $\lambda \in \mathbb{F}$ is an **eigenvalue** of $A$ if there exists a **non-zero** vector $\mathbf{v} \in \mathbb{F}^n$ such that:
+
+$$
+A\mathbf{v} = \lambda\mathbf{v}.
+$$
+
+The vector $\mathbf{v}$ is the **eigenvector** corresponding to $\lambda$. The requirement $\mathbf{v} \neq \mathbf{0}$ is essential: $A\mathbf{0} = \lambda\mathbf{0}$ holds trivially for any $\lambda$ and carries no information.
+
+
+
+### Definition 2.6.2 — Characteristic Polynomial
+
+The **characteristic polynomial** of $A$ is:
+
+$$
+p(\lambda) = \det(A - \lambda I).
+$$
+
+This is a degree-$n$ polynomial in $\lambda$. Its roots (in $\mathbb{F}$) are precisely the eigenvalues of $A$. Over $\mathbb{C}$, $p$ always has $n$ roots (counting multiplicity) by the Fundamental Theorem of Algebra.
+
+### Definition 2.6.3 — Eigenspace
+
+The **eigenspace** of $A$ corresponding to eigenvalue $\lambda$ is:
+
+$$
+E_\lambda = \ker(A - \lambda I) = \{\mathbf{v} \in \mathbb{F}^n : A\mathbf{v} = \lambda\mathbf{v}\}.
+$$
+
+$E_\lambda$ is a subspace of $\mathbb{F}^n$ (it is the null space of $A - \lambda I$).
+
+### Definition 2.6.4 — Algebraic vs. Geometric Multiplicity
+
+Let $\lambda_0$ be an eigenvalue of $A$.
+
+- **Algebraic multiplicity** $m_a(\lambda_0)$: the multiplicity of $\lambda_0$ as a root of $p(\lambda) = \det(A-\lambda I)$.
+- **Geometric multiplicity** $m_g(\lambda_0)$: the dimension of the eigenspace $E_{\lambda_0} = \ker(A-\lambda_0 I)$.
+
+Always: $1 \leq m_g(\lambda_0) \leq m_a(\lambda_0)$. When $m_g < m_a$, the matrix is **defective** (not diagonalizable).
+
+### Definition 2.6.5 — Diagonalization
+
+$A$ is **diagonalizable** if there exists an invertible matrix $S$ and a diagonal matrix $D$ such that:
+
+$$
+A = SDS^{-1}, \quad \text{equivalently} \quad S^{-1}AS = D.
+$$
+
+The columns of $S$ are eigenvectors of $A$; the diagonal entries of $D$ are the corresponding eigenvalues. This is a change-of-basis to the eigenvector basis (Chapter 2.4).
+
+---
+
+## 📐 2. Axioms / Postulates
+
+We work in $\mathbb{F}^n$ over $\mathbb{F} = \mathbb{R}$ or $\mathbb{C}$. The key postulate underwriting eigenvalue theory:
+
+**Postulate 2.6.P1 (Fundamental Theorem of Algebra):** Every polynomial of degree $n \geq 1$ over $\mathbb{C}$ has exactly $n$ roots (counting multiplicity). Over $\mathbb{R}$, real symmetric matrices have all real eigenvalues (Spectral Theorem).
+
+**Postulate 2.6.P2:** Matrix similarity is an equivalence relation and preserves the characteristic polynomial (hence eigenvalues), trace, and determinant.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 2.6.1 — Finding Eigenvalues
+
+$\lambda$ is an eigenvalue of $A$ if and only if $\det(A - \lambda I) = 0$.
+
+**Proof.** $A\mathbf{v} = \lambda\mathbf{v}$ with $\mathbf{v} \neq \mathbf{0}$ is equivalent to $(A - \lambda I)\mathbf{v} = \mathbf{0}$ having a non-trivial solution. By the invertibility criterion (Theorem 2.5.3), this happens iff $\det(A - \lambda I) = 0$. $\blacksquare$
+
+### Lemma 2.6.2 — Trace and Determinant via Eigenvalues
+
+If $A$ has eigenvalues $\lambda_1, \ldots, \lambda_n$ (over $\mathbb{C}$, counting multiplicity):
+
+$$
+\operatorname{tr}(A) = \sum_{i=1}^n \lambda_i, \qquad \det(A) = \prod_{i=1}^n \lambda_i.
+$$
+
+**Proof.** The characteristic polynomial is $p(\lambda) = \det(A - \lambda I) = (-\lambda)^n + \operatorname{tr}(A)(-\lambda)^{n-1} + \cdots + \det(A)$. Factoring over $\mathbb{C}$: $p(\lambda) = (-1)^n(\lambda-\lambda_1)\cdots(\lambda-\lambda_n)$. Comparing coefficients of $\lambda^{n-1}$ gives trace; setting $\lambda = 0$ gives determinant. $\blacksquare$
+
+### Lemma 2.6.3 — Eigenvalues of $A^k$, $A^{-1}$, $p(A)$
+
+If $A\mathbf{v} = \lambda\mathbf{v}$ (with $\mathbf{v} \neq \mathbf{0}$), then:
+- $A^k \mathbf{v} = \lambda^k \mathbf{v}$ for any positive integer $k$.
+- If $A$ is invertible: $A^{-1}\mathbf{v} = \lambda^{-1}\mathbf{v}$.
+- For any polynomial $p$: $p(A)\mathbf{v} = p(\lambda)\mathbf{v}$.
+
+**Proof.** Apply $A$ repeatedly: $A^2\mathbf{v} = A(A\mathbf{v}) = A(\lambda\mathbf{v}) = \lambda A\mathbf{v} = \lambda^2\mathbf{v}$. By induction, $A^k\mathbf{v} = \lambda^k\mathbf{v}$. For $p(A) = \sum_j c_j A^j$: $p(A)\mathbf{v} = \sum_j c_j A^j \mathbf{v} = \sum_j c_j \lambda^j \mathbf{v} = p(\lambda)\mathbf{v}$. $\blacksquare$
+
+
+---
+
+## 👑 4. Major Theorems
+
+### Theorem 2.6.1 — Eigenvectors for Distinct Eigenvalues Are Linearly Independent
+
+If $\lambda_1, \lambda_2, \ldots, \lambda_k$ are **distinct** eigenvalues of $A$ with corresponding eigenvectors $\mathbf{v}_1, \ldots, \mathbf{v}_k$, then $\{\mathbf{v}_1, \ldots, \mathbf{v}_k\}$ is linearly independent.
+
+### Theorem 2.6.2 — Diagonalizability Criterion
+
+$A \in M_{n\times n}(\mathbb{F})$ is diagonalizable over $\mathbb{F}$ if and only if $A$ has $n$ linearly independent eigenvectors in $\mathbb{F}^n$.
+
+Equivalently: $A$ is diagonalizable iff for **every** eigenvalue $\lambda$, the geometric multiplicity equals the algebraic multiplicity: $m_g(\lambda) = m_a(\lambda)$.
+
+### Theorem 2.6.3 — Spectral Theorem for Real Symmetric Matrices
+
+Let $A \in M_{n\times n}(\mathbb{R})$ with $A = A^T$. Then:
+
+1. All eigenvalues of $A$ are **real**.
+2. Eigenvectors corresponding to **distinct** eigenvalues are **orthogonal**.
+3. $A$ is **orthogonally diagonalizable**: $A = Q D Q^T$ where $Q$ is orthogonal ($Q^T Q = I$) and $D$ is diagonal with real entries.
+
+### Theorem 2.6.4 — Cayley-Hamilton Theorem
+
+Every square matrix $A$ satisfies its own characteristic equation: if $p(\lambda) = \det(A - \lambda I)$ is the characteristic polynomial, then:
+
+$$
+p(A) = \mathbf{0} \quad (\text{the zero matrix}).
+$$
+
+### Theorem 2.6.5 — Matrix Powers via Diagonalization
+
+If $A = SDS^{-1}$ with $D = \operatorname{diag}(\lambda_1, \ldots, \lambda_n)$, then for any integer $k$:
+
+$$
+A^k = S D^k S^{-1}, \quad D^k = \operatorname{diag}(\lambda_1^k, \ldots, \lambda_n^k).
+$$
+
+---
+
+## ✍️ 5. Proofs
+
+### 5.1 Proof of Theorem 2.6.1 (Distinct Eigenvalues → Linearly Independent)
+
+**Proof by strong induction on $k$.**
+
+**Base case $k=1$:** A single eigenvector $\mathbf{v}_1 \neq \mathbf{0}$ is trivially linearly independent.
+
+**Inductive step:** Assume $\{\mathbf{v}_1, \ldots, \mathbf{v}_{k-1}\}$ is linearly independent. Suppose:
+
+$$
+c_1\mathbf{v}_1 + c_2\mathbf{v}_2 + \cdots + c_k\mathbf{v}_k = \mathbf{0}. \tag{$*$}
+$$
+
+Multiply both sides on the left by $A$:
+
+$$
+c_1 A\mathbf{v}_1 + c_2 A\mathbf{v}_2 + \cdots + c_k A\mathbf{v}_k = \mathbf{0},
+$$
+
+$$
+c_1\lambda_1\mathbf{v}_1 + c_2\lambda_2\mathbf{v}_2 + \cdots + c_k\lambda_k\mathbf{v}_k = \mathbf{0}. \tag{$**$}
+$$
+
+Now multiply $(*)$ by $\lambda_k$ and subtract from $(**)$:
+
+$$
+c_1(\lambda_1 - \lambda_k)\mathbf{v}_1 + c_2(\lambda_2 - \lambda_k)\mathbf{v}_2 + \cdots + c_{k-1}(\lambda_{k-1} - \lambda_k)\mathbf{v}_{k-1} = \mathbf{0}.
+$$
+
+By the inductive hypothesis, $\{\mathbf{v}_1, \ldots, \mathbf{v}_{k-1}\}$ is linearly independent, so all coefficients must be zero:
+
+$$
+c_i(\lambda_i - \lambda_k) = 0 \quad \text{for } i = 1, \ldots, k-1.
+$$
+
+Since $\lambda_1, \ldots, \lambda_k$ are **distinct**, $\lambda_i - \lambda_k \neq 0$ for $i < k$. Therefore $c_i = 0$ for $i = 1, \ldots, k-1$. Substituting back into $(*)$: $c_k \mathbf{v}_k = \mathbf{0}$. Since $\mathbf{v}_k \neq \mathbf{0}$, $c_k = 0$.
+
+All coefficients are zero; $\{\mathbf{v}_1, \ldots, \mathbf{v}_k\}$ is linearly independent. $\blacksquare$
+
+### 5.2 Proof of Spectral Theorem — Real Eigenvalues of Symmetric $A$
+
+**Claim:** If $A = A^T \in M_{n\times n}(\mathbb{R})$ and $A\mathbf{v} = \lambda\mathbf{v}$ with $\mathbf{v} \in \mathbb{C}^n$, $\mathbf{v} \neq \mathbf{0}$, then $\lambda \in \mathbb{R}$.
+
+**Proof.** Take the complex inner product $\langle \cdot, \cdot \rangle$ on $\mathbb{C}^n$ where $\langle \mathbf{u}, \mathbf{w} \rangle = \bar{\mathbf{u}}^T \mathbf{w}$.
+
+Compute $\langle \mathbf{v}, A\mathbf{v}\rangle$ in two ways:
+
+**Way 1:** $\langle \mathbf{v}, A\mathbf{v}\rangle = \langle \mathbf{v}, \lambda\mathbf{v}\rangle = \lambda \langle \mathbf{v}, \mathbf{v}\rangle = \lambda \|\mathbf{v}\|^2$.
+
+**Way 2:** Since $A = A^T$ (real symmetric, hence Hermitian over $\mathbb{C}$: $\bar{A}^T = A$):
+
+$$
+\langle \mathbf{v}, A\mathbf{v}\rangle = (A\mathbf{v})^*\mathbf{v}^{??} \ldots
+$$
+
+More cleanly: $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle = \langle \lambda\mathbf{v}, \mathbf{v}\rangle = \bar\lambda\|\mathbf{v}\|^2$.
+
+But $\langle \mathbf{v}, A\mathbf{v}\rangle \in \mathbb{C}$ and $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle$. Since $A$ is symmetric (real), $A = A^T$, so $\langle A\mathbf{v}, \mathbf{v}\rangle = (A\mathbf{v})^T\bar\mathbf{v} = \mathbf{v}^T A^T \bar\mathbf{v} = \mathbf{v}^T A\bar\mathbf{v}$... 
+
+Let us use the cleaner route: $\langle \mathbf{v}, A\mathbf{v}\rangle = \bar\mathbf{v}^T A\mathbf{v}$. Then:
+
+$$
+\overline{\bar\mathbf{v}^T A\mathbf{v}} = \mathbf{v}^T \bar{A} \bar\mathbf{v} = \mathbf{v}^T A \bar\mathbf{v} \quad (A \text{ real})
+$$
+
+$$
+= (A^T \mathbf{v})^T \bar\mathbf{v} = (A\mathbf{v})^T\bar\mathbf{v} = (\lambda\mathbf{v})^T\bar\mathbf{v} = \lambda \mathbf{v}^T\bar\mathbf{v} = \bar\lambda \bar\mathbf{v}^T\mathbf{v}.
+$$
+
+Wait — $\mathbf{v}^T\bar\mathbf{v} = \overline{\bar\mathbf{v}^T\mathbf{v}}$. We have $\bar\mathbf{v}^T A \mathbf{v} = \lambda\|\mathbf{v}\|^2$ and taking conjugates: $\mathbf{v}^T A\bar\mathbf{v} = \bar\lambda\|\mathbf{v}\|^2$. But $\mathbf{v}^T A\bar\mathbf{v} = (\bar\mathbf{v}^T A^T \mathbf{v})^T \to$ by symmetry $= \bar\mathbf{v}^T A\mathbf{v} = \lambda\|\mathbf{v}\|^2$.
+
+So $\bar\lambda\|\mathbf{v}\|^2 = \lambda\|\mathbf{v}\|^2$. Since $\|\mathbf{v}\|^2 > 0$, $\bar\lambda = \lambda$, hence $\lambda \in \mathbb{R}$. $\blacksquare$
+
+
+**Claim:** Eigenvectors of symmetric $A$ for distinct eigenvalues are orthogonal.
+
+**Proof.** Let $A\mathbf{u} = \lambda\mathbf{u}$ and $A\mathbf{v} = \mu\mathbf{v}$ with $\lambda \neq \mu$. Then:
+
+$$
+\lambda\langle\mathbf{u},\mathbf{v}\rangle = \langle A\mathbf{u},\mathbf{v}\rangle = \mathbf{u}^T A^T \mathbf{v} = \mathbf{u}^T A\mathbf{v} = \langle\mathbf{u}, A\mathbf{v}\rangle = \mu\langle\mathbf{u},\mathbf{v}\rangle.
+$$
+
+So $(\lambda - \mu)\langle\mathbf{u},\mathbf{v}\rangle = 0$. Since $\lambda \neq \mu$, we get $\langle\mathbf{u},\mathbf{v}\rangle = 0$. $\blacksquare$
+
+### 5.3 Cayley-Hamilton — Full Proof for $2\times 2$
+
+For $A = \begin{pmatrix}a&b\\c&d\end{pmatrix}$, the characteristic polynomial is:
+
+$$
+p(\lambda) = \lambda^2 - (a+d)\lambda + (ad-bc) = \lambda^2 - \operatorname{tr}(A)\lambda + \det(A).
+$$
+
+Compute $p(A) = A^2 - \operatorname{tr}(A) \cdot A + \det(A) \cdot I$:
+
+$$
+A^2 = \begin{pmatrix}a^2+bc & ab+bd \\ ac+cd & bc+d^2\end{pmatrix} = \begin{pmatrix}a^2+bc & b(a+d) \\ c(a+d) & bc+d^2\end{pmatrix}.
+$$
+
+$$
+\operatorname{tr}(A) \cdot A = (a+d)\begin{pmatrix}a&b\\c&d\end{pmatrix} = \begin{pmatrix}a(a+d) & b(a+d) \\ c(a+d) & d(a+d)\end{pmatrix}.
+$$
+
+$$
+A^2 - \operatorname{tr}(A)A = \begin{pmatrix}a^2+bc-a^2-ad & 0 \\ 0 & bc+d^2-d^2-ad\end{pmatrix} = \begin{pmatrix}bc-ad & 0 \\ 0 & bc-ad\end{pmatrix} = -(ad-bc)I.
+$$
+
+Adding $\det(A) \cdot I = (ad-bc)I$:
+
+$$
+p(A) = -(ad-bc)I + (ad-bc)I = \mathbf{0}. \quad \blacksquare
+$$
+
+---
+
+## 🖼️ More SVGs
+
+### SVG 2 — Eigenvalue Stretch/Shrink
+
+![math-02__2.6-fig2](math-02__2.6-fig2.svg)
+
+### SVG 3 — Characteristic Polynomial Roots
+
+![math-02__2.6-fig3](math-02__2.6-fig3.svg)
+
+
+### SVG 4 — Diagonalization Commutative Diagram
+
+![math-02__2.6-fig4](math-02__2.6-fig4.svg)
+
+### SVG 5 — Power Iteration to Dominant Eigenvector
+
+![math-02__2.6-fig5](math-02__2.6-fig5.svg)
+
+---
+
+## 🎯 6. Worked Examples
+
+### Example 2.6.E1 — Find Eigenvalues of a 2×2 Matrix
+
+Let $A = \begin{pmatrix}4&2\\1&3\end{pmatrix}$.
+
+**Characteristic polynomial:**
+
+$$
+p(\lambda) = \det\begin{pmatrix}4-\lambda & 2 \\ 1 & 3-\lambda\end{pmatrix} = (4-\lambda)(3-\lambda) - 2.
+$$
+
+Expand: $\lambda^2 - 7\lambda + 12 - 2 = \lambda^2 - 7\lambda + 10$.
+
+Factor: $(\lambda - 5)(\lambda - 2) = 0$, so $\lambda_1 = 5$, $\lambda_2 = 2$.
+
+**Check:** $\operatorname{tr}(A) = 7 = 5+2$ ✓. $\det(A) = 12-2 = 10 = 5\cdot2$ ✓.
+
+### Example 2.6.E2 — Find Eigenvectors
+
+Continuing from E1 with $A = \begin{pmatrix}4&2\\1&3\end{pmatrix}$:
+
+**Eigenvector for $\lambda_1 = 5$:** Solve $(A - 5I)\mathbf{v} = \mathbf{0}$:
+
+$$
+\begin{pmatrix}-1&2\\1&-2\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix} = \begin{pmatrix}0\\0\end{pmatrix}.
+$$
+
+Row 1: $-x + 2y = 0 \Rightarrow x = 2y$. Choose $y=1$: $\mathbf{v}_1 = \begin{pmatrix}2\\1\end{pmatrix}$.
+
+**Eigenvector for $\lambda_2 = 2$:** Solve $(A - 2I)\mathbf{v} = \mathbf{0}$:
+
+$$
+\begin{pmatrix}2&2\\1&1\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix} = \begin{pmatrix}0\\0\end{pmatrix}.
+$$
+
+Row 1: $x + y = 0 \Rightarrow x = -y$. Choose $y=1$: $\mathbf{v}_2 = \begin{pmatrix}-1\\1\end{pmatrix}$.
+
+
+### Example 2.6.E3 — Diagonalizing a 2×2 Matrix
+
+From E1 and E2: $S = \begin{pmatrix}2&-1\\1&1\end{pmatrix}$, $D = \begin{pmatrix}5&0\\0&2\end{pmatrix}$.
+
+**Verify $AS = SD$:**
+
+$$
+AS = \begin{pmatrix}4&2\\1&3\end{pmatrix}\begin{pmatrix}2&-1\\1&1\end{pmatrix} = \begin{pmatrix}10&-2\\5&2\end{pmatrix}.
+$$
+
+$$
+SD = \begin{pmatrix}2&-1\\1&1\end{pmatrix}\begin{pmatrix}5&0\\0&2\end{pmatrix} = \begin{pmatrix}10&-2\\5&2\end{pmatrix}. \quad \checkmark
+$$
+
+So $A = SDS^{-1}$ with $S^{-1} = \frac{1}{3}\begin{pmatrix}1&1\\-1&2\end{pmatrix}$.
+
+### Example 2.6.E4 — Computing $A^{10}$ via Diagonalization
+
+With the matrix from E1: $A = SDS^{-1}$, so:
+
+$$
+A^{10} = SD^{10}S^{-1} = \begin{pmatrix}2&-1\\1&1\end{pmatrix}\begin{pmatrix}5^{10}&0\\0&2^{10}\end{pmatrix}\frac{1}{3}\begin{pmatrix}1&1\\-1&2\end{pmatrix}.
+$$
+
+$$
+SD^{10} = \begin{pmatrix}2\cdot5^{10} & -2^{10} \\ 5^{10} & 2^{10}\end{pmatrix}.
+$$
+
+$$
+A^{10} = \frac{1}{3}\begin{pmatrix}2\cdot5^{10}+2^{10} & 2\cdot5^{10}-2^{11} \\ 5^{10}-2^{10} & 5^{10}+2^{11}\end{pmatrix}.
+$$
+
+Without diagonalization, computing $A^{10}$ would require 9 matrix multiplications.
+
+### Example 2.6.E5 — Eigenvalues of a 3×3 Matrix
+
+Let $A = \begin{pmatrix}2&1&0\\0&2&1\\0&0&3\end{pmatrix}$.
+
+**Characteristic polynomial** (upper triangular: determinant = product of diagonal entries):
+
+$$
+p(\lambda) = (2-\lambda)^2(3-\lambda).
+$$
+
+Eigenvalues: $\lambda_1 = 2$ (algebraic multiplicity 2), $\lambda_2 = 3$ (algebraic multiplicity 1).
+
+**Eigenspace for $\lambda_1 = 2$:** Solve $(A-2I)\mathbf{v} = \mathbf{0}$:
+
+$$
+A - 2I = \begin{pmatrix}0&1&0\\0&0&1\\0&0&1\end{pmatrix} \to \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}.
+$$
+
+Free variable: $x_1 = t$, $x_2 = 0$, $x_3 = 0$. So $E_2 = \text{span}\{(1,0,0)^T\}$, $m_g(2) = 1 \neq 2 = m_a(2)$.
+
+**This matrix is NOT diagonalizable** — the geometric multiplicity of $\lambda=2$ is 1, less than its algebraic multiplicity 2. It requires a Jordan block.
+
+### Example 2.6.E6 — Spectral Theorem Application
+
+Let $A = \begin{pmatrix}3&1\\1&3\end{pmatrix}$ (symmetric).
+
+$p(\lambda) = (3-\lambda)^2 - 1 = \lambda^2 - 6\lambda + 8 = (\lambda-2)(\lambda-4)$.
+
+$\lambda_1 = 2$: $(A-2I)\mathbf{v} = 0 \Rightarrow \mathbf{v}_1 = (1,-1)/\sqrt{2}$.
+
+$\lambda_2 = 4$: $(A-4I)\mathbf{v} = 0 \Rightarrow \mathbf{v}_2 = (1,1)/\sqrt{2}$.
+
+Orthogonal diagonalization: $Q = \frac{1}{\sqrt{2}}\begin{pmatrix}1&1\\-1&1\end{pmatrix}$, $D = \begin{pmatrix}2&0\\0&4\end{pmatrix}$.
+
+Verify $\mathbf{v}_1 \cdot \mathbf{v}_2 = \frac{1}{2}(1)(1) + \frac{1}{2}(-1)(1) = 0$. ✓
+
+### Example 2.6.E7 — Cayley-Hamilton Verification
+
+For $A = \begin{pmatrix}4&2\\1&3\end{pmatrix}$: $p(\lambda) = \lambda^2 - 7\lambda + 10$.
+
+$$
+p(A) = A^2 - 7A + 10I.
+$$
+
+$$
+A^2 = \begin{pmatrix}18&14\\7&11\end{pmatrix}.
+$$
+
+$$
+p(A) = \begin{pmatrix}18&14\\7&11\end{pmatrix} - \begin{pmatrix}28&14\\7&21\end{pmatrix} + \begin{pmatrix}10&0\\0&10\end{pmatrix} = \begin{pmatrix}0&0\\0&0\end{pmatrix}. \quad \checkmark
+$$
+
+### Example 2.6.E8 — Algebraic vs. Geometric Multiplicity
+
+Consider $A = \begin{pmatrix}2&1&0\\0&2&0\\0&0&2\end{pmatrix}$ (Jordan form). $p(\lambda) = (2-\lambda)^3$, $m_a(2) = 3$.
+
+$(A - 2I) = \begin{pmatrix}0&1&0\\0&0&0\\0&0&0\end{pmatrix}$. Null space: $x_2 = 0$, $x_1, x_3$ free. $E_2 = \text{span}\{(1,0,0)^T, (0,0,1)^T\}$, $m_g(2) = 2$.
+
+Since $m_g(2) = 2 < 3 = m_a(2)$: **not fully diagonalizable**. Only 2 linearly independent eigenvectors; the Jordan block for $\lambda = 2$ has size 2.
+
+---
+
+## ⚠️ 7. Common Pitfalls
+
+### Pitfall 1 — Confusing Algebraic and Geometric Multiplicity
+
+A repeated eigenvalue ($m_a > 1$) does **not** guarantee a 2D eigenspace. Example E5 above shows $m_a(2) = 2$ but $m_g(2) = 1$ — the matrix is defective. Always compute the actual null space dimension.
+
+### Pitfall 2 — Defective Matrices (Not Diagonalizable)
+
+When a matrix doesn't have $n$ linearly independent eigenvectors, $A = SDS^{-1}$ fails. You need the Jordan Normal Form instead. The $2\times 2$ case: $\begin{pmatrix}\lambda&1\\0&\lambda\end{pmatrix}$ has only one eigenvector direction.
+
+### Pitfall 3 — Complex Eigenvalues of Real Matrices
+
+A real matrix can have complex eigenvalues — they always appear in conjugate pairs. Example: $A = \begin{pmatrix}0&-1\\1&0\end{pmatrix}$ has $p(\lambda) = \lambda^2 + 1$, eigenvalues $\lambda = \pm i$. Over $\mathbb{R}$, the matrix represents rotation by 90° and is not diagonalizable over $\mathbb{R}$ (but is over $\mathbb{C}$).
+
+---
+
+## 📝 8. Challenge Problems
+
+### Problem 2.6.P1
+
+Find the eigenvalues and eigenvectors of $A = \begin{pmatrix}1&1\\4&-2\end{pmatrix}$ and diagonalize $A$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$p(\lambda) = (1-\lambda)(-2-\lambda) - 4 = -2 - \lambda + 2\lambda + \lambda^2 - 4 = \lambda^2 + \lambda - 6 = (\lambda+3)(\lambda-2)$.
+
+$\lambda_1 = -3$: $(A+3I)\mathbf{v}=0$: $\begin{pmatrix}4&1\\4&1\end{pmatrix}\mathbf{v}=0 \Rightarrow \mathbf{v}_1 = (1,-4)^T$.
+
+$\lambda_2 = 2$: $(A-2I)\mathbf{v}=0$: $\begin{pmatrix}-1&1\\4&-4\end{pmatrix}\mathbf{v}=0 \Rightarrow \mathbf{v}_2 = (1,1)^T$.
+
+$S = \begin{pmatrix}1&1\\-4&1\end{pmatrix}$, $D = \begin{pmatrix}-3&0\\0&2\end{pmatrix}$. $\det S = 1+4 = 5$, $S^{-1} = \frac{1}{5}\begin{pmatrix}1&-1\\4&1\end{pmatrix}$.
+
+</details>
+
+### Problem 2.6.P2
+
+Compute $A^{20}$ where $A = \begin{pmatrix}3&1\\0&2\end{pmatrix}$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$A$ is upper triangular: eigenvalues $\lambda_1=3$, $\lambda_2=2$. Eigenvectors: for $\lambda=3$: $\mathbf{v}_1=(1,0)^T$; for $\lambda=2$: $(A-2I)\mathbf{v}=0$: $\begin{pmatrix}1&1\\0&0\end{pmatrix}\mathbf{v}=0 \Rightarrow \mathbf{v}_2=(-1,1)^T$.
+
+$S=\begin{pmatrix}1&-1\\0&1\end{pmatrix}$, $S^{-1}=\begin{pmatrix}1&1\\0&1\end{pmatrix}$, $D=\begin{pmatrix}3&0\\0&2\end{pmatrix}$.
+
+$A^{20}=SD^{20}S^{-1}=\begin{pmatrix}1&-1\\0&1\end{pmatrix}\begin{pmatrix}3^{20}&0\\0&2^{20}\end{pmatrix}\begin{pmatrix}1&1\\0&1\end{pmatrix}=\begin{pmatrix}3^{20}&3^{20}-2^{20}\\0&2^{20}\end{pmatrix}$.
+
+</details>
+
+### Problem 2.6.P3
+
+Verify Cayley-Hamilton for $A = \begin{pmatrix}1&2\\3&4\end{pmatrix}$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$p(\lambda) = \lambda^2 - 5\lambda - 2$. $A^2 = \begin{pmatrix}7&10\\15&22\end{pmatrix}$.
+
+$p(A) = \begin{pmatrix}7&10\\15&22\end{pmatrix} - 5\begin{pmatrix}1&2\\3&4\end{pmatrix} - 2\begin{pmatrix}1&0\\0&1\end{pmatrix} = \begin{pmatrix}7-5-2&10-10\\15-15&22-20-2\end{pmatrix} = \begin{pmatrix}0&0\\0&0\end{pmatrix}$. ✓
+
+</details>
+
+### Problem 2.6.P4
+
+Find eigenvalues of the symmetric matrix $A = \begin{pmatrix}5&-2\\-2&5\end{pmatrix}$ and verify the eigenvectors are orthogonal.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$p(\lambda) = (5-\lambda)^2 - 4 = \lambda^2 - 10\lambda + 21 = (\lambda-3)(\lambda-7)$.
+
+$\lambda_1=3$: $(A-3I)\mathbf{v}=0$: $\mathbf{v}_1=(1,1)^T/\sqrt{2}$.
+
+$\lambda_2=7$: $(A-7I)\mathbf{v}=0$: $\mathbf{v}_2=(1,-1)^T/\sqrt{2}$.
+
+$\mathbf{v}_1\cdot\mathbf{v}_2 = \frac{1}{2}(1\cdot1 + 1\cdot(-1)) = 0$. Orthogonal. ✓ (Spectral Theorem for symmetric matrices.)
+
+</details>
+
+### Problem 2.6.P5
+
+Prove that if $\lambda$ is an eigenvalue of invertible $A$, then $1/\lambda$ is an eigenvalue of $A^{-1}$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$A\mathbf{v} = \lambda\mathbf{v}$. Since $A$ is invertible and $\lambda \neq 0$ (because $\det(A) \neq 0$ means no zero eigenvalue), multiply both sides on the left by $A^{-1}$:
+
+$A^{-1}(A\mathbf{v}) = A^{-1}(\lambda\mathbf{v}) \Rightarrow \mathbf{v} = \lambda A^{-1}\mathbf{v} \Rightarrow A^{-1}\mathbf{v} = \frac{1}{\lambda}\mathbf{v}$. $\blacksquare$
+
+</details>
+
+### Problem 2.6.P6
+
+For $A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}$, find the characteristic polynomial and discuss why $A$ is not diagonalizable over $\mathbb{R}$.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+$p(\lambda) = \lambda^2 + 1$. Over $\mathbb{R}$, this has no real roots — no real eigenvalues. Without eigenvalues in $\mathbb{R}$, there are no real eigenvectors, so $A$ cannot be diagonalized over $\mathbb{R}$.
+
+Over $\mathbb{C}$: $\lambda = \pm i$. Eigenvectors: for $\lambda = i$: $(A-iI)\mathbf{v}=0$, $\mathbf{v}=(1,-i)^T$; for $\lambda=-i$: $\mathbf{v}=(1,i)^T$. Note $A$ represents 90° rotation — no real direction is preserved.
+
+</details>
+
+### Problem 2.6.P7
+
+Show that eigenvectors for distinct eigenvalues of the same matrix are linearly independent for $k=3$ explicitly (spell out the induction step).
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+Take $A\mathbf{v}_i = \lambda_i\mathbf{v}_i$, $\lambda_1,\lambda_2,\lambda_3$ distinct. Suppose $c_1\mathbf{v}_1+c_2\mathbf{v}_2+c_3\mathbf{v}_3=\mathbf{0}$ (★). Multiply by $A$: $c_1\lambda_1\mathbf{v}_1+c_2\lambda_2\mathbf{v}_2+c_3\lambda_3\mathbf{v}_3=\mathbf{0}$ (★★). Compute (★★)$-\lambda_3$(★): $c_1(\lambda_1-\lambda_3)\mathbf{v}_1+c_2(\lambda_2-\lambda_3)\mathbf{v}_2=\mathbf{0}$. By $k=2$ case (proved earlier), $\{\mathbf{v}_1,\mathbf{v}_2\}$ lin. indep., so $c_1(\lambda_1-\lambda_3)=0$ and $c_2(\lambda_2-\lambda_3)=0$. Since $\lambda_i$ distinct, $c_1=c_2=0$. From (★): $c_3\mathbf{v}_3=\mathbf{0}$, so $c_3=0$. $\blacksquare$
+
+</details>
+
+### Problem 2.6.P8
+
+Let $A$ be an $n\times n$ nilpotent matrix ($A^k = 0$ for some $k$). Prove all eigenvalues of $A$ are 0.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+Suppose $A\mathbf{v} = \lambda\mathbf{v}$, $\mathbf{v} \neq \mathbf{0}$. By Lemma 2.6.3: $A^k\mathbf{v} = \lambda^k\mathbf{v}$. But $A^k = 0$, so $\lambda^k\mathbf{v} = \mathbf{0}$. Since $\mathbf{v} \neq \mathbf{0}$, $\lambda^k = 0$. In $\mathbb{F}$ (a field), $\lambda^k = 0 \Rightarrow \lambda = 0$. $\blacksquare$
+
+</details>
+
+---
+
+## 🔗 Cross-Links
+
+- Change-of-basis underpins $S^{-1}AS = D$: [2.4 - Linear Transformations & Change of Basis](2.4---Linear-Transformations-&-Change-of-Basis)
+- Characteristic polynomial uses determinant: [2.5 - Determinants & Cramer's Rule](2.5---Determinants-&-Cramer's-Rule)
+- Orthogonal diagonalization and QR: [2.7 - Inner Product Spaces & Orthogonality](2.7---Inner-Product-Spaces-&-Orthogonality)
+- SVD extends to non-square, non-diagonalizable: [2.8 - Tensors & Multilinear Algebra](2.8---Tensors-&-Multilinear-Algebra)
+- Eigenvalue problems in physics: [04 - Classical Mechanics & Dynamical Systems](04---Classical-Mechanics-&-Dynamical-Systems)

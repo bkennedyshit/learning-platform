@@ -1,0 +1,98 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-mem" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .mem-block { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 4; transition: all 0.3s; cursor: pointer; }
+    .mem-block:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .stack-block { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 4; }
+    .heap-block { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 4; stroke-dasharray: 4,2; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: start; }
+    .ptr-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#arrow-mem); stroke-dasharray: 5,3; }
+    .val-cat { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .val-cat-active { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 6; }
+  </style>
+
+  <text x="350" y="22" class="title">C++ Memory Layout &amp; Value Categories</text>
+
+  <!-- Stack Section -->
+  <text x="120" y="50" class="section-label">Stack (automatic)</text>
+  <rect x="30" y="58" width="180" height="160" class="stack-block"/>
+  <text x="40" y="78" class="detail">int x = 42;</text>
+  <rect x="140" y="66" width="60" height="18" class="mem-block"/>
+  <text x="170" y="79" class="label">42</text>
+
+  <text x="40" y="100" class="detail">float y = 3.14;</text>
+  <rect x="140" y="88" width="60" height="18" class="mem-block"/>
+  <text x="170" y="101" class="label">3.14</text>
+
+  <text x="40" y="122" class="detail">int* ptr = &amp;x;</text>
+  <rect x="140" y="110" width="60" height="18" class="mem-block"/>
+  <text x="170" y="123" class="label">0x7ff..</text>
+
+  <text x="40" y="144" class="detail">Vec3 pos{1,2,3};</text>
+  <rect x="140" y="132" width="60" height="30" class="mem-block"/>
+  <text x="170" y="148" class="label">1|2|3</text>
+
+  <text x="40" y="178" class="detail">vector&lt;int&gt; v;</text>
+  <rect x="140" y="166" width="60" height="30" class="mem-block"/>
+  <text x="170" y="180" class="label">ptr|sz|cap</text>
+
+  <text x="120" y="210" class="detail">↑ Fast: ~1 cycle alloc</text>
+
+  <!-- Heap Section -->
+  <text x="420" y="50" class="section-label">Heap (dynamic)</text>
+  <rect x="300" y="58" width="200" height="160" class="heap-block"/>
+
+  <text x="310" y="78" class="detail">new int(99)</text>
+  <rect x="420" y="66" width="60" height="18" class="mem-block"/>
+  <text x="450" y="79" class="label">99</text>
+
+  <text x="310" y="108" class="detail">vector's buffer:</text>
+  <rect x="420" y="96" width="60" height="18" class="mem-block"/>
+  <text x="450" y="109" class="label">[1,2,3]</text>
+
+  <text x="310" y="138" class="detail">make_unique&lt;T&gt;()</text>
+  <rect x="420" y="126" width="60" height="30" class="mem-block"/>
+  <text x="450" y="143" class="label">Object</text>
+
+  <text x="400" y="185" class="detail">↑ Slow: ~100 cycles alloc</text>
+  <text x="400" y="200" class="detail">  Fragmentation possible</text>
+
+  <!-- Pointer arrow from stack to heap -->
+  <path d="M 200 180 C 250 180 280 105 415 105" class="ptr-arrow"/>
+
+  <!-- Value Categories Section -->
+  <text x="350" y="250" class="section-label">Value Categories</text>
+
+  <!-- lvalue -->
+  <rect x="30" y="265" width="190" height="65" class="val-cat-active"/>
+  <text x="125" y="285" class="label">lvalue</text>
+  <text x="40" y="302" class="detail">Has identity (addressable)</text>
+  <text x="40" y="316" class="detail">x, arr[0], *ptr, obj.m</text>
+
+  <!-- prvalue -->
+  <rect x="250" y="265" width="190" height="65" class="val-cat"/>
+  <text x="345" y="285" class="label">prvalue</text>
+  <text x="260" y="302" class="detail">Temporary (no address)</text>
+  <text x="260" y="316" class="detail">42, x+y, string("hi")</text>
+
+  <!-- xvalue -->
+  <rect x="470" y="265" width="200" height="65" class="val-cat-active"/>
+  <text x="570" y="285" class="label">xvalue</text>
+  <text x="480" y="302" class="detail">Expiring (can be moved)</text>
+  <text x="480" y="316" class="detail">std::move(x), cast&lt;T&amp;&amp;&gt;</text>
+
+  <!-- Arrows showing relationship -->
+  <text x="125" y="355" class="detail">Can't move from</text>
+  <text x="345" y="355" class="detail">Always moved</text>
+  <text x="570" y="355" class="detail">Explicitly moved</text>
+
+  <!-- Python comparison -->
+  <text x="350" y="385" class="section-label">Python: everything is a heap reference | C++: you choose</text>
+</svg>

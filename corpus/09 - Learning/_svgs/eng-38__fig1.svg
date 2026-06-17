@@ -1,0 +1,211 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 800px; height: auto;">
+  <style>
+    .title { font-family: 'Outfit', 'Inter', system-ui, sans-serif; font-size: 22px; fill: var(--text-normal, #c9d1d9); font-weight: 800; letter-spacing: -0.5px; }
+    .subtitle { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; fill: var(--text-muted, #8b949e); }
+    .node-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: 600; }
+    .pos-tag { font-family: 'Fira Code', monospace; font-size: 10px; fill: var(--text-accent, #58a6ff); font-weight: bold; }
+    .word-text { font-family: 'Outfit', 'Inter', system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box-root { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; fill: var(--background-secondary-alt, #0d1117); }
+    .box-phrase { stroke: var(--text-accent, #58a6ff); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); opacity: 0.9; }
+    .box-pos { stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 4; fill: var(--background-primary, #0d1117); }
+    .box-word { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); }
+    .connector-line { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; opacity: 0.5; }
+    .connector-active { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 8, 8; }
+    .pulse-dot { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .hover-grow { transition: all 0.3s ease; cursor: pointer; }
+    .hover-grow:hover { transform: translateY(-3px); filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="root-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="var(--text-accent, #58a6ff)" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="word-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--text-accent, #58a6ff)" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="var(--background-secondary, #161b22)" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="var(--background-primary, #0d1117)" rx="12"/>
+
+  <!-- Title & Subtitle -->
+  <text x="40" y="45" class="title">Syntactic Parsing &amp; Grammar Architecture</text>
+  <text x="40" y="65" class="subtitle">Hierarchical analysis of a compound-complex sentence structure</text>
+
+  <!-- Connectors (Lines) -->
+  <!-- Root to Clauses -->
+  <path d="M 400 115 L 240 155" class="connector-line"/>
+  <path d="M 400 115 L 610 155" class="connector-line"/>
+
+  <!-- Independent Clause down to NP / VP -->
+  <path d="M 240 185 L 140 225" class="connector-line"/>
+  <path d="M 240 185 L 340 225" class="connector-line"/>
+
+  <!-- Dependent Clause down to Conj / Sub-S -->
+  <path d="M 610 185 L 530 225" class="connector-line"/>
+  <path d="M 610 185 L 690 225" class="connector-line"/>
+
+  <!-- NP (Subject) down to Det / Adj / N -->
+  <path d="M 140 255 L 60 295" class="connector-line"/>
+  <path d="M 140 255 L 140 295" class="connector-line"/>
+  <path d="M 140 255 L 220 295" class="connector-line"/>
+
+  <!-- VP (Predicate) down to Adv / V / NP -->
+  <path d="M 340 255 L 300 295" class="connector-line"/>
+  <path d="M 340 255 L 380 295" class="connector-line"/>
+  <path d="M 340 255 L 450 295" class="connector-line"/>
+
+  <!-- VP-NP (Direct Object) down to Det / N -->
+  <path d="M 450 325 L 430 365" class="connector-line"/>
+  <path d="M 450 325 L 480 365" class="connector-line"/>
+
+  <!-- Sub-S (Dependent Clause) down to Det / N / V -->
+  <path d="M 690 255 L 610 295" class="connector-line"/>
+  <path d="M 690 255 L 690 295" class="connector-line"/>
+  <path d="M 690 255 L 750 295" class="connector-line"/>
+
+  <!-- Animated Active Paths (representing electrical/flow path of parsing) -->
+  <path id="flow1" d="M 400 115 L 240 155 L 340 225 L 380 295" class="connector-active"/>
+  <path id="flow2" d="M 400 115 L 610 155 L 690 225 L 750 295" class="connector-active"/>
+
+  <!-- SMIL Pulse Dots along the paths -->
+  <circle r="4" class="pulse-dot">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 400 115 L 240 155 L 340 225 L 380 295" />
+  </circle>
+  <circle r="4" class="pulse-dot">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M 400 115 L 610 155 L 690 225 L 750 295" />
+  </circle>
+
+  <!-- Root Node -->
+  <g class="hover-grow" transform="translate(0,0)">
+    <rect x="330" y="85" width="140" height="30" class="box-root" fill="url(#root-grad)"/>
+    <text x="400" y="104" class="node-text" text-anchor="middle">S (Sentence)</text>
+  </g>
+
+  <!-- Tier 1: Clauses -->
+  <g class="hover-grow">
+    <rect x="150" y="155" width="180" height="30" class="box-phrase"/>
+    <text x="240" y="174" class="node-text" text-anchor="middle">Independent Clause</text>
+  </g>
+  <g class="hover-grow">
+    <rect x="520" y="155" width="180" height="30" class="box-phrase"/>
+    <text x="610" y="174" class="node-text" text-anchor="middle">Dependent Clause</text>
+  </g>
+
+  <!-- Tier 2: Main Components -->
+  <!-- NP Subject -->
+  <g class="hover-grow">
+    <rect x="80" y="225" width="120" height="30" class="box-phrase"/>
+    <text x="140" y="244" class="node-text" text-anchor="middle">NP (Subject)</text>
+  </g>
+  <!-- VP Predicate -->
+  <g class="hover-grow">
+    <rect x="280" y="225" width="120" height="30" class="box-phrase"/>
+    <text x="340" y="244" class="node-text" text-anchor="middle">VP (Predicate)</text>
+  </g>
+  <!-- Subordinate Conjunction -->
+  <g class="hover-grow">
+    <rect x="480" y="225" width="100" height="30" class="box-phrase" stroke="var(--text-muted)"/>
+    <text x="530" y="244" class="node-text" text-anchor="middle">Subordinate Conj</text>
+  </g>
+  <!-- Dependent S -->
+  <g class="hover-grow">
+    <rect x="630" y="225" width="120" height="30" class="box-phrase"/>
+    <text x="690" y="244" class="node-text" text-anchor="middle">S (Dependent)</text>
+  </g>
+
+  <!-- Tier 3: Grammatical Parts & Words -->
+  
+  <!-- "The" -->
+  <g class="hover-grow">
+    <rect x="25" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="60" y="316" class="pos-tag" text-anchor="middle">DET</text>
+    <text x="60" y="335" class="word-text" text-anchor="middle">The</text>
+  </g>
+  
+  <!-- "exhausted" -->
+  <g class="hover-grow">
+    <rect x="105" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="140" y="316" class="pos-tag" text-anchor="middle">ADJ</text>
+    <text x="140" y="335" class="word-text" text-anchor="middle" font-size="12">exhausted</text>
+  </g>
+
+  <!-- "engineer" -->
+  <g class="hover-grow">
+    <rect x="185" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="220" y="316" class="pos-tag" text-anchor="middle">NOUN</text>
+    <text x="220" y="335" class="word-text" text-anchor="middle" font-size="12">engineer</text>
+  </g>
+
+  <!-- "quickly" -->
+  <g class="hover-grow">
+    <rect x="265" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="300" y="316" class="pos-tag" text-anchor="middle">ADV</text>
+    <text x="300" y="335" class="word-text" text-anchor="middle">quickly</text>
+  </g>
+
+  <!-- "deployed" -->
+  <g class="hover-grow">
+    <rect x="345" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="380" y="316" class="pos-tag" text-anchor="middle">VERB</text>
+    <text x="380" y="335" class="word-text" text-anchor="middle" font-size="12">deployed</text>
+  </g>
+
+  <!-- DO (Direct Object NP Box) -->
+  <g class="hover-grow">
+    <rect x="425" y="295" width="50" height="30" class="box-phrase"/>
+    <text x="450" y="314" class="node-text" text-anchor="middle" font-size="10">NP (DO)</text>
+  </g>
+  <!-- "a" -->
+  <g class="hover-grow">
+    <rect x="400" y="365" width="50" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="425" y="386" class="pos-tag" text-anchor="middle">DET</text>
+    <text x="425" y="405" class="word-text" text-anchor="middle">a</text>
+  </g>
+  <!-- "hotfix" -->
+  <g class="hover-grow">
+    <rect x="455" y="365" width="60" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="485" y="386" class="pos-tag" text-anchor="middle">NOUN</text>
+    <text x="485" y="405" class="word-text" text-anchor="middle" font-size="12">hotfix</text>
+  </g>
+
+  <!-- "because" -->
+  <g class="hover-grow">
+    <rect x="495" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)" stroke="var(--text-muted)"/>
+    <text x="530" y="316" class="pos-tag" text-anchor="middle" fill="var(--text-muted)">CONJ</text>
+    <text x="530" y="335" class="word-text" text-anchor="middle" font-size="12">because</text>
+  </g>
+
+  <!-- "the" -->
+  <g class="hover-grow">
+    <rect x="575" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="610" y="316" class="pos-tag" text-anchor="middle">DET</text>
+    <text x="610" y="335" class="word-text" text-anchor="middle">the</text>
+  </g>
+
+  <!-- "server" -->
+  <g class="hover-grow">
+    <rect x="655" y="295" width="70" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="690" y="316" class="pos-tag" text-anchor="middle">NOUN</text>
+    <text x="690" y="335" class="word-text" text-anchor="middle">server</text>
+  </g>
+
+  <!-- "crashed" -->
+  <g class="hover-grow">
+    <rect x="735" y="295" width="60" height="50" class="box-word" fill="url(#word-grad)"/>
+    <text x="765" y="316" class="pos-tag" text-anchor="middle">VERB</text>
+    <text x="765" y="335" class="word-text" text-anchor="middle" font-size="12">crashed</text>
+  </g>
+
+  <!-- Grounding sentence block at bottom -->
+  <rect x="40" y="445" width="720" height="35" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-opacity="0.3"/>
+  <text x="400" y="467" font-family="'Inter', sans-serif" font-size="13" fill="var(--text-normal, #c9d1d9)" text-anchor="middle">
+    Full Sentence: <tspan font-weight="bold">"The exhausted engineer quickly deployed a hotfix because the server crashed."</tspan>
+  </text>
+
+  <!-- Interactive/Instructional Legend -->
+  <text x="760" y="45" font-family="'Inter', sans-serif" font-size="10" fill="var(--text-muted, #8b949e)" text-anchor="end">Hover over nodes to explore hierarchy • Pulses represent syntactic flow</text>
+</svg>

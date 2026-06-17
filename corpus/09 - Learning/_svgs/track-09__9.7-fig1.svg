@@ -1,0 +1,79 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="xr-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L8 5 L0 8z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .xr-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; transition: all 0.2s; }
+    .xr-box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .xr-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .xr-sub { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .xr-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .xr-ray { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6 3; animation: rayDash 1s linear infinite; }
+    @keyframes rayDash { to { stroke-dashoffset: -18; } }
+    .xr-hand { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .xr-zone { fill: var(--interactive-accent, #58a6ff); opacity: 0.08; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; stroke-dasharray: 3 2; }
+  </style>
+
+  <text x="350" y="20" class="xr-title">XR Interaction Modalities</text>
+
+  <!-- Ray Interaction -->
+  <rect x="20" y="40" width="200" height="130" class="xr-box"/>
+  <text x="120" y="62" class="xr-label">Ray Casting</text>
+  <text x="120" y="78" class="xr-sub">(Far-field interaction)</text>
+  <!-- Controller with ray -->
+  <rect x="40" y="110" width="25" height="12" rx="3" fill="var(--text-muted, #8b949e)"/>
+  <line x1="65" y1="116" x2="190" y2="90" class="xr-ray" marker-end="url(#xr-arrow)"/>
+  <circle cx="190" cy="90" r="5" fill="var(--interactive-accent, #58a6ff)" opacity="0.5"/>
+  <text x="120" y="148" class="xr-sub">• Point at distant objects</text>
+  <text x="120" y="160" class="xr-sub">• Trigger to select/activate</text>
+
+  <!-- Direct Manipulation -->
+  <rect x="250" y="40" width="200" height="130" class="xr-box"/>
+  <text x="350" y="62" class="xr-label">Direct Manipulation</text>
+  <text x="350" y="78" class="xr-sub">(Near-field / hand tracking)</text>
+  <!-- Hand outline -->
+  <path d="M310 120 Q320 100 330 105 Q335 95 345 100 Q350 92 360 98 Q365 90 370 100 L375 120 Q370 135 350 140 Q330 135 310 120" class="xr-hand"/>
+  <circle cx="345" cy="115" r="15" class="xr-zone"/>
+  <text x="350" y="155" class="xr-sub">• Pinch to grab</text>
+  <text x="350" y="167" class="xr-sub">• Push buttons directly</text>
+
+  <!-- Gaze + Dwell -->
+  <rect x="480" y="40" width="200" height="130" class="xr-box"/>
+  <text x="580" y="62" class="xr-label">Gaze + Dwell</text>
+  <text x="580" y="78" class="xr-sub">(Hands-free / accessibility)</text>
+  <!-- Eye with gaze line -->
+  <ellipse cx="520" cy="115" rx="12" ry="8" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" fill="none"/>
+  <circle cx="520" cy="115" r="4" fill="var(--text-normal, #c9d1d9)"/>
+  <line x1="532" y1="115" x2="650" y2="105" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="3 2"/>
+  <circle cx="650" cy="105" r="8" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5">
+    <animate attributeName="stroke-dasharray" values="0 50;50 0" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="580" y="148" class="xr-sub">• Look at target</text>
+  <text x="580" y="160" class="xr-sub">• Dwell timer activates</text>
+
+  <!-- Comfort Zones -->
+  <rect x="20" y="200" width="660" height="130" class="xr-box"/>
+  <text x="350" y="222" class="xr-label">Ergonomic Comfort Zones</text>
+
+  <!-- Comfort zone diagram -->
+  <!-- Head/torso silhouette -->
+  <circle cx="200" cy="280" r="15" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" fill="none"/>
+  <line x1="200" y1="295" x2="200" y2="320" stroke="var(--text-normal, #c9d1d9)" stroke-width="2"/>
+
+  <!-- Primary zone (green) -->
+  <ellipse cx="200" cy="270" rx="80" ry="50" fill="#2ecc71" opacity="0.1" stroke="#2ecc71" stroke-width="1"/>
+  <text x="200" y="240" class="xr-sub" fill="#2ecc71">Primary Zone (comfortable)</text>
+
+  <!-- Secondary zone -->
+  <ellipse cx="200" cy="270" rx="140" ry="80" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="350" y="250" class="xr-sub">Secondary (reachable)</text>
+
+  <!-- Guidelines -->
+  <text x="500" y="250" class="xr-sub" text-anchor="start">• UI: 0.5–3m from user</text>
+  <text x="500" y="265" class="xr-sub" text-anchor="start">• Buttons: ≥ 2cm minimum size</text>
+  <text x="500" y="280" class="xr-sub" text-anchor="start">• Text: ≥ 1° visual angle</text>
+  <text x="500" y="295" class="xr-sub" text-anchor="start">• Avoid arms above shoulders</text>
+  <text x="500" y="310" class="xr-sub" text-anchor="start">• Content in 30° cone preferred</text>
+</svg>

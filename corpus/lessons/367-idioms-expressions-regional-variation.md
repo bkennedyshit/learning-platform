@@ -1,0 +1,238 @@
+---
+title: "36.7 — Idioms, Expressions & Regional Variation"
+subject: "Spanish"
+catalog: advanced
+audience_tier: higher-education
+chapter: "36.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [Learning Index](00---09---Learning-Index)*
+
+# 36.7 — Idioms, Expressions & Regional Variation
+
+> *"The idiom is the soul of a language. Master the grammar, and you sound correct. Master the idioms, and you sound human."*
+
+Grammar correctness gets you understood. Idiomatic fluency gets you respected — it signals to native speakers that you have actually absorbed the language, not just memorized the rules. This chapter covers the high-frequency idiomatic expressions, verb-based idioms (especially with *tener*, *hacer*, *dar*, *llevar*), and the regional variation that makes Spanish so richly diverse.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Use the 50 highest-frequency Spanish idioms naturally in conversation and writing.
+2. Apply *tener* idioms (hunger, age, fear, etc.) correctly.
+3. Apply *hacer* idioms (weather, time elapsed, etc.) correctly.
+4. Recognize and adapt to the major regional variations in vocabulary and register.
+5. Use basic colloquial expressions from Mexican, Castilian, and Rioplatense Spanish.
+
+---
+
+## 📚 1. TENER Idioms — Expressing States and Needs
+
+In Spanish, many states that English expresses with *to be* are expressed with *tener* (to have). These are extremely high-frequency — you will use them every day.
+
+| Spanish | Literal | Actual meaning |
+|---------|---------|---------------|
+| *tener hambre* | to have hunger | to be hungry |
+| *tener sed* | to have thirst | to be thirsty |
+| *tener sueño* | to have sleep | to be sleepy |
+| *tener miedo (de)* | to have fear | to be afraid |
+| *tener frío* | to have cold | to be cold |
+| *tener calor* | to have heat | to be hot |
+| *tener razón* | to have reason | to be right |
+| *tener prisa* | to have hurry | to be in a hurry |
+| *tener suerte* | to have luck | to be lucky |
+| *tener éxito* | to have success | to be successful |
+| *tener vergüenza* | to have shame | to be ashamed/embarrassed |
+| *tener cuidado* | to have care | to be careful |
+| *tener en cuenta* | to have in account | to take into account |
+| *tener ganas de + inf* | to have desire for | to feel like doing, to want to |
+| *tener que + inf* | to have that + inf | to have to do, must |
+| *tener lugar* | to have place | to take place (an event) |
+| *tener + age* | *Tengo 30 años* | I am 30 years old |
+| *tener la culpa* | to have the blame | to be at fault |
+
+> *No tengo ganas de trabajar hoy.* (I don't feel like working today.)
+> *Tienes razón — lo hice mal.* (You're right — I did it wrong.)
+
+---
+
+## 📚 2. HACER Idioms — Weather and Time
+
+### Weather (always 3rd person singular)
+
+| Spanish | Meaning |
+|---------|---------|
+| *Hace calor / frío* | It's hot / cold |
+| *Hace sol* | It's sunny |
+| *Hace viento* | It's windy |
+| *Hace buen/mal tiempo* | The weather is good/bad |
+| *Hace niebla* | It's foggy |
+
+### Time elapsed — HACE + time + QUE + verb
+
+*¿Cuánto tiempo hace que estudias español?*
+(How long have you been studying Spanish?)
+
+*Hace dos años que lo estudio.*
+(I've been studying it for two years. — Present tense in Spanish, even though English uses present perfect!)
+
+*Hacía tres horas que esperábamos cuando llegó.*
+(We had been waiting for three hours when he arrived.)
+
+---
+
+## 📚 3. DAR Idioms
+
+| Expression | Meaning |
+|-----------|---------|
+| *dar igual / dar lo mismo* | to not matter, to be all the same |
+| *darse cuenta (de)* | to realize |
+| *dar ánimos* | to encourage |
+| *dar un paseo* | to take a walk |
+| *dar vergüenza* | to cause embarrassment |
+| *dar miedo* | to scare, to be scary |
+| *dar las gracias* | to thank (give thanks) |
+| *dar a entender* | to imply, to give to understand |
+
+*Me da igual.* (I don't care. / It's all the same to me.)
+*Me di cuenta de que había un error.* (I realized there was a mistake.)
+
+---
+
+## 📚 4. High-Frequency Idioms — Master List (50)
+
+| Expression | Meaning |
+|-----------|---------|
+| *a la vez* | at the same time |
+| *a lo mejor* | maybe, perhaps (+ indicative, not subjunctive) |
+| *a propósito* | by the way / on purpose |
+| *a tiempo* | on time |
+| *así que* | so, therefore |
+| *a veces* | sometimes |
+| *claro que sí / claro que no* | of course yes / of course not |
+| *de acuerdo* | agreed, okay |
+| *de hecho* | in fact |
+| *de nada* | you're welcome |
+| *de pronto / de repente* | suddenly |
+| *de vez en cuando* | from time to time |
+| *depende* | it depends |
+| *echar de menos* | to miss (someone/something) |
+| *echar un vistazo* | to take a look |
+| *en absoluto* | not at all |
+| *en cambio* | on the other hand |
+| *en cuanto* | as soon as (+ subjunctive) |
+| *en seguida* | right away |
+| *en serio* | seriously |
+| *es que…* | the thing is… |
+| *estar de acuerdo* | to agree |
+| *estar harto/a (de)* | to be fed up (with) |
+| *estar de vuelta* | to be back |
+| *faltar + time* | to have X left: *Me falta una hora.* |
+| *hacer falta* | to be needed: *Me hace falta dormir.* |
+| *hasta luego / hasta pronto* | goodbye / see you soon |
+| *hay que + inf* | one must, it is necessary to |
+| *lo que* | what (that which) |
+| *llevarse bien/mal* | to get along well/badly |
+| *más o menos* | more or less |
+| *me parece (que)* | it seems to me (that) |
+| *ni siquiera* | not even |
+| *o sea* | that is, in other words |
+| *ojalá* | I hope, God willing |
+| *pasarlo bien/mal* | to have a good/bad time |
+| *pedir prestado* | to borrow |
+| *perder el tiempo* | to waste time |
+| *por cierto* | by the way |
+| *por eso* | that's why, for that reason |
+| *por favor* | please |
+| *por fin* | finally |
+| *por lo general* | generally, in general |
+| *por supuesto* | of course |
+| *¿qué tal?* | how's it going? |
+| *sin embargo* | however, nevertheless |
+| *sobre todo* | above all, especially |
+| *tal vez / quizás* | maybe (+ subjunctive or indicative) |
+| *tener ganas de* | to feel like (doing something) |
+| *ya que* | since, given that |
+
+---
+
+## 📚 5. Regional Variation — The Big Picture
+
+Spanish is spoken by ~500 million people across 20+ countries. Regional variation is real — not noise. This section gives you a map.
+
+### 5.1 Vocabulary Differences — Same Thing, Different Words
+
+| Item | Mexico | Spain | Argentina | Colombia |
+|------|--------|-------|-----------|---------|
+| Car | *el carro* | *el coche* | *el auto* | *el carro* |
+| Computer | *la computadora* | *el ordenador* | *la computadora* | *el computador* |
+| Bus | *el camión* (city), *el autobús* | *el autobús* | *el colectivo* | *el bus / buseta* |
+| Apartment | *el departamento* | *el piso* | *el departamento* | *el apartamento* |
+| Cell phone | *el celular* | *el móvil* | *el celular* | *el celular* |
+| Straw | *el popote* | *la pajita* | *la bombilla* | *el pitillo* |
+| Popcorn | *las palomitas* | *las palomitas* | *el pochoclo* | *las crispetas* |
+| Swimming pool | *la alberca* | *la piscina* | *la pileta* | *la piscina* |
+
+### 5.2 Grammar Differences
+
+| Feature | Latin America | Spain |
+|---------|--------------|-------|
+| Vosotros | **Not used** — *ustedes* for all 2nd pl | **Used** for informal 2nd pl |
+| Vos | Used in Argentina, Uruguay, Central America (replaces tú) | Not standard |
+| Compound past | Less common; simple preterite preferred | More common for recent past |
+
+### 5.3 The Vos Paradigm (Argentina, Uruguay, much of Central America)
+
+*Vos* replaces *tú* for informal address. It uses distinct present tense and imperative forms:
+
+| Tense | Tú form | Vos form |
+|-------|---------|---------|
+| Present -AR | *hablas* | *hablás* |
+| Present -ER | *comes* | *comés* |
+| Present -IR | *vivís* | *vivís* |
+| Affirmative command | *habla* | *hablá* |
+
+*¿Vos qué pensás?* (What do you think? — Argentina)
+*¿Tú qué piensas?* (same — Mexico/Spain)
+
+### 5.4 Slang by Region (a small sample)
+
+| Mexico | Spain | Argentina |
+|--------|-------|-----------|
+| *chido/a* (cool) | *guay* (cool) | *copado/a* (cool) |
+| *güey/wey* (dude, man) | *tío/tía* (dude, man/woman) | *boludo/a* (dude — mild insult/affectionate) |
+| *ahorita* (right now / soon / later — context!) | *ahora mismo* (right now) | *ahora* |
+| *órale* (okay / let's go / wow) | *venga* (come on / okay) | *dale* (okay / go on) |
+| *padre* (cool, great) | *mola* (it's cool) | *bárbaro* (great) |
+| *no manches* (no way, come on!) | *no me jodas* (don't mess with me) | *no me rompas* |
+
+---
+
+## 🧮 6. Hands-On Lab
+
+**Drill:** Run `17.7_idiom_drill.py --count 20` for context-based idiom identification exercises.
+
+**Immersion exercise:** Watch 10 minutes of a Mexican YouTube channel and 10 minutes of a Spanish (Castilian) channel on the same topic. List every vocabulary or expression difference you notice.
+
+**Anki deck:** Create a dedicated idioms deck with *tener/hacer/dar* + idiom on the front, English + example sentence on the back.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- Previous: [36.6 - Future, Conditional & The Subjunctive](36.6---Future,-Conditional-&-The-Subjunctive)
+- Next: [36.8 - Reading, Listening & Cultural Immersion](36.8---Reading,-Listening-&-Cultural-Immersion)
+
+### External Resources
+- [Easy Spanish (YouTube)](https://www.youtube.com/@EasySpanish) — street interviews; natural idioms across regions
+- [Notes in Spanish](https://www.notesinspanish.com/) — natural conversational Spanish
+- [WordReference Forums](https://forum.wordreference.com/) — for regional usage questions
+- [Dreaming Spanish](https://www.youtube.com/@DreamingSpanish) — massive comprehensible input

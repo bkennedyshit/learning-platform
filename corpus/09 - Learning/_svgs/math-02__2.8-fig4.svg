@@ -1,0 +1,76 @@
+<svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <defs>
+    <marker id="tmarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .tmbox { fill:var(--background-secondary, #161b22); stroke:var(--interactive-accent, #58a6ff);
+             stroke-width:2; rx:8; }
+    .tmarr { stroke:var(--text-muted, #8b949e); stroke-width:1.5; fill:none;
+             marker-end:url(#tmarr); }
+    .tmc   { stroke:var(--text-accent, #79c0ff); stroke-width:1.5; fill:none;
+             marker-end:url(#tmarr); }
+    .tmt   { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9);
+             text-anchor:middle; }
+    .tmT   { font-family:'Latin Modern Math',serif; font-style:italic; font-size:22px;
+             fill:var(--interactive-accent, #58a6ff); font-weight:bold; text-anchor:middle; }
+    .tmin  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--text-muted, #8b949e); }
+    .tmout { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--text-accent, #79c0ff); text-anchor:middle; }
+  </style>
+  <!-- Central tensor box -->
+  <rect x="210" y="90" width="140" height="80" rx="8" class="tmbox"/>
+  <text x="280" y="138" class="tmT">T</text>
+  <text x="280" y="154" class="tmt">(p,q)-tensor</text>
+  <!-- Contravariant inputs (from top = covectors ω) -->
+  <line x1="240" y1="90" x2="240" y2="40" class="tmarr"/>
+  <circle r="3" fill="var(--text-muted, #8b949e)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 240 40 L 240 90"/>
+  </circle>
+  <text x="240" y="32" class="tmin">ω¹ ∈ V*</text>
+  <line x1="280" y1="90" x2="280" y2="40" class="tmarr"/>
+  <circle r="3" fill="var(--text-muted, #8b949e)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 280 40 L 280 90"/>
+  </circle>
+  <text x="280" y="32" class="tmin">⋯</text>
+  <line x1="320" y1="90" x2="320" y2="40" class="tmarr"/>
+  <circle r="3" fill="var(--text-muted, #8b949e)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 320 40 L 320 90"/>
+  </circle>
+  <text x="340" y="32" class="tmin">ωᵖ ∈ V*</text>
+  <!-- Covariant inputs (from bottom = vectors v) -->
+  <line x1="240" y1="170" x2="240" y2="220" class="tmc"/>
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 240 220 L 240 170"/>
+  </circle>
+  <text x="240" y="234" class="tmin">v₁ ∈ V</text>
+  <line x1="280" y1="170" x2="280" y2="220" class="tmc"/>
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 280 220 L 280 170"/>
+  </circle>
+  <text x="280" y="234" class="tmin">⋯</text>
+  <line x1="320" y1="170" x2="320" y2="220" class="tmc"/>
+  <circle r="3" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 320 220 L 320 170"/>
+  </circle>
+  <text x="340" y="234" class="tmin">vq ∈ V</text>
+  <!-- Output -->
+  <line x1="350" y1="130" x2="430" y2="130" class="tmarr"/>
+  <circle r="3" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 350 130 L 430 130"/>
+  </circle>
+  <text x="466" y="126" class="tmout">ℝ</text>
+  <!-- Label the slot types -->
+  <text x="190" y="35" class="tmt">contravariant slots</text>
+  <text x="150" y="225" class="tmt">covariant slots</text>
+  <text x="442" y="146" class="tmt">scalar output</text>
+  <!-- Component expression -->
+  <rect x="10" y="100" width="195" height="60" rx="5"
+        fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="107" y="122" class="tmt" font-weight="bold">Component form</text>
+  <text x="107" y="144" class="tmt">T^{i₁…iₚ}_{j₁…jq}</text>
+  <text x="107" y="158" class="tmt">n^(p+q) components</text>
+</svg>

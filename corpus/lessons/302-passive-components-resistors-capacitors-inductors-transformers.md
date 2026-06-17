@@ -1,0 +1,133 @@
+---
+title: "30.2 — Passive Components: Resistors, Capacitors, Inductors, Transformers"
+subject: "Electronics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "30.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 30.2 — Passive Components: Resistors, Capacitors, Inductors, Transformers
+
+> *"Resistors burn energy. Capacitors store electric field. Inductors store magnetic field. Once you internalize the three constitutive equations, every analog filter, oscillator, and power supply becomes legible."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. State the **constitutive equations** of R, L, C and recognize them in any schematic.
+2. Solve the **RC step response** ($v(t) = V_0(1 - e^{-t/RC})$) and identify $\tau = RC$.
+3. Solve the **RL step response** and identify $\tau = L/R$.
+4. Analyze **RLC circuits** in the underdamped, critically damped, and overdamped regimes.
+5. Compute **impedance** ($Z_R = R$, $Z_C = 1/j\omega C$, $Z_L = j\omega L$) and read a **Bode plot**.
+6. Recognize transformers and use the turns ratio ($V_p / V_s = N_p / N_s$).
+
+---
+
+## 🖼️ Visual Anchor
+
+![elec__21.2-fig1](elec__21.2-fig1.svg)
+
+---
+
+## 📚 1. Constitutive Equations
+
+| Component | Symbol | Equation | Energy stored |
+|---|---|---|---|
+| Resistor | $R$ | $v = iR$ | dissipated, none stored |
+| Capacitor | $C$ | $i = C\,\dfrac{dv}{dt}$ | $\tfrac{1}{2}CV^2$ |
+| Inductor | $L$ | $v = L\,\dfrac{di}{dt}$ | $\tfrac{1}{2}LI^2$ |
+
+Series/parallel rules invert for L and C compared to R:
+
+| | Series | Parallel |
+|---|---|---|
+| R | add | reciprocal-add |
+| L | add | reciprocal-add |
+| **C** | **reciprocal-add** | **add** |
+
+---
+
+## 📐 2. Transients — RC Circuit
+
+For the canonical RC charging from a step $V_0$:
+$$
+v_C(t) = V_0\bigl(1 - e^{-t/\tau}\bigr), \quad \tau = RC
+$$
+
+Discharging:
+$$
+v_C(t) = V_0\,e^{-t/\tau}
+$$
+
+After 1τ → 63%, after 5τ → 99% (engineering rule of thumb).
+
+For RL, swap roles: $\tau = L/R$, current rises like a charging cap.
+
+---
+
+## 🌊 3. Sinusoidal / Frequency-Domain — Impedance
+
+For a sinusoid at angular frequency $\omega = 2\pi f$:
+
+| Component | Impedance $Z(\omega)$ | Phase |
+|---|---|---|
+| R | $R$ | 0 |
+| C | $\dfrac{1}{j\omega C}$ | −90° (current leads) |
+| L | $j\omega L$ | +90° (voltage leads) |
+
+For a series RC low-pass filter with break frequency $f_c = 1/(2\pi RC)$:
+- DC: pass
+- Above $f_c$: roll off −20 dB/decade
+
+This is why every digital line has a tiny capacitor — it's a passive low-pass filter knocking out RF noise.
+
+---
+
+## 🔁 4. Transformers (preview)
+
+Two coupled inductors. With turns ratio $N_p : N_s$:
+$$
+\frac{V_p}{V_s} = \frac{N_p}{N_s}, \qquad \frac{I_p}{I_s} = \frac{N_s}{N_p}
+$$
+Used for galvanic isolation, voltage step-up/step-down, and impedance matching.
+
+---
+
+## 🛠️ 5. Worked Example (skeleton) — RC Low-Pass Filter
+
+Design an RC low-pass filter with $f_c = 1\,\mathrm{kHz}$:
+- Choose $C = 10\,\mathrm{nF}$.
+- $R = \dfrac{1}{2\pi f_c C} = \dfrac{1}{2\pi(1000)(10\times 10^{-9})} \approx 15.9\,\mathrm{k\Omega}$.
+- Pick the closest E12 value: 16 kΩ (or 15 kΩ for slight bandwidth margin).
+
+Verify in LTspice or ngspice (sweep AC), confirm the −3 dB point sits at 1 kHz.
+
+---
+
+## 🔗 6. Cross-links & Further Reading
+
+### Internal
+- [30.1 - Electrical Fundamentals - Charge, Current, Voltage, Ohm & Kirchhoff](30.1---Electrical-Fundamentals---Charge,-Current,-Voltage,-Ohm-&-Kirchhoff)
+- [30.3 - Semiconductors - Diodes, BJTs, MOSFETs, Op-Amps](30.3---Semiconductors---Diodes,-BJTs,-MOSFETs,-Op-Amps) — non-linear active devices
+- [Subject_Plan](Subject_Plan) — the math under transients
+
+### External
+- [MIT 6.002 Lectures 5–7](https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/)
+- [Lessons in Electric Circuits — AC vol.](https://www.allaboutcircuits.com/textbook/alternating-current/)
+- [LTspice (free Linear Tech / Analog Devices simulator)](https://www.analog.com/en/resources/design-tools-and-calculators/ltspice-simulator.html)
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+- **"Capacitors block DC."** True in steady state, but during transients DC absolutely flows through them.
+- **"Inductors block AC."** They impede AC by $j\omega L$, but they do not block; they create phase shift + frequency-dependent attenuation.
+- **"Bigger cap is always better for decoupling."** No — large electrolytics have high ESL/ESR; pair them with small ceramics for high frequencies.
+- **"Series RLC is always resonant at $1/\sqrt{LC}$."** Yes for the math, but real components have parasitics (resistance, leakage) that shift and broaden the peak.

@@ -1,0 +1,1333 @@
+---
+title: "09.5 — Standard Template Library: Containers, Algorithms, Iterators, Ranges"
+subject: "C++"
+catalog: advanced
+audience_tier: higher-education
+chapter: "9.5"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | [LEARNING_PATH](LEARNING_PATH) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 09.5 — Standard Template Library: Containers, Algorithms, Iterators, Ranges
+
+> *"The STL is not a library of algorithms and data structures. It is a library of concepts."* — Alexander Stepanov (STL creator)
+
+The STL is C++'s killer feature — a library of generic, composable, zero-overhead components. Where Python gives you `list`, `dict`, and list comprehensions, C++ gives you 15+ containers, 100+ algorithms, and (since C++20) a lazy range pipeline system that rivals Python's generators.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Choose the right container for any access pattern (sequential, associative, unordered).
+2. Use STL algorithms instead of hand-written loops for clarity and performance.
+3. Understand iterator categories and how they connect containers to algorithms.
+4. Write range pipelines with views and adaptors (C++20/23).
+5. Implement custom iterators and range adaptors.
+6. Avoid common STL pitfalls: iterator invalidation, unnecessary copies, wrong container choice.
+
+---
+
+## 🖼️ Visual Anchor — STL Architecture
+
+![cpp__2.5-fig1](cpp__2.5-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 09.5.1 — Container Categories
+
+| Category | Containers | Access Pattern | Python Equivalent |
+|----------|-----------|---------------|-------------------|
+| **Sequence** | `vector`, `deque`, `list`, `array`, `forward_list` | Ordered by insertion | `list` |
+| **Associative** | `set`, `map`, `multiset`, `multimap` | Sorted by key (red-black tree) | — |
+| **Unordered** | `unordered_set`, `unordered_map` | Hash table | `set`, `dict` |
+| **Adaptors** | `stack`, `queue`, `priority_queue` | Restricted access | — |
+| **Views** | `span`, `string_view`, `mdspan` | Non-owning window | `memoryview` |
+
+### Definition 09.5.2 — The Big Three Containers
+
+```cpp
+#include <vector>
+#include <unordered_map>
+#include <array>
+
+// std::vector — dynamic array (your default container)
+std::vector<int> scores = {100, 95, 87, 92};
+scores.push_back(88);        // Amortized O(1)
+scores[2];                   // O(1) random access
+// Contiguous memory → cache-friendly → fast iteration
+
+// std::unordered_map — hash table (Python's dict)
+std::unordered_map<std::string, int> player_scores = {
+    {"Bill", 100}, {"Alice", 95}
+};
+player_scores["Bob"] = 88;  // O(1) average insert/lookup
+player_scores.contains("Bill");  // C++20: true
+
+// std::array — fixed-size, stack-allocated
+std::array<float, 3> position = {1.0f, 2.0f, 3.0f};
+// Size known at compile time, zero overhead vs C array
+// But with bounds checking via .at() and STL compatibility
+```
+
+### Definition 09.5.3 — Iterator Categories
+
+Iterators are the glue between containers and algorithms. They form a hierarchy:
+
+| Category | Operations | Containers |
+|----------|-----------|-----------|
+| **Input** | `++`, `*`, `==` (single-pass read) | `istream_iterator` |
+| **Forward** | + multi-pass | `forward_list`, `unordered_*` |
+| **Bidirectional** | + `--` | `list`, `set`, `map` |
+| **Random Access** | + `[]`, `+n`, `-n`, `<` | `vector`, `deque`, `array` |
+| **Contiguous** | + guaranteed contiguous memory | `vector`, `array`, `string` |
+
+```cpp
+std::vector<int> v = {1, 2, 3, 4, 5};
+
+auto it = v.begin();   // Points to first element
+++it;                  // Advance to second
+*it;                   // Dereference: 2
+it += 3;              // Random access: jump to fifth
+auto dist = it - v.begin();  // Distance: 4
+```
+
+### Definition 09.5.4 — Ranges (C++20)
+
+**Ranges** are an abstraction over "anything you can iterate." A range is any type with `begin()` and `end()`. **Views** are lazy, non-owning ranges that transform data on-the-fly:
+
+```cpp
+#include <ranges>
+namespace rv = std::views;
+
+std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+// Pipeline: filter even, square them, take first 3
+auto result = data
+    | rv::filter([](int x) { return x % 2 == 0; })
+    | rv::transform([](int x) { return x * x; })
+    | rv::take(3);
+
+// result is LAZY — nothing computed until iteration
+for (int x : result) {
+    fmt::print("{} ", x);  // 4 16 36
+}
+```
+
+---
+
+## 🧩 2. Mental Models
+
+### Model 2.5.1 — "Container Selection Flowchart"
+
+```
+Need a container?
+├── Need key-value pairs?
+│   ├── Keys unique? → unordered_map (O(1) lookup)
+│   └── Keys sorted? → map (O(log n) lookup, ordered iteration)
+├── Need unique elements only?
+│   ├── Order matters? → set (sorted)
+│   └── Just uniqueness? → unordered_set (O(1) lookup)
+├── Need ordered sequence?
+│   ├── Size known at compile time? → array
+│   ├── Frequent random access? → vector (99% of the time)
+│   ├── Frequent insert/remove at both ends? → deque
+│   └── Frequent insert/remove in middle? → list (rare!)
+└── Default → vector
+```
+
+**Rule of thumb:** Use `std::vector` unless you have a specific reason not to. Its cache-friendly contiguous memory beats theoretically-better containers in practice.
+
+### Model 2.5.2 — "Algorithms > Loops"
+
+```cpp
+// BAD: Hand-written loop
+int max_score = INT_MIN;
+for (size_t i = 0; i < scores.size(); ++i) {
+    if (scores[i] > max_score) max_score = scores[i];
+}
+
+// GOOD: STL algorithm (clearer intent, potentially parallelizable)
+int max_score = *std::ranges::max_element(scores);
+
+// BETTER: Even more expressive
+auto max_score = std::ranges::max(scores);
+```
+
+Why algorithms are better:
+1. **Intent is clear** — `std::ranges::sort` says "sort" without implementation details
+2. **Optimized** — library authors use SIMD, branch-free code, etc.
+3. **Composable** — chain with ranges
+4. **Parallelizable** — add `std::execution::par` for free threading
+
+### Model 2.5.3 — "Views Are Lazy Generators"
+
+Python generators compute values on demand. C++20 views do the same:
+
+```python
+# Python generator pipeline
+result = (x**2 for x in data if x % 2 == 0)
+list(itertools.islice(result, 3))  # [4, 16, 36]
+```
+
+```cpp
+// C++20 range pipeline (equivalent, zero allocation)
+auto result = data
+    | std::views::filter([](int x) { return x % 2 == 0; })
+    | std::views::transform([](int x) { return x * x; })
+    | std::views::take(3);
+// No intermediate vectors created — each element flows through the pipeline
+```
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Essential Algorithms
+
+```cpp
+#include <algorithm>
+#include <numeric>
+#include <ranges>
+
+std::vector<int> v = {5, 2, 8, 1, 9, 3, 7, 4, 6};
+
+// Sorting
+std::ranges::sort(v);                    // {1,2,3,4,5,6,7,8,9}
+std::ranges::sort(v, std::greater{});    // {9,8,7,6,5,4,3,2,1}
+
+// Searching
+auto it = std::ranges::find(v, 7);       // Iterator to 7
+bool has_5 = std::ranges::contains(v, 5); // C++23: true
+
+// Binary search (requires sorted range)
+std::ranges::sort(v);
+bool found = std::ranges::binary_search(v, 5);  // O(log n)
+
+// Transforming
+std::vector<int> squared;
+std::ranges::transform(v, std::back_inserter(squared),
+    [](int x) { return x * x; });
+
+// Accumulate / reduce
+int sum = std::accumulate(v.begin(), v.end(), 0);
+int product = std::accumulate(v.begin(), v.end(), 1, std::multiplies{});
+
+// Remove-erase idiom (C++20: std::erase_if)
+std::erase_if(v, [](int x) { return x < 5; });  // Remove elements < 5
+
+// Partitioning
+auto pivot = std::ranges::partition(v,
+    [](int x) { return x % 2 == 0; });
+// Even numbers before pivot, odd after
+
+// Min/Max
+auto [min_it, max_it] = std::ranges::minmax_element(v);
+```
+
+### 3.2 — Range Views & Adaptors
+
+```cpp
+#include <ranges>
+namespace rv = std::views;
+
+std::vector<std::string> words = {"hello", "world", "foo", "bar", "baz"};
+
+// Filter + transform
+auto long_upper = words
+    | rv::filter([](const auto& s) { return s.size() > 3; })
+    | rv::transform([](auto s) {
+        std::ranges::transform(s, s.begin(), ::toupper);
+        return s;
+    });
+// Yields: "HELLO", "WORLD"
+
+// Enumerate (C++23)
+for (auto [idx, word] : words | rv::enumerate) {
+    fmt::print("[{}] {}\n", idx, word);
+}
+
+// Zip (C++23)
+std::vector<float> xs = {1, 2, 3};
+std::vector<float> ys = {4, 5, 6};
+for (auto [x, y] : rv::zip(xs, ys)) {
+    fmt::print("({}, {})\n", x, y);
+}
+
+// Chunk (C++23)
+std::vector<int> data = {1,2,3,4,5,6,7,8,9};
+for (auto chunk : data | rv::chunk(3)) {
+    // chunk is a view of 3 elements: {1,2,3}, {4,5,6}, {7,8,9}
+}
+
+// iota (generate sequence)
+for (int i : rv::iota(0, 10)) { /* 0,1,2,...,9 */ }
+
+// Reverse + take
+auto last_3 = v | rv::reverse | rv::take(3);
+
+// Split string
+std::string csv = "one,two,three";
+for (auto word : csv | rv::split(',')) {
+    fmt::print("{}\n", std::string_view(word));
+}
+```
+
+### 3.3 — Container Operations Cheat Sheet
+
+```cpp
+// --- std::vector ---
+std::vector<int> v;
+v.reserve(1000);          // Pre-allocate (avoid reallocations)
+v.push_back(42);          // Add to end
+v.emplace_back(42);       // Construct in-place (avoids copy)
+v.pop_back();             // Remove last
+v.insert(v.begin(), 0);   // Insert at position (O(n) — shifts elements)
+v.erase(v.begin() + 2);   // Remove at position (O(n))
+v.clear();                // Remove all
+v.shrink_to_fit();        // Release excess capacity
+
+// --- std::unordered_map ---
+std::unordered_map<std::string, int> m;
+m["key"] = 42;                    // Insert or overwrite
+m.insert({"key", 42});            // Insert only if not present
+m.try_emplace("key", 42);        // Construct value only if key absent
+m.contains("key");                // C++20: check existence
+m.erase("key");                   // Remove by key
+auto [it, ok] = m.insert({"k", 1}); // Structured binding: iterator + success
+
+// --- std::set ---
+std::set<int> s = {3, 1, 4, 1, 5};  // {1, 3, 4, 5} — sorted, unique
+s.insert(2);                          // {1, 2, 3, 4, 5}
+s.contains(3);                        // true
+s.erase(3);                           // {1, 2, 4, 5}
+auto it = s.lower_bound(3);          // First element >= 3
+```
+
+### 3.4 — Parallel Algorithms (C++17)
+
+```cpp
+#include <execution>
+#include <algorithm>
+
+std::vector<double> data(10'000'000);
+std::iota(data.begin(), data.end(), 0.0);
+
+// Sequential (default)
+std::sort(data.begin(), data.end());
+
+// Parallel (uses thread pool internally)
+std::sort(std::execution::par, data.begin(), data.end());
+
+// Parallel + vectorized (SIMD)
+std::sort(std::execution::par_unseq, data.begin(), data.end());
+
+// Works with most algorithms:
+auto sum = std::reduce(std::execution::par, data.begin(), data.end(), 0.0);
+std::for_each(std::execution::par, data.begin(), data.end(),
+    [](double& x) { x = std::sin(x); });
+```
+
+---
+
+## ✍️ 4. Worked Examples
+
+### Example 09.5.1 — Game Entity Filtering Pipeline
+
+<details>
+<summary>Filter, sort, and process game entities using ranges</summary>
+
+```cpp
+#include <ranges>
+#include <vector>
+#include <algorithm>
+#include <fmt/core.h>
+
+struct Entity {
+    std::string name;
+    float health;
+    float distance_to_player;
+    bool is_hostile;
+};
+
+std::vector<Entity> entities = {
+    {"Goblin", 30, 5.0f, true},
+    {"Merchant", 100, 12.0f, false},
+    {"Dragon", 500, 50.0f, true},
+    {"Wolf", 45, 8.0f, true},
+    {"Healer", 80, 20.0f, false},
+    {"Skeleton", 20, 3.0f, true},
+};
+
+// Find hostile entities within range 10, sorted by distance
+namespace rv = std::views;
+
+auto threats = entities
+    | rv::filter([](const Entity& e) { return e.is_hostile; })
+    | rv::filter([](const Entity& e) { return e.distance_to_player < 10.0f; });
+
+// Ranges are lazy — need to materialize for sorting
+std::vector<Entity*> threat_ptrs;
+for (auto& e : threats) {
+    threat_ptrs.push_back(&e);
+}
+std::ranges::sort(threat_ptrs, {}, [](const Entity* e) {
+    return e->distance_to_player;
+});
+
+fmt::print("Immediate threats:\n");
+for (const auto* e : threat_ptrs) {
+    fmt::print("  {} (HP:{}, dist:{:.1f})\n",
+        e->name, e->health, e->distance_to_player);
+}
+// Output:
+//   Skeleton (HP:20, dist:3.0)
+//   Goblin (HP:30, dist:5.0)
+//   Wolf (HP:45, dist:8.0)
+```
+
+</details>
+
+### Example 09.5.2 — Custom Iterator for a Ring Buffer
+
+<details>
+<summary>Implement a fixed-size ring buffer with STL-compatible iterators</summary>
+
+```cpp
+#include <array>
+#include <iterator>
+#include <cstddef>
+
+template<typename T, size_t N>
+class RingBuffer {
+    std::array<T, N> data_{};
+    size_t head_ = 0;
+    size_t size_ = 0;
+
+public:
+    void push(const T& value) {
+        data_[(head_ + size_) % N] = value;
+        if (size_ < N) ++size_;
+        else head_ = (head_ + 1) % N;
+    }
+
+    T& operator[](size_t i) { return data_[(head_ + i) % N]; }
+    const T& operator[](size_t i) const { return data_[(head_ + i) % N]; }
+    size_t size() const { return size_; }
+    bool empty() const { return size_ == 0; }
+    bool full() const { return size_ == N; }
+
+    // STL-compatible iterator
+    class iterator {
+        RingBuffer* buf_;
+        size_t index_;
+    public:
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+
+        iterator(RingBuffer* buf, size_t idx) : buf_(buf), index_(idx) {}
+
+        reference operator*() { return (*buf_)[index_]; }
+        iterator& operator++() { ++index_; return *this; }
+        iterator operator++(int) { auto tmp = *this; ++index_; return tmp; }
+        iterator& operator+=(difference_type n) { index_ += n; return *this; }
+        iterator operator+(difference_type n) const { return {buf_, index_ + n}; }
+        difference_type operator-(const iterator& o) const { return index_ - o.index_; }
+        bool operator==(const iterator& o) const { return index_ == o.index_; }
+        auto operator<=>(const iterator& o) const { return index_ <=> o.index_; }
+    };
+
+    iterator begin() { return {this, 0}; }
+    iterator end() { return {this, size_}; }
+};
+
+// Usage with STL algorithms:
+RingBuffer<float, 60> frame_times;
+for (int i = 0; i < 100; ++i) frame_times.push(16.6f + (i % 5));
+
+float avg = std::accumulate(frame_times.begin(), frame_times.end(), 0.0f)
+            / frame_times.size();
+auto max_frame = *std::ranges::max_element(frame_times);
+```
+
+</details>
+
+### Example 09.5.3 — Frequency Counter (Python `Counter` Equivalent)
+
+<details>
+<summary>Replicate Python's collections.Counter with STL</summary>
+
+```cpp
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
+#include <ranges>
+#include <string>
+
+template<typename Range>
+auto frequency_count(const Range& items) {
+    using T = std::ranges::range_value_t<Range>;
+    std::unordered_map<T, int> counts;
+    for (const auto& item : items) {
+        ++counts[item];
+    }
+    return counts;
+}
+
+template<typename Range>
+auto most_common(const Range& items, size_t n) {
+    auto counts = frequency_count(items);
+
+    // Convert to vector of pairs for sorting
+    std::vector<std::pair<std::ranges::range_value_t<Range>, int>> pairs(
+        counts.begin(), counts.end());
+
+    // Partial sort: only need top n
+    auto end_it = pairs.begin() + std::min(n, pairs.size());
+    std::partial_sort(pairs.begin(), end_it, pairs.end(),
+        [](const auto& a, const auto& b) { return a.second > b.second; });
+
+    pairs.resize(std::min(n, pairs.size()));
+    return pairs;
+}
+
+// Usage:
+std::string text = "hello world hello foo hello bar world";
+auto words = text | std::views::split(' ')
+    | std::views::transform([](auto r) {
+        return std::string(r.begin(), r.end());
+    });
+
+std::vector<std::string> word_vec(words.begin(), words.end());
+auto top3 = most_common(word_vec, 3);
+// [("hello", 3), ("world", 2), ("foo", 1)]
+```
+
+</details>
+
+---
+
+## 💻 5. Code Patterns & Idioms
+
+### Pattern 2.5.1 — Erase-Remove Idiom (Pre-C++20) vs `std::erase_if`
+
+```cpp
+std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+// Pre-C++20: erase-remove idiom
+v.erase(std::remove_if(v.begin(), v.end(),
+    [](int x) { return x % 2 == 0; }), v.end());
+
+// C++20: clean one-liner
+std::erase_if(v, [](int x) { return x % 2 == 0; });
+// v = {1, 3, 5, 7, 9}
+```
+
+### Pattern 2.5.2 — Collecting Range Results into a Container
+
+```cpp
+namespace rv = std::views;
+
+std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+// C++23: ranges::to
+auto evens = data
+    | rv::filter([](int x) { return x % 2 == 0; })
+    | std::ranges::to<std::vector>();  // Materializes the lazy view
+
+// Pre-C++23 workaround:
+auto view = data | rv::filter([](int x) { return x % 2 == 0; });
+std::vector<int> evens2(view.begin(), view.end());
+```
+
+### Pattern 2.5.3 — Projection-Based Sorting
+
+```cpp
+struct Player {
+    std::string name;
+    int score;
+    int level;
+};
+
+std::vector<Player> players = {
+    {"Bill", 100, 5}, {"Alice", 200, 3}, {"Bob", 150, 7}
+};
+
+// Sort by score (descending) using projection
+std::ranges::sort(players, std::greater{}, &Player::score);
+// Players sorted: Alice(200), Bob(150), Bill(100)
+
+// Sort by level (ascending)
+std::ranges::sort(players, {}, &Player::level);
+// Players sorted: Alice(3), Bill(5), Bob(7)
+
+// Multi-key sort: by level desc, then score desc
+std::ranges::sort(players, [](const Player& a, const Player& b) {
+    if (a.level != b.level) return a.level > b.level;
+    return a.score > b.score;
+});
+```
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 2.5.1 — Iterator Invalidation
+
+```cpp
+std::vector<int> v = {1, 2, 3, 4, 5};
+
+// BUG: Modifying vector while iterating
+for (auto it = v.begin(); it != v.end(); ++it) {
+    if (*it == 3) {
+        v.erase(it);  // INVALIDATES it and all iterators after it!
+        // Continuing the loop is UNDEFINED BEHAVIOR
+    }
+}
+
+// FIX: erase returns the next valid iterator
+for (auto it = v.begin(); it != v.end(); ) {
+    if (*it == 3) {
+        it = v.erase(it);  // Returns iterator to next element
+    } else {
+        ++it;
+    }
+}
+
+// BETTER FIX (C++20):
+std::erase(v, 3);
+```
+
+### Gotcha 2.5.2 — `operator[]` on Maps Creates Elements
+
+```cpp
+std::unordered_map<std::string, int> scores;
+
+// BUG: operator[] inserts a default value if key doesn't exist!
+int s = scores["nonexistent"];  // Inserts {"nonexistent", 0} into the map!
+
+// FIX: Use .find() or .contains() for lookup
+if (auto it = scores.find("key"); it != scores.end()) {
+    int s = it->second;  // Safe: key exists
+}
+
+// Or .at() which throws if missing:
+try {
+    int s = scores.at("key");
+} catch (const std::out_of_range&) { /* handle */ }
+```
+
+### Gotcha 2.5.3 — `reserve` vs `resize`
+
+```cpp
+std::vector<int> v;
+v.reserve(1000);  // Allocates memory but size is still 0
+// v[0] = 42;     // UB! No elements exist yet
+v.push_back(42);  // OK: adds first element
+
+v.resize(1000);   // Creates 1000 default-initialized elements (size = 1000)
+v[999] = 42;      // OK: element exists
+```
+
+### Gotcha 2.5.4 — Dangling Views
+
+```cpp
+auto get_view() {
+    std::vector<int> local = {1, 2, 3, 4, 5};
+    return local | std::views::take(3);  // BUG: view into destroyed vector!
+}
+
+auto v = get_view();  // Dangling! local is dead.
+// Iterating v is undefined behavior.
+
+// FIX: Views don't own data — the source must outlive the view.
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [09.4 - Modern C++ - Smart Pointers, Move Semantics, Lambdas, Concepts](09.4---Modern-C++---Smart-Pointers,-Move-Semantics,-Lambdas,-Concepts)
+- **Next:** [09.6 - Concurrency - Threads, Atomics, std__async, Coroutines](09.6---Concurrency---Threads,-Atomics,-std__async,-Coroutines)
+- **Python comparison:** [08.2 - Core Language - Syntax, Types, Control Flow & Functions](08.2---Core-Language---Syntax,-Types,-Control-Flow-&-Functions) (list comprehensions, generators)
+- **Performance implications:** [09.7 - Performance - SIMD, Memory Layout & Cache Optimization](09.7---Performance---SIMD,-Memory-Layout-&-Cache-Optimization)
+
+### External Resources
+- [cppreference: Containers](https://en.cppreference.com/w/cpp/container)
+- [cppreference: Algorithms](https://en.cppreference.com/w/cpp/algorithm)
+- [cppreference: Ranges](https://en.cppreference.com/w/cpp/ranges)
+- [C++ Core Guidelines: STL](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-stdlib)
+- [CppCon: "Back to Basics: Algorithms"](https://www.youtube.com/results?search_query=cppcon+back+to+basics+algorithms)
+- [Compiler Explorer](https://godbolt.org) — See how algorithms compile
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Ranges Algorithms with Views — Complete Pipeline
+
+**Problem:** Process a game's entity list using C++20/23 ranges: filter active enemies within range, sort by distance, take the closest 5, and transform into targeting data — all lazily evaluated in a single pipeline.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <ranges>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <fmt/core.h>
+
+namespace rv = std::views;
+namespace rng = std::ranges;
+
+struct Entity {
+    std::string name;
+    float x, y;
+    int health;
+    bool is_enemy;
+    bool is_active;
+};
+
+struct TargetData {
+    std::string name;
+    float distance;
+    int priority;
+};
+
+float distance_to(const Entity& e, float px, float py) {
+    float dx = e.x - px, dy = e.y - py;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+std::vector<TargetData> find_targets(
+    const std::vector<Entity>& entities,
+    float player_x, float player_y,
+    float max_range,
+    int max_targets)
+{
+    // ═══════════════════════════════════════════════════════════
+    // Lazy pipeline: nothing executes until materialized
+    // ═══════════════════════════════════════════════════════════
+
+    // Step 1: Filter active enemies within range
+    auto in_range = entities
+        | rv::filter([](const Entity& e) { return e.is_active && e.is_enemy; })
+        | rv::filter([&](const Entity& e) {
+            return distance_to(e, player_x, player_y) <= max_range;
+        });
+
+    // Step 2: We need to sort, but views are lazy — must materialize
+    // (sorting requires random access and mutation)
+    std::vector<std::reference_wrapper<const Entity>> candidates(
+        in_range.begin(), in_range.end());
+
+    rng::sort(candidates, {}, [&](const Entity& e) {
+        return distance_to(e, player_x, player_y);
+    });
+
+    // Step 3: Take closest N and transform to TargetData
+    auto targets = candidates
+        | rv::take(max_targets)
+        | rv::transform([&](const Entity& e) -> TargetData {
+            float dist = distance_to(e, player_x, player_y);
+            int priority = static_cast<int>((max_range - dist) / max_range * 100);
+            return {e.name, dist, priority};
+        });
+
+    // Step 4: Materialize into vector (C++23 ranges::to)
+    return targets | rng::to<std::vector>();
+
+    // Pre-C++23 alternative:
+    // std::vector<TargetData> result;
+    // for (auto&& t : targets) result.push_back(t);
+    // return result;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// More view examples
+// ═══════════════════════════════════════════════════════════════
+
+void view_examples() {
+    std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // Chunk into groups of 3
+    for (auto chunk : data | rv::chunk(3)) {
+        // chunk is a view: [1,2,3], [4,5,6], [7,8,9], [10]
+        for (int x : chunk) fmt::print("{} ", x);
+        fmt::print("| ");
+    }
+
+    // Sliding window of size 3
+    for (auto window : data | rv::slide(3)) {
+        // [1,2,3], [2,3,4], [3,4,5], ...
+    }
+
+    // Zip two ranges together (C++23)
+    std::vector<std::string> names = {"Alice", "Bob", "Charlie"};
+    std::vector<int> scores = {100, 200, 150};
+    for (auto [name, score] : rv::zip(names, scores)) {
+        fmt::print("{}: {}\n", name, score);
+    }
+
+    // Enumerate (index + value, C++23)
+    for (auto [idx, val] : data | rv::enumerate) {
+        fmt::print("[{}] = {}\n", idx, val);
+    }
+
+    // Cartesian product (C++23)
+    std::vector<int> xs = {0, 1, 2};
+    std::vector<int> ys = {0, 1, 2};
+    for (auto [x, y] : rv::cartesian_product(xs, ys)) {
+        fmt::print("({},{}) ", x, y);
+    }
+
+    // Infinite ranges with take
+    auto squares = rv::iota(1)
+        | rv::transform([](int n) { return n * n; })
+        | rv::take(10);
+    // squares: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100
+
+    // Split string by delimiter
+    std::string csv = "hello,world,foo,bar";
+    for (auto word : csv | rv::split(',')) {
+        fmt::print("{}\n", std::string_view(word.begin(), word.end()));
+    }
+}
+```
+
+</details>
+
+### Example 8.2 — `std::format` vs `printf` — Complete Comparison
+
+**Problem:** Migrate a codebase from printf-style formatting to `std::format` (C++20). Understand performance characteristics, custom formatters, and compile-time format string validation.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <format>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <fmt/core.h>  // fmt library (std::format's predecessor)
+
+// ═══════════════════════════════════════════════════════════════
+// Basic comparison: printf vs std::format vs fmt
+// ═══════════════════════════════════════════════════════════════
+
+void comparison() {
+    int score = 9001;
+    float fps = 59.97f;
+    const char* name = "Bill";
+
+    // printf: fast, but type-unsafe, no std::string support
+    printf("Player %s: score=%d, fps=%.1f\n", name, score, fps);
+    // %d with a string → CRASH (no compile-time check)
+
+    // std::format (C++20): type-safe, returns std::string
+    auto msg = std::format("Player {}: score={}, fps={:.1f}\n", name, score, fps);
+    // Wrong type → compile error (with consteval format string)
+
+    // std::print (C++23): like format but writes directly to stdout
+    std::print("Player {}: score={}, fps={:.1f}\n", name, score, fps);
+
+    // fmt::format: identical API, works in C++17, faster than std::format
+    auto msg2 = fmt::format("Player {}: score={}, fps={:.1f}\n", name, score, fps);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Format specifiers
+// ═══════════════════════════════════════════════════════════════
+
+void specifiers() {
+    // Alignment and fill
+    std::format("{:<20}", "left");     // "left                "
+    std::format("{:>20}", "right");    // "               right"
+    std::format("{:^20}", "center");   // "       center       "
+    std::format("{:*^20}", "star");    // "********star********"
+
+    // Numbers
+    std::format("{:d}", 42);           // "42" (decimal)
+    std::format("{:x}", 255);          // "ff" (hex)
+    std::format("{:X}", 255);          // "FF" (hex uppercase)
+    std::format("{:b}", 42);           // "101010" (binary)
+    std::format("{:o}", 42);           // "52" (octal)
+    std::format("{:#x}", 255);         // "0xff" (with prefix)
+    std::format("{:#b}", 42);          // "0b101010"
+
+    // Floating point
+    std::format("{:.2f}", 3.14159);    // "3.14"
+    std::format("{:.4e}", 12345.6);    // "1.2346e+04"
+    std::format("{:10.3f}", 3.14);     // "     3.140"
+
+    // Thousands separator (locale-dependent)
+    std::format("{:L}", 1000000);      // "1,000,000" (with locale)
+
+    // Dynamic width/precision
+    int width = 20;
+    int prec = 3;
+    std::format("{:{}.{}f}", 3.14159, width, prec);  // "               3.142"
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Custom formatter for your own types
+// ═══════════════════════════════════════════════════════════════
+
+struct Vec3 { float x, y, z; };
+
+// Specialize std::formatter
+template<>
+struct std::formatter<Vec3> {
+    int precision = 2;
+    char presentation = 'f';
+
+    // Parse format spec: {:3f} or {:e} or just {}
+    constexpr auto parse(std::format_parse_context& ctx) {
+        auto it = ctx.begin();
+        if (it != ctx.end() && *it >= '0' && *it <= '9') {
+            precision = *it - '0';
+            ++it;
+        }
+        if (it != ctx.end() && (*it == 'f' || *it == 'e')) {
+            presentation = *it;
+            ++it;
+        }
+        return it;
+    }
+
+    // Format the value
+    auto format(const Vec3& v, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "({:.{}{}}, {:.{}{}}, {:.{}{}})",
+            v.x, precision, presentation,
+            v.y, precision, presentation,
+            v.z, precision, presentation);
+    }
+};
+
+void custom_format() {
+    Vec3 pos{1.5f, 2.7f, 3.14159f};
+    auto s = std::format("Position: {}", pos);      // "(1.50, 09.70, 3.14)"
+    auto s2 = std::format("Position: {:4f}", pos);  // "(1.5000, 09.7000, 3.1416)"
+    auto s3 = std::format("Position: {:e}", pos);   // "(1.50e+00, 2.70e+00, 3.14e+00)"
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Performance: format_to with pre-allocated buffer (zero allocation)
+// ═══════════════════════════════════════════════════════════════
+
+void high_perf_logging() {
+    // Pre-allocate buffer for hot-path logging
+    std::string buffer;
+    buffer.reserve(4096);
+
+    for (int frame = 0; frame < 1000; ++frame) {
+        buffer.clear();
+        std::format_to(std::back_inserter(buffer),
+            "[Frame {}] entities={}, dt={:.3f}ms\n",
+            frame, 1500, 16.667f);
+        // Write buffer to file/console without allocation
+    }
+}
+```
+
+</details>
+
+### Example 8.3 — `std::span` vs `gsl::span` — Non-Owning Views into Contiguous Memory
+
+**Problem:** Write functions that accept any contiguous container (vector, array, C-array, raw pointer+size) without templates or overloads. Compare `std::span` (C++20) with `gsl::span`.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <span>
+#include <vector>
+#include <array>
+#include <numeric>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// std::span: a non-owning view into contiguous memory
+// Think of it as a "fat pointer" (pointer + size)
+// ═══════════════════════════════════════════════════════════════
+
+// One function handles ALL contiguous containers:
+float average(std::span<const float> values) {
+    if (values.empty()) return 0.0f;
+    float sum = std::accumulate(values.begin(), values.end(), 0.0f);
+    return sum / values.size();
+}
+
+void span_basics() {
+    // Works with std::vector
+    std::vector<float> vec = {1.0f, 2.0f, 3.0f, 4.0f};
+    float avg1 = average(vec);  // Implicit conversion
+
+    // Works with std::array
+    std::array<float, 4> arr = {1.0f, 2.0f, 3.0f, 4.0f};
+    float avg2 = average(arr);
+
+    // Works with C-style arrays
+    float c_arr[] = {1.0f, 2.0f, 3.0f, 4.0f};
+    float avg3 = average(c_arr);
+
+    // Works with pointer + size (legacy C APIs)
+    float* ptr = vec.data();
+    float avg4 = average({ptr, vec.size()});
+
+    // Subspan (slicing)
+    auto first_two = std::span(vec).first(2);   // [1.0, 09.0]
+    auto last_two = std::span(vec).last(2);     // [3.0, 4.0]
+    auto middle = std::span(vec).subspan(1, 2); // [09.0, 3.0]
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Static extent vs dynamic extent
+// ═══════════════════════════════════════════════════════════════
+
+// Dynamic extent (size known at runtime) — like a slice
+void process_dynamic(std::span<int> data) {
+    // data.size() determined at runtime
+}
+
+// Static extent (size known at compile time) — enables optimizations
+void process_static(std::span<int, 4> data) {
+    // Compiler knows exactly 4 elements — can unroll loops, use SIMD
+    // Passing wrong-sized container is a compile error!
+}
+
+void extent_demo() {
+    std::array<int, 4> arr = {1, 2, 3, 4};
+    process_static(arr);  // OK: array<int,4> → span<int,4>
+
+    std::vector<int> vec = {1, 2, 3, 4};
+    // process_static(vec);  // ERROR: vector has dynamic size
+    process_static({vec.data(), 4});  // OK: explicit construction
+
+    process_dynamic(arr);  // OK: span<int,4> converts to span<int>
+    process_dynamic(vec);  // OK: vector converts to span<int>
+}
+
+// ═══════════════════════════════════════════════════════════════
+// std::span vs gsl::span differences
+// ═══════════════════════════════════════════════════════════════
+
+// std::span (C++20):
+// - Standard, no external dependency
+// - No bounds checking in release (UB on out-of-bounds)
+// - operator[] is unchecked
+// - .at() doesn't exist (no throwing accessor)
+
+// gsl::span (Guidelines Support Library):
+// - Works in C++14/17
+// - Bounds checking configurable (GSL_TERMINATE_ON_CONTRACT_VIOLATION)
+// - .at() throws on out-of-bounds
+// - Slightly more safety-oriented
+
+// For game dev: use std::span (zero overhead, standard)
+// For safety-critical: use gsl::span with bounds checking enabled
+
+// ═══════════════════════════════════════════════════════════════
+// Practical pattern: span as function parameter
+// ═══════════════════════════════════════════════════════════════
+
+// Audio processing: works with any buffer type
+void apply_gain(std::span<float> samples, float gain) {
+    for (auto& s : samples) s *= gain;
+}
+
+// Rendering: upload vertex data from any source
+void upload_vertices(std::span<const float> vertex_data) {
+    glBufferData(GL_ARRAY_BUFFER, vertex_data.size_bytes(),
+                 vertex_data.data(), GL_STATIC_DRAW);
+}
+
+// Multi-dimensional: span of spans (2D grid)
+void process_grid(std::span<std::span<float>> rows) {
+    for (auto row : rows) {
+        for (float& cell : row) cell *= 2.0f;
+    }
+}
+
+// Type-safe byte view (for serialization)
+template<typename T>
+std::span<const std::byte> as_bytes_view(const T& obj) {
+    return std::as_bytes(std::span{&obj, 1});
+}
+```
+
+</details>
+
+### Example 8.4 — Custom Range Adaptor (C++23 Pattern)
+
+**Problem:** Create a custom `stride` view that takes every Nth element from a range, following the standard library's range adaptor pattern.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```cpp
+#include <ranges>
+#include <iterator>
+#include <vector>
+#include <fmt/core.h>
+
+// ═══════════════════════════════════════════════════════════════
+// Custom view: stride (take every Nth element)
+// Note: std::views::stride exists in C++23, this shows HOW it works
+// ═══════════════════════════════════════════════════════════════
+
+template<std::ranges::input_range V>
+    requires std::ranges::view<V>
+class stride_view : public std::ranges::view_interface<stride_view<V>> {
+    V base_;
+    std::ranges::range_difference_t<V> stride_;
+
+    class iterator {
+        using base_iter = std::ranges::iterator_t<V>;
+        base_iter current_;
+        base_iter end_;
+        std::ranges::range_difference_t<V> stride_;
+
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type = std::ranges::range_value_t<V>;
+        using difference_type = std::ranges::range_difference_t<V>;
+
+        iterator() = default;
+        iterator(base_iter current, base_iter end, difference_type stride)
+            : current_(current), end_(end), stride_(stride) {}
+
+        decltype(auto) operator*() const { return *current_; }
+
+        iterator& operator++() {
+            for (difference_type i = 0; i < stride_ && current_ != end_; ++i) {
+                ++current_;
+            }
+            return *this;
+        }
+
+        iterator operator++(int) { auto tmp = *this; ++*this; return tmp; }
+
+        bool operator==(const iterator& other) const {
+            return current_ == other.current_;
+        }
+
+        bool operator==(std::default_sentinel_t) const {
+            return current_ == end_;
+        }
+    };
+
+public:
+    stride_view() = default;
+    stride_view(V base, std::ranges::range_difference_t<V> stride)
+        : base_(std::move(base)), stride_(stride) {}
+
+    auto begin() {
+        return iterator(std::ranges::begin(base_), std::ranges::end(base_), stride_);
+    }
+
+    auto end() { return std::default_sentinel; }
+};
+
+// Deduction guide
+template<typename R>
+stride_view(R&&, std::ranges::range_difference_t<R>) -> stride_view<std::views::all_t<R>>;
+
+// Range adaptor closure (enables pipe syntax)
+struct stride_adaptor {
+    std::ptrdiff_t n;
+
+    template<std::ranges::viewable_range R>
+    auto operator()(R&& r) const {
+        return stride_view(std::views::all(std::forward<R>(r)), n);
+    }
+};
+
+// Pipe operator
+template<std::ranges::viewable_range R>
+auto operator|(R&& r, stride_adaptor adaptor) {
+    return adaptor(std::forward<R>(r));
+}
+
+// Factory function
+auto stride(std::ptrdiff_t n) { return stride_adaptor{n}; }
+
+// ═══════════════════════════════════════════════════════════════
+// Usage
+// ═══════════════════════════════════════════════════════════════
+void demo() {
+    std::vector<int> data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    // Take every 3rd element
+    for (int x : data | stride(3)) {
+        fmt::print("{} ", x);  // 0 3 6 9
+    }
+
+    // Compose with other views
+    auto result = data
+        | std::views::filter([](int x) { return x > 2; })
+        | stride(2);
+    // Filters to {3,4,5,6,7,8,9}, then strides: {3, 5, 7, 9}
+}
+```
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Small-Buffer Optimization (SBO) in `std::string`
+
+**Most `std::string` implementations store short strings directly inside the object (on the stack) without heap allocation.** This is called the Small-Buffer Optimization (SBO) or Short-String Optimization (SSO).
+
+#### How It Works
+
+A typical `std::string` object is 32 bytes (on 64-bit systems). The internal layout switches between two modes:
+
+```
+Long string (heap-allocated):
+┌──────────────────────────────────┐
+│ pointer to heap buffer (8 bytes) │
+│ size (8 bytes)                   │
+│ capacity (8 bytes)               │
+│ [padding/flags] (8 bytes)        │
+└──────────────────────────────────┘
+
+Short string (inline, NO heap allocation):
+┌──────────────────────────────────┐
+│ char buffer[22-23] (inline data) │
+│ size/flag byte (1 byte)          │
+│ [remaining bytes for alignment]  │
+└──────────────────────────────────┘
+```
+
+#### Implementation-Specific Thresholds
+
+| Implementation | `sizeof(string)` | SSO capacity | Notes |
+|---------------|-------------------|--------------|-------|
+| libstdc++ (GCC) | 32 bytes | 15 chars | Uses last byte as size/flag |
+| libc++ (Clang) | 24 bytes | 22 chars | More aggressive packing |
+| MSVC STL | 32 bytes | 15 chars | Similar to libstdc++ |
+
+```cpp
+#include <string>
+#include <fmt/core.h>
+
+void demonstrate_sso() {
+    std::string short_str = "Hello";  // 5 chars → SSO (no heap allocation!)
+    std::string long_str = "This is a longer string that exceeds SSO";  // Heap
+
+    // You can detect SSO by comparing data() to the object's address range:
+    auto* obj_start = reinterpret_cast<const char*>(&short_str);
+    auto* obj_end = obj_start + sizeof(std::string);
+    bool is_sso = (short_str.data() >= obj_start && short_str.data() < obj_end);
+    fmt::print("Short string uses SSO: {}\n", is_sso);  // true
+}
+```
+
+#### Performance Implications
+
+```cpp
+// SSO strings are MUCH faster to create, copy, and destroy:
+// - No malloc/free calls
+// - No pointer indirection (data is right there in the object)
+// - Better cache locality (string data is adjacent to other members)
+
+// This is why short strings in game entities are essentially free:
+struct Entity {
+    std::string name;  // "Goblin" → 6 chars → SSO → no heap allocation
+    // The name is stored directly inside the Entity struct!
+};
+
+// But beware: moving a short string is NOT faster than copying it
+// (there's no pointer to steal — must copy the inline buffer)
+std::string a = "Hi";
+std::string b = std::move(a);  // Still copies 2 bytes (no optimization possible)
+```
+
+### 9.2 `std::vector` Growth Factor and Reallocation Strategy
+
+**When a `std::vector` runs out of capacity, it allocates a new buffer and moves all elements.** The growth factor determines how much larger the new buffer is.
+
+#### Growth Factors by Implementation
+
+| Implementation | Growth Factor | Rationale |
+|---------------|--------------|-----------|
+| MSVC | 1.5x | Better memory reuse (can reuse freed blocks) |
+| GCC (libstdc++) | 2x | Simpler, fewer reallocations |
+| Clang (libc++) | 2x | Same as GCC |
+
+#### Why 1.5x vs 2x Matters
+
+With a growth factor of 2x, the new allocation is always larger than the sum of all previous allocations. This means the allocator can NEVER reuse the previously freed memory blocks:
+
+```
+2x growth: 1, 2, 4, 8, 16, 32, 64, ...
+Sum of freed: 1+2+4+8+16+32 = 63 < 64 (can't reuse!)
+
+1.5x growth: 1, 2, 3, 5, 8, 12, 18, 27, ...
+Sum of freed: 1+2+3+5+8+12 = 31 > 27 (CAN reuse after ~4 reallocations!)
+```
+
+#### Amortized O(1) Push-Back Proof
+
+Regardless of growth factor `g > 1`, `push_back` is amortized O(1):
+
+- After `n` push_backs, there have been at most `log_g(n)` reallocations
+- Total elements copied across all reallocations: `n + n/g + n/g² + ... = n * g/(g-1)`
+- This is O(n) total work for n insertions → O(1) amortized per insertion
+
+#### Practical Advice
+
+```cpp
+// If you know the final size, ALWAYS reserve:
+std::vector<Entity> entities;
+entities.reserve(10000);  // One allocation, zero reallocations
+for (int i = 0; i < 10000; ++i) {
+    entities.emplace_back(...);  // Never reallocates
+}
+
+// For unknown sizes with performance requirements:
+// - reserve() an upper bound estimate
+// - Or use a custom allocator with a memory pool
+
+// Shrink after bulk removal:
+entities.erase(std::remove_if(...), entities.end());
+entities.shrink_to_fit();  // Release unused capacity (non-binding request)
+```
+
+### 9.3 Container Selection Guide — When to Use What
+
+| Container | Access | Insert/Remove | Memory | Use When |
+|-----------|--------|---------------|--------|----------|
+| `vector` | O(1) random | O(1) back, O(n) middle | Contiguous | Default choice (95% of cases) |
+| `array` | O(1) random | N/A (fixed) | Stack, contiguous | Size known at compile time |
+| `deque` | O(1) random | O(1) front+back | Chunked | Need front insertion |
+| `list` | O(n) | O(1) anywhere (with iterator) | Scattered | Frequent mid-insertion, no invalidation |
+| `forward_list` | O(n) | O(1) after position | Scattered | Minimal memory per node |
+| `unordered_map` | O(1) average | O(1) average | Hash table | Key-value lookup |
+| `map` | O(log n) | O(log n) | Red-black tree | Ordered iteration needed |
+| `flat_map` (C++23) | O(log n) | O(n) | Sorted vector | Small maps, cache-friendly |
+| `unordered_set` | O(1) average | O(1) average | Hash table | Membership testing |
+| `priority_queue` | O(1) top | O(log n) push/pop | Heap in vector | Always need max/min |
+
+**The "just use vector" rule:** For collections under ~1000 elements, `std::vector` with linear search often beats `std::unordered_map` due to cache locality. Profile before switching to "theoretically faster" containers.
+
+---
+
+*Next: [09.6 - Concurrency - Threads, Atomics, std__async, Coroutines](09.6---Concurrency---Threads,-Atomics,-std__async,-Coroutines) →*

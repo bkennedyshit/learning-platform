@@ -1,0 +1,87 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.3 — Computational Theories of Mind: CTM, IIT, Global Workspace &amp; Predictive Processing</text>
+  <!-- CTM -->
+  <rect x="20" y="35" width="200" height="180" class="box" rx="4"/>
+  <text x="120" y="52" class="label" text-anchor="middle" font-weight="bold">Classical CTM</text>
+  <text x="30" y="68" class="sub" font-weight="bold">Computational Theory of Mind:</text>
+  <text x="30" y="82" class="sub">Mental states = computational states</text>
+  <text x="30" y="94" class="sub">Mind = program running on brain</text>
+  <text x="30" y="108" class="sub" font-weight="bold">Language of Thought (Fodor):</text>
+  <text x="30" y="122" class="sub">Thoughts have syntactic structure</text>
+  <text x="30" y="134" class="sub">Mentalese: inner symbolic language</text>
+  <text x="30" y="146" class="sub">Compositional semantics</text>
+  <text x="30" y="160" class="sub" font-weight="bold">Critique:</text>
+  <text x="30" y="172" class="sub">Frame problem: how to know what's</text>
+  <text x="30" y="184" class="sub">relevant in open-ended situations</text>
+  <text x="30" y="198" class="sub">Symbol grounding: symbols don't</text>
+  <text x="30" y="210" class="sub">inherently mean anything (→ Searle)</text>
+  <!-- IIT -->
+  <rect x="235" y="35" width="200" height="180" class="box" rx="4"/>
+  <text x="335" y="52" class="label" text-anchor="middle" font-weight="bold">IIT (Tononi)</text>
+  <text x="245" y="68" class="sub" font-weight="bold">Integrated Information Theory:</text>
+  <text x="245" y="82" class="sub">Consciousness = Φ (phi)</text>
+  <text x="245" y="94" class="sub">Amount of info integrated</text>
+  <text x="245" y="106" class="sub">beyond its parts</text>
+  <!-- Phi diagram -->
+  <circle cx="335" cy="140" r="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <circle cx="315" cy="140" r="12" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <circle cx="355" cy="140" r="12" fill="none" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="327" y1="140" x2="343" y2="140" stroke="#ffd93d" stroke-width="2"/>
+  <text x="335" y="180" class="sub" text-anchor="middle">High Φ = tightly integrated</text>
+  <text x="245" y="195" class="sub">High Φ system = more conscious</text>
+  <text x="245" y="207" class="sub">Feedforward net: Φ ≈ 0 (not conscious)</text>
+  <!-- GWT -->
+  <rect x="450" y="35" width="250" height="180" class="box" rx="4"/>
+  <text x="575" y="52" class="label" text-anchor="middle" font-weight="bold">Global Workspace Theory (Baars)</text>
+  <!-- GWT diagram -->
+  <rect x="460" y="62" width="230" height="80" fill="#0d1117" rx="3"/>
+  <text x="575" y="80" class="sub" text-anchor="middle" font-weight="bold">Global Workspace (Broadcast)</text>
+  <rect x="468" y="90" width="50" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="2"/>
+  <text x="493" y="109" class="sub" text-anchor="middle">Vision</text>
+  <rect x="528" y="90" width="50" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="2"/>
+  <text x="553" y="109" class="sub" text-anchor="middle">Language</text>
+  <rect x="590" y="90" width="50" height="30" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="2"/>
+  <text x="615" y="109" class="sub" text-anchor="middle">Memory</text>
+  <line x1="493" y1="90" x2="575" y2="65" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <line x1="553" y1="90" x2="575" y2="65" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <line x1="615" y1="90" x2="575" y2="65" stroke="var(--text-muted,#8b949e)" stroke-width="0.8"/>
+  <text x="575" y="162" class="sub" text-anchor="middle">Consciousness = content broadcast</text>
+  <text x="575" y="175" class="sub" text-anchor="middle">to global workspace for all subsystems</text>
+  <text x="575" y="190" class="sub" text-anchor="middle">Predicts prefrontal-cortex importance</text>
+  <text x="575" y="205" class="sub" text-anchor="middle">→ Anesthesia disrupts broadcast</text>
+  <!-- Predictive Processing -->
+  <rect x="20" y="230" width="690" height="170" class="box" rx="4"/>
+  <text x="360" y="247" class="label" text-anchor="middle" font-weight="bold">Predictive Processing / Active Inference (Karl Friston)</text>
+  <!-- PP diagram -->
+  <rect x="35" y="258" width="120" height="50" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="3"/>
+  <text x="95" y="278" class="sub" text-anchor="middle">Top-down</text>
+  <text x="95" y="292" class="sub" text-anchor="middle">Predictions</text>
+  <rect x="175" y="258" width="120" height="50" fill="none" stroke="#51cf66" stroke-width="1.2" rx="3"/>
+  <text x="235" y="278" class="sub" text-anchor="middle">Prediction Error</text>
+  <text x="235" y="292" class="sub" text-anchor="middle">(bottom-up signal)</text>
+  <rect x="315" y="258" width="120" height="50" fill="none" stroke="#ffd93d" stroke-width="1.2" rx="3"/>
+  <text x="375" y="278" class="sub" text-anchor="middle">Update Model</text>
+  <text x="375" y="292" class="sub" text-anchor="middle">(minimize free energy)</text>
+  <rect x="455" y="258" width="120" height="50" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" rx="3"/>
+  <text x="515" y="278" class="sub" text-anchor="middle">Action</text>
+  <text x="515" y="292" class="sub" text-anchor="middle">(also reduce error)</text>
+  <rect x="595" y="258" width="110" height="50" fill="none" stroke="#ff6b6b" stroke-width="1.2" rx="3"/>
+  <text x="650" y="278" class="sub" text-anchor="middle">New sensory</text>
+  <text x="650" y="292" class="sub" text-anchor="middle">input cycle</text>
+  <line x1="155" y1="283" x2="175" y2="283" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="295" y1="283" x2="315" y2="283" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="435" y1="283" x2="455" y2="283" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <line x1="575" y1="283" x2="595" y2="283" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <path d="M705,283 Q705,320 360,320 Q15,320 15,283" fill="none" stroke="var(--text-muted,#8b949e)" stroke-dasharray="4 2" stroke-width="0.8"/>
+  <text x="360" y="350" class="sub" text-anchor="middle">PP claim: perception IS prediction. You don't see the world — you hallucinate a model confirmed/corrected by sensory data. Consciousness = the model itself.</text>
+  <text x="360" y="365" class="sub" text-anchor="middle">IIT: most influential computational theory in consciousness science 2025. But: feedforward transformer networks have Φ ≈ 0 — does that mean GPT-4 is not conscious? IIT says yes.</text>
+  <text x="360" y="380" class="sub" text-anchor="middle">GWT: Dehaene's neural global workspace theory has strong empirical support from ignition patterns in EEG/fMRI. Predicts P3 ERP component marks global broadcast.</text>
+  <text x="360" y="395" class="sub" text-anchor="middle">Free resources: Friston "Free Energy Principle" (free) · Tononi IIT papers (scholarpedia.org) · Seth "Being You" 2022 (Amazon/library)</text>
+</svg>

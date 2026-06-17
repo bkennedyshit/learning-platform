@@ -1,0 +1,61 @@
+<svg viewBox="0 0 620 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="ko-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ko-ax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none}
+    .ko-orb{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.5;fill:none}
+    .ko-eff{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none}
+    .ko-dot{fill:var(--interactive-accent, #58a6ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5;cursor:pointer;transition:all .2s}
+    .ko-dot:hover{r:8;filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .ko-sun{fill:var(--text-accent, #79c0ff);stroke:var(--text-normal, #c9d1d9);stroke-width:1.5}
+    .ko-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .ko-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .ko-plan{fill:var(--interactive-accent, #58a6ff);stroke:none}
+    .ko-anim{animation:koOrbit 5s linear infinite}
+    @keyframes koOrbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  </style>
+  <!-- Left: Elliptical orbit -->
+  <text x="150" y="20" class="ko-acc" text-anchor="middle">Elliptical Orbit (e=0.6)</text>
+  <path id="orb-path" d="M 280 175 A 120 90 0 1 1 40 175 A 120 90 0 1 1 280 175" class="ko-orb"/>
+  <!-- Sun at focus -->
+  <circle cx="100" cy="175" r="8" class="ko-sun"/>
+  <text x="100" y="200" class="ko-lbl" text-anchor="middle">M (focus)</text>
+  <!-- Planet (animated) -->
+  <circle cx="0" cy="0" r="5" class="ko-plan">
+    <animateMotion dur="5s" repeatCount="indefinite">
+      <mpath href="#orb-path"/>
+    </animateMotion>
+  </circle>
+  <!-- Apsidal distances -->
+  <line x1="100" y1="175" x2="280" y2="175" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="190" y="165" class="ko-lbl">r_max (apoapsis)</text>
+  <line x1="100" y1="175" x2="40" y2="175" stroke="var(--text-muted, #8b949e)" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="55" y="165" class="ko-lbl">r_min</text>
+  <!-- Angular momentum vector -->
+  <line x1="100" y1="175" x2="100" y2="60" class="ko-orb" marker-end="url(#ko-arr)" style="color:var(--interactive-accent, #58a6ff)"/>
+  <text x="110" y="55" class="ko-acc">L</text>
+  <!-- Right: Effective potential -->
+  <rect x="330" y="30" width="270" height="290" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="465" y="55" class="ko-acc" text-anchor="middle">Effective Potential</text>
+  <line x1="360" y1="270" x2="580" y2="270" class="ko-ax" marker-end="url(#ko-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <line x1="380" y1="290" x2="380" y2="60" class="ko-ax" marker-end="url(#ko-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <text x="585" y="275" class="ko-lbl">r</text>
+  <text x="370" y="55" class="ko-lbl">V_eff</text>
+  <!-- V_eff curve -->
+  <path d="M395 80 Q 410 250, 430 280 Q 450 295, 480 275 Q 530 240, 580 255" class="ko-eff"/>
+  <!-- Energy level -->
+  <line x1="360" y1="230" x2="580" y2="230" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="555" y="222" class="ko-acc">E</text>
+  <!-- Turning points -->
+  <circle cx="420" cy="230" r="3" fill="var(--text-muted, #8b949e)"/>
+  <circle cx="540" cy="230" r="3" fill="var(--text-muted, #8b949e)"/>
+  <!-- Oscillating particle -->
+  <circle cx="420" cy="230" r="5" class="ko-dot">
+    <animate attributeName="cx" values="420;540;420" dur="5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"/>
+  </circle>
+  <text x="420" y="250" class="ko-lbl" text-anchor="middle">r_min</text>
+  <text x="540" y="250" class="ko-lbl" text-anchor="middle">r_max</text>
+</svg>

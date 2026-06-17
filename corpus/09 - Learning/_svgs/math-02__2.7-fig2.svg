@@ -1,0 +1,111 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <style>
+    .gsax { stroke:var(--text-normal, #c9d1d9); stroke-width:1.4; fill:none; }
+    .gsv  { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none;
+             marker-end:url(#gsarr); }
+    .gsq  { stroke:var(--text-accent, #79c0ff); stroke-width:2.5; fill:none;
+             marker-end:url(#gsarr); }
+    .gsp  { stroke:var(--text-muted, #8b949e); stroke-width:1.6; stroke-dasharray:5 3;
+             fill:none; marker-end:url(#gsarr); }
+    .gsrt { stroke:var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .gslb { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .gsla { font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px;
+             fill:var(--interactive-accent, #58a6ff); }
+    .gslq { font-family:'Latin Modern Math',serif; font-style:italic; font-size:14px;
+             fill:var(--text-accent, #79c0ff); }
+    .gslm { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--text-muted, #8b949e); }
+  </style>
+  <defs>
+    <marker id="gsarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <!-- Panel 1: a1 → q1 -->
+  <g transform="translate(20,20)">
+    <text x="65" y="14" class="gslb" text-anchor="middle" font-weight="bold">Step 1</text>
+    <line x1="60" y1="240" x2="60" y2="30" class="gsax"/>
+    <line x1="10" y1="200" x2="130" y2="200" class="gsax"/>
+    <line x1="60" y1="200" x2="60" y2="200" />
+    <!-- a1 -->
+    <line x1="60" y1="200" x2="60" y2="200" class="gsv" opacity="0">
+      <animate attributeName="opacity" to="1" begin="0.5s" dur="0.01s" fill="freeze"/>
+      <animate attributeName="x2" to="120" begin="0.5s" dur="0.5s" fill="freeze"/>
+      <animate attributeName="y2" to="100" begin="0.5s" dur="0.5s" fill="freeze"/>
+    </line>
+    <text x="125" y="98" class="gsla" opacity="0">a₁
+      <animate attributeName="opacity" to="1" begin="1.0s" dur="0.3s" fill="freeze"/>
+    </text>
+    <!-- q1 = a1/||a1|| (normalized, shorter) -->
+    <line x1="60" y1="200" x2="60" y2="200" class="gsq" opacity="0">
+      <animate attributeName="opacity" to="1" begin="1.5s" dur="0.01s" fill="freeze"/>
+      <animate attributeName="x2" to="96" begin="1.5s" dur="0.4s" fill="freeze"/>
+      <animate attributeName="y2" to="140" begin="1.5s" dur="0.4s" fill="freeze"/>
+    </line>
+    <text x="100" y="138" class="gslq" opacity="0">q₁
+      <animate attributeName="opacity" to="1" begin="1.9s" dur="0.3s" fill="freeze"/>
+    </text>
+    <text x="65" y="270" class="gslb" text-anchor="middle" opacity="0">q₁ = a₁/‖a₁‖
+      <animate attributeName="opacity" to="1" begin="1.9s" dur="0.3s" fill="freeze"/>
+    </text>
+  </g>
+  <!-- Panel 2: a2 minus projection onto q1 -->
+  <g transform="translate(220,20)">
+    <text x="75" y="14" class="gslb" text-anchor="middle" font-weight="bold">Step 2</text>
+    <line x1="60" y1="240" x2="60" y2="30" class="gsax"/>
+    <line x1="10" y1="200" x2="150" y2="200" class="gsax"/>
+    <!-- a2 -->
+    <line x1="60" y1="200" x2="60" y2="200" class="gsv" opacity="0">
+      <animate attributeName="opacity" to="1" begin="2.5s" dur="0.01s" fill="freeze"/>
+      <animate attributeName="x2" to="140" begin="2.5s" dur="0.5s" fill="freeze"/>
+      <animate attributeName="y2" to="80" begin="2.5s" dur="0.5s" fill="freeze"/>
+    </line>
+    <text x="145" y="78" class="gsla" opacity="0">a₂
+      <animate attributeName="opacity" to="1" begin="3.0s" dur="0.3s" fill="freeze"/>
+    </text>
+    <!-- q1 direction (dashed) -->
+    <line x1="60" y1="200" x2="60" y2="200" class="gsp" opacity="0">
+      <animate attributeName="opacity" to="1" begin="3.5s" dur="0.01s" fill="freeze"/>
+      <animate attributeName="x2" to="110" begin="3.5s" dur="0.4s" fill="freeze"/>
+    </line>
+    <text x="115" y="215" class="gslm" opacity="0">⟨a₂,q₁⟩q₁
+      <animate attributeName="opacity" to="1" begin="3.9s" dur="0.3s" fill="freeze"/>
+    </text>
+    <!-- v2 = a2 - projection (perpendicular result) -->
+    <line x1="140" y1="80" x2="140" y2="80" class="gsq" opacity="0">
+      <animate attributeName="opacity" to="1" begin="4.4s" dur="0.01s" fill="freeze"/>
+      <animate attributeName="x1" to="110" begin="4.4s" dur="0.5s" fill="freeze"/>
+      <animate attributeName="y1" to="200" begin="4.4s" dur="0.5s" fill="freeze"/>
+    </line>
+    <text x="148" y="140" class="gslq" opacity="0">v₂
+      <animate attributeName="opacity" to="1" begin="4.9s" dur="0.3s" fill="freeze"/>
+    </text>
+    <!-- right angle tick -->
+    <polyline points="103,200 103,190 113,190" class="gsrt" opacity="0">
+      <animate attributeName="opacity" to="1" begin="4.9s" dur="0.3s" fill="freeze"/>
+    </polyline>
+    <text x="30" y="270" class="gslb" text-anchor="middle" opacity="0">v₂ = a₂ − ⟨a₂,q₁⟩q₁
+      <animate attributeName="opacity" to="1" begin="4.9s" dur="0.3s" fill="freeze"/>
+    </text>
+    <text x="65" y="285" class="gslb" text-anchor="middle" opacity="0">q₂ = v₂/‖v₂‖
+      <animate attributeName="opacity" to="1" begin="5.5s" dur="0.3s" fill="freeze"/>
+    </text>
+  </g>
+  <!-- Panel 3: result — orthonormal basis -->
+  <g transform="translate(440,20)" opacity="0">
+    <animate attributeName="opacity" to="1" begin="6.2s" dur="0.5s" fill="freeze"/>
+    <text x="65" y="14" class="gslb" text-anchor="middle" font-weight="bold">Result</text>
+    <line x1="60" y1="240" x2="60" y2="30" class="gsax"/>
+    <line x1="10" y1="200" x2="130" y2="200" class="gsax"/>
+    <!-- q1 -->
+    <line x1="60" y1="200" x2="96" y2="140" class="gsq"/>
+    <text x="100" y="138" class="gslq">q₁</text>
+    <!-- q2 -->
+    <line x1="60" y1="200" x2="110" y2="120" class="gsq"/>
+    <text x="115" y="118" class="gslq">q₂</text>
+    <polyline points="89,176 95,165 106,171" class="gsrt"/>
+    <text x="65" y="270" class="gslb" text-anchor="middle">⟨q₁, q₂⟩ = 0</text>
+    <text x="65" y="285" class="gslb" text-anchor="middle">‖q₁‖ = ‖q₂‖ = 1</text>
+  </g>
+</svg>

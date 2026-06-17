@@ -1,0 +1,51 @@
+<svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="cc-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .cc-outline { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .cc-region { stroke-width: 1.5; fill-opacity: 0.3; cursor: pointer; transition: fill-opacity 0.2s; }
+    .cc-region:hover { fill-opacity: 0.6; }
+    .cc-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .cc-title { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .cc-data { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .cc-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 6; animation: flow 1.5s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -12; } }
+  </style>
+  <text x="300" y="20" class="cc-title" text-anchor="middle">Corpus Callosum: Subdivisions &amp; Connectivity</text>
+  <!-- Midsagittal CC shape -->
+  <path d="M 120 180 C 140 130 200 100 300 100 C 400 100 460 130 480 180 C 460 200 400 210 300 210 C 200 210 140 200 120 180 Z" class="cc-outline" fill="var(--background-secondary, #161b22)"/>
+  <!-- Rostrum -->
+  <path d="M 120 180 C 130 160 150 145 175 140 L 175 170 C 150 175 130 180 120 180 Z" class="cc-region" fill="#e74c3c" stroke="#e74c3c"/>
+  <text x="100" y="230" class="cc-label" fill="#e74c3c" font-weight="bold">Rostrum</text>
+  <text x="100" y="242" class="cc-data">Orbital PFC</text>
+  <!-- Genu -->
+  <path d="M 175 140 C 200 120 230 110 260 108 L 260 195 C 230 198 200 195 175 170 Z" class="cc-region" fill="#3498db" stroke="#3498db"/>
+  <text x="190" y="250" class="cc-label" fill="#3498db" font-weight="bold">Genu</text>
+  <text x="190" y="262" class="cc-data">Prefrontal cortex</text>
+  <!-- Body -->
+  <path d="M 260 108 C 300 100 340 100 380 108 L 380 195 C 340 200 300 200 260 195 Z" class="cc-region" fill="#27ae60" stroke="#27ae60"/>
+  <text x="290" y="250" class="cc-label" fill="#27ae60" font-weight="bold">Body</text>
+  <text x="290" y="262" class="cc-data">Motor + Somatosensory</text>
+  <!-- Isthmus -->
+  <path d="M 380 108 C 410 115 430 125 440 140 L 440 175 C 430 185 410 192 380 195 Z" class="cc-region" fill="#f39c12" stroke="#f39c12"/>
+  <text x="390" y="250" class="cc-label" fill="#f39c12" font-weight="bold">Isthmus</text>
+  <text x="390" y="262" class="cc-data">Auditory + Temporal</text>
+  <!-- Splenium -->
+  <path d="M 440 140 C 460 155 470 170 480 180 C 470 195 460 200 440 175 Z" class="cc-region" fill="#9b59b6" stroke="#9b59b6"/>
+  <text x="460" y="250" class="cc-label" fill="#9b59b6" font-weight="bold">Splenium</text>
+  <text x="460" y="262" class="cc-data">Visual + Parietal</text>
+  <!-- Bandwidth info box -->
+  <rect x="50" y="280" width="500" height="60" rx="5" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="300" class="cc-label" text-anchor="middle" font-weight="bold">Callosal Statistics</text>
+  <text x="300" y="315" class="cc-data" text-anchor="middle">~200 million axons | Diameter: 0.4–15 μm | Conduction: 2–90 m/s | IHTT: 5–25 ms</text>
+  <text x="300" y="330" class="cc-data" text-anchor="middle">Bilateral processors: larger isthmus + splenium → faster posterior transfer</text>
+  <!-- Hemisphere labels -->
+  <text x="80" y="155" class="cc-label" font-weight="bold">L</text>
+  <text x="510" y="155" class="cc-label" font-weight="bold">R</text>
+  <!-- Transfer arrows -->
+  <line x1="85" y1="165" x2="115" y2="178" class="cc-arrow" marker-end="url(#cc-arr)"/>
+  <line x1="485" y1="178" x2="515" y2="165" class="cc-arrow" marker-end="url(#cc-arr)"/>
+</svg>

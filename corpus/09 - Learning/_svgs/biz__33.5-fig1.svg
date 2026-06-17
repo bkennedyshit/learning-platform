@@ -1,0 +1,180 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .bootstrap { fill: #1a4a3a; stroke: #51cf66; stroke-width: 1.5; animation: stagePulse 6s infinite ease-in-out; }
+    .preseed { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: stagePulse 6s infinite ease-in-out 1.5s; }
+    .seed { fill: #2a1a4a; stroke: #8c3db8; stroke-width: 1.5; animation: stagePulse 6s infinite ease-in-out 3s; }
+    .seriesA { fill: #4a2a1a; stroke: #b8703d; stroke-width: 1.5; animation: stagePulse 6s infinite ease-in-out 4.5s; }
+    .safe-box { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .cap-founder { fill: var(--interactive-accent, #58a6ff); opacity: 0.8; animation: pulseFounder 4s infinite ease-in-out; }
+    .cap-option { fill: #ffd93d; opacity: 0.7; animation: pulseOption 4s infinite ease-in-out 0.5s; }
+    .cap-safe { fill: #51cf66; opacity: 0.7; animation: pulseSafe 4s infinite ease-in-out 1s; }
+    .cap-series { fill: #ff6b6b; opacity: 0.6; animation: pulseSeries 4s infinite ease-in-out 1.5s; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+
+    @keyframes stagePulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 4px cubic-bezier(0.4, 0, 0.2, 1)); }
+    }
+    @keyframes pulseFounder {
+      0%, 100% { fill-opacity: 0.8; }
+      50% { fill-opacity: 0.95; }
+    }
+    @keyframes pulseOption {
+      0%, 100% { fill-opacity: 0.7; }
+      50% { fill-opacity: 0.9; }
+    }
+    @keyframes pulseSafe {
+      0%, 100% { fill-opacity: 0.7; }
+      50% { fill-opacity: 0.95; }
+    }
+    @keyframes pulseSeries {
+      0%, 100% { fill-opacity: 0.6; }
+      50% { fill-opacity: 0.85; }
+    }
+    @keyframes flowArrows {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz5-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">Fundraising Stages &amp; Cap Table Dilution Flow</text>
+
+  <!-- Stage timeline -->
+  <!-- Bootstrap -->
+  <rect x="10" y="32" width="148" height="98" rx="4" class="bootstrap"/>
+  <text x="84" y="50" class="bold" text-anchor="middle">Bootstrap / Ramen</text>
+  <text x="20" y="66" class="sublabel">Revenue = your runway</text>
+  <text x="20" y="79" class="sublabel">Full ownership (100%)</text>
+  <text x="20" y="92" class="sublabel">No dilution, no investors</text>
+  <text x="20" y="105" class="sublabel">Validate PMF first</text>
+  <text x="20" y="118" class="sublabel">Ramen profitable = infinite runway</text>
+
+  <line x1="160" y1="80" x2="178" y2="80" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- Pre-seed / Angel -->
+  <rect x="180" y="32" width="148" height="98" rx="4" class="preseed"/>
+  <text x="254" y="50" class="bold" text-anchor="middle">Pre-Seed / Angels</text>
+  <text x="188" y="66" class="sublabel">$50k–$500k SAFE or note</text>
+  <text x="188" y="79" class="sublabel">Post-money SAFE standard</text>
+  <text x="188" y="92" class="sublabel">~5–15% dilution per round</text>
+  <text x="188" y="105" class="sublabel">Angel = operator with check</text>
+  <text x="188" y="118" class="sublabel">Expect: idea + founder + early signal</text>
+
+  <line x1="330" y1="80" x2="348" y2="80" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- Seed -->
+  <rect x="350" y="32" width="148" height="98" rx="4" class="seed"/>
+  <text x="424" y="50" class="bold" text-anchor="middle">Seed Round</text>
+  <text x="358" y="66" class="sublabel">$500k–$3M SAFE / priced</text>
+  <text x="358" y="79" class="sublabel">Need: PMF evidence, MRR</text>
+  <text x="358" y="92" class="sublabel">~15–25% dilution</text>
+  <text x="358" y="105" class="sublabel">First institutional VCs (First Round)</text>
+  <text x="358" y="118" class="sublabel">May include board observer seat</text>
+
+  <line x1="500" y1="80" x2="518" y2="80" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- Series A -->
+  <rect x="520" y="32" width="188" height="98" rx="4" class="seriesA"/>
+  <text x="614" y="50" class="bold" text-anchor="middle">Series A</text>
+  <text x="528" y="66" class="sublabel">$3M–$15M priced equity round</text>
+  <text x="528" y="79" class="sublabel">Need: T2D3 growth trajectory</text>
+  <text x="528" y="92" class="sublabel">~20–25% dilution + board seat</text>
+  <text x="528" y="105" class="sublabel">LTV/CAC ≥ 3 required</text>
+  <text x="528" y="118" class="sublabel">Institutional VCs (a16z, Sequoia, Benchmark)</text>
+
+  <!-- MIDDLE: Cap Table Waterfall -->
+  <text x="360" y="148" class="bold" text-anchor="middle">Cap Table Dilution — Waterfall Visualization</text>
+
+  <!-- Day 0 -->
+  <text x="60" y="168" class="label" text-anchor="middle">Day 0</text>
+  <text x="60" y="180" class="sublabel" text-anchor="middle">Formation</text>
+  <rect x="20" y="184" width="80" height="55" rx="2" class="cap-founder"/>
+  <text x="60" y="207" class="sublabel" text-anchor="middle" fill="#1a1a1a">Founders</text>
+  <text x="60" y="220" class="sublabel" text-anchor="middle" fill="#1a1a1a">100%</text>
+
+  <line x1="105" y1="211" x2="125" y2="211" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- After option pool -->
+  <text x="195" y="168" class="label" text-anchor="middle">Option Pool</text>
+  <text x="195" y="180" class="sublabel" text-anchor="middle">Created</text>
+  <rect x="155" y="184" width="80" height="45" rx="2" class="cap-founder"/>
+  <text x="195" y="207" class="sublabel" text-anchor="middle" fill="#1a1a1a">Founders 83%</text>
+  <rect x="155" y="229" width="80" height="10" rx="1" class="cap-option"/>
+  <text x="195" y="237" class="sublabel" text-anchor="middle" fill="#1a1a1a">Pool 17%</text>
+
+  <line x1="240" y1="211" x2="258" y2="211" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- After $500k SAFE -->
+  <text x="330" y="168" class="label" text-anchor="middle">$500k SAFE</text>
+  <text x="330" y="180" class="sublabel" text-anchor="middle">$4M post-money cap</text>
+  <rect x="290" y="184" width="80" height="38" rx="2" class="cap-founder"/>
+  <text x="330" y="200" class="sublabel" text-anchor="middle" fill="#1a1a1a">Founders 72%</text>
+  <rect x="290" y="222" width="80" height="8" rx="1" class="cap-option"/>
+  <text x="330" y="229" class="sublabel" text-anchor="middle" fill="#1a1a1a">Option 15%</text>
+  <rect x="290" y="230" width="80" height="10" rx="1" class="cap-safe"/>
+  <text x="330" y="239" class="sublabel" text-anchor="middle" fill="#1a1a1a">SAFE inv 13%</text>
+
+  <line x1="375" y1="211" x2="393" y2="211" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- After Seed $2M -->
+  <text x="465" y="168" class="label" text-anchor="middle">Seed $2M</text>
+  <text x="465" y="180" class="sublabel" text-anchor="middle">$10M pre-money</text>
+  <rect x="425" y="184" width="80" height="30" rx="2" class="cap-founder"/>
+  <text x="465" y="199" class="sublabel" text-anchor="middle" fill="#1a1a1a">Founders 60%</text>
+  <rect x="425" y="214" width="80" height="7" rx="1" class="cap-option"/>
+  <text x="465" y="220" class="sublabel" text-anchor="middle" fill="#1a1a1a">Opt 13%</text>
+  <rect x="425" y="221" width="80" height="8" rx="1" class="cap-safe"/>
+  <text x="465" y="228" class="sublabel" text-anchor="middle" fill="#1a1a1a">Angel 11%</text>
+  <rect x="425" y="229" width="80" height="12" rx="1" class="cap-series"/>
+  <text x="465" y="239" class="sublabel" text-anchor="middle" fill="#1a1a1a">Seed VC 16%</text>
+
+  <line x1="510" y1="211" x2="530" y2="211" class="arrow" marker-end="url(#biz5-arr)"/>
+
+  <!-- After Series A $8M -->
+  <text x="620" y="168" class="label" text-anchor="middle">Series A $8M</text>
+  <text x="620" y="180" class="sublabel" text-anchor="middle">$30M pre-money</text>
+  <rect x="575" y="184" width="90" height="24" rx="2" class="cap-founder"/>
+  <text x="620" y="197" class="sublabel" text-anchor="middle" fill="#1a1a1a">Founders 46%</text>
+  <rect x="575" y="208" width="90" height="5" rx="1" class="cap-option"/>
+  <text x="620" y="213" class="sublabel" text-anchor="middle" fill="#1a1a1a">Option 10%</text>
+  <rect x="575" y="213" width="90" height="6" rx="1" class="cap-safe"/>
+  <text x="620" y="218" class="sublabel" text-anchor="middle" fill="#1a1a1a">Angel 8%</text>
+  <rect x="575" y="219" width="90" height="7" rx="1" fill="#8c3db8" opacity="0.6"/>
+  <text x="620" y="225" class="sublabel" text-anchor="middle" fill="#1a1a1a">Seed VC 12%</text>
+  <rect x="575" y="226" width="90" height="15" rx="1" class="cap-series"/>
+  <text x="620" y="238" class="sublabel" text-anchor="middle" fill="#1a1a1a">Series A 21%</text>
+
+  <!-- Insight: value vs % -->
+  <rect x="10" y="258" width="700" height="50" class="box" rx="4"/>
+  <text x="360" y="275" class="bold" text-anchor="middle">The Key Insight: Dilution is Not the Enemy</text>
+  <text x="20" y="292" class="sublabel">Founder value = Ownership % × Company Valuation. After Series A: 46% of $38M = $17.5M founder value.</text>
+  <text x="20" y="305" class="sublabel">Without raising: 100% of $2M bootstrapped = $2M. Good dilution (into growth) multiplies wealth. Bad dilution (for low-value investors) destroys it.</text>
+
+  <!-- BOTTOM: SAFE Mechanics -->
+  <rect x="10" y="320" width="340" height="88" class="safe-box" rx="4"/>
+  <text x="180" y="338" class="bold" text-anchor="middle">SAFE Mechanics (YC Post-Money Standard)</text>
+  <text x="18" y="355" class="sublabel">Investment: $100,000</text>
+  <text x="18" y="368" class="sublabel">Post-money cap: $2,000,000</text>
+  <text x="18" y="381" class="sublabel">Ownership at conversion: $100k / $2M = 5%</text>
+  <text x="18" y="394" class="sublabel">Converts to equity at Series A (not debt — no interest, no maturity date)</text>
+  <text x="18" y="404" class="sublabel">Pro-rata right: investor can maintain 5% in future rounds</text>
+
+  <!-- BOTTOM RIGHT: Bootstrapping vs VC -->
+  <rect x="360" y="320" width="350" height="88" class="box" rx="4"/>
+  <text x="535" y="338" class="bold" text-anchor="middle">Should You Raise? Decision Check</text>
+  <text x="368" y="355" class="sublabel">✅ Raise if: winner-take-all market · proven unit economics (LTV/CAC ≥ 3) · need speed to outrun competition</text>
+  <text x="368" y="368" class="sublabel">✅ Bootstrap if: niche market · capital-efficient model · you want control · revenue already growing</text>
+  <text x="368" y="381" class="sublabel">❌ Don't raise if: no PMF · no clear use of funds · "everyone else is raising"</text>
+  <text x="368" y="394" class="sublabel">Key question: "What will $X of capital let me prove in 18 months that I can't prove without it?"</text>
+  <text x="368" y="406" class="sublabel">If the answer is unclear, keep bootstrapping until it is.</text>
+</svg>

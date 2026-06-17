@@ -1,0 +1,216 @@
+---
+title: "Shader Examples"
+subject: "scripts"
+catalog: advanced
+audience_tier: higher-education
+chapter: "Chapter 1"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 9.4 — Shader Examples: Annotated GLSL & HLSL Collection
+
+*Reference companion to [28.4 - Shader Programming - GLSL & HLSL](28.4---Shader-Programming---GLSL-&-HLSL)*
+
+---
+
+## 1. Normal Mapping (Tangent Space)
+
+Normal maps encode per-pixel surface detail without additional geometry. The TBN matrix transforms the sampled normal from tangent space to world space.
+
+```glsl
+// GLSL Fragment Shader — Normal Mapping
+#version 450 core
+
+in vec3 v_WorldPos;
+in vec2 v_UV;
+in mat3 v_TBN; // Tangent-Bitangent-Normal matrix (world space)
+
+uniform sampler2D u_NormalMap;
+uniform sampler2D u_AlbedoMap;
+uniform vec3 u_LightDir;
+
+out vec4 FragColor;
+
+void main() {
+    // Sample normal map: stored as [0,1], remap to [-1,1]
+    vec3 tangentNormal = texture(u_NormalMap, v_UV).rgb * 2.0 - 1.0;
+
+    // Transform to world space via TBN
+    vec3 N = normalize(v_TBN * tangentNormal);
+
+    // Simple diffuse
+    float diff = max(dot(N, normalize(u_LightDir)), 0.0);
+    vec3 albedo = texture(u_AlbedoMap, v_UV).rgb;
+    FragColor = vec4(albedo * diff + albedo * 0.1, 1.0);
+}
+```
+
+**Key insight:** The TBN matrix columns are the tangent (T), bitangent (B), and geometric normal (N) vectors at the vertex, interpolated across the triangle. The vertex shader must compute and pass this matrix.
+
+---
+
+## 2. Shadow Mapping (Depth Comparison)
+
+```glsl
+// GLSL Fragment — Shadow map sampling
+uniform sampler2D u_ShadowMap;
+uniform mat4 u_LightSpaceMatrix;
+
+float ShadowCalculation(vec4 fragPosLightSpace) {
+    // Perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5; // [0,1] range
+
+    float closestDepth = texture(u_ShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    // Bias to prevent shadow acne
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    // PCF (Percentage Closer Filtering) for soft edges
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(u_ShadowMap, 0);
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            float pcfDepth = texture(u_ShadowMap, projCoords.xy + vec2(x,y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    return shadow / 9.0;
+}
+```
+
+---
+
+## 3. Screen-Space Ambient Occlusion (SSAO)
+
+```glsl
+// GLSL Fragment — SSAO kernel sampling
+uniform sampler2D u_PositionTex; // G-buffer view-space positions
+uniform sampler2D u_NormalTex;
+uniform sampler2D u_NoiseTex;
+uniform vec3 u_Samples[64]; // hemisphere kernel
+uniform mat4 u_Projection;
+
+const float radius = 0.5;
+const float bias = 0.025;
+
+float SSAO(vec2 uv) {
+    vec3 fragPos = texture(u_PositionTex, uv).xyz;
+    vec3 normal = texture(u_NormalTex, uv).xyz;
+    vec3 randomVec = texture(u_NoiseTex, uv * noiseScale).xyz;
+
+    // Gram-Schmidt to create TBN from random vector
+    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 TBN = mat3(tangent, bitangent, normal);
+
+    float occlusion = 0.0;
+    for (int i = 0; i < 64; ++i) {
+        vec3 samplePos = fragPos + TBN * u_Samples[i] * radius;
+
+        // Project sample to screen space
+        vec4 offset = u_Projection * vec4(samplePos, 1.0);
+        offset.xyz /= offset.w;
+        offset.xyz = offset.xyz * 0.5 + 0.5;
+
+        float sampleDepth = texture(u_PositionTex, offset.xy).z;
+        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
+        occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
+    }
+    return 1.0 - (occlusion / 64.0);
+}
+```
+
+---
+
+## 4. HLSL: Unity Shader Graph Custom Function
+
+```hlsl
+// Custom HLSL function node for Unity Shader Graph
+// Triplanar mapping — projects texture from 3 axes based on normal
+void TriplanarMapping_float(
+    float3 Position, float3 Normal, float Sharpness,
+    UnityTexture2D Tex, UnitySamplerState SS,
+    out float4 Color)
+{
+    float3 blend = pow(abs(Normal), Sharpness);
+    blend /= dot(blend, 1.0); // normalize weights
+
+    float4 xProj = SAMPLE_TEXTURE2D(Tex, SS, Position.yz);
+    float4 yProj = SAMPLE_TEXTURE2D(Tex, SS, Position.xz);
+    float4 zProj = SAMPLE_TEXTURE2D(Tex, SS, Position.xy);
+
+    Color = xProj * blend.x + yProj * blend.y + zProj * blend.z;
+}
+```
+
+---
+
+## 5. GLSL vs HLSL Quick Reference
+
+| Feature | GLSL | HLSL |
+|---------|------|------|
+| Vector types | `vec2`, `vec3`, `vec4` | `float2`, `float3`, `float4` |
+| Matrix types | `mat4` (column-major) | `float4x4` (row-major) |
+| Texture sample | `texture(sampler, uv)` | `tex.Sample(sampler, uv)` |
+| Clamp [0,1] | `clamp(x, 0.0, 1.0)` | `saturate(x)` |
+| Lerp | `mix(a, b, t)` | `lerp(a, b, t)` |
+| Fragment output | `out vec4 FragColor` | `SV_Target` semantic |
+| Vertex position | `gl_Position` | `SV_Position` semantic |
+| Instance ID | `gl_InstanceID` | `SV_InstanceID` |
+| Discard | `discard` | `clip(-1)` |
+| Modulo | `mod(x, y)` | `fmod(x, y)` |
+| Inverse sqrt | `inversesqrt(x)` | `rsqrt(x)` |
+
+---
+
+## 6. Compute Shader: Image Blur (Box Filter)
+
+```hlsl
+// HLSL Compute Shader — 5x5 Box Blur
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float4 sum = float4(0, 0, 0, 0);
+    for (int y = -2; y <= 2; y++) {
+        for (int x = -2; x <= 2; x++) {
+            sum += InputTexture[id.xy + int2(x, y)];
+        }
+    }
+    OutputTexture[id.xy] = sum / 25.0;
+}
+```
+
+---
+
+## 7. VR-Specific: Single-Pass Stereo Instancing
+
+```glsl
+// GLSL Vertex Shader — VR stereo rendering via instancing
+#version 450
+#extension GL_ARB_shader_viewport_layer_array : enable
+
+layout(location = 0) in vec3 aPos;
+uniform mat4 u_ViewProj[2]; // left eye [0], right eye [1]
+
+void main() {
+    // gl_InstanceID 0 = left eye, 1 = right eye
+    gl_Position = u_ViewProj[gl_InstanceID] * vec4(aPos, 1.0);
+    gl_ViewportIndex = gl_InstanceID; // route to left/right viewport
+}
+```
+
+**VR optimization:** Single-pass stereo renders both eyes in one draw call using instancing or multiview extensions, halving CPU overhead.
+
+
+---
+
+## Related Notes
+- [9.5_engine_skeletons](9.5_engine_skeletons) - Shared review/3d/reference focus
+- [9.7_xr_interaction](9.7_xr_interaction) - Shared review/3d/reference focus
+- [_IMPORT_TO_OBSIDIAN](_IMPORT_TO_OBSIDIAN) - Related reference topic
+- [Architecture Inspiration Index](Architecture-Inspiration-Index) - Related reference topic

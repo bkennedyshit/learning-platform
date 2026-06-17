@@ -1,0 +1,914 @@
+---
+title: "34.3 — Cardiovascular Bioenergetics & VO2 Max"
+subject: "Biomechanics & HCI"
+catalog: advanced
+audience_tier: higher-education
+chapter: "34.3"
+type: chapter-note
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [34 - Biomechanics & HCI](34---Biomechanics-&-HCI)*
+
+# 34.3 — Cardiovascular Bioenergetics & VO2 Max
+
+> *"The rate of energy liberation in a muscle is a function of the load and the speed of shortening."* — A.V. Hill, *The Heat of Shortening and the Dynamic Constants of Muscle*, 1938
+
+The cardiovascular system is a fluid-mechanical pump delivering oxygen to mitochondria for ATP synthesis. For an athlete with a 33 BPM resting heart rate, the enlarged left ventricle (Athlete's Heart) achieves extraordinary stroke volumes. This chapter quantifies the physics of cardiac output, the biochemistry of oxidative phosphorylation, and the measurement of VO2 max — the gold standard of aerobic fitness.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Derive the **Fick equation** relating VO2 to cardiac output and arteriovenous O2 difference.
+2. Calculate **cardiac output** from heart rate and stroke volume.
+3. Model **ATP yield** from oxidative phosphorylation (glucose, fatty acids).
+4. Compute **metabolic equivalents (METs)** and energy expenditure during exercise.
+5. Understand the physiology of **Athlete's Heart** (33 BPM, enlarged LV).
+6. Apply Hill's force-velocity relationship to muscle energetics.
+7. Implement VO2 estimation algorithms from heart rate data.
+
+---
+
+## 🖼️ Visual Anchor — Cardiac Output & O2 Delivery
+
+![track-13__13.3-fig1](track-13__13.3-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 34.3.1 — VO2 (Oxygen Consumption Rate)
+
+$$
+\dot{V}O_2 = \text{Volume of oxygen consumed per minute (mL/min or L/min)}
+$$
+
+Measured via expired gas analysis: $\dot{V}O_2 = \dot{V}_E(F_{I,O_2} - F_{E,O_2})$ where $\dot{V}_E$ is minute ventilation and $F$ denotes fractional gas concentrations.
+
+### Definition 34.3.2 — VO2 Max
+
+The **maximal oxygen uptake** — the highest rate at which the body can consume oxygen during maximal exercise:
+
+$$
+\dot{V}O_{2,\max} = Q_{\max} \times (C_aO_2 - C_vO_2)_{\max}
+$$
+
+Typical values: untrained male ~35–45 mL/kg/min; elite cyclist ~70–85 mL/kg/min; elite BMX rider ~55–65 mL/kg/min.
+
+### Definition 34.3.3 — Cardiac Output
+
+$$
+\dot{Q} = HR \times SV
+$$
+
+where $HR$ = heart rate (beats/min) and $SV$ = stroke volume (mL/beat).
+
+**For the 33 BPM athlete at rest:**
+
+$$
+\dot{Q}_{\text{rest}} = 33 \times 200 = 6600 \text{ mL/min} = 6.6 \text{ L/min}
+$$
+
+(Normal resting SV ~70 mL; athlete's SV ~200 mL due to enlarged LV)
+
+### Definition 34.3.4 — Stroke Volume
+
+The volume of blood ejected per heartbeat:
+
+$$
+SV = EDV - ESV
+$$
+
+where $EDV$ = end-diastolic volume (~250 mL in athletes) and $ESV$ = end-systolic volume (~50 mL).
+
+### Definition 34.3.5 — Metabolic Equivalent (MET)
+
+$$
+1 \text{ MET} = 3.5 \text{ mL O}_2/\text{kg/min} = \text{resting metabolic rate}
+$$
+
+Exercise intensity in METs: $\text{METs} = \dot{V}O_2 / 3.5$ (per kg body mass).
+
+### Definition 34.3.6 — Respiratory Exchange Ratio (RER)
+
+$$
+RER = \frac{\dot{V}CO_2}{\dot{V}O_2}
+$$
+
+- RER = 0.7: pure fat oxidation
+- RER = 1.0: pure carbohydrate oxidation
+- RER > 1.0: anaerobic threshold exceeded (CO2 buffering of lactate)
+
+### Definition 34.3.7 — ATP (Adenosine Triphosphate)
+
+The universal energy currency of cells. Energy released per mole of ATP hydrolysis:
+
+$$
+\Delta G_{\text{ATP}} = -30.5 \text{ kJ/mol} \approx -7.3 \text{ kcal/mol}
+$$
+
+### Definition 34.3.8 — Hill's Force-Velocity Equation
+
+$$
+(F + a)(v + b) = (F_0 + a)b = \text{constant}
+$$
+
+where $F$ = muscle force, $v$ = shortening velocity, $F_0$ = isometric force, and $a, b$ are constants (Hill, 1938).
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 34.3.A1 — Conservation of Energy (First Law of Thermodynamics)
+
+$$
+\dot{E}_{\text{metabolic}} = \dot{W}_{\text{mechanical}} + \dot{Q}_{\text{heat}}
+$$
+
+The metabolic energy rate equals mechanical power output plus heat dissipation. Human mechanical efficiency is typically 20–25%.
+
+### Axiom 34.3.A2 — Fick Principle
+
+At steady state, the rate of oxygen consumption equals the product of blood flow and oxygen extraction:
+
+$$
+\dot{V}O_2 = \dot{Q} \times (C_aO_2 - C_{\bar{v}}O_2)
+$$
+
+### Axiom 34.3.A3 — Stoichiometry of Oxidative Phosphorylation
+
+Glucose oxidation:
+
+$$
+C_6H_{12}O_6 + 6O_2 \rightarrow 6CO_2 + 6H_2O + 30\text{–}32 \text{ ATP}
+$$
+
+Palmitate (fatty acid) oxidation:
+
+$$
+C_{16}H_{32}O_2 + 23O_2 \rightarrow 16CO_2 + 16H_2O + 106 \text{ ATP}
+$$
+
+Note the RER difference: glucose yields $RER = 6CO_2/6O_2 = 1.0$; palmitate yields $RER = 16/23 = 0.70$.
+
+### Axiom 34.3.A4 — Frank-Starling Mechanism
+
+The heart's stroke volume increases with increased venous return (preload):
+
+$$
+SV \propto EDV \quad \text{(within physiological range)}
+$$
+
+Greater end-diastolic volume stretches the myocardium, increasing the force of contraction (length-tension relationship). The athlete's enlarged LV has greater compliance, allowing EDV up to 250 mL (vs. normal 120 mL), which drives the extraordinary stroke volume.
+
+### Axiom 34.3.A5 — Oxygen Dissociation Curve (Bohr Effect)
+
+Hemoglobin oxygen saturation follows a sigmoidal curve. During exercise, local factors shift the curve rightward (Bohr effect):
+- Decreased pH (lactic acid): shifts right
+- Increased temperature: shifts right
+- Increased 2,3-DPG: shifts right
+- Increased PCO₂: shifts right
+
+This rightward shift **enhances oxygen unloading** at the muscle:
+
+$$
+\Delta SaO_2 \approx -3\% \text{ per 0.1 pH decrease}
+$$
+
+At exercising muscle (pH 7.0 vs. arterial 7.4): the P50 shifts from 26 to ~35 mmHg, releasing an additional 10–15% of bound oxygen.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 34.3.1 — Caloric Equivalent of Oxygen
+
+At RER = 0.85 (mixed substrate):
+
+$$
+1 \text{ L O}_2 \approx 4.86 \text{ kcal} \approx 20.3 \text{ kJ}
+$$
+
+At RER = 1.0 (carbohydrate only): 1 L O₂ = 5.05 kcal
+At RER = 0.7 (fat only): 1 L O₂ = 4.69 kcal
+
+### Lemma 34.3.2 — Mechanical Efficiency
+
+$$
+\eta = \frac{\dot{W}_{\text{mech}}}{\dot{E}_{\text{metabolic}}} = \frac{\dot{W}_{\text{mech}}}{\dot{V}O_2 \times 20.3 \text{ kJ/L}}
+$$
+
+For cycling: $\eta \approx 0.20\text{–}0.25$ (20–25% efficient).
+
+### Lemma 34.3.3 — Heart Rate Reserve (Karvonen Method)
+
+$$
+HR_{\text{target}} = HR_{\text{rest}} + f \times (HR_{\max} - HR_{\text{rest}})
+$$
+
+For the 33 BPM athlete with $HR_{\max} = 190$:
+
+$$
+HR_{\text{target}}(70\%) = 33 + 0.70 \times (190 - 33) = 33 + 110 = 143 \text{ BPM}
+$$
+
+### Lemma 34.3.4 — Oxygen Delivery Chain Efficiency
+
+The total oxygen delivery from atmosphere to mitochondria involves multiple transfer steps, each with an efficiency:
+
+$$
+\dot{V}O_{2,\text{mito}} = \dot{V}_E \times F_{IO_2} \times \eta_{\text{alveolar}} \times \eta_{\text{diffusion}} \times \eta_{\text{perfusion}} \times \eta_{\text{extraction}}
+$$
+
+For the 33 BPM athlete at maximum:
+- Minute ventilation: $\dot{V}_E = 180$ L/min
+- $F_{IO_2} = 0.2093$ (atmospheric)
+- Alveolar efficiency: $\eta_{\text{alv}} = 0.85$ (dead space correction)
+- Diffusion: $\eta_{\text{diff}} = 0.98$ (near-complete equilibration)
+- Perfusion matching: $\eta_{\text{perf}} = 0.95$ (V/Q matching)
+- Extraction: $(a\text{-}vO_2)/C_aO_2 = 160/200 = 0.80$
+
+$$
+\dot{V}O_{2,\max} = 180 \times 0.2093 \times 0.85 \times 0.98 \times 0.95 \times 0.80 = 24.5 \text{ L O}_2/\text{min available}
+$$
+
+Actual VO2max is limited by cardiac output (Fick principle), not ventilation — confirming the cardiovascular system is the bottleneck.
+
+### Lemma 34.3.5 — Phosphocreatine Recovery Kinetics
+
+After high-intensity exercise, PCr resynthesis follows a mono-exponential:
+
+$$
+PCr(t) = PCr_{\max}\left(1 - e^{-t/\tau_{PCr}}\right)
+$$
+
+where $\tau_{PCr} \approx 20\text{–}40$ s in trained athletes (vs. 60–90 s untrained).
+
+Half-recovery time: $t_{1/2} = \tau \ln 2 \approx 0.693 \times 30 = 20.8$ s.
+
+**BMX application:** Between race motos (5-minute rest), PCr is fully recovered ($5 \times 60 / 30 = 10$ time constants). Between gate starts in practice (30 s rest): only $1 - e^{-30/30} = 63\%$ recovered — performance will decline.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 34.3.1 — VO2-Heart Rate Linear Relationship
+
+Over the range of 40–90% of VO2 max, the relationship between HR and VO2 is approximately linear:
+
+$$
+\dot{V}O_2 = m \cdot HR + c
+$$
+
+where $m$ and $c$ are individual-specific constants determined by a graded exercise test.
+
+For estimation without a lab test (Swain et al., 1994):
+
+$$
+\%\dot{V}O_{2R} \approx \%HRR
+$$
+
+(Percent VO2 reserve ≈ Percent heart rate reserve)
+
+### Theorem 34.3.2 — Maximal Cardiac Output Determines VO2 Max
+
+$$
+\dot{V}O_{2,\max} = HR_{\max} \times SV_{\max} \times (C_aO_2 - C_{\bar{v}}O_2)_{\max}
+$$
+
+For the 33 BPM athlete:
+- $HR_{\max} = 190$ BPM
+- $SV_{\max} = 220$ mL (Frank-Starling mechanism at max)
+- $(a\text{-}vO_2)_{\max} = 16$ mL O₂/100 mL blood
+
+$$
+\dot{V}O_{2,\max} = 190 \times 220 \times 0.16 = 6688 \text{ mL/min} = 6.69 \text{ L/min}
+$$
+
+For a 75 kg rider: $6690/75 = 89.2$ mL/kg/min — world-class level.
+
+### Theorem 34.3.3 — Power-Duration Relationship (Critical Power Model)
+
+$$
+t = \frac{W'}{P - CP}
+$$
+
+where $W'$ = anaerobic work capacity (kJ), $P$ = power output (W), $CP$ = critical power (W).
+
+Equivalently: $W_{\text{total}} = W' + CP \cdot t$ (the total work done above CP is limited to $W'$).
+
+### Theorem 34.3.4 — Oxygen Pulse as Stroke Volume Proxy
+
+The **oxygen pulse** (O₂ pulse) is VO2 divided by heart rate:
+
+$$
+O_2\text{ pulse} = \frac{\dot{V}O_2}{HR} = SV \times (C_aO_2 - C_{\bar{v}}O_2)
+$$
+
+This is proportional to stroke volume (assuming constant a-vO₂ difference). For the 33 BPM athlete at rest:
+
+$$
+O_2\text{ pulse}_{\text{rest}} = \frac{330}{33} = 10.0 \text{ mL O}_2/\text{beat}
+$$
+
+At maximum:
+
+$$
+O_2\text{ pulse}_{\max} = \frac{6690}{190} = 35.2 \text{ mL O}_2/\text{beat}
+$$
+
+Normal maximum O₂ pulse is 10–15 mL/beat. A value of 35 mL/beat confirms the extraordinary stroke volume of the athlete's heart.
+
+### Theorem 34.3.5 — Mechanical Efficiency and Economy
+
+**Gross efficiency:**
+
+$$
+\eta_{\text{gross}} = \frac{P_{\text{mech}}}{\dot{E}_{\text{total}}} \times 100\%
+$$
+
+**Net efficiency** (subtracting resting metabolism):
+
+$$
+\eta_{\text{net}} = \frac{P_{\text{mech}}}{\dot{E}_{\text{total}} - \dot{E}_{\text{rest}}} \times 100\%
+$$
+
+**Delta efficiency** (change in work / change in energy):
+
+$$
+\eta_{\delta} = \frac{\Delta P_{\text{mech}}}{\Delta \dot{E}} \times 100\%
+$$
+
+For elite cyclists: $\eta_{\text{gross}} \approx 20\text{–}25\%$, $\eta_{\text{net}} \approx 25\text{–}30\%$, $\eta_{\delta} \approx 27\text{–}30\%$.
+
+---
+
+
+## ✍️ 5. Physics & Math Derivations
+
+### 5.1 Derivation — ATP Yield from Glucose Oxidation
+
+**Step 1:** Glycolysis (cytoplasm):
+
+$$
+\text{Glucose} \rightarrow 2\text{ Pyruvate} + 2\text{ ATP} + 2\text{ NADH}
+$$
+
+**Step 2:** Pyruvate dehydrogenase (mitochondrial matrix):
+
+$$
+2\text{ Pyruvate} \rightarrow 2\text{ Acetyl-CoA} + 2\text{ NADH} + 2\text{ CO}_2
+$$
+
+**Step 3:** Krebs cycle (×2 turns per glucose):
+
+$$
+2\text{ Acetyl-CoA} \rightarrow 4\text{ CO}_2 + 6\text{ NADH} + 2\text{ FADH}_2 + 2\text{ GTP}
+$$
+
+**Step 4:** Electron transport chain:
+- Each NADH → 2.5 ATP (via Complex I)
+- Each FADH₂ → 1.5 ATP (via Complex II)
+
+Total NADH: $2 + 2 + 6 = 10$ NADH → $10 \times 2.5 = 25$ ATP
+Total FADH₂: $2$ → $2 \times 1.5 = 3$ ATP
+Substrate-level: $2$ ATP (glycolysis) + $2$ GTP (Krebs) = $4$ ATP
+
+**Step 5:** Grand total:
+
+$$
+\text{ATP}_{\text{total}} = 25 + 3 + 4 = 32 \text{ ATP per glucose}
+$$
+
+**Step 6:** Energy efficiency:
+
+$$
+\eta_{\text{metabolic}} = \frac{32 \times 30.5 \text{ kJ}}{2870 \text{ kJ (glucose combustion)}} = \frac{976}{2870} = 34\%
+$$
+
+---
+
+### 5.2 Derivation — Energy Expenditure from VO2
+
+**Given:** A BMX rider consuming $\dot{V}O_2 = 3.0$ L/min at RER = 0.90.
+
+**Step 1:** Caloric equivalent at RER = 0.90:
+
+$$
+\text{kcal/L O}_2 = 4.924 \text{ (interpolated from RER table)}
+$$
+
+**Step 2:** Energy expenditure rate:
+
+$$
+\dot{E} = \dot{V}O_2 \times 4.924 = 3.0 \times 4.924 = 14.77 \text{ kcal/min}
+$$
+
+**Step 3:** Convert to watts (mechanical power at 22% efficiency):
+
+$$
+\dot{W}_{\text{mech}} = 0.22 \times 14.77 \times \frac{4184 \text{ J}}{60 \text{ s}} = 0.22 \times 1030 = 226.6 \text{ W}
+$$
+
+**Step 4:** METs:
+
+$$
+\text{METs} = \frac{\dot{V}O_2}{3.5 \times m} = \frac{3000}{3.5 \times 75} = \frac{3000}{262.5} = 11.4 \text{ METs}
+$$
+
+This corresponds to vigorous cycling intensity.
+
+---
+
+### 5.3 Derivation — Cardiac Output at 33 BPM (Athlete's Heart)
+
+**The Physiology:** A resting HR of 33 BPM indicates:
+1. **Enlarged left ventricle** (LV internal diameter ~60–65 mm vs. normal 45–55 mm)
+2. **Increased stroke volume** (~200 mL vs. normal ~70 mL)
+3. **Enhanced vagal tone** (dorsal vagal complex dominance)
+
+**Step 1:** Resting cardiac output must maintain tissue perfusion:
+
+$$
+\dot{Q}_{\text{rest}} = HR \times SV = 33 \times 200 = 6600 \text{ mL/min}
+$$
+
+Normal resting $\dot{Q} \approx 5000$ mL/min, so the athlete actually has **higher** resting cardiac output despite the low HR.
+
+**Step 2:** Resting VO2:
+
+$$
+\dot{V}O_{2,\text{rest}} = \dot{Q} \times (a\text{-}vO_2\text{ diff}) = 6.6 \times 5.0 = 330 \text{ mL/min}
+$$
+
+(Normal a-vO₂ diff at rest ≈ 5 mL O₂/100 mL blood = 50 mL/L)
+
+Wait — let's be precise: $6.6 \text{ L/min} \times 50 \text{ mL O}_2/\text{L blood} = 330$ mL O₂/min.
+
+For 75 kg: $330/75 = 4.4$ mL/kg/min ≈ 1.26 METs. Slightly above 1 MET due to higher resting metabolism in trained athletes.
+
+**Step 3:** Maximum cardiac output:
+
+$$
+\dot{Q}_{\max} = 190 \times 220 = 41,800 \text{ mL/min} = 41.8 \text{ L/min}
+$$
+
+**Step 4:** Cardiac output reserve:
+
+$$
+\text{Reserve} = \frac{\dot{Q}_{\max}}{\dot{Q}_{\text{rest}}} = \frac{41.8}{6.6} = 6.3\times
+$$
+
+The heart can increase output by 6.3× from rest to max — extraordinary cardiovascular reserve.
+
+---
+
+### 5.4 Derivation — Hill's Force-Velocity and Power Output
+
+**Hill's equation** (1938):
+
+$$
+(F + a)(v + b) = (F_0 + a)b
+$$
+
+**Step 1:** Solve for velocity:
+
+$$
+v = \frac{b(F_0 - F)}{F + a}
+$$
+
+**Step 2:** Power output $P = Fv$:
+
+$$
+P = F \cdot \frac{b(F_0 - F)}{F + a} = \frac{bF(F_0 - F)}{F + a}
+$$
+
+**Step 3:** Maximum power occurs at $dP/dF = 0$. Using the quotient rule:
+
+$$
+\frac{dP}{dF} = \frac{b[(F_0 - 2F)(F + a) - F(F_0 - F)]}{(F + a)^2} = 0
+$$
+
+Numerator = 0:
+
+$$
+(F_0 - 2F)(F + a) - F(F_0 - F) = 0
+$$
+
+$$
+F_0 F + F_0 a - 2F^2 - 2Fa - F \cdot F_0 + F^2 = 0
+$$
+
+$$
+F_0 a - F^2 - 2Fa = 0
+$$
+
+$$
+F^2 + 2aF - aF_0 = 0
+$$
+
+$$
+F_{\text{opt}} = \frac{-2a + \sqrt{4a^2 + 4aF_0}}{2} = -a + \sqrt{a^2 + aF_0} = a(\sqrt{1 + F_0/a} - 1)
+$$
+
+For typical muscle: $a/F_0 \approx 0.25$, so $F_{\text{opt}} \approx 0.31 F_0$ and $v_{\text{opt}} \approx 0.31 v_{\max}$.
+
+---
+
+## 🧬 6. Biological Impact
+
+### Athlete's Heart Adaptations (33 BPM Context)
+
+The user's 33 BPM resting heart rate reflects specific cardiac remodeling:
+
+| Adaptation | Normal | Athlete's Heart | Mechanism |
+|:---|:---|:---|:---|
+| LV wall thickness | 6–11 mm | 12–15 mm | Eccentric hypertrophy |
+| LV internal diameter | 45–55 mm | 55–65 mm | Volume overload adaptation |
+| Stroke volume | 60–80 mL | 180–220 mL | Frank-Starling mechanism |
+| Resting HR | 60–80 BPM | 28–40 BPM | Enhanced vagal tone |
+| VO2 max | 35–45 mL/kg/min | 60–90 mL/kg/min | Central + peripheral |
+
+### Mitochondrial Density
+
+Trained skeletal muscle has:
+- **Mitochondrial volume density:** 8–12% (vs. 3–5% untrained)
+- **Capillary density:** 500–600 capillaries/mm² (vs. 300–400)
+- **Myoglobin concentration:** 2× higher (intracellular O₂ shuttle)
+- **Oxidative enzyme activity:** Citrate synthase 2–3× higher
+
+### Substrate Utilization During BMX
+
+| Intensity | Duration | Primary Fuel | ATP Rate (mmol/s) |
+|:---|:---|:---|:---|
+| Sprint start (>150% VO2max) | 0–10 s | Phosphocreatine | 9.0 |
+| Race pace (90–110% VO2max) | 10–45 s | Glycolysis (anaerobic) | 6.5 |
+| Recovery pedaling (50% VO2max) | 45–120 s | Aerobic (glycogen + fat) | 2.5 |
+| Rest between motos | 5–20 min | Fat oxidation | 0.8 |
+
+### Oxygen Cascade
+
+The partial pressure of O₂ drops through the delivery chain:
+
+$$
+P_{O_2}: \text{Atmosphere}(159) \rightarrow \text{Alveoli}(100) \rightarrow \text{Arterial}(95) \rightarrow \text{Capillary}(40) \rightarrow \text{Mitochondria}(2\text{–}5 \text{ mmHg})
+$$
+
+---
+
+## 💻 7. Software Implementation
+
+### 7.1 VO2 Estimation from Heart Rate
+
+```python
+import numpy as np
+
+def estimate_vo2_from_hr(hr: np.ndarray, hr_rest: float = 33.0, hr_max: float = 190.0,
+                          vo2_max: float = 65.0, body_mass: float = 75.0) -> np.ndarray:
+    """Estimate VO2 from heart rate using %HRR ≈ %VO2R relationship.
+    
+    Args:
+        hr: Heart rate array (BPM)
+        hr_rest: Resting heart rate (BPM)
+        hr_max: Maximum heart rate (BPM)
+        vo2_max: Maximum VO2 (mL/kg/min)
+        body_mass: Body mass (kg)
+    
+    Returns:
+        Estimated VO2 in mL/min
+    """
+    vo2_rest = 3.5 * body_mass  # 1 MET in mL/min
+    hrr_fraction = (hr - hr_rest) / (hr_max - hr_rest)
+    hrr_fraction = np.clip(hrr_fraction, 0, 1)
+    
+    vo2_reserve = vo2_max * body_mass - vo2_rest
+    vo2 = vo2_rest + hrr_fraction * vo2_reserve
+    
+    return vo2
+
+
+def energy_expenditure(vo2_ml_min: np.ndarray, rer: float = 0.85) -> dict:
+    """Compute energy expenditure from VO2.
+    
+    Returns dict with kcal/min, watts, METs
+    """
+    # Caloric equivalent lookup (simplified linear interpolation)
+    cal_equiv = 4.686 + (rer - 0.7) * (5.047 - 4.686) / 0.3  # kcal per L O2
+    
+    vo2_L_min = vo2_ml_min / 1000.0
+    kcal_per_min = vo2_L_min * cal_equiv
+    watts = kcal_per_min * 4184 / 60  # total metabolic watts
+    mets = vo2_ml_min / (3.5 * 75)  # assuming 75 kg
+    
+    return {'kcal_per_min': kcal_per_min, 'watts': watts, 'mets': mets}
+```
+
+### 7.2 Critical Power Model
+
+```python
+def critical_power_model(power_data: np.ndarray, time_data: np.ndarray) -> dict:
+    """Fit the 2-parameter critical power model: W = W' + CP * t.
+    
+    Args:
+        power_data: Array of power outputs from time trials (W)
+        time_data: Corresponding time-to-exhaustion (s)
+    
+    Returns:
+        dict with CP (watts) and W_prime (joules)
+    """
+    # Linear regression: Work = W' + CP * time
+    # Work = Power * time
+    work = power_data * time_data
+    
+    # W = CP*t + W'  =>  linear fit of Work vs time
+    coeffs = np.polyfit(time_data, work, 1)
+    cp = coeffs[0]       # slope = CP
+    w_prime = coeffs[1]  # intercept = W'
+    
+    return {'CP': cp, 'W_prime': w_prime}
+
+
+def time_to_exhaustion(power: float, cp: float, w_prime: float) -> float:
+    """Predict time to exhaustion at a given power output.
+    
+    t = W' / (P - CP)  [only valid for P > CP]
+    """
+    if power <= cp:
+        return float('inf')  # sustainable indefinitely
+    return w_prime / (power - cp)
+```
+
+### 7.3 ATP Yield Calculator
+
+```python
+def atp_yield_glucose(n_glucose: float = 1.0) -> dict:
+    """Calculate ATP yield from complete glucose oxidation."""
+    glycolysis_atp = 2 * n_glucose
+    glycolysis_nadh = 2 * n_glucose
+    pdh_nadh = 2 * n_glucose
+    krebs_nadh = 6 * n_glucose
+    krebs_fadh2 = 2 * n_glucose
+    krebs_gtp = 2 * n_glucose
+    
+    etc_from_nadh = (glycolysis_nadh + pdh_nadh + krebs_nadh) * 2.5
+    etc_from_fadh2 = krebs_fadh2 * 1.5
+    
+    total = glycolysis_atp + krebs_gtp + etc_from_nadh + etc_from_fadh2
+    
+    return {
+        'substrate_level': glycolysis_atp + krebs_gtp,
+        'from_NADH': etc_from_nadh,
+        'from_FADH2': etc_from_fadh2,
+        'total_ATP': total,
+        'efficiency': (total * 30.5) / 2870 * 100  # percent
+    }
+```
+
+---
+
+## 🧮 8. Worked Examples
+
+<details>
+<summary>Example 1: Cardiac Output at Various Exercise Intensities</summary>
+
+**Problem:** For the 33 BPM athlete (SV_rest = 200 mL, SV_max = 220 mL), calculate cardiac output at rest, 50% HRR, and maximum. Assume SV increases linearly from rest to max over the HR range.
+
+**Solution:**
+
+**Step 1:** HR at 50% HRR:
+
+$$
+HR_{50\%} = 33 + 0.5(190 - 33) = 33 + 78.5 = 111.5 \text{ BPM}
+$$
+
+**Step 2:** SV at 50% HRR (linear interpolation):
+
+$$
+SV_{50\%} = 200 + \frac{111.5 - 33}{190 - 33}(220 - 200) = 200 + 0.5 \times 20 = 210 \text{ mL}
+$$
+
+**Step 3:** Cardiac outputs:
+
+$$
+\dot{Q}_{\text{rest}} = 33 \times 200 = 6,600 \text{ mL/min} = 6.6 \text{ L/min}
+$$
+
+$$
+\dot{Q}_{50\%} = 111.5 \times 210 = 23,415 \text{ mL/min} = 23.4 \text{ L/min}
+$$
+
+$$
+\dot{Q}_{\max} = 190 \times 220 = 41,800 \text{ mL/min} = 41.8 \text{ L/min}
+$$
+
+**Step 4:** VO2 at each level (a-vO₂ diff: rest=5, 50%=12, max=16 mL/dL):
+
+$$
+\dot{V}O_{2,\text{rest}} = 6.6 \times 50 = 330 \text{ mL/min}
+$$
+
+$$
+\dot{V}O_{2,50\%} = 23.4 \times 120 = 2,808 \text{ mL/min}
+$$
+
+$$
+\dot{V}O_{2,\max} = 41.8 \times 160 = 6,688 \text{ mL/min} = 89.2 \text{ mL/kg/min}
+$$
+
+</details>
+
+<details>
+<summary>Example 2: Energy Cost of a BMX Race Moto</summary>
+
+**Problem:** A BMX race moto lasts 38 seconds. Average HR = 178 BPM. Estimate total energy expenditure and mechanical work (efficiency = 22%).
+
+**Solution:**
+
+**Step 1:** %HRR:
+
+$$
+\%HRR = \frac{178 - 33}{190 - 33} = \frac{145}{157} = 92.4\%
+$$
+
+**Step 2:** VO2 (using %HRR ≈ %VO2R):
+
+$$
+\dot{V}O_2 = 262.5 + 0.924 \times (4875 - 262.5) = 262.5 + 4262 = 4524 \text{ mL/min}
+$$
+
+(VO2 max = 65 × 75 = 4875 mL/min; VO2 rest = 3.5 × 75 = 262.5 mL/min)
+
+**Step 3:** Energy rate (RER ≈ 1.05 at this intensity → 5.1 kcal/L O₂):
+
+$$
+\dot{E} = 4.524 \times 5.1 = 23.1 \text{ kcal/min} = 1610 \text{ W (metabolic)}
+$$
+
+**Step 4:** Total energy in 38 s:
+
+$$
+E_{\text{total}} = 1610 \times \frac{38}{60} = 1020 \text{ J... wait}
+$$
+
+Let me redo in consistent units:
+
+$$
+\dot{E} = 4.524 \text{ L/min} \times 21.35 \text{ kJ/L} = 96.6 \text{ kJ/min} = 1610 \text{ W}
+$$
+
+$$
+E_{\text{total}} = 1610 \times 38 = 61,180 \text{ J} = 61.2 \text{ kJ} = 14.6 \text{ kcal}
+$$
+
+**Step 5:** Mechanical work:
+
+$$
+W_{\text{mech}} = 0.22 \times 61,180 = 13,460 \text{ J} = 34.5 \text{ kJ}
+$$
+
+Average mechanical power: $13,460 / 38 = 354$ W.
+
+</details>
+
+<details>
+<summary>Example 3: ATP Turnover During a Sprint</summary>
+
+**Problem:** During a 10-second BMX gate start, power output is 1200 W at 22% efficiency. Calculate: (a) metabolic power, (b) total ATP consumed, (c) contribution from phosphocreatine vs. glycolysis.
+
+**Solution:**
+
+**(a) Metabolic power:**
+
+$$
+\dot{E}_{\text{met}} = \frac{1200}{0.22} = 5455 \text{ W}
+$$
+
+**(b) Total energy in 10 s:
+
+$$
+E = 5455 \times 10 = 54,550 \text{ J} = 54.6 \text{ kJ}
+$$
+
+ATP consumed (at 30.5 kJ/mol per ATP, but considering in vivo ΔG ≈ 50 kJ/mol):
+
+$$
+n_{\text{ATP}} = \frac{54,550}{50,000} = 1.09 \text{ mol ATP}
+$$
+
+**(c) Sources (10-second sprint):**
+
+Phosphocreatine system: ~60% of ATP in first 10 s
+
+$$
+\text{PCr contribution} = 0.60 \times 1.09 = 0.65 \text{ mol}
+$$
+
+Anaerobic glycolysis: ~35%
+
+$$
+\text{Glycolysis} = 0.35 \times 1.09 = 0.38 \text{ mol}
+$$
+
+Aerobic: ~5%
+
+$$
+\text{Aerobic} = 0.05 \times 1.09 = 0.055 \text{ mol}
+$$
+
+PCr stores in muscle: ~80 mmol/kg wet muscle × 25 kg active muscle = 2.0 mol. So 0.65 mol uses ~33% of PCr stores in just 10 seconds.
+
+</details>
+
+---
+
+## 🔗 9. Cross-links & Further Reading
+
+### Internal Cross-links
+- [34.4 - Autonomic Nervous System Telemetry - HRV](34.4---Autonomic-Nervous-System-Telemetry---HRV) — Next: analyzing the 33 BPM heart via HRV
+- [34.2 - Rotational Dynamics in Extreme Sports](34.2---Rotational-Dynamics-in-Extreme-Sports) — Energy demands of aerial tricks
+- [34.7 - Building Bio-metric Software Applications](34.7---Building-Bio-metric-Software-Applications) — Implementing VO2 tracking in apps
+- [05 - Neuroscience & Computational Cognition](05---Neuroscience-&-Computational-Cognition) — Neural control of cardiovascular regulation
+
+### Additional Derivations
+
+#### Oxygen Deficit and EPOC
+
+**Step 1:** At exercise onset, VO2 rises exponentially toward steady state:
+
+$$
+\dot{V}O_2(t) = \dot{V}O_{2,\text{ss}}\left(1 - e^{-t/\tau}\right)
+$$
+
+where $\tau \approx 30$ s for trained athletes (vs. 45 s untrained).
+
+**Step 2:** The oxygen deficit (energy supplied anaerobically) is:
+
+$$
+O_2\text{ deficit} = \int_0^{t_{\text{ss}}} [\dot{V}O_{2,\text{ss}} - \dot{V}O_2(t)]\,dt = \dot{V}O_{2,\text{ss}} \cdot \tau
+$$
+
+For the 33 BPM athlete at 4 L/min steady state: deficit = $4 \times 0.5 = 2.0$ L O₂ equivalent.
+
+**Step 3:** Post-exercise, the elevated VO2 (EPOC — Excess Post-exercise Oxygen Consumption) repays this deficit:
+
+$$
+EPOC = \int_0^{\infty} [\dot{V}O_2(t) - \dot{V}O_{2,\text{rest}}]\,dt
+$$
+
+EPOC typically exceeds the deficit by 2–5× due to elevated temperature, catecholamines, and glycogen resynthesis.
+
+#### Lactate Threshold and Ventilatory Threshold
+
+The lactate threshold (LT) occurs at approximately 75–85% of VO2max in trained athletes:
+
+$$
+\text{LT intensity} = 0.80 \times \dot{V}O_{2,\max} = 0.80 \times 65 \times 75 = 3900 \text{ mL/min}
+$$
+
+Corresponding HR (using %HRR ≈ %VO2R):
+
+$$
+HR_{LT} = 33 + 0.80 \times (190 - 33) = 33 + 125.6 = 159 \text{ BPM}
+$$
+
+Above LT, lactate accumulates exponentially and RER exceeds 1.0 as bicarbonate buffers H⁺:
+
+$$
+H^+ + HCO_3^- \rightarrow H_2CO_3 \rightarrow H_2O + CO_2 \uparrow
+$$
+
+This "extra" CO₂ drives ventilation disproportionately — the ventilatory threshold.
+
+#### Cardiac Efficiency and Myocardial VO2
+
+The heart itself consumes oxygen. Myocardial VO2:
+
+$$
+M\dot{V}O_2 \approx 0.14 \times HR \times SBP \times 10^{-4} \text{ (mL O}_2\text{/beat/100g)}
+$$
+
+Rate-pressure product (RPP) as index of myocardial work:
+
+$$
+RPP = HR \times SBP
+$$
+
+At rest for the 33 BPM athlete (SBP = 110 mmHg): $RPP = 33 \times 110 = 3630$
+
+At max (HR=190, SBP=200): $RPP = 190 \times 200 = 38000$
+
+The heart's workload increases 10.5× from rest to max — yet the enlarged athlete's heart does this more efficiently per beat due to greater stroke volume.
+
+### Authoritative Sources
+- **Hill, A.V.** (1938). "The Heat of Shortening and the Dynamic Constants of Muscle." *Proceedings of the Royal Society B*, 126(843), 136–195.
+- **McGinnis, P.M.** (2013). *Biomechanics of Sport and Exercise*. Chapter 12: Energy, Work, and Power.
+- **Wasserman, K. et al.** (2011). *Principles of Exercise Testing and Interpretation* (5th ed.). Lippincott.
+- **Jones, A.M. et al.** (2010). "Critical Power: Implications for the Determination of VO2max and Exercise Tolerance." *Medicine & Science in Sports & Exercise*.
+- **MIT 2.183** — Biomechanics and Neural Control of Movement.
+- **Brooks, G.A.** (2018). "The Science and Translation of Lactate Shuttle Theory." *Cell Metabolism*, 27(4), 757–785.
+
+---

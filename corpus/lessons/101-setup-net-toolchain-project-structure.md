@@ -1,0 +1,1312 @@
+---
+title: "10.1 — Setup, .NET Toolchain & Project Structure"
+subject: "C#"
+catalog: advanced
+audience_tier: higher-education
+chapter: "10.1"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 10.1 — Setup, .NET Toolchain & Project Structure
+
+> *"The .NET SDK is your compiler, your package manager, your test runner, and your build system — all in one CLI."* — Mads Torgersen
+
+Coming from Python, you're used to `pip`, `venv`, and `pyproject.toml`. C#'s ecosystem is more structured but follows the same principles: a CLI tool manages dependencies, builds, and execution. This chapter gets your environment production-ready for both standalone .NET projects and Unity game development.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Install and verify the .NET 8 SDK on Windows.
+2. Create, build, and run C# projects from the command line.
+3. Understand the `.csproj` / `.sln` file structure.
+4. Configure NuGet package management.
+5. Set up a Unity project with proper folder conventions.
+6. Configure your IDE (Rider / VS Code) for C# + Unity development.
+7. Understand the compilation pipeline: source → IL → JIT/AOT → native.
+
+---
+
+## 🖼️ Visual Anchor — .NET Toolchain Architecture
+
+![csharp__3.1-fig1](csharp__3.1-fig1.svg)
+
+---
+
+## 📚 1. Concepts
+
+### Concept 3.1.1 — The .NET SDK
+
+The **.NET SDK** is the complete development toolkit:
+
+| Python Equivalent | .NET Equivalent | Purpose |
+|-------------------|-----------------|---------|
+| `python` | `dotnet` | CLI entry point |
+| `pip install` | `dotnet add package` | Dependency management |
+| `pip` + PyPI | NuGet | Package registry |
+| `venv` | Per-project `.csproj` isolation | Dependency isolation |
+| `pyproject.toml` | `.csproj` (XML) | Project metadata |
+| `python script.py` | `dotnet run` | Execute project |
+| `pytest` | `dotnet test` | Run tests |
+| `python -m build` | `dotnet publish` | Create distributable |
+
+### Concept 3.1.2 — Project File (`.csproj`)
+
+Every C# project has a `.csproj` file — an XML manifest that defines:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+  </ItemGroup>
+</Project>
+```
+
+Key properties:
+- **TargetFramework**: Which .NET version (net8.0, net9.0)
+- **Nullable**: Enable nullable reference type warnings (always enable this)
+- **LangVersion**: C# language version (12 = latest stable)
+- **ImplicitUsings**: Auto-imports common namespaces
+
+### Concept 3.1.3 — Solution File (`.sln`)
+
+A **solution** groups multiple projects:
+
+```
+MyGame.sln
+├── src/
+│   ├── MyGame.Core/          ← Shared game logic
+│   │   └── MyGame.Core.csproj
+│   ├── MyGame.Unity/         ← Unity-specific code
+│   │   └── MyGame.Unity.csproj
+│   └── MyGame.Server/        ← Dedicated server
+│       └── MyGame.Server.csproj
+└── tests/
+    └── MyGame.Tests/
+        └── MyGame.Tests.csproj
+```
+
+### Concept 3.1.4 — The Compilation Pipeline
+
+```
+C# Source (.cs)
+    │
+    ▼ Roslyn Compiler
+IL (Intermediate Language) in .dll/.exe
+    │
+    ├──▶ JIT (Just-In-Time) — Desktop/Server
+    │    Compiles IL → native at runtime, method by method
+    │
+    └──▶ AOT (Ahead-Of-Time) — Unity IL2CPP, NativeAOT
+         Compiles IL → native at build time (faster startup, no JIT overhead)
+```
+
+**Unity uses IL2CPP** for release builds: your C# compiles to IL, then IL2CPP transpiles to C++, then the platform's C++ compiler produces native code. This means:
+- No `System.Reflection.Emit` (runtime code generation)
+- Generic types must be known at compile time (no `MakeGenericType` with value types)
+- Faster execution, smaller builds
+
+### Concept 3.1.5 — NuGet Package Management
+
+NuGet is C#'s PyPI. Packages are versioned, signed, and restored automatically:
+
+```bash
+# Add a package
+dotnet add package Newtonsoft.Json --version 13.0.3
+
+# Restore all packages (like pip install -r requirements.txt)
+dotnet restore
+
+# List installed packages
+dotnet list package
+```
+
+Packages are cached globally (`~/.nuget/packages/`) and referenced per-project. No virtual environments needed — each `.csproj` specifies its own dependency versions.
+
+**Unity Note:** Unity uses its own package manager (UPM) for engine packages, but you can still reference NuGet packages via `NuGetForUnity` or manual `.dll` imports.
+
+### Concept 3.1.6 — Unity Project Anatomy
+
+```
+MyUnityGame/
+├── Assets/                    ← YOUR code and assets live here
+│   ├── _Project/             ← Project-specific (underscore = top of Explorer)
+│   │   ├── Scripts/
+│   │   │   ├── Runtime/      ← Game code
+│   │   │   └── Editor/       ← Editor tools (not in builds)
+│   │   ├── Prefabs/
+│   │   ├── ScriptableObjects/
+│   │   ├── Materials/
+│   │   ├── Textures/
+│   │   └── Scenes/
+│   └── Plugins/              ← Third-party .dlls
+├── Packages/                  ← UPM manifest
+│   └── manifest.json
+├── ProjectSettings/           ← Unity settings (version control these!)
+├── Library/                   ← Cache (gitignore this)
+├── Logs/                      ← Build logs (gitignore)
+└── Temp/                      ← Temp files (gitignore)
+```
+
+---
+
+## 📐 2. Mental Models
+
+### Model 3.1.1 — Python Dev → C# Dev Translation
+
+| You're Used To | C# Equivalent | Key Difference |
+|----------------|---------------|----------------|
+| `python -m venv .venv` | (not needed) | Dependencies are per-project via `.csproj` |
+| `requirements.txt` | `<PackageReference>` in `.csproj` | Exact versions, transitive resolution |
+| `__init__.py` | `namespace` declarations | Namespaces are logical, not file-based |
+| `if __name__ == "__main__"` | Top-level statements or `Main()` | Entry point is explicit |
+| Dynamic typing | Static typing + inference (`var`) | Compiler catches type errors |
+| `# type: ignore` | `#pragma warning disable` | Suppress specific warnings |
+| `mypy` | Built-in (Roslyn) | Type checking is compilation |
+
+### Model 3.1.2 — The "Two Worlds" of C# Development
+
+```
+┌─────────────────────────────────────────────────┐
+│              .NET Standalone World               │
+│  • Full .NET 8 runtime                          │
+│  • Any NuGet package                            │
+│  • Latest C# features immediately              │
+│  • Console apps, web APIs, services             │
+└─────────────────────────────────────────────────┘
+                      ↕ Shared logic via class libraries
+┌─────────────────────────────────────────────────┐
+│              Unity World                         │
+│  • Mono / IL2CPP runtime (subset of .NET)       │
+│  • Unity Package Manager + limited NuGet        │
+│  • C# version tied to Unity version             │
+│  • MonoBehaviour scripts, ScriptableObjects     │
+│  • Unity 2022+ ≈ C# 9, Unity 6 ≈ C# 11        │
+└─────────────────────────────────────────────────┘
+```
+
+**Strategy:** Write game logic in pure C# class libraries (no Unity dependencies), then reference them from Unity. This enables unit testing outside Unity and code reuse for dedicated servers.
+
+---
+
+## 🔑 3. Mechanics
+
+### 10.1 — Installing .NET 8 SDK
+
+```powershell
+# Windows — via winget (recommended)
+winget install Microsoft.DotNet.SDK.8
+
+# Verify installation
+dotnet --version    # Should show 8.x.x
+dotnet --list-sdks  # Shows all installed SDKs
+```
+
+### 10.2 — Creating Projects from CLI
+
+```bash
+# Create a new console application
+dotnet new console -n MyGame.Core -o src/MyGame.Core
+
+# Create a class library (shared logic)
+dotnet new classlib -n MyGame.Shared -o src/MyGame.Shared
+
+# Create a solution and add projects
+dotnet new sln -n MyGame
+dotnet sln add src/MyGame.Core
+dotnet sln add src/MyGame.Shared
+
+# Add project reference (Core depends on Shared)
+dotnet add src/MyGame.Core reference src/MyGame.Shared
+
+# Build and run
+dotnet build
+dotnet run --project src/MyGame.Core
+```
+
+### 10.3 — Global.json (Pin SDK Version)
+
+```json
+{
+  "sdk": {
+    "version": "8.0.300",
+    "rollForward": "latestPatch"
+  }
+}
+```
+
+Place at solution root. Ensures all developers use the same SDK version (like `.python-version` for pyenv).
+
+### 10.4 — Directory.Build.props (Shared Settings)
+
+```xml
+<!-- Place at solution root — applies to ALL projects -->
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+  </PropertyGroup>
+</Project>
+```
+
+### 10.5 — .editorconfig (Code Style)
+
+```ini
+# .editorconfig — C# conventions
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Naming conventions
+dotnet_naming_rule.private_fields.symbols = private_fields
+dotnet_naming_rule.private_fields.style = _camelCase
+dotnet_naming_rule.private_fields.severity = warning
+dotnet_naming_symbol.private_fields.applicable_kinds = field
+dotnet_naming_symbol.private_fields.applicable_accessibilities = private
+dotnet_naming_style._camelCase.required_prefix = _
+dotnet_naming_style._camelCase.capitalization = camel_case
+
+# Prefer var when type is obvious
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+```
+
+### 10.6 — Unity Project Setup
+
+```bash
+# 1. Install Unity Hub → Install Unity 6 LTS (or 2022 LTS)
+# 2. Create new project: 2D URP template (for Stardew-like)
+# 3. Configure scripting backend:
+#    Edit → Project Settings → Player → Other Settings
+#    - Scripting Backend: IL2CPP (for release)
+#    - API Compatibility Level: .NET Standard 2.1
+#    - C# Compiler: Roslyn
+
+# 4. Install essential packages via Package Manager:
+#    - Input System (new input)
+#    - TextMeshPro (UI text)
+#    - Cinemachine (camera)
+#    - Addressables (asset management)
+```
+
+### 10.7 — IDE Configuration
+
+**JetBrains Rider** (recommended for Unity):
+- Built-in Unity support, debugging, profiling
+- Roslyn analyzers, refactoring, code generation
+- `Ctrl+Shift+F9` — hot reload in Unity
+
+**VS Code** (free alternative):
+- Install: C# Dev Kit extension + Unity extension
+- `omnisharp.useModernNet: true` in settings
+- Debugger: `.NET Core Launch` configuration
+
+### 10.8 — .gitignore for Unity
+
+```gitignore
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Unity asset meta files are REQUIRED — do NOT ignore .meta files
+```
+
+**Critical:** Never ignore `.meta` files. Unity uses them to track asset GUIDs. Missing `.meta` = broken references.
+
+---
+
+## ✍️ 4. Worked Examples
+
+### Example 10.1.1 — From Zero to Running Console App
+
+```powershell
+# Create project
+mkdir ~/projects/CSharpLearning
+cd ~/projects/CSharpLearning
+dotnet new console -n HelloCSharp
+cd HelloCSharp
+```
+
+```csharp
+// Program.cs — Top-level statements (C# 9+, no Main() boilerplate)
+Console.WriteLine("Hello from C#!");
+
+// Variables with type inference
+var name = "Bill";           // string (inferred)
+int age = 30;                // explicit type
+double pi = 10.14159;         // 64-bit float (Python's default)
+
+// String interpolation (like Python f-strings)
+Console.WriteLine($"Name: {name}, Age: {age}, Pi: {pi:F2}");
+
+// Collections
+var tools = new List<string> { "Unity", "Rider", ".NET CLI" };
+foreach (var tool in tools)
+{
+    Console.WriteLine($"  - {tool}");
+}
+
+// LINQ (like Python list comprehensions)
+var longNames = tools.Where(t => t.Length > 4).ToList();
+Console.WriteLine($"Tools with >4 chars: {string.Join(", ", longNames)}");
+```
+
+```powershell
+dotnet run
+# Output:
+# Hello from C#!
+# Name: Bill, Age: 30, Pi: 10.14
+#   - Unity
+#   - Rider
+#   - .NET CLI
+# Tools with >4 chars: Unity, Rider, .NET CLI
+```
+
+### Example 10.1.2 — Multi-Project Solution
+
+```powershell
+# Create solution structure
+dotnet new sln -n FarmGame
+dotnet new classlib -n FarmGame.Core -o src/FarmGame.Core
+dotnet new console -n FarmGame.Server -o src/FarmGame.Server
+dotnet new nunit -n FarmGame.Tests -o tests/FarmGame.Tests
+
+# Wire up references
+dotnet sln add src/FarmGame.Core src/FarmGame.Server tests/FarmGame.Tests
+dotnet add src/FarmGame.Server reference src/FarmGame.Core
+dotnet add tests/FarmGame.Tests reference src/FarmGame.Core
+```
+
+```csharp
+// src/FarmGame.Core/Crop.cs
+namespace FarmGame.Core;
+
+public record Crop(string Name, int GrowthDays, float SellPrice)
+{
+    public bool IsReadyToHarvest(int daysSincePlanted) =>
+        daysSincePlanted >= GrowthDays;
+}
+```
+
+```csharp
+// tests/FarmGame.Tests/CropTests.cs
+using FarmGame.Core;
+
+namespace FarmGame.Tests;
+
+[TestFixture]
+public class CropTests
+{
+    [Test]
+    public void Crop_IsReady_AfterGrowthDays()
+    {
+        var parsnip = new Crop("Parsnip", 4, 35f);
+
+        Assert.That(parsnip.IsReadyToHarvest(3), Is.False);
+        Assert.That(parsnip.IsReadyToHarvest(4), Is.True);
+        Assert.That(parsnip.IsReadyToHarvest(10), Is.True);
+    }
+}
+```
+
+```powershell
+dotnet test  # All green ✓
+```
+
+---
+
+## 🧩 5. Code Patterns
+
+### Pattern 3.1.1 — Namespace Conventions
+
+```csharp
+// Match folder structure to namespaces
+// src/FarmGame.Core/Systems/CropSystem.cs
+namespace FarmGame.Core.Systems;
+
+public class CropSystem { /* ... */ }
+
+// src/FarmGame.Core/Models/Crop.cs
+namespace FarmGame.Core.Models;
+
+public record Crop(string Name, int GrowthDays);
+```
+
+### Pattern 3.1.2 — Global Usings (Reduce Boilerplate)
+
+```csharp
+// GlobalUsings.cs — place at project root
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading.Tasks;
+global using FarmGame.Core.Models;
+```
+
+### Pattern 3.1.3 — Assembly Definitions in Unity
+
+```json
+// Assets/_Project/Scripts/Runtime/FarmGame.Runtime.asmdef
+{
+    "name": "FarmGame.Runtime",
+    "rootNamespace": "FarmGame",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "UniTask"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "platforms": []
+}
+```
+
+Assembly Definitions (`.asmdef`) split your Unity code into separate compilation units:
+- **Faster iteration**: Only recompile changed assemblies
+- **Enforce dependencies**: Can't accidentally reference Editor code from Runtime
+- **Required for**: Addressables, DOTS packages
+
+---
+
+## ⚠️ 6. Gotchas
+
+### Gotcha 3.1.1 — Unity's C# Version Lag
+Unity doesn't always support the latest C# features. Check the [Unity C# compiler docs](https://docs.unity3d.com/Manual/CSharpCompiler.html) for your version. Unity 6 supports C# 11 features but not all .NET 8 APIs.
+
+### Gotcha 3.1.2 — `.csproj` Files in Unity Are Auto-Generated
+Unity regenerates `.csproj` and `.sln` files. Don't edit them manually — use Assembly Definitions instead. Your `.gitignore` should exclude them.
+
+### Gotcha 3.1.3 — IL2CPP Stripping
+IL2CPP strips unused code aggressively. If you use reflection, add a `link.xml` to preserve types:
+
+```xml
+<!-- Assets/link.xml -->
+<linker>
+  <assembly fullname="FarmGame.Core" preserve="all"/>
+</linker>
+```
+
+### Gotcha 3.1.4 — Windows Path Length
+Unity projects with deep folder nesting can hit Windows' 260-char path limit. Keep your project path short (`C:\Dev\MyGame\` not `C:\Users\Bill\Documents\Unity Projects\My Awesome Farm Game\`).
+
+### Gotcha 3.1.5 — NuGet in Unity
+Unity doesn't natively support NuGet. Options:
+1. **NuGetForUnity** package (recommended) — GUI in Unity Editor
+2. Manual: download `.nupkg`, extract `.dll`, place in `Assets/Plugins/`
+3. Use a separate .NET class library project, build it, copy the `.dll`
+
+---
+
+## 🔗 7. Cross-References
+
+- **Next**: [10.2 - Core Language - Types, Generics & LINQ](10.2---Core-Language---Types,-Generics-&-LINQ) — Start writing real C#
+- **Engine Context**: [28.5 - Game Engine Architectures - Unity & Unreal](28.5---Game-Engine-Architectures---Unity-&-Unreal) — Unity's compilation pipeline
+- **Python Comparison**: [08.3 - OOP, Data Models & Pythonic Idioms](08.3---OOP,-Data-Models-&-Pythonic-Idioms) — OOP model differences
+- **Cheatsheet**: [C# Basics for Unity](C#-Basics-for-Unity) — Quick syntax reference
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — IDE Comparison: Visual Studio vs Rider vs VS Code + OmniSharp
+
+**Problem:** You need to choose the right IDE for C# + Unity development. Each has tradeoffs in performance, features, and cost.
+
+<details>
+<summary>🔍 Full comparison deep dive</summary>
+
+#### Visual Studio 2022 (Community — Free)
+
+**Strengths:**
+- Native Microsoft tooling — first to get new .NET features
+- IntelliCode AI completions (trained on open-source C#)
+- Built-in profiler, memory diagnostics, hot reload
+- XAML designer for WPF/MAUI
+- Unity Tools extension (official Microsoft)
+
+**Weaknesses:**
+- Windows-only (VS for Mac was discontinued)
+- Heavy RAM usage (2–4 GB baseline)
+- Slower startup than Rider
+- Unity debugging can be flaky with large projects
+- Solution-level operations (rename, refactor) slower than Rider
+
+**Best for:** Windows developers who want free + official tooling, WPF/MAUI apps.
+
+```bash
+# Install via winget
+winget install Microsoft.VisualStudio.2022.Community
+
+# Workloads to select in installer:
+# - .NET desktop development
+# - Game development with Unity
+# - ASP.NET and web development (for game servers)
+```
+
+#### JetBrains Rider ($149/year, free for students/OSS)
+
+**Strengths:**
+- Cross-platform (Windows, macOS, Linux)
+- Fastest refactoring engine (ReSharper built-in)
+- Superior Unity integration: play mode debugging, asset usage search
+- Decompiler built-in (navigate to framework source)
+- Database tools, Docker, Git — all integrated
+- Handles 500K+ line solutions without lag
+
+**Weaknesses:**
+- Paid license (though free for qualifying users)
+- Heavier than VS Code
+- Some Unity-specific features lag behind VS (e.g., shader debugging)
+- JetBrains ecosystem lock-in (keybindings, plugins)
+
+**Best for:** Professional Unity developers, large codebases, cross-platform teams.
+
+```json
+// .idea/.idea.FarmGame/.idea/workspace.xml — Rider auto-configures Unity
+// Key settings to verify:
+// Settings → Languages & Frameworks → Unity Engine
+//   ✓ Enable Unity support
+//   ✓ Install Rider package in Unity (auto-prompt)
+//   ✓ Start Unity with debugger attached
+```
+
+#### VS Code + C# Dev Kit + Unity Extension
+
+**Strengths:**
+- Free and lightweight (~200 MB RAM baseline)
+- Cross-platform
+- Fastest startup time
+- Extension ecosystem (Copilot, GitLens, etc.)
+- Terminal-first workflow (matches .NET CLI philosophy)
+- Great for server-side C# (ASP.NET, console apps)
+
+**Weaknesses:**
+- Unity debugging requires extra setup
+- No built-in decompiler
+- Refactoring less powerful than Rider/VS
+- OmniSharp can be slow on large Unity projects (1000+ scripts)
+- No visual designer for UI
+
+**Best for:** Lightweight editing, server-side C#, developers who live in the terminal.
+
+```json
+// .vscode/settings.json — Optimal C# configuration
+{
+    "dotnet.defaultSolution": "FarmGame.sln",
+    "omnisharp.useModernNet": true,
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.organizeImportsOnFormat": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "[csharp]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    }
+}
+```
+
+```json
+// .vscode/launch.json — Unity attach configuration
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Unity",
+            "type": "vstuc",
+            "request": "attach"
+        },
+        {
+            "name": ".NET Core Launch",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/FarmGame.Server.dll",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
+```
+
+#### Decision Matrix
+
+| Criterion | Visual Studio | Rider | VS Code |
+|-----------|:---:|:---:|:---:|
+| Cost | Free | $149/yr | Free |
+| Unity Debugging | ★★★☆ | ★★★★★ | ★★★☆ |
+| Refactoring Power | ★★★★ | ★★★★★ | ★★★☆ |
+| RAM Usage | 2–4 GB | 1–3 GB | 200–800 MB |
+| Startup Speed | Slow | Medium | Fast |
+| Cross-Platform | ❌ | ✅ | ✅ |
+| Large Solutions | ★★★☆ | ★★★★★ | ★★☆☆ |
+| Server-side C# | ★★★★★ | ★★★★★ | ★★★★☆ |
+
+**Recommendation for Unity game dev:** Rider if you can afford it, VS Code for quick edits and server code, Visual Studio as a free fallback on Windows.
+
+</details>
+
+### Example 8.2 — Native AOT Compilation: Zero-Dependency Executables
+
+**Problem:** You want to ship a game server or CLI tool as a single native executable with no .NET runtime dependency, sub-10ms startup, and minimal memory footprint.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### What is Native AOT?
+
+Native AOT (Ahead-of-Time) compiles your C# directly to native machine code at build time. No JIT, no runtime download required. The output is a single self-contained binary.
+
+```
+Traditional .NET:  C# → IL → [ship .dll + runtime] → JIT at startup → native
+Native AOT:        C# → IL → native binary at build time → ship single .exe
+```
+
+#### Step 1: Enable Native AOT in `.csproj`
+
+```csharp
+// src/FarmGame.Server/FarmGame.Server.csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PublishAot>true</PublishAot>
+    
+    <!-- AOT-specific optimizations -->
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <StackTraceSupport>false</StackTraceSupport>
+    
+    <!-- Trimming (remove unused code) -->
+    <TrimMode>link</TrimMode>
+    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+  </PropertyGroup>
+</Project>
+```
+
+#### Step 2: Publish for Target Platform
+
+```bash
+# Windows x64 native binary
+dotnet publish -c Release -r win-x64
+
+# Linux x64 (for dedicated game servers)
+dotnet publish -c Release -r linux-x64
+
+# macOS ARM (Apple Silicon)
+dotnet publish -c Release -r osx-arm64
+```
+
+#### Step 3: Size Comparison
+
+| Build Type | Size | Startup | Dependencies |
+|-----------|------|---------|--------------|
+| Framework-dependent | 150 KB | ~80ms | .NET 8 runtime required |
+| Self-contained | 65 MB | ~60ms | None (runtime bundled) |
+| Self-contained + trimmed | 12 MB | ~50ms | None |
+| **Native AOT** | **3–8 MB** | **<10ms** | **None** |
+| Native AOT + stripped | 1.5–4 MB | <5ms | None |
+
+#### Step 4: AOT-Compatible Code Patterns
+
+```csharp
+// ✅ AOT-SAFE: Concrete generic types known at compile time
+var list = new List<int>();
+var dict = new Dictionary<string, PlayerData>();
+
+// ❌ AOT-UNSAFE: Runtime generic instantiation
+Type playerType = Type.GetType("FarmGame.Player");
+var method = typeof(Serializer).MakeGenericMethod(playerType); // FAILS at runtime
+
+// ✅ AOT-SAFE alternative: Source generators
+[JsonSerializable(typeof(PlayerData))]
+[JsonSerializable(typeof(List<CropData>))]
+internal partial class AppJsonContext : JsonSerializerContext { }
+
+// Usage with source-generated serializer (no reflection!)
+var json = JsonSerializer.Serialize(player, AppJsonContext.Default.PlayerData);
+var data = JsonSerializer.Deserialize<PlayerData>(json, AppJsonContext.Default.PlayerData);
+```
+
+#### Step 5: AOT Compatibility Analyzers
+
+```csharp
+// Enable AOT warnings during development (catches issues before publish)
+<PropertyGroup>
+    <IsAotCompatible>true</IsAotCompatible>
+</PropertyGroup>
+
+// This generates warnings like:
+// warning IL2026: Using 'System.Type.MakeGenericType' requires unreferenced code
+// warning IL3050: Using 'System.Reflection.Emit' is not AOT compatible
+```
+
+#### Real-World Use Case: Game Server
+
+```csharp
+// A minimal game server that compiles to a 4 MB native binary
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+var listener = new TcpListener(IPAddress.Any, 7777);
+listener.Start();
+Console.WriteLine("Game server listening on :7777");
+
+while (true)
+{
+    var client = await listener.AcceptTcpClientAsync();
+    _ = HandleClientAsync(client); // Fire-and-forget
+}
+
+async Task HandleClientAsync(TcpClient client)
+{
+    await using var stream = client.GetStream();
+    var buffer = new byte[4096];
+    var bytesRead = await stream.ReadAsync(buffer);
+    
+    var message = JsonSerializer.Deserialize(
+        buffer.AsSpan(0, bytesRead),
+        AppJsonContext.Default.GameMessage);
+    
+    // Process message...
+}
+
+[JsonSerializable(typeof(GameMessage))]
+internal partial class AppJsonContext : JsonSerializerContext { }
+
+public record GameMessage(string Type, string PlayerId, float X, float Y);
+```
+
+```bash
+# Build and check size
+dotnet publish -c Release -r win-x64
+# Output: bin/Release/net8.0/win-x64/publish/FarmGame.Server.exe (4.2 MB)
+# Startup: <8ms, Memory: 12 MB RSS
+```
+
+</details>
+
+### Example 8.3 — .NET 8 Trimming: Shrinking Self-Contained Deployments
+
+**Problem:** You're shipping a self-contained app but 65 MB is too large. Use IL trimming to remove unused framework code.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Trimming Levels
+
+```csharp
+<PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
+    
+    <!-- TrimMode options: -->
+    <!-- "partial" — Only trim assemblies that opted in (safe default) -->
+    <!-- "full"    — Trim all assemblies (aggressive, may break reflection) -->
+    <TrimMode>full</TrimMode>
+    
+    <!-- Additional size reduction -->
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+</PropertyGroup>
+```
+
+#### Preserving Types from Trimming
+
+When the trimmer removes code you actually need (common with DI containers and serialization):
+
+```csharp
+// Method 1: [DynamicallyAccessedMembers] attribute
+public T Deserialize<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(
+    string json)
+{
+    return JsonSerializer.Deserialize<T>(json)!;
+}
+
+// Method 2: TrimmerRootAssembly in .csproj
+<ItemGroup>
+    <TrimmerRootAssembly Include="FarmGame.Core" />
+</ItemGroup>
+
+// Method 3: [DynamicDependency] for specific methods
+[DynamicDependency(nameof(PlayerData.Health), typeof(PlayerData))]
+public void LoadPlayer() { /* reflection-based loading */ }
+```
+
+#### Trimming Warnings and How to Fix Them
+
+```bash
+# Enable all trimming warnings
+dotnet publish -c Release --self-contained -p:PublishTrimmed=true -p:TrimmerSingleWarn=false
+
+# Common warnings:
+# IL2026: Members annotated with 'RequiresUnreferencedCodeAttribute' require...
+# IL2057: Unrecognized value passed to the parameter of 'System.Type.GetType'
+# IL2072: Value stored in field does not satisfy DynamicallyAccessedMembersAttribute
+```
+
+#### Size Results for a Typical Game Server
+
+| Configuration | Size |
+|--------------|------|
+| Self-contained (no trim) | 65 MB |
+| Trimmed (partial) | 25 MB |
+| Trimmed (full) | 12 MB |
+| Trimmed + ReadyToRun disabled | 9 MB |
+| Native AOT | 4 MB |
+
+</details>
+
+### Example 8.4 — Multi-Targeting: One Codebase, Multiple Runtimes
+
+**Problem:** You want shared game logic that compiles for both .NET 8 (server) and .NET Standard 2.1 (Unity). Use multi-targeting to maintain a single codebase.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```csharp
+// FarmGame.Core.csproj — Multi-target project
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <LangVersion>11</LangVersion> <!-- Lowest common denominator for Unity -->
+  </PropertyGroup>
+
+  <!-- .NET 8 only packages -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- .NET Standard 2.1 polyfills -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+  </ItemGroup>
+</Project>
+```
+
+```csharp
+// Conditional compilation for platform-specific code
+namespace FarmGame.Core;
+
+public static class TimeProvider
+{
+#if NET8_0_OR_GREATER
+    // .NET 8: Use TimeProvider abstraction (testable)
+    public static DateTimeOffset Now => System.TimeProvider.System.GetUtcNow();
+#else
+    // Unity / .NET Standard 2.1: Fallback
+    public static DateTimeOffset Now => DateTimeOffset.UtcNow;
+#endif
+}
+
+// Platform-agnostic game logic
+public class CropGrowthSystem
+{
+    private readonly List<PlantedCrop> _crops = new();
+
+    public void Tick(float deltaTime)
+    {
+        foreach (var crop in _crops)
+        {
+            crop.GrowthProgress += deltaTime * crop.GrowthRate;
+            if (crop.GrowthProgress >= 1f)
+                crop.State = CropState.Harvestable;
+        }
+    }
+}
+```
+
+#### Unity Integration
+
+```bash
+# Build the .NET Standard 2.1 DLL
+dotnet build -c Release -f netstandard2.1
+
+# Copy to Unity
+cp bin/Release/netstandard2.1/FarmGame.Core.dll ../UnityProject/Assets/Plugins/
+```
+
+Or better — use a local NuGet feed or symlink during development:
+
+```bash
+# Create local NuGet package
+dotnet pack -c Release -o ./nupkg
+
+# In Unity, reference via NuGetForUnity pointing to local feed
+```
+
+</details>
+
+### Example 8.5 — Dotnet CLI Power User Workflows
+
+**Problem:** You want to maximize productivity with the `dotnet` CLI for rapid iteration during game server development.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+```bash
+# ═══════════════════════════════════════════════════════════════
+# WATCH MODE — Auto-rebuild on file changes (like nodemon)
+# ═══════════════════════════════════════════════════════════════
+dotnet watch run --project src/FarmGame.Server
+# Recompiles and restarts on any .cs file change
+
+# Watch with hot reload (keeps state, patches running app)
+dotnet watch --project src/FarmGame.Server --no-hot-reload  # disable if causing issues
+
+# ═══════════════════════════════════════════════════════════════
+# CUSTOM TEMPLATES — Create your own `dotnet new` templates
+# ═══════════════════════════════════════════════════════════════
+
+# Install a community template
+dotnet new install Boxed.Templates
+
+# Create template from existing project
+# .template.config/template.json in your project root:
+```
+
+```json
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Bill",
+    "classifications": ["Game", "Unity", "Server"],
+    "identity": "FarmGame.GameServer",
+    "name": "Farm Game Server Template",
+    "shortName": "farmserver",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "FarmGame.Server",
+    "preferNameDirectory": true
+}
+```
+
+```bash
+# Install your template
+dotnet new install ./src/FarmGame.Server
+
+# Use it
+dotnet new farmserver -n MyNewServer
+
+# ═══════════════════════════════════════════════════════════════
+# USEFUL DIAGNOSTIC COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+# Show dependency tree (like pip show --verbose)
+dotnet list package --include-transitive
+
+# Check for outdated packages
+dotnet list package --outdated
+
+# Check for vulnerable packages
+dotnet list package --vulnerable
+
+# Generate build binary log (for debugging slow builds)
+dotnet build -bl
+# Opens with: dotnet tool install -g MSBuild.StructuredLogger && msbuild.structuredlogger build.binlog
+
+# ═══════════════════════════════════════════════════════════════
+# PERFORMANCE PROFILING FROM CLI
+# ═══════════════════════════════════════════════════════════════
+
+# Install diagnostic tools
+dotnet tool install -g dotnet-counters
+dotnet tool install -g dotnet-trace
+dotnet tool install -g dotnet-dump
+
+# Monitor live metrics
+dotnet counters monitor --process-id <PID> --counters System.Runtime
+
+# Collect a trace (open in PerfView or Speedscope)
+dotnet trace collect --process-id <PID> --duration 00:00:30
+```
+
+</details>
+
+---
+
+## 📖 9. Appendix: Extended Derivations & Special Cases
+
+### Appendix 9.1 — `.csproj` SDK Styles Explained
+
+The `<Project Sdk="...">` attribute determines what MSBuild targets and props are imported. Understanding this unlocks advanced build customization.
+
+#### Available SDK Styles
+
+| SDK | Purpose | Auto-imports |
+|-----|---------|--------------|
+| `Microsoft.NET.Sdk` | Console apps, class libraries | System.*, basic BCL |
+| `Microsoft.NET.Sdk.Web` | ASP.NET Core web apps | + Kestrel, MVC, Razor |
+| `Microsoft.NET.Sdk.Worker` | Background services | + HostedService, DI |
+| `Microsoft.NET.Sdk.Razor` | Razor class libraries | + Razor compilation |
+| `Microsoft.NET.Sdk.BlazorWebAssembly` | Blazor WASM | + WASM linker |
+
+#### What the SDK Actually Does
+
+When you write `<Project Sdk="Microsoft.NET.Sdk">`, MSBuild implicitly imports:
+
+```
+$(MSBuildSDKsPath)/Microsoft.NET.Sdk/Sdk/Sdk.props          ← Before your .csproj
+    Your .csproj content (PropertyGroup, ItemGroup, etc.)
+$(MSBuildSDKsPath)/Microsoft.NET.Sdk/Sdk/Sdk.targets        ← After your .csproj
+```
+
+These files define:
+1. **Default file globs**: `**/*.cs` is automatically included (no need to list files)
+2. **Output paths**: `bin/$(Configuration)/$(TargetFramework)/`
+3. **NuGet restore targets**: How packages are resolved
+4. **Compilation targets**: Roslyn invocation, analyzers
+
+#### Customizing the Build Pipeline
+
+```csharp
+<!-- Custom build step: generate code before compilation -->
+<Target Name="GenerateVersion" BeforeTargets="CoreCompile">
+  <PropertyGroup>
+    <BuildTimestamp>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildTimestamp>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>BuildTimestamp</_Parameter1>
+      <_Parameter2>$(BuildTimestamp)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Target>
+
+<!-- Custom build step: copy assets after build -->
+<Target Name="CopyGameData" AfterTargets="Build">
+  <Copy SourceFiles="@(GameDataFiles)" DestinationFolder="$(OutputPath)/data/" />
+</Target>
+
+<!-- Conditional compilation symbols -->
+<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  <DefineConstants>$(DefineConstants);ENABLE_CHEATS;VERBOSE_LOGGING</DefineConstants>
+</PropertyGroup>
+```
+
+### Appendix 9.2 — How Dotnet's Incremental Build Works
+
+Understanding incremental builds helps you diagnose "why is my build slow?" issues.
+
+#### The Build Graph
+
+MSBuild constructs a **dependency graph** of targets. Each target has:
+- **Inputs**: Files that trigger rebuild if changed
+- **Outputs**: Files produced by the target
+- **Skip condition**: If all outputs are newer than all inputs → skip
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│ .cs files   │────▶│ CoreCompile  │────▶│ .dll output │
+│ (inputs)    │     │ (target)     │     │ (outputs)   │
+└─────────────┘     └──────────────┘     └─────────────┘
+       │                                        │
+       └── If .cs timestamp > .dll timestamp ──▶ REBUILD
+           Otherwise ──▶ SKIP (incremental)
+```
+
+#### Why Builds Can Be Slow
+
+1. **NuGet restore on every build**: Fixed by `--no-restore` flag after first restore
+2. **Analyzers running**: Each Roslyn analyzer adds ~100–500ms
+3. **Source generators**: Run on every compilation (can't be incremental)
+4. **Large solutions**: Use `dotnet build --project` to build only what you need
+5. **Anti-virus scanning**: Exclude `bin/`, `obj/`, `.nuget/` from real-time scanning
+
+#### Diagnosing Build Performance
+
+```bash
+# Binary log captures everything
+dotnet build -bl
+# Then analyze with:
+# - MSBuild Structured Log Viewer (GUI)
+# - dotnet tool install -g MSBuild.StructuredLogger
+
+# Quick timing breakdown
+dotnet build --verbosity diagnostic 2>&1 | Select-String "Target.*ms"
+
+# Parallel build (default, but verify)
+dotnet build -maxcpucount  # Uses all cores
+```
+
+#### The `obj/` Folder Internals
+
+```
+obj/
+├── Debug/
+│   └── net8.0/
+│       ├── FarmGame.Core.csproj.FileListAbsolute.txt  ← Tracks all outputs
+│       ├── FarmGame.Core.GeneratedMSBuildEditorConfig.editorconfig
+│       ├── FarmGame.Core.GlobalUsings.g.cs            ← Auto-generated usings
+│       ├── FarmGame.Core.AssemblyInfo.cs              ← Auto-generated metadata
+│       ├── ref/FarmGame.Core.dll                      ← Reference assembly (API only)
+│       └── FarmGame.Core.dll                          ← Actual compiled output
+├── project.assets.json                                ← NuGet dependency graph
+└── project.nuget.cache                                ← Restore cache hash
+```
+
+The **reference assembly** (`ref/`) is key to incremental builds across projects: if you change a method body but not its signature, downstream projects don't recompile because the reference assembly hasn't changed.
+
+### Appendix 9.3 — Global Tools and Local Tools
+
+```bash
+# ═══════════════════════════════════════════════════════════════
+# GLOBAL TOOLS — Installed system-wide (like pip install --user)
+# ═══════════════════════════════════════════════════════════════
+dotnet tool install -g dotnet-ef              # Entity Framework CLI
+dotnet tool install -g dotnet-outdated        # Check outdated packages
+dotnet tool install -g dotnet-format          # Code formatter
+dotnet tool install -g dotnet-counters        # Performance counters
+
+dotnet tool list -g                           # List all global tools
+dotnet tool update -g dotnet-ef               # Update specific tool
+
+# ═══════════════════════════════════════════════════════════════
+# LOCAL TOOLS — Per-project (like npx / pipx)
+# ═══════════════════════════════════════════════════════════════
+dotnet new tool-manifest                      # Creates .config/dotnet-tools.json
+dotnet tool install dotnet-ef                 # Installs locally
+dotnet tool restore                           # Restore from manifest (CI/CD)
+
+# .config/dotnet-tools.json (commit this to git)
+```
+
+```json
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-ef": {
+      "version": "8.0.4",
+      "commands": ["dotnet-ef"]
+    },
+    "dotnet-format": {
+      "version": "8.0.0",
+      "commands": ["dotnet-format"]
+    }
+  }
+}
+```
+
+### Appendix 9.4 — Runtime Identifiers (RIDs) and Cross-Compilation
+
+When publishing for different platforms, you specify a **Runtime Identifier**:
+
+| RID | Platform | Use Case |
+|-----|----------|----------|
+| `win-x64` | Windows 64-bit | Desktop game, dev tools |
+| `win-arm64` | Windows ARM | Surface Pro X |
+| `linux-x64` | Linux 64-bit | Dedicated game servers |
+| `linux-arm64` | Linux ARM | Raspberry Pi, cloud ARM |
+| `osx-x64` | macOS Intel | Older Macs |
+| `osx-arm64` | macOS Apple Silicon | M1/M2/M3 Macs |
+
+```bash
+# Cross-compile from Windows to Linux (for game server deployment)
+dotnet publish -c Release -r linux-x64 --self-contained
+
+# Create a Docker image with the native binary
+```
+
+```yaml
+# Dockerfile for AOT-compiled game server
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy-chiseled AS runtime
+WORKDIR /app
+COPY bin/Release/net8.0/linux-x64/publish/ .
+EXPOSE 7777/udp
+ENTRYPOINT ["./FarmGame.Server"]
+```
+
+The `chiseled` base image is Ubuntu with everything removed except the C runtime — perfect for AOT binaries. Final image size: ~10 MB total.
+
+### Appendix 9.5 — Central Package Management (CPM)
+
+For solutions with many projects, managing package versions individually is painful. CPM centralizes all versions in one file:
+
+```csharp
+<!-- Directory.Packages.props (solution root) -->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- All version numbers defined HERE, once -->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Serilog" Version="3.1.1" />
+    <PackageVersion Include="xunit" Version="2.7.0" />
+    <PackageVersion Include="NUnit" Version="4.1.0" />
+    <PackageVersion Include="Moq" Version="4.20.70" />
+  </ItemGroup>
+</Project>
+```
+
+```csharp
+<!-- Individual .csproj files — NO version attribute needed -->
+<ItemGroup>
+  <PackageReference Include="Newtonsoft.Json" />
+  <PackageReference Include="Serilog" />
+</ItemGroup>
+```
+
+Benefits:
+- Single source of truth for all dependency versions
+- No version conflicts between projects
+- Easy bulk updates
+- Transitive pinning prevents diamond dependency issues
+
+---
+
+## 🔄 Maintenance
+- **Created**: 2026-05-24
+- **Last Updated**: 2026-05-24

@@ -1,0 +1,1171 @@
+---
+title: "Multiple Integrals Jacobians"
+subject: "Mathematical Foundations & Calculus"
+catalog: advanced
+audience_tier: higher-education
+chapter: "1.5"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 1.5 — Multiple Integrals & Jacobians
+
+> *"The integral is a means for adding up infinitely many infinitely thin slices. In higher dimensions, you're just slicing in more directions."* — paraphrased from Richard Courant.
+
+The single-variable integral you built in Chapter 1.3 was a machine for adding up function values along a line — height × width, summed over infinitely thin strips. Multiple integrals do exactly the same thing, but now you're summing over regions in the plane, in 3-space, or in any number of dimensions you care to throw at the problem. Every concept from 1.3 survives: Riemann sums, taking the limit as the partition gets infinitely fine, and the fundamental relationship between integration and anti-differentiation. What's new is that the geometry of your domain can be far richer than an interval, and different coordinate systems slice that geometry in dramatically different (and sometimes much cleaner) ways. **The Jacobian is the bookkeeping device that tells you exactly how much your coordinate-system transformation stretches or compresses area and volume elements.** Get that right and almost nothing else can go wrong.
+
+---
+
+## 🎯 What you'll be able to do by the end
+
+1. Set up and evaluate a double integral $\iint_R f\,dA$ over any rectangle or general planar region as an iterated integral.
+2. State Fubini's Theorem precisely, understand its hypotheses, and use it confidently in both iteration orders.
+3. Compute triple integrals $\iiint_E f\,dV$ over boxes and general 3D regions.
+4. Derive the Jacobian determinant $\partial(x,y)/\partial(u,v)$ from first principles via linear approximation, and apply the Change of Variables Theorem.
+5. Convert integrals to polar, cylindrical, and spherical coordinates — deriving each Jacobian from scratch rather than memorizing it.
+6. Compute surface areas using the area element $dS = \sqrt{1 + f_x^2 + f_y^2}\,dA$.
+7. Interpret double and triple integrals physically: mass of laminas and solids, center of mass, probability densities, and partition functions.
+
+---
+
+## 🔥 Why the fuck does this matter?
+
+Single-variable integration lets you compute the area under a curve. That's a fine party trick. But the universe is three-dimensional (at least), and real physical quantities — mass, energy, probability, electric charge — are distributed *over volumes and surfaces*, not along lines. Here's what multiple integrals actually unlock:
+
+**Mass and center of mass.** The mass of a 3D solid with density $\rho(x,y,z)$ is $\iiint_E \rho\,dV$. The center of mass coordinates are $\bar{x} = \iiint_E x\rho\,dV / M$, and similarly for $\bar{y}, \bar{z}$. You cannot compute where a rocket's center of mass is without this.
+
+**Probability densities.** In quantum mechanics, the probability of finding a particle in a region $E$ is $\iiint_E |\psi|^2\,dV$. The normalization condition $\iiint_{\mathbb{R}^3}|\psi|^2\,dV = 1$ is a triple integral. The expectation value of any observable is a triple integral of (observable × density) over all space.
+
+**Statistical mechanics partition functions.** The classical partition function is $Z = \int e^{-H(\mathbf{q},\mathbf{p})/k_BT}\,d^{3N}\mathbf{q}\,d^{3N}\mathbf{p}$ — a $6N$-dimensional integral over phase space. Everything in thermodynamics (free energy, entropy, specific heat) is derived by differentiating $Z$. You can't touch stat mech without integration over high-dimensional spaces.
+
+**Flux integrals.** The electric flux through a surface (Gauss's Law), the magnetic flux through a loop, the flow rate of a fluid through a cross-section — all of these are double integrals of a vector field component over a surface. We build to those in Chapter 1.6, but the surface area element $dS$ we derive here is the prerequisite.
+
+**The Gaussian integral and the normal distribution.** The fact that $\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$ — which underlies all of probability theory and statistical inference — is impossible to prove by single-variable techniques. The proof requires converting to polar coordinates in a double integral. We do it in Example 3 below.
+
+---
+
+
+## 🖼️ SVG 1 — Rectangular Riemann Partition in 3D
+
+A surface $z = f(x,y)$ above a planar rectangle $R$. The volume is approximated by prisms of width $\Delta x$, depth $\Delta y$, and height $f(x_i^*, y_j^*)$. As the mesh refines, the sum converges to the double integral.
+
+![math-01__1.5-fig1](math-01__1.5-fig1.svg)
+
+Each prism has base area $\Delta x\,\Delta y$ and height $f(x_i^*, y_j^*)$, the function sampled at an arbitrary point inside the sub-rectangle. The double integral $\iint_R f\,dA$ is the limit of this sum as $\Delta x, \Delta y \to 0$.
+
+---
+
+## 📚 1. Definitions
+
+### Definition 1.5.1 — Double Integral over a Rectangle
+
+Let $R = [a,b] \times [c,d]$ be a closed rectangle in $\mathbb{R}^2$ and let $f : R \to \mathbb{R}$ be bounded. Partition $[a,b]$ into $m$ subintervals of width $\Delta x = (b-a)/m$ and $[c,d]$ into $n$ subintervals of width $\Delta y = (d-c)/n$. This produces $mn$ sub-rectangles $R_{ij} = [x_{i-1},x_i]\times[y_{j-1},y_j]$. Choose a sample point $(x_{ij}^*, y_{ij}^*)$ in each $R_{ij}$. The **double Riemann sum** is:
+
+$$
+S_{mn} = \sum_{i=1}^{m}\sum_{j=1}^{n} f(x_{ij}^*, y_{ij}^*)\,\Delta x\,\Delta y.
+$$
+
+If this sum converges to the same limit $L$ for every choice of sample points and every refinement sequence with $\max(\Delta x, \Delta y) \to 0$, we define:
+
+$$
+\iint_R f(x,y)\,dA = \lim_{\substack{m \to \infty \\ n \to \infty}} S_{mn} = L.
+$$
+
+The notation $dA$ means "area element" and is shorthand for $dx\,dy$ (or $dy\,dx$ — order doesn't matter for the area element itself).
+
+### Definition 1.5.2 — Double Integral over a General Region
+
+Let $D$ be a bounded region in $\mathbb{R}^2$. Enclose $D$ in a rectangle $R$. Define:
+
+$$
+\tilde{f}(x,y) = \begin{cases} f(x,y) & (x,y) \in D \\ 0 & (x,y) \in R \setminus D \end{cases}
+$$
+
+and set $\iint_D f\,dA = \iint_R \tilde{f}\,dA$, provided the latter exists. **The integral over $D$ is the integral over the enclosing rectangle with the function extended by zero outside $D$.** This is why we need continuity (or at least piecewise continuity) — the boundary of $D$ introduces potential discontinuities that must be controlled.
+
+**Type I regions** (vertically simple): $D = \{(x,y) : a \le x \le b,\; g_1(x) \le y \le g_2(x)\}$.
+
+**Type II regions** (horizontally simple): $D = \{(x,y) : c \le y \le d,\; h_1(y) \le x \le h_2(y)\}$.
+
+### Definition 1.5.3 — Iterated Integral
+
+Given $f : R \to \mathbb{R}$ with $R = [a,b]\times[c,d]$, the **iterated integrals** are:
+
+$$
+\int_a^b \left(\int_c^d f(x,y)\,dy\right)dx \qquad \text{and} \qquad \int_c^d \left(\int_a^b f(x,y)\,dx\right)dy.
+$$
+
+In the first, $y$ is the "inner" variable of integration and $x$ is held fixed while computing the inner integral; the result is a function of $x$ only, which is then integrated over $[a,b]$.
+
+### Definition 1.5.4 — Triple Integral
+
+Let $E \subset \mathbb{R}^3$ be a bounded region. Partition $E$ with a three-dimensional grid of boxes $\Delta V_{ijk} = \Delta x\,\Delta y\,\Delta z$. The **triple integral** is:
+
+$$
+\iiint_E f(x,y,z)\,dV = \lim \sum_{i,j,k} f(x_{ijk}^*, y_{ijk}^*, z_{ijk}^*)\,\Delta V.
+$$
+
+For a box $E = [a,b]\times[c,d]\times[p,q]$ with $f$ continuous, this equals the iterated integral in any of the $3! = 6$ possible orderings of $dx\,dy\,dz$.
+
+### Definition 1.5.5 — The Jacobian Determinant
+
+Let $T : (u,v) \mapsto (x(u,v), y(u,v))$ be a $C^1$ coordinate transformation. The **Jacobian** of $T$ is the $2\times 2$ determinant:
+
+$$
+\frac{\partial(x,y)}{\partial(u,v)} = \begin{vmatrix} \dfrac{\partial x}{\partial u} & \dfrac{\partial x}{\partial v} \\[8pt] \dfrac{\partial y}{\partial u} & \dfrac{\partial y}{\partial v} \end{vmatrix} = \frac{\partial x}{\partial u}\frac{\partial y}{\partial v} - \frac{\partial x}{\partial v}\frac{\partial y}{\partial u}.
+$$
+
+For a 3D transformation $(u,v,w)\mapsto(x,y,z)$, the Jacobian is the $3\times 3$ determinant of the matrix of all nine partial derivatives.
+
+### Definition 1.5.6 — Surface Area Element
+
+Let $z = f(x,y)$ define a surface over a region $D$ in the $xy$-plane. The **surface area element** at $(x,y)$ is:
+
+$$
+dS = \sqrt{1 + \left(\frac{\partial f}{\partial x}\right)^2 + \left(\frac{\partial f}{\partial y}\right)^2}\,dA.
+$$
+
+The total surface area is $A = \iint_D dS$. The factor under the square root measures how much the surface tilts relative to the horizontal — a flat surface ($f = \text{const}$) gives $dS = dA$; a steeply tilted surface gives $dS \gg dA$.
+
+---
+
+
+## 📐 2. Axioms / Postulates
+
+We inherit from the single-variable theory:
+
+### Axiom 1.5.A — Linearity of the Integral
+
+$$
+\iint_R [\alpha f + \beta g]\,dA = \alpha\iint_R f\,dA + \beta\iint_R g\,dA
+$$
+
+for constants $\alpha, \beta \in \mathbb{R}$ and integrable $f, g$. Proved the same way as for single integrals — linearity of finite sums carries through the limit.
+
+### Axiom 1.5.B — Monotonicity
+
+If $f(x,y) \leq g(x,y)$ for all $(x,y) \in R$, then $\iint_R f\,dA \leq \iint_R g\,dA$.
+
+### Axiom 1.5.C — Domain Additivity
+
+If $D = D_1 \cup D_2$ with $D_1 \cap D_2$ a set of area zero (a curve or a finite number of points), then:
+
+$$
+\iint_D f\,dA = \iint_{D_1} f\,dA + \iint_{D_2} f\,dA.
+$$
+
+This is the higher-dimensional analogue of the additive property $\int_a^c f\,dx = \int_a^b f\,dx + \int_b^c f\,dx$.
+
+---
+
+## 👑 3. Theorems
+
+### Theorem 1.5.1 — Fubini's Theorem
+
+**Statement.** Let $f$ be continuous on the rectangle $R = [a,b]\times[c,d]$. Then the double integral exists and equals both iterated integrals:
+
+$$
+\iint_R f(x,y)\,dA = \int_a^b\int_c^d f(x,y)\,dy\,dx = \int_c^d\int_a^b f(x,y)\,dx\,dy.
+$$
+
+**Conditions.** Continuity on $R$ is sufficient but not necessary. The theorem holds more generally when $f$ is bounded and the set of discontinuities has area zero (i.e., $f$ is Riemann integrable over $R$). The theorem fails if $f$ is not integrable — there exist bounded functions where the two iterated integrals exist and differ.
+
+**Extension to general regions.** For a Type I region $D = \{a \le x \le b,\; g_1(x) \le y \le g_2(x)\}$ with $f$ continuous on $D$:
+
+$$
+\iint_D f\,dA = \int_a^b \int_{g_1(x)}^{g_2(x)} f(x,y)\,dy\,dx.
+$$
+
+For a Type II region $D = \{c \le y \le d,\; h_1(y) \le x \le h_2(y)\}$:
+
+$$
+\iint_D f\,dA = \int_c^d \int_{h_1(y)}^{h_2(y)} f(x,y)\,dx\,dy.
+$$
+
+### Theorem 1.5.2 — Change of Variables Theorem
+
+Let $T : S \to R$ be a $C^1$ bijection from a region $S$ in the $(u,v)$-plane to a region $R$ in the $(x,y)$-plane, with Jacobian $\partial(x,y)/\partial(u,v)$ non-vanishing on the interior of $S$. Let $f$ be continuous on $R$. Then:
+
+$$
+\iint_R f(x,y)\,dA_{xy} = \iint_S f\bigl(x(u,v),\,y(u,v)\bigr)\;\left|\frac{\partial(x,y)}{\partial(u,v)}\right|\,du\,dv.
+$$
+
+The absolute value $|\cdot|$ accounts for the possibility that $T$ reverses orientation (the Jacobian could be negative, but area is always positive).
+
+**Extension to 3D.** For a $C^1$ bijection $(u,v,w)\mapsto(x,y,z)$:
+
+$$
+\iiint_R f\,dV_{xyz} = \iiint_S f\bigl(x(u,v,w), y(u,v,w), z(u,v,w)\bigr)\;\left|\frac{\partial(x,y,z)}{\partial(u,v,w)}\right|\,du\,dv\,dw.
+$$
+
+### Theorem 1.5.3 — Area and Volume as Special Cases
+
+Setting $f \equiv 1$:
+
+$$
+A(D) = \iint_D 1\,dA, \qquad V(E) = \iiint_E 1\,dV.
+$$
+
+These are not trivial tautologies — they mean that area and volume are themselves integrals, defined by exactly the same limiting process as any other integral. The Riemann sum for $f \equiv 1$ over a partition of $D$ is just the sum of the areas of the sub-rectangles that fit inside $D$, which visually converges to the area of $D$ as the partition refines.
+
+---
+
+
+## ✍️ 4. Proofs
+
+### 4.1 — Proof of Fubini's Theorem (Rigorous Sketch)
+
+**Setup.** Let $f$ be continuous on $R = [a,b]\times[c,d]$. We want to show $\iint_R f\,dA = \int_a^b A(x)\,dx$ where $A(x) = \int_c^d f(x,y)\,dy$.
+
+**Step 1 — Existence of $A(x)$.** For each fixed $x_0 \in [a,b]$, the function $y \mapsto f(x_0, y)$ is continuous on $[c,d]$ (because $f$ is continuous, and holding $x$ fixed is a continuous operation). By the fundamental theorem of single-variable calculus, $A(x_0) = \int_c^d f(x_0,y)\,dy$ exists for every $x_0$.
+
+**Step 2 — Continuity of $A$.** We show $A$ is continuous on $[a,b]$, hence integrable. Let $\varepsilon > 0$. Since $f$ is continuous on the compact set $R$, it is **uniformly** continuous: $\exists \delta > 0$ such that $\|(x_1,y_1)-(x_2,y_2)\| < \delta \Rightarrow |f(x_1,y_1)-f(x_2,y_2)| < \varepsilon/(d-c)$.
+
+If $|x_1 - x_2| < \delta$, then for all $y$:
+
+$$
+|A(x_1) - A(x_2)| = \left|\int_c^d [f(x_1,y) - f(x_2,y)]\,dy\right| \leq \int_c^d |f(x_1,y)-f(x_2,y)|\,dy < \int_c^d \frac{\varepsilon}{d-c}\,dy = \varepsilon.
+$$
+
+So $A$ is uniformly continuous, hence integrable over $[a,b]$.
+
+**Step 3 — Relating $\int_a^b A(x)\,dx$ to $\iint_R f\,dA$.** Consider a partition of $R$ into sub-rectangles $R_{ij} = [x_{i-1},x_i]\times[y_{j-1},y_j]$ with widths $\Delta x_i$ and $\Delta y_j$. By the Mean Value Theorem for integrals applied to each row:
+
+$$
+\sum_j f(x_i^*, y_j^*)\,\Delta y_j \approx A(x_i^*)
+$$
+
+with error controlled by the uniform continuity of $f$. Summing over $i$ and letting the mesh go to zero, the double sum converges to $\int_a^b A(x)\,dx$. The same argument works for the other order, establishing the equality of both iterated integrals with $\iint_R f\,dA$. $\blacksquare$
+
+**Why the theorem can fail.** If $f$ is not Riemann integrable, the double integral may not exist. Even if both iterated integrals exist, they can disagree: consider
+
+$$
+f(x,y) = \frac{x^2 - y^2}{(x^2+y^2)^2} \quad \text{on } (0,1]\times(0,1].
+$$
+
+Here $\int_0^1 \int_0^1 f\,dy\,dx = \pi/4$ but $\int_0^1\int_0^1 f\,dx\,dy = -\pi/4$. The issue is that $f$ is not bounded near $(0,0)$, so it is not Riemann integrable over any rectangle containing the origin. **Fubini's theorem requires integrability; it does not magically create it.**
+
+### 4.2 — Derivation of the Change of Variables Theorem
+
+**The key idea.** The Jacobian arises naturally by asking: if I move by $(du, 0)$ and $(0, dv)$ in the $(u,v)$-plane, what parallelogram do I trace out in the $(x,y)$-plane?
+
+**Step 1 — Linear approximation of $T$.** Near a point $(u_0, v_0)$, the transformation $T : (u,v)\mapsto(x,y)$ is approximated by its derivative (the total differential from Chapter 1.4):
+
+$$
+\begin{pmatrix} dx \\ dy \end{pmatrix} \approx \begin{pmatrix} \partial x/\partial u & \partial x/\partial v \\ \partial y/\partial u & \partial y/\partial v \end{pmatrix} \begin{pmatrix} du \\ dv \end{pmatrix}.
+$$
+
+**Step 2 — Two tangent vectors.** The infinitesimal displacement $(du, 0)$ maps to the vector:
+
+$$
+\mathbf{e}_u = \left(\frac{\partial x}{\partial u}\,du,\;\frac{\partial y}{\partial u}\,du\right).
+$$
+
+The displacement $(0, dv)$ maps to:
+
+$$
+\mathbf{e}_v = \left(\frac{\partial x}{\partial v}\,dv,\;\frac{\partial y}{\partial v}\,dv\right).
+$$
+
+**Step 3 — Area of the image parallelogram.** The area of the parallelogram spanned by $\mathbf{e}_u$ and $\mathbf{e}_v$ is the absolute value of their 2D cross product (i.e., the $z$-component of $\mathbf{e}_u \times \mathbf{e}_v$):
+
+$$
+dA_{xy} = \left|\mathbf{e}_u \times \mathbf{e}_v\right| = \left|\frac{\partial x}{\partial u}\frac{\partial y}{\partial v} - \frac{\partial x}{\partial v}\frac{\partial y}{\partial u}\right| du\,dv = \left|\frac{\partial(x,y)}{\partial(u,v)}\right| du\,dv.
+$$
+
+**Step 4 — Substituting into the Riemann sum.** Partition the $(u,v)$-domain into tiny rectangles. Each rectangle of area $du\,dv$ maps to a tiny parallelogram of area $|J|\,du\,dv$ in the $(x,y)$-plane. Summing $f(x(u,v),y(u,v)) \cdot |J|\,du\,dv$ over all pieces and taking the limit gives exactly the double integral over the $(u,v)$-domain. The full proof requires showing the error from approximating parallelogram area by the linear approximation is $o(du\,dv)$ — this follows from the $C^1$ hypothesis on $T$. $\blacksquare$
+
+---
+
+
+## 🖼️ SVG 2 — Fubini Order Swap
+
+Two iteration orders for the same region $D$. Left: integrate $y$ first (inner) then $x$ (outer) — horizontal slices stacked vertically. Right: integrate $x$ first (inner) then $y$ (outer) — vertical slices. Same region, same integral value, different limit expressions.
+
+![math-01__1.5-fig2](math-01__1.5-fig2.svg)
+
+**Reading the picture.** Left panel shows horizontal strips — for each fixed $x$, $y$ runs from $g_1(x)$ (bottom boundary) to $g_2(x)$ (top boundary). Right panel shows vertical strips — for each fixed $y$, $x$ runs from $h_1(y)$ to $h_2(y)$. **Critically: if you swap the order of integration, the limits on both integrals must change to reflect the new slicing geometry.** Keeping the old limits with the new order is a fatal error.
+
+---
+
+## 🎯 5. Coordinate Systems and Their Jacobians
+
+### 5.1 — Polar Coordinates
+
+The transformation is $T : (r,\theta) \mapsto (x,y)$ with:
+
+$$
+x = r\cos\theta, \qquad y = r\sin\theta, \qquad r \geq 0, \quad \theta \in [0, 2\pi).
+$$
+
+**Jacobian derivation (from scratch).** Compute all four partial derivatives:
+
+$$
+\frac{\partial x}{\partial r} = \cos\theta, \quad \frac{\partial x}{\partial \theta} = -r\sin\theta, \quad \frac{\partial y}{\partial r} = \sin\theta, \quad \frac{\partial y}{\partial \theta} = r\cos\theta.
+$$
+
+The Jacobian is:
+
+$$
+\frac{\partial(x,y)}{\partial(r,\theta)} = \begin{vmatrix} \cos\theta & -r\sin\theta \\ \sin\theta & r\cos\theta \end{vmatrix} = \cos\theta \cdot r\cos\theta - (-r\sin\theta)\cdot\sin\theta = r\cos^2\theta + r\sin^2\theta = r.
+$$
+
+Using the Pythagorean identity $\cos^2\theta + \sin^2\theta = 1$:
+
+$$
+\boxed{\frac{\partial(x,y)}{\partial(r,\theta)} = r.}
+$$
+
+Therefore:
+
+$$
+\iint_R f(x,y)\,dA = \iint_S f(r\cos\theta, r\sin\theta)\,r\,dr\,d\theta.
+$$
+
+**Geometric interpretation.** A small "polar rectangle" with sides $dr$ and $r\,d\theta$ has area $r\,dr\,d\theta$, not $dr\,d\theta$. The factor $r$ accounts for the fact that arcs of radius $r$ are longer when $r$ is large — angular steps of size $d\theta$ sweep out more area far from the origin.
+
+### 5.2 — Cylindrical Coordinates
+
+Extension of polar to 3D: $(r,\theta,z) \mapsto (x,y,z)$ with:
+
+$$
+x = r\cos\theta, \quad y = r\sin\theta, \quad z = z.
+$$
+
+The Jacobian is the $3\times 3$ determinant. Because $z$ maps to itself, the matrix is block-diagonal:
+
+$$
+\frac{\partial(x,y,z)}{\partial(r,\theta,z)} = \begin{vmatrix} \cos\theta & -r\sin\theta & 0 \\ \sin\theta & r\cos\theta & 0 \\ 0 & 0 & 1 \end{vmatrix} = 1 \cdot \frac{\partial(x,y)}{\partial(r,\theta)} = r.
+$$
+
+So $dV = r\,dr\,d\theta\,dz$.
+
+### 5.3 — Spherical Coordinates
+
+The transformation is $(\rho,\phi,\theta) \mapsto (x,y,z)$ with:
+
+$$
+x = \rho\sin\phi\cos\theta, \quad y = \rho\sin\phi\sin\theta, \quad z = \rho\cos\phi,
+$$
+
+where $\rho \geq 0$ is the radial distance, $\phi \in [0,\pi]$ is the polar angle (from the positive $z$-axis), and $\theta \in [0,2\pi)$ is the azimuthal angle.
+
+**Jacobian computation.** The nine partial derivatives are:
+
+$$
+\frac{\partial x}{\partial\rho} = \sin\phi\cos\theta, \quad \frac{\partial x}{\partial\phi} = \rho\cos\phi\cos\theta, \quad \frac{\partial x}{\partial\theta} = -\rho\sin\phi\sin\theta,
+$$
+
+$$
+\frac{\partial y}{\partial\rho} = \sin\phi\sin\theta, \quad \frac{\partial y}{\partial\phi} = \rho\cos\phi\sin\theta, \quad \frac{\partial y}{\partial\theta} = \rho\sin\phi\cos\theta,
+$$
+
+$$
+\frac{\partial z}{\partial\rho} = \cos\phi, \quad \frac{\partial z}{\partial\phi} = -\rho\sin\phi, \quad \frac{\partial z}{\partial\theta} = 0.
+$$
+
+Expanding the $3\times 3$ determinant along the third column (since $\partial z/\partial\theta = 0$):
+
+$$
+J = -\rho\sin\phi\sin\theta\bigl[(\sin\phi\cos\theta)(-\rho\sin\phi) - (\rho\cos\phi\cos\theta)(\cos\phi)\bigr]
+$$
+
+$$
++ \rho\sin\phi\cos\theta\bigl[(\sin\phi\sin\theta)(-\rho\sin\phi) - (\rho\cos\phi\sin\theta)(\cos\phi)\bigr]
+$$
+
+$$
++ 0.
+$$
+
+Working out each bracket:
+
+First bracket: $-\rho\sin^2\phi\cos\theta - \rho\cos^2\phi\cos\theta = -\rho\cos\theta(\sin^2\phi+\cos^2\phi) = -\rho\cos\theta$.
+
+Second bracket: $-\rho\sin^2\phi\sin\theta - \rho\cos^2\phi\sin\theta = -\rho\sin\theta$.
+
+So:
+
+$$
+J = (-\rho\sin\phi\sin\theta)(-\rho\cos\theta) + (\rho\sin\phi\cos\theta)(-\rho\sin\theta)
+$$
+
+$$
+= \rho^2\sin\phi\sin\theta\cos\theta - \rho^2\sin\phi\cos\theta\sin\theta = 0?
+$$
+
+Wait — I need to be more careful expanding along the third column. Let me use cofactor expansion along the last row instead (the $z$-row has the simplest structure):
+
+$$
+J = \cos\phi \cdot M_{31} + (-\rho\sin\phi) \cdot M_{32} + 0 \cdot M_{33}
+$$
+
+where $M_{31}$ and $M_{32}$ are the appropriate cofactors. Explicitly:
+
+$$
+M_{31} = (-1)^{3+1}\begin{vmatrix} \rho\cos\phi\cos\theta & -\rho\sin\phi\sin\theta \\ \rho\cos\phi\sin\theta & \rho\sin\phi\cos\theta \end{vmatrix}
+= \rho^2\cos\phi\sin\phi\cos^2\theta + \rho^2\cos\phi\sin\phi\sin^2\theta = \rho^2\cos\phi\sin\phi.
+$$
+
+$$
+M_{32} = (-1)^{3+2}\begin{vmatrix} \sin\phi\cos\theta & -\rho\sin\phi\sin\theta \\ \sin\phi\sin\theta & \rho\sin\phi\cos\theta \end{vmatrix}
+= -\bigl(\rho\sin^2\phi\cos^2\theta + \rho\sin^2\phi\sin^2\theta\bigr) = -\rho\sin^2\phi.
+$$
+
+Therefore:
+
+$$
+J = \cos\phi \cdot \rho^2\cos\phi\sin\phi + (-\rho\sin\phi)\cdot(-\rho\sin^2\phi) = \rho^2\sin\phi\cos^2\phi + \rho^2\sin^3\phi = \rho^2\sin\phi(\cos^2\phi + \sin^2\phi) = \rho^2\sin\phi.
+$$
+
+$$
+\boxed{\frac{\partial(x,y,z)}{\partial(\rho,\phi,\theta)} = \rho^2\sin\phi.}
+$$
+
+Therefore $dV = \rho^2\sin\phi\,d\rho\,d\phi\,d\theta$.
+
+**Why $\sin\phi$?** The azimuthal angle $\theta$ sweeps arcs of radius $\rho\sin\phi$ — the distance from the $z$-axis. Near the poles ($\phi \approx 0$ or $\pi$), $\sin\phi \approx 0$ and angular steps $d\theta$ sweep out almost no volume; near the equator ($\phi = \pi/2$), $\sin\phi = 1$ and $d\theta$ sweeps out the most volume. The $\sin\phi$ factor captures exactly this latitude-dependent stretching.
+
+---
+
+
+## 🖼️ SVG 3 — Polar Coordinate Grid Over a Region
+
+The natural polar partition of an annular sector: radial lines at constant $\theta$ and arcs at constant $r$ form the "polar rectangles." Note that each cell has arc-length $r\,d\theta$ along the angular direction, making its area $r\,dr\,d\theta$ — not $dr\,d\theta$.
+
+![math-01__1.5-fig3](math-01__1.5-fig3.svg)
+
+---
+
+## 🖼️ SVG 4 — Spherical Coordinates: $\rho$, $\phi$, $\theta$
+
+![math-01__1.5-fig4](math-01__1.5-fig4.svg)
+
+---
+
+
+## 🖼️ SVG 5 — Jacobian as Area Scaling
+
+A small rectangle in $(u,v)$-space maps to a parallelogram in $(x,y)$-space. The Jacobian $|J|$ is the ratio of parallelogram area to rectangle area — the local linear magnification factor of the transformation.
+
+![math-01__1.5-fig5](math-01__1.5-fig5.svg)
+
+The Jacobian $|J| = |\partial(x,y)/\partial(u,v)|$ is the factor by which the transformation $T$ locally stretches (or compresses) area. If $|J| > 1$, $T$ is locally expanding; if $|J| < 1$, contracting; if $|J| = 0$ at a point, $T$ is degenerate there (mapping a 2D region to a 1D curve), and the Change of Variables Theorem does not apply.
+
+---
+
+## ✍️ 6. Worked Examples
+
+### Example 1.5.E1 — Double Integral over a Rectangle, Both Orders
+
+Compute $\iint_R (x+y)\,dA$ over $R = [0,1]\times[0,2]$ in both integration orders, and verify they agree.
+
+**Order 1: $dy\,dx$.** Inner integral first (treat $x$ as constant):
+
+$$
+\int_0^2 (x+y)\,dy = \left[xy + \frac{y^2}{2}\right]_0^2 = 2x + 2.
+$$
+
+Now the outer integral:
+
+$$
+\int_0^1 (2x + 2)\,dx = \left[x^2 + 2x\right]_0^1 = 1 + 2 = 3.
+$$
+
+**Order 2: $dx\,dy$.** Inner integral (treat $y$ as constant):
+
+$$
+\int_0^1 (x+y)\,dx = \left[\frac{x^2}{2} + xy\right]_0^1 = \frac{1}{2} + y.
+$$
+
+Outer integral:
+
+$$
+\int_0^2 \left(\frac{1}{2} + y\right)dy = \left[\frac{y}{2} + \frac{y^2}{2}\right]_0^2 = 1 + 2 = 3.
+$$
+
+Both orders give $\boxed{3}$, confirming Fubini's Theorem.
+
+### Example 1.5.E2 — Double Integral over a Triangle
+
+Compute $\iint_D x^2 y\,dA$ where $D$ is the triangle with vertices $(0,0)$, $(1,0)$, $(0,1)$.
+
+**Describe $D$.** The boundary edges are: the $x$-axis ($y=0$), the $y$-axis ($x=0$), and the hypotenuse $x+y=1$ (i.e., $y=1-x$). As a Type I region:
+
+$$
+D = \{(x,y) : 0 \leq x \leq 1,\; 0 \leq y \leq 1-x\}.
+$$
+
+**Set up the iterated integral:**
+
+$$
+\int_0^1\int_0^{1-x} x^2 y\,dy\,dx.
+$$
+
+**Inner integral** ($x$ fixed, integrate over $y$):
+
+$$
+\int_0^{1-x} x^2 y\,dy = x^2 \left[\frac{y^2}{2}\right]_0^{1-x} = \frac{x^2(1-x)^2}{2}.
+$$
+
+**Outer integral:**
+
+$$
+\int_0^1 \frac{x^2(1-x)^2}{2}\,dx = \frac{1}{2}\int_0^1 x^2(1 - 2x + x^2)\,dx = \frac{1}{2}\int_0^1 (x^2 - 2x^3 + x^4)\,dx.
+$$
+
+$$
+= \frac{1}{2}\left[\frac{x^3}{3} - \frac{x^4}{2} + \frac{x^5}{5}\right]_0^1 = \frac{1}{2}\left(\frac{1}{3} - \frac{1}{2} + \frac{1}{5}\right) = \frac{1}{2} \cdot \frac{10 - 15 + 6}{30} = \frac{1}{2}\cdot\frac{1}{30} = \boxed{\frac{1}{60}}.
+$$
+
+**Note on the limits.** The upper limit on $y$ is $1-x$, not $1$. Using $1$ as the upper limit is a very common error that gives the wrong answer by including the region above the hypotenuse.
+
+### Example 1.5.E3 — Polar Conversion and the Gaussian Integral
+
+Compute $I = \iint_{\mathbb{R}^2} e^{-(x^2+y^2)}\,dA$ using polar coordinates, and deduce $\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$.
+
+**Step 1 — Square the single-variable integral.** Let $J = \int_{-\infty}^{\infty} e^{-x^2}\,dx$. Since $x$ and $y$ are independent:
+
+$$
+J^2 = \left(\int_{-\infty}^{\infty} e^{-x^2}\,dx\right)\left(\int_{-\infty}^{\infty} e^{-y^2}\,dy\right) = \iint_{\mathbb{R}^2} e^{-(x^2+y^2)}\,dA = I.
+$$
+
+**Step 2 — Convert to polar.** In polar, $x^2 + y^2 = r^2$, $dA = r\,dr\,d\theta$, and the full plane corresponds to $r \in [0,\infty)$, $\theta \in [0,2\pi)$:
+
+$$
+I = \int_0^{2\pi}\int_0^{\infty} e^{-r^2}\cdot r\,dr\,d\theta.
+$$
+
+**Step 3 — Separate the iterated integral** (the integrand factors as a function of $r$ times a function of $\theta$):
+
+$$
+I = \left(\int_0^{2\pi} d\theta\right)\left(\int_0^{\infty} r\,e^{-r^2}\,dr\right) = 2\pi \cdot \int_0^{\infty} r\,e^{-r^2}\,dr.
+$$
+
+**Step 4 — Compute the radial integral** by substitution $u = r^2$, $du = 2r\,dr$:
+
+$$
+\int_0^{\infty} r\,e^{-r^2}\,dr = \frac{1}{2}\int_0^{\infty} e^{-u}\,du = \frac{1}{2}\left[-e^{-u}\right]_0^{\infty} = \frac{1}{2}(0 - (-1)) = \frac{1}{2}.
+$$
+
+**Step 5 — Combine:**
+
+$$
+I = 2\pi \cdot \frac{1}{2} = \pi.
+$$
+
+**Step 6 — Extract $J$:**
+
+$$
+J^2 = \pi \;\Longrightarrow\; J = \sqrt{\pi} \quad (J > 0 \text{ since } e^{-x^2} > 0).
+$$
+
+$$
+\boxed{\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}.}
+$$
+
+This is the most famous integral in mathematics. It cannot be done without the dimensional trick: squaring the integral to get a 2D integral, then converting to polar where the rotational symmetry makes the computation trivial.
+
+### Example 1.5.E4 — Volume of a Sphere via Spherical Coordinates
+
+Compute the volume of the ball $B = \{\rho \leq R\}$ (sphere of radius $R$) using the triple integral in spherical coordinates.
+
+$$
+V = \iiint_B 1\,dV = \int_0^{2\pi}\int_0^{\pi}\int_0^R \rho^2\sin\phi\,d\rho\,d\phi\,d\theta.
+$$
+
+**Step 1 — Separate:** the integrand $\rho^2\sin\phi$ factors multiplicatively, and the limits factorize:
+
+$$
+V = \left(\int_0^{2\pi}d\theta\right)\left(\int_0^{\pi}\sin\phi\,d\phi\right)\left(\int_0^R \rho^2\,d\rho\right).
+$$
+
+**Step 2 — Each factor:**
+
+$$
+\int_0^{2\pi}d\theta = 2\pi.
+$$
+
+$$
+\int_0^{\pi}\sin\phi\,d\phi = \left[-\cos\phi\right]_0^{\pi} = -\cos\pi + \cos 0 = 1 + 1 = 2.
+$$
+
+$$
+\int_0^R \rho^2\,d\rho = \left[\frac{\rho^3}{3}\right]_0^R = \frac{R^3}{3}.
+$$
+
+**Step 3 — Multiply:**
+
+$$
+V = 2\pi \cdot 2 \cdot \frac{R^3}{3} = \frac{4\pi R^3}{3}.
+$$
+
+$$
+\boxed{V = \frac{4}{3}\pi R^3.}
+$$
+
+Every step was mandatory — note how the Jacobian $\rho^2\sin\phi$ contributes both the $\rho^2$ factor (from the radial dimension) and the $\sin\phi$ factor (from the azimuthal geometry). Without the Jacobian, you'd integrate $1$ over a cuboid in $(\rho,\phi,\theta)$-space and get the wrong answer.
+
+### Example 1.5.E5 — Polar Jacobian from Scratch
+
+**Claim:** the area element in polar coordinates is $dA = r\,dr\,d\theta$.
+
+**Geometric derivation (alternative to the algebraic one in §5.1).** Consider the polar rectangle:
+
+$$
+P = \{(r,\theta) : r_0 \leq r \leq r_0 + \Delta r,\; \theta_0 \leq \theta \leq \theta_0 + \Delta\theta\}.
+$$
+
+Its image in Cartesian space is bounded by two arcs and two radii. The inner arc has length $r_0\,\Delta\theta$, the outer arc has length $(r_0+\Delta r)\,\Delta\theta$. The radial width is $\Delta r$. For small $\Delta r, \Delta\theta$, the region is approximately a rectangle with dimensions $\Delta r$ (radial) and $r_0\,\Delta\theta$ (angular), so:
+
+$$
+\Delta A \approx \Delta r \cdot r_0\,\Delta\theta = r_0\,\Delta r\,\Delta\theta.
+$$
+
+The error is $O(\Delta r \cdot \Delta\theta \cdot \Delta r)$, which is $o(\Delta r\,\Delta\theta)$ — it vanishes faster than the main term. In the limit:
+
+$$
+dA = r\,dr\,d\theta.
+$$
+
+The algebraic route via the Jacobian determinant (which we computed in §5.1) gives exactly the same answer, confirming the geometric picture.
+
+### Example 1.5.E6 — Change of Variables: $(u,v) = (x+y, x-y)$
+
+Compute $\iint_R (x+y)^2(x-y)^2\,dA$ where $R$ is the square with vertices $(0,1)$, $(1,0)$, $(0,-1)$, $(-1,0)$.
+
+**Step 1 — Define the substitution.** Let $u = x+y$, $v = x-y$. Solving for $x$ and $y$:
+
+$$
+x = \frac{u+v}{2}, \qquad y = \frac{u-v}{2}.
+$$
+
+**Step 2 — Compute the Jacobian.** We need $\partial(x,y)/\partial(u,v)$:
+
+$$
+\frac{\partial x}{\partial u} = \frac{1}{2},\quad \frac{\partial x}{\partial v} = \frac{1}{2},\quad \frac{\partial y}{\partial u} = \frac{1}{2},\quad \frac{\partial y}{\partial v} = -\frac{1}{2}.
+$$
+
+$$
+J = \begin{vmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{vmatrix} = \frac{1}{2}\cdot\left(-\frac{1}{2}\right) - \frac{1}{2}\cdot\frac{1}{2} = -\frac{1}{4} - \frac{1}{4} = -\frac{1}{2}.
+$$
+
+So $|J| = 1/2$ and $dA_{xy} = \tfrac{1}{2}\,du\,dv$.
+
+**Step 3 — Describe $R$ in $(u,v)$-coordinates.** The vertices of $R$ are:
+
+- $(0,1) \to u = 0+1 = 1,\; v = 0-1 = -1$
+- $(1,0) \to u = 1,\; v = 1$
+- $(0,-1) \to u = -1,\; v = 1$
+- $(-1,0) \to u = -1,\; v = -1$
+
+So $R$ maps to the square $S = [-1,1]\times[-1,1]$ in the $(u,v)$-plane.
+
+**Step 4 — Rewrite the integrand.** The integrand $(x+y)^2(x-y)^2 = u^2 v^2$.
+
+**Step 5 — Compute:**
+
+$$
+\iint_R (x+y)^2(x-y)^2\,dA = \iint_S u^2 v^2 \cdot \frac{1}{2}\,du\,dv = \frac{1}{2}\int_{-1}^{1} u^2\,du \int_{-1}^{1} v^2\,dv.
+$$
+
+$$
+= \frac{1}{2}\left[\frac{u^3}{3}\right]_{-1}^{1}\left[\frac{v^3}{3}\right]_{-1}^{1} = \frac{1}{2}\cdot\frac{2}{3}\cdot\frac{2}{3} = \boxed{\frac{2}{9}}.
+$$
+
+The substitution transformed a complicated region (rotated square) with a complicated integrand into a simple rectangle with a separable integrand. That's exactly what good change-of-variables does.
+
+### Example 1.5.E7 — Surface Area of a Paraboloid
+
+Find the surface area of the paraboloid $z = x^2 + y^2$ over the disk $D = \{x^2 + y^2 \leq 1\}$.
+
+**Step 1 — Compute $f_x$ and $f_y$:**
+
+$$
+f_x = 2x, \qquad f_y = 2y.
+$$
+
+**Step 2 — Surface area element:**
+
+$$
+dS = \sqrt{1 + f_x^2 + f_y^2}\,dA = \sqrt{1 + 4x^2 + 4y^2}\,dA.
+$$
+
+**Step 3 — Convert to polar.** In polar, $x^2 + y^2 = r^2$ and $D$ becomes $r \in [0,1]$, $\theta \in [0,2\pi)$:
+
+$$
+A = \iint_D \sqrt{1 + 4r^2}\,r\,dr\,d\theta = \int_0^{2\pi}d\theta \int_0^1 r\sqrt{1+4r^2}\,dr = 2\pi\int_0^1 r\sqrt{1+4r^2}\,dr.
+$$
+
+**Step 4 — Evaluate the radial integral** by substitution $u = 1 + 4r^2$, $du = 8r\,dr$, so $r\,dr = du/8$. When $r=0$, $u=1$; when $r=1$, $u=5$:
+
+$$
+\int_0^1 r\sqrt{1+4r^2}\,dr = \int_1^5 \sqrt{u}\,\frac{du}{8} = \frac{1}{8}\left[\frac{2}{3}u^{3/2}\right]_1^5 = \frac{1}{12}(5^{3/2} - 1) = \frac{5\sqrt{5}-1}{12}.
+$$
+
+**Step 5 — Final answer:**
+
+$$
+A = 2\pi \cdot \frac{5\sqrt{5}-1}{12} = \boxed{\frac{\pi(5\sqrt{5}-1)}{6}}.
+$$
+
+### Example 1.5.E8 — Mass of a Lamina with Variable Density
+
+A lamina occupies the region $D = \{0 \leq x \leq 1,\; 0 \leq y \leq x\}$ (the triangle below $y = x$) with density $\rho(x,y) = xy$. Find the total mass.
+
+**Step 1 — Set up the integral.** The mass is:
+
+$$
+M = \iint_D \rho(x,y)\,dA = \int_0^1\int_0^x xy\,dy\,dx.
+$$
+
+**Step 2 — Inner integral** ($x$ fixed, integrate over $y$ from $0$ to $x$):
+
+$$
+\int_0^x xy\,dy = x\left[\frac{y^2}{2}\right]_0^x = x \cdot \frac{x^2}{2} = \frac{x^3}{2}.
+$$
+
+**Step 3 — Outer integral:**
+
+$$
+M = \int_0^1 \frac{x^3}{2}\,dx = \frac{1}{2}\cdot\frac{1}{4} = \boxed{\frac{1}{8}}.
+$$
+
+---
+
+
+## 📝 7. Challenge Problems
+
+> **House rule:** Solve on paper — every step — before opening the spoiler. The point isn't the answer. It's the muscle memory.
+
+### Problem 1.5.P1 — Order Swap with Tricky Limits
+
+Evaluate $\displaystyle\int_0^1\int_x^1 e^{y^2}\,dy\,dx$ by swapping the order of integration. (Hint: you cannot evaluate $\int e^{y^2}\,dy$ in closed form; changing order removes the problem.)
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Identify the region.** The limits say: $x$ runs from $0$ to $1$; for each $x$, $y$ runs from $x$ to $1$. So:
+
+$$
+D = \{(x,y) : 0 \leq x \leq 1,\; x \leq y \leq 1\}.
+$$
+
+In the $xy$-plane, this is the triangle above the line $y = x$ and below $y = 1$, for $x \in [0,1]$.
+
+**Step 2 — Redescribe as a Type II region.** For a fixed $y \in [0,1]$, $x$ ranges from $0$ to $y$ (since we need $x \leq y$):
+
+$$
+D = \{(x,y) : 0 \leq y \leq 1,\; 0 \leq x \leq y\}.
+$$
+
+**Step 3 — Swap the integral:**
+
+$$
+\int_0^1\int_x^1 e^{y^2}\,dy\,dx = \int_0^1\int_0^y e^{y^2}\,dx\,dy.
+$$
+
+**Step 4 — Inner integral** ($y$ fixed, integrate over $x$):
+
+$$
+\int_0^y e^{y^2}\,dx = e^{y^2} \cdot y \quad \text{(since }e^{y^2}\text{ is constant w.r.t. }x\text{)}.
+$$
+
+**Step 5 — Outer integral:**
+
+$$
+\int_0^1 y\,e^{y^2}\,dy.
+$$
+
+Substitute $u = y^2$, $du = 2y\,dy$:
+
+$$
+= \frac{1}{2}\int_0^1 e^u\,du = \frac{1}{2}\left[e^u\right]_0^1 = \frac{1}{2}(e - 1).
+$$
+
+$$
+\boxed{\frac{e-1}{2}.}
+$$
+
+</details>
+
+### Problem 1.5.P2 — Triple Integral over a Tetrahedron
+
+Compute $\iiint_E z\,dV$ where $E$ is the tetrahedron with vertices $(0,0,0)$, $(1,0,0)$, $(0,1,0)$, $(0,0,1)$.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Describe $E$.** The tetrahedron is bounded by the four planes $x = 0$, $y = 0$, $z = 0$, and $x + y + z = 1$. As a Type I (in the $z$-direction) region over the triangle $x+y \leq 1$, $x,y \geq 0$:
+
+$$
+E = \{(x,y,z) : 0 \leq x \leq 1,\; 0 \leq y \leq 1-x,\; 0 \leq z \leq 1-x-y\}.
+$$
+
+**Step 2 — Set up the triple iterated integral:**
+
+$$
+\int_0^1\int_0^{1-x}\int_0^{1-x-y} z\,dz\,dy\,dx.
+$$
+
+**Step 3 — Innermost integral:**
+
+$$
+\int_0^{1-x-y} z\,dz = \left[\frac{z^2}{2}\right]_0^{1-x-y} = \frac{(1-x-y)^2}{2}.
+$$
+
+**Step 4 — Middle integral:** Let $s = 1-x$ (constant w.r.t. $y$):
+
+$$
+\int_0^{s} \frac{(s-y)^2}{2}\,dy = \frac{1}{2}\left[-\frac{(s-y)^3}{3}\right]_0^{s} = \frac{1}{2}\cdot\frac{s^3}{3} = \frac{s^3}{6} = \frac{(1-x)^3}{6}.
+$$
+
+**Step 5 — Outer integral:**
+
+$$
+\int_0^1 \frac{(1-x)^3}{6}\,dx = \frac{1}{6}\left[-\frac{(1-x)^4}{4}\right]_0^1 = \frac{1}{6}\cdot\frac{1}{4} = \boxed{\frac{1}{24}}.
+$$
+
+</details>
+
+### Problem 1.5.P3 — Area Between Polar Curves
+
+Find the area of the region inside the circle $r = 2\cos\theta$ using a double integral in polar coordinates.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Identify the curve.** $r = 2\cos\theta$ is a circle. Converting: $r^2 = 2r\cos\theta \Rightarrow x^2 + y^2 = 2x \Rightarrow (x-1)^2 + y^2 = 1$. It is a circle of radius $1$ centered at $(1,0)$.
+
+**Step 2 — Determine $\theta$-range.** The curve exists for $r \geq 0$, i.e., $\cos\theta \geq 0$, i.e., $\theta \in [-\pi/2, \pi/2]$.
+
+**Step 3 — Area as double integral:**
+
+$$
+A = \int_{-\pi/2}^{\pi/2}\int_0^{2\cos\theta} r\,dr\,d\theta.
+$$
+
+**Step 4 — Inner integral:**
+
+$$
+\int_0^{2\cos\theta} r\,dr = \left[\frac{r^2}{2}\right]_0^{2\cos\theta} = 2\cos^2\theta.
+$$
+
+**Step 5 — Outer integral:**
+
+$$
+A = \int_{-\pi/2}^{\pi/2} 2\cos^2\theta\,d\theta = 2\int_{-\pi/2}^{\pi/2}\frac{1+\cos 2\theta}{2}\,d\theta = \int_{-\pi/2}^{\pi/2}(1+\cos 2\theta)\,d\theta.
+$$
+
+$$
+= \left[\theta + \frac{\sin 2\theta}{2}\right]_{-\pi/2}^{\pi/2} = \left(\frac{\pi}{2} + 0\right) - \left(-\frac{\pi}{2} + 0\right) = \pi.
+$$
+
+This correctly gives the area of the disk $(x-1)^2+y^2=1$, which has radius $1$ and area $\pi\cdot 1^2 = \pi$. $\checkmark$
+
+$$\boxed{A = \pi.}$$
+
+</details>
+
+### Problem 1.5.P4 — Cylindrical Coordinates Volume
+
+Find the volume of the solid bounded above by the paraboloid $z = 4 - x^2 - y^2$ and below by the $xy$-plane.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Find the base.** The paraboloid meets $z = 0$ where $x^2 + y^2 = 4$, i.e., a circle of radius $2$. So the projection onto the $xy$-plane is $D = \{r \leq 2\}$.
+
+**Step 2 — Set up in cylindrical coordinates** ($x = r\cos\theta$, $y = r\sin\theta$, $z = z$, $dV = r\,dr\,d\theta\,dz$). The solid is $0 \leq z \leq 4 - r^2$ for $0 \leq r \leq 2$:
+
+$$
+V = \int_0^{2\pi}\int_0^2\int_0^{4-r^2} r\,dz\,dr\,d\theta.
+$$
+
+**Step 3 — Innermost integral:**
+
+$$
+\int_0^{4-r^2} r\,dz = r(4-r^2).
+$$
+
+**Step 4 — Middle integral:**
+
+$$
+\int_0^2 r(4-r^2)\,dr = \int_0^2 (4r - r^3)\,dr = \left[2r^2 - \frac{r^4}{4}\right]_0^2 = 8 - 4 = 4.
+$$
+
+**Step 5 — Outer integral:**
+
+$$
+V = \int_0^{2\pi} 4\,d\theta = 8\pi.
+$$
+
+$$\boxed{V = 8\pi.}$$
+
+</details>
+
+### Problem 1.5.P5 — Jacobian of a Non-Linear Transformation
+
+Compute the Jacobian $\partial(x,y)/\partial(r,s)$ for the transformation $x = r^2 - s^2$, $y = 2rs$, and use it to evaluate $\iint_S (x^2+y^2)\,dA$ over the image of $S = [1,2]\times[0,1]$ under this map.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Compute the Jacobian:**
+
+$$
+\frac{\partial x}{\partial r} = 2r, \quad \frac{\partial x}{\partial s} = -2s, \quad \frac{\partial y}{\partial r} = 2s, \quad \frac{\partial y}{\partial s} = 2r.
+$$
+
+$$
+J = \begin{vmatrix} 2r & -2s \\ 2s & 2r \end{vmatrix} = 4r^2 + 4s^2 = 4(r^2+s^2).
+$$
+
+**Step 2 — Express $x^2+y^2$ in terms of $r,s$:**
+
+$$
+x^2 + y^2 = (r^2-s^2)^2 + (2rs)^2 = r^4 - 2r^2s^2 + s^4 + 4r^2s^2 = r^4 + 2r^2s^2 + s^4 = (r^2+s^2)^2.
+$$
+
+**Step 3 — Apply Change of Variables:**
+
+$$
+\iint_R (x^2+y^2)\,dA_{xy} = \iint_S (r^2+s^2)^2 \cdot 4(r^2+s^2)\,dr\,ds = 4\int_1^2\int_0^1 (r^2+s^2)^3\,ds\,dr.
+$$
+
+**Step 4 — Expand** $(r^2+s^2)^3 = r^6 + 3r^4s^2 + 3r^2s^4 + s^6$ and integrate over $s \in [0,1]$:
+
+$$
+\int_0^1 (r^6 + 3r^4 s^2 + 3r^2 s^4 + s^6)\,ds = r^6 + r^4 + \frac{3r^2}{5} + \frac{1}{7}.
+$$
+
+**Step 5 — Integrate over $r \in [1,2]$:**
+
+$$
+\int_1^2 \left(r^6 + r^4 + \frac{3r^2}{5} + \frac{1}{7}\right)dr = \left[\frac{r^7}{7} + \frac{r^5}{5} + \frac{r^3}{5} + \frac{r}{7}\right]_1^2.
+$$
+
+At $r=2$: $\frac{128}{7} + \frac{32}{5} + \frac{8}{5} + \frac{2}{7} = \frac{130}{7} + 8 = \frac{130+56}{7} = \frac{186}{7}$.
+
+At $r=1$: $\frac{1}{7} + \frac{1}{5} + \frac{1}{5} + \frac{1}{7} = \frac{2}{7} + \frac{2}{5} = \frac{10+14}{35} = \frac{24}{35}$.
+
+Difference: $\frac{186}{7} - \frac{24}{35} = \frac{930 - 24}{35} = \frac{906}{35}$.
+
+$$\boxed{4 \cdot \frac{906}{35} = \frac{3624}{35}.}$$
+
+</details>
+
+### Problem 1.5.P6 — Center of Mass
+
+A lamina occupies the half-disk $D = \{x^2 + y^2 \leq R^2,\; y \geq 0\}$ with uniform density $\rho = 1$. Find the $y$-coordinate of the center of mass.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Mass.** $M = \iint_D 1\,dA = \frac{1}{2}\pi R^2$ (half the area of a disk of radius $R$).
+
+**Step 2 — Moment about the $x$-axis.** In polar, the half-disk is $r \in [0,R]$, $\theta \in [0,\pi]$:
+
+$$
+M_x = \iint_D y\,dA = \int_0^{\pi}\int_0^R (r\sin\theta) \cdot r\,dr\,d\theta = \int_0^{\pi}\sin\theta\,d\theta \int_0^R r^2\,dr.
+$$
+
+$$
+= \left[-\cos\theta\right]_0^{\pi} \cdot \frac{R^3}{3} = 2 \cdot \frac{R^3}{3} = \frac{2R^3}{3}.
+$$
+
+**Step 3 — Center of mass:**
+
+$$
+\bar{y} = \frac{M_x}{M} = \frac{2R^3/3}{\pi R^2/2} = \frac{2R^3}{3}\cdot\frac{2}{\pi R^2} = \frac{4R}{3\pi}.
+$$
+
+$$\boxed{\bar{y} = \frac{4R}{3\pi}.}$$
+
+By symmetry, $\bar{x} = 0$ (the region and density are symmetric about the $y$-axis).
+
+</details>
+
+### Problem 1.5.P7 — Surface Area of a Cone
+
+Find the lateral surface area of the cone $z = \sqrt{x^2 + y^2}$ for $z \leq H$ (i.e., over the disk $x^2 + y^2 \leq H^2$).
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Partial derivatives.** With $f(x,y) = \sqrt{x^2+y^2}$:
+
+$$
+f_x = \frac{x}{\sqrt{x^2+y^2}}, \qquad f_y = \frac{y}{\sqrt{x^2+y^2}}.
+$$
+
+**Step 2 — Area element:**
+
+$$
+dS = \sqrt{1 + f_x^2 + f_y^2}\,dA = \sqrt{1 + \frac{x^2}{x^2+y^2} + \frac{y^2}{x^2+y^2}}\,dA = \sqrt{1 + 1}\,dA = \sqrt{2}\,dA.
+$$
+
+The cone has constant slope $1$, so the area element is uniformly $\sqrt{2}\,dA$ — no integration needed for the area element itself.
+
+**Step 3 — Integrate over the disk $x^2+y^2 \leq H^2$:**
+
+$$
+A = \iint_{x^2+y^2 \leq H^2} \sqrt{2}\,dA = \sqrt{2} \cdot \pi H^2.
+$$
+
+$$\boxed{A = \sqrt{2}\,\pi H^2.}$$
+
+Note: this matches the elementary formula $A = \pi R \ell$ where $R = H$ (base radius) and $\ell = H\sqrt{2}$ (slant height).
+
+</details>
+
+### Problem 1.5.P8 — Ellipsoid Volume via Spherical Stretching
+
+Find the volume of the ellipsoid $\dfrac{x^2}{a^2} + \dfrac{y^2}{b^2} + \dfrac{z^2}{c^2} \leq 1$ using the substitution $x = a\rho\sin\phi\cos\theta$, $y = b\rho\sin\phi\sin\theta$, $z = c\rho\cos\phi$.
+
+<details>
+
+<summary>🔍 View Step-by-Step Solution</summary>
+
+**Step 1 — Compute the Jacobian.** The transformation is $(\rho,\phi,\theta) \mapsto (x,y,z)$ with:
+
+$$
+\frac{\partial(x,y,z)}{\partial(\rho,\phi,\theta)} = \begin{vmatrix} a\sin\phi\cos\theta & a\rho\cos\phi\cos\theta & -a\rho\sin\phi\sin\theta \\ b\sin\phi\sin\theta & b\rho\cos\phi\sin\theta & b\rho\sin\phi\cos\theta \\ c\cos\phi & -c\rho\sin\phi & 0 \end{vmatrix}.
+$$
+
+Each row has a prefactor $a$, $b$, $c$ respectively relative to the standard spherical Jacobian. Factoring those out:
+
+$$
+J = abc \cdot \frac{\partial(\tilde{x},\tilde{y},\tilde{z})}{\partial(\rho,\phi,\theta)} = abc \cdot \rho^2\sin\phi,
+$$
+
+where $(\tilde{x},\tilde{y},\tilde{z}) = (\rho\sin\phi\cos\theta, \rho\sin\phi\sin\theta, \rho\cos\phi)$ are the standard spherical coordinates with Jacobian $\rho^2\sin\phi$ (derived in §5.3).
+
+**Step 2 — Limits.** Under this substitution, the ellipsoid $\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2} \leq 1$ becomes $\rho^2 \leq 1$, i.e., $\rho \in [0,1]$, $\phi \in [0,\pi]$, $\theta \in [0,2\pi)$.
+
+**Step 3 — Volume integral:**
+
+$$
+V = \int_0^{2\pi}\int_0^{\pi}\int_0^1 abc\,\rho^2\sin\phi\,d\rho\,d\phi\,d\theta = abc\int_0^{2\pi}d\theta\int_0^{\pi}\sin\phi\,d\phi\int_0^1\rho^2\,d\rho.
+$$
+
+$$
+= abc \cdot 2\pi \cdot 2 \cdot \frac{1}{3} = \frac{4\pi abc}{3}.
+$$
+
+$$\boxed{V = \frac{4}{3}\pi abc.}$$
+
+When $a = b = c = R$, this recovers $V = \frac{4}{3}\pi R^3$.
+
+</details>
+
+---
+
+
+## ⚠️ 8. Common Pitfalls
+
+### Pitfall #1 — Swapping Integration Order Without Adjusting the Limits
+
+This is the most common error and it produces wrong answers every time. The limits of integration encode the *geometry* of your region, not just the *variable ranges*. When you swap from $\int dx\int_{g_1(x)}^{g_2(x)} dy$ to $\int dy\int_{h_1(y)}^{h_2(y)} dx$, you must re-derive the $x$-limits by re-describing the *same region* from the $y$-perspective.
+
+**Example of the error:** Region $D = \{0 \leq x \leq 1, 0 \leq y \leq x\}$. Correct swap gives $D = \{0 \leq y \leq 1, y \leq x \leq 1\}$. Wrong swap: $0 \leq x \leq 1, 0 \leq y \leq 1$ (that's a square, not a triangle).
+
+**Rule:** Always draw the region first. Then derive limits from the picture for *each* order separately. Don't "algebraically invert" limits — redraw.
+
+### Pitfall #2 — Forgetting the Jacobian Factor
+
+If you convert to polar and write $\int\int f(r\cos\theta, r\sin\theta)\,dr\,d\theta$ without the $r$, you've computed a different integral over a different region with a different weighting. The Jacobian is not optional decoration — it is the correct area element for that coordinate system.
+
+The error is especially sneaky because the limits look perfectly right. Forgetting $r$ in polar, forgetting $\rho^2\sin\phi$ in spherical, or forgetting $r$ in cylindrical: **these are all fatal. Check for the Jacobian every single time you change coordinates.**
+
+Mnemonic: polar $dA = r\,dr\,d\theta$ (one extra $r$); cylindrical $dV = r\,dr\,d\theta\,dz$ (one extra $r$); spherical $dV = \rho^2\sin\phi\,d\rho\,d\phi\,d\theta$ (factors $\rho^2$ AND $\sin\phi$).
+
+### Pitfall #3 — Wrong Bounds on Non-Rectangular Regions
+
+For a Type I region $\{a \leq x \leq b,\; g_1(x) \leq y \leq g_2(x)\}$, the **outer** limits $a$, $b$ must be constants; the **inner** limits $g_1(x)$, $g_2(x)$ can depend on the outer variable $x$. If you put functions of $y$ in the outer limits of a $dy\,dx$ integral, the integral is ill-defined.
+
+Common mistake: $\int_0^y \int_0^1 f(x,y)\,dx\,dy$ — the outer limits involve $y$ which is the outer variable of integration. This is circular and meaningless.
+
+### Pitfall #4 — Mixing Up Cylindrical and Spherical $z$ Conventions
+
+In cylindrical, $z$ is still the vertical Cartesian coordinate — the formula $z = \text{const}$ gives horizontal planes, and $r^2 = x^2 + y^2$ gives the horizontal distance from the $z$-axis. The variable $z$ appears unchanged.
+
+In spherical, the vertical distance is $z = \rho\cos\phi$ and the horizontal distance from the axis is $r = \rho\sin\phi$. The quantity $\rho$ is the full 3D radial distance; the angle $\phi$ is from the $z$-axis (not from the $xy$-plane — that would be the elevation angle, common in physics notation). **The convention $\phi \in [0,\pi]$ from $+z$ is the mathematician's convention; some physics texts swap $\phi$ and $\theta$, or measure $\phi$ from the $xy$-plane.** Always check which convention a problem is using.
+
+### Pitfall #5 — Not Converting $dA$ When Changing Coordinates
+
+Changing coordinates affects *both* the integrand *and* the differential. When going to polar:
+- $f(x,y) \to f(r\cos\theta, r\sin\theta)$ ✓
+- $dA \to r\,dr\,d\theta$ ✓
+
+Both substitutions are mandatory. Changing only the integrand and leaving $dA = dx\,dy$ intact is like unit conversion where you change the numerator unit but forget the denominator.
+
+### Pitfall #6 — Applying Fubini to Non-Integrable Functions
+
+Fubini's theorem requires $f$ to be Riemann integrable (or at least absolutely integrable for the Lebesgue version). If $f$ has unbounded behavior inside the region, both iterated integrals can exist, give different values, and neither equals the true double integral (which may not exist). Always check whether $f$ is bounded and continuous (or at least bounded with finitely many discontinuities) on your region before applying Fubini.
+
+---
+
+## 🛠️ 9. Pairing With Local Tools
+
+Use the `[CalculusVisualizer](CalculusVisualizer)` to:
+
+1. **Visualize Riemann partitions.** For a function like $f(x,y) = \sin(x)\cos(y)$ over $[0,\pi]\times[0,\pi]$, start with a $4\times 4$ grid of prisms and refine to $16\times 16$. Watch the sum converge.
+2. **Draw polar regions.** Set up the annular sector $1 \leq r \leq 2$, $0 \leq \theta \leq \pi/3$ and watch the polar grid cells tile it.
+3. **Plot Jacobian scaling.** Input a transformation (e.g., polar coordinates), draw a small square in $(r,\theta)$-space, and observe the elongated curvilinear parallelogram it maps to in $(x,y)$-space. The ratio of areas is $|J|$.
+4. **Check surface area integrals.** Plot the paraboloid from Example E7 and visually compare the tilted surface area to the flat disk area.
+
+The empirical-numerical intuition and the rigorous computation are not alternatives — they're partners.
+
+---
+
+## 📝 10. Study Tactics
+
+1. **Spend time on region geometry before you compute anything.** The biggest source of errors is incorrect limits. Draw the region in every problem. Shade it. Label the boundary curves. Derive limits from the picture.
+2. **Derive every Jacobian you use from scratch** at least once. After that you can use the formulas from §5, but the derivations are what give you the intuition to catch errors.
+3. **Run the practice script** (`_practice/scripts/1.5_multiple_integrals.py`) weekly. Eight problem archetypes, SymPy-verified solutions, fresh randomization every run.
+4. **The four-pass strategy** as in Chapter 1.1: (a) skim for the big ideas; (b) work all 8 worked examples on paper; (c) attempt all 8 challenge problems blind; (d) come back in a week and re-derive both Fubini's theorem proof sketch and the spherical Jacobian from scratch. If you pass (d), you own this chapter.
+5. **Physics pairing.** After mastering the computation, go to Chapter 5.x (statistical mechanics) and Chapter 9.x (quantum mechanics) and identify every integral. You will find $\iiint_{\mathbb{R}^3}|\psi|^2\,dV = 1$ (normalization), phase space integrals, and partition functions. The formalism here is the bridge.
+
+---
+
+## 🔗 11. Cross-Links to the Knowledge Web
+
+### Backward Dependencies
+- **[1.3 - Single-Variable Integration](1.3---Single-Variable-Integration)** — the double integral is literally Fubini applied twice to single-variable integrals. Every technique from 1.3 (substitution, parts, tabular integration) appears in the inner integrals of iterated integrals.
+- **[1.4 - Multivariable Limits & Partial Derivatives](1.4---Multivariable-Limits-&-Partial-Derivatives)** — the surface area element $dS = \sqrt{1 + f_x^2 + f_y^2}\,dA$ uses the partial derivatives from 1.4. The Jacobian matrix is the matrix of all partial derivatives.
+
+### Forward Dependencies
+- **[1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl)** — flux integrals $\iint_S \mathbf{F}\cdot d\mathbf{S}$ are double integrals of a vector component over a surface. The surface element $d\mathbf{S}$ built here is the prerequisite.
+- **[1.7 - Green's, Stokes' & Divergence Theorems](1.7---Green's,-Stokes'-&-Divergence-Theorems)** — the Divergence Theorem converts a volume integral $\iiint_E \nabla\cdot\mathbf{F}\,dV$ to a surface integral $\oiint_{\partial E}\mathbf{F}\cdot d\mathbf{S}$, and vice versa. Without being fluent in triple integrals, the Divergence Theorem is just a symbol.
+
+### Physics Cross-Links
+- **[5.x Statistical Mechanics — Partition Functions](5.x-Statistical-Mechanics-—-Partition-Functions)** — the classical partition function $Z = \int\cdots\int e^{-H/k_BT}\,d^{3N}q\,d^{3N}p$ is a $6N$-dimensional integral. All thermodynamic quantities are its derivatives. The tools here (change of variables, Jacobians, Gaussian integrals) are the engine.
+- **[9.x Quantum Mechanics — Probability Densities](9.x-Quantum-Mechanics-—-Probability-Densities)** — Born rule: $P(\text{particle in }E) = \iiint_E |\psi(\mathbf{r})|^2\,d^3r$. The normalization condition, expectation values, and matrix elements are all triple integrals. The hydrogen atom wave functions are most naturally computed in spherical coordinates.
+
+---
+
+## 📚 12. Verified Open-Access Source Material
+
+| Source | Location | Why it's authoritative |
+|---|---|---|
+| **MIT 18.02SC, Unit 3 — Multiple Integrals** | [ocw.mit.edu/courses/18-02sc](https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/3.-double-integrals-and-line-integrals-in-the-plane/) | Core MIT multivariable calculus; full problem sets and video lectures. Hosted on `mit.edu`. |
+| **Strang, *Calculus* (3rd ed.) Ch. 14–15** | [Strang on OCW](https://ocw.mit.edu/ans7870/textbooks/Strang/stranginstruct.htm) | Chapters 14 (multiple integrals) and 15 (vector calculus) directly cover this material. Author has taught at MIT for 50+ years. |
+| **APEX Calculus, Vol. 3, Ch. 13–14** | [apexcalculus.com](https://www.apexcalculus.com/) | Open-source, CC-BY-NC; excellent figures for polar/cylindrical/spherical; wide classroom adoption. |
+| **Paul Dawkins — Calculus III, Multiple Integrals** | [tutorial.math.lamar.edu/calc3](https://tutorial.math.lamar.edu/classes/calciii/calciii.aspx) | Lamar University; the most-referenced online calc notes; thorough coverage of all coordinate systems and change of variables. |
+| **3Blue1Brown — Essence of Calculus (integration episodes)** | [3blue1brown.com/topics/calculus](https://www.3blue1brown.com/topics/calculus) | Unmatched visual intuition for what area elements "really are" in different coordinate systems. Watch alongside this chapter. |
+
+*(Resource descriptions above were paraphrased for licensing compliance.)*
+
+---

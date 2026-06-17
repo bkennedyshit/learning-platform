@@ -1,0 +1,57 @@
+<svg viewBox="0 0 500 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="p-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pax   { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .path1 { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .path2 { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; stroke-dasharray: 8 4; }
+    .orig  { fill: var(--text-normal, #c9d1d9); }
+    .lv1   { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .lv2   { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    .lbl3  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .math3 { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 13px; fill: var(--text-muted, #8b949e); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Axes -->
+  <line x1="50"  y1="230" x2="470" y2="230" class="pax" marker-end="url(#p-arrow)"/>
+  <line x1="250" y1="430" x2="250" y2="30"  class="pax" marker-end="url(#p-arrow)"/>
+  <text x="476" y="234" class="lbl3">x</text>
+  <text x="254" y="26"  class="lbl3">y</text>
+  <!-- Path 1: y=0, approaching from right (solid accent) -->
+  <line x1="440" y1="230" x2="254" y2="230" class="path1" marker-end="url(#p-arrow)"/>
+  <text x="380" y="218" class="lv1">y = 0, limit → 0</text>
+  <!-- Path 2: y=x diagonal (dashed accent) -->
+  <line x1="440" y1="40"  x2="254" y2="228" class="path2" marker-end="url(#p-arrow)"/>
+  <text x="350" y="90" class="lv2">y = x, limit → ½</text>
+  <!-- Origin point -->
+  <circle cx="252" cy="230" r="6" class="orig"/>
+  <text x="238" y="248" class="lbl3">(0,0)</text>
+  <!-- Annotation box -->
+  <rect x="40" y="300" width="230" height="90" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="155" y="320" class="lbl3" text-anchor="middle" font-weight="bold">f(x,y) = xy/(x²+y²)</text>
+  <text x="155" y="340" class="lbl3" text-anchor="middle">Path 1 (y=0): f = 0</text>
+  <text x="155" y="358" class="lbl3" text-anchor="middle">Path 2 (y=x): f = 1/2</text>
+  <text x="155" y="378" class="lbl3" text-anchor="middle" style="fill:var(--interactive-accent, #58a6ff);font-weight:bold">∴ Limit DNE</text>
+</svg>

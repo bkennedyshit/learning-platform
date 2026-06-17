@@ -1,0 +1,61 @@
+<svg viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="ga2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent, #58a6ff)" />
+    </marker>
+  </defs>
+  <style>
+    @keyframes dash { to { stroke-dashoffset: -16; } }
+    @keyframes pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.3; } }
+    .domain-box{fill:var(--background-secondary, #161b22);stroke:var(--text-muted, #8b949e);stroke-width:1.5;rx:8;}
+    .cs-fill{fill:var(--interactive-accent, #58a6ff);opacity:0.15; animation: pulse 2s ease-in-out infinite;}
+    .ns-fill{fill:var(--text-accent, #79c0ff);opacity:0.15;}
+    .rs-fill{fill:var(--interactive-accent, #58a6ff);opacity:0.10;}
+    .ln-fill{fill:var(--text-accent, #79c0ff);opacity:0.10;}
+    .sub-label{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--text-normal, #c9d1d9);font-weight:bold;}
+    .dim-label{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--text-muted, #8b949e);}
+    .arrow-map{stroke:var(--interactive-accent, #58a6ff);stroke-width:2;fill:none;stroke-dasharray:5 3; animation: dash 1s linear infinite;}
+    .orth-arrow{stroke:var(--text-accent, #79c0ff);stroke-width:1.5;fill:none;stroke-dasharray:3 2;}
+    .map-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--interactive-accent, #58a6ff);}
+  </style>
+  <!-- Domain box: ℝⁿ (input) -->
+  <rect x="20" y="60" width="260" height="280" class="domain-box"/>
+  <text x="150" y="52" class="sub-label" text-anchor="middle">Domain: ℝⁿ</text>
+  <!-- Row space C(Aᵀ) -->
+  <ellipse cx="150" cy="150" rx="100" ry="60" class="rs-fill"/>
+  <ellipse cx="150" cy="150" rx="100" ry="60" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="150" y="145" class="sub-label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">Row Space</text>
+  <text x="150" y="162" class="dim-label" text-anchor="middle">C(Aᵀ) ⊆ ℝⁿ, dim = r</text>
+  <!-- Null space N(A) -->
+  <ellipse cx="150" cy="280" rx="85" ry="45" class="ns-fill"/>
+  <ellipse cx="150" cy="280" rx="85" ry="45" fill="none" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5"/>
+  <text x="150" y="275" class="sub-label" text-anchor="middle" fill="var(--text-accent, #79c0ff)">Null Space</text>
+  <text x="150" y="293" class="dim-label" text-anchor="middle">N(A) ⊆ ℝⁿ, dim = n−r</text>
+  <!-- Codomain box: ℝᵐ (output) -->
+  <rect x="340" y="60" width="260" height="280" class="domain-box"/>
+  <text x="470" y="52" class="sub-label" text-anchor="middle">Codomain: ℝᵐ</text>
+  <!-- Column space C(A) -->
+  <ellipse cx="470" cy="150" rx="100" ry="60" class="cs-fill"/>
+  <ellipse cx="470" cy="150" rx="100" ry="60" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="470" y="145" class="sub-label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">Column Space</text>
+  <text x="470" y="162" class="dim-label" text-anchor="middle">C(A) ⊆ ℝᵐ, dim = r</text>
+  <!-- Left null space N(Aᵀ) -->
+  <ellipse cx="470" cy="280" rx="85" ry="45" class="ln-fill"/>
+  <ellipse cx="470" cy="280" rx="85" ry="45" fill="none" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5"/>
+  <text x="470" y="275" class="sub-label" text-anchor="middle" fill="var(--text-accent, #79c0ff)">Left Null Space</text>
+  <text x="470" y="293" class="dim-label" text-anchor="middle">N(Aᵀ) ⊆ ℝᵐ, dim = m−r</text>
+  <!-- Map arrow A -->
+  <path d="M 255 150 Q 300 130 345 150" class="arrow-map" marker-end="url(#ga2)"/>
+  <text x="295" y="127" class="map-lbl" text-anchor="middle">A</text>
+  <!-- Animated vector mapping -->
+  <circle r="4" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 150 150 L 255 150 Q 300 130 345 150 L 470 150" />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Orthogonality labels -->
+  <line x1="150" y1="215" x2="150" y2="235" class="orth-arrow"/>
+  <text x="170" y="228" class="dim-label" fill="var(--text-accent, #79c0ff)">⊥</text>
+  <line x1="470" y1="215" x2="470" y2="235" class="orth-arrow"/>
+  <text x="490" y="228" class="dim-label" fill="var(--text-accent, #79c0ff)">⊥</text>
+  <text x="310" y="375" class="map-lbl" text-anchor="middle">r + (n−r) = n, r + (m−r) = m</text>
+</svg>

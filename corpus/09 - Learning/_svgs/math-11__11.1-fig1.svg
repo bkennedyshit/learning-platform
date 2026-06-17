@@ -1,0 +1,82 @@
+<svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="ltf-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ltf-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; rx: 10; }
+    .ltf-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .ltf-arrow-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; color: var(--interactive-accent, #58a6ff); }
+    .ltf-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ltf-title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ltf-eq { font-family: serif; font-size: 15px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .ltf-domain { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .ltf-wave { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawWave 3s ease-in-out infinite; }
+    @keyframes drawWave { to { stroke-dashoffset: 0; } }
+    .ltf-pulse { fill: var(--interactive-accent, #58a6ff); opacity: 0.7; }
+    .ltf-pulse:hover { opacity: 1; }
+    .ltf-signal { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <!-- Time Domain Box -->
+  <rect x="30" y="40" width="200" height="130" class="ltf-box"/>
+  <text x="130" y="70" class="ltf-title">Time Domain</text>
+  <text x="130" y="95" class="ltf-label">Differential Equation</text>
+  <text x="130" y="120" class="ltf-eq">mẍ + bẋ + kx = f(t)</text>
+  <text x="130" y="150" class="ltf-domain">t ∈ [0, ∞)</text>
+
+  <!-- Forward Transform Arrow -->
+  <line x1="240" y1="105" x2="340" y2="105" class="ltf-arrow-line" marker-end="url(#ltf-arrow)"/>
+  <text x="290" y="90" class="ltf-title" font-size="13px">ℒ{·}</text>
+  <text x="290" y="130" class="ltf-domain">∫₀^∞ f(t)e⁻ˢᵗ dt</text>
+
+  <!-- S-Domain Box -->
+  <rect x="350" y="40" width="200" height="130" class="ltf-box"/>
+  <text x="450" y="70" class="ltf-title">s-Domain</text>
+  <text x="450" y="95" class="ltf-label">Algebraic Equation</text>
+  <text x="450" y="120" class="ltf-eq">(ms² + bs + k)X(s) = F(s)</text>
+  <text x="450" y="150" class="ltf-domain">s = σ + jω</text>
+
+  <!-- Transfer Function Box -->
+  <rect x="350" y="210" width="200" height="110" class="ltf-box"/>
+  <text x="450" y="240" class="ltf-title">Transfer Function</text>
+  <text x="450" y="270" class="ltf-eq">G(s) = X(s)/F(s)</text>
+  <text x="450" y="295" class="ltf-eq">= 1/(ms² + bs + k)</text>
+
+  <!-- Arrow from s-domain to TF -->
+  <line x1="450" y1="175" x2="450" y2="205" class="ltf-arrow-line" marker-end="url(#ltf-arrow)"/>
+  <text x="500" y="195" class="ltf-domain">Solve for ratio</text>
+
+  <!-- Inverse Transform Arrow -->
+  <line x1="340" y1="265" x2="240" y2="265" class="ltf-arrow-line" marker-end="url(#ltf-arrow)"/>
+  <text x="290" y="250" class="ltf-title" font-size="13px">ℒ⁻¹{·}</text>
+  <text x="290" y="285" class="ltf-domain">Partial fractions</text>
+
+  <!-- Time Response Box -->
+  <rect x="30" y="210" width="200" height="110" class="ltf-box"/>
+  <text x="130" y="240" class="ltf-title">Time Response</text>
+  <text x="130" y="270" class="ltf-label">x(t) = ...</text>
+  <!-- Mini waveform -->
+  <path d="M 50 295 Q 80 260 110 295 Q 125 310 140 295 Q 150 285 160 290 L 210 290" class="ltf-wave"/>
+
+  <!-- Pole-Zero indicator -->
+  <rect x="580" y="100" width="100" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="630" y="120" class="ltf-label" font-weight="bold">Poles × Zeros</text>
+  <text x="630" y="145" class="ltf-eq">× poles: s = pᵢ</text>
+  <text x="630" y="165" class="ltf-eq">○ zeros: s = zⱼ</text>
+
+  <!-- Connecting line -->
+  <line x1="555" y1="140" x2="575" y2="140" stroke="var(--text-muted, #8b949e)" stroke-width="1.5" stroke-dasharray="4 2"/>
+
+  <!-- Animated Signals -->
+  <circle r="4" class="ltf-signal">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 240,105 L 340,105" />
+  </circle>
+  <circle r="4" class="ltf-signal">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 450,175 L 450,205" />
+  </circle>
+  <circle r="4" class="ltf-signal">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 340,265 L 240,265" />
+  </circle>
+</svg>

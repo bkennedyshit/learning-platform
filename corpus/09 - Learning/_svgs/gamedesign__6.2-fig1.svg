@@ -1,0 +1,124 @@
+<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .node { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: var(--background-secondary, #161b22); rx: 8; ry: 8; transition: all 0.3s; cursor: pointer; }
+    .node:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); transform: translateY(-2px); }
+    .core { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.1; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; animation: core-breath 4s ease-in-out infinite; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .conn { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; opacity: 0.7; }
+    .conn-accent { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6,4; animation: meta-flow 1.5s linear infinite; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    
+    @keyframes core-breath {
+      0%, 100% { fill-opacity: 0.08; filter: drop-shadow(0 0 2px rgba(88, 166, 255, 0.2)); }
+      50% { fill-opacity: 0.18; filter: drop-shadow(0 0 10px rgba(88, 166, 255, 0.5)); }
+    }
+    
+    @keyframes meta-flow {
+      to { stroke-dashoffset: -20; }
+    }
+    
+    .node-group { transition: transform 0.3s ease; }
+    .node-group:hover { transform: scale(1.02); }
+  </style>
+
+  <text x="325" y="25" class="title">Core Mechanics Atom — Systems Design Anatomy</text>
+
+  <!-- Central Core Loop -->
+  <ellipse cx="325" cy="210" rx="80" ry="50" class="core"/>
+  <text x="325" y="205" class="label" fill="var(--interactive-accent, #58a6ff)">CORE LOOP</text>
+  <text x="325" y="222" class="sublabel" font-weight="bold">Action → Feedback → Reward</text>
+
+  <!-- Surrounding systems -->
+  <!-- Resources -->
+  <g class="node-group">
+    <rect x="40" y="60" width="120" height="60" class="node"/>
+    <text x="100" y="88" class="label">Resources</text>
+    <text x="100" y="105" class="sublabel">Currencies, HP, mana</text>
+  </g>
+
+  <!-- Actions -->
+  <g class="node-group">
+    <rect x="40" y="180" width="120" height="60" class="node"/>
+    <text x="100" y="208" class="label">Actions</text>
+    <text x="100" y="225" class="sublabel">Verbs: jump, craft, attack</text>
+  </g>
+
+  <!-- State -->
+  <g class="node-group">
+    <rect x="40" y="300" width="120" height="60" class="node"/>
+    <text x="100" y="328" class="label">State</text>
+    <text x="100" y="345" class="sublabel">World data, inventory</text>
+  </g>
+
+  <!-- Rules -->
+  <g class="node-group">
+    <rect x="490" y="60" width="120" height="60" class="node"/>
+    <text x="550" y="88" class="label">Rules</text>
+    <text x="550" y="105" class="sublabel">Constraints, physics</text>
+  </g>
+
+  <!-- Feedback -->
+  <g class="node-group">
+    <rect x="490" y="180" width="120" height="60" class="node"/>
+    <text x="550" y="208" class="label">Feedback</text>
+    <text x="550" y="225" class="sublabel">Signals, UI, juice</text>
+  </g>
+
+  <!-- Goals -->
+  <g class="node-group">
+    <rect x="490" y="300" width="120" height="60" class="node"/>
+    <text x="550" y="328" class="label">Goals</text>
+    <text x="550" y="345" class="sublabel">Win states, quests</text>
+  </g>
+
+  <!-- Connections to core -->
+  <line x1="160" y1="90" x2="250" y2="190" class="conn"/>
+  <line x1="160" y1="210" x2="245" y2="210" class="conn"/>
+  <line x1="160" y1="330" x2="250" y2="230" class="conn"/>
+  <line x1="490" y1="90" x2="400" y2="190" class="conn"/>
+  <line x1="490" y1="210" x2="405" y2="210" class="conn"/>
+  <line x1="490" y1="330" x2="400" y2="230" class="conn"/>
+
+  <!-- Flowing data/energy particles along connections -->
+  <!-- Resources to Core -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.7">
+    <animate attributeName="cx" from="160" to="250" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" from="90" to="190" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Actions to Core -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.7">
+    <animate attributeName="cx" from="160" to="245" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    <animate attributeName="cy" from="210" to="210" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+  </circle>
+  <!-- State to Core -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.7">
+    <animate attributeName="cx" from="160" to="250" dur="3s" repeatCount="indefinite" begin="0.2s"/>
+    <animate attributeName="cy" from="330" to="230" dur="3s" repeatCount="indefinite" begin="0.2s"/>
+  </circle>
+  <!-- Rules to Core -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.7">
+    <animate attributeName="cx" from="490" to="400" dur="2.5s" repeatCount="indefinite" begin="0.8s"/>
+    <animate attributeName="cy" from="90" to="190" dur="2.5s" repeatCount="indefinite" begin="0.8s"/>
+  </circle>
+  <!-- Core to Feedback (signals outward) -->
+  <circle r="3.5" fill="var(--interactive-accent, #58a6ff)">
+    <animate attributeName="cx" from="405" to="490" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" from="210" to="210" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Goals to Core -->
+  <circle r="3" fill="var(--text-muted, #8b949e)" opacity="0.7">
+    <animate attributeName="cx" from="490" to="400" dur="2.8s" repeatCount="indefinite" begin="0.4s"/>
+    <animate attributeName="cy" from="330" to="230" dur="2.8s" repeatCount="indefinite" begin="0.4s"/>
+  </circle>
+
+  <!-- Outer meta-loop -->
+  <path d="M 100 125 L 100 175" class="conn-accent"/>
+  <path d="M 100 245 L 100 295" class="conn-accent"/>
+  <path d="M 550 125 L 550 175" class="conn-accent"/>
+  <path d="M 550 245 L 550 295" class="conn-accent"/>
+
+  <!-- Bottom annotation -->
+  <text x="325" y="395" class="sublabel">Every game = Core Loop + Meta Loops + Progression Shell</text>
+  <text x="325" y="412" class="sublabel" fill="var(--text-accent, #79c0ff)">Schell Lens #32: "What are the meaningful choices?"</text>
+</svg>

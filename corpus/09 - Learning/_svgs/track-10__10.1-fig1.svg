@@ -1,0 +1,56 @@
+<svg viewBox="0 0 580 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <defs>
+    <marker id="gd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <radialGradient id="bowl-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.25"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .gd-contour { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; opacity: 0.6; }
+    .gd-path { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 400; animation: drawPath 4s ease-in-out infinite; }
+    .gd-point { fill: var(--interactive-accent, #58a6ff); transition: r 0.2s; cursor: pointer; }
+    .gd-point:hover { r: 7; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .gd-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .gd-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .gd-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .gd-neg-grad { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; stroke-dasharray: 5 3; animation: pulseGrad 2s infinite; }
+    @keyframes drawPath { 0% { stroke-dashoffset: 400; } 60%, 100% { stroke-dashoffset: 0; } }
+    @keyframes pulseGrad { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  </style>
+  <!-- Contour ellipses representing loss surface -->
+  <ellipse cx="320" cy="240" rx="220" ry="140" class="gd-contour"/>
+  <ellipse cx="320" cy="240" rx="170" ry="108" class="gd-contour"/>
+  <ellipse cx="320" cy="240" rx="120" ry="76" class="gd-contour"/>
+  <ellipse cx="320" cy="240" rx="70" ry="44" class="gd-contour"/>
+  <ellipse cx="320" cy="240" rx="25" ry="16" class="gd-contour" stroke="var(--interactive-accent, #58a6ff)" opacity="0.8"/>
+  <!-- Gradient fill at center -->
+  <ellipse cx="320" cy="240" rx="25" ry="16" fill="url(#bowl-grad)"/>
+  <!-- GD trajectory -->
+  <polyline points="120,130 200,180 260,220 300,235 315,239" class="gd-path" marker-end="url(#gd-arrow)"/>
+  <!-- Points along trajectory -->
+  <circle cx="120" cy="130" r="5" class="gd-point"/>
+  <circle cx="200" cy="180" r="4" class="gd-point"/>
+  <circle cx="260" cy="220" r="4" class="gd-point"/>
+  <circle cx="300" cy="235" r="4" class="gd-point"/>
+  <!-- Negative gradient arrow at first point -->
+  <line x1="120" y1="130" x2="170" y2="155" class="gd-neg-grad" marker-end="url(#gd-arrow)"/>
+  <text x="140" y="120" class="gd-label" fill="var(--text-accent, #79c0ff)">−∇L</text>
+  <!-- Labels -->
+  <text x="118" y="115" class="gd-accent">θ₀</text>
+  <text x="320" y="260" class="gd-accent">θ* (minimum)</text>
+  <text x="195" y="172" class="gd-label">θ₁</text>
+  <text x="255" y="212" class="gd-label">θ₂</text>
+  <!-- Info box -->
+  <rect x="30" y="290" width="240" height="70" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="150" y="312" class="gd-accent" text-anchor="middle">Update Rule</text>
+  <text x="150" y="335" class="gd-label" text-anchor="middle">θₜ₊₁ = θₜ − η ∇L(θₜ)</text>
+  <text x="150" y="352" class="gd-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">η = learning rate</text>
+  <!-- Axes -->
+  <line x1="50" y1="360" x2="560" y2="360" class="gd-axis" marker-end="url(#gd-arrow)"/>
+  <line x1="50" y1="360" x2="50" y2="30" class="gd-axis" marker-end="url(#gd-arrow)"/>
+  <text x="565" y="365" class="gd-label">θ₁</text>
+  <text x="50" y="20" class="gd-label">θ₂</text>
+</svg>

@@ -1,0 +1,163 @@
+<svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <defs>
+    <marker id="arrow-diff" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pipe-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; rx: 8; cursor: pointer; transition: all 0.3s ease; }
+    .pipe-box:hover { fill: var(--interactive-accent, #58a6ff); fill-opacity: 0.12; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .cond-box { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; fill: none; rx: 6; transition: all 0.3s ease; }
+    .cond-box:hover { fill: var(--text-accent, #79c0ff); fill-opacity: 0.08; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; pointer-events: none; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); pointer-events: none; }
+
+    /* Animated Flows */
+    .flow { 
+      stroke: var(--text-normal, #c9d1d9); 
+      stroke-dasharray: 6,4; 
+      stroke-width: 1.5; 
+      fill: none; 
+      animation: diff-flow-move 1.5s linear infinite; 
+    }
+    .noise-flow { 
+      stroke: var(--interactive-accent, #58a6ff); 
+      stroke-dasharray: 4,3; 
+      stroke-width: 1.5; 
+      fill: none; 
+      animation: diff-flow-move 0.8s linear infinite; 
+    }
+    
+    @keyframes diff-flow-move {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Core Units Pulse & Glow Animations */
+    .unet-active {
+      animation: unet-glow 3.5s ease-in-out infinite;
+    }
+    .clip-active {
+      animation: clip-glow 4s ease-in-out infinite;
+    }
+    .vae-active {
+      animation: vae-glow 4s ease-in-out infinite;
+    }
+    .output-active {
+      animation: output-glow 3s ease-in-out infinite;
+    }
+    .noise-box-active {
+      animation: noise-box-glow 2.5s ease-in-out infinite;
+    }
+    .guidance-active {
+      stroke: #ff7b72;
+      animation: guidance-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes unet-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); fill: rgba(88, 166, 255, 0.02); stroke-width: 3; }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(121, 192, 255, 0.1); stroke-width: 3.5; filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.5)); }
+    }
+    
+    @keyframes clip-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.05); }
+    }
+
+    @keyframes vae-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); }
+      50% { stroke: var(--text-accent, #79c0ff); fill: rgba(88, 166, 255, 0.05); }
+    }
+
+    @keyframes output-glow {
+      0%, 100% { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: rgba(88, 166, 255, 0.02); }
+      50% { stroke: #3fb950; stroke-width: 3.5; fill: rgba(63, 185, 80, 0.08); filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.4)); }
+    }
+
+    @keyframes noise-box-glow {
+      0%, 100% { stroke: var(--text-accent, #79c0ff); }
+      50% { stroke: #d2a8ff; fill: rgba(210, 168, 255, 0.05); filter: drop-shadow(0 0 4px rgba(210, 168, 255, 0.3)); }
+    }
+
+    @keyframes guidance-glow {
+      0%, 100% { stroke: #ff7b72; fill: rgba(255, 123, 114, 0.01); }
+      50% { stroke: #ff9e96; fill: rgba(255, 123, 114, 0.06); filter: drop-shadow(0 0 5px rgba(255, 123, 114, 0.4)); }
+    }
+  </style>
+
+  <text x="350" y="25" class="title" text-anchor="middle">Latent Diffusion Pipeline (SDXL)</text>
+
+  <!-- Text Prompt -->
+  <rect x="20" y="50" width="120" height="50" class="cond-box"/>
+  <text x="80" y="72" class="label" text-anchor="middle" font-weight="bold">Text Prompt</text>
+  <text x="80" y="88" class="sublabel" text-anchor="middle">"A cyberpunk city..."</text>
+
+  <!-- CLIP Encoder -->
+  <rect x="20" y="120" width="120" height="45" class="pipe-box clip-active"/>
+  <text x="80" y="140" class="label" text-anchor="middle" font-weight="bold">CLIP Encoder</text>
+  <text x="80" y="155" class="sublabel" text-anchor="middle">77 × 2048 tokens</text>
+  <line x1="80" y1="100" x2="80" y2="120" class="flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- Noise -->
+  <rect x="180" y="50" width="100" height="45" class="cond-box noise-box-active" stroke-dasharray="4,2"/>
+  <text x="230" y="72" class="label" text-anchor="middle" font-weight="bold">Random Noise</text>
+  <text x="230" y="88" class="sublabel" text-anchor="middle">ε ~ N(0, I)</text>
+
+  <!-- Latent Space -->
+  <rect x="170" y="120" width="120" height="45" class="pipe-box"/>
+  <text x="230" y="140" class="label" text-anchor="middle" font-weight="bold">Latent z_T</text>
+  <text x="230" y="155" class="sublabel" text-anchor="middle">128×128×4</text>
+  <line x1="230" y1="95" x2="230" y2="120" class="noise-flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- U-Net Denoising Loop -->
+  <rect x="160" y="190" width="200" height="70" class="pipe-box unet-active" stroke-width="3"/>
+  <text x="260" y="215" class="label" text-anchor="middle" font-weight="bold">U-Net Denoiser</text>
+  <text x="260" y="233" class="sublabel" text-anchor="middle">3.5B params | Cross-Attention</text>
+  <text x="260" y="248" class="sublabel" text-anchor="middle">× 25 steps (DPM++ 2M)</text>
+  <line x1="230" y1="165" x2="230" y2="190" class="flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- Conditioning arrow -->
+  <line x1="140" y1="142" x2="160" y2="210" class="flow" marker-end="url(#arrow-diff)"/>
+  <text x="135" y="180" class="sublabel" text-anchor="end">conditioning</text>
+
+  <!-- Scheduler -->
+  <rect x="390" y="195" width="100" height="40" class="cond-box"/>
+  <text x="440" y="215" class="label" text-anchor="middle" font-weight="bold">Scheduler</text>
+  <text x="440" y="228" class="sublabel" text-anchor="middle">DPM++/Euler</text>
+  <line x1="360" y1="220" x2="390" y2="220" class="flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- Loop arrow -->
+  <path d="M 440 235 L 440 270 L 260 270 L 260 260" class="noise-flow" marker-end="url(#arrow-diff)"/>
+  <text x="350" y="285" class="sublabel" text-anchor="middle">iterative denoising</text>
+
+  <!-- Denoised Latent -->
+  <rect x="170" y="295" width="120" height="40" class="pipe-box"/>
+  <text x="230" y="315" class="label" text-anchor="middle" font-weight="bold">Latent z_0</text>
+  <text x="230" y="330" class="sublabel" text-anchor="middle">clean latent</text>
+
+  <!-- VAE Decoder -->
+  <rect x="340" y="295" width="120" height="40" class="pipe-box vae-active"/>
+  <text x="400" y="315" class="label" text-anchor="middle" font-weight="bold">VAE Decoder</text>
+  <text x="400" y="330" class="sublabel" text-anchor="middle">latent → pixels</text>
+  <line x1="290" y1="315" x2="340" y2="315" class="flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- Output Image -->
+  <rect x="510" y="290" width="130" height="50" class="pipe-box output-active" stroke-width="3"/>
+  <text x="575" y="312" class="label" text-anchor="middle" font-weight="bold">Output Image</text>
+  <text x="575" y="328" class="sublabel" text-anchor="middle">1024 × 1024 × 3</text>
+  <line x1="460" y1="315" x2="510" y2="315" class="flow" marker-end="url(#arrow-diff)"/>
+
+  <!-- ControlNet (optional) -->
+  <rect x="510" y="120" width="130" height="50" class="cond-box guidance-active" stroke-dasharray="4,2"/>
+  <text x="575" y="140" class="label" text-anchor="middle" font-weight="bold">ControlNet</text>
+  <text x="575" y="158" class="sublabel" text-anchor="middle">Canny/Depth/Pose</text>
+  <line x1="510" y1="155" x2="360" y2="210" class="noise-flow" marker-end="url(#arrow-diff)"/>
+  <text x="450" y="175" class="sublabel" text-anchor="middle">structural guidance</text>
+
+  <!-- LoRA -->
+  <rect x="510" y="195" width="100" height="35" class="cond-box guidance-active" stroke-dasharray="4,2"/>
+  <text x="560" y="215" class="label" text-anchor="middle" font-weight="bold">LoRA</text>
+  <text x="560" y="225" class="sublabel" text-anchor="middle">ΔW = BA</text>
+  <line x1="510" y1="212" x2="360" y2="225" class="noise-flow" marker-end="url(#arrow-diff)"/>
+</svg>

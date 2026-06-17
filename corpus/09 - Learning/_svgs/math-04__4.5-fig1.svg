@@ -1,0 +1,50 @@
+<svg viewBox="0 0 550 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:550px;height:auto;">
+  <defs>
+    <marker id="hm-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .hm-ax{stroke:var(--text-muted, #8b949e);stroke-width:1.2;fill:none}
+    .hm-orb{stroke:var(--interactive-accent, #58a6ff);stroke-width:2;fill:none}
+    .hm-sep{stroke:var(--text-accent, #79c0ff);stroke-width:2.5;fill:none}
+    .hm-pt{fill:var(--interactive-accent, #58a6ff);transition:all .2s;cursor:pointer}
+    .hm-pt:hover{r:6;filter:drop-shadow(0 0 4px var(--interactive-accent, #58a6ff))}
+    .hm-lbl{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal, #c9d1d9)}
+    .hm-acc{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--interactive-accent, #58a6ff);font-weight:bold}
+    .hm-flow{stroke:var(--interactive-accent, #58a6ff);stroke-width:1.5;fill:none;stroke-dasharray:300;stroke-dashoffset:300;animation:hmFlow 4s linear infinite}
+    @keyframes hmFlow{to{stroke-dashoffset:0}}
+  </style>
+  <!-- Phase space axes -->
+  <line x1="50" y1="160" x2="520" y2="160" class="hm-ax" marker-end="url(#hm-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <line x1="275" y1="310" x2="275" y2="10" class="hm-ax" marker-end="url(#hm-arr)" style="color:var(--text-muted, #8b949e)"/>
+  <text x="525" y="165" class="hm-lbl">q</text>
+  <text x="280" y="15" class="hm-lbl">p</text>
+  <text x="275" y="310" class="hm-acc" text-anchor="middle">Harmonic Oscillator Phase Portrait</text>
+  <!-- Concentric ellipses (constant H) -->
+  <ellipse cx="275" cy="160" rx="40" ry="30" class="hm-orb"/>
+  <ellipse cx="275" cy="160" rx="80" ry="60" class="hm-orb"/>
+  <ellipse cx="275" cy="160" rx="120" ry="90" class="hm-orb"/>
+  <ellipse cx="275" cy="160" rx="180" ry="130" class="hm-orb" style="opacity:0.5"/>
+  <!-- Animated flow particles (Liouville volume) -->
+  <g class="hm-pt">
+    <circle r="4">
+      <animateMotion dur="4s" repeatCount="indefinite" path="M355 160 A80 60 0 1 1 355 159.9"/>
+    </circle>
+    <circle r="4" fill="var(--text-accent, #79c0ff)">
+      <animateMotion dur="4s" repeatCount="indefinite" path="M375 160 A100 75 0 1 1 375 159.9"/>
+    </circle>
+    <circle r="4" fill="var(--text-muted, #8b949e)">
+      <animateMotion dur="4s" repeatCount="indefinite" path="M335 160 A60 45 0 1 1 335 159.9"/>
+    </circle>
+  </g>
+  <!-- Labels -->
+  <text x="370" y="105" class="hm-acc">H = const</text>
+  <text x="100" y="50" class="hm-lbl">q̇ = ∂H/∂p</text>
+  <text x="100" y="70" class="hm-lbl">ṗ = −∂H/∂q</text>
+  <!-- Info box -->
+  <rect x="380" y="220" width="150" height="70" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="455" y="245" class="hm-acc" text-anchor="middle">Liouville:</text>
+  <text x="455" y="270" class="hm-lbl" text-anchor="middle">dΓ/dt = 0</text>
+  <text x="455" y="285" class="hm-lbl" text-anchor="middle">(volume preserved)</text>
+</svg>

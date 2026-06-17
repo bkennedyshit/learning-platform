@@ -1,0 +1,1044 @@
+---
+title: "Nlp Recurrent Models Rnns Lstms"
+subject: "AI & Machine Learning Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "23.4"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 23.4 — NLP & Recurrent Models: RNNs & LSTMs
+
+> *"A recurrent neural network can be thought of as multiple copies of the same network, each passing a message to a successor — unrolled in time, it becomes a very deep network with shared weights."*
+> — **Geoffrey Hinton**, *Neural Networks for Machine Learning* (2012)
+
+Recurrent Neural Networks process sequences by maintaining a hidden state that evolves over time. This chapter derives the RNN forward equations, performs Backpropagation Through Time (BPTT), diagnoses the vanishing gradient problem mathematically, and shows how LSTM gates solve it through carefully designed gradient highways.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Define the vanilla RNN cell equations and trace hidden state evolution.
+2. Perform Backpropagation Through Time (BPTT) with explicit Jacobian products.
+3. Prove why vanilla RNNs suffer from vanishing/exploding gradients using eigenvalue analysis.
+4. Derive the LSTM cell equations (forget, input, output gates) and explain how they solve gradient flow.
+5. Implement RNN and LSTM cells from scratch with manual gradient verification.
+6. Compare GRU vs LSTM architectures and their parameter counts.
+7. Explain bidirectional RNNs and sequence-to-sequence architectures.
+
+---
+
+## 🖼️ Visual Anchor — RNN Unrolled Through Time
+
+![track-10__10.4-fig1](track-10__10.4-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 23.4.1 — Vanilla RNN Cell
+
+The **Elman RNN** cell computes at each time step $t$:
+
+$$
+\mathbf{h}_t = \tanh(\mathbf{W}_{hh}\mathbf{h}_{t-1} + \mathbf{W}_{xh}\mathbf{x}_t + \mathbf{b}_h)
+$$
+
+$$
+\mathbf{y}_t = \mathbf{W}_{hy}\mathbf{h}_t + \mathbf{b}_y
+$$
+
+where $\mathbf{h}_t \in \mathbb{R}^H$ (hidden state), $\mathbf{x}_t \in \mathbb{R}^D$ (input), $\mathbf{y}_t \in \mathbb{R}^K$ (output), $\mathbf{W}_{hh} \in \mathbb{R}^{H \times H}$, $\mathbf{W}_{xh} \in \mathbb{R}^{H \times D}$, $\mathbf{W}_{hy} \in \mathbb{R}^{K \times H}$.
+
+### Definition 23.4.2 — LSTM Cell (Hochreiter & Schmidhuber, 1997)
+
+The LSTM introduces a **cell state** $\mathbf{c}_t$ and three gates:
+
+$$
+\mathbf{f}_t = \sigma(\mathbf{W}_f[\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_f) \quad \text{(forget gate)}
+$$
+
+$$
+\mathbf{i}_t = \sigma(\mathbf{W}_i[\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_i) \quad \text{(input gate)}
+$$
+
+$$
+\tilde{\mathbf{c}}_t = \tanh(\mathbf{W}_c[\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_c) \quad \text{(candidate)}
+$$
+
+$$
+\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t \quad \text{(cell update)}
+$$
+
+$$
+\mathbf{o}_t = \sigma(\mathbf{W}_o[\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_o) \quad \text{(output gate)}
+$$
+
+$$
+\mathbf{h}_t = \mathbf{o}_t \odot \tanh(\mathbf{c}_t) \quad \text{(hidden state)}
+$$
+
+where $[\mathbf{h}_{t-1}, \mathbf{x}_t]$ denotes concatenation, $\sigma$ is sigmoid, $\odot$ is element-wise product.
+
+### Definition 23.4.3 — GRU Cell (Cho et al., 2014)
+
+$$
+\mathbf{z}_t = \sigma(\mathbf{W}_z[\mathbf{h}_{t-1}, \mathbf{x}_t]) \quad \text{(update gate)}
+$$
+
+$$
+\mathbf{r}_t = \sigma(\mathbf{W}_r[\mathbf{h}_{t-1}, \mathbf{x}_t]) \quad \text{(reset gate)}
+$$
+
+$$
+\tilde{\mathbf{h}}_t = \tanh(\mathbf{W}_h[\mathbf{r}_t \odot \mathbf{h}_{t-1}, \mathbf{x}_t]) \quad \text{(candidate)}
+$$
+
+$$
+\mathbf{h}_t = (1 - \mathbf{z}_t) \odot \mathbf{h}_{t-1} + \mathbf{z}_t \odot \tilde{\mathbf{h}}_t \quad \text{(interpolation)}
+$$
+
+GRU merges cell state and hidden state, using 2 gates instead of 3 (fewer parameters than LSTM).
+
+### Definition 23.4.4 — Backpropagation Through Time (BPTT)
+
+BPTT unrolls the RNN for $T$ time steps and applies standard backpropagation to the unrolled graph. The total loss gradient:
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_{hh}} = \sum_{t=1}^T \frac{\partial \mathcal{L}_t}{\partial \mathbf{W}_{hh}} = \sum_{t=1}^T \sum_{k=1}^t \frac{\partial \mathcal{L}_t}{\partial \mathbf{h}_t}\left(\prod_{j=k+1}^t \frac{\partial \mathbf{h}_j}{\partial \mathbf{h}_{j-1}}\right)\frac{\partial \mathbf{h}_k}{\partial \mathbf{W}_{hh}}
+$$
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+**Postulate 10.4.P1 (Stationarity of Dynamics):** RNNs assume the transition function $f(\mathbf{h}_{t-1}, \mathbf{x}_t; \theta)$ is the same at every time step — weights are shared across time. This is analogous to time-invariant dynamical systems.
+
+**Postulate 10.4.P2 (Sufficient Hidden State):** The hidden state $\mathbf{h}_t$ should encode all information from the past sequence $(\mathbf{x}_1, \ldots, \mathbf{x}_t)$ needed to predict future outputs — a Markov property on the hidden state.
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 23.4.1 — Jacobian of the RNN Transition
+
+For $\mathbf{h}_t = \tanh(\mathbf{W}_{hh}\mathbf{h}_{t-1} + \mathbf{W}_{xh}\mathbf{x}_t + \mathbf{b})$:
+
+$$
+\frac{\partial \mathbf{h}_t}{\partial \mathbf{h}_{t-1}} = \text{diag}(1 - \mathbf{h}_t^2) \cdot \mathbf{W}_{hh} \in \mathbb{R}^{H \times H}
+$$
+
+where $\text{diag}(1 - \mathbf{h}_t^2)$ is the diagonal matrix of tanh derivatives (since $\tanh'(z) = 1 - \tanh^2(z)$).
+
+### Lemma 23.4.2 — Gradient Product Over Time
+
+The gradient from time $t$ to time $k < t$ involves:
+
+$$
+\prod_{j=k+1}^t \frac{\partial \mathbf{h}_j}{\partial \mathbf{h}_{j-1}} = \prod_{j=k+1}^t \text{diag}(1-\mathbf{h}_j^2)\mathbf{W}_{hh}
+$$
+
+The spectral norm of this product determines whether gradients vanish or explode.
+
+### Lemma 23.4.3 — LSTM Cell State Gradient
+
+For the LSTM cell state update $\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t$:
+
+$$
+\frac{\partial \mathbf{c}_t}{\partial \mathbf{c}_{t-1}} = \text{diag}(\mathbf{f}_t)
+$$
+
+Since $\mathbf{f}_t \in (0,1)^H$ (sigmoid output), the gradient through the cell state is simply scaled by the forget gate — no matrix multiplication, no tanh squashing.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 23.4.1 — Vanishing Gradient in Vanilla RNNs (Bengio et al., 1994)
+
+For a vanilla RNN with $\|\text{diag}(1-\mathbf{h}_j^2)\| \leq 1$ and $\|\mathbf{W}_{hh}\| = \rho$:
+
+$$
+\left\|\prod_{j=k+1}^t \frac{\partial \mathbf{h}_j}{\partial \mathbf{h}_{j-1}}\right\| \leq \rho^{t-k}
+$$
+
+- If $\rho < 1$: gradients vanish exponentially as $\rho^{t-k} \to 0$.
+- If $\rho > 1$: gradients explode exponentially.
+
+The critical threshold is $\rho = 1$ (spectral radius of $\mathbf{W}_{hh}$).
+
+### Theorem 23.4.2 — LSTM Solves Vanishing Gradient
+
+In an LSTM, the gradient through the cell state over $T$ steps:
+
+$$
+\frac{\partial \mathbf{c}_T}{\partial \mathbf{c}_0} = \prod_{t=1}^T \text{diag}(\mathbf{f}_t)
+$$
+
+If forget gates are close to 1 (which they learn to be for long-range dependencies), this product stays close to the identity. The LSTM can maintain gradients over hundreds of time steps because:
+1. No matrix multiplication (only diagonal scaling)
+2. No nonlinear squashing (no tanh derivative)
+3. Forget gate values are learned, not fixed
+
+### Theorem 23.4.3 — RNN Parameter Count
+
+| Model | Parameters |
+|-------|-----------|
+| Vanilla RNN | $H^2 + HD + H$ (for $W_{hh}$, $W_{xh}$, $b_h$) |
+| LSTM | $4(H^2 + HD + H)$ (4 gate/candidate weight matrices) |
+| GRU | $3(H^2 + HD + H)$ (3 gate/candidate weight matrices) |
+
+For $H=512$, $D=256$: RNN = 393,728; LSTM = 1,574,912; GRU = 1,181,184.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 BPTT for Vanilla RNN — Complete Derivation
+
+**Setup:** Sequence $(x_1, \ldots, x_T)$, per-step loss $\mathcal{L} = \sum_t \mathcal{L}_t$, $\mathcal{L}_t = \ell(y_t, \hat{y}_t)$.
+
+**Step 1.** Gradient of loss at time $t$ w.r.t. $\mathbf{h}_t$:
+
+$$
+\frac{\partial \mathcal{L}_t}{\partial \mathbf{h}_t} = \mathbf{W}_{hy}^T \frac{\partial \mathcal{L}_t}{\partial \mathbf{y}_t} \in \mathbb{R}^H
+$$
+
+**Step 2.** Total gradient at $\mathbf{h}_t$ (accumulating future losses):
+
+$$
+\boldsymbol{\delta}_t = \frac{\partial \mathcal{L}_t}{\partial \mathbf{h}_t} + \left(\frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{h}_t}\right)^T\boldsymbol{\delta}_{t+1}
+$$
+
+$$
+= \mathbf{W}_{hy}^T\frac{\partial\mathcal{L}_t}{\partial\mathbf{y}_t} + \mathbf{W}_{hh}^T\text{diag}(1-\mathbf{h}_{t+1}^2)\boldsymbol{\delta}_{t+1}
+$$
+
+**Step 3.** Weight gradients (summed over all time steps):
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{W}_{hh}} = \sum_{t=1}^T \boldsymbol{\delta}_t \cdot \text{diag}(1-\mathbf{h}_t^2) \cdot \mathbf{h}_{t-1}^T
+$$
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{W}_{xh}} = \sum_{t=1}^T \boldsymbol{\delta}_t \cdot \text{diag}(1-\mathbf{h}_t^2) \cdot \mathbf{x}_t^T
+$$
+
+### 5.2 Why Eigenvalues Determine Gradient Fate
+
+**Step 1.** Diagonalize $\mathbf{W}_{hh} = \mathbf{Q}\boldsymbol{\Lambda}\mathbf{Q}^{-1}$ (assuming diagonalizable).
+
+**Step 2.** The product $\mathbf{W}_{hh}^{t-k} = \mathbf{Q}\boldsymbol{\Lambda}^{t-k}\mathbf{Q}^{-1}$.
+
+**Step 3.** $\boldsymbol{\Lambda}^{t-k} = \text{diag}(\lambda_1^{t-k}, \ldots, \lambda_H^{t-k})$.
+
+**Step 4.** If $|\lambda_{\max}| < 1$: all eigenvalue powers $\to 0$ (vanishing).
+If $|\lambda_{\max}| > 1$: dominant eigenvalue power $\to \infty$ (exploding).
+
+**Step 5.** With tanh derivative factor $\leq 1$, the effective spectral radius is $\rho_{\text{eff}} = \max_j |\lambda_j| \cdot \max|\tanh'| \leq |\lambda_{\max}|$.
+
+This connects directly to [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) and [3.4 - Systems of Linear ODEs](3.4---Systems-of-Linear-ODEs) (stability of linear dynamical systems).
+
+### 5.3 LSTM Gate Gradients — Full Derivation
+
+**Given:** $\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t$, upstream $\frac{\partial\mathcal{L}}{\partial\mathbf{c}_t}$.
+
+**Gradient w.r.t. $\mathbf{c}_{t-1}$:**
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{c}_{t-1}} = \frac{\partial\mathcal{L}}{\partial\mathbf{c}_t} \odot \mathbf{f}_t
+$$
+
+**Gradient w.r.t. forget gate (pre-sigmoid) $\mathbf{z}_f$:**
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{z}_f} = \frac{\partial\mathcal{L}}{\partial\mathbf{c}_t} \odot \mathbf{c}_{t-1} \odot \mathbf{f}_t \odot (1-\mathbf{f}_t)
+$$
+
+**Gradient w.r.t. input gate (pre-sigmoid) $\mathbf{z}_i$:**
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{z}_i} = \frac{\partial\mathcal{L}}{\partial\mathbf{c}_t} \odot \tilde{\mathbf{c}}_t \odot \mathbf{i}_t \odot (1-\mathbf{i}_t)
+$$
+
+**Gradient w.r.t. candidate (pre-tanh) $\mathbf{z}_c$:**
+
+$$
+\frac{\partial\mathcal{L}}{\partial\mathbf{z}_c} = \frac{\partial\mathcal{L}}{\partial\mathbf{c}_t} \odot \mathbf{i}_t \odot (1-\tilde{\mathbf{c}}_t^2)
+$$
+
+---
+
+## 💻 6. Code Examples
+
+### RNN Cell from Scratch
+
+```python
+import numpy as np
+
+def rnn_cell(x_t, h_prev, W_xh, W_hh, b_h):
+    """
+    Single RNN step.
+    x_t: (D,), h_prev: (H,), W_xh: (H,D), W_hh: (H,H), b_h: (H,)
+    Returns: h_t: (H,)
+    """
+    z = W_hh @ h_prev + W_xh @ x_t + b_h  # (H,)
+    h_t = np.tanh(z)                         # (H,)
+    return h_t
+
+def lstm_cell(x_t, h_prev, c_prev, W_f, W_i, W_c, W_o, b_f, b_i, b_c, b_o):
+    """
+    Single LSTM step.
+    x_t: (D,), h_prev: (H,), c_prev: (H,)
+    W_*: (H, H+D), b_*: (H,)
+    Returns: h_t: (H,), c_t: (H,)
+    """
+    concat = np.concatenate([h_prev, x_t])  # (H+D,)
+    
+    f_t = 1 / (1 + np.exp(-(W_f @ concat + b_f)))  # forget gate, (H,)
+    i_t = 1 / (1 + np.exp(-(W_i @ concat + b_i)))  # input gate, (H,)
+    c_tilde = np.tanh(W_c @ concat + b_c)           # candidate, (H,)
+    o_t = 1 / (1 + np.exp(-(W_o @ concat + b_o)))  # output gate, (H,)
+    
+    c_t = f_t * c_prev + i_t * c_tilde              # cell state, (H,)
+    h_t = o_t * np.tanh(c_t)                        # hidden state, (H,)
+    
+    return h_t, c_t
+
+def gru_cell(x_t, h_prev, W_z, W_r, W_h, b_z, b_r, b_h):
+    """
+    Single GRU step.
+    x_t: (D,), h_prev: (H,)
+    W_*: (H, H+D), b_*: (H,)
+    Returns: h_t: (H,)
+    """
+    concat = np.concatenate([h_prev, x_t])  # (H+D,)
+    
+    z_t = 1 / (1 + np.exp(-(W_z @ concat + b_z)))  # update gate, (H,)
+    r_t = 1 / (1 + np.exp(-(W_r @ concat + b_r)))  # reset gate, (H,)
+    
+    concat_reset = np.concatenate([r_t * h_prev, x_t])  # (H+D,)
+    h_tilde = np.tanh(W_h @ concat_reset + b_h)         # candidate, (H,)
+    
+    h_t = (1 - z_t) * h_prev + z_t * h_tilde            # interpolation, (H,)
+    return h_t
+
+# Demo: process a sequence
+H, D, T = 4, 3, 5
+np.random.seed(42)
+W_xh = np.random.randn(H, D) * 0.1
+W_hh = np.random.randn(H, H) * 0.1
+b_h = np.zeros(H)
+
+h = np.zeros(H)
+for t in range(T):
+    x_t = np.random.randn(D)
+    h = rnn_cell(x_t, h, W_xh, W_hh, b_h)
+    print(f"t={t}: h = [{', '.join(f'{v:.4f}' for v in h)}]")
+```
+
+### Gradient Flow Comparison: RNN vs LSTM
+
+```python
+import numpy as np
+
+def rnn_gradient_flow(W_hh, T=50):
+    """Simulate gradient magnitude through T steps of vanilla RNN."""
+    H = W_hh.shape[0]
+    grad = np.eye(H)
+    norms = []
+    for t in range(T):
+        # tanh derivative (assume activations ~0, so tanh'≈1 for best case)
+        tanh_deriv = np.diag(np.random.uniform(0.5, 1.0, H))
+        grad = tanh_deriv @ W_hh @ grad
+        norms.append(np.linalg.norm(grad, ord=2))
+    return norms
+
+def lstm_gradient_flow(T=50, forget_bias=1.0):
+    """Simulate gradient through LSTM cell state (diagonal scaling only)."""
+    H = 4
+    norms = []
+    grad = np.ones(H)
+    for t in range(T):
+        # Forget gate values (biased toward 1 for long memory)
+        f_t = 1 / (1 + np.exp(-forget_bias - np.random.randn(H)*0.1))
+        grad = grad * f_t
+        norms.append(np.linalg.norm(grad))
+    return norms
+
+# Compare
+np.random.seed(0)
+W = np.random.randn(4, 4) * 0.5  # spectral radius < 1
+rnn_norms = rnn_gradient_flow(W, T=50)
+lstm_norms = lstm_gradient_flow(T=50, forget_bias=2.0)
+
+print("Gradient magnitude over 50 time steps:")
+print(f"{'Step':>5} {'RNN':>12} {'LSTM':>12} {'Ratio':>10}")
+for t in [0, 9, 19, 29, 39, 49]:
+    ratio = lstm_norms[t] / max(rnn_norms[t], 1e-15)
+    print(f"{t+1:>5} {rnn_norms[t]:>12.6f} {lstm_norms[t]:>12.6f} {ratio:>10.1f}x")
+```
+
+### Bidirectional RNN
+
+```python
+import numpy as np
+
+def bidirectional_rnn(X, W_xh_fwd, W_hh_fwd, W_xh_bwd, W_hh_bwd, b_fwd, b_bwd):
+    """
+    Bidirectional RNN.
+    X: (T, D) — sequence of T inputs
+    Returns: H_concat: (T, 2*H) — concatenated forward and backward hidden states
+    """
+    T, D = X.shape
+    H = W_hh_fwd.shape[0]
+    
+    # Forward pass
+    h_fwd = np.zeros((T, H))
+    h = np.zeros(H)
+    for t in range(T):
+        h = np.tanh(W_hh_fwd @ h + W_xh_fwd @ X[t] + b_fwd)
+        h_fwd[t] = h
+    
+    # Backward pass
+    h_bwd = np.zeros((T, H))
+    h = np.zeros(H)
+    for t in range(T-1, -1, -1):
+        h = np.tanh(W_hh_bwd @ h + W_xh_bwd @ X[t] + b_bwd)
+        h_bwd[t] = h
+    
+    # Concatenate: each position has context from both directions
+    return np.concatenate([h_fwd, h_bwd], axis=1)  # (T, 2*H)
+
+# Demo
+T, D, H = 5, 3, 4
+X = np.random.randn(T, D)
+W_xh_f = np.random.randn(H, D) * 0.1
+W_hh_f = np.random.randn(H, H) * 0.1
+W_xh_b = np.random.randn(H, D) * 0.1
+W_hh_b = np.random.randn(H, H) * 0.1
+H_bi = bidirectional_rnn(X, W_xh_f, W_hh_f, W_xh_b, W_hh_b, np.zeros(H), np.zeros(H))
+print(f"Bidirectional output shape: {H_bi.shape}")  # (5, 8)
+```
+
+> **See also:** `_practice/scripts/10.4_rnn_lstm.py` for gradient flow analysis.
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall 1 — Exploding Gradients in RNNs
+
+When $\|\mathbf{W}_{hh}\| > 1$, gradients grow exponentially. **Solution:** Gradient clipping — rescale the gradient if its norm exceeds a threshold:
+
+$$
+\mathbf{g} \leftarrow \frac{\tau}{\|\mathbf{g}\|}\mathbf{g} \quad \text{if } \|\mathbf{g}\| > \tau
+$$
+
+Typical threshold: $\tau = 1.0$ or $5.0$.
+
+### Pitfall 2 — Forget Gate Initialization
+
+If forget gate biases start at 0, $f_t = \sigma(0) = 0.5$ — the LSTM forgets half the cell state at each step. **Solution (Jozefowicz et al., 2015):** Initialize forget gate bias to 1 or 2, so $f_t \approx \sigma(1) = 0.73$ or $\sigma(2) = 0.88$ initially.
+
+### Pitfall 3 — Truncated BPTT Length
+
+Full BPTT over very long sequences is memory-intensive ($O(T)$ activations stored). **Solution:** Truncated BPTT — backpropagate only $k$ steps (e.g., $k=35$). This introduces bias but makes training feasible. Hidden states still carry information forward; only gradient computation is truncated.
+
+### Pitfall 4 — Sequence Padding and Masking
+
+Batching variable-length sequences requires padding. Without masking, the model processes padding tokens and corrupts hidden states. **Solution:** Apply a binary mask to zero out contributions from padding positions in both loss computation and attention (for Transformer-based models).
+
+---
+
+## 📝 Sequence-to-Sequence Architecture
+
+The **encoder-decoder** (Sutskever et al., 2014) architecture for machine translation:
+
+**Encoder:** Processes input sequence $(x_1, \ldots, x_T)$ and produces a context vector $\mathbf{c} = \mathbf{h}_T^{enc}$ (final hidden state).
+
+**Decoder:** Generates output sequence $(y_1, \ldots, y_{T'})$ autoregressively:
+
+$$
+\mathbf{h}_t^{dec} = \text{LSTM}([\mathbf{y}_{t-1}; \mathbf{c}], \mathbf{h}_{t-1}^{dec})
+$$
+
+$$
+P(y_t | y_{<t}, x) = \text{softmax}(\mathbf{W}_o\mathbf{h}_t^{dec})
+$$
+
+**Limitation:** The fixed-size context vector $\mathbf{c}$ becomes a bottleneck for long sequences. This motivated the **attention mechanism** (Bahdanau et al., 2015), which allows the decoder to attend to all encoder hidden states — the precursor to the Transformer.
+
+
+
+---
+
+## 🧮 7. Worked Examples
+
+### Example 23.4.E1 — RNN Forward Pass by Hand
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Given:** $H=2$, $D=2$, $\mathbf{W}_{hh} = \begin{pmatrix}0.5&0.1\\0.2&0.3\end{pmatrix}$, $\mathbf{W}_{xh} = \begin{pmatrix}0.4&0.6\\0.1&0.3\end{pmatrix}$, $\mathbf{b}=\mathbf{0}$, $\mathbf{h}_0 = (0,0)^T$.
+
+Input sequence: $\mathbf{x}_1 = (1, 0)^T$, $\mathbf{x}_2 = (0, 1)^T$.
+
+**Time step 1:**
+
+$$
+\mathbf{z}_1 = \mathbf{W}_{hh}\mathbf{h}_0 + \mathbf{W}_{xh}\mathbf{x}_1 = (0,0)^T + (0.4, 0.1)^T = (0.4, 0.1)^T
+$$
+
+$$
+\mathbf{h}_1 = \tanh(\mathbf{z}_1) = (\tanh(0.4), \tanh(0.1)) = (0.3799, 0.0997)
+$$
+
+**Time step 2:**
+
+$$
+\mathbf{z}_2 = \mathbf{W}_{hh}\mathbf{h}_1 + \mathbf{W}_{xh}\mathbf{x}_2
+$$
+
+$$
+= \begin{pmatrix}0.5(0.3799)+0.1(0.0997)\\0.2(0.3799)+0.3(0.0997)\end{pmatrix} + \begin{pmatrix}0.6\\0.3\end{pmatrix} = \begin{pmatrix}0.1900+0.0100+0.6\\0.0760+0.0299+0.3\end{pmatrix} = \begin{pmatrix}0.7999\\0.4059\end{pmatrix}
+$$
+
+$$
+\mathbf{h}_2 = (\tanh(0.7999), \tanh(0.4059)) = (0.6640, 0.3856)
+$$
+
+</details>
+
+### Example 23.4.E2 — Vanishing Gradient Magnitude
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** $\mathbf{W}_{hh}$ has eigenvalues $\lambda_1 = 0.8$, $\lambda_2 = 0.6$. Estimate gradient magnitude from $t=20$ to $t=1$.
+
+**Step 1.** Gradient product bound: $\|\prod_{j=2}^{20}\frac{\partial\mathbf{h}_j}{\partial\mathbf{h}_{j-1}}\| \leq |\lambda_{\max}|^{19} = 0.8^{19}$.
+
+**Step 2.** $0.8^{19} = 0.8^{10} \cdot 0.8^9 = 0.1074 \cdot 0.1342 = 0.0144$.
+
+**Step 3.** The gradient at layer 1 is at most 1.4% of the gradient at layer 20. Information from 19 steps ago is essentially lost.
+
+**Comparison with LSTM:** If forget gates $f_t \approx 0.95$: $0.95^{19} = 0.377$ — gradient retains 37.7% of its magnitude.
+
+</details>
+
+### Example 23.4.E3 — LSTM Gate Values
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** At time $t$, an LSTM has $c_{t-1} = 2.5$ (single unit), $f_t = 0.9$, $i_t = 0.3$, $\tilde{c}_t = 0.7$, $o_t = 0.8$. Compute $c_t$ and $h_t$.
+
+**Cell state:**
+
+$$
+c_t = f_t \cdot c_{t-1} + i_t \cdot \tilde{c}_t = 0.9 \times 2.5 + 0.3 \times 0.7 = 2.25 + 0.21 = 2.46
+$$
+
+**Hidden state:**
+
+$$
+h_t = o_t \cdot \tanh(c_t) = 0.8 \times \tanh(2.46) = 0.8 \times 0.9853 = 0.7882
+$$
+
+**Interpretation:** The forget gate (0.9) retains 90% of the previous cell state. The input gate (0.3) adds only 30% of the new candidate. This is typical for long-range memory — the LSTM is mostly remembering, not updating.
+
+</details>
+
+### Example 23.4.E4 — LSTM vs GRU Parameter Comparison
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+**Problem:** $H=256$, $D=128$. Compare parameter counts.
+
+**LSTM:** 4 weight matrices of size $(H, H+D) = (256, 384)$ plus 4 bias vectors of size $H$:
+
+$$
+4 \times (256 \times 384 + 256) = 4 \times (98,304 + 256) = 4 \times 98,560 = 394,240
+$$
+
+**GRU:** 3 weight matrices of same size plus 3 biases:
+
+$$
+3 \times 98,560 = 295,680
+$$
+
+**Ratio:** GRU uses 75% of LSTM parameters. In practice, GRU often matches LSTM performance with faster training.
+
+</details>
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal Cross-links
+- Eigenvalue analysis for stability: [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)
+- Linear dynamical systems (RNN as discrete-time system): [3.4 - Systems of Linear ODEs](3.4---Systems-of-Linear-ODEs)
+- Gradient computation: [23.2 - Deep Neural Networks - Backprop & Architecture](23.2---Deep-Neural-Networks---Backprop-&-Architecture)
+- Replaced by Transformers: [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs)
+- Optimization for training: [23.1 - Statistical Learning & Optimization](23.1---Statistical-Learning-&-Optimization)
+
+### External References
+- **Hochreiter & Schmidhuber (1997)** — *Long Short-Term Memory* (original LSTM paper)
+- **Cho et al. (2014)** — *Learning Phrase Representations using RNN Encoder-Decoder* (GRU)
+- **Goodfellow et al.** — *Deep Learning*, Chapter 10: Sequence Modeling
+- **Stanford CS224n** — NLP with Deep Learning ([cs224n.stanford.edu](https://cs224n.stanford.edu/))
+- **Karpathy (2015)** — *The Unreasonable Effectiveness of Recurrent Neural Networks* (blog)
+- **Pascanu et al. (2013)** — *On the difficulty of training Recurrent Neural Networks* ([arXiv:1211.5063](https://arxiv.org/abs/1211.5063))
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — RNN Forward Pass and Backpropagation Through Time (3-Step Sequence)
+
+**Problem:** Given a simple RNN with hidden size $h = 2$, input size $d = 2$, and a 3-step input sequence, compute the full forward pass and BPTT gradients by hand.
+
+**Architecture:** $h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h)$, output $o_t = W_{ho} h_t$
+
+**Given:**
+
+$$
+W_{xh} = \begin{bmatrix} 0.5 & 0.3 \\ 0.2 & 0.7 \end{bmatrix}, \quad W_{hh} = \begin{bmatrix} 0.1 & -0.2 \\ 0.3 & 0.4 \end{bmatrix}, \quad b_h = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+$$
+
+$$
+W_{ho} = \begin{bmatrix} 1.0 & 0.5 \end{bmatrix}, \quad h_0 = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+$$
+
+Input sequence: $x_1 = [1, 0]^T$, $x_2 = [0, 1]^T$, $x_3 = [1, 1]^T$
+
+Target outputs: $y_1 = 1$, $y_2 = 0$, $y_3 = 1$. Loss: $\mathcal{L} = \frac{1}{2}\sum_t (o_t - y_t)^2$
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Forward Pass — Time Step 1
+
+Pre-activation:
+
+$$
+z_1 = W_{xh} x_1 + W_{hh} h_0 + b_h = \begin{bmatrix} 0.5(1) + 0.3(0) \\ 0.2(1) + 0.7(0) \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0.5 \\ 0.2 \end{bmatrix}
+$$
+
+Hidden state:
+
+$$
+h_1 = \tanh(z_1) = \begin{bmatrix} \tanh(0.5) \\ \tanh(0.2) \end{bmatrix} = \begin{bmatrix} 0.4621 \\ 0.1974 \end{bmatrix}
+$$
+
+Output:
+
+$$
+o_1 = W_{ho} h_1 = 1.0(0.4621) + 0.5(0.1974) = 0.5608
+$$
+
+#### Step 2: Forward Pass — Time Step 2
+
+$$
+z_2 = W_{xh} x_2 + W_{hh} h_1 = \begin{bmatrix} 0.5(0) + 0.3(1) \\ 0.2(0) + 0.7(1) \end{bmatrix} + \begin{bmatrix} 0.1(0.4621) + (-0.2)(0.1974) \\ 0.3(0.4621) + 0.4(0.1974) \end{bmatrix}
+$$
+
+$$
+= \begin{bmatrix} 0.3 \\ 0.7 \end{bmatrix} + \begin{bmatrix} 0.0462 - 0.0395 \\ 0.1386 + 0.0790 \end{bmatrix} = \begin{bmatrix} 0.3 \\ 0.7 \end{bmatrix} + \begin{bmatrix} 0.0067 \\ 0.2176 \end{bmatrix} = \begin{bmatrix} 0.3067 \\ 0.9176 \end{bmatrix}
+$$
+
+$$
+h_2 = \tanh(z_2) = \begin{bmatrix} 0.2975 \\ 0.7258 \end{bmatrix}
+$$
+
+$$
+o_2 = 1.0(0.2975) + 0.5(0.7258) = 0.6604
+$$
+
+#### Step 3: Forward Pass — Time Step 3
+
+$$
+z_3 = W_{xh} x_3 + W_{hh} h_2 = \begin{bmatrix} 0.5(1) + 0.3(1) \\ 0.2(1) + 0.7(1) \end{bmatrix} + \begin{bmatrix} 0.1(0.2975) - 0.2(0.7258) \\ 0.3(0.2975) + 0.4(0.7258) \end{bmatrix}
+$$
+
+$$
+= \begin{bmatrix} 0.8 \\ 0.9 \end{bmatrix} + \begin{bmatrix} 0.0298 - 0.1452 \\ 0.0893 + 0.2903 \end{bmatrix} = \begin{bmatrix} 0.8 \\ 0.9 \end{bmatrix} + \begin{bmatrix} -0.1154 \\ 0.3796 \end{bmatrix} = \begin{bmatrix} 0.6846 \\ 1.2796 \end{bmatrix}
+$$
+
+$$
+h_3 = \tanh(z_3) = \begin{bmatrix} 0.5946 \\ 0.8566 \end{bmatrix}
+$$
+
+$$
+o_3 = 1.0(0.5946) + 0.5(0.8566) = 1.0229
+$$
+
+#### Step 4: Compute Loss
+
+$$
+\mathcal{L} = \frac{1}{2}[(0.5608 - 1)^2 + (0.6604 - 0)^2 + (1.0229 - 1)^2]
+$$
+
+$$
+= \frac{1}{2}[0.1929 + 0.4361 + 0.0005] = \frac{1}{2}(0.6295) = 0.3148
+$$
+
+#### Step 5: BPTT — Output Gradients
+
+$$
+\delta_t^{o} = o_t - y_t: \quad \delta_1^o = -0.4392, \quad \delta_2^o = 0.6604, \quad \delta_3^o = 0.0229
+$$
+
+#### Step 6: BPTT — Hidden State Gradients (Backward Through Time)
+
+At $t = 3$ (last step, no future contribution):
+
+$$
+\frac{\partial \mathcal{L}}{\partial h_3} = W_{ho}^T \delta_3^o = \begin{bmatrix} 1.0 \\ 0.5 \end{bmatrix} (0.0229) = \begin{bmatrix} 0.0229 \\ 0.0115 \end{bmatrix}
+$$
+
+Gradient through tanh: $\delta_3^z = \frac{\partial \mathcal{L}}{\partial h_3} \odot (1 - h_3^2)$:
+
+$$
+1 - h_3^2 = \begin{bmatrix} 1 - 0.3536 \\ 1 - 0.7338 \end{bmatrix} = \begin{bmatrix} 0.6464 \\ 0.2662 \end{bmatrix}
+$$
+
+$$
+\delta_3^z = \begin{bmatrix} 0.0229 \times 0.6464 \\ 0.0115 \times 0.2662 \end{bmatrix} = \begin{bmatrix} 0.0148 \\ 0.0031 \end{bmatrix}
+$$
+
+At $t = 2$ (receives gradient from $t = 3$ via $W_{hh}$):
+
+$$
+\frac{\partial \mathcal{L}}{\partial h_2} = W_{ho}^T \delta_2^o + W_{hh}^T \delta_3^z = \begin{bmatrix} 0.6604 \\ 0.3302 \end{bmatrix} + \begin{bmatrix} 0.1(0.0148) + 0.3(0.0031) \\ -0.2(0.0148) + 0.4(0.0031) \end{bmatrix}
+$$
+
+$$
+= \begin{bmatrix} 0.6604 \\ 0.3302 \end{bmatrix} + \begin{bmatrix} 0.0024 \\ -0.0017 \end{bmatrix} = \begin{bmatrix} 0.6628 \\ 0.3285 \end{bmatrix}
+$$
+
+#### Step 7: Gradient w.r.t. $W_{hh}$ (Accumulated Over All Time Steps)
+
+$$
+\frac{\partial \mathcal{L}}{\partial W_{hh}} = \sum_{t=1}^{3} \delta_t^z \cdot h_{t-1}^T
+$$
+
+This accumulation is the essence of BPTT — gradients from all time steps contribute to the same shared weight matrix.
+
+**Final Answer:** The total loss is $\mathcal{L} = 0.3148$. BPTT computes gradients by unrolling the recurrence and applying the chain rule through all time steps, with the critical multiplication by $W_{hh}^T$ at each step causing gradient magnitudes to depend on $\|W_{hh}\|$.
+
+$$
+\frac{\partial \mathcal{L}}{\partial h_t} = W_{ho}^T \delta_t^o + W_{hh}^T \delta_{t+1}^z
+$$
+
+</details>
+
+### Example 9.2 — LSTM Gating Algebra: Full Update Rule Derivation
+
+**Problem:** Derive the complete LSTM update equations from first principles, showing how each gate addresses a specific failure mode of vanilla RNNs. Then compute one time step with concrete values.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: The Vanilla RNN Problem
+
+In a vanilla RNN, the cell state IS the hidden state, updated multiplicatively:
+
+$$
+h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t)
+$$
+
+The gradient over $T$ steps involves:
+
+$$
+\frac{\partial h_T}{\partial h_1} = \prod_{t=2}^{T} W_{hh}^T \text{diag}(\tanh'(z_t))
+$$
+
+Since $|\tanh'(z)| \leq 1$ and $\|W_{hh}\|$ is typically $\lt  1$ after training, this product vanishes exponentially.
+
+#### Step 2: LSTM Solution — Additive Cell State Updates
+
+The key insight: replace multiplicative updates with **additive** updates to the cell state $c_t$:
+
+$$
+c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t
+$$
+
+The gradient through the cell state is:
+
+$$
+\frac{\partial c_T}{\partial c_1} = \prod_{t=2}^{T} f_t
+$$
+
+If forget gates $f_t \approx 1$, gradients flow unchanged — the "constant error carousel."
+
+#### Step 3: Gate Definitions
+
+All gates use sigmoid activation $\sigma$ (output in $[0,1]$) to act as soft switches:
+
+**Forget gate** (what to erase from memory):
+
+$$
+f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)
+$$
+
+**Input gate** (what new information to write):
+
+$$
+i_t = \sigma(W_i [h_{t-1}, x_t] + b_i)
+$$
+
+**Candidate cell state** (proposed new content):
+
+$$
+\tilde{c}_t = \tanh(W_c [h_{t-1}, x_t] + b_c)
+$$
+
+**Output gate** (what to expose as hidden state):
+
+$$
+o_t = \sigma(W_o [h_{t-1}, x_t] + b_o)
+$$
+
+**Cell state update:**
+
+$$
+c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t
+$$
+
+**Hidden state:**
+
+$$
+h_t = o_t \odot \tanh(c_t)
+$$
+
+#### Step 4: Numerical Example
+
+Let hidden size $= 2$, input size $= 1$. Given $h_{t-1} = [0.5, -0.3]^T$, $x_t = [0.8]$, $c_{t-1} = [1.0, -0.5]^T$.
+
+Concatenated input: $[h_{t-1}; x_t] = [0.5, -0.3, 0.8]^T$
+
+Suppose after the linear transformations:
+- $W_f [h_{t-1}; x_t] + b_f = [1.2, 0.8]^T \implies f_t = [\sigma(1.2), \sigma(0.8)] = [0.769, 0.690]$
+- $W_i [h_{t-1}; x_t] + b_i = [0.5, -0.4]^T \implies i_t = [0.622, 0.401]$
+- $W_c [h_{t-1}; x_t] + b_c = [0.3, 0.9]^T \implies \tilde{c}_t = [\tanh(0.3), \tanh(0.9)] = [0.291, 0.716]$
+- $W_o [h_{t-1}; x_t] + b_o = [0.7, 0.2]^T \implies o_t = [0.668, 0.550]$
+
+Cell state update:
+
+$$
+c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t = \begin{bmatrix} 0.769 \times 1.0 + 0.622 \times 0.291 \\ 0.690 \times (-0.5) + 0.401 \times 0.716 \end{bmatrix} = \begin{bmatrix} 0.769 + 0.181 \\ -0.345 + 0.287 \end{bmatrix} = \begin{bmatrix} 0.950 \\ -0.058 \end{bmatrix}
+$$
+
+Hidden state:
+
+$$
+h_t = o_t \odot \tanh(c_t) = \begin{bmatrix} 0.668 \times \tanh(0.950) \\ 0.550 \times \tanh(-0.058) \end{bmatrix} = \begin{bmatrix} 0.668 \times 0.740 \\ 0.550 \times (-0.058) \end{bmatrix} = \begin{bmatrix} 0.494 \\ -0.032 \end{bmatrix}
+$$
+
+**Final Answer:** The LSTM maintains a separate cell state $c_t$ with additive updates gated by learned sigmoid functions, enabling gradient flow over hundreds of time steps:
+
+$$
+c_t = \underbrace{f_t \odot c_{t-1}}_{\text{selective forgetting}} + \underbrace{i_t \odot \tilde{c}_t}_{\text{selective writing}}, \quad h_t = o_t \odot \tanh(c_t)
+$$
+
+</details>
+
+
+### Example 9.3 — Word2Vec Skip-Gram with Negative Sampling Derivation
+
+**Problem:** Derive the skip-gram negative sampling (SGNS) objective from the original softmax-based skip-gram, showing why negative sampling is a computationally efficient approximation. Compute the gradient update for a concrete example.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Original Skip-Gram Objective
+
+Given center word $w_c$ and context word $w_o$, the skip-gram model maximizes:
+
+$$
+P(w_o | w_c) = \frac{\exp(\mathbf{u}_{w_o}^T \mathbf{v}_{w_c})}{\sum_{w=1}^{|V|} \exp(\mathbf{u}_w^T \mathbf{v}_{w_c})}
+$$
+
+where $\mathbf{v}_{w_c}$ is the center embedding and $\mathbf{u}_{w_o}$ is the context embedding.
+
+The denominator sums over the entire vocabulary $|V|$ (often 100K–1M words) — prohibitively expensive.
+
+#### Step 2: Negative Sampling Approximation
+
+Instead of normalizing over all words, we reformulate as a binary classification: distinguish real context pairs from noise pairs.
+
+The SGNS objective for one (center, context) pair with $K$ negative samples:
+
+$$
+\mathcal{L}_{\text{SGNS}} = -\log \sigma(\mathbf{u}_{w_o}^T \mathbf{v}_{w_c}) - \sum_{k=1}^{K} \mathbb{E}_{w_k \sim P_n(w)} \left[ \log \sigma(-\mathbf{u}_{w_k}^T \mathbf{v}_{w_c}) \right]
+$$
+
+where $\sigma(x) = 1/(1+e^{-x})$ and $P_n(w) \propto f(w)^{3/4}$ is the noise distribution (unigram raised to 3/4 power).
+
+#### Step 3: Why This Works — Connection to PMI
+
+Levy & Goldberg (2014) showed that SGNS implicitly factorizes the shifted pointwise mutual information (PMI) matrix:
+
+$$
+\mathbf{u}_w^T \mathbf{v}_c \approx \text{PMI}(w, c) - \log K
+$$
+
+where $\text{PMI}(w, c) = \log \frac{P(w, c)}{P(w)P(c)}$.
+
+#### Step 4: Gradient Computation
+
+For the positive pair $(w_c, w_o)$:
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{v}_{w_c}} = -\left(1 - \sigma(\mathbf{u}_{w_o}^T \mathbf{v}_{w_c})\right) \mathbf{u}_{w_o} + \sum_{k=1}^{K} \sigma(\mathbf{u}_{w_k}^T \mathbf{v}_{w_c}) \mathbf{u}_{w_k}
+$$
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{u}_{w_o}} = -\left(1 - \sigma(\mathbf{u}_{w_o}^T \mathbf{v}_{w_c})\right) \mathbf{v}_{w_c}
+$$
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{u}_{w_k}} = \sigma(\mathbf{u}_{w_k}^T \mathbf{v}_{w_c}) \mathbf{v}_{w_c}
+$$
+
+#### Step 5: Numerical Example
+
+Let embedding dimension $d = 3$. Center word "king": $\mathbf{v}_{\text{king}} = [0.5, 0.3, -0.2]^T$.
+
+Context word "crown": $\mathbf{u}_{\text{crown}} = [0.4, 0.6, 0.1]^T$.
+
+Negative sample "banana": $\mathbf{u}_{\text{banana}} = [-0.3, 0.1, 0.8]^T$.
+
+Positive score: $\mathbf{u}_{\text{crown}}^T \mathbf{v}_{\text{king}} = 0.4(0.5) + 0.6(0.3) + 0.1(-0.2) = 0.2 + 0.18 - 0.02 = 0.36$
+
+$$
+\sigma(0.36) = \frac{1}{1 + e^{-0.36}} = 0.589
+$$
+
+Negative score: $\mathbf{u}_{\text{banana}}^T \mathbf{v}_{\text{king}} = -0.3(0.5) + 0.1(0.3) + 0.8(-0.2) = -0.15 + 0.03 - 0.16 = -0.28$
+
+$$
+\sigma(-0.28) = 0.430
+$$
+
+Gradient for $\mathbf{v}_{\text{king}}$:
+
+$$
+\frac{\partial \mathcal{L}}{\partial \mathbf{v}_{\text{king}}} = -(1 - 0.589)\begin{bmatrix}0.4\\0.6\\0.1\end{bmatrix} + 0.430\begin{bmatrix}-0.3\\0.1\\0.8\end{bmatrix} = -0.411\begin{bmatrix}0.4\\0.6\\0.1\end{bmatrix} + 0.430\begin{bmatrix}-0.3\\0.1\\0.8\end{bmatrix}
+$$
+
+$$
+= \begin{bmatrix}-0.164\\-0.247\\-0.041\end{bmatrix} + \begin{bmatrix}-0.129\\0.043\\0.344\end{bmatrix} = \begin{bmatrix}-0.293\\-0.204\\0.303\end{bmatrix}
+$$
+
+With learning rate $\eta = 0.01$: $\mathbf{v}_{\text{king}}^{\text{new}} = [0.5, 0.3, -0.2]^T - 0.01 \times [-0.293, -0.204, 0.303]^T = [0.503, 0.302, -0.203]^T$
+
+**Final Answer:** The update pushes "king" closer to "crown" (positive context) and away from "banana" (negative sample) in embedding space.
+
+$$
+\mathcal{L}_{\text{SGNS}} = -\log\sigma(\mathbf{u}_o^T \mathbf{v}_c) - \sum_{k=1}^K \log\sigma(-\mathbf{u}_k^T \mathbf{v}_c)
+$$
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 23.1 Teacher Forcing vs Scheduled Sampling
+
+**Teacher forcing** feeds the ground-truth token $y_{t-1}$ as input at time $t$ during training, rather than the model's own prediction $\hat{y}_{t-1}$. This creates a train-test mismatch called **exposure bias**.
+
+**Formal analysis:** During training with teacher forcing, the model optimizes:
+
+$$
+\mathcal{L}_{\text{TF}} = -\sum_{t=1}^{T} \log P(y_t | y_1, \ldots, y_{t-1}; \theta)
+$$
+
+During inference (autoregressive generation), errors compound:
+
+$$
+P(\hat{y}_t | \hat{y}_1, \ldots, \hat{y}_{t-1}; \theta) \neq P(\hat{y}_t | y_1, \ldots, y_{t-1}; \theta)
+$$
+
+If the model makes an error at step $t$, it enters a state distribution never seen during training, potentially causing cascading failures.
+
+**Scheduled sampling** (Bengio et al., 2015) addresses this by gradually transitioning from teacher forcing to free-running during training. At each step, with probability $\epsilon_i$ (decreasing over epochs), use the ground truth; otherwise use the model's own prediction:
+
+$$
+\text{input}_t = \begin{cases} y_{t-1} & \text{with probability } \epsilon_i \\ \hat{y}_{t-1} & \text{with probability } 1 - \epsilon_i \end{cases}
+$$
+
+Common schedules: linear decay $\epsilon_i = \max(0, 1 - i/N)$, exponential decay $\epsilon_i = k^i$, or inverse sigmoid $\epsilon_i = k/(k + \exp(i/k))$.
+
+### 23.2 Perplexity and Cross-Entropy Relationship
+
+**Cross-entropy** of a language model on a test sequence $w_1, \ldots, w_N$:
+
+$$
+H(P, Q) = -\frac{1}{N} \sum_{t=1}^{N} \log_2 Q(w_t | w_1, \ldots, w_{t-1})
+$$
+
+where $Q$ is the model's distribution and $P$ is the true distribution.
+
+**Perplexity** is the exponentiation of cross-entropy:
+
+$$
+\text{PPL} = 2^{H(P,Q)} = 2^{-\frac{1}{N}\sum_t \log_2 Q(w_t | w_{<t})}
+$$
+
+Equivalently, using natural log:
+
+$$
+\text{PPL} = \exp\left(-\frac{1}{N}\sum_{t=1}^{N} \ln Q(w_t | w_{<t})\right)
+$$
+
+**Interpretation:** Perplexity represents the effective vocabulary size the model is "confused" among at each step. A perplexity of 100 means the model is, on average, as uncertain as if it were choosing uniformly among 100 words.
+
+**Relationship to bits-per-character (BPC):**
+
+$$
+\text{BPC} = \frac{H(P,Q)}{\text{avg chars per token}} = \frac{\log_2(\text{PPL})}{\text{avg chars per token}}
+$$
+
+### 23.3 BPE and WordPiece Tokenization Theory
+
+**Byte Pair Encoding (BPE)** (Sennrich et al., 2016) is a data-driven subword tokenization algorithm:
+
+1. Initialize vocabulary with all individual characters
+2. Count all adjacent symbol pairs in the corpus
+3. Merge the most frequent pair into a new symbol
+4. Repeat steps 2–3 for $k$ iterations (typically $k = 30{,}000$–$50{,}000$)
+
+**Information-theoretic justification:** BPE approximately minimizes the description length of the corpus. Frequent substrings get short codes (single tokens), while rare words are decomposed into known subwords. This achieves a balance between:
+- Character-level models (small vocabulary, long sequences, no OOV)
+- Word-level models (large vocabulary, short sequences, OOV problem)
+
+**WordPiece** (Schuster & Nakajima, 2012; used in BERT) differs from BPE in the merge criterion. Instead of frequency, WordPiece merges the pair that maximizes the likelihood of the training data:
+
+$$
+\text{score}(a, b) = \frac{\text{freq}(ab)}{\text{freq}(a) \times \text{freq}(b)}
+$$
+
+This is equivalent to merging pairs with the highest pointwise mutual information, preferring pairs that co-occur more than expected by chance.
+
+**Vocabulary size tradeoffs:**
+- Too small ($< 10K$): sequences become very long, increasing compute and making it harder for the model to learn long-range dependencies
+- Too large ($> 100K$): embedding matrix becomes enormous, rare tokens get insufficient training signal
+- Sweet spot: 32K–50K for most modern LLMs (GPT-2: 50,257; LLaMA: 32,000)
+
+---

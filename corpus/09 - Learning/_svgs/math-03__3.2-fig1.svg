@@ -1,0 +1,57 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="do-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .do-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; fill: none; }
+    .do-grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.3; }
+    .do-under { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .do-crit { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; }
+    .do-over { stroke: var(--text-muted, #8b949e); stroke-width: 2.5; fill: none; stroke-dasharray: 6 3; }
+    .do-env { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; fill: none; stroke-dasharray: 4 2; opacity: 0.6; }
+    .do-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .do-accent { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .do-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+    .do-particle { fill: var(--interactive-accent, #58a6ff); }
+  </style>
+  <!-- Grid -->
+  <path class="do-grid" d="M 60 50 H 580 M 60 110 H 580 M 60 170 H 580 M 60 230 H 580 M 60 290 H 580"/>
+  <!-- Axis -->
+  <line x1="60" y1="170" x2="580" y2="170" class="do-axis" marker-end="url(#do-arr)"/>
+  <line x1="60" y1="330" x2="60" y2="20" class="do-axis" marker-end="url(#do-arr)"/>
+  <text x="585" y="175" class="do-label">t</text>
+  <text x="45" y="20" class="do-label">y(t)</text>
+  <!-- Underdamped: e^{-t}cos(5t) -->
+  <path d="M 60 50 Q 85 170 110 260 Q 130 170 150 110 Q 170 170 190 210 Q 210 170 230 145 Q 250 170 270 185 Q 290 170 310 162 Q 330 170 350 173 Q 370 170 390 169" class="do-under" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- Envelope -->
+  <path d="M 60 50 Q 200 130 390 168" class="do-env"/>
+  <path d="M 60 290 Q 200 210 390 172" class="do-env"/>
+  <!-- Critically damped: (1+2t)e^{-2t} -->
+  <path d="M 60 50 Q 120 120 180 155 Q 250 168 390 170" class="do-crit" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- Overdamped: slow exponential decay -->
+  <path d="M 60 50 Q 150 100 250 145 Q 350 163 500 169" class="do-over" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="4s" repeatCount="indefinite" />
+  </path>
+  <!-- Animated particle on underdamped curve -->
+  <circle r="4" class="do-particle">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 60 50 Q 85 170 110 260 Q 130 170 150 110 Q 170 170 190 210 Q 210 170 230 145 Q 250 170 270 185 Q 290 170 310 162 Q 330 170 350 173 Q 370 170 390 169"/>
+  </circle>
+  <!-- Legend box -->
+  <rect x="410" y="40" width="175" height="100" class="do-box"/>
+  <line x1="420" y1="60" x2="450" y2="60" class="do-under"/>
+  <text x="455" y="64" class="do-accent">Underdamped (Δ&lt;0)</text>
+  <line x1="420" y1="85" x2="450" y2="85" class="do-crit"/>
+  <text x="455" y="89" class="do-label" fill="var(--text-accent, #79c0ff)">Critically damped (Δ=0)</text>
+  <line x1="420" y1="110" x2="450" y2="110" class="do-over"/>
+  <text x="455" y="114" class="do-label">Overdamped (Δ&gt;0)</text>
+  <!-- Equation box -->
+  <rect x="410" y="160" width="175" height="50" class="do-box"/>
+  <text x="497" y="182" class="do-accent" text-anchor="middle">ay'' + by' + cy = 0</text>
+  <text x="497" y="200" class="do-label" text-anchor="middle">Δ = b² − 4ac</text>
+</svg>

@@ -1,0 +1,45 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="nh-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .nh-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; }
+    .nh-yc { stroke: var(--text-muted, #8b949e); stroke-width: 2; fill: none; stroke-dasharray: 6 3; }
+    .nh-yp { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; fill: none; }
+    .nh-ytot { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    .nh-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .nh-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 5; }
+    .nh-particle { fill: var(--interactive-accent, #58a6ff); }
+  </style>
+  <!-- Axis -->
+  <line x1="50" y1="160" x2="570" y2="160" class="nh-axis" marker-end="url(#nh-arr)"/>
+  <line x1="50" y1="300" x2="50" y2="20" class="nh-axis" marker-end="url(#nh-arr)"/>
+  <text x="575" y="165" class="nh-label">x</text>
+  <text x="35" y="20" class="nh-label">y</text>
+  <!-- y_c: decaying oscillation -->
+  <path d="M 50 80 Q 100 160 150 220 Q 190 160 230 130 Q 270 160 310 175 Q 350 160 390 152 Q 430 160 470 163 Q 510 160 550 159" class="nh-yc" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="5s" repeatCount="indefinite" />
+  </path>
+  <!-- y_p: steady sinusoid -->
+  <path d="M 50 160 Q 100 120 150 160 Q 200 200 250 160 Q 300 120 350 160 Q 400 200 450 160 Q 500 120 550 160" class="nh-yp" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="5s" repeatCount="indefinite" />
+  </path>
+  <!-- y = y_c + y_p: sum -->
+  <path d="M 50 80 Q 100 120 150 220 Q 190 200 230 130 Q 270 120 310 175 Q 350 200 390 152 Q 430 120 470 163 Q 510 120 550 159" class="nh-ytot" pathLength="100">
+    <animate attributeName="stroke-dasharray" values="0 100; 100 0" dur="5s" repeatCount="indefinite" />
+  </path>
+  <!-- Animated particle on total solution -->
+  <circle r="4" class="nh-particle">
+    <animateMotion dur="5s" repeatCount="indefinite" path="M 50 80 Q 100 120 150 220 Q 190 200 230 130 Q 270 120 310 175 Q 350 200 390 152 Q 430 120 470 163 Q 510 120 550 159"/>
+  </circle>
+  <!-- Legend -->
+  <rect x="380" y="230" width="195" height="75" class="nh-box"/>
+  <line x1="390" y1="250" x2="420" y2="250" class="nh-yc"/>
+  <text x="425" y="254" class="nh-label">y_c (transient, decays)</text>
+  <line x1="390" y1="270" x2="420" y2="270" class="nh-yp"/>
+  <text x="425" y="274" class="nh-label" fill="var(--text-accent, #79c0ff)">y_p (steady-state)</text>
+  <line x1="390" y1="290" x2="420" y2="290" class="nh-ytot"/>
+  <text x="425" y="294" class="nh-label" fill="var(--interactive-accent, #58a6ff)">y = y_c + y_p (total)</text>
+</svg>

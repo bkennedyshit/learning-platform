@@ -1,0 +1,793 @@
+---
+title: "Rigid Body Dynamics Euler Angles"
+subject: "Classical Mechanics & Dynamical Systems"
+catalog: advanced
+audience_tier: higher-education
+chapter: "4.7"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 4.7 — Rigid Body Dynamics & Euler Angles
+
+> *"The motion of a rigid body about a fixed point is one of the most beautiful problems in mathematical physics."* — Leonhard Euler, 1758
+
+A rigid body has six degrees of freedom: three for translation of the center of mass and three for rotation. This chapter develops the inertia tensor, Euler's equations of motion, and the Euler angle parameterization of rotations, with applications to gyroscopes, precession, and torque-free motion.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compute the **inertia tensor** $I_{ij}$ for continuous and discrete mass distributions.
+2. Find **principal axes** and **principal moments** via eigenvalue decomposition.
+3. Derive **Euler's equations** for torque-free and forced rotation.
+4. Parameterize 3D rotations using **Euler angles** $(\phi, \theta, \psi)$.
+5. Analyze **precession** and **nutation** of symmetric tops.
+6. Apply the **parallel axis theorem** and **perpendicular axis theorem**.
+
+---
+
+## 🖼️ Visual Anchor — Rigid Body & Principal Axes
+
+![math-04__4.7-fig1](math-04__4.7-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 4.7.1 — Inertia Tensor
+
+The **moment of inertia tensor** about the center of mass is:
+
+$$
+I_{ij} = \int_{\text{body}} \rho(\mathbf{r})\left(|\mathbf{r}|^2\delta_{ij} - r_i r_j\right)dV,
+$$
+
+or in index notation: $I_{ij} = \int\rho(r^2\delta_{ij} - x_i x_j)\,dV$. This is a symmetric $3\times3$ matrix.
+
+### Definition 4.7.2 — Principal Axes and Principal Moments
+
+The **principal axes** are the eigenvectors of $I_{ij}$. In the principal axis frame, $I$ is diagonal:
+
+$$
+I = \text{diag}(I_1, I_2, I_3).
+$$
+
+The eigenvalues $I_1, I_2, I_3$ are the **principal moments of inertia** (see [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)).
+
+### Definition 4.7.3 — Euler Angles $(\phi, \theta, \psi)$
+
+The orientation of a rigid body is parameterized by three angles:
+- $\phi$: precession angle (rotation about lab $z$-axis)
+- $\theta$: nutation angle (tilt of body symmetry axis from lab $z$)
+- $\psi$: spin angle (rotation about body symmetry axis)
+
+The rotation matrix is $R = R_z(\phi)R_x(\theta)R_z(\psi)$ (ZXZ convention).
+
+### Definition 4.7.4 — Angular Velocity in Body Frame
+
+$$
+\boldsymbol{\omega}_{\text{body}} = \begin{pmatrix}\dot\phi\sin\theta\sin\psi + \dot\theta\cos\psi \\ \dot\phi\sin\theta\cos\psi - \dot\theta\sin\psi \\ \dot\phi\cos\theta + \dot\psi\end{pmatrix}.
+$$
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 4.7.A1 — Rigidity Constraint
+
+All inter-particle distances are fixed: $|\mathbf{r}_i - \mathbf{r}_j| = \text{const}$ for all pairs. This eliminates internal degrees of freedom, leaving 6 (or 3 for rotation about a fixed point).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 4.7.1 — Parallel Axis Theorem
+
+The moment of inertia about an axis displaced by $\mathbf{d}$ from the center of mass:
+
+$$
+I_{\text{axis}} = I_{\text{cm}} + Md^2,
+$$
+
+where $d$ is the perpendicular distance from the CM to the new axis.
+
+### Lemma 4.7.2 — Rotational Kinetic Energy
+
+$$
+T_{\text{rot}} = \frac{1}{2}\boldsymbol{\omega}\cdot I\boldsymbol{\omega} = \frac{1}{2}(I_1\omega_1^2 + I_2\omega_2^2 + I_3\omega_3^2).
+$$
+
+### Lemma 4.7.3 — Angular Momentum in Body Frame
+
+$$
+\mathbf{L} = I\boldsymbol{\omega} = (I_1\omega_1, I_2\omega_2, I_3\omega_3)^T.
+$$
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 4.7.1 — Euler's Equations of Rotation
+
+In the body-fixed principal axis frame:
+
+$$
+I_1\dot\omega_1 - (I_2 - I_3)\omega_2\omega_3 = \tau_1,
+$$
+
+$$
+I_2\dot\omega_2 - (I_3 - I_1)\omega_3\omega_1 = \tau_2,
+$$
+
+$$
+I_3\dot\omega_3 - (I_1 - I_2)\omega_1\omega_2 = \tau_3.
+$$
+
+### Theorem 4.7.2 — Torque-Free Symmetric Top
+
+For $I_1 = I_2 \neq I_3$ and $\boldsymbol{\tau} = 0$: $\omega_3 = \text{const}$ and $\omega_1, \omega_2$ precess about the symmetry axis with frequency $\Omega = \frac{(I_3-I_1)}{I_1}\omega_3$.
+
+### Theorem 4.7.3 — Heavy Symmetric Top (Steady Precession)
+
+A symmetric top with one point fixed, spinning rapidly with $\dot\psi \gg \dot\phi$, precesses at rate:
+
+$$
+\dot\phi = \frac{Mgl}{I_3\dot\psi},
+$$
+
+where $l$ is the distance from the fixed point to the center of mass.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Derivation of Euler's Equations
+
+**Step 1:** In the lab frame, $\frac{d\mathbf{L}}{dt}\big|_{\text{lab}} = \boldsymbol{\tau}$.
+
+**Step 2:** The relation between time derivatives in lab and body frames:
+
+$$
+\frac{d\mathbf{L}}{dt}\bigg|_{\text{lab}} = \frac{d\mathbf{L}}{dt}\bigg|_{\text{body}} + \boldsymbol{\omega}\times\mathbf{L}.
+$$
+
+**Step 3:** In the body frame with principal axes: $\mathbf{L} = (I_1\omega_1, I_2\omega_2, I_3\omega_3)$, so $\frac{d\mathbf{L}}{dt}\big|_{\text{body}} = (I_1\dot\omega_1, I_2\dot\omega_2, I_3\dot\omega_3)$.
+
+**Step 4:** Compute $\boldsymbol{\omega}\times\mathbf{L}$:
+
+$$
+\boldsymbol{\omega}\times\mathbf{L} = \begin{vmatrix}\hat{e}_1 & \hat{e}_2 & \hat{e}_3 \\ \omega_1 & \omega_2 & \omega_3 \\ I_1\omega_1 & I_2\omega_2 & I_3\omega_3\end{vmatrix} = \begin{pmatrix}(I_3-I_2)\omega_2\omega_3 \\ (I_1-I_3)\omega_3\omega_1 \\ (I_2-I_1)\omega_1\omega_2\end{pmatrix}.
+$$
+
+**Step 5:** Setting $\frac{d\mathbf{L}}{dt}\big|_{\text{body}} + \boldsymbol{\omega}\times\mathbf{L} = \boldsymbol{\tau}$ gives Euler's equations. $\blacksquare$
+
+### 5.2 Derivation — Rotational Kinetic Energy
+
+**Proof.** For a rigid body rotating with angular velocity $\boldsymbol{\omega}$, the velocity of mass element $dm$ at position $\mathbf{r}$ from the rotation axis is $\mathbf{v} = \boldsymbol{\omega}\times\mathbf{r}$.
+
+$$
+T = \frac{1}{2}\int |\mathbf{v}|^2\,dm = \frac{1}{2}\int |\boldsymbol{\omega}\times\mathbf{r}|^2\,dm.
+$$
+
+Using the BAC-CAB identity: $|\boldsymbol{\omega}\times\mathbf{r}|^2 = \omega^2 r^2 - (\boldsymbol{\omega}\cdot\mathbf{r})^2 = \sum_{i,j}\omega_i\omega_j(r^2\delta_{ij} - r_i r_j)$.
+
+Therefore:
+
+$$
+T = \frac{1}{2}\sum_{i,j}\omega_i\omega_j\int(r^2\delta_{ij} - r_i r_j)\,dm = \frac{1}{2}\sum_{i,j}I_{ij}\omega_i\omega_j = \frac{1}{2}\boldsymbol{\omega}^T I\boldsymbol{\omega}. \quad \blacksquare
+$$
+
+### 5.3 Derivation — Angular Velocity in Terms of Euler Angles
+
+The total rotation is $R = R_z(\phi)R_x(\theta)R_z(\psi)$. The angular velocity has contributions from each Euler angle rate:
+
+$$
+\boldsymbol{\omega} = \dot\phi\hat{\mathbf{z}}_{\text{lab}} + \dot\theta\hat{\mathbf{N}} + \dot\psi\hat{\mathbf{z}}_{\text{body}},
+$$
+
+where $\hat{\mathbf{N}}$ is the line of nodes. Projecting onto body axes:
+
+$$
+\omega_1 = \dot\phi\sin\theta\sin\psi + \dot\theta\cos\psi,
+$$
+
+$$
+\omega_2 = \dot\phi\sin\theta\cos\psi - \dot\theta\sin\psi,
+$$
+
+$$
+\omega_3 = \dot\phi\cos\theta + \dot\psi.
+$$
+
+### 5.4 Derivation — Steady Precession of Heavy Symmetric Top
+
+For a symmetric top ($I_1 = I_2$) with tip fixed, the Lagrangian in Euler angles:
+
+$$
+L = \frac{1}{2}I_1(\dot\theta^2 + \dot\phi^2\sin^2\theta) + \frac{1}{2}I_3(\dot\psi + \dot\phi\cos\theta)^2 - Mgl\cos\theta.
+$$
+
+$\phi$ and $\psi$ are cyclic. Conserved quantities: $p_\phi = \frac{\partial L}{\partial\dot\phi}$ and $p_\psi = I_3(\dot\psi + \dot\phi\cos\theta)$.
+
+For steady precession ($\dot\theta = 0$, $\ddot\theta = 0$, constant $\dot\phi$ and $\dot\psi$):
+
+The $\theta$-equation gives: $I_1\dot\phi^2\sin\theta\cos\theta - I_3(\dot\psi+\dot\phi\cos\theta)\dot\phi\sin\theta + Mgl\sin\theta = 0$.
+
+For fast spin ($I_3\dot\psi \gg I_1\dot\phi$): $-I_3\dot\psi\dot\phi\sin\theta + Mgl\sin\theta \approx 0$, giving:
+
+$$
+\dot\phi \approx \frac{Mgl}{I_3\dot\psi}. \quad \blacksquare
+$$
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 4.7.1 — Inertia Tensor of a Uniform Cube
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+For a cube of side $a$, mass $M$, centered at origin. By symmetry $I_{12} = I_{13} = I_{23} = 0$ and $I_1 = I_2 = I_3$.
+
+$$
+I_{11} = \frac{M}{a^3}\int_{-a/2}^{a/2}\int_{-a/2}^{a/2}\int_{-a/2}^{a/2}(y^2+z^2)\,dx\,dy\,dz = \frac{M}{a^3}\cdot a\cdot 2\cdot\frac{a^3}{12}\cdot a = \frac{Ma^2}{6}.
+$$
+
+So $I = \frac{Ma^2}{6}\,\mathbf{1}_3$. Every axis through the center is a principal axis.
+
+</details>
+
+### Example 4.7.2 — Torque-Free Precession of Earth
+
+<details>
+<summary>🔍 Full Solution</summary>
+
+Earth is an oblate spheroid: $I_3 \gt  I_1 = I_2$, with $(I_3-I_1)/I_1 \approx 1/305$.
+
+The body-frame precession frequency: $\Omega = \frac{I_3-I_1}{I_1}\omega_3 \approx \frac{\omega_{\text{Earth}}}{305}$.
+
+Period: $T = \frac{2\pi}{\Omega} = 305$ sidereal days $\approx 10$ months (Euler period). Observed: ~14 months (Chandler wobble, modified by Earth's elasticity).
+
+</details>
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+- **Previous:** [4.6 - Poisson Brackets & Canonical Transformations](4.6---Poisson-Brackets-&-Canonical-Transformations)
+- **Next:** [4.8 - Non-linear Oscillators & Chaos Theory](4.8---Non-linear-Oscillators-&-Chaos-Theory)
+- **Eigenvalue decomposition of $I$:** [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization)
+- **Rotation matrices:** [2.4 - Linear Transformations & Change of Basis](2.4---Linear-Transformations-&-Change-of-Basis)
+- **Goldstein**, Ch. 4–5 — Kinematics and Dynamics of Rigid Bodies
+- **Landau & Lifshitz**, *Mechanics*, Ch. 6 — Motion of a Rigid Body
+
+---
+
+*Next: [4.8 - Non-linear Oscillators & Chaos Theory](4.8---Non-linear-Oscillators-&-Chaos-Theory) →*
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Euler's Equations for a Force-Free Symmetric Top
+
+**Problem:** A symmetric top ($I_1 = I_2 \neq I_3$) rotates freely in space (no external torques). Solve Euler's equations for the body-frame angular velocity components $\omega_1(t)$, $\omega_2(t)$, $\omega_3(t)$. Describe the resulting motion.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Write Euler's equations for torque-free motion
+
+Euler's equations in the body frame are:
+
+$$
+I_1\dot\omega_1 - (I_2 - I_3)\omega_2\omega_3 = 0,
+$$
+
+$$
+I_2\dot\omega_2 - (I_3 - I_1)\omega_3\omega_1 = 0,
+$$
+
+$$
+I_3\dot\omega_3 - (I_1 - I_2)\omega_1\omega_2 = 0.
+$$
+
+#### Step 2: Apply the symmetric top condition $I_1 = I_2$
+
+The third equation becomes:
+
+$$
+I_3\dot\omega_3 - (I_1 - I_1)\omega_1\omega_2 = I_3\dot\omega_3 = 0 \implies \omega_3 = \text{const}.
+$$
+
+The spin about the symmetry axis is constant. Define $\Omega \equiv \frac{(I_3 - I_1)}{I_1}\omega_3$ (a constant with dimensions of angular frequency).
+
+#### Step 3: Solve the remaining two equations
+
+With $I_1 = I_2$ and $\omega_3 = \text{const}$:
+
+$$
+I_1\dot\omega_1 = (I_1 - I_3)\omega_2\omega_3 = -I_1\Omega\omega_2,
+$$
+
+$$
+I_1\dot\omega_2 = (I_3 - I_1)\omega_3\omega_1 = I_1\Omega\omega_1.
+$$
+
+So:
+
+$$
+\dot\omega_1 = -\Omega\omega_2, \quad \dot\omega_2 = \Omega\omega_1.
+$$
+
+#### Step 4: Recognize the coupled harmonic system
+
+Differentiate the first equation: $\ddot\omega_1 = -\Omega\dot\omega_2 = -\Omega^2\omega_1$.
+
+This is simple harmonic motion: $\omega_1(t) = A\cos(\Omega t + \phi_0)$.
+
+From $\dot\omega_1 = -\Omega\omega_2$: $\omega_2(t) = A\sin(\Omega t + \phi_0)$.
+
+#### Step 5: Interpret the motion
+
+In the body frame, the angular velocity vector $\boldsymbol{\omega}$ traces a circle about the symmetry axis ($\hat{e}_3$):
+
+$$
+\omega_\perp = \sqrt{\omega_1^2 + \omega_2^2} = A = \text{const}, \quad \omega_3 = \text{const}.
+$$
+
+The angular velocity vector precesses about the body's symmetry axis at rate $\Omega = \frac{(I_3-I_1)}{I_1}\omega_3$.
+
+In the lab frame, the symmetry axis precesses about the fixed angular momentum vector $\mathbf{L}$ (which is conserved). This is **torque-free precession** (also called free precession or Euler precession).
+
+#### Step 6: Precession rate
+
+- **Body-frame precession rate:** $\Omega_{\text{body}} = \frac{I_3 - I_1}{I_1}\omega_3$.
+- **Lab-frame precession rate:** $\Omega_{\text{lab}} = \frac{I_3 - I_1}{I_3}\omega_3$ (different due to the frame transformation).
+
+For Earth ($I_3 \gt  I_1$, $(I_3-I_1)/I_1 \approx 1/305$): the predicted Euler period is $305/\omega_{\text{Earth}} = 305$ days ≈ 10 months. The observed Chandler wobble has period ~14 months (modified by Earth's elasticity).
+
+**Final Answer:**
+
+$$
+\omega_1(t) = A\cos(\Omega t), \quad \omega_2(t) = A\sin(\Omega t), \quad \omega_3 = \text{const}
+$$
+
+$$
+\Omega = \frac{I_3 - I_1}{I_1}\omega_3 \quad \text{(body-frame precession rate)}
+$$
+
+</details>
+
+### Example 8.2 — Steady Precession of a Spinning Top Under Gravity
+
+**Problem:** A symmetric top of mass $M$ with tip fixed spins at rate $\dot\psi$ about its symmetry axis, which is tilted at angle $\theta_0$ from the vertical. Find the steady precession rate $\dot\phi$ assuming $\dot\theta = 0$ (no nutation).
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: The Lagrangian in Euler angles
+
+For a symmetric top ($I_1 = I_2$) with tip fixed at the origin, the center of mass is at distance $\ell$ from the pivot along the symmetry axis:
+
+$$
+L = \frac{1}{2}I_1(\dot\theta^2 + \dot\phi^2\sin^2\theta) + \frac{1}{2}I_3(\dot\psi + \dot\phi\cos\theta)^2 - Mg\ell\cos\theta.
+$$
+
+#### Step 2: Identify conserved quantities
+
+$\phi$ is cyclic: $p_\phi = I_1\dot\phi\sin^2\theta + I_3(\dot\psi+\dot\phi\cos\theta)\cos\theta = \text{const}$.
+
+$\psi$ is cyclic: $p_\psi = I_3(\dot\psi + \dot\phi\cos\theta) = \text{const}$.
+
+Note: $p_\psi = I_3\omega_3$ where $\omega_3 = \dot\psi + \dot\phi\cos\theta$ is the spin component along the symmetry axis.
+
+#### Step 3: Equation of motion for $\theta$
+
+The Euler-Lagrange equation for $\theta$:
+
+$$
+I_1\ddot\theta = I_1\dot\phi^2\sin\theta\cos\theta - I_3\omega_3\dot\phi\sin\theta + Mg\ell\sin\theta.
+$$
+
+#### Step 4: Steady precession conditions
+
+Set $\dot\theta = 0$, $\ddot\theta = 0$, $\theta = \theta_0 = \text{const}$, $\dot\phi = \text{const}$. The $\theta$-equation becomes (dividing by $\sin\theta_0 \neq 0$):
+
+$$
+I_1\dot\phi^2\cos\theta_0 - I_3\omega_3\dot\phi + Mg\ell = 0.
+$$
+
+This is a **quadratic equation in $\dot\phi$**:
+
+$$
+I_1\cos\theta_0\cdot\dot\phi^2 - I_3\omega_3\cdot\dot\phi + Mg\ell = 0.
+$$
+
+#### Step 5: Solve the quadratic
+
+$$
+\dot\phi = \frac{I_3\omega_3 \pm \sqrt{I_3^2\omega_3^2 - 4I_1 Mg\ell\cos\theta_0}}{2I_1\cos\theta_0}.
+$$
+
+For a real solution, we need the discriminant $\geq 0$:
+
+$$
+I_3^2\omega_3^2 \geq 4I_1 Mg\ell\cos\theta_0.
+$$
+
+This sets a **minimum spin rate** for steady precession to exist.
+
+#### Step 6: Fast-spin approximation
+
+When $I_3\omega_3 \gg \sqrt{4I_1 Mg\ell\cos\theta_0}$ (fast spin), the two roots are:
+
+**Slow precession** (taking the minus sign, expanding the square root):
+
+$$
+\dot\phi_{\text{slow}} \approx \frac{Mg\ell}{I_3\omega_3}.
+$$
+
+**Fast precession** (taking the plus sign):
+
+$$
+\dot\phi_{\text{fast}} \approx \frac{I_3\omega_3}{I_1\cos\theta_0}.
+$$
+
+The slow precession is the familiar gyroscopic precession seen in toy tops. The fast precession is rarely observed (it requires special initial conditions).
+
+#### Step 7: Physical interpretation
+
+The slow precession rate $\dot\phi \approx Mg\ell/(I_3\omega_3)$ shows that:
+- Faster spin → slower precession (the gyroscope resists tilting more strongly)
+- Greater torque ($Mg\ell$) → faster precession
+- The precession is independent of $\theta_0$ in this approximation
+
+**Final Answer:**
+
+$$
+\dot\phi_{\text{slow}} \approx \frac{Mg\ell}{I_3\omega_3} \quad \text{(fast-spin limit)}
+$$
+
+$$
+\text{Exact: } I_1\cos\theta_0\cdot\dot\phi^2 - I_3\omega_3\cdot\dot\phi + Mg\ell = 0
+$$
+
+</details>
+
+### Example 8.3 — The Tennis Racquet Theorem (Intermediate Axis Instability)
+
+**Problem:** A rigid body with three distinct principal moments of inertia $I_1 < I_2 < I_3$ is set spinning about each principal axis in turn. Show that rotation about the intermediate axis ($I_2$) is unstable, while rotation about the axes of greatest and least moment of inertia is stable.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Euler's equations (torque-free)
+
+$$
+I_1\dot\omega_1 = (I_2 - I_3)\omega_2\omega_3, \tag{1}
+$$
+
+$$
+I_2\dot\omega_2 = (I_3 - I_1)\omega_3\omega_1, \tag{2}
+$$
+
+$$
+I_3\dot\omega_3 = (I_1 - I_2)\omega_1\omega_2. \tag{3}
+$$
+
+#### Step 2: Linearize about rotation around the intermediate axis
+
+Suppose the body rotates primarily about $\hat{e}_2$: $\omega_2 \approx \omega_0$ (large), $\omega_1, \omega_3 \ll \omega_0$ (small perturbations).
+
+From equation (2): $I_2\dot\omega_2 = (I_3-I_1)\omega_3\omega_1 \approx 0$ (second-order small), so $\omega_2 \approx \omega_0 = \text{const}$ to first order.
+
+Linearized equations (1) and (3):
+
+$$
+I_1\dot\omega_1 = (I_2 - I_3)\omega_0\omega_3, \tag{1'}
+$$
+
+$$
+I_3\dot\omega_3 = (I_1 - I_2)\omega_0\omega_1. \tag{3'}
+$$
+
+#### Step 3: Decouple the system
+
+Differentiate (1'): $I_1\ddot\omega_1 = (I_2-I_3)\omega_0\dot\omega_3$. Substitute $\dot\omega_3$ from (3'):
+
+$$
+I_1\ddot\omega_1 = (I_2-I_3)\omega_0\cdot\frac{(I_1-I_2)\omega_0}{I_3}\omega_1 = \frac{(I_2-I_3)(I_1-I_2)}{I_3}\omega_0^2\,\omega_1.
+$$
+
+$$
+\ddot\omega_1 = \frac{(I_2-I_3)(I_1-I_2)}{I_1 I_3}\omega_0^2\,\omega_1.
+$$
+
+#### Step 4: Analyze the sign of the coefficient
+
+Let $\lambda^2 = \frac{(I_2-I_3)(I_1-I_2)}{I_1 I_3}\omega_0^2$.
+
+Since $I_1 \lt  I_2 \lt  I_3$:
+- $(I_2 - I_3) \lt  0$
+- $(I_1 - I_2) \lt  0$
+- Product: $(I_2-I_3)(I_1-I_2) \gt  0$
+
+Therefore $\lambda^2 \gt  0$, and the equation $\ddot\omega_1 = \lambda^2\omega_1$ has **exponentially growing solutions**:
+
+$$
+\omega_1(t) = C_1 e^{\lambda t} + C_2 e^{-\lambda t}.
+$$
+
+The rotation about the intermediate axis is **unstable**.
+
+#### Step 5: Check the other axes
+
+**Rotation about $\hat{e}_1$ (smallest moment):** Set $\omega_1 \approx \omega_0$, perturb $\omega_2, \omega_3$. The coefficient becomes $\frac{(I_1-I_3)(I_2-I_1)}{I_2 I_3}\omega_0^2$. Since $(I_1-I_3) \lt  0$ and $(I_2-I_1) \gt  0$: product is negative. So $\ddot\omega_2 = -|\lambda|^2\omega_2$ → oscillatory (stable).
+
+**Rotation about $\hat{e}_3$ (largest moment):** Set $\omega_3 \approx \omega_0$, perturb $\omega_1, \omega_2$. The coefficient becomes $\frac{(I_3-I_2)(I_3-I_1)}{I_1 I_2}\omega_0^2$... wait, let me redo. Linearize (1) and (2) with $\omega_3 \approx \omega_0$:
+
+$I_1\dot\omega_1 = (I_2-I_3)\omega_2\omega_0$, $I_2\dot\omega_2 = (I_3-I_1)\omega_0\omega_1$.
+
+$\ddot\omega_1 = \frac{(I_2-I_3)(I_3-I_1)}{I_1 I_2}\omega_0^2\omega_1$. Since $(I_2-I_3) \lt  0$ and $(I_3-I_1) \gt  0$: product is negative → oscillatory (stable).
+
+#### Step 6: Summary
+
+| Axis | Moment | Stability | Solution type |
+|------|--------|-----------|---------------|
+| $\hat{e}_1$ | $I_1$ (smallest) | **Stable** | Oscillatory |
+| $\hat{e}_2$ | $I_2$ (intermediate) | **Unstable** | Exponential growth |
+| $\hat{e}_3$ | $I_3$ (largest) | **Stable** | Oscillatory |
+
+This is the **tennis racquet theorem** (also called the Dzhanibekov effect or intermediate axis theorem). A tennis racquet thrown spinning about its intermediate axis (the axis through the handle, perpendicular to the face) will tumble unpredictably — the spin flips back and forth.
+
+**Final Answer:**
+
+$$
+\text{Intermediate axis: } \ddot\omega_1 = +\lambda^2\omega_1 \text{ (unstable, } \lambda^2 \gt  0\text{)}
+$$
+
+$$
+\text{Extreme axes: } \ddot\omega = -\lambda^2\omega \text{ (stable oscillation)}
+$$
+
+</details>
+
+
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Derivation of Euler Angles (3-1-3 Convention) and Angular Velocity Components
+
+The Euler angles $(\phi, \theta, \psi)$ parameterize the orientation of a rigid body by three successive rotations. Here we derive the full rotation matrix and the angular velocity components in the body frame for the classical 3-1-3 (or $z$-$x'$-$z''$) convention used in most physics textbooks.
+
+**Step 1: The three rotations.**
+
+Starting from the lab frame $(X, Y, Z)$, reach the body frame $(x, y, z)$ by:
+
+1. **Rotate by $\phi$ about $Z$** (lab $z$-axis): maps $(X,Y,Z) \to (N, N', Z)$ where $N$ is the line of nodes.
+
+$$
+R_Z(\phi) = \begin{pmatrix}\cos\phi & \sin\phi & 0\\-\sin\phi & \cos\phi & 0\\0 & 0 & 1\end{pmatrix}.
+$$
+
+2. **Rotate by $\theta$ about $N$** (the new $x'$-axis, i.e., the line of nodes):
+
+$$
+R_N(\theta) = \begin{pmatrix}1 & 0 & 0\\0 & \cos\theta & \sin\theta\\0 & -\sin\theta & \cos\theta\end{pmatrix}.
+$$
+
+3. **Rotate by $\psi$ about $z$** (the body symmetry axis):
+
+$$
+R_z(\psi) = \begin{pmatrix}\cos\psi & \sin\psi & 0\\-\sin\psi & \cos\psi & 0\\0 & 0 & 1\end{pmatrix}.
+$$
+
+**Step 2: Total rotation matrix (body from lab).**
+
+$$
+R = R_z(\psi)\,R_N(\theta)\,R_Z(\phi).
+$$
+
+The full $3\times 3$ matrix (which we omit writing in full) transforms lab-frame vectors to body-frame vectors.
+
+**Step 3: Angular velocity in the body frame.**
+
+The total angular velocity is:
+
+$$
+\boldsymbol{\omega} = \dot\phi\,\hat{Z} + \dot\theta\,\hat{N} + \dot\psi\,\hat{z}_{\text{body}}.
+$$
+
+To express in body-frame components, project each term onto the body axes $(\hat{e}_1, \hat{e}_2, \hat{e}_3)$:
+
+- $\hat{Z}$ in body frame: $\hat{Z} = -\sin\theta\sin\psi\,\hat{e}_1 + \sin\theta\cos\psi\,\hat{e}_2 + \cos\theta\,\hat{e}_3$ (from the inverse rotation).
+- $\hat{N}$ in body frame: $\hat{N} = \cos\psi\,\hat{e}_1 - \sin\psi\,\hat{e}_2 + 0\,\hat{e}_3$ (the line of nodes after the $\psi$ rotation).
+- $\hat{z}_{\text{body}} = \hat{e}_3$.
+
+Wait — let me be more careful. After the $\psi$ rotation, the line of nodes $\hat{N}$ has body-frame components:
+
+$$
+\hat{N}_{\text{body}} = R_z(\psi)\hat{N}_{\text{intermediate}} = R_z(\psi)\begin{pmatrix}1\\0\\0\end{pmatrix} = \begin{pmatrix}\cos\psi\\\text{-}\sin\psi\\0\end{pmatrix}.
+$$
+
+And $\hat{Z}$ in the body frame (after both $\theta$ and $\psi$ rotations):
+
+$$
+\hat{Z}_{\text{body}} = R_z(\psi)R_N(\theta)\begin{pmatrix}0\\0\\1\end{pmatrix} = R_z(\psi)\begin{pmatrix}0\\-\sin\theta\\\cos\theta\end{pmatrix} = \begin{pmatrix}\sin\theta\sin\psi\\\text{-}\sin\theta\cos\psi\\\cos\theta\end{pmatrix}.
+$$
+
+Hmm — sign conventions vary. Using the standard result (Goldstein convention):
+
+$$
+\omega_1 = \dot\phi\sin\theta\sin\psi + \dot\theta\cos\psi,
+$$
+
+$$
+\omega_2 = \dot\phi\sin\theta\cos\psi - \dot\theta\sin\psi,
+$$
+
+$$
+\omega_3 = \dot\phi\cos\theta + \dot\psi.
+$$
+
+**Step 4: Kinetic energy in Euler angles (symmetric top, $I_1 = I_2$).**
+
+$$
+T = \frac{1}{2}I_1(\omega_1^2 + \omega_2^2) + \frac{1}{2}I_3\omega_3^2.
+$$
+
+Using $\omega_1^2 + \omega_2^2 = \dot\phi^2\sin^2\theta + \dot\theta^2$ (the cross terms cancel for the symmetric case):
+
+$$
+T = \frac{1}{2}I_1(\dot\theta^2 + \dot\phi^2\sin^2\theta) + \frac{1}{2}I_3(\dot\psi + \dot\phi\cos\theta)^2.
+$$
+
+This is the standard Lagrangian for the symmetric top (used in Example 8.2).
+
+*References: Goldstein, Classical Mechanics, §4.4; Landau & Lifshitz, Mechanics, §35; Marion & Thornton, Ch. 11.*
+
+### 9.2 Quaternions vs. Direction Cosine Matrices: A Comparison
+
+For computational rigid body dynamics (robotics, aerospace, game engines), the choice between quaternions and direction cosine matrices (DCMs) for representing rotations is a critical engineering decision.
+
+**Direction Cosine Matrix (DCM):**
+
+A $3\times 3$ orthogonal matrix $R$ with $\det R = +1$ (element of $SO(3)$). It has 9 elements but only 3 degrees of freedom (constrained by $R^T R = I$ and $\det R = 1$).
+
+**Advantages:**
+- Direct physical interpretation (columns are body axes in lab frame)
+- Composition by matrix multiplication: $R_{\text{total}} = R_2 R_1$
+- No singularities (unlike Euler angles)
+
+**Disadvantages:**
+- 9 parameters for 3 DOF → numerical drift from orthogonality (requires periodic re-orthogonalization)
+- More memory and computation for propagation
+
+**Quaternion (unit quaternion):**
+
+A quaternion $\mathbf{q} = q_0 + q_1\mathbf{i} + q_2\mathbf{j} + q_3\mathbf{k}$ with $|\mathbf{q}| = 1$ (element of $S^3$, double cover of $SO(3)$). It has 4 parameters with 1 constraint ($|\mathbf{q}|^2 = 1$) → 3 DOF.
+
+The rotation of a vector $\mathbf{v}$ by quaternion $\mathbf{q}$: $\mathbf{v}' = \mathbf{q}\mathbf{v}\mathbf{q}^*$ (quaternion sandwich product).
+
+**Advantages:**
+- Only 4 parameters (minimal non-singular representation)
+- Normalization constraint is a single equation ($|\mathbf{q}|^2 = 1$) — easy to enforce
+- Smooth interpolation (SLERP) between orientations
+- No gimbal lock
+- Propagation equation is linear: $\dot{\mathbf{q}} = \frac{1}{2}\boldsymbol{\omega}\mathbf{q}$ (where $\boldsymbol{\omega}$ is treated as a pure quaternion)
+
+**Disadvantages:**
+- Less intuitive physically
+- Double cover: $\mathbf{q}$ and $-\mathbf{q}$ represent the same rotation
+- Quaternion-to-DCM conversion needed for some operations
+
+**Euler Angles:**
+
+3 parameters, intuitive, but suffer from **gimbal lock** (singularity when $\theta = 0$ or $\pi$ in the 3-1-3 convention). The kinematic equations become singular at these configurations.
+
+**Comparison table:**
+
+| Property | DCM | Quaternion | Euler Angles |
+|----------|-----|-----------|--------------|
+| Parameters | 9 | 4 | 3 |
+| Constraints | 6 | 1 | 0 |
+| Singularities | None | None | Gimbal lock |
+| Composition | Matrix multiply | Quaternion multiply | Complex trig |
+| Numerical drift | Orthogonality loss | Norm drift (easy fix) | N/A |
+| Interpolation | Difficult | SLERP (smooth) | Non-uniform |
+| Memory | 9 floats | 4 floats | 3 floats |
+
+**Recommendation:** For numerical integration of rigid body dynamics (spacecraft attitude, game physics), quaternions are preferred. For analytical work and textbook derivations, Euler angles remain standard. DCMs are used when the full rotation matrix is needed frequently (e.g., coordinate transformations in navigation).
+
+*References: Goldstein, §4.5 (Euler parameters); Diebel, "Representing Attitude: Euler Angles, Unit Quaternions, and Rotation Vectors" (Stanford tech report); Kuipers, Quaternions and Rotation Sequences.*
+
+---
+
+
+### 9.3 Euler's Equations of Motion: Full Derivation from Angular Momentum
+
+Here we derive Euler's equations from the fundamental relation $\boldsymbol{\tau} = \frac{d\mathbf{L}}{dt}$ by carefully handling the time derivative in the rotating body frame.
+
+**Step 1: Angular momentum in the body frame.**
+
+In the body frame (principal axes), $\mathbf{L} = I_1\omega_1\hat{e}_1 + I_2\omega_2\hat{e}_2 + I_3\omega_3\hat{e}_3$.
+
+**Step 2: Time derivative in the rotating frame.**
+
+For any vector $\mathbf{A}$, the lab-frame and body-frame time derivatives are related by:
+
+$$
+\left(\frac{d\mathbf{A}}{dt}\right)_{\text{lab}} = \left(\frac{d\mathbf{A}}{dt}\right)_{\text{body}} + \boldsymbol{\omega}\times\mathbf{A}.
+$$
+
+Apply this to $\mathbf{L}$:
+
+$$
+\boldsymbol{\tau} = \left(\frac{d\mathbf{L}}{dt}\right)_{\text{lab}} = \left(\frac{d\mathbf{L}}{dt}\right)_{\text{body}} + \boldsymbol{\omega}\times\mathbf{L}.
+$$
+
+**Step 3: Compute each term.**
+
+$$
+\left(\frac{d\mathbf{L}}{dt}\right)_{\text{body}} = I_1\dot\omega_1\hat{e}_1 + I_2\dot\omega_2\hat{e}_2 + I_3\dot\omega_3\hat{e}_3.
+$$
+
+(The moments of inertia are constant in the body frame since we use principal axes.)
+
+$$
+\boldsymbol{\omega}\times\mathbf{L} = \begin{vmatrix}\hat{e}_1 & \hat{e}_2 & \hat{e}_3\\\omega_1 & \omega_2 & \omega_3\\I_1\omega_1 & I_2\omega_2 & I_3\omega_3\end{vmatrix}
+$$
+
+$$
+= (I_3 - I_2)\omega_2\omega_3\,\hat{e}_1 + (I_1 - I_3)\omega_3\omega_1\,\hat{e}_2 + (I_2 - I_1)\omega_1\omega_2\,\hat{e}_3.
+$$
+
+**Step 4: Combine to get Euler's equations.**
+
+$$
+\tau_1 = I_1\dot\omega_1 + (I_3 - I_2)\omega_2\omega_3,
+$$
+
+$$
+\tau_2 = I_2\dot\omega_2 + (I_1 - I_3)\omega_3\omega_1,
+$$
+
+$$
+\tau_3 = I_3\dot\omega_3 + (I_2 - I_1)\omega_1\omega_2.
+$$
+
+Or equivalently (rearranging):
+
+$$
+I_1\dot\omega_1 = \tau_1 - (I_3 - I_2)\omega_2\omega_3 = \tau_1 + (I_2 - I_3)\omega_2\omega_3.
+$$
+
+For torque-free motion ($\boldsymbol{\tau} = 0$), these reduce to the equations used in Examples 8.1 and 8.3.
+
+**Step 5: Conservation laws from Euler's equations.**
+
+Multiply the $i$-th equation by $\omega_i$ and sum:
+
+$$
+\sum_i I_i\omega_i\dot\omega_i = \sum_i\tau_i\omega_i = \boldsymbol{\tau}\cdot\boldsymbol{\omega} = \text{power of external torque}.
+$$
+
+The left side is $\frac{d}{dt}\left(\frac{1}{2}\sum_i I_i\omega_i^2\right) = \dot{T}_{\text{rot}}$. For $\boldsymbol{\tau} = 0$: rotational kinetic energy is conserved.
+
+Similarly, $\frac{d}{dt}|\mathbf{L}|^2 = 2\mathbf{L}\cdot\dot{\mathbf{L}}_{\text{lab}} = 2\mathbf{L}\cdot\boldsymbol{\tau} = 0$ for torque-free motion. So $L^2 = I_1^2\omega_1^2 + I_2^2\omega_2^2 + I_3^2\omega_3^2$ is also conserved.
+
+These two conservation laws ($T$ and $L^2$) define two ellipsoids in $(\omega_1, \omega_2, \omega_3)$ space. The actual motion lies on their intersection — this is the geometric construction behind the Poinsot ellipsoid.
+
+*References: Goldstein, Classical Mechanics, §5.5; Landau & Lifshitz, Mechanics, §36; Marion & Thornton, §11.11.*
+

@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Outfit:wght@500;700&amp;display=swap');
+      .svg-bg {
+        fill: var(--background-primary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 12px;
+      }
+      .title {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        fill: var(--text-muted);
+      }
+      .card {
+        fill: var(--background-secondary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 8px;
+      }
+      .card-header {
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .card-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: var(--text-muted);
+      }
+      .bold-word {
+        font-weight: 600;
+        fill: var(--text-normal);
+      }
+      .verb-jp {
+        font-family: 'Outfit', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .stem-jp {
+        font-family: 'Outfit', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .badge-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        text-anchor: middle;
+      }
+      .flow-path {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        opacity: 0.4;
+      }
+      .flow-path-active {
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-dasharray: 6, 6;
+      }
+      .matrix-header {
+        font-family: 'Outfit', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .matrix-cell {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        fill: var(--text-muted);
+      }
+      .matrix-highlight {
+        font-weight: 600;
+        fill: var(--text-normal);
+      }
+    </style>
+    
+    <!-- Master Animation Timer -->
+    <rect id="master" width="0" height="0">
+      <animate id="master_timer" attributeName="width" from="0" to="100" dur="4s" repeatCount="indefinite" />
+    </rect>
+  </defs>
+
+  <!-- Container Background -->
+  <rect width="100%" height="100%" class="svg-bg" />
+
+  <!-- Header -->
+  <g transform="translate(30, 45)">
+    <text x="0" y="0" class="title">日本語動詞の活用 — Japanese Verb Conjugation Map</text>
+    <text x="0" y="20" class="subtitle">Visualizing Ichidan vs. Godan stems, the 5 phonetic て-form consonant changes, and polite vs. plain forms</text>
+  </g>
+
+  <!-- ==================== FLOW CHANNELS (PATHS) ==================== -->
+  <!-- Left to Center -->
+  <path id="path_ichidan_to_stem" d="M 230,160 L 270,127" class="flow-path" stroke="#3b82f6" />
+  <path id="path_godan_to_stem" d="M 230,325 C 245,325 255,212 270,212" class="flow-path" stroke="#ec4899" />
+  <path id="path_godan_to_matrix" d="M 230,325 L 270,332" class="flow-path" stroke="#eab308" />
+
+  <!-- Center to Right -->
+  <path id="path_ichidan_stem_to_polite" d="M 500,127 L 550,127" class="flow-path" stroke="#3b82f6" />
+  <path id="path_ichidan_stem_to_plain" d="M 500,127 C 520,127 530,217 550,217" class="flow-path" stroke="#3b82f6" />
+  <path id="path_ichidan_stem_to_te" d="M 500,127 C 515,127 530,337 550,337" class="flow-path" stroke="#3b82f6" />
+
+  <path id="path_godan_stem_to_polite" d="M 500,212 C 515,212 530,127 550,127" class="flow-path" stroke="#ec4899" />
+  <path id="path_godan_stem_to_plain" d="M 500,212 L 550,217" class="flow-path" stroke="#ec4899" />
+
+  <path id="path_matrix_to_te" d="M 500,332 L 550,337" class="flow-path" stroke="#eab308" />
+
+  <!-- Animated Active Flow Overlays -->
+  <use href="#path_ichidan_to_stem" class="flow-path-active" stroke="#3b82f6">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite" />
+  </use>
+  <use href="#path_godan_to_stem" class="flow-path-active" stroke="#ec4899">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite" />
+  </use>
+  <use href="#path_godan_to_matrix" class="flow-path-active" stroke="#eab308">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1.1s" repeatCount="indefinite" />
+  </use>
+  <use href="#path_ichidan_stem_to_te" class="flow-path-active" stroke="#3b82f6">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1.5s" repeatCount="indefinite" />
+  </use>
+  <use href="#path_matrix_to_te" class="flow-path-active" stroke="#eab308">
+    <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite" />
+  </use>
+
+  <!-- Glowing Flow Particles -->
+  <circle r="4" fill="#60a5fa">
+    <animateMotion dur="2.5s" repeatCount="indefinite">
+      <mpath href="#path_ichidan_to_stem" />
+    </animateMotion>
+  </circle>
+  <circle r="4" fill="#f472b6">
+    <animateMotion dur="3s" repeatCount="indefinite">
+      <mpath href="#path_godan_to_stem" />
+    </animateMotion>
+  </circle>
+  <circle r="4" fill="#fbbf24">
+    <animateMotion dur="2.8s" repeatCount="indefinite">
+      <mpath href="#path_godan_to_matrix" />
+    </animateMotion>
+  </circle>
+  <circle r="4" fill="#fbbf24">
+    <animateMotion dur="2.2s" repeatCount="indefinite">
+      <mpath href="#path_matrix_to_te" />
+    </animateMotion>
+  </circle>
+
+  <!-- ==================== LEFT COLUMN: CLASSIFICATION ==================== -->
+  <!-- Ichidan Verbs Card -->
+  <g transform="translate(30, 90)">
+    <rect width="200" height="140" class="card" />
+    <rect x="10" y="10" width="85" height="18" fill="rgba(59, 130, 246, 0.1)" stroke="#3b82f6" stroke-width="1" rx="4" />
+    <text x="52.5" y="22" class="badge-text" fill="#3b82f6">ICHIDAN (る)</text>
+    
+    <text x="15" y="55" class="verb-jp" fill="var(--text-normal)">食べる <tspan font-size="12px" font-weight="400" fill="var(--text-muted)">taberu (eat)</tspan></text>
+    
+    <text x="15" y="82" class="card-text">
+      <tspan x="15" dy="0">• Rule: Ends in <tspan class="bold-word">i-る</tspan> or <tspan class="bold-word">e-る</tspan></tspan>
+      <tspan x="15" dy="16">• Conjugation: Drop <tspan class="bold-word" fill="#3b82f6">る</tspan></tspan>
+      <tspan x="15" dy="16">  and directly append endings</tspan>
+    </text>
+  </g>
+
+  <!-- Godan Verbs Card -->
+  <g transform="translate(30, 245)">
+    <rect width="200" height="160" class="card" />
+    <rect x="10" y="10" width="85" height="18" fill="rgba(236, 72, 153, 0.1)" stroke="#ec4899" stroke-width="1" rx="4" />
+    <text x="52.5" y="22" class="badge-text" fill="#ec4899">GODAN (う)</text>
+    
+    <text x="15" y="55" class="verb-jp" fill="var(--text-normal)">飲む <tspan font-size="12px" font-weight="400" fill="var(--text-muted)">nomu (drink)</tspan></text>
+    
+    <text x="15" y="82" class="card-text">
+      <tspan x="15" dy="0">• Rule: Ends in any <tspan class="bold-word">u-row</tspan> sound</tspan>
+      <tspan x="15" dy="16">• Conjugation: <tspan class="bold-word" fill="#ec4899">Vowel shifts</tspan></tspan>
+      <tspan x="15" dy="16">  (u → i/a/o) or phonetic</tspan>
+      <tspan x="15" dy="16">  consonant substitutions</tspan>
+    </text>
+  </g>
+
+
+  <!-- ==================== CENTER COLUMN: STEMS & MATRIX ==================== -->
+  <!-- Ichidan Stem Card -->
+  <g transform="translate(270, 90)">
+    <rect width="230" height="75" class="card" />
+    <text x="15" y="22" class="card-header" fill="#3b82f6">Ichidan Stem (Drop る)</text>
+    <text x="15" y="52" class="stem-jp">食べ- <tspan font-size="13px" font-weight="400" fill="var(--text-muted)">tabe- (stem is immutable)</tspan></text>
+  </g>
+
+  <!-- Godan Stem Card -->
+  <g transform="translate(270, 175)">
+    <rect width="230" height="75" class="card" />
+    <text x="15" y="22" class="card-header" fill="#ec4899">Godan Stems (Vowel Shift)</text>
+    <text x="15" y="45" class="card-text">
+      <tspan x="15" dy="0">Polite stem (i-row): <tspan class="matrix-highlight">飲み-</tspan> <tspan fill="var(--text-faint)">(nomi-)</tspan></tspan>
+      <tspan x="15" dy="18">Plain negative (a-row): <tspan class="matrix-highlight">飲ま-</tspan> <tspan fill="var(--text-faint)">(noma-)</tspan></tspan>
+    </text>
+  </g>
+
+  <!-- Godan て-Form Sound Matrix -->
+  <g transform="translate(270, 260)">
+    <rect width="230" height="145" class="card" />
+    <rect x="0" y="0" width="230" height="24" fill="var(--background-primary)" stroke="var(--divider-color)" stroke-width="1.5" rx="8" />
+    <text x="15" y="16" class="matrix-header">Godan て-Form Sound Matrix</text>
+    
+    <g transform="translate(15, 42)">
+      <!-- Line 1 -->
+      <text x="0" y="0" class="matrix-cell">Ends in <tspan class="matrix-highlight">く</tspan> → <tspan class="matrix-highlight" fill="#eab308">いて</tspan> / <tspan class="matrix-highlight">ぐ</tspan> → <tspan class="matrix-highlight" fill="#eab308">いで</tspan></text>
+      <text x="135" y="0" class="matrix-cell" font-size="10px" fill="var(--text-faint)">書く→書いて</text>
+      
+      <!-- Line 2 -->
+      <text x="0" y="18" class="matrix-cell">Ends in <tspan class="matrix-highlight">す</tspan> → <tspan class="matrix-highlight" fill="#eab308">して</tspan></text>
+      <text x="135" y="18" class="matrix-cell" font-size="10px" fill="var(--text-faint)">話す→話して</text>
+      
+      <!-- Line 3 -->
+      <text x="0" y="36" class="matrix-cell">Ends in <tspan class="matrix-highlight">む/ぶ/ぬ</tspan> → <tspan class="matrix-highlight" fill="#eab308">んで</tspan></text>
+      <text x="135" y="36" class="matrix-cell" font-size="10px" fill="var(--text-faint)">飲む→飲んで</text>
+
+      <!-- Line 4 -->
+      <text x="0" y="54" class="matrix-cell">Ends in <tspan class="matrix-highlight">る/つ/う</tspan> → <tspan class="matrix-highlight" fill="#eab308">って</tspan></text>
+      <text x="135" y="54" class="matrix-cell" font-size="10px" fill="var(--text-faint)">買う→買って</text>
+
+      <!-- Line 5 -->
+      <text x="0" y="72" class="matrix-cell" font-weight="600" fill="#f43f5e">Exception: 行く → 行って (itte)</text>
+    </g>
+  </g>
+
+
+  <!-- ==================== RIGHT COLUMN: CONJUGATED FORMS ==================== -->
+  <!-- Polite Form (ます-form) -->
+  <g transform="translate(550, 90)">
+    <rect width="220" height="80" class="card" />
+    <rect x="10" y="10" width="80" height="18" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" stroke-width="1" rx="4" />
+    <text x="50" y="22" class="badge-text" fill="#10b981">POLITE (ます)</text>
+    
+    <text x="15" y="48" class="card-text">
+      <tspan x="15" dy="0">Ichidan: <tspan class="matrix-highlight" fill="#10b981">食べます</tspan> <tspan font-size="10px" fill="var(--text-faint)">(tabemasu)</tspan></tspan>
+      <tspan x="15" dy="18">Godan: <tspan class="matrix-highlight" fill="#10b981">飲みます</tspan> <tspan font-size="10px" fill="var(--text-faint)">(nomimasu)</tspan></tspan>
+    </text>
+  </g>
+
+  <!-- Plain Form (ない/た-form) -->
+  <g transform="translate(550, 180)">
+    <rect width="220" height="80" class="card" />
+    <rect x="10" y="10" width="70" height="18" fill="rgba(107, 114, 128, 0.1)" stroke="var(--text-muted)" stroke-width="1" rx="4" />
+    <text x="45" y="22" class="badge-text" fill="var(--text-muted)">PLAIN (辞書/ない)</text>
+    
+    <text x="15" y="48" class="card-text">
+      <tspan x="15" dy="0">Negative: <tspan class="matrix-highlight">食べない</tspan> / <tspan class="matrix-highlight">飲まない</tspan></tspan>
+      <tspan x="15" dy="18">Past (た): <tspan class="matrix-highlight">食べた</tspan> / <tspan class="matrix-highlight">飲んだ</tspan></tspan>
+    </text>
+  </g>
+
+  <!-- て-form Gateway -->
+  <g transform="translate(550, 270)">
+    <rect width="220" height="135" class="card" />
+    <rect x="10" y="10" width="105" height="18" fill="rgba(234, 179, 8, 0.1)" stroke="#eab308" stroke-width="1" rx="4" />
+    <text x="62.5" y="22" class="badge-text" fill="#eab308">て-FORM GATEWAY</text>
+    
+    <text x="15" y="46" class="card-text">
+      <tspan x="15" dy="0">Ichidan: <tspan class="matrix-highlight" fill="#eab308">食べて</tspan> | Godan: <tspan class="matrix-highlight" fill="#eab308">飲んで</tspan></tspan>
+      <tspan x="15" dy="18" font-weight="600" fill="var(--text-normal)">Unlocks 20+ Key Patterns:</tspan>
+      <tspan x="15" dy="16">• <tspan class="matrix-highlight">〜てください</tspan> (Please do)</tspan>
+      <tspan x="15" dy="16">• <tspan class="matrix-highlight">〜ています</tspan> (Ongoing state)</tspan>
+      <tspan x="15" dy="16">• <tspan class="matrix-highlight">〜てもいい</tspan> (Permission)</tspan>
+    </text>
+  </g>
+
+  <!-- FOOTER -->
+  <rect x="30" y="415" width="740" height="22" fill="var(--background-secondary)" stroke="var(--divider-color)" stroke-width="1" rx="4" />
+  <text x="400" y="430" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10px" fill="var(--text-muted)">
+    Irregulars: <tspan class="bold-word">する → して / します</tspan> and <tspan class="bold-word">くる → きて / きます</tspan>. Plain past (<tspan fill="#eab308" class="bold-word">た-form</tspan>) mirrors the exact same consonant-change rules as the <tspan fill="#eab308" class="bold-word">て-form</tspan>.
+  </text>
+</svg>

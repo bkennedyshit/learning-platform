@@ -1,0 +1,316 @@
+---
+title: "33.4 — CNC Machining & G-Code"
+subject: "Mechanical Engineering & Fabrication"
+catalog: advanced
+audience_tier: higher-education
+chapter: "33.4"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 33.4 — CNC Machining & G-Code
+
+> *"The tool doesn't know what you intended. It only knows what you programmed."*
+
+---
+
+## 🎯 Learning Objectives
+
+1. Explain the CNC coordinate system (XYZ + rotary ABC) and right-hand rule.
+2. Write basic G-code programs with rapid moves, linear feeds, arcs, drill cycles, and tool changes.
+3. Calculate **spindle RPM** and **feed rate** from cutting speed and chip load for aluminium and mild steel.
+4. Identify 5 toolpath strategies (contour, pocket, adaptive, drill, 3D surface) and when to use each.
+5. Generate a CAM toolpath in **FreeCAD Path workbench**, post-process to G-code, and simulate it.
+6. Explain **work offsets** (G54–G59) and **tool length offsets** (G43).
+
+---
+
+## 🖼️ Visual Anchor
+
+![mech__34.4-fig1](mech__34.4-fig1.svg)
+
+---
+
+## 📚 1. CNC Machine Axes
+
+### 1.1 The Right-Hand Coordinate System
+
+```
+Z+ = up (away from table / spindle extends)
+X+ = right (when facing machine)
+Y+ = toward operator
+```
+
+**Rotation axes (right-hand rule: thumb points along + axis, fingers curl in + rotation direction):**
+- A = rotation around X
+- B = rotation around Y
+- C = rotation around Z
+
+### 1.2 Machine Types
+
+| Machine | Axes | Typical use |
+|---------|------|-------------|
+| 3-axis mill | X, Y, Z | Flat parts, prismatic features |
+| 4-axis mill | X, Y, Z + A or B | Cylindrical engraving, wrapped features |
+| 5-axis mill | X, Y, Z + 2 rotary | Complex aerospace/medical parts, undercuts |
+| 2-axis lathe | X, Z | Cylindrical parts |
+| Mill-turn | All of above | Combined prismatic + cylindrical |
+| Router (3-axis) | X, Y, Z | Wood, foam, soft metals, PCBs |
+
+---
+
+## 📚 2. G-Code Reference
+
+G-code is the programming language of CNC machines. Each line is a "block" containing one or more words (letters + numbers).
+
+### 2.1 Essential G-Codes (Preparatory)
+
+| Code | Function | Example |
+|------|---------|---------|
+| G00 | Rapid positioning (max speed) | `G00 X10.0 Y20.0` |
+| G01 | Linear interpolation (controlled feed) | `G01 X50.0 F200` |
+| G02 | Circular arc — Clockwise | `G02 X60 Y0 R10 F150` |
+| G03 | Circular arc — Counter-clockwise | `G03 I-10 J0 F150` |
+| G17 | Select XY plane (default for milling) | `G17` |
+| G18 | Select XZ plane | `G18` |
+| G19 | Select YZ plane | `G19` |
+| G20 | Input in inches | `G20` |
+| G21 | Input in millimetres | `G21` |
+| G28 | Return to machine home | `G28 Z0` |
+| G40 | Cancel cutter radius compensation | `G40` |
+| G41 | Cutter radius compensation — left | `G41 D1` |
+| G42 | Cutter radius compensation — right | `G42 D1` |
+| G43 | Tool length offset positive | `G43 H01 Z5.0` |
+| G49 | Cancel tool length offset | `G49` |
+| G54–G59 | Work coordinate system selection | `G54` |
+| G80 | Cancel drill cycle | `G80` |
+| G81 | Drilling cycle | `G81 X0 Y0 Z-10 R2 F100` |
+| G83 | Peck drilling cycle | `G83 Z-20 Q3 R2 F100` |
+| G84 | Tapping cycle | `G84 Z-12 R2 F500 S1000` |
+| G90 | Absolute coordinates | `G90` |
+| G91 | Incremental coordinates | `G91` |
+| G94 | Feed in mm/min | `G94` |
+| G95 | Feed in mm/rev | `G95` |
+
+### 2.2 M-Codes (Miscellaneous)
+
+| Code | Function |
+|------|---------|
+| M03 | Spindle CW (forward) + speed | `M03 S1200` |
+| M04 | Spindle CCW (reverse) | `M04 S800` |
+| M05 | Spindle stop | `M05` |
+| M06 | Tool change | `M06 T02` |
+| M07 | Mist coolant on | `M07` |
+| M08 | Flood coolant on | `M08` |
+| M09 | Coolant off | `M09` |
+| M30 | End of program + rewind | `M30` |
+
+### 2.3 A Minimal CNC Program (Face a 50×50mm Al square)
+
+```gcode
+; Face milling operation — Al 6061, 12mm face mill
+G21        ; mm mode
+G90        ; absolute coords
+G17        ; XY plane
+G54        ; use work offset 1
+M03 S3000  ; spindle on, 3000 RPM
+G43 H01    ; tool length offset for tool 1
+G00 Z5.0   ; rapid to safe height
+G00 X-7 Y-7 ; rapid to start position (outside part)
+G01 Z-0.5 F200 ; plunge 0.5mm depth at 200mm/min
+G01 X57 F800   ; face across at 800mm/min
+G00 Z5.0       ; retract
+G00 X-7 Y10    ; reposition for next pass
+G01 Z-0.5 F200
+G01 X57 F800
+G00 Z5.0
+M05        ; spindle off
+M09        ; coolant off
+G28 Z0     ; return Z to home
+M30        ; end program
+```
+
+---
+
+## 📚 3. Speeds & Feeds
+
+### 3.1 Cutting Speed → Spindle RPM
+
+Cutting speed (Vc) is the speed at which the tool's cutting edge moves through material, measured in Surface Feet per Minute (SFM) or Surface Meters per Minute (m/min).
+
+**Formula (imperial/SFM):**
+$$\text{RPM} = \frac{Vc_{SFM} \times 3.82}{\text{Diameter (inches)}}$$
+
+**Formula (metric/m/min):**
+$$\text{RPM} = \frac{Vc_{m/min} \times 1000}{\pi \times \text{Diameter (mm)}}$$
+
+**Recommended cutting speeds:**
+
+| Material | SFM (HSS) | SFM (Carbide) | m/min (Carbide) |
+|---------|----------|--------------|----------------|
+| Aluminium | 300–500 | 700–1500 | 210–450 |
+| Brass/Bronze | 150–300 | 300–500 | 90–150 |
+| Mild steel (1020) | 100–150 | 200–400 | 60–120 |
+| Alloy steel (4140) | 80–120 | 150–300 | 45–90 |
+| Stainless (304) | 50–80 | 100–200 | 30–60 |
+| Titanium | 25–50 | 50–100 | 15–30 |
+| Cast iron | 80–120 | 200–400 | 60–120 |
+
+### 3.2 Feed Rate
+
+$$\text{Feed rate (mm/min)} = \text{RPM} \times \text{flutes} \times \text{chip load (mm)}$$
+
+**Typical chip loads (carbide end mill):**
+
+| Material | Chip load per tooth (mm) |
+|---------|------------------------|
+| Aluminium | 0.05–0.13 (4-flute) |
+| Mild steel | 0.025–0.05 |
+| Stainless | 0.015–0.04 |
+| Titanium | 0.015–0.03 |
+
+**Worked example:** 6mm diameter 3-flute carbide end mill in Al 6061
+- RPM = (700 SFM × 3.82) / 0.236" = ~11,300 RPM → cap at machine max (e.g. 10,000)
+- Feed = 10,000 × 3 × 0.076mm = 2,280 mm/min (at full chipload)
+- In practice: start at 50–70% → 1,600 mm/min, increase if no chatter
+
+### 3.3 Depth of Cut
+
+| Operation | Axial (Z) depth | Radial (stepover) |
+|----------|----------------|------------------|
+| Roughing Al | 0.5–1× diameter | 50–75% diameter |
+| Finishing Al | 0.05–0.1× dia | 5–15% diameter |
+| Adaptive clearing | 0.5–2× dia (!) | 10–30% diameter |
+
+**Adaptive clearing (trochoidal):** maintains constant radial engagement → consistent chip load → high material removal rate + long tool life. All modern CAM packages support it.
+
+---
+
+## 📚 4. Work Offsets and Tool Offsets
+
+### 4.1 Work Coordinate System (WCS)
+
+The machine has its own home position (machine coordinate system). Work offsets (G54–G59) define the origin of YOUR part relative to machine home.
+
+**Setting G54:**
+1. Mount part on table
+2. Use an edge finder or probing cycle to locate X, Y, Z zero
+3. Enter the offset distance into the machine's G54 table
+4. Program uses G54 → machine translates coordinates automatically
+
+**G55–G59:** Additional work offsets for multi-part setups or different parts in sequence.
+
+### 4.2 Tool Length Offsets (TLO)
+
+Tools have different lengths. G43 H01 tells the controller to apply the stored length offset for tool 1 to all Z moves.
+
+**Setting TLO:**
+1. Touch tool to Z datum surface (part top surface or fixed reference)
+2. Machine measures distance from spindle face to datum
+3. Stores as H01 (or whatever tool number)
+4. Now Z0 means "top of part" regardless of tool length
+
+---
+
+## 📚 5. CAM Toolpath Strategies
+
+### 5.1 FreeCAD Path Workbench Workflow
+
+```
+1. Create 3D solid in Part Design or Part WB
+2. Switch to Path workbench
+3. Create new Job → select solid → choose post-processor (Grbl, LinuxCNC, Fanuc…)
+4. Add operations:
+   a. Profile (outer contour) — outer profile cutting
+   b. Pocket (interior pocket) — pocket clearing
+   c. Drilling — holes
+   d. Adaptive clearing (most efficient for pockets)
+5. Set tool parameters (diameter, flutes, material)
+6. Set speeds/feeds
+7. Simulate: Path → Simulate Path
+8. Post-process: generate G-code file
+9. Send to machine via CNCjs, bCNC, or Pronterface
+```
+
+### 5.2 Toolpath Types
+
+| Type | Description | Use when |
+|------|-------------|---------|
+| **Profile/Contour** | Follow part boundary at specified depth | Outline cuts, 2.5D parts |
+| **Pocket** | Clear interior area | Recesses, cavities |
+| **Adaptive (trochoidal)** | Circular arcing paths, constant engagement | Hard materials, deep pockets |
+| **Drill cycles** | G81/G83/G84 canned cycles | Holes, taps |
+| **3D surface (raster/contour)** | Follow 3D surface, scallop-height controlled | Organic surfaces, mould tools |
+| **Thread mill** | Helical interpolation for internal/external threads | All thread sizes with one tool |
+
+### 5.3 Climb vs Conventional Milling
+
+| Type | Tool rotation vs feed | Surface quality | Force direction |
+|------|----------------------|----------------|----------------|
+| Climb (down-cut) | Same direction | Better | Pulls workpiece into table |
+| Conventional (up-cut) | Opposite direction | Rougher | Lifts workpiece |
+
+**Use climb milling** for finishing passes on CNC (modern machine, good fixturing). Use conventional for roughing when backlash is a concern (older machines) or when chip clearing is poor.
+
+---
+
+## 🛠️ 6. Worked Example — Simple Robot Bracket in FreeCAD Path
+
+**Part:** 50×30×10mm Al 6061 bracket with a 20×15×5mm pocket and 4× Ø5mm through holes.
+
+**CAM Setup:**
+1. Part Design: sketch pocket + holes, pad to 10mm
+2. Path workbench → new Job
+3. Operation 1: Adaptive Clearing on pocket, 6mm 3-flute carbide, depth 5mm, WOC 1.2mm, DOC 3mm
+4. Operation 2: Profile (outer contour), climb, depth 10mm, 2 passes
+5. Operation 3: Drilling G83 peck cycle, Ø4.8mm drill (undersized for finish), peck Q2mm
+6. Post-process: LinuxCNC post → bracket.ngc
+7. Simulate in CAMotics → verify no gouges
+8. Run on machine
+
+**Speeds for Step 3–5:**
+- RPM = (800 SFM × 3.82) / 0.236" ≈ 12,950 → cap at 10,000 RPM
+- Feed = 10,000 × 3 × 0.076 = 2,280 mm/min (adaptive roughing)
+- Finishing pass: feed = 10,000 × 3 × 0.025 = 750 mm/min
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+1. **"Higher RPM is always better."** RPM must match the tool diameter and material. Running too fast in steel burns tools. Too slow in aluminium causes built-up edge (material welds to tool).
+
+2. **"G-code is the same on all machines."** Not quite. Every controller (Fanuc, Haas, Siemens, Grbl) has dialect differences. Post-processors handle this translation, but always review output before first cut.
+
+3. **"I can program the part and run it immediately."** ALWAYS simulate first (CAMotics is free). CNC crashes destroy expensive tooling, fixtures, and sometimes the machine. Air-cut the first program (run with Z raised 50mm) before actual cutting.
+
+4. **"Coolant is optional."** For steel and titanium — no. Cutting heat destroys tools and workpiece surface quality in minutes. Mist coolant minimum. Aluminium can be dry with sharp carbide, but flood is preferred.
+
+5. **"Adaptive clearing is slower because it uses less material engagement."** Counter-intuitive but false. By maintaining constant chip load, you can run 3–5× faster feed rates. Total time is less than traditional pocketing.
+
+6. **"Tool deflection doesn't matter for aluminium."** Long thin tools deflect even in aluminium at high feed rates, causing dimensional error and surface marks. Maximum L/D ratio for good accuracy ≈ 4:1 (tool stickout:diameter).
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+### Internal
+- [33.7 - FreeCAD & Parametric Modelling](33.7---FreeCAD-&-Parametric-Modelling) — create the CAD model before CAM
+- [33.3 - Manufacturing Processes & DFM](33.3---Manufacturing-Processes-&-DFM) — DFM rules that constrain what you program
+- [33.6 - Tolerancing, Fits & Assemblies](33.6---Tolerancing,-Fits-&-Assemblies) — the tolerances the CNC must achieve
+
+### External
+- [NYC CNC YouTube](https://www.youtube.com/@NYCCNC) — CNC machining, speeds/feeds, Fusion 360/FreeCAD CAM
+- [FSWizard free speeds/feeds calculator](https://www.carbide-depot.com/FswizApp) — enter tool + material → get numbers
+- [CAMotics free G-code simulator](https://camotics.org/) — simulate before cutting
+- [FreeCAD Path Workbench Wiki](https://wiki.freecad.org/Path_Workbench) — full reference
+- [Practical Machinist forum](https://www.practicalmachinist.com/) — professional community
+- [G-code reference (LinuxCNC)](https://linuxcnc.org/docs/html/gcode/) — comprehensive dialect reference
+
+---
+
+*Prev: [33.3 - Manufacturing Processes & DFM](33.3---Manufacturing-Processes-&-DFM) | Next: [33.5 - 3D Printing & Additive Manufacturing](33.5---3D-Printing-&-Additive-Manufacturing)*

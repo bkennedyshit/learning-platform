@@ -1,0 +1,60 @@
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <style>
+    .fsb1 { fill:var(--interactive-accent, #58a6ff); opacity:0.15; stroke:var(--interactive-accent, #58a6ff); stroke-width:1.2; }
+    .fsb2 { fill:var(--text-accent, #79c0ff); opacity:0.15; stroke:var(--text-accent, #79c0ff); stroke-width:1.2; }
+    .fsb3 { fill:var(--text-muted, #8b949e); opacity:0.10; stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .fsarr { stroke:var(--text-normal, #c9d1d9); stroke-width:1.6; fill:none;
+             marker-end:url(#fsarr28); }
+    .fslb  { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9);
+             text-anchor:middle; }
+    .fsla  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--interactive-accent, #58a6ff); text-anchor:middle; }
+    .fslb2 { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+             fill:var(--text-accent, #79c0ff); text-anchor:middle; }
+    .fslm  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:12px;
+             fill:var(--text-muted, #8b949e); text-anchor:middle; }
+  </style>
+  <defs>
+    <marker id="fsarr28" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <!-- ℝⁿ domain -->
+  <rect x="10" y="30" width="250" height="240" rx="8" class="fsb3"/>
+  <text x="135" y="22" class="fslb" font-weight="bold">ℝⁿ (domain)</text>
+  <!-- Row space C(Aᵀ) -->
+  <ellipse cx="100" cy="130" rx="70" ry="50" class="fsb1"/>
+  <text x="100" y="126" class="fsla">C(Aᵀ)</text>
+  <text x="100" y="143" class="fslb">row space</text>
+  <text x="100" y="158" class="fslb">v₁,…,vᵣ</text>
+  <!-- Null space N(A) -->
+  <ellipse cx="190" cy="220" rx="55" ry="30" class="fsb2"/>
+  <text x="190" y="215" class="fslb2">N(A)</text>
+  <text x="190" y="230" class="fslb">vᵣ₊₁,…,vₙ</text>
+  <!-- ℝᵐ codomain -->
+  <rect x="340" y="30" width="250" height="240" rx="8" class="fsb3"/>
+  <text x="465" y="22" class="fslb" font-weight="bold">ℝᵐ (codomain)</text>
+  <!-- Column space C(A) -->
+  <ellipse cx="410" cy="130" rx="60" ry="50" class="fsb1"/>
+  <text x="410" y="126" class="fsla">C(A)</text>
+  <text x="410" y="143" class="fslb">col space</text>
+  <text x="410" y="158" class="fslb">u₁,…,uᵣ</text>
+  <!-- Left null space N(Aᵀ) -->
+  <ellipse cx="520" cy="220" rx="55" ry="30" class="fsb2"/>
+  <text x="520" y="215" class="fslb2">N(Aᵀ)</text>
+  <text x="520" y="230" class="fslb">uᵣ₊₁,…,uₘ</text>
+  <!-- Mapping arrow: row space → col space -->
+  <line x1="170" y1="130" x2="350" y2="130" class="fsarr"/>
+  <circle r="4" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 170 130 L 350 130"/>
+  </circle>
+  <text x="260" y="120" class="fslb">A (invertible on C(Aᵀ))</text>
+  <!-- Mapping arrow: null → 0 -->
+  <line x1="245" y1="220" x2="340" y2="220" class="fsarr"/>
+  <circle r="4" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 245 220 L 340 220"/>
+    <animate attributeName="r" values="4;0;0" keyTimes="0;0.8;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="293" y="212" class="fslm">A → 0</text>
+</svg>

@@ -1,0 +1,1231 @@
+---
+title: "13.8 — Backend with TypeScript: Node, Bun, Deno, Express, Fastify, Hono"
+subject: "TypeScript"
+catalog: advanced
+audience_tier: higher-education
+chapter: "13.8"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 13.8 — Backend with TypeScript: Node, Bun, Deno, Express, Fastify, Hono
+
+> *"Bun + Hono is the new Express. It's faster, it's typed, and it runs everywhere — Node, Bun, Deno, Cloudflare Workers, Vercel Edge."* — **Yusuke Wada**, creator of Hono
+
+The backend TypeScript ecosystem has exploded. You're no longer stuck with Express (untyped, callback-heavy, 2010-era design). Modern options give you type-safe routing, schema validation with type inference, and runtimes that are 3-10x faster than Node. This chapter covers the landscape and gets you building.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Build a REST API with Hono (runs on Bun, Node, Deno, and edge runtimes).
+2. Use Fastify's schema-first approach for validated, typed endpoints.
+3. Implement end-to-end type safety with tRPC (shared types between client and server).
+4. Understand Deno's permissions model and built-in TypeScript support.
+5. Use Zod/Valibot for runtime validation with compile-time type inference.
+6. Set up a typed ORM (Drizzle or Prisma) for database access.
+7. Compare runtime characteristics: Node vs Bun vs Deno.
+
+---
+
+## 🖼️ Visual Anchor — Backend Runtime & Framework Landscape
+
+![ts__6.8-fig1](ts__6.8-fig1.svg)
+
+---
+
+## 📚 1. Concepts & Definitions
+
+### Definition 13.8.1 — Runtime Comparison
+
+| Feature | Node.js | Bun | Deno |
+|---------|---------|-----|------|
+| TypeScript | Via `tsc` or `tsx` | Native (strips types) | Native (type-checks) |
+| Package Manager | npm/pnpm/yarn | Built-in (npm-compatible) | Built-in (URL imports + npm:) |
+| Speed | Baseline | 3-5x faster (startup, I/O) | 1.5-2x faster |
+| Compatibility | 100% npm | ~95% npm | ~90% npm (via npm: prefix) |
+| Security | No sandbox | No sandbox | Permissions model |
+| Maturity | 15+ years | 2+ years | 5+ years |
+| Best For | Production, enterprise | Fast dev, new projects | Security-sensitive, scripts |
+
+### Definition 13.8.2 — Framework Comparison
+
+| Framework | Runtime | Type Safety | Speed | Philosophy |
+|-----------|---------|-------------|-------|-----------|
+| **Express** | Node | ❌ Poor (needs @types) | Slow | Minimal, middleware-based |
+| **Fastify** | Node | ✅ Schema-first | Fast | Performance + validation |
+| **Hono** | All | ✅ Built-in | Fastest | Ultralight, edge-first |
+| **Elysia** | Bun | ✅ End-to-end | Fastest | Bun-native, type inference |
+| **tRPC** | Any | ✅✅ Full-stack | N/A | Type-safe RPC (not REST) |
+
+### Definition 13.8.3 — Schema Validation with Type Inference
+
+The modern pattern: define a schema once, get both runtime validation AND compile-time types:
+
+```ts
+import { z } from "zod";
+
+// Define schema
+const UserSchema = z.object({
+  name: z.string().min(2).max(50),
+  email: z.string().email(),
+  age: z.number().int().min(0).max(150),
+  role: z.enum(["admin", "user", "guest"]),
+});
+
+// Extract TypeScript type from schema (zero duplication!)
+type User = z.infer<typeof UserSchema>;
+// { name: string; email: string; age: number; role: "admin" | "user" | "guest" }
+
+// Runtime validation
+const result = UserSchema.safeParse(requestBody);
+if (result.success) {
+  const user: User = result.data; // Fully typed
+} else {
+  console.error(result.error.issues); // Detailed error messages
+}
+```
+
+---
+
+## 🧩 2. Mental Models
+
+### Model 6.8.1 — The Type Safety Spectrum
+
+```
+No types          Partial types         Full type safety
+   │                   │                       │
+Express          Fastify+Schema          tRPC / Hono RPC
+(any everywhere)  (validated at boundary)  (types flow client↔server)
+```
+
+### Model 6.8.2 — When to Use What
+
+| Scenario | Recommendation |
+|----------|---------------|
+| New project, full control | Bun + Hono |
+| Enterprise, existing Node | Fastify |
+| Full-stack Next.js app | tRPC or Server Actions |
+| Edge/serverless functions | Hono |
+| Learning/scripts | Deno |
+| Legacy maintenance | Express (don't rewrite) |
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — Hono (The Modern Choice)
+
+```ts
+// src/index.ts — Hono API server
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
+
+const app = new Hono();
+
+// Typed route with Zod validation
+const createUserSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+});
+
+app.post("/users", zValidator("json", createUserSchema), async (c) => {
+  const body = c.req.valid("json"); // Fully typed: { name: string; email: string }
+
+  const user = await db.user.create({ data: body });
+  return c.json(user, 201);
+});
+
+// Route groups with middleware
+const api = new Hono()
+  .basePath("/api/v1")
+  .get("/users", async (c) => {
+    const users = await db.user.findMany();
+    return c.json(users);
+  })
+  .get("/users/:id", async (c) => {
+    const id = c.req.param("id"); // string
+    const user = await db.user.findUnique({ where: { id } });
+    if (!user) return c.json({ error: "Not found" }, 404);
+    return c.json(user);
+  });
+
+// Run on Bun
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+
+// Or run on Node
+// import { serve } from "@hono/node-server";
+// serve({ fetch: app.fetch, port: 3000 });
+```
+
+### 3.2 — Hono RPC (End-to-End Type Safety)
+
+```ts
+// server.ts — Define typed routes
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
+
+const app = new Hono()
+  .get("/users", async (c) => {
+    const users = await db.user.findMany();
+    return c.json(users);
+  })
+  .post("/users", zValidator("json", z.object({
+    name: z.string(),
+    email: z.string().email(),
+  })), async (c) => {
+    const body = c.req.valid("json");
+    const user = await db.user.create({ data: body });
+    return c.json(user, 201);
+  })
+  .get("/users/:id", async (c) => {
+    const user = await db.user.findUnique({ where: { id: c.req.param("id") } });
+    return c.json(user);
+  });
+
+export type AppType = typeof app; // Export the type!
+
+// client.ts — Type-safe client (no codegen needed!)
+import { hc } from "hono/client";
+import type { AppType } from "./server";
+
+const client = hc<AppType>("http://localhost:3000");
+
+// Fully typed — autocomplete on routes, typed responses
+const res = await client.users.$get();
+const users = await res.json(); // User[] — inferred from server!
+
+const newUser = await client.users.$post({
+  json: { name: "Bill", email: "bill@example.com" },
+});
+```
+
+### 3.3 — Fastify (Node.js Performance King)
+
+```ts
+import Fastify from "fastify";
+import { z } from "zod";
+import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+
+const app = Fastify().withTypeProvider<ZodTypeProvider>();
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+// Schema-validated route
+app.post("/users", {
+  schema: {
+    body: z.object({
+      name: z.string(),
+      email: z.string().email(),
+    }),
+    response: {
+      201: z.object({
+        id: z.string(),
+        name: z.string(),
+        email: z.string(),
+      }),
+    },
+  },
+}, async (request, reply) => {
+  // request.body is typed: { name: string; email: string }
+  const user = await createUser(request.body);
+  return reply.status(201).send(user);
+});
+
+app.listen({ port: 3000 });
+```
+
+### 3.4 — tRPC (Full-Stack Type Safety)
+
+```ts
+// server/trpc.ts — Define procedures
+import { initTRPC, TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+const t = initTRPC.create();
+
+export const router = t.router({
+  users: t.router({
+    list: t.procedure.query(async () => {
+      return db.user.findMany();
+    }),
+
+    byId: t.procedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        const user = await db.user.findUnique({ where: { id: input.id } });
+        if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+        return user;
+      }),
+
+    create: t.procedure
+      .input(z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.user.create({ data: input });
+      }),
+  }),
+});
+
+export type AppRouter = typeof router;
+
+// client/trpc.ts — Consume with full types
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import type { AppRouter } from "../server/trpc";
+
+const trpc = createTRPCClient<AppRouter>({
+  links: [httpBatchLink({ url: "http://localhost:3000/trpc" })],
+});
+
+// Fully typed — errors if you pass wrong input
+const users = await trpc.users.list.query();           // User[]
+const user = await trpc.users.byId.query({ id: "1" }); // User
+const created = await trpc.users.create.mutate({
+  name: "Bill",
+  email: "bill@example.com",
+}); // User
+```
+
+### 3.5 — Deno (Secure by Default)
+
+```ts
+// server.ts — Deno with Oak framework
+// Run: deno run --allow-net --allow-read server.ts
+
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+// Or with npm: import { Hono } from "npm:hono";
+
+const router = new Router();
+
+router.get("/api/users", (ctx) => {
+  ctx.response.body = { users: [] };
+});
+
+const app = new Application();
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+// Deno permissions model:
+// --allow-net         → network access
+// --allow-read        → file system read
+// --allow-write       → file system write
+// --allow-env         → environment variables
+// --allow-run         → subprocess execution
+// --deny-net=evil.com → deny specific domains
+
+await app.listen({ port: 3000 });
+```
+
+### 3.6 — Database Access (Drizzle ORM)
+
+```ts
+// schema.ts — Type-safe schema definition
+import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+
+export const users = pgTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  age: integer("age"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Type is inferred from schema!
+type User = typeof users.$inferSelect;    // { id: string; name: string; email: string; ... }
+type NewUser = typeof users.$inferInsert; // { name: string; email: string; age?: number; ... }
+
+// queries.ts — Type-safe queries
+import { eq, and, gt } from "drizzle-orm";
+import { db } from "./db";
+import { users } from "./schema";
+
+async function getActiveUsers(minAge: number): Promise<User[]> {
+  return db
+    .select()
+    .from(users)
+    .where(and(
+      eq(users.isActive, true),
+      gt(users.age, minAge)
+    ));
+}
+
+async function createUser(data: NewUser): Promise<User> {
+  const [user] = await db.insert(users).values(data).returning();
+  return user;
+}
+```
+
+
+---
+
+## 💻 4. Code Patterns & Examples
+
+### Pattern 6.8.1 — Middleware with Type Augmentation (Hono)
+
+```ts
+import { Hono } from "hono";
+import { jwt } from "hono/jwt";
+
+// Middleware that adds typed context
+type Env = {
+  Variables: {
+    userId: string;
+    role: "admin" | "user";
+  };
+};
+
+const authMiddleware = async (c: any, next: any) => {
+  const payload = c.get("jwtPayload");
+  c.set("userId", payload.sub);
+  c.set("role", payload.role);
+  await next();
+};
+
+const app = new Hono<Env>();
+
+app.use("/api/*", jwt({ secret: "your-secret" }), authMiddleware);
+
+app.get("/api/profile", (c) => {
+  const userId = c.get("userId");  // string — typed!
+  const role = c.get("role");      // "admin" | "user" — typed!
+  return c.json({ userId, role });
+});
+```
+
+### Pattern 6.8.2 — Error Handling Middleware
+
+```ts
+import { Hono, type Context } from "hono";
+import { HTTPException } from "hono/http-exception";
+
+// Custom error types
+class NotFoundError extends Error {
+  constructor(resource: string, id: string) {
+    super(`${resource} with id ${id} not found`);
+    this.name = "NotFoundError";
+  }
+}
+
+class ValidationError extends Error {
+  constructor(public readonly issues: { field: string; message: string }[]) {
+    super("Validation failed");
+    this.name = "ValidationError";
+  }
+}
+
+// Global error handler
+const app = new Hono();
+
+app.onError((err, c) => {
+  if (err instanceof NotFoundError) {
+    return c.json({ error: err.message }, 404);
+  }
+  if (err instanceof ValidationError) {
+    return c.json({ error: err.message, issues: err.issues }, 400);
+  }
+  if (err instanceof HTTPException) {
+    return c.json({ error: err.message }, err.status);
+  }
+  console.error("Unhandled error:", err);
+  return c.json({ error: "Internal server error" }, 500);
+});
+```
+
+---
+
+## 🧮 5. Worked Examples
+
+### Example 13.8.1 — Build a Complete CRUD API with Bun + Hono + Drizzle
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```bash
+# Setup
+bun init
+bun add hono @hono/zod-validator zod drizzle-orm postgres
+bun add -D drizzle-kit @types/node
+```
+
+```ts
+// src/db/schema.ts
+import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
+
+export const todos = pgTable("todos", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  completed: integer("completed").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Todo = typeof todos.$inferSelect;
+export type NewTodo = typeof todos.$inferInsert;
+```
+
+```ts
+// src/index.ts
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
+import { todos } from "./db/schema";
+
+const app = new Hono();
+
+// GET /todos
+app.get("/todos", async (c) => {
+  const allTodos = await db.select().from(todos);
+  return c.json(allTodos);
+});
+
+// POST /todos
+app.post("/todos", zValidator("json", z.object({
+  title: z.string().min(1).max(200),
+})), async (c) => {
+  const { title } = c.req.valid("json");
+  const [todo] = await db.insert(todos).values({ title }).returning();
+  return c.json(todo, 201);
+});
+
+// PATCH /todos/:id
+app.patch("/todos/:id", zValidator("json", z.object({
+  title: z.string().min(1).optional(),
+  completed: z.number().min(0).max(1).optional(),
+})), async (c) => {
+  const id = c.req.param("id");
+  const updates = c.req.valid("json");
+  const [todo] = await db.update(todos).set(updates).where(eq(todos.id, id)).returning();
+  if (!todo) return c.json({ error: "Not found" }, 404);
+  return c.json(todo);
+});
+
+// DELETE /todos/:id
+app.delete("/todos/:id", async (c) => {
+  const id = c.req.param("id");
+  await db.delete(todos).where(eq(todos.id, id));
+  return c.body(null, 204);
+});
+
+export default { port: 3000, fetch: app.fetch };
+```
+
+Run: `bun run src/index.ts`
+
+</details>
+
+### Example 13.8.2 — Type-Safe Environment Variables
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```ts
+// src/env.ts — Validate env vars at startup
+import { z } from "zod";
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  PORT: z.coerce.number().default(3000),
+  DATABASE_URL: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+  REDIS_URL: z.string().url().optional(),
+  CORS_ORIGIN: z.string().default("http://localhost:5173"),
+});
+
+// Validate at import time — app crashes immediately if env is wrong
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error("❌ Invalid environment variables:");
+  console.error(parsed.error.flatten().fieldErrors);
+  process.exit(1);
+}
+
+export const env = parsed.data;
+// Type: { NODE_ENV: "development" | "production" | "test"; PORT: number; DATABASE_URL: string; ... }
+
+// Usage anywhere:
+import { env } from "./env";
+console.log(env.PORT);         // number (not string!)
+console.log(env.DATABASE_URL); // string (guaranteed to be a URL)
+```
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 6.8.1 — Express Types Are Lies
+
+```ts
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+app.post("/users", (req, res) => {
+  // req.body is 'any' — NO type safety!
+  const name = req.body.name; // No error even if body is undefined
+  res.json({ name });
+});
+
+// Fix: Always validate with Zod at the boundary
+app.post("/users", (req, res) => {
+  const result = UserSchema.safeParse(req.body);
+  if (!result.success) return res.status(400).json(result.error);
+  const user = result.data; // Now typed!
+});
+
+// Better fix: Use Hono or Fastify instead of Express for new projects
+```
+
+### Gotcha 6.8.2 — Bun Doesn't Type-Check
+
+```bash
+# Bun strips types but does NOT check them!
+bun run broken.ts  # Runs even with type errors!
+
+# Always run tsc separately for type checking:
+tsc --noEmit && bun run src/index.ts
+
+# Or in package.json:
+# "dev": "tsc --noEmit && bun --watch src/index.ts"
+```
+
+### Gotcha 6.8.3 — Deno npm Compatibility Gaps
+
+```ts
+// Some npm packages don't work in Deno due to:
+// 1. Node.js built-in dependencies (fs, path, crypto)
+// 2. Native addons (bcrypt, sharp)
+// 3. Webpack-specific imports
+
+// Use Deno-native alternatives:
+import { crypto } from "https://deno.land/std/crypto/mod.ts"; // Instead of node:crypto
+import { join } from "https://deno.land/std/path/mod.ts";     // Instead of node:path
+
+// Or use Node compatibility layer:
+import { readFile } from "node:fs/promises"; // Works in Deno with --allow-read
+```
+
+### Gotcha 6.8.4 — JSON Response Types
+
+```ts
+// ❌ Returning untyped JSON
+app.get("/users", async (c) => {
+  const users = await db.query("SELECT * FROM users");
+  return c.json(users); // What type does the client get? Unknown!
+});
+
+// ✅ Define response types explicitly
+interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+app.get("/users", async (c) => {
+  const users: UserResponse[] = await db.select().from(usersTable);
+  return c.json(users); // Client knows the shape
+});
+```
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Links
+- **Previous:** [13.7 - Frontend with TypeScript - React, Vue, Svelte, SolidJS](13.7---Frontend-with-TypeScript---React,-Vue,-Svelte,-SolidJS)
+- **Reference appendix:** [TypeScript Essentials for Coding Tests](TypeScript-Essentials-for-Coding-Tests)
+- **Async patterns:** [13.5 - Async, Promises & Async Generators](13.5---Async,-Promises-&-Async-Generators)
+- **Module systems:** [13.6 - Modules & Build Systems](13.6---Modules-&-Build-Systems)
+- **React/Next.js integration:** [22.1 - React & Next.js - Functional Components & Hooks](22.1---React-&-Next.js---Functional-Components-&-Hooks)
+
+### External Resources
+- [Hono Documentation](https://hono.dev/)
+- [Fastify Documentation](https://fastify.dev/)
+- [tRPC Documentation](https://trpc.io/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [Bun Documentation](https://bun.sh/docs)
+- [Deno Manual](https://docs.deno.com/)
+- [Zod Documentation](https://zod.dev/)
+- [Theo — T3 Stack Tutorial](https://create.t3.gg/)
+
+---
+
+*Last updated: 2026-05-24*
+
+
+
+---
+
+## 🏗️ 8. Type-Safe Backend Patterns: Hono RPC, Fastify, ORMs & tRPC
+
+### 8.1 — Hono RPC: Full Type-Safe Client-Server Communication
+
+Hono is an ultrafast web framework that works on every runtime (Node, Bun, Deno, Cloudflare Workers, Vercel Edge). Its RPC feature provides end-to-end type safety without code generation.
+
+```ts
+// server.ts — Define typed routes
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
+
+const app = new Hono()
+  .get("/users", async (c) => {
+    const users = await db.select().from(usersTable);
+    return c.json(users);
+  })
+  .get("/users/:id", async (c) => {
+    const id = c.req.param("id");
+    const user = await db.select().from(usersTable).where(eq(usersTable.id, id));
+    if (!user) return c.json({ error: "Not found" }, 404);
+    return c.json(user);
+  })
+  .post(
+    "/users",
+    zValidator("json", z.object({
+      name: z.string().min(2),
+      email: z.string().email(),
+      age: z.number().int().min(0).max(150),
+    })),
+    async (c) => {
+      const body = c.req.valid("json");
+      const created = await db.insert(usersTable).values(body).returning();
+      return c.json(created, 201);
+    }
+  )
+  .delete("/users/:id", async (c) => {
+    const id = c.req.param("id");
+    await db.delete(usersTable).where(eq(usersTable.id, id));
+    return c.json({ success: true });
+  });
+
+// Export the type for the client
+export type AppType = typeof app;
+export default app;
+```
+
+```ts
+// client.ts — Type-safe RPC client (zero code generation!)
+import { hc } from "hono/client";
+import type { AppType } from "./server";
+
+const client = hc<AppType>("http://localhost:3000");
+
+// Every method is fully typed — autocomplete works!
+const users = await client.users.$get();
+const usersData = await users.json(); // User[] — inferred from server!
+
+const user = await client.users[":id"].$get({ param: { id: "123" } });
+const userData = await user.json(); // User — inferred!
+
+const created = await client.users.$post({
+  json: {
+    name: "Bill",
+    email: "bill@example.com",
+    age: 35,
+  },
+});
+// If you typo a field or pass wrong type → compile error!
+// created.json() returns the exact type the server returns
+```
+
+### 8.2 — Fastify Schema Validation with Type Inference
+
+Fastify uses JSON Schema for validation and automatically infers TypeScript types from schemas:
+
+```ts
+import Fastify from "fastify";
+import { Type, Static } from "@sinclair/typebox";
+
+// Define schemas with TypeBox (JSON Schema + TypeScript inference)
+const UserSchema = Type.Object({
+  id: Type.String({ format: "uuid" }),
+  name: Type.String({ minLength: 2 }),
+  email: Type.String({ format: "email" }),
+  age: Type.Integer({ minimum: 0, maximum: 150 }),
+  role: Type.Union([
+    Type.Literal("admin"),
+    Type.Literal("user"),
+    Type.Literal("guest"),
+  ]),
+});
+
+type User = Static<typeof UserSchema>;
+// Inferred: { id: string; name: string; email: string; age: number; role: "admin" | "user" | "guest" }
+
+const CreateUserBody = Type.Omit(UserSchema, ["id"]);
+const UserParams = Type.Object({ id: Type.String({ format: "uuid" }) });
+const UserQuery = Type.Object({
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+});
+
+const app = Fastify({ logger: true });
+
+// Route with full schema validation + type inference
+app.get<{
+  Querystring: Static<typeof UserQuery>;
+  Reply: User[];
+}>("/users", {
+  schema: {
+    querystring: UserQuery,
+    response: { 200: Type.Array(UserSchema) },
+  },
+}, async (request, reply) => {
+  const { page, limit } = request.query; // Typed! page: number, limit: number
+  const users = await db.getUsers({ page, limit });
+  return users; // Must match User[] or TypeScript errors
+});
+
+app.post<{
+  Body: Static<typeof CreateUserBody>;
+  Reply: User;
+}>("/users", {
+  schema: {
+    body: CreateUserBody,
+    response: { 201: UserSchema },
+  },
+}, async (request, reply) => {
+  const { name, email, age, role } = request.body; // All typed!
+  const user = await db.createUser({ name, email, age, role });
+  reply.status(201);
+  return user;
+});
+```
+
+### 8.3 — Drizzle ORM vs Prisma vs Kysely
+
+| Feature | Drizzle | Prisma | Kysely |
+|---------|---------|--------|--------|
+| **Approach** | SQL-like TypeScript | Schema-first + codegen | Query builder |
+| **Type safety** | Inferred from schema | Generated from schema | Inferred from DB types |
+| **Bundle size** | ~50KB | ~2MB (engine binary) | ~30KB |
+| **Edge runtime** | ✅ Works everywhere | ⚠️ Needs adapter | ✅ Works everywhere |
+| **Migrations** | SQL or push | Prisma Migrate | External (e.g., umzug) |
+| **Raw SQL** | ✅ First-class | ⚠️ `$queryRaw` | ✅ `sql` template tag |
+| **Relations** | Explicit joins | Implicit includes | Explicit joins |
+| **Learning curve** | Low (SQL knowledge) | Medium (Prisma DSL) | Low (SQL knowledge) |
+| **Performance** | Excellent | Good (query engine overhead) | Excellent |
+
+#### Drizzle ORM Example
+
+```ts
+import { drizzle } from "drizzle-orm/node-postgres";
+import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { eq, and, gt, desc } from "drizzle-orm";
+
+// Schema definition (TypeScript = source of truth)
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  age: integer("age").notNull(),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  authorId: integer("author_id").references(() => users.id),
+  published: boolean("published").default(false),
+});
+
+const db = drizzle(pool);
+
+// Type-safe queries — autocomplete on columns, type-checked conditions
+const activeAdults = await db
+  .select({
+    name: users.name,
+    email: users.email,
+    postCount: sql<number>`count(${posts.id})`,
+  })
+  .from(users)
+  .leftJoin(posts, eq(posts.authorId, users.id))
+  .where(and(eq(users.active, true), gt(users.age, 18)))
+  .groupBy(users.name, users.email)
+  .orderBy(desc(sql`count(${posts.id})`))
+  .limit(10);
+
+// Result type is inferred: { name: string; email: string; postCount: number }[]
+```
+
+#### Kysely Example
+
+```ts
+import { Kysely, PostgresDialect } from "kysely";
+
+// Define database interface
+interface Database {
+  users: {
+    id: number;
+    name: string;
+    email: string;
+    age: number;
+    active: boolean;
+  };
+  posts: {
+    id: number;
+    title: string;
+    body: string;
+    author_id: number;
+    published: boolean;
+  };
+}
+
+const db = new Kysely<Database>({ dialect: new PostgresDialect({ pool }) });
+
+// Fully type-safe query builder
+const result = await db
+  .selectFrom("users")
+  .innerJoin("posts", "posts.author_id", "users.id")
+  .select(["users.name", "users.email", "posts.title"])
+  .where("users.active", "=", true)
+  .where("users.age", ">", 18)
+  .orderBy("users.name", "asc")
+  .execute();
+
+// result: { name: string; email: string; title: string }[]
+```
+
+### 8.4 — tRPC: End-to-End Type Safety
+
+tRPC provides type-safe API communication between client and server without schemas, code generation, or runtime validation overhead on the client.
+
+```ts
+// server/trpc.ts — Define the router
+import { initTRPC, TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+const t = initTRPC.context<{ userId?: string }>().create();
+
+const isAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+  return next({ ctx: { userId: ctx.userId } });
+});
+
+const protectedProcedure = t.procedure.use(isAuthed);
+
+export const appRouter = t.router({
+  users: t.router({
+    list: t.procedure
+      .input(z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(20),
+      }))
+      .query(async ({ input }) => {
+        return db.users.findMany({
+          skip: (input.page - 1) * input.limit,
+          take: input.limit,
+        });
+      }),
+
+    byId: t.procedure
+      .input(z.string().uuid())
+      .query(async ({ input: id }) => {
+        const user = await db.users.findUnique({ where: { id } });
+        if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+        return user;
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return db.users.create({
+          data: { ...input, createdBy: ctx.userId },
+        });
+      }),
+
+    delete: protectedProcedure
+      .input(z.string().uuid())
+      .mutation(async ({ input: id }) => {
+        await db.users.delete({ where: { id } });
+        return { success: true };
+      }),
+  }),
+});
+
+export type AppRouter = typeof appRouter;
+```
+
+```ts
+// client/trpc.ts — Consume with full type safety
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import type { AppRouter } from "../server/trpc";
+
+const trpc = createTRPCClient<AppRouter>({
+  links: [httpBatchLink({ url: "http://localhost:3000/trpc" })],
+});
+
+// Every call is fully typed — autocomplete, error types, return types
+const users = await trpc.users.list.query({ page: 1, limit: 10 });
+// users: { id: string; name: string; email: string; ... }[]
+
+const user = await trpc.users.byId.query("uuid-here");
+// user: { id: string; name: string; ... }
+
+const created = await trpc.users.create.mutate({
+  name: "Bill",
+  email: "bill@example.com",
+});
+// created: { id: string; name: string; email: string; createdBy: string }
+
+// Type errors at compile time:
+// trpc.users.create.mutate({ name: "B" }); // ❌ name too short
+// trpc.users.byId.query(123);              // ❌ must be string
+// trpc.users.nonexistent.query();          // ❌ route doesn't exist
+```
+
+---
+
+## 📎 9. Appendix — Deep Dives & Theory
+
+### Appendix A — Bun vs Node.js: Startup Time & Runtime Performance
+
+| Metric | Node.js 22 | Bun 1.1 | Deno 2.0 |
+|--------|------------|---------|----------|
+| **Cold start** | ~30ms | ~5ms | ~20ms |
+| **HTTP hello world (req/s)** | ~65,000 | ~120,000 | ~85,000 |
+| **File read (1MB)** | ~2ms | ~0.8ms | ~1.5ms |
+| **JSON parse (10MB)** | ~45ms | ~25ms | ~40ms |
+| **SQLite operations** | Via better-sqlite3 | Built-in (bun:sqlite) | Via npm |
+| **Package install** | npm: ~15s, pnpm: ~5s | bun install: ~1s | npm compat |
+| **Test runner** | node --test | bun test | deno test |
+| **TypeScript** | Via tsx/ts-node | Native (no transpile) | Native |
+| **Bundle size** | N/A (no bundler) | Built-in bundler | N/A |
+
+#### When to Choose Each Runtime
+
+**Node.js** — Production-proven, largest ecosystem, best debugging tools, most hosting options. Choose for enterprise applications where stability and ecosystem matter most.
+
+**Bun** — Fastest startup and I/O, built-in TypeScript, bundler, test runner, and package manager. Choose for new projects where speed matters and you want an all-in-one tool.
+
+**Deno** — Best security model (permissions), built-in TypeScript, web-standard APIs, excellent for edge/serverless. Choose when security is paramount or you want web-standard APIs.
+
+#### Bun-Specific Features
+
+```ts
+// bun:sqlite — built-in SQLite (no npm package needed)
+import { Database } from "bun:sqlite";
+
+const db = new Database("mydb.sqlite");
+db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)");
+
+const insert = db.prepare("INSERT INTO users (name) VALUES (?)");
+insert.run("Bill");
+
+const users = db.query("SELECT * FROM users").all();
+
+// Bun.serve — high-performance HTTP server
+Bun.serve({
+  port: 3000,
+  fetch(req) {
+    const url = new URL(req.url);
+    if (url.pathname === "/") return new Response("Hello!");
+    return new Response("Not Found", { status: 404 });
+  },
+});
+
+// Bun.file — fast file I/O
+const file = Bun.file("./data.json");
+const content = await file.json(); // Parsed directly, no intermediate string
+
+// Bun.build — built-in bundler
+await Bun.build({
+  entrypoints: ["./src/index.ts"],
+  outdir: "./dist",
+  target: "browser",
+  minify: true,
+  splitting: true,
+});
+```
+
+### Appendix B — Deno Permissions Model Deep Dive
+
+Deno's security model is "deny by default" — no file, network, or environment access unless explicitly granted.
+
+```bash
+# No permissions — can only compute
+deno run script.ts
+
+# Specific permissions
+deno run --allow-net=api.example.com --allow-read=./data script.ts
+
+# Permission flags:
+# --allow-read[=<paths>]     File system read access
+# --allow-write[=<paths>]    File system write access
+# --allow-net[=<hosts>]      Network access
+# --allow-env[=<vars>]       Environment variable access
+# --allow-run[=<programs>]   Subprocess execution
+# --allow-ffi                Foreign function interface
+# --allow-sys                System information access
+
+# All permissions (development only!)
+deno run --allow-all script.ts
+# Or shorthand:
+deno run -A script.ts
+```
+
+#### Runtime Permission Requests
+
+```ts
+// Request permissions at runtime (user gets a prompt)
+const netStatus = await Deno.permissions.request({ name: "net", host: "api.example.com" });
+if (netStatus.state === "granted") {
+  const response = await fetch("https://api.example.com/data");
+  // ...
+}
+
+// Check permission without requesting
+const readStatus = await Deno.permissions.query({ name: "read", path: "/etc/passwd" });
+if (readStatus.state === "denied") {
+  console.log("Cannot read system files (good!)");
+}
+
+// Revoke a previously granted permission
+await Deno.permissions.revoke({ name: "net" });
+```
+
+#### Deno Deploy (Edge Runtime)
+
+```ts
+// Deno Deploy — serverless edge functions
+// Runs in 35+ regions, cold start < 10ms
+
+import { Hono } from "hono";
+
+const app = new Hono();
+
+app.get("/", (c) => c.text("Hello from the edge!"));
+
+app.get("/users/:id", async (c) => {
+  const id = c.req.param("id");
+  // Deno KV — built-in key-value store (globally replicated)
+  const kv = await Deno.openKv();
+  const user = await kv.get(["users", id]);
+  if (!user.value) return c.json({ error: "Not found" }, 404);
+  return c.json(user.value);
+});
+
+Deno.serve(app.fetch);
+```
+
+### Appendix C — Backend Framework Decision Matrix
+
+```
+Need: Maximum performance + minimal overhead
+→ Hono (works on every runtime, 150KB, fastest routing)
+
+Need: Enterprise Node.js with validation + OpenAPI
+→ Fastify (mature, plugin ecosystem, schema-based)
+
+Need: End-to-end type safety with React frontend
+→ tRPC (zero schema duplication, instant refactoring)
+
+Need: Full-featured framework (auth, ORM, jobs, etc.)
+→ AdonisJS or NestJS (batteries-included)
+
+Need: Edge/serverless deployment
+→ Hono or Deno Fresh (designed for edge runtimes)
+
+Need: GraphQL API
+→ Pothos + Yoga (type-safe schema builder)
+```
+
+### Appendix D — Database Access Pattern Comparison
+
+```ts
+// 1. RAW SQL (maximum control, no type safety)
+const result = await pool.query(
+  "SELECT * FROM users WHERE age > $1 AND active = $2",
+  [18, true]
+);
+// result.rows: any[] — no type inference
+
+// 2. KYSELY (type-safe query builder, SQL-like)
+const result = await db
+  .selectFrom("users")
+  .selectAll()
+  .where("age", ">", 18)
+  .where("active", "=", true)
+  .execute();
+// result: User[] — fully typed from DB interface
+
+// 3. DRIZZLE (type-safe, relational query builder)
+const result = await db.query.users.findMany({
+  where: and(gt(users.age, 18), eq(users.active, true)),
+  with: { posts: true }, // Type-safe relations
+});
+// result: (User & { posts: Post[] })[]
+
+// 4. PRISMA (schema-first, generated client)
+const result = await prisma.user.findMany({
+  where: { age: { gt: 18 }, active: true },
+  include: { posts: true },
+});
+// result: (User & { posts: Post[] })[] — generated types
+
+// 5. tRPC + DRIZZLE (end-to-end type safety)
+// Server defines query → Client gets exact return type
+// Change DB schema → TypeScript errors propagate to frontend
+```
+
+### Appendix E — Middleware Pattern Comparison
+
+```ts
+// Express-style (mutation-based)
+app.use((req, res, next) => {
+  req.user = authenticate(req.headers.authorization);
+  next(); // Must call next() or response hangs
+});
+
+// Fastify-style (hook-based)
+app.addHook("onRequest", async (request, reply) => {
+  request.user = await authenticate(request.headers.authorization);
+  // No next() — async completion signals "done"
+});
+
+// Hono-style (functional composition)
+app.use("*", async (c, next) => {
+  const user = await authenticate(c.req.header("Authorization"));
+  c.set("user", user);
+  await next(); // Explicit await — can run code AFTER downstream
+  // Code here runs after the route handler
+  c.header("X-Response-Time", `${Date.now() - start}ms`);
+});
+
+// Effect-style (dependency injection)
+const AuthMiddleware = Effect.gen(function* () {
+  const request = yield* HttpRequest;
+  const auth = yield* AuthService;
+  const user = yield* auth.verify(request.headers.authorization);
+  return user;
+});
+// No middleware chain — dependencies are declared and provided via Layers
+```
+
+---
+
+*Last updated: 2026-05-24*

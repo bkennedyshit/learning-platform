@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#1e1e1e" rx="12"/>
+    <text x="400" y="40" fill="#ffffff" font-family="sans-serif" font-size="24" font-weight="bold" text-anchor="middle">The Hard Problem &amp; Explanatory Gap</text>
+    
+    <!-- Physical Domain -->
+    <g transform="translate(150, 200)">
+        <circle cx="0" cy="0" r="80" fill="none" stroke="#4a90e2" stroke-width="4" stroke-dasharray="8 4">
+            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="0" cy="0" r="50" fill="#4a90e2" fill-opacity="0.2" stroke="#4a90e2" stroke-width="2"/>
+        <path d="M-20,-20 L20,20 M-20,20 L20,-20" stroke="#4a90e2" stroke-width="3"/>
+        <text y="120" fill="#4a90e2" font-family="sans-serif" font-size="20" text-anchor="middle">Physical Processes (Brain)</text>
+        <text y="145" fill="#a0a0a0" font-family="sans-serif" font-size="14" text-anchor="middle">Objective, 3rd Person, Neural</text>
+    </g>
+
+    <!-- Phenomenal Domain -->
+    <g transform="translate(650, 200)">
+        <circle cx="0" cy="0" r="80" fill="url(#glow)" stroke="#e24a8d" stroke-width="4">
+            <animate attributeName="r" values="75;85;75" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <text y="5" fill="#ffffff" font-family="sans-serif" font-size="24" text-anchor="middle">Qualia</text>
+        <text y="120" fill="#e24a8d" font-family="sans-serif" font-size="20" text-anchor="middle">Subjective Experience</text>
+        <text y="145" fill="#a0a0a0" font-family="sans-serif" font-size="14" text-anchor="middle">Subjective, 1st Person, Felt</text>
+    </g>
+
+    <!-- Explanatory Gap -->
+    <g transform="translate(400, 200)">
+        <line x1="-140" y1="0" x2="-40" y2="0" stroke="#ffffff" stroke-width="4" marker-end="url(#arrow)">
+            <animate attributeName="x2" values="-40; -20; -40" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <line x1="40" y1="0" x2="140" y2="0" stroke="#ffffff" stroke-width="4" marker-start="url(#arrow-rev)"/>
+        
+        <rect x="-30" y="-80" width="60" height="160" fill="#ff4444" fill-opacity="0.2" stroke="#ff4444" stroke-width="2" stroke-dasharray="5 5"/>
+        <text y="-100" fill="#ff4444" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Explanatory Gap</text>
+        <text y="110" fill="#ff4444" font-family="sans-serif" font-size="14" text-anchor="middle">"Why does it feel like anything?"</text>
+    </g>
+
+    <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e24a8d" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#e24a8d" stop-opacity="0"/>
+        </radialGradient>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#ffffff"/>
+        </marker>
+        <marker id="arrow-rev" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M10,0 L0,5 L10,10 z" fill="#ffffff"/>
+        </marker>
+    </defs>
+</svg>

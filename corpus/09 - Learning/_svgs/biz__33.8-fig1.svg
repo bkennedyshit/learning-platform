@@ -1,0 +1,179 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .metric-good { fill: #1a4a3a; stroke: #51cf66; stroke-width: 1.2; animation: goodPulse 3s infinite ease-in-out; }
+    .metric-warn { fill: #4a3a1a; stroke: #ffd93d; stroke-width: 1.2; animation: warnPulse 3s infinite ease-in-out 1.5s; }
+    .metric-bad { fill: #3a1a1a; stroke: #ff6b6b; stroke-width: 1.2; }
+    .bar-mrr { fill: var(--interactive-accent, #58a6ff); opacity: 0.8; }
+    .bar-churn { fill: #ff6b6b; opacity: 0.7; }
+    .bar-expansion { fill: #51cf66; opacity: 0.7; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .leak { stroke: #ff6b6b; stroke-width: 1.5; stroke-dasharray: 4 2; fill: none; animation: leakFlow 0.8s linear infinite; }
+
+    @keyframes goodPulse {
+      0%, 100% { stroke-width: 1.2; fill-opacity: 0.95; }
+      50% { stroke-width: 2; fill-opacity: 1; filter: drop-shadow(0 0 4px #51cf66); }
+    }
+    @keyframes warnPulse {
+      0%, 100% { stroke-width: 1.2; fill-opacity: 0.95; }
+      50% { stroke-width: 2; fill-opacity: 1; filter: drop-shadow(0 0 4px #ffd93d); }
+    }
+    @keyframes leakFlow {
+      to { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz8-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">SaaS Metrics Dashboard — MRR, CAC, LTV, Churn, NRR &amp; Growth Signals</text>
+
+  <!-- Left column: MRR waterfall -->
+  <rect x="10" y="30" width="200" height="230" class="box" rx="4"/>
+  <text x="110" y="50" class="bold" text-anchor="middle">MRR Waterfall</text>
+  <text x="110" y="62" class="sublabel" text-anchor="middle">(Monthly Recurring Revenue)</text>
+
+  <!-- Waterfall bars -->
+  <!-- Starting MRR -->
+  <rect x="25" y="72" width="170" height="18" rx="2" class="bar-mrr"/>
+  <text x="30" y="84" class="mono">Starting MRR:  $18,500</text>
+
+  <!-- + New MRR -->
+  <rect x="25" y="94" width="85" height="18" rx="2" class="bar-expansion"/>
+  <text x="30" y="106" class="mono">+ New MRR:     +$2,800</text>
+
+  <!-- + Expansion MRR -->
+  <rect x="25" y="116" width="55" height="18" rx="2" class="bar-expansion"/>
+  <text x="30" y="128" class="mono">+ Expansion:   +$1,100</text>
+
+  <!-- - Churn MRR -->
+  <rect x="25" y="138" width="40" height="18" rx="2" class="bar-churn"/>
+  <text x="30" y="150" class="mono">- Churned:     -$740</text>
+
+  <!-- - Contraction -->
+  <rect x="25" y="160" width="18" height="18" rx="2" class="bar-churn"/>
+  <text x="30" y="172" class="mono">- Contraction: -$160</text>
+
+  <line x1="25" y1="182" x2="195" y2="182" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <rect x="25" y="186" width="182" height="20" rx="2" fill="var(--interactive-accent, #58a6ff)" opacity="0.9"/>
+  <text x="30" y="200" class="mono">Net new MRR:   +$3,000</text>
+
+  <rect x="25" y="210" width="182" height="20" rx="2" fill="#1a4a3a" opacity="0.9"/>
+  <text x="30" y="224" class="mono">Ending MRR:   $21,500</text>
+
+  <text x="110" y="248" class="label" text-anchor="middle">ARR = $258,000</text>
+  <text x="110" y="260" class="sublabel" text-anchor="middle">MoM growth: +16.2%</text>
+
+  <!-- MIDDLE column: Key ratio cards -->
+  <rect x="220" y="30" width="268" height="230" class="box" rx="4"/>
+  <text x="354" y="50" class="bold" text-anchor="middle">Key Health Metrics</text>
+
+  <!-- LTV/CAC card -->
+  <rect x="228" y="58" width="120" height="62" rx="4" class="metric-good"/>
+  <text x="288" y="75" class="bold" text-anchor="middle">LTV / CAC</text>
+  <text x="288" y="93" class="label" text-anchor="middle" font-size="18px" fill="#51cf66">5.2×</text>
+  <text x="288" y="110" class="sublabel" text-anchor="middle">LTV $1,633 / CAC $314</text>
+
+  <!-- NRR card -->
+  <rect x="358" y="58" width="120" height="62" rx="4" class="metric-good"/>
+  <text x="418" y="75" class="bold" text-anchor="middle">NRR</text>
+  <text x="418" y="93" class="label" text-anchor="middle" font-size="18px" fill="#51cf66">118%</text>
+  <text x="418" y="110" class="sublabel" text-anchor="middle">Expansion &gt; Churn ✅</text>
+
+  <!-- MRR Churn card -->
+  <rect x="228" y="128" width="120" height="62" rx="4" class="metric-warn"/>
+  <text x="288" y="145" class="bold" text-anchor="middle">MRR Churn</text>
+  <text x="288" y="163" class="label" text-anchor="middle" font-size="18px" fill="#ffd93d">2.1%</text>
+  <text x="288" y="180" class="sublabel" text-anchor="middle">Watch: &gt;2% = warning</text>
+
+  <!-- CAC Payback card -->
+  <rect x="358" y="128" width="120" height="62" rx="4" class="metric-good"/>
+  <text x="418" y="145" class="bold" text-anchor="middle">CAC Payback</text>
+  <text x="418" y="163" class="label" text-anchor="middle" font-size="18px" fill="#51cf66">6.4 mo</text>
+  <text x="418" y="180" class="sublabel" text-anchor="middle">Target: &lt;12 months</text>
+
+  <!-- NRR explanation -->
+  <text x="228" y="210" class="sublabel">NRR &gt; 100% = growth from existing customers alone</text>
+  <text x="228" y="222" class="sublabel">Snowflake NRR: 158% (best-in-class example)</text>
+  <text x="228" y="234" class="sublabel">Expansion = tier upgrades + seat adds + usage growth</text>
+  <text x="228" y="246" class="sublabel">Build at least one expansion motion from day one</text>
+  <text x="228" y="258" class="sublabel">LTV/CAC ≥ 3 = fundable · ≥ 5 = excellent</text>
+
+  <!-- RIGHT column: Leaky bucket + hiring -->
+  <rect x="498" y="30" width="212" height="230" class="box" rx="4"/>
+  <text x="604" y="50" class="bold" text-anchor="middle">Leaky Bucket Diagnosis</text>
+
+  <!-- Funnel with leaks -->
+  <polygon points="530,60 678,60 658,100 550,100" fill="var(--interactive-accent, #58a6ff)" opacity="0.25"/>
+  <text x="604" y="84" class="sublabel" text-anchor="middle">Signups: 500/mo</text>
+  <line x1="670" y1="80" x2="700" y2="80" class="leak"/>
+  <text x="702" y="83" class="sublabel" fill="#ff6b6b">Leak A</text>
+
+  <polygon points="550,104 658,104 640,140 568,140" fill="var(--interactive-accent, #58a6ff)" opacity="0.35"/>
+  <text x="604" y="126" class="sublabel" text-anchor="middle">Activated: 250/mo</text>
+  <line x1="650" y1="122" x2="700" y2="122" class="leak"/>
+  <text x="702" y="125" class="sublabel" fill="#ff6b6b">Leak B</text>
+
+  <polygon points="568,144 640,144 624,178 584,178" fill="var(--interactive-accent, #58a6ff)" opacity="0.5"/>
+  <text x="604" y="166" class="sublabel" text-anchor="middle">Paid: 30/mo (12%)</text>
+  <line x1="630" y1="162" x2="700" y2="162" class="leak"/>
+  <text x="702" y="165" class="sublabel" fill="#ff6b6b">Leak C</text>
+
+  <polygon points="584,182 624,182 612,215 596,215" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <text x="604" y="205" class="sublabel" text-anchor="middle">Retained: 24/mo</text>
+
+  <text x="506" y="232" class="sublabel">Leak A → fix onboarding / TTV</text>
+  <text x="506" y="244" class="sublabel">Leak B → fix pricing / trial gate</text>
+  <text x="506" y="256" class="sublabel">Leak C → fix product retention</text>
+
+  <!-- BOTTOM ROW: Three sections -->
+  <!-- Churn benchmarks -->
+  <rect x="10" y="270" width="215" height="140" class="box" rx="4"/>
+  <text x="117" y="288" class="bold" text-anchor="middle">Churn Rate Benchmarks</text>
+  <rect x="18" y="296" width="200" height="16" rx="2" class="metric-good"/>
+  <text x="25" y="308" class="sublabel">&lt;1% monthly (&lt;12% annual) — Excellent</text>
+  <rect x="18" y="315" width="200" height="16" rx="2" fill="#2a3a2a" stroke="#51cf66" stroke-width="0.5"/>
+  <text x="25" y="327" class="sublabel">1–2% monthly (12–22% annual) — Acceptable</text>
+  <rect x="18" y="334" width="200" height="16" rx="2" class="metric-warn"/>
+  <text x="25" y="346" class="sublabel">2–4% monthly (22–40% annual) — Problematic</text>
+  <rect x="18" y="353" width="200" height="16" rx="2" class="metric-bad"/>
+  <text x="25" y="365" class="sublabel">&gt;4% monthly (&gt;40% annual) — Fix immediately</text>
+  <text x="18" y="385" class="sublabel">At 3% monthly churn: 31% of a cohort</text>
+  <text x="18" y="397" class="sublabel">remains after 12 months. You're replacing</text>
+  <text x="18" y="408" class="sublabel">the base just to stay flat — treadmill.</text>
+
+  <!-- First 3 Hires -->
+  <rect x="234" y="270" width="250" height="140" class="box" rx="4"/>
+  <text x="359" y="288" class="bold" text-anchor="middle">First 3 Hires (Order Matters)</text>
+  <rect x="242" y="296" width="234" height="30" rx="2" fill="#1a4a3a" opacity="0.5"/>
+  <text x="250" y="309" class="sublabel">#1 — Customer Success (hire when: 30% of</text>
+  <text x="250" y="320" class="sublabel">your time is support · reduces churn most)</text>
+  <rect x="242" y="330" width="234" height="30" rx="2" fill="#1a3a5c" opacity="0.5"/>
+  <text x="250" y="343" class="sublabel">#2 — Engineer (hire when: roadmap &gt; capacity</text>
+  <text x="250" y="354" class="sublabel">· you can't ship fast enough for growth)</text>
+  <rect x="242" y="364" width="234" height="30" rx="2" fill="#2a1a4a" opacity="0.5"/>
+  <text x="250" y="377" class="sublabel">#3 — Sales / Growth (hire when: proven CAC</text>
+  <text x="250" y="388" class="sublabel">channel · have playbook to give them)</text>
+  <text x="242" y="405" class="sublabel">⚠ Hire to a clear output metric, not out of optimism</text>
+
+  <!-- OKR / North Star -->
+  <rect x="494" y="270" width="216" height="140" class="box" rx="4"/>
+  <text x="602" y="288" class="bold" text-anchor="middle">North Star + OKR Structure</text>
+  <text x="502" y="303" class="sublabel">North Star: what predicts revenue</text>
+  <text x="502" y="315" class="sublabel">example → "AI gens/active user/week"</text>
+  <line x1="502" y1="320" x2="702" y2="320" stroke="var(--text-muted, #8b949e)" stroke-width="0.5"/>
+  <text x="502" y="333" class="sublabel">Objective: "Become default tool for</text>
+  <text x="502" y="345" class="sublabel">indie game devs — Q3 2026"</text>
+  <text x="502" y="357" class="sublabel">KR1: Reach $50k MRR</text>
+  <text x="502" y="369" class="sublabel">KR2: Monthly churn &lt;2%</text>
+  <text x="502" y="381" class="sublabel">KR3: NPS &gt;50</text>
+  <text x="502" y="393" class="sublabel">KR4: 5 Discord/Reddit case studies</text>
+  <text x="502" y="405" class="sublabel">KRs = outcomes, not activities</text>
+</svg>

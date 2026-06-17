@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@500;700&amp;display=swap');
+      .svg-bg {
+        fill: var(--background-primary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 12px;
+      }
+      .title {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        fill: var(--text-muted);
+      }
+      .grid-border {
+        stroke: var(--divider-color);
+        stroke-width: 2;
+        fill: var(--background-secondary);
+        stroke-dasharray: none;
+        rx: 8px;
+      }
+      .grid-line {
+        stroke: var(--text-faint);
+        stroke-width: 1;
+        stroke-dasharray: 4,4;
+        fill: none;
+      }
+      .char-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        fill: var(--interactive-accent);
+        text-anchor: middle;
+      }
+      .char-translation {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: var(--text-muted);
+        text-anchor: middle;
+      }
+      .desc-title {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        fill: var(--text-normal);
+      }
+      .desc-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        fill: var(--text-muted);
+      }
+      .bold-word {
+        font-weight: 600;
+        fill: var(--text-normal);
+      }
+      .brush-stroke-h {
+        stroke: var(--interactive-accent);
+        stroke-width: 14;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+        opacity: 0.95;
+      }
+      .brush-stroke-k {
+        stroke: #3b82f6; /* Beautiful high-contrast blue for Katakana */
+        stroke-width: 14;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+        opacity: 0.95;
+      }
+      .stroke-bg {
+        stroke: var(--text-faint);
+        stroke-width: 14;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+        opacity: 0.25;
+      }
+      .badge-h {
+        fill: rgba(168, 85, 247, 0.1);
+        stroke: var(--interactive-accent);
+        stroke-width: 1;
+        rx: 4px;
+      }
+      .badge-k {
+        fill: rgba(59, 130, 246, 0.1);
+        stroke: #3b82f6;
+        stroke-width: 1;
+        rx: 4px;
+      }
+      .badge-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+      }
+    </style>
+    
+    <!-- Master Animation Timer -->
+    <rect id="master" width="0" height="0">
+      <animate id="master_timer" attributeName="width" from="0" to="100" dur="5s" repeatCount="indefinite" />
+    </rect>
+  </defs>
+
+  <!-- Container Background -->
+  <rect width="100%" height="100%" class="svg-bg" />
+
+  <!-- Header -->
+  <g transform="translate(30, 45)">
+    <text x="0" y="0" class="title">ひらがな vs カタカナ — Kana Script Dynamics</text>
+    <text x="0" y="20" class="subtitle">Contrasting the organic cursive flow of Hiragana with the sharp geometric angles of Katakana</text>
+  </g>
+
+  <!-- LEFT: HIRAGANA (あ) -->
+  <g transform="translate(50, 95)">
+    <!-- Character Square (Genkō Yōshi Grid) -->
+    <rect x="0" y="0" width="240" height="240" class="grid-border" />
+    <line x1="120" y1="0" x2="120" y2="240" class="grid-line" />
+    <line x1="0" y1="120" x2="240" y2="120" class="grid-line" />
+    
+    <!-- Outer Box Labels -->
+    <rect x="10" y="10" width="70" height="20" class="badge-h" />
+    <text x="45" y="24" text-anchor="middle" class="badge-text" fill="var(--interactive-accent)">CURSIVE</text>
+    
+    <!-- Ghost Background Stroke Trace (for visual clarity when not animated) -->
+    <!-- Stroke 1 (horizontal) -->
+    <path d="M 50,80 C 100,75 140,75 190,80" class="stroke-bg" />
+    <!-- Stroke 2 (vertical loop) -->
+    <path d="M 120,40 C 120,130 115,180 90,215" class="stroke-bg" />
+    <!-- Stroke 3 (large dynamic loop) -->
+    <path d="M 155,100 C 95,140 70,205 130,205 C 190,205 200,140 135,100" class="stroke-bg" />
+
+    <!-- Animated Brush Strokes -->
+    <!-- Stroke 1 (horizontal) -->
+    <path d="M 50,80 C 100,75 140,75 190,80" class="brush-stroke-h" stroke-dasharray="150" stroke-dashoffset="150">
+      <animate attributeName="stroke-dashoffset" from="150" to="0" dur="0.6s" begin="master_timer.begin" fill="freeze" />
+      <animate attributeName="stroke-dashoffset" from="0" to="150" dur="0.3s" begin="master_timer.begin+4.5s" fill="freeze" />
+    </path>
+    
+    <!-- Stroke 2 (vertical loop) -->
+    <path d="M 120,40 C 120,130 115,180 90,215" class="brush-stroke-h" stroke-dasharray="250" stroke-dashoffset="250">
+      <animate attributeName="stroke-dashoffset" from="250" to="0" dur="0.8s" begin="master_timer.begin+0.6s" fill="freeze" />
+      <animate attributeName="stroke-dashoffset" from="0" to="250" dur="0.3s" begin="master_timer.begin+4.5s" fill="freeze" />
+    </path>
+    
+    <!-- Stroke 3 (large dynamic loop) -->
+    <path d="M 155,100 C 95,140 70,205 130,205 C 190,205 200,140 135,100" class="brush-stroke-h" stroke-dasharray="450" stroke-dashoffset="450">
+      <animate attributeName="stroke-dashoffset" from="450" to="0" dur="1.4s" begin="master_timer.begin+1.4s" fill="freeze" />
+      <animate attributeName="stroke-dashoffset" from="0" to="450" dur="0.3s" begin="master_timer.begin+4.5s" fill="freeze" />
+    </path>
+
+    <!-- Stroke Order Indicators (Dynamic highlight dots) -->
+    <circle cx="50" cy="80" r="4" fill="#ffffff" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="0.6s" begin="master_timer.begin" fill="freeze" />
+    </circle>
+    <circle cx="120" cy="40" r="4" fill="#ffffff" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="0.8s" begin="master_timer.begin+0.6s" fill="freeze" />
+    </circle>
+    <circle cx="155" cy="100" r="4" fill="#ffffff" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1.4s" begin="master_timer.begin+1.4s" fill="freeze" />
+    </circle>
+    
+    <!-- Labels below square -->
+    <text x="120" y="270" class="char-label">あ <tspan class="char-translation">(Hiragana "a")</tspan></text>
+  </g>
+
+  <!-- RIGHT: KATAKANA (ア) -->
+  <g transform="translate(340, 95)">
+    <!-- Character Square (Genkō Yōshi Grid) -->
+    <rect x="0" y="0" width="240" height="240" class="grid-border" />
+    <line x1="120" y1="0" x2="120" y2="240" class="grid-line" />
+    <line x1="0" y1="120" x2="240" y2="120" class="grid-line" />
+    
+    <!-- Outer Box Labels -->
+    <rect x="10" y="10" width="80" height="20" class="badge-k" />
+    <text x="50" y="24" text-anchor="middle" class="badge-text" fill="#3b82f6">ANGULAR</text>
+    
+    <!-- Ghost Background Stroke Trace -->
+    <!-- Stroke 1 (hook-slash) -->
+    <path d="M 50,70 L 190,70 L 160,130" class="stroke-bg" />
+    <!-- Stroke 2 (slash) -->
+    <path d="M 120,110 C 100,165 70,215 25,230" class="stroke-bg" />
+
+    <!-- Animated Brush Strokes -->
+    <!-- Stroke 1 (hook-slash) -->
+    <path d="M 50,70 L 190,70 L 160,130" class="brush-stroke-k" stroke-dasharray="250" stroke-dashoffset="250">
+      <animate attributeName="stroke-dashoffset" from="250" to="0" dur="0.9s" begin="master_timer.begin" fill="freeze" />
+      <animate attributeName="stroke-dashoffset" from="0" to="250" dur="0.3s" begin="master_timer.begin+4.5s" fill="freeze" />
+    </path>
+    
+    <!-- Stroke 2 (slash) -->
+    <path d="M 120,110 C 100,165 70,215 25,230" class="brush-stroke-k" stroke-dasharray="200" stroke-dashoffset="200">
+      <animate attributeName="stroke-dashoffset" from="200" to="0" dur="0.9s" begin="master_timer.begin+0.9s" fill="freeze" />
+      <animate attributeName="stroke-dashoffset" from="0" to="200" dur="0.3s" begin="master_timer.begin+4.5s" fill="freeze" />
+    </path>
+
+    <!-- Stroke Order Indicators -->
+    <circle cx="50" cy="70" r="4" fill="#ffffff" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="0.9s" begin="master_timer.begin" fill="freeze" />
+    </circle>
+    <circle cx="120" cy="110" r="4" fill="#ffffff" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="0.9s" begin="master_timer.begin+0.9s" fill="freeze" />
+    </circle>
+
+    <!-- Labels below square -->
+    <text x="120" y="270" class="char-label" fill="#3b82f6">ア <tspan class="char-translation">(Katakana "a")</tspan></text>
+  </g>
+
+  <!-- MID-RIGHT: CORE DIFFERENCE LABELS -->
+  <g transform="translate(610, 110)">
+    <!-- Background Card for Details -->
+    <rect x="-10" y="-15" width="180" height="255" fill="var(--background-secondary)" stroke="var(--divider-color)" stroke-width="1.5" rx="8" />
+    
+    <!-- Hiragana Notes -->
+    <text x="0" y="15" class="desc-title" font-size="14px" fill="var(--interactive-accent)">ひらがな (Hiragana)</text>
+    <text x="0" y="35" class="desc-text">
+      <tspan x="0" dy="0">• Origin: <tspan class="bold-word">Sōsho</tspan> (Chinese cursive)</tspan>
+      <tspan x="0" dy="16">• Structure: <tspan class="bold-word">Soft &amp; Circular</tspan></tspan>
+      <tspan x="0" dy="16">• Use: Grammatical elements,</tspan>
+      <tspan x="0" dy="16">  native vocabulary, particles.</tspan>
+      <tspan x="0" dy="16">• Character count: <tspan class="bold-word">46 base</tspan></tspan>
+    </text>
+    
+    <line x1="-5" y1="120" x2="165" y2="120" stroke="var(--divider-color)" stroke-width="1" />
+    
+    <!-- Katakana Notes -->
+    <text x="0" y="145" class="desc-title" font-size="14px" fill="#3b82f6">カタカナ (Katakana)</text>
+    <text x="0" y="165" class="desc-text">
+      <tspan x="0" dy="0">• Origin: <tspan class="bold-word">Kaisho</tspan> (Chinese radical parts)</tspan>
+      <tspan x="0" dy="16">• Structure: <tspan class="bold-word">Sharp &amp; Angular</tspan></tspan>
+      <tspan x="0" dy="16">• Use: Foreign loanwords,</tspan>
+      <tspan x="0" dy="16">  names, onomatopoeia, tech.</tspan>
+      <tspan x="0" dy="16">• Sound inventory: <tspan class="bold-word">Identical</tspan></tspan>
+    </text>
+  </g>
+  
+  <!-- FOOTER OR REFERENCE INDICATOR -->
+  <rect x="30" y="395" width="740" height="30" fill="var(--background-secondary)" stroke="var(--divider-color)" stroke-width="1" rx="6" />
+  <text x="400" y="414" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11px" fill="var(--text-muted)">
+    Both systems represent the exact same <tspan class="bold-word" fill="var(--interactive-accent)">Gojūon (50-Sound)</tspan> phonetic grid. Modern Japanese blends them fluidly: <tspan fill="var(--interactive-accent)">Hiragana</tspan> for grammar, <tspan fill="#3b82f6">Katakana</tspan> for loanwords, and <tspan class="bold-word">Kanji</tspan> for nouns/verb roots.
+  </text>
+</svg>

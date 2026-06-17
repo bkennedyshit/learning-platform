@@ -1,0 +1,211 @@
+<svg viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    @keyframes wave-travel {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes lc-wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(5deg); }
+    }
+    @keyframes lc-align {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(85deg); }
+    }
+    @keyframes pulse-voltage {
+      0%, 100% { fill: #30363d; }
+      50% { fill: #ffd700; }
+    }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 18px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .subtitle { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #30363d); stroke-width: 1.5; rx: 8; }
+    
+    /* Device materials & components */
+    .substrate { fill: #212529; stroke: #495057; stroke-width: 1; }
+    .ito { fill: #00b4d8; fill-opacity: 0.2; stroke: #00b4d8; stroke-width: 1; }
+    .mirror-electrode { fill: #e5e5e5; stroke: #adb5bd; stroke-width: 1; }
+    .active-mirror { animation: pulse-voltage 4s ease-in-out infinite; }
+    .lc-molecule { fill: #48cae4; stroke: #0077b6; stroke-width: 0.8; rx: 4; ry: 10; transform-origin: center; }
+    .lc-molecule-tilted { fill: #f72585; stroke: #b5179e; stroke-width: 0.8; rx: 4; ry: 10; transform-origin: center; }
+    
+    /* Light waves */
+    .light-ray-in { stroke: #ffd700; stroke-width: 1.5; fill: none; stroke-dasharray: 4, 3; animation: wave-travel 1s linear infinite; }
+    .light-wave-out { stroke: #00f0ff; stroke-width: 1.5; fill: none; stroke-dasharray: 4, 3; animation: wave-travel 0.8s linear infinite; filter: url(#glow-cyan); }
+    
+    /* Metasurface pillars */
+    .meta-atom { fill: #7209b7; stroke: #f72585; stroke-width: 1.2; rx: 2; }
+    .wavefront-plane { stroke: #ffd700; stroke-width: 1.5; fill: none; stroke-dasharray: 5, 3; }
+    .wavefront-shaped { stroke: #00f0ff; stroke-width: 2; fill: none; filter: url(#glow-cyan-thick); }
+    
+    .tech-text { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+  </style>
+
+  <defs>
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow-cyan-thick" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="30" class="title" text-anchor="middle">Spatial Light Modulator (SLM) Modulation Mechanisms</text>
+  <text x="360" y="48" class="subtitle" text-anchor="middle">Comparing Liquid Crystal on Silicon (LCoS) active phase shift with sub-wavelength Metasurface phase sculpting</text>
+
+  <!-- PANEL 1: Liquid Crystal on Silicon (LCoS) Cell -->
+  <rect x="20" y="65" width="330" height="385" class="box"/>
+  <text x="185" y="88" class="label" text-anchor="middle">1. LCoS Phase Modulation Cell</text>
+  <text x="185" y="104" class="sublabel" text-anchor="middle">Variable refractive index via LC alignment</text>
+
+  <!-- Glass Substrate Top -->
+  <rect x="40" y="120" width="290" height="15" class="substrate"/>
+  <text x="185" y="131" class="tech-text" text-anchor="middle" fill="#8b949e">Glass Substrate</text>
+  
+  <!-- Transparent ITO Electrode -->
+  <rect x="40" y="135" width="290" height="6" class="ito"/>
+  <text x="50" y="152" class="tech-text" fill="#00b4d8">ITO Cover Electrode (Ground)</text>
+
+  <!-- Liquid Crystal Layer (divided into two pixels: Left Pixel = Off, Right Pixel = On) -->
+  
+  <!-- PIXEL 1 (LEFT): OFF STATE (No Voltage, LCs are flat, high refractive index for polarized light) -->
+  <!-- LC molecules grid -->
+  <!-- We'll draw them horizontally aligned, wiggling slightly -->
+  <g transform="translate(40, 150)">
+    <!-- Backplane grid boundary -->
+    <line x1="72" y1="0" x2="72" y2="85" stroke="#30363d" stroke-dasharray="2, 2"/>
+    
+    <!-- Molecules -->
+    <rect x="15" y="10" width="8" height="20" class="lc-molecule" transform="rotate(90 19 20)"/>
+    <rect x="45" y="10" width="8" height="20" class="lc-molecule" transform="rotate(85 49 20)"/>
+    <rect x="30" y="30" width="8" height="20" class="lc-molecule" transform="rotate(90 34 40)"/>
+    <rect x="15" y="50" width="8" height="20" class="lc-molecule" transform="rotate(95 19 60)"/>
+    <rect x="45" y="50" width="8" height="20" class="lc-molecule" transform="rotate(90 49 60)"/>
+
+    <text x="36" y="80" class="tech-text" text-anchor="middle" fill="#48cae4">Index n_e (Max)</text>
+  </g>
+
+  <!-- PIXEL 2 (RIGHT): ON STATE (High Voltage, LCs vertically aligned, low refractive index) -->
+  <g transform="translate(185, 150)">
+    <!-- Molecules -->
+    <rect x="25" y="10" width="8" height="20" class="lc-molecule-tilted" transform="rotate(5 29 20)"/>
+    <rect x="55" y="10" width="8" height="20" class="lc-molecule-tilted" transform="rotate(0 59 20)"/>
+    <rect x="40" y="30" width="8" height="20" class="lc-molecule-tilted" transform="rotate(-5 44 40)"/>
+    <rect x="25" y="50" width="8" height="20" class="lc-molecule-tilted" transform="rotate(2 29 60)"/>
+    <rect x="55" y="50" width="8" height="20" class="lc-molecule-tilted" transform="rotate(0 59 60)"/>
+
+    <text x="45" y="80" class="tech-text" text-anchor="middle" fill="#f72585">Index n_o (Min)</text>
+  </g>
+
+  <!-- Silicon Backplane reflecting electrodes -->
+  <!-- Left Pixel Electrode (OFF, 0V) -->
+  <rect x="40" y="235" width="142" height="10" class="mirror-electrode"/>
+  <text x="111" y="258" class="tech-text" text-anchor="middle">Reflective Electrode (0 V)</text>
+
+  <!-- Right Pixel Electrode (ON, 5V) -->
+  <rect x="187" y="235" width="143" height="10" class="mirror-electrode active-mirror"/>
+  <text x="258" y="258" class="tech-text" text-anchor="middle" fill="#ffd700">Reflective Electrode (5 V)</text>
+
+  <!-- Silicon Substrate Bottom -->
+  <rect x="40" y="270" width="290" height="25" class="substrate"/>
+  <text x="185" y="285" class="tech-text" text-anchor="middle" fill="#c9d1d9">Silicon Backplane (LCoS Circuitry)</text>
+
+  <!-- Wave paths inside cell -->
+  <!-- Left pixel path (delayed phase / more refractive index) -->
+  <path d="M 100 110 L 100 235" class="light-ray-in"/>
+  <path d="M 100 235 L 120 110" class="light-wave-out"/>
+  
+  <!-- Right pixel path (advanced phase / less refractive index) -->
+  <path d="M 245 110 L 245 235" class="light-ray-in"/>
+  <path d="M 245 235 L 265 110" class="light-wave-out"/>
+  
+  <!-- Wavefront lines indicating phase shift -->
+  <!-- Delayed wave crests on left -->
+  <path d="M 100 95 Q 110 90 120 95" class="light-wave-out" />
+  <path d="M 104 80 Q 114 75 124 80" class="light-wave-out" />
+  
+  <!-- Advanced wave crests on right -->
+  <path d="M 245 80 Q 255 75 265 80" class="light-wave-out" />
+  <path d="M 249 65 Q 259 60 269 65" class="light-wave-out" />
+  
+  <!-- Labels for phase -->
+  <text x="112" y="55" class="tech-text" text-anchor="middle" fill="#00f0ff">Phase Shift = &pi;</text>
+  <text x="259" y="55" class="tech-text" text-anchor="middle" fill="#ffd700">Phase Shift = 0</text>
+
+  <!-- Explanatory note below LCoS -->
+  <text x="185" y="375" class="sublabel" text-anchor="middle">Liquid Crystal alignment changes the refractive</text>
+  <text x="185" y="390" class="sublabel" text-anchor="middle">index experienced by polarized incident light.</text>
+  <text x="185" y="405" class="sublabel" text-anchor="middle">Varying voltage across pixels controls local index,</text>
+  <text x="185" y="420" class="sublabel" text-anchor="middle">creating an arbitrary spatial phase profile.</text>
+
+
+  <!-- PANEL 2: Dielectric Metasurface Nano-pillars -->
+  <rect x="370" y="65" width="330" height="385" class="box"/>
+  <text x="535" y="88" class="label" text-anchor="middle">2. Metasurface Nano-pillars (2026 Tech)</text>
+  <text x="535" y="104" class="sublabel" text-anchor="middle">Sub-wavelength phase modulation via meta-atoms</text>
+
+  <!-- Silica substrate (bottom) -->
+  <rect x="390" y="270" width="290" height="25" class="substrate"/>
+  <text x="535" y="286" class="tech-text" text-anchor="middle" fill="#8b949e">Silica Substrate (Quartz)</text>
+
+  <!-- Nano-pillars of varying widths (e.g. Silicon Pillars) -->
+  <!-- Wide pillars delay phase more; thin pillars delay phase less -->
+  
+  <!-- Pillar 1: very thin -->
+  <rect x="415" y="150" width="8" height="120" class="meta-atom"/>
+  <text x="419" y="140" class="tech-text" text-anchor="middle">D_1</text>
+  
+  <!-- Pillar 2: thin-medium -->
+  <rect x="475" y="150" width="14" height="120" class="meta-atom"/>
+  <text x="482" y="140" class="tech-text" text-anchor="middle">D_2</text>
+  
+  <!-- Pillar 3: medium-thick -->
+  <rect x="535" y="150" width="20" height="120" class="meta-atom"/>
+  <text x="545" y="140" class="tech-text" text-anchor="middle">D_3</text>
+  
+  <!-- Pillar 4: very thick -->
+  <rect x="595" y="150" width="26" height="120" class="meta-atom"/>
+  <text x="608" y="140" class="tech-text" text-anchor="middle">D_4</text>
+  
+  <!-- Pillar 5: ultra thick -->
+  <rect x="655" y="150" width="32" height="120" class="meta-atom"/>
+  <text x="671" y="140" class="tech-text" text-anchor="middle">D_5</text>
+
+  <!-- Incident light from bottom (plane wave) -->
+  <line x1="390" y1="330" x2="680" y2="330" class="wavefront-plane"/>
+  <line x1="390" y1="315" x2="680" y2="315" class="wavefront-plane"/>
+  <line x1="390" y1="300" x2="680" y2="300" class="wavefront-plane"/>
+  
+  <!-- Arrow indicators showing incident direction -->
+  <line x1="440" y1="340" x2="440" y2="300" class="light-ray-in"/>
+  <line x1="535" y1="340" x2="535" y2="300" class="light-ray-in"/>
+  <line x1="630" y1="340" x2="630" y2="300" class="light-ray-in"/>
+  
+  <text x="535" y="355" class="tech-text" text-anchor="middle" fill="#ffd700">Incident Coherent Plane Wave (&amp;lambda;)</text>
+
+  <!-- Sculpted Outcoming Wavefronts (curves indicating local delay) -->
+  <!-- The wavefront is delayed most by the thickest pillar (right), least by thin (left) -->
+  <!-- This forms a slanted wavefront = steered beam! -->
+  <path d="M 400 115 L 680 85" class="wavefront-shaped"/>
+  <path d="M 400 100 L 680 70" class="wavefront-shaped"/>
+  <path d="M 400 85 L 680 55" class="wavefront-shaped"/>
+  
+  <text x="540" y="65" class="tech-text" text-anchor="middle" fill="#00f0ff" transform="rotate(-6 540 65)">Sculpted Phase Front (Steered Beam)</text>
+
+  <!-- Explanatory note below Metasurfaces -->
+  <text x="535" y="375" class="sublabel" text-anchor="middle">Nano-pillars act as sub-wavelength resonators.</text>
+  <text x="535" y="390" class="sublabel" text-anchor="middle">Varying the diameter (D_n) changes the local</text>
+  <text x="535" y="405" class="sublabel" text-anchor="middle">effective index and phase retardation.</text>
+  <text x="535" y="420" class="sublabel" text-anchor="middle">Achieves sub-micron resolution (no crosstalk).</text>
+
+</svg>

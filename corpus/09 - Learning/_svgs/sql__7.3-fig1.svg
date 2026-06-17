@@ -1,0 +1,67 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .row { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 3; }
+    .row-active { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 3; }
+    .frame-highlight { fill: var(--interactive-accent, #58a6ff); opacity: 0.1; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; stroke-dasharray: 4,3; rx: 4; }
+    .partition-box { fill: none; stroke: var(--text-accent, #79c0ff); stroke-width: 2; stroke-dasharray: 6,3; rx: 6; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .syntax { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--interactive-accent, #58a6ff); }
+    .arrow-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; stroke-dasharray: 3,2; }
+    .bracket { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+  </style>
+
+  <text x="350" y="25" class="title">Window Function Anatomy</text>
+
+  <!-- Syntax breakdown -->
+  <text x="50" y="55" class="syntax">SUM(salary) OVER (PARTITION BY dept_id ORDER BY hire_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</text>
+  <text x="50" y="75" class="section-label">↑ function    ↑ partition        ↑ order              ↑ frame clause</text>
+
+  <!-- Partition 1 -->
+  <rect x="40" y="100" width="280" height="250" class="partition-box"/>
+  <text x="50" y="115" class="section-label">partition: dept_id = 1</text>
+
+  <rect x="55" y="125" width="250" height="22" class="row"/>
+  <text x="65" y="140" class="label">Alice  | 2020-01 | $95,000</text>
+
+  <rect x="55" y="152" width="250" height="22" class="row"/>
+  <text x="65" y="167" class="label">Bob    | 2021-03 | $85,000</text>
+
+  <rect x="55" y="179" width="250" height="22" class="row-active"/>
+  <text x="65" y="194" class="label">Carol  | 2022-06 | $90,000  ← current</text>
+
+  <rect x="55" y="206" width="250" height="22" class="row"/>
+  <text x="65" y="221" class="label">Dave   | 2023-01 | $78,000</text>
+
+  <rect x="55" y="233" width="250" height="22" class="row"/>
+  <text x="65" y="248" class="label">Eve    | 2024-02 | $92,000</text>
+
+  <!-- Frame highlight (2 PRECEDING to CURRENT ROW) -->
+  <rect x="50" y="122" width="260" height="82" class="frame-highlight"/>
+  <text x="315" y="155" class="section-label" style="fill: var(--interactive-accent, #58a6ff);">frame</text>
+  <text x="315" y="170" class="label" style="fill: var(--interactive-accent, #58a6ff);">2 PRECEDING</text>
+  <text x="315" y="185" class="label" style="fill: var(--interactive-accent, #58a6ff);">to CURRENT</text>
+
+  <!-- Partition 2 -->
+  <rect x="380" y="100" width="280" height="190" class="partition-box"/>
+  <text x="390" y="115" class="section-label">partition: dept_id = 2</text>
+
+  <rect x="395" y="125" width="250" height="22" class="row"/>
+  <text x="405" y="140" class="label">Frank  | 2019-05 | $88,000</text>
+
+  <rect x="395" y="152" width="250" height="22" class="row"/>
+  <text x="405" y="167" class="label">Grace  | 2021-11 | $76,000</text>
+
+  <rect x="395" y="179" width="250" height="22" class="row"/>
+  <text x="405" y="194" class="label">Hank   | 2023-04 | $82,000</text>
+
+  <rect x="395" y="206" width="250" height="22" class="row"/>
+  <text x="405" y="221" class="label">Iris   | 2024-08 | $91,000</text>
+
+  <!-- Legend -->
+  <rect x="380" y="310" width="280" height="60" rx="6" style="fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1;"/>
+  <text x="395" y="330" class="section-label">key functions</text>
+  <text x="395" y="348" class="label">ROW_NUMBER | RANK | DENSE_RANK | NTILE</text>
+  <text x="395" y="363" class="label">LAG | LEAD | FIRST_VALUE | LAST_VALUE</text>
+</svg>

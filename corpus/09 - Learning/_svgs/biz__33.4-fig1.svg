@@ -1,0 +1,180 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .bold { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .plg { fill: #1a3a5c; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; animation: plgPulse 5s infinite ease-in-out; }
+    .slg { fill: #3a1a4a; stroke: #8c3db8; stroke-width: 1.5; animation: slgPulse 5s infinite ease-in-out 1.5s; }
+    .clg { fill: #1a4a3a; stroke: #3db88c; stroke-width: 1.5; animation: clgPulse 5s infinite ease-in-out 3s; }
+    .stage { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .arrow-acc { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; animation: flowArrows 1.5s linear infinite; }
+    .channel-good { fill: #51cf66; opacity: 0.2; stroke: #51cf66; stroke-width: 1; }
+    .channel-slow { fill: #ffd93d; opacity: 0.2; stroke: #ffd93d; stroke-width: 1; }
+
+    @keyframes plgPulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes slgPulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 4px #8c3db8); }
+    }
+    @keyframes clgPulse {
+      0%, 100% { stroke-width: 1.5; }
+      50% { stroke-width: 2.2; filter: drop-shadow(0 0 4px #3db88c); }
+    }
+    @keyframes flowArrows {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -20; }
+    }
+  </style>
+  <defs>
+    <marker id="biz4-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="biz4-arr-acc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">GTM Motion Comparison — PLG vs Sales-Led vs Content-Led</text>
+
+  <!-- PLG Column -->
+  <rect x="10" y="30" width="218" height="230" rx="4" class="plg"/>
+  <text x="119" y="50" class="bold" text-anchor="middle">Product-Led Growth (PLG)</text>
+  <text x="119" y="63" class="sublabel" text-anchor="middle">The product IS the sales motion</text>
+
+  <text x="18" y="82" class="sublabel">Acquisition: organic, content, WOM</text>
+  <text x="18" y="95" class="sublabel">Signup: self-serve, no sales call needed</text>
+  <text x="18" y="108" class="sublabel">Aha moment: &lt;5 min in product</text>
+  <text x="18" y="121" class="sublabel">Conversion: usage gate → upgrade in-app</text>
+  <text x="18" y="134" class="sublabel">Expansion: product prompts tier upgrade</text>
+
+  <line x1="18" y1="142" x2="220" y2="142" stroke="var(--interactive-accent, #58a6ff)" stroke-width="0.5"/>
+  <text x="18" y="157" class="label">Best for:</text>
+  <text x="18" y="170" class="sublabel">• Developer tools (devs hate salespeople)</text>
+  <text x="18" y="183" class="sublabel">• Self-explanatory value delivery</text>
+  <text x="18" y="196" class="sublabel">• Individual purchase authority</text>
+  <text x="18" y="209" class="sublabel">• Products with viral/collab potential</text>
+  <text x="18" y="222" class="sublabel">Key metric: activation rate + PQL count</text>
+  <text x="18" y="240" class="label">Your tools → PLG first</text>
+  <text x="18" y="252" class="sublabel">CAC: low (product converts itself)</text>
+
+  <!-- SLG Column -->
+  <rect x="236" y="30" width="218" height="230" rx="4" class="slg"/>
+  <text x="345" y="50" class="bold" text-anchor="middle">Sales-Led Growth (SLG)</text>
+  <text x="345" y="63" class="sublabel" text-anchor="middle">People close people</text>
+
+  <text x="244" y="82" class="sublabel">Acquisition: outbound prospecting, cold email</text>
+  <text x="244" y="95" class="sublabel">Qualify: BANT / MEDDIC screening</text>
+  <text x="244" y="108" class="sublabel">Discovery call: SPIN selling framework</text>
+  <text x="244" y="121" class="sublabel">Demo: mapped to their specific pain</text>
+  <text x="244" y="134" class="sublabel">Negotiation → contract → close</text>
+
+  <line x1="244" y1="142" x2="446" y2="142" stroke="#8c3db8" stroke-width="0.5"/>
+  <text x="244" y="157" class="label">Best for:</text>
+  <text x="244" y="170" class="sublabel">• Enterprise / high ACV ($10k+/yr)</text>
+  <text x="244" y="183" class="sublabel">• Buying committee involved (5+ people)</text>
+  <text x="244" y="196" class="sublabel">• Complex integration / customization</text>
+  <text x="244" y="209" class="sublabel">• Technical buyer ≠ economic buyer</text>
+  <text x="244" y="222" class="sublabel">Key metric: pipeline coverage × win rate</text>
+  <text x="244" y="240" class="label">Later stage → sales assist layer</text>
+  <text x="244" y="252" class="sublabel">CAC: high ($500–$5000+ per customer)</text>
+
+  <!-- CLG Column -->
+  <rect x="462" y="30" width="248" height="230" rx="4" class="clg"/>
+  <text x="586" y="50" class="bold" text-anchor="middle">Content-Led Growth (CLG)</text>
+  <text x="586" y="63" class="sublabel" text-anchor="middle">Audience = distribution asset</text>
+
+  <text x="470" y="82" class="sublabel">Acquisition: SEO, YouTube, Twitter/X, email</text>
+  <text x="470" y="95" class="sublabel">Trust: audience trusts you as expert</text>
+  <text x="470" y="108" class="sublabel">CTA: "try the tool that built this"</text>
+  <text x="470" y="121" class="sublabel">Email capture: list = warm lead channel</text>
+  <text x="470" y="134" class="sublabel">Conversion: warm audience → product trial</text>
+
+  <line x1="470" y1="142" x2="702" y2="142" stroke="#3db88c" stroke-width="0.5"/>
+  <text x="470" y="157" class="label">Best for:</text>
+  <text x="470" y="170" class="sublabel">• Long-term brand + SEO moat building</text>
+  <text x="470" y="183" class="sublabel">• ICP consumes content before buying</text>
+  <text x="470" y="196" class="sublabel">• Your BMX brand → product bridge</text>
+  <text x="470" y="209" class="sublabel">• Founders with public profiles (YC-style)</text>
+  <text x="470" y="222" class="sublabel">Key metric: list growth + content → trial %</text>
+  <text x="470" y="240" class="label">BMX brand → AI tools bridge</text>
+  <text x="470" y="252" class="sublabel">CAC: near-zero at scale (organic)</text>
+
+  <!-- BOTTOM: Customer Journey -->
+  <text x="360" y="285" class="bold" text-anchor="middle">Customer Journey — Awareness to Advocacy</text>
+
+  <!-- Journey stages -->
+  <rect x="10" y="294" width="80" height="50" rx="4" class="stage"/>
+  <text x="50" y="314" class="label" text-anchor="middle">Aware</text>
+  <text x="50" y="328" class="sublabel" text-anchor="middle">SEO · social</text>
+  <text x="50" y="340" class="sublabel" text-anchor="middle">· WOM · ads</text>
+
+  <line x1="92" y1="319" x2="112" y2="319" class="arrow" marker-end="url(#biz4-arr)"/>
+
+  <rect x="114" y="294" width="84" height="50" rx="4" class="stage"/>
+  <text x="156" y="314" class="label" text-anchor="middle">Consider</text>
+  <text x="156" y="328" class="sublabel" text-anchor="middle">Landing pg</text>
+  <text x="156" y="340" class="sublabel" text-anchor="middle">compare · demos</text>
+
+  <line x1="200" y1="319" x2="218" y2="319" class="arrow" marker-end="url(#biz4-arr)"/>
+
+  <rect x="220" y="294" width="80" height="50" rx="4" class="stage"/>
+  <text x="260" y="314" class="label" text-anchor="middle">Activate</text>
+  <text x="260" y="328" class="sublabel" text-anchor="middle">Aha moment</text>
+  <text x="260" y="340" class="sublabel" text-anchor="middle">&lt;5 min TTV</text>
+
+  <line x1="302" y1="319" x2="320" y2="319" class="arrow-acc" marker-end="url(#biz4-arr-acc)"/>
+
+  <rect x="322" y="294" width="80" height="50" rx="4" fill="#1a3a5c" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2"/>
+  <text x="362" y="314" class="label" text-anchor="middle">Convert</text>
+  <text x="362" y="328" class="sublabel" text-anchor="middle">$ payment</text>
+  <text x="362" y="340" class="sublabel" text-anchor="middle">plan upgrade</text>
+
+  <line x1="404" y1="319" x2="422" y2="319" class="arrow" marker-end="url(#biz4-arr)"/>
+
+  <rect x="424" y="294" width="80" height="50" rx="4" class="stage"/>
+  <text x="464" y="314" class="label" text-anchor="middle">Retain</text>
+  <text x="464" y="328" class="sublabel" text-anchor="middle">habit loop</text>
+  <text x="464" y="340" class="sublabel" text-anchor="middle">NRR &gt;100%</text>
+
+  <line x1="506" y1="319" x2="524" y2="319" class="arrow" marker-end="url(#biz4-arr)"/>
+
+  <rect x="526" y="294" width="80" height="50" rx="4" class="stage"/>
+  <text x="566" y="314" class="label" text-anchor="middle">Expand</text>
+  <text x="566" y="328" class="sublabel" text-anchor="middle">tier upgrade</text>
+  <text x="566" y="340" class="sublabel" text-anchor="middle">seat add</text>
+
+  <line x1="608" y1="319" x2="626" y2="319" class="arrow" marker-end="url(#biz4-arr)"/>
+
+  <rect x="628" y="294" width="82" height="50" rx="4" fill="#1a4a3a" stroke="#51cf66" stroke-width="1.5"/>
+  <text x="669" y="314" class="label" text-anchor="middle">Advocate</text>
+  <text x="669" y="328" class="sublabel" text-anchor="middle">refers others</text>
+  <text x="669" y="340" class="sublabel" text-anchor="middle">NPS &gt;40</text>
+
+  <!-- Distribution channel speed chart -->
+  <rect x="10" y="358" width="700" height="52" class="box" rx="4"/>
+  <text x="360" y="373" class="bold" text-anchor="middle">Channel Speed vs Longevity Matrix</text>
+  <text x="25" y="390" class="sublabel">Fast (days):</text>
+  <rect x="90" y="382" width="60" height="14" class="channel-good" rx="2"/>
+  <text x="120" y="393" class="sublabel" text-anchor="middle">Cold email</text>
+  <rect x="158" y="382" width="72" height="14" class="channel-good" rx="2"/>
+  <text x="194" y="393" class="sublabel" text-anchor="middle">Community post</text>
+  <rect x="238" y="382" width="70" height="14" class="channel-good" rx="2"/>
+  <text x="273" y="393" class="sublabel" text-anchor="middle">ProductHunt launch</text>
+  <text x="318" y="390" class="sublabel">  Slow (months):</text>
+  <rect x="390" y="382" width="50" height="14" class="channel-slow" rx="2"/>
+  <text x="415" y="393" class="sublabel" text-anchor="middle">SEO</text>
+  <rect x="448" y="382" width="54" height="14" class="channel-slow" rx="2"/>
+  <text x="475" y="393" class="sublabel" text-anchor="middle">YouTube</text>
+  <rect x="510" y="382" width="52" height="14" class="channel-slow" rx="2"/>
+  <text x="536" y="393" class="sublabel" text-anchor="middle">Twitter/X</text>
+  <text x="570" y="390" class="sublabel">  Compounding:</text>
+  <rect x="640" y="382" width="62" height="14" fill="var(--interactive-accent, #58a6ff)" opacity="0.3" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1" rx="2"/>
+  <text x="671" y="393" class="sublabel" text-anchor="middle">Email list</text>
+  <text x="360" y="408" class="sublabel" text-anchor="middle">Principle: Fast channels get early customers. Compounding channels create moats. Build both from day one.</text>
+</svg>

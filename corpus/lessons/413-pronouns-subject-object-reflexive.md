@@ -1,0 +1,150 @@
+---
+title: "41.3 — Pronouns — Subject, Object & Reflexive"
+subject: "French"
+catalog: advanced
+audience_tier: higher-education
+chapter: "41.3"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+# 41.3 — Pronouns — Subject, Object & Reflexive
+
+*Back to [Subject_Plan](Subject_Plan) | [← 41.2](41.2---Nouns,-Articles,-Gender-&-Adjective-Agreement) | [41.4 →](41.4---Verb-System-—-Present,-Imperative-&-Immediate-Future)*
+
+> **Chapter goal:** Master all French pronoun types and the clitic ordering stack — the most complex single chapter in the grammar, but the key that unlocks natural-sounding French.
+
+---
+
+## 1. Subject Pronouns
+
+| Person | Singular | Plural |
+|--------|---------|--------|
+| 1st | *je* (j' before vowel) | *nous* (formal/written) / ***on*** (spoken — almost always) |
+| 2nd | *tu* (informal) / *vous* (formal) | *vous* |
+| 3rd masc. | *il* | *ils* |
+| 3rd fem. | *elle* | *elles* |
+
+> **On vs. nous:** In spoken French, *on* has almost entirely replaced *nous* for "we." *On mange* = "We eat" / "One eats." *On* takes **3rd person singular** verb conjugation.
+
+---
+
+## 2. Direct Object Pronouns (Replaces the direct object)
+
+| Person | Form | Example |
+|--------|------|---------|
+| me/me | *me* (*m'*) | *Il me voit.* — He sees me. |
+| you (sg.) | *te* (*t'*) | *Je t'entends.* — I hear you. |
+| him/it (masc.) | *le* (*l'*) | *Je le prends.* — I take it/him. |
+| her/it (fem.) | *la* (*l'*) | *Je la regarde.* — I watch her/it. |
+| us | *nous* | *Il nous aide.* — He helps us. |
+| you (pl./formal) | *vous* | *Je vous remercie.* — I thank you. |
+| them (masc.) | *les* | *Je les connais.* — I know them. |
+| them (fem.) | *les* | *Je les aime.* — I love them. |
+
+---
+
+## 3. Indirect Object Pronouns (Replaces à + person)
+
+| Person | Form | Example |
+|--------|------|---------|
+| to me | *me* (*m'*) | *Il me parle.* — He speaks to me. |
+| to you (sg.) | *te* (*t'*) | *Je te donne ça.* — I give that to you. |
+| to him/her | ***lui*** | *Je lui explique.* — I explain to him/her. |
+| to us | *nous* | *Il nous écrit.* — He writes to us. |
+| to you (pl.) | *vous* | *Je vous réponds.* — I answer you. |
+| to them | ***leur*** | *Je leur dis.* — I tell them. |
+
+> **Key difference from Spanish/Italian:** French *lui* = to him OR to her (no gender distinction in indirect object pronouns 3rd sg.).
+
+---
+
+## 4. The Clitic Stack — Pronoun Ordering
+
+When multiple pronouns appear before a verb, the order is fixed:
+
+```
+ne   +   [me/te/se/nous/vous]   +   [le/la/les]   +   [lui/leur]   +   y   +   en   +   VERB
+```
+
+| Slot | Pronouns |
+|------|---------|
+| 1 (negation) | *ne* |
+| 2 (reflexive / 1st-2nd person) | *me, te, se, nous, vous* |
+| 3 (direct 3rd person) | *le, la, les* |
+| 4 (indirect 3rd person) | *lui, leur* |
+| 5 (locative) | *y* (= là, à + place) |
+| 6 (partitive/genitive) | *en* (= de + noun) |
+| 7 | VERB |
+
+**Examples:**
+- *Il me le donne.* — He gives it to me. (me + le)
+- *Je le lui envoie.* — I send it to him. (le + lui)
+- *Il y en a.* — There is some (of it). (y + en)
+- *Je ne vous en parle pas.* — I'm not talking to you about it. (ne + vous + en)
+
+---
+
+## 5. Reflexive Pronouns & Reflexive Verbs (Verbes Pronominaux)
+
+Reflexive verbs are extremely common in French — used to express actions done to oneself, reciprocal actions, or idiomatic meanings.
+
+| Person | Reflexive pronoun |
+|--------|-----------------|
+| je | *me* (*m'*) |
+| tu | *te* (*t'*) |
+| il/elle/on | *se* (*s'*) |
+| nous | *nous* |
+| vous | *vous* |
+| ils/elles | *se* (*s'*) |
+
+**High-frequency reflexive verbs:**
+- *se lever* (to get up), *se coucher* (to go to bed), *se réveiller* (to wake up)
+- *se souvenir de* (to remember), *s'appeler* (to be called), *se trouver* (to be located)
+- *s'habiller* (to get dressed), *se dépêcher* (to hurry), *se reposer* (to rest)
+- *se retrouver* (to meet up), *se marier* (to get married), *se sentir* (to feel)
+
+> **Reflexive verbs always use être as auxiliary in compound tenses** (see chapter 41.5).
+
+---
+
+## 6. Stress/Disjunctive Pronouns (Used after prepositions, for emphasis, in comparisons)
+
+*moi, toi, lui, elle, nous, vous, eux, elles*
+
+- After preposition: *avec moi, sans elle, pour eux, chez lui*
+- For emphasis: *Moi, je préfère le café.* (I personally prefer coffee.)
+- In comparison: *plus grand que lui* (taller than him)
+- After *c'est/ce sont*: *C'est moi. Ce sont eux.*
+
+---
+
+## 7. Relative Pronouns
+
+| Pronoun | Function | Example |
+|---------|---------|---------|
+| *qui* | Subject of relative clause | *L'homme qui parle...* (The man who speaks...) |
+| *que* (*qu'*) | Direct object of relative clause | *Le livre que je lis...* (The book that I'm reading...) |
+| *dont* | Replaces *de + noun/pronoun* | *L'ami dont je parle...* (The friend I'm talking about...) |
+| *où* | Location or time | *La ville où j'habite...* (The city where I live...) |
+
+---
+
+## 📚 Primary Sources
+
+- Tex's French Grammar — Pronouns — [coerll.utexas.edu/tex](https://coerll.utexas.edu/tex/)
+- Lawless French — Clitic Pronouns — [lawlessfrench.com](https://www.lawlessfrench.com/grammar/pronouns/)
+
+<details>
+<summary>🧠 Active Recall Prompts</summary>
+
+1. Write out the full clitic stack order from memory. Give one sentence using 3 clitics.
+2. What is the difference between *le/la/les* (direct) and *lui/leur* (indirect)?
+3. Give 5 reflexive verbs with their meanings. What auxiliary do they take in compound tenses?
+4. When do you use *moi* instead of *me*? Give 3 examples.
+5. Translate: "I give it to her" (using clitics). Then: "I'm not giving it to her."
+
+</details>

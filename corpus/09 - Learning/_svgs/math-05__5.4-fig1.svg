@@ -1,0 +1,45 @@
+<svg viewBox="0 0 520 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <style>
+    .pd-axis { stroke:var(--text-normal, #c9d1d9); stroke-width:2; fill:none; }
+    .pd-coex { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; }
+    .pd-trip { fill:var(--text-accent, #79c0ff); stroke:var(--text-normal, #c9d1d9); stroke-width:1.5; }
+    .pd-crit { fill:var(--interactive-accent, #58a6ff); stroke:var(--text-normal, #c9d1d9); stroke-width:2; }
+    .pd-lbl { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); }
+    .pd-phase { font-family:Inter,system-ui,sans-serif; font-size:16px; fill:var(--text-muted, #8b949e); font-weight:bold; }
+    .pd-acc { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    @keyframes blink-crit { 0%,100%{r:6} 50%{r:9} }
+    .pd-crit-anim { animation: blink-crit 2s ease-in-out infinite; }
+    @keyframes draw-phase { from{stroke-dashoffset:200} to{stroke-dashoffset:0} }
+    .pd-coex { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; stroke-dasharray: 200; animation: draw-phase 4s ease-in-out infinite alternate; }
+  </style>
+  <defs>
+    <marker id="pda" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <!-- Axes -->
+  <line x1="60" y1="350" x2="480" y2="350" class="pd-axis" marker-end="url(#pda)"/>
+  <line x1="60" y1="350" x2="60" y2="30" class="pd-axis" marker-end="url(#pda)"/>
+  <text x="490" y="355" class="pd-lbl">T</text>
+  <text x="50" y="25" class="pd-lbl">P</text>
+  <!-- Phase regions -->
+  <text x="130" y="150" class="pd-phase">SOLID</text>
+  <text x="300" y="200" class="pd-phase">LIQUID</text>
+  <text x="350" y="320" class="pd-phase">GAS</text>
+  <!-- Solid-Liquid coexistence -->
+  <path d="M 180 280 L 200 180 L 210 80" class="pd-coex"/>
+  <!-- Solid-Gas coexistence (sublimation) -->
+  <path d="M 180 280 Q 140 310 100 340" class="pd-coex"/>
+  <!-- Liquid-Gas coexistence (vaporization) -->
+  <path d="M 180 280 Q 280 260 360 200" class="pd-coex"/>
+  <!-- Critical point -->
+  <circle cx="360" cy="200" r="6" class="pd-crit pd-crit-anim"/>
+  <text x="375" y="195" class="pd-acc">Critical Point</text>
+  <text x="375" y="210" class="pd-lbl">(T_c, P_c)</text>
+  <!-- Triple point -->
+  <circle cx="180" cy="280" r="5" class="pd-trip"/>
+  <text x="185" y="270" class="pd-acc">Triple Point</text>
+  <!-- Supercritical region -->
+  <text x="420" y="130" class="pd-lbl" fill="var(--text-muted, #8b949e)">Supercritical</text>
+  <text x="420" y="145" class="pd-lbl" fill="var(--text-muted, #8b949e)">Fluid</text>
+</svg>

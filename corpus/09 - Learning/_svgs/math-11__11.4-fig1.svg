@@ -1,0 +1,59 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="rh-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rh-stable { fill: var(--interactive-accent, #58a6ff); opacity: 0.08; }
+    .rh-unstable { fill: #ff6b6b; opacity: 0.08; }
+    .rh-ax { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .rh-jw { stroke: var(--text-accent, #79c0ff); stroke-width: 2; stroke-dasharray: 6 3; }
+    .rh-pole { fill: var(--interactive-accent, #58a6ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; animation: pulseStable 3s infinite; }
+    .rh-pole:hover { r: 8; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .rh-upole { fill: #ff6b6b; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: all 0.2s; animation: pulseUnstable 1.5s infinite; }
+    .rh-upole:hover { r: 8; filter: drop-shadow(0 0 4px #ff6b6b); }
+    @keyframes pulseStable { 0%, 100% { filter: drop-shadow(0 0 1px var(--interactive-accent, #58a6ff)); } 50% { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); } }
+    @keyframes pulseUnstable { 0%, 100% { filter: drop-shadow(0 0 2px #ff6b6b); transform: translate(0, 0); } 25% { transform: translate(1px, -1px); } 50% { filter: drop-shadow(0 0 12px #ff6b6b); transform: translate(-1px, 1px); } 75% { transform: translate(-1px, -1px); } }
+    .rh-lbl { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .rh-acc { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .rh-warn { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: #ff6b6b; font-weight: bold; }
+  </style>
+
+  <!-- Stable region (LHP) -->
+  <rect x="30" y="30" width="270" height="340" class="rh-stable"/>
+  <text x="150" y="380" class="rh-acc" text-anchor="middle">STABLE (LHP)</text>
+
+  <!-- Unstable region (RHP) -->
+  <rect x="300" y="30" width="270" height="340" class="rh-unstable"/>
+  <text x="440" y="380" class="rh-warn" text-anchor="middle">UNSTABLE (RHP)</text>
+
+  <!-- Axes -->
+  <line x1="30" y1="200" x2="570" y2="200" class="rh-ax" marker-end="url(#rh-arr)"/>
+  <line x1="300" y1="370" x2="300" y2="30" class="rh-ax" marker-end="url(#rh-arr)"/>
+  <text x="580" y="205" class="rh-lbl">σ (Real)</text>
+  <text x="305" y="25" class="rh-lbl">jω (Imag)</text>
+
+  <!-- jω axis highlighted -->
+  <line x1="300" y1="370" x2="300" y2="30" class="rh-jw"/>
+  <text x="310" y="55" class="rh-lbl" fill="var(--text-accent, #79c0ff)">jω axis</text>
+
+  <!-- Stable poles (LHP) -->
+  <circle cx="180" cy="140" r="6" class="rh-pole"/>
+  <text x="190" y="135" class="rh-lbl">-2+3j</text>
+  <circle cx="180" cy="260" r="6" class="rh-pole"/>
+  <text x="190" y="275" class="rh-lbl">-2-3j</text>
+  <circle cx="120" cy="200" r="6" class="rh-pole"/>
+  <text x="100" y="220" class="rh-lbl">-5</text>
+
+  <!-- Unstable poles (RHP) -->
+  <circle cx="400" cy="150" r="6" class="rh-upole"/>
+  <text x="410" y="145" class="rh-warn">+1+2j ✗</text>
+  <circle cx="400" cy="250" r="6" class="rh-upole"/>
+  <text x="410" y="265" class="rh-warn">+1-2j ✗</text>
+
+  <!-- Marginal pole (jω axis) -->
+  <circle cx="300" cy="120" r="6" fill="var(--text-accent, #79c0ff)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+  <text x="310" y="115" class="rh-lbl" fill="var(--text-accent, #79c0ff)">±jω (marginal)</text>
+  <circle cx="300" cy="280" r="6" fill="var(--text-accent, #79c0ff)" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+</svg>

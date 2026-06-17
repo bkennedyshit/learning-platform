@@ -1,0 +1,73 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .target-name { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; marker-end: url(#t-arr); }
+  </style>
+  <defs>
+    <marker id="t-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="300" y="22" class="title" text-anchor="middle">Rust Production Deployment Targets</text>
+
+  <!-- Center: Rust source -->
+  <rect x="220" y="40" width="160" height="45" class="box-accent"/>
+  <text x="300" y="60" class="label-bold" text-anchor="middle">Rust Source Code</text>
+  <text x="300" y="76" class="label" text-anchor="middle">cargo build --target ...</text>
+
+  <!-- Arrows to targets -->
+  <line x1="240" y1="85" x2="100" y2="120" class="arrow"/>
+  <line x1="280" y1="85" x2="250" y2="120" class="arrow"/>
+  <line x1="320" y1="85" x2="380" y2="120" class="arrow"/>
+  <line x1="360" y1="85" x2="500" y2="120" class="arrow"/>
+
+  <!-- WASM -->
+  <rect x="20" y="120" width="160" height="100" class="box"/>
+  <text x="100" y="140" class="target-name" text-anchor="middle">WebAssembly</text>
+  <text x="30" y="158" class="label">wasm32-unknown-unknown</text>
+  <text x="30" y="174" class="label">Tools: wasm-pack, wasm-bindgen</text>
+  <text x="30" y="190" class="label">Use: Browser compute, image</text>
+  <text x="30" y="206" class="label">processing, crypto, physics</text>
+  <text x="30" y="218" class="label">Size: ~50-200KB typical</text>
+
+  <!-- FFI -->
+  <rect x="195" y="120" width="140" height="100" class="box"/>
+  <text x="265" y="140" class="target-name" text-anchor="middle">FFI</text>
+  <text x="205" y="158" class="label">C ABI compatible</text>
+  <text x="205" y="174" class="label">Tools: cbindgen, PyO3</text>
+  <text x="205" y="190" class="label">Use: Speed up Python,</text>
+  <text x="205" y="206" class="label">expose to any language</text>
+  <text x="205" y="218" class="label">cdylib → .so/.dll</text>
+
+  <!-- Embedded -->
+  <rect x="350" y="120" width="120" height="100" class="box"/>
+  <text x="410" y="140" class="target-name" text-anchor="middle">Embedded</text>
+  <text x="360" y="158" class="label">no_std, no heap</text>
+  <text x="360" y="174" class="label">embedded-hal</text>
+  <text x="360" y="190" class="label">STM32, nRF52,</text>
+  <text x="360" y="206" class="label">ESP32, RP2040</text>
+  <text x="360" y="218" class="label">probe-rs flash</text>
+
+  <!-- Game Dev -->
+  <rect x="485" y="120" width="100" height="100" class="box"/>
+  <text x="535" y="140" class="target-name" text-anchor="middle">Bevy</text>
+  <text x="495" y="158" class="label">ECS architecture</text>
+  <text x="495" y="174" class="label">2D/3D games</text>
+  <text x="495" y="190" class="label">WASM export</text>
+  <text x="495" y="206" class="label">Hot reload</text>
+  <text x="495" y="218" class="label">MIT licensed</text>
+
+  <!-- Bottom: ecosystem -->
+  <rect x="20" y="245" width="560" height="95" class="box"/>
+  <text x="300" y="265" class="label-bold" text-anchor="middle">Production Ecosystem</text>
+  <text x="40" y="285" class="label">Web Servers: axum, actix-web, rocket     │  CLI: clap, crossterm, ratatui</text>
+  <text x="40" y="302" class="label">Serialization: serde (JSON, TOML, YAML)   │  Async: tokio, async-std</text>
+  <text x="40" y="319" class="label">Database: sqlx, diesel, sea-orm           │  ML: candle, burn, ort</text>
+  <text x="40" y="336" class="label">Logging: tracing, env_logger              │  Testing: proptest, criterion</text>
+</svg>

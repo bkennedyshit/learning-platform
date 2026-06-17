@@ -1,0 +1,88 @@
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="save-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; cursor: pointer; transition: all 0.2s; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; pointer-events: none; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .flow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; color: var(--interactive-accent, #58a6ff); }
+    .note { font-family: monospace; font-size: 10px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    
+    /* Animations */
+    @keyframes pulse-gamestate {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      5%, 15% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-serializer {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      35%, 45% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-blob {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      72%, 82% { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    }
+    @keyframes pulse-storage {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); filter: none; }
+      92%, 98% { stroke: #2ecc71; filter: drop-shadow(0 0 10px #2ecc71); }
+    }
+    
+    .box-gamestate { animation: pulse-gamestate 4s infinite ease-in-out; }
+    .box-serializer { animation: pulse-serializer 4s infinite ease-in-out; }
+    .box-blob { animation: pulse-blob 4s infinite ease-in-out; }
+    .box-storage { animation: pulse-storage 4s infinite ease-in-out; }
+    
+    .data-particle {
+      filter: drop-shadow(0 0 3px #2ecc71);
+    }
+  </style>
+  
+  <text x="300" y="25" class="title">Save System Architecture</text>
+  
+  <!-- Game State -->
+  <rect x="30" y="50" width="120" height="60" class="box box-gamestate"/>
+  <text x="90" y="75" class="label" font-weight="bold">Game State</text>
+  <text x="90" y="92" class="note">Runtime objects</text>
+  
+  <!-- Serializer -->
+  <rect x="200" y="50" width="120" height="60" class="box box-serializer"/>
+  <text x="260" y="75" class="label" font-weight="bold">Serializer</text>
+  <text x="260" y="92" class="note">JSON / Binary / Proto</text>
+  
+  <!-- Versioned Data -->
+  <rect x="370" y="50" width="120" height="60" class="box box-blob"/>
+  <text x="430" y="75" class="label" font-weight="bold">Versioned Blob</text>
+  <text x="430" y="92" class="note">header + payload</text>
+  
+  <!-- Storage -->
+  <rect x="370" y="150" width="120" height="60" class="box box-storage"/>
+  <text x="430" y="175" class="label" font-weight="bold">Storage</text>
+  <text x="430" y="192" class="note">Disk / Cloud / Steam</text>
+  
+  <!-- Arrows -->
+  <line x1="150" y1="80" x2="200" y2="80" class="flow" marker-end="url(#save-arrow)"/>
+  <line x1="320" y1="80" x2="370" y2="80" class="flow" marker-end="url(#save-arrow)"/>
+  <line x1="430" y1="110" x2="430" y2="150" class="flow" marker-end="url(#save-arrow)"/>
+  
+  <!-- Saving data flow particle -->
+  <circle r="4.5" fill="#2ecc71" class="data-particle">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 90 80 L 260 80 L 430 80 L 430 180" />
+  </circle>
+
+  <!-- Migration path -->
+  <rect x="30" y="150" width="280" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="170" y="170" class="label" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">Version Migration Chain</text>
+  <text x="170" y="190" class="note">v1 → migrate_1_to_2() → v2 → migrate_2_to_3() → v3</text>
+  <text x="170" y="208" class="note">Each migration is a pure function: SaveData → SaveData</text>
+  <text x="170" y="222" class="note">Never delete fields — mark deprecated, add new ones</text>
+  
+  <!-- Slot system -->
+  <rect x="30" y="260" width="540" height="70" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="300" y="280" class="label" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">Slot Pattern Pattern</text>
+  <text x="300" y="298" class="note">slots/slot_0/header.json  ← metadata (timestamp, playtime, thumbnail path)</text>
+  <text x="300" y="312" class="note">slots/slot_0/world.bin    ← world state (tiles, NPCs, items)</text>
+  <text x="300" y="326" class="note">slots/slot_0/player.bin   ← player state (inventory, stats, quests)</text>
+</svg>

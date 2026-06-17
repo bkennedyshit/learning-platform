@@ -1,0 +1,78 @@
+<svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .box { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; }
+    .box-accent { fill: none; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .label-bold { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .pattern-name { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <text x="300" y="20" class="title" text-anchor="middle">Idiomatic Rust Pattern Catalog</text>
+
+  <!-- Row 1 -->
+  <rect x="20" y="35" width="170" height="75" class="box-accent"/>
+  <text x="105" y="52" class="pattern-name" text-anchor="middle">Newtype</text>
+  <text x="30" y="68" class="label">struct UserId(u64);</text>
+  <text x="30" y="82" class="label">• Type safety for primitives</text>
+  <text x="30" y="96" class="label">• Bypass orphan rule</text>
+  <text x="30" y="108" class="label">• Zero runtime cost</text>
+
+  <rect x="215" y="35" width="170" height="75" class="box-accent"/>
+  <text x="300" y="52" class="pattern-name" text-anchor="middle">Builder</text>
+  <text x="225" y="68" class="label">Config::builder()</text>
+  <text x="225" y="82" class="label">  .host("0.0.0.0")</text>
+  <text x="225" y="96" class="label">  .port(8080)</text>
+  <text x="225" y="108" class="label">  .build()?</text>
+
+  <rect x="410" y="35" width="170" height="75" class="box-accent"/>
+  <text x="495" y="52" class="pattern-name" text-anchor="middle">Typestate</text>
+  <text x="420" y="68" class="label">Doc&lt;Draft&gt; → Doc&lt;Review&gt;</text>
+  <text x="420" y="82" class="label">• State in the type system</text>
+  <text x="420" y="96" class="label">• Invalid transitions =</text>
+  <text x="420" y="108" class="label">  compile error</text>
+
+  <!-- Row 2 -->
+  <rect x="20" y="125" width="170" height="75" class="box-accent"/>
+  <text x="105" y="142" class="pattern-name" text-anchor="middle">From / Into</text>
+  <text x="30" y="158" class="label">impl From&lt;Celsius&gt; for Fahr</text>
+  <text x="30" y="172" class="label">• Idiomatic conversions</text>
+  <text x="30" y="186" class="label">• ? uses From for errors</text>
+  <text x="30" y="198" class="label">• TryFrom for fallible</text>
+
+  <rect x="215" y="125" width="170" height="75" class="box-accent"/>
+  <text x="300" y="142" class="pattern-name" text-anchor="middle">Parse Don't Validate</text>
+  <text x="225" y="158" class="label">Email::parse(s) → Email</text>
+  <text x="225" y="172" class="label">• Validate once at boundary</text>
+  <text x="225" y="186" class="label">• Type guarantees validity</text>
+  <text x="225" y="198" class="label">• No runtime checks needed</text>
+
+  <rect x="410" y="125" width="170" height="75" class="box-accent"/>
+  <text x="495" y="142" class="pattern-name" text-anchor="middle">Iterator Chains</text>
+  <text x="420" y="158" class="label">data.iter()</text>
+  <text x="420" y="172" class="label">  .filter(|x| x &gt; 0)</text>
+  <text x="420" y="186" class="label">  .map(|x| x * x)</text>
+  <text x="420" y="198" class="label">  .collect() // zero-cost</text>
+
+  <!-- Anti-patterns -->
+  <text x="300" y="230" class="title" text-anchor="middle">Anti-Patterns to Avoid</text>
+
+  <rect x="20" y="245" width="170" height="55" class="box"/>
+  <text x="105" y="262" class="label-bold" text-anchor="middle" fill="#e74c3c">❌ Stringly Typed</text>
+  <text x="30" y="278" class="label">fn set(s: &amp;str) // "active"</text>
+  <text x="30" y="292" class="label">→ Use enum Status {Active}</text>
+
+  <rect x="215" y="245" width="170" height="55" class="box"/>
+  <text x="300" y="262" class="label-bold" text-anchor="middle" fill="#e74c3c">❌ Excessive clone()</text>
+  <text x="225" y="278" class="label">data.clone() to silence</text>
+  <text x="225" y="292" class="label">→ Use references or Cow</text>
+
+  <rect x="410" y="245" width="170" height="55" class="box"/>
+  <text x="495" y="262" class="label-bold" text-anchor="middle" fill="#e74c3c">❌ Boolean Params</text>
+  <text x="420" y="278" class="label">render(true, false, true)</text>
+  <text x="420" y="292" class="label">→ Use enums for clarity</text>
+
+  <!-- Performance note -->
+  <rect x="20" y="315" width="560" height="35" class="box"/>
+  <text x="300" y="337" class="label-bold" text-anchor="middle">Zero-Cost Abstractions: Iterator chains compile to same ASM as manual loops (often faster via SIMD)</text>
+</svg>

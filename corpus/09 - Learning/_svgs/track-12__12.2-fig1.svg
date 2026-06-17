@@ -1,0 +1,91 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <defs>
+    <marker id="rpe-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .rpe-title { font-family:Inter,system-ui,sans-serif; font-size:13px; fill:var(--text-normal, #c9d1d9); font-weight:bold; }
+    .rpe-label { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-normal, #c9d1d9); }
+    .rpe-accent { font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+    .rpe-axis { stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .rpe-baseline { stroke:var(--text-muted, #8b949e); stroke-width:1; stroke-dasharray:3 2; }
+    .rpe-spike { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawSignal 2s ease-out infinite; }
+    .rpe-dip { stroke:#e74c3c; stroke-width:2.5; fill:none; stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawSignal 2s ease-out infinite; }
+    .rpe-flat { stroke:var(--text-normal, #c9d1d9); stroke-width:2; fill:none; }
+    .rpe-event { stroke:var(--text-accent, #79c0ff); stroke-width:1.5; stroke-dasharray:4 2; animation: flashEvent 2s step-end infinite; }
+    .rpe-box { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; rx:5; }
+    @keyframes drawSignal { 0% { stroke-dashoffset: 200; } 50%, 100% { stroke-dashoffset: 0; } }
+    @keyframes flashEvent { 0%, 100% { opacity: 0.3; } 10%, 40% { opacity: 1; } }
+  </style>
+  <!-- Panel A: Unexpected Reward -->
+  <rect x="5" y="5" width="230" height="130" class="rpe-box"/>
+  <text x="120" y="22" class="rpe-title" text-anchor="middle">A: Unexpected Reward</text>
+  <text x="120" y="36" class="rpe-accent" text-anchor="middle">δ > 0 → BURST</text>
+  <line x1="25" y1="95" x2="215" y2="95" class="rpe-axis"/>
+  <line x1="25" y1="50" x2="25" y2="120" class="rpe-axis"/>
+  <text x="22" y="47" class="rpe-label" text-anchor="end">↑fire</text>
+  <!-- Baseline flat then spike at reward -->
+  <path d="M30 95 L100 95" class="rpe-flat"/>
+  <path d="M100 95 L105 55 L110 50 L115 55 L120 60 L125 90 L130 95" class="rpe-spike"/>
+  <path d="M130 95 L210 95" class="rpe-flat"/>
+  <line x1="110" y1="100" x2="110" y2="125" class="rpe-event"/>
+  <text x="110" y="133" class="rpe-label" text-anchor="middle">Reward</text>
+  <!-- Panel B: Expected Reward (after learning) -->
+  <rect x="245" y="5" width="230" height="130" class="rpe-box"/>
+  <text x="360" y="22" class="rpe-title" text-anchor="middle">B: Expected Reward</text>
+  <text x="360" y="36" class="rpe-accent" text-anchor="middle">δ = 0 → NO CHANGE</text>
+  <line x1="265" y1="95" x2="455" y2="95" class="rpe-axis"/>
+  <line x1="265" y1="50" x2="265" y2="120" class="rpe-axis"/>
+  <!-- Spike at CS, flat at reward -->
+  <path d="M270 95 L310 95" class="rpe-flat"/>
+  <path d="M310 95 L315 60 L320 55 L325 60 L330 90 L335 95" class="rpe-spike"/>
+  <path d="M335 95 L450 95" class="rpe-flat"/>
+  <line x1="320" y1="100" x2="320" y2="125" class="rpe-event"/>
+  <text x="320" y="133" class="rpe-label" text-anchor="middle">CS</text>
+  <line x1="400" y1="100" x2="400" y2="125" class="rpe-event"/>
+  <text x="400" y="133" class="rpe-label" text-anchor="middle">Reward</text>
+  <!-- Panel C: Omitted Reward -->
+  <rect x="485" y="5" width="230" height="130" class="rpe-box"/>
+  <text x="600" y="22" class="rpe-title" text-anchor="middle">C: Omitted Reward</text>
+  <text x="600" y="36" class="rpe-accent" text-anchor="middle">δ &lt; 0 → DIP</text>
+  <line x1="505" y1="95" x2="695" y2="95" class="rpe-axis"/>
+  <line x1="505" y1="50" x2="505" y2="120" class="rpe-axis"/>
+  <!-- Spike at CS, dip at expected reward time -->
+  <path d="M510 95 L550 95" class="rpe-flat"/>
+  <path d="M550 95 L555 60 L560 55 L565 60 L570 90 L575 95" class="rpe-spike"/>
+  <path d="M575 95 L630 95" class="rpe-flat"/>
+  <path d="M630 95 L635 105 L640 115 L645 118 L650 115 L655 105 L660 95" class="rpe-dip"/>
+  <path d="M660 95 L690 95" class="rpe-flat"/>
+  <line x1="560" y1="100" x2="560" y2="125" class="rpe-event"/>
+  <text x="560" y="133" class="rpe-label" text-anchor="middle">CS</text>
+  <line x1="645" y1="100" x2="645" y2="125" class="rpe-event"/>
+  <text x="645" y="133" class="rpe-label" text-anchor="middle">No R!</text>
+  <!-- Summary equation panel -->
+  <rect x="5" y="150" width="710" height="260" class="rpe-box"/>
+  <text x="360" y="175" class="rpe-title" text-anchor="middle">Temporal-Difference Reward Prediction Error</text>
+  <text x="360" y="200" class="rpe-accent" text-anchor="middle" font-size="14px">δₜ = rₜ + γ·V(sₜ₊₁) − V(sₜ)</text>
+  <!-- Timeline showing signal transfer -->
+  <text x="40" y="235" class="rpe-title">Learning Timeline (signal transfer from US to CS):</text>
+  <line x1="40" y1="260" x2="680" y2="260" class="rpe-axis" marker-end="url(#rpe-arr)"/>
+  <text x="690" y="264" class="rpe-label">trials</text>
+  <!-- Early: spike at US -->
+  <rect x="60" y="270" width="140" height="55" rx="4" fill="none" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="130" y="288" class="rpe-label" text-anchor="middle">Early Training</text>
+  <text x="130" y="305" class="rpe-label" text-anchor="middle">δ > 0 at US time</text>
+  <text x="130" y="320" class="rpe-accent" text-anchor="middle">Dopamine burst → US</text>
+  <!-- Mid: spike transfers to CS -->
+  <rect x="260" y="270" width="160" height="55" rx="4" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="340" y="288" class="rpe-label" text-anchor="middle">After Learning</text>
+  <text x="340" y="305" class="rpe-label" text-anchor="middle">δ > 0 at CS time</text>
+  <text x="340" y="320" class="rpe-accent" text-anchor="middle">Burst transfers → CS</text>
+  <!-- Late: dip if omitted -->
+  <rect x="480" y="270" width="170" height="55" rx="4" fill="none" stroke="#e74c3c" stroke-width="1.5"/>
+  <text x="565" y="288" class="rpe-label" text-anchor="middle">Reward Omission</text>
+  <text x="565" y="305" class="rpe-label" text-anchor="middle">δ &lt; 0 at expected US time</text>
+  <text x="565" y="320" style="font-family:Inter,system-ui,sans-serif;font-size:11px;fill:#e74c3c;font-weight:bold;" text-anchor="middle">Dip → disappointment</text>
+  <!-- Neural pathway -->
+  <text x="40" y="360" class="rpe-title">Neural Circuit:</text>
+  <text x="40" y="380" class="rpe-label">VTA/SNc → Nucleus Accumbens (reward) + Dorsal Striatum (action selection) + PFC (planning)</text>
+  <text x="40" y="400" class="rpe-label">Dopamine = broadcast TD-error signal δ to all downstream targets simultaneously</text>
+</svg>

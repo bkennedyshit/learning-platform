@@ -1,0 +1,1268 @@
+---
+title: "Electromagnetic Wave Propagation Poynting Vector"
+subject: "Electrodynamics & Classical Field Theory"
+catalog: advanced
+audience_tier: higher-education
+chapter: "7.5"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 7.5 — Electromagnetic Wave Propagation & Poynting Vector
+
+> *"Light itself is an electromagnetic disturbance propagated through the field according to electromagnetic laws."* — James Clerk Maxwell, *A Treatise on Electricity and Magnetism* (1873)
+>
+> *"The velocity of transverse undulations in our hypothetical medium, calculated from the electromagnetic experiments of MM. Kohlrausch and Weber, agrees so exactly with the velocity of light… that we can scarcely avoid the inference that light consists in the transverse undulations of the same medium."* — James Clerk Maxwell
+
+Having derived the wave equation from Maxwell's equations in [7.4 - Electrodynamics - Induction & Maxwell's Equations](7.4---Electrodynamics---Induction-&-Maxwell's-Equations), we now study its solutions in detail: plane waves, polarization states, energy transport via the Poynting vector, radiation pressure, and the behavior of waves at interfaces.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Write the general plane-wave solution to Maxwell's equations and verify it satisfies all four equations.
+2. Derive the relationships between $\mathbf{E}$, $\mathbf{B}$, and the propagation direction $\hat{\mathbf{k}}$ in a plane wave.
+3. Compute the time-averaged Poynting vector and radiation pressure.
+4. Describe linear, circular, and elliptical polarization using Jones vectors.
+5. Derive the Fresnel equations for reflection and transmission at a dielectric interface.
+6. Apply boundary conditions on $\mathbf{E}$ and $\mathbf{B}$ at material interfaces.
+
+---
+
+## 🖼️ Visual Anchor — Electromagnetic Plane Wave
+
+![math-07__7.5-fig1](math-07__7.5-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 7.5.1 — Monochromatic Plane Wave
+
+A **monochromatic plane wave** is a solution to the wave equation with definite frequency $\omega$ and wave vector $\mathbf{k}$:
+
+$$
+\tilde{\mathbf{E}}(\mathbf{r},t) = \tilde{\mathbf{E}}_0\,e^{i(\mathbf{k}\cdot\mathbf{r} - \omega t)}
+$$
+
+$$
+\tilde{\mathbf{B}}(\mathbf{r},t) = \tilde{\mathbf{B}}_0\,e^{i(\mathbf{k}\cdot\mathbf{r} - \omega t)}
+$$
+
+The physical fields are the real parts. The **dispersion relation** in vacuum: $\omega = c|\mathbf{k}|$, i.e., $k = \omega/c$.
+
+### Definition 7.5.2 — Transversality Conditions
+
+Maxwell's equations impose constraints on plane waves:
+
+$$
+\mathbf{k}\cdot\tilde{\mathbf{E}}_0 = 0, \quad \mathbf{k}\cdot\tilde{\mathbf{B}}_0 = 0
+$$
+
+$$
+\tilde{\mathbf{B}}_0 = \frac{1}{\omega}\mathbf{k}\times\tilde{\mathbf{E}}_0 = \frac{1}{c}\hat{\mathbf{k}}\times\tilde{\mathbf{E}}_0
+$$
+
+The fields are **transverse** (perpendicular to propagation) and mutually perpendicular: $\mathbf{E}\perp\mathbf{B}\perp\hat{\mathbf{k}}$.
+
+### Definition 7.5.3 — Poynting Vector and Intensity
+
+The **Poynting vector** gives the energy flux (power per unit area):
+
+$$
+\mathbf{S} = \frac{1}{\mu_0}\mathbf{E}\times\mathbf{B}
+$$
+
+For a plane wave, the **time-averaged** intensity:
+
+$$
+\langle S\rangle = \frac{1}{2\mu_0}E_0^2 = \frac{1}{2}c\varepsilon_0 E_0^2 = I
+$$
+
+### Definition 7.5.4 — Polarization States
+
+The polarization describes the trajectory of the $\mathbf{E}$-field tip in the plane perpendicular to $\hat{\mathbf{k}}$:
+
+| Type | Description | Jones Vector |
+|:---|:---|:---|
+| Linear | $\mathbf{E}$ oscillates in a fixed plane | $\begin{pmatrix}\cos\alpha\\\sin\alpha\end{pmatrix}$ |
+| Right circular | $\mathbf{E}$ tip traces a circle (clockwise looking into beam) | $\frac{1}{\sqrt{2}}\begin{pmatrix}1\\-i\end{pmatrix}$ |
+| Left circular | $\mathbf{E}$ tip traces a circle (counterclockwise) | $\frac{1}{\sqrt{2}}\begin{pmatrix}1\\i\end{pmatrix}$ |
+| Elliptical | General case | $\begin{pmatrix}E_x\\E_y e^{i\delta}\end{pmatrix}$ |
+
+### Definition 7.5.5 — Radiation Pressure
+
+Electromagnetic waves carry momentum density $\mathbf{g} = \mathbf{S}/c^2 = \varepsilon_0(\mathbf{E}\times\mathbf{B})$. The **radiation pressure** on a perfectly absorbing surface:
+
+$$
+P_{\text{rad}} = \frac{\langle S\rangle}{c} = \frac{I}{c}
+$$
+
+For a perfectly reflecting surface: $P_{\text{rad}} = 2I/c$.
+
+
+
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Axiom 7.5.1 — Linearity and Superposition of Waves
+
+The wave equation is linear: any superposition of solutions is also a solution. This allows Fourier decomposition — any electromagnetic disturbance can be expressed as a sum of monochromatic plane waves.
+
+### Axiom 7.5.2 — Boundary Conditions at Interfaces
+
+At an interface between two media (with no free surface charges or currents):
+1. $E_{\parallel}$ is continuous (from Faraday's Law)
+2. $B_{\parallel}/\mu$ is continuous (from Ampère's Law)
+3. $\varepsilon E_{\perp}$ is continuous (from Gauss's Law)
+4. $B_{\perp}$ is continuous (from $\nabla\cdot\mathbf{B} = 0$)
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 7.5.1 — Plane Wave Satisfies All Four Maxwell Equations
+
+<details>
+<summary>🔍 Proof</summary>
+
+**Step 1:** Let $\tilde{\mathbf{E}} = \tilde{\mathbf{E}}_0 e^{i(\mathbf{k}\cdot\mathbf{r}-\omega t)}$. Note that $\nabla \to i\mathbf{k}$ and $\partial/\partial t \to -i\omega$ for plane waves.
+
+**Step 2 (Gauss for E):** $\nabla\cdot\tilde{\mathbf{E}} = i\mathbf{k}\cdot\tilde{\mathbf{E}}_0\,e^{i(\mathbf{k}\cdot\mathbf{r}-\omega t)} = 0$ requires $\mathbf{k}\cdot\tilde{\mathbf{E}}_0 = 0$. ✓ (transversality)
+
+**Step 3 (Gauss for B):** Similarly $\mathbf{k}\cdot\tilde{\mathbf{B}}_0 = 0$. ✓
+
+**Step 4 (Faraday):** $\nabla\times\tilde{\mathbf{E}} = i\mathbf{k}\times\tilde{\mathbf{E}}_0\,e^{i(\cdots)}$ and $-\partial\tilde{\mathbf{B}}/\partial t = i\omega\tilde{\mathbf{B}}_0\,e^{i(\cdots)}$. Equating: $\tilde{\mathbf{B}}_0 = \frac{1}{\omega}\mathbf{k}\times\tilde{\mathbf{E}}_0$. ✓
+
+**Step 5 (Ampère-Maxwell):** $i\mathbf{k}\times\tilde{\mathbf{B}}_0 = -i\omega\mu_0\varepsilon_0\tilde{\mathbf{E}}_0$. Substituting $\tilde{\mathbf{B}}_0$:
+
+$$
+\mathbf{k}\times(\mathbf{k}\times\tilde{\mathbf{E}}_0) = -\omega\mu_0\varepsilon_0\omega\tilde{\mathbf{E}}_0/\omega = -\mu_0\varepsilon_0\omega\tilde{\mathbf{E}}_0
+$$
+
+Using $\mathbf{k}\times(\mathbf{k}\times\tilde{\mathbf{E}}_0) = \mathbf{k}(\mathbf{k}\cdot\tilde{\mathbf{E}}_0) - k^2\tilde{\mathbf{E}}_0 = -k^2\tilde{\mathbf{E}}_0$:
+
+$$
+-k^2\tilde{\mathbf{E}}_0 = -\mu_0\varepsilon_0\omega^2\tilde{\mathbf{E}}_0
+$$
+
+This gives the dispersion relation $k^2 = \mu_0\varepsilon_0\omega^2$, i.e., $\omega/k = 1/\sqrt{\mu_0\varepsilon_0} = c$. ✓ $\blacksquare$
+
+</details>
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 7.5.1 — Energy-Momentum Relations for EM Waves
+
+For a plane wave in vacuum:
+- Energy density: $u = \varepsilon_0 E^2$ (equally split between $\mathbf{E}$ and $\mathbf{B}$)
+- Momentum density: $\mathbf{g} = \mathbf{S}/c^2 = u\hat{\mathbf{k}}/c$
+- Energy-momentum relation: $u = pc$ (massless, like photons)
+
+### Theorem 7.5.2 — Fresnel Equations
+
+For a plane wave incident on a planar interface between media with indices $n_1$ and $n_2$, at angle $\theta_i$:
+
+**s-polarization** (E perpendicular to plane of incidence):
+
+$$
+r_s = \frac{n_1\cos\theta_i - n_2\cos\theta_t}{n_1\cos\theta_i + n_2\cos\theta_t}, \quad t_s = \frac{2n_1\cos\theta_i}{n_1\cos\theta_i + n_2\cos\theta_t}
+$$
+
+**p-polarization** (E in plane of incidence):
+
+$$
+r_p = \frac{n_2\cos\theta_i - n_1\cos\theta_t}{n_2\cos\theta_i + n_1\cos\theta_t}, \quad t_p = \frac{2n_1\cos\theta_i}{n_2\cos\theta_i + n_1\cos\theta_t}
+$$
+
+where $\theta_t$ satisfies Snell's Law: $n_1\sin\theta_i = n_2\sin\theta_t$.
+
+### Theorem 7.5.3 — Brewster's Angle
+
+At the **Brewster angle** $\theta_B = \arctan(n_2/n_1)$, the reflected p-polarized wave vanishes ($r_p = 0$). The reflected light is purely s-polarized.
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### Derivation 7.5.1 — Time-Averaged Poynting Vector
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** For a linearly polarized plane wave propagating in $\hat{\mathbf{z}}$:
+
+$$
+\mathbf{E} = E_0\cos(kz - \omega t)\,\hat{\mathbf{x}}, \quad \mathbf{B} = \frac{E_0}{c}\cos(kz-\omega t)\,\hat{\mathbf{y}}
+$$
+
+**Step 2:** The instantaneous Poynting vector:
+
+$$
+\mathbf{S} = \frac{1}{\mu_0}\mathbf{E}\times\mathbf{B} = \frac{E_0^2}{\mu_0 c}\cos^2(kz-\omega t)\,\hat{\mathbf{z}}
+$$
+
+**Step 3:** Time-average over one period ($\langle\cos^2\rangle = 1/2$):
+
+$$
+\langle\mathbf{S}\rangle = \frac{E_0^2}{2\mu_0 c}\,\hat{\mathbf{z}} = \frac{1}{2}c\varepsilon_0 E_0^2\,\hat{\mathbf{z}}
+$$
+
+(using $1/(\mu_0 c) = c\varepsilon_0$). $\blacksquare$
+
+</details>
+
+### Derivation 7.5.2 — Fresnel Equations (Normal Incidence)
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** At normal incidence ($\theta_i = 0$), the incident, reflected, and transmitted waves all propagate along $\hat{\mathbf{z}}$. Let $\mathbf{E}$ be polarized along $\hat{\mathbf{x}}$:
+
+- Incident: $\tilde{E}_I = E_0 e^{i(k_1 z - \omega t)}$
+- Reflected: $\tilde{E}_R = E_{0R} e^{i(-k_1 z - \omega t)}$
+- Transmitted: $\tilde{E}_T = E_{0T} e^{i(k_2 z - \omega t)}$
+
+**Step 2:** Boundary condition at $z = 0$ — $E_\parallel$ continuous:
+
+$$
+E_0 + E_{0R} = E_{0T} \quad \text{...(1)}
+$$
+
+**Step 3:** Boundary condition — $B_\parallel/\mu$ continuous. For each wave $B = E/v = nE/c$:
+
+$$
+\frac{1}{\mu_1}\cdot\frac{n_1}{c}(E_0 - E_{0R}) = \frac{1}{\mu_2}\cdot\frac{n_2}{c}E_{0T}
+$$
+
+For non-magnetic media ($\mu_1 = \mu_2 = \mu_0$):
+
+$$
+n_1(E_0 - E_{0R}) = n_2 E_{0T} \quad \text{...(2)}
+$$
+
+**Step 4:** Solve (1) and (2). From (1): $E_{0T} = E_0 + E_{0R}$. Substitute into (2):
+
+$$
+n_1(E_0 - E_{0R}) = n_2(E_0 + E_{0R})
+$$
+
+$$
+E_0(n_1 - n_2) = E_{0R}(n_1 + n_2)
+$$
+
+$$
+r = \frac{E_{0R}}{E_0} = \frac{n_1 - n_2}{n_1 + n_2}
+$$
+
+$$
+t = \frac{E_{0T}}{E_0} = 1 + r = \frac{2n_1}{n_1 + n_2}
+$$
+
+**Step 5:** Reflectance and transmittance:
+
+$$
+R = r^2 = \left(\frac{n_1-n_2}{n_1+n_2}\right)^2, \quad T = \frac{n_2}{n_1}t^2 = \frac{4n_1 n_2}{(n_1+n_2)^2}
+$$
+
+Verify: $R + T = 1$ (energy conservation). $\blacksquare$
+
+</details>
+
+
+
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 7.5.1 — Radiation Pressure on a Solar Sail
+
+**Problem:** The solar intensity at Earth's orbit is $I = 1361$ W/m². Calculate the radiation pressure on a perfectly reflecting solar sail of area $A = 1000$ m² and the resulting force.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** For a perfectly reflecting surface, the radiation pressure is:
+
+$$
+P = \frac{2I}{c} = \frac{2\times 1361}{3\times 10^8} = 9.07\times 10^{-6}\text{ Pa}
+$$
+
+**Step 2:** The force:
+
+$$
+F = PA = 9.07\times 10^{-6}\times 1000 = 9.07\times 10^{-3}\text{ N} \approx 9\text{ mN}
+$$
+
+**Step 3:** While small, this force acts continuously without fuel expenditure. For a 10 kg sail, the acceleration is $a = F/m = 9\times 10^{-4}$ m/s², which over a year gives $\Delta v \approx 28$ km/s — significant for interplanetary travel.
+
+</details>
+
+---
+
+### Example 7.5.2 — Electric Field Amplitude of a Laser Beam
+
+**Problem:** A 5 mW laser beam has a spot diameter of 1 mm. Find the peak electric field amplitude.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** The beam area:
+
+$$
+A = \pi(0.5\times 10^{-3})^2 = 7.85\times 10^{-7}\text{ m}^2
+$$
+
+**Step 2:** The intensity:
+
+$$
+I = \frac{P}{A} = \frac{5\times 10^{-3}}{7.85\times 10^{-7}} = 6370\text{ W/m}^2
+$$
+
+**Step 3:** From $I = \frac{1}{2}c\varepsilon_0 E_0^2$:
+
+$$
+E_0 = \sqrt{\frac{2I}{c\varepsilon_0}} = \sqrt{\frac{2\times 6370}{3\times 10^8\times 8.854\times 10^{-12}}} = \sqrt{4.79\times 10^6} = 2190\text{ V/m}
+$$
+
+**Step 4:** The corresponding magnetic field amplitude:
+
+$$
+B_0 = E_0/c = 2190/(3\times 10^8) = 7.3\times 10^{-6}\text{ T} = 7.3\text{ μT}
+$$
+
+</details>
+
+---
+
+### Example 7.5.3 — Reflection at an Air-Glass Interface
+
+**Problem:** Light passes from air ($n_1 = 1$) into glass ($n_2 = 1.5$) at normal incidence. Find the fraction of power reflected and transmitted.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** Reflection coefficient:
+
+$$
+r = \frac{n_1 - n_2}{n_1 + n_2} = \frac{1 - 1.5}{1 + 1.5} = \frac{-0.5}{2.5} = -0.2
+$$
+
+The negative sign indicates a $180°$ phase shift upon reflection.
+
+**Step 2:** Reflectance (fraction of power reflected):
+
+$$
+R = r^2 = 0.04 = 4\%
+$$
+
+**Step 3:** Transmittance:
+
+$$
+T = 1 - R = 0.96 = 96\%
+$$
+
+**Step 4 (Verification via transmission coefficient):**
+
+$$
+t = \frac{2n_1}{n_1+n_2} = \frac{2}{2.5} = 0.8
+$$
+
+$$
+T = \frac{n_2}{n_1}t^2 = \frac{1.5}{1}\times 0.64 = 0.96 \quad \checkmark
+$$
+
+</details>
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Vault Links
+
+| Topic | Link | Relevance |
+|:---|:---|:---|
+| Wave equation derivation | [7.4 - Electrodynamics - Induction & Maxwell's Equations](7.4---Electrodynamics---Induction-&-Maxwell's-Equations) | Source of the wave equation |
+| Potentials for radiation | [7.6 - Potential Formulations & Gauge Transformations](7.6---Potential-Formulations-&-Gauge-Transformations) | Retarded potentials for radiation |
+| Relativistic waves | [7.7 - Relativistic Electrodynamics & Four-Vectors](7.7---Relativistic-Electrodynamics-&-Four-Vectors) | Wave four-vector $k^\mu$ |
+| Vector calculus | [1.6 - Vector Fields, Div & Curl](1.6---Vector-Fields,-Div-&-Curl) | Curl and divergence in wave analysis |
+
+### Authoritative External Resources
+
+1. **Griffiths, D.J.** — *Introduction to Electrodynamics*, 4th ed., Chapters 9.
+2. **Hecht, E.** — *Optics*, 5th ed. Comprehensive treatment of wave optics and polarization.
+3. **Jackson, J.D.** — *Classical Electrodynamics*, 3rd ed., Chapter 7.
+
+### Key Equations Summary
+
+| Name | Equation | Number |
+|:---|:---|:---|
+| Dispersion relation | $\omega = ck$ | (7.5.1) |
+| Transversality | $\mathbf{k}\cdot\mathbf{E} = 0$, $\mathbf{B} = \hat{\mathbf{k}}\times\mathbf{E}/c$ | (7.5.2) |
+| Time-averaged intensity | $I = \frac{1}{2}c\varepsilon_0 E_0^2$ | (7.5.3) |
+| Radiation pressure (absorbing) | $P = I/c$ | (7.5.4) |
+| Fresnel (normal) | $r = (n_1-n_2)/(n_1+n_2)$ | (7.5.5) |
+| Snell's Law | $n_1\sin\theta_i = n_2\sin\theta_t$ | (7.5.6) |
+| Brewster's angle | $\theta_B = \arctan(n_2/n_1)$ | (7.5.7) |
+
+
+
+
+---
+
+### Derivation 7.5.3 — Snell's Law from Boundary Conditions
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** Consider a plane wave incident on a planar interface at $z = 0$ between media with indices $n_1$ (for $z \lt  0$) and $n_2$ (for $z \gt  0$).
+
+**Step 2:** The incident wave: $\tilde{\mathbf{E}}_I = \mathbf{E}_{0I}\,e^{i(\mathbf{k}_I\cdot\mathbf{r} - \omega t)}$ with $\mathbf{k}_I = k_1(\sin\theta_i\,\hat{\mathbf{x}} + \cos\theta_i\,\hat{\mathbf{z}})$.
+
+**Step 3:** The reflected wave: $\tilde{\mathbf{E}}_R = \mathbf{E}_{0R}\,e^{i(\mathbf{k}_R\cdot\mathbf{r} - \omega t)}$ with $\mathbf{k}_R = k_1(\sin\theta_r\,\hat{\mathbf{x}} - \cos\theta_r\,\hat{\mathbf{z}})$.
+
+**Step 4:** The transmitted wave: $\tilde{\mathbf{E}}_T = \mathbf{E}_{0T}\,e^{i(\mathbf{k}_T\cdot\mathbf{r} - \omega t)}$ with $\mathbf{k}_T = k_2(\sin\theta_t\,\hat{\mathbf{x}} + \cos\theta_t\,\hat{\mathbf{z}})$.
+
+**Step 5:** Boundary condition: $E_\parallel$ must be continuous at $z = 0$ for **all** $x$ and **all** $t$. This requires the phase factors to match at $z = 0$:
+
+$$
+\mathbf{k}_I\cdot\mathbf{r}\big|_{z=0} = \mathbf{k}_R\cdot\mathbf{r}\big|_{z=0} = \mathbf{k}_T\cdot\mathbf{r}\big|_{z=0}
+$$
+
+$$
+k_1\sin\theta_i\,x = k_1\sin\theta_r\,x = k_2\sin\theta_t\,x
+$$
+
+**Step 6:** From the first equality: $\sin\theta_i = \sin\theta_r$, so $\theta_r = \theta_i$ (law of reflection).
+
+**Step 7:** From the second equality: $k_1\sin\theta_i = k_2\sin\theta_t$. Since $k = n\omega/c$:
+
+$$
+n_1\sin\theta_i = n_2\sin\theta_t
+$$
+
+This is **Snell's Law**. $\blacksquare$
+
+</details>
+
+### Derivation 7.5.4 — Total Internal Reflection
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** From Snell's Law: $\sin\theta_t = (n_1/n_2)\sin\theta_i$.
+
+**Step 2:** If $n_1 \gt  n_2$ (going from denser to rarer medium), then $\sin\theta_t \gt  \sin\theta_i$. There exists a **critical angle** $\theta_c$ where $\sin\theta_t = 1$:
+
+$$
+\sin\theta_c = \frac{n_2}{n_1}
+$$
+
+**Step 3:** For $\theta_i \gt  \theta_c$: $\sin\theta_t \gt  1$, which means $\cos\theta_t = \sqrt{1-\sin^2\theta_t}$ becomes imaginary:
+
+$$
+\cos\theta_t = i\sqrt{\sin^2\theta_t - 1} = i\kappa
+$$
+
+**Step 4:** The transmitted wave becomes:
+
+$$
+\tilde{\mathbf{E}}_T \propto e^{i(k_2\sin\theta_t\,x + k_2(i\kappa)z - \omega t)} = e^{-k_2\kappa z}\,e^{i(k_2\sin\theta_t\,x - \omega t)}
+$$
+
+This is an **evanescent wave** — it propagates along the surface but decays exponentially into the second medium. No energy is transmitted on average: total internal reflection.
+
+**Step 5:** The penetration depth: $\delta = 1/(k_2\kappa) = \frac{\lambda_2}{2\pi\sqrt{(n_1/n_2)^2\sin^2\theta_i - 1}}$.
+
+$\blacksquare$
+
+</details>
+
+---
+
+### Example 7.5.4 — Circular Polarization Decomposition
+
+**Problem:** A linearly polarized wave $\mathbf{E} = E_0\cos(kz-\omega t)\hat{\mathbf{x}}$ is decomposed into left and right circular polarizations. Find the amplitudes.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** Write in complex notation: $\tilde{\mathbf{E}} = E_0\hat{\mathbf{x}}\,e^{i(kz-\omega t)}$.
+
+**Step 2:** The circular polarization basis vectors:
+
+$$
+\hat{\mathbf{e}}_R = \frac{1}{\sqrt{2}}(\hat{\mathbf{x}} - i\hat{\mathbf{y}}), \quad \hat{\mathbf{e}}_L = \frac{1}{\sqrt{2}}(\hat{\mathbf{x}} + i\hat{\mathbf{y}})
+$$
+
+**Step 3:** Invert: $\hat{\mathbf{x}} = \frac{1}{\sqrt{2}}(\hat{\mathbf{e}}_R + \hat{\mathbf{e}}_L)$.
+
+**Step 4:** Therefore:
+
+$$
+\tilde{\mathbf{E}} = \frac{E_0}{\sqrt{2}}\hat{\mathbf{e}}_R\,e^{i(kz-\omega t)} + \frac{E_0}{\sqrt{2}}\hat{\mathbf{e}}_L\,e^{i(kz-\omega t)}
+$$
+
+**Step 5:** A linearly polarized wave is an equal superposition of right and left circular polarizations, each with amplitude $E_0/\sqrt{2}$.
+
+</details>
+
+---
+
+### Example 7.5.5 — Energy Transport in a Standing Wave
+
+**Problem:** Two counter-propagating plane waves of equal amplitude create a standing wave. Show that the time-averaged Poynting vector vanishes.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** The two waves:
+
+$$
+\mathbf{E}_1 = E_0\cos(kz-\omega t)\hat{\mathbf{x}}, \quad \mathbf{E}_2 = E_0\cos(kz+\omega t)\hat{\mathbf{x}}
+$$
+
+**Step 2:** Superposition: $\mathbf{E} = \mathbf{E}_1 + \mathbf{E}_2 = 2E_0\cos(kz)\cos(\omega t)\hat{\mathbf{x}}$ (standing wave).
+
+**Step 3:** The corresponding magnetic fields:
+
+$$
+\mathbf{B}_1 = \frac{E_0}{c}\cos(kz-\omega t)\hat{\mathbf{y}}, \quad \mathbf{B}_2 = -\frac{E_0}{c}\cos(kz+\omega t)\hat{\mathbf{y}}
+$$
+
+$$
+\mathbf{B} = -\frac{2E_0}{c}\sin(kz)\sin(\omega t)\hat{\mathbf{y}}
+$$
+
+**Step 4:** The Poynting vector:
+
+$$
+\mathbf{S} = \frac{1}{\mu_0}\mathbf{E}\times\mathbf{B} = \frac{1}{\mu_0}\cdot 2E_0\cos(kz)\cos(\omega t)\cdot\left(-\frac{2E_0}{c}\sin(kz)\sin(\omega t)\right)\hat{\mathbf{z}}
+$$
+
+$$
+= -\frac{2E_0^2}{\mu_0 c}\sin(2kz)\sin(2\omega t)\hat{\mathbf{z}} \cdot \frac{1}{2}
+$$
+
+Wait — let me be more careful:
+
+$$
+\mathbf{S} = \frac{1}{\mu_0}(2E_0\cos kz\cos\omega t)\hat{\mathbf{x}}\times\left(-\frac{2E_0}{c}\sin kz\sin\omega t\right)\hat{\mathbf{y}}
+$$
+
+$$
+= -\frac{4E_0^2}{\mu_0 c}\cos(kz)\sin(kz)\cos(\omega t)\sin(\omega t)\hat{\mathbf{z}}
+$$
+
+$$
+= -\frac{E_0^2}{\mu_0 c}\sin(2kz)\sin(2\omega t)\hat{\mathbf{z}}
+$$
+
+**Step 5:** Time average: $\langle\sin(2\omega t)\rangle = 0$.
+
+$$
+\langle\mathbf{S}\rangle = 0
+$$
+
+No net energy transport in a standing wave — energy sloshes back and forth but doesn't go anywhere on average. $\blacksquare$
+
+</details>
+
+
+
+
+---
+
+### Derivation 7.5.5 — Electromagnetic Momentum and the Abraham-Minkowski Debate
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** In vacuum, the electromagnetic momentum density is unambiguous:
+
+$$
+\mathbf{g} = \mu_0\varepsilon_0(\mathbf{E}\times\mathbf{B}) = \frac{\mathbf{S}}{c^2}
+$$
+
+**Step 2:** The total momentum stored in the fields of a volume $V$:
+
+$$
+\mathbf{G} = \varepsilon_0\int_V(\mathbf{E}\times\mathbf{B})\,d\tau
+$$
+
+**Step 3:** The momentum flux is described by the Maxwell stress tensor $T_{ij}$:
+
+$$
+T_{ij} = \varepsilon_0\left(E_iE_j - \frac{1}{2}\delta_{ij}E^2\right) + \frac{1}{\mu_0}\left(B_iB_j - \frac{1}{2}\delta_{ij}B^2\right)
+$$
+
+**Step 4:** The force per unit area on a surface is $f_i = \sum_j T_{ij}\hat{n}_j$. The total electromagnetic force on charges in volume $V$:
+
+$$
+F_i = \oint_S \sum_j T_{ij}\,da_j - \varepsilon_0\mu_0\frac{\partial}{\partial t}\int_V S_i\,d\tau
+$$
+
+**Step 5:** For a plane wave, the momentum carried per unit volume:
+
+$$
+|\mathbf{g}| = \frac{u}{c}
+$$
+
+where $u$ is the energy density. This gives the energy-momentum relation for massless radiation: $E = pc$.
+
+**Step 6:** For a pulse of total energy $U$, the total momentum is $p = U/c$. When absorbed by a surface, this delivers an impulse $\Delta p = U/c$, producing radiation pressure $P = I/c$.
+
+$\blacksquare$
+
+</details>
+
+### Derivation 7.5.6 — Dispersion in a Plasma
+
+<details>
+<summary>🔍 Complete Derivation</summary>
+
+**Step 1:** In a plasma, free electrons respond to the wave's electric field. The equation of motion for an electron:
+
+$$
+m_e\ddot{\mathbf{x}} = -e\mathbf{E} = -eE_0 e^{-i\omega t}\hat{\mathbf{x}}
+$$
+
+**Step 2:** Assuming harmonic response $\mathbf{x} = \mathbf{x}_0 e^{-i\omega t}$:
+
+$$
+-m_e\omega^2\mathbf{x}_0 = -e\mathbf{E}_0 \implies \mathbf{x}_0 = \frac{e\mathbf{E}_0}{m_e\omega^2}
+$$
+
+**Step 3:** The polarization (dipole moment per unit volume, with $n_e$ electrons/m³):
+
+$$
+\mathbf{P} = -n_e e\mathbf{x} = -\frac{n_e e^2}{m_e\omega^2}\mathbf{E}
+$$
+
+**Step 4:** The effective permittivity:
+
+$$
+\varepsilon(\omega) = \varepsilon_0\left(1 - \frac{\omega_p^2}{\omega^2}\right)
+$$
+
+where $\omega_p = \sqrt{n_e e^2/(m_e\varepsilon_0)}$ is the **plasma frequency**.
+
+**Step 5:** The dispersion relation $k^2 = \mu_0\varepsilon(\omega)\omega^2$:
+
+$$
+k^2 = \frac{\omega^2 - \omega_p^2}{c^2}
+$$
+
+**Step 6:** Consequences:
+- For $\omega \gt  \omega_p$: $k$ is real, waves propagate. Phase velocity $v_p = c/\sqrt{1-\omega_p^2/\omega^2} \gt  c$.
+- For $\omega \lt  \omega_p$: $k$ is imaginary, waves are evanescent. The plasma reflects radiation below its plasma frequency.
+- Group velocity: $v_g = d\omega/dk = c\sqrt{1-\omega_p^2/\omega^2} \lt  c$. Energy travels slower than $c$.
+- $v_p v_g = c^2$ (always).
+
+$\blacksquare$
+
+**Application:** The ionosphere reflects AM radio waves ($f \sim 1$ MHz, below $\omega_p$) but transmits FM and TV ($f \gt  30$ MHz, above $\omega_p$). This is why AM radio can be received beyond the horizon.
+
+</details>
+
+---
+
+### Example 7.5.6 — Waveguide Cutoff Frequency
+
+**Problem:** A rectangular waveguide has dimensions $a \times b$ ($a > b$). Find the cutoff frequency for the dominant TE₁₀ mode.
+
+<details>
+<summary>🔍 Complete Solution</summary>
+
+**Step 1:** In a waveguide, the wave must satisfy boundary conditions on the conducting walls. For the TE$_{mn}$ mode, the transverse wave number is:
+
+$$
+k_c^2 = \left(\frac{m\pi}{a}\right)^2 + \left(\frac{n\pi}{b}\right)^2
+$$
+
+**Step 2:** The propagation constant along the guide ($z$-direction):
+
+$$
+k_z^2 = k^2 - k_c^2 = \frac{\omega^2}{c^2} - k_c^2
+$$
+
+**Step 3:** Propagation requires $k_z^2 \gt  0$, i.e., $\omega \gt  \omega_c = ck_c$. The **cutoff frequency**:
+
+$$
+f_c = \frac{c}{2}\sqrt{\left(\frac{m}{a}\right)^2 + \left(\frac{n}{b}\right)^2}
+$$
+
+**Step 4:** For the TE₁₀ mode ($m=1$, $n=0$):
+
+$$
+f_{c,10} = \frac{c}{2a}
+$$
+
+**Step 5:** This is the lowest cutoff frequency (since $a \gt  b$), making TE₁₀ the **dominant mode**. For $a = 2.286$ cm (standard X-band waveguide):
+
+$$
+f_{c,10} = \frac{3\times10^8}{2\times0.02286} = 6.56\text{ GHz}
+$$
+
+The waveguide operates in single-mode between $f_{c,10}$ and $f_{c,20} = c/a = 13.1$ GHz.
+
+</details>
+
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Skin Depth in a Good Conductor
+
+**Problem:** An electromagnetic wave of frequency $f = 1$ GHz impinges on a copper surface ($\sigma = 5.96 \times 10^7$ S/m, $\mu \approx \mu_0$, $\varepsilon \approx \varepsilon_0$). Derive the skin depth $\delta$ from first principles and compute its numerical value.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Wave equation in a conductor
+
+Start from Maxwell's equations in a conducting medium with Ohm's law $\mathbf{J}_f = \sigma\mathbf{E}$:
+
+$$
+\nabla \times \mathbf{B} = \mu_0\mathbf{J}_f + \mu_0\varepsilon_0\frac{\partial\mathbf{E}}{\partial t} = \mu_0\sigma\mathbf{E} + \mu_0\varepsilon_0\frac{\partial\mathbf{E}}{\partial t}
+$$
+
+Taking the curl of Faraday's law $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t$ and substituting:
+
+$$
+\nabla^2\mathbf{E} = \mu_0\sigma\frac{\partial\mathbf{E}}{\partial t} + \mu_0\varepsilon_0\frac{\partial^2\mathbf{E}}{\partial t^2}
+$$
+
+#### Step 2: Assume harmonic plane wave
+
+Let $\mathbf{E} = E_0\,e^{i(\tilde{k}z - \omega t)}\hat{\mathbf{x}}$ where $\tilde{k}$ is a complex wave number. Substituting:
+
+$$
+-\tilde{k}^2 = -\mu_0\sigma(i\omega) - \mu_0\varepsilon_0\omega^2
+$$
+
+$$
+\tilde{k}^2 = \mu_0\varepsilon_0\omega^2 + i\mu_0\sigma\omega
+$$
+
+#### Step 3: Good conductor approximation
+
+A "good conductor" means $\sigma \gg \varepsilon_0\omega$. For copper at 1 GHz:
+
+$$
+\frac{\sigma}{\varepsilon_0\omega} = \frac{5.96\times10^7}{8.854\times10^{-12}\times2\pi\times10^9} = \frac{5.96\times10^7}{5.56\times10^{-2}} \approx 1.07\times10^9 \gg 1
+$$
+
+Therefore we drop the displacement current term:
+
+$$
+\tilde{k}^2 \approx i\mu_0\sigma\omega
+$$
+
+#### Step 4: Extract real and imaginary parts of $\tilde{k}$
+
+Write $\tilde{k} = k + i\kappa$ (both $k, \kappa \gt  0$). Then:
+
+$$
+(k + i\kappa)^2 = k^2 - \kappa^2 + 2ik\kappa = i\mu_0\sigma\omega
+$$
+
+Equating real and imaginary parts:
+
+$$
+k^2 - \kappa^2 = 0 \implies k = \kappa
+$$
+
+$$
+2k\kappa = \mu_0\sigma\omega \implies 2k^2 = \mu_0\sigma\omega
+$$
+
+$$
+k = \kappa = \sqrt{\frac{\mu_0\sigma\omega}{2}}
+$$
+
+#### Step 5: Define skin depth
+
+The wave propagates as $e^{i(kz - \omega t)}e^{-\kappa z}$. The amplitude decays by $1/e$ at distance:
+
+$$
+\delta = \frac{1}{\kappa} = \sqrt{\frac{2}{\mu_0\sigma\omega}}
+$$
+
+#### Step 6: Numerical evaluation for copper at 1 GHz
+
+$$
+\delta = \sqrt{\frac{2}{(4\pi\times10^{-7})(5.96\times10^7)(2\pi\times10^9)}}
+$$
+
+Compute the denominator inside the square root:
+
+$$
+\mu_0\sigma\omega = 4\pi\times10^{-7}\times5.96\times10^7\times2\pi\times10^9
+$$
+
+$$
+= 4\pi\times5.96\times2\pi\times10^{-7+7+9} = 8\pi^2\times5.96\times10^9
+$$
+
+$$
+= 8\times9.8696\times5.96\times10^9 = 470.3\times10^9
+$$
+
+$$
+\delta = \sqrt{\frac{2}{4.703\times10^{11}}} = \sqrt{4.253\times10^{-12}} = 2.06\times10^{-6}\text{ m}
+$$
+
+**Final Answer:**
+
+$$
+\delta = \sqrt{\frac{2}{\mu_0\sigma\omega}} \approx 2.06\;\mu\text{m (copper at 1 GHz)}
+$$
+
+</details>
+
+### Example 8.2 — Fresnel Coefficients at Normal Incidence on a Dielectric
+
+**Problem:** A plane electromagnetic wave in vacuum ($n_1 = 1$) strikes a glass surface ($n_2 = 1.5$) at normal incidence. Derive the reflection and transmission coefficients for the electric field amplitude, and verify energy conservation.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Boundary conditions at the interface
+
+At $z = 0$, the tangential components of $\mathbf{E}$ and $\mathbf{H}$ must be continuous. For normal incidence with $\mathbf{E}$ polarized along $\hat{\mathbf{x}}$:
+
+$$
+E_I + E_R = E_T
+$$
+
+$$
+H_I - H_R = H_T
+$$
+
+The minus sign on $H_R$ arises because the reflected wave propagates in the $-z$ direction, so $\mathbf{B}_R = -\frac{E_R}{c}\hat{\mathbf{y}}$ (from $\hat{\mathbf{k}}\times\hat{\mathbf{E}} = \hat{\mathbf{B}}/c$).
+
+#### Step 2: Express $H$ in terms of $E$
+
+In a linear medium with index $n$, the impedance is $\eta = \mu_0 c/n$ (for non-magnetic media). Therefore $H = E/\eta = nE/(\mu_0 c)$:
+
+$$
+\frac{n_1}{\mu_0 c}(E_I - E_R) = \frac{n_2}{\mu_0 c}E_T
+$$
+
+$$
+n_1(E_I - E_R) = n_2 E_T
+$$
+
+#### Step 3: Solve the system
+
+From the first boundary condition: $E_T = E_I + E_R$.
+
+Substitute into the second:
+
+$$
+n_1(E_I - E_R) = n_2(E_I + E_R)
+$$
+
+$$
+n_1 E_I - n_1 E_R = n_2 E_I + n_2 E_R
+$$
+
+$$
+E_I(n_1 - n_2) = E_R(n_1 + n_2)
+$$
+
+$$
+r \equiv \frac{E_R}{E_I} = \frac{n_1 - n_2}{n_1 + n_2}
+$$
+
+And:
+
+$$
+t \equiv \frac{E_T}{E_I} = 1 + r = \frac{2n_1}{n_1 + n_2}
+$$
+
+#### Step 4: Numerical values
+
+$$
+r = \frac{1 - 1.5}{1 + 1.5} = \frac{-0.5}{2.5} = -0.2
+$$
+
+$$
+t = \frac{2\times1}{2.5} = 0.8
+$$
+
+The negative sign of $r$ means the reflected $\mathbf{E}$ is phase-shifted by $\pi$ (inverted) relative to the incident wave.
+
+#### Step 5: Reflectance and transmittance (intensity)
+
+The reflectance $R$ and transmittance $T$ are defined in terms of the Poynting vector (intensity $\propto n|E|^2$):
+
+$$
+R = |r|^2 = 0.04
+$$
+
+$$
+T = \frac{n_2}{n_1}|t|^2 = \frac{1.5}{1}\times0.64 = 0.96
+$$
+
+#### Step 6: Verify energy conservation
+
+$$
+R + T = 0.04 + 0.96 = 1.00 \quad \checkmark
+$$
+
+**Final Answer:**
+
+$$
+r = \frac{n_1 - n_2}{n_1 + n_2} = -0.2, \quad t = \frac{2n_1}{n_1 + n_2} = 0.8, \quad R + T = 1
+$$
+
+</details>
+
+### Example 8.3 — Poynting Vector and Radiation Pressure for a Plane Wave
+
+**Problem:** A monochromatic plane wave in vacuum has electric field amplitude $E_0 = 100$ V/m. Compute: (a) the time-averaged Poynting vector magnitude, (b) the energy density, and (c) the radiation pressure on a perfectly reflecting surface at normal incidence.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Time-averaged Poynting vector
+
+For a plane wave $\mathbf{E} = E_0\cos(kz - \omega t)\hat{\mathbf{x}}$ and $\mathbf{B} = (E_0/c)\cos(kz - \omega t)\hat{\mathbf{y}}$:
+
+$$
+\mathbf{S} = \frac{1}{\mu_0}\mathbf{E}\times\mathbf{B} = \frac{E_0^2}{\mu_0 c}\cos^2(kz - \omega t)\hat{\mathbf{z}}
+$$
+
+Time-averaging: $\langle\cos^2\rangle = 1/2$:
+
+$$
+\langle S \rangle = \frac{E_0^2}{2\mu_0 c}
+$$
+
+#### Step 2: Numerical evaluation
+
+$$
+\langle S \rangle = \frac{(100)^2}{2\times(4\pi\times10^{-7})\times(3\times10^8)}
+$$
+
+$$
+= \frac{10^4}{2\times1.2566\times10^{-6}\times3\times10^8}
+$$
+
+$$
+= \frac{10^4}{7.54\times10^2} = 13.3\text{ W/m}^2
+$$
+
+#### Step 3: Time-averaged energy density
+
+$$
+\langle u \rangle = \frac{1}{2}\varepsilon_0 E_0^2\langle\cos^2\rangle + \frac{1}{2\mu_0}B_0^2\langle\cos^2\rangle
+$$
+
+Since $B_0 = E_0/c$ and $\varepsilon_0 = 1/(\mu_0 c^2)$:
+
+$$
+\langle u \rangle = \frac{1}{2}\varepsilon_0 E_0^2\cdot\frac{1}{2} + \frac{1}{2\mu_0}\frac{E_0^2}{c^2}\cdot\frac{1}{2} = \frac{\varepsilon_0 E_0^2}{4} + \frac{\varepsilon_0 E_0^2}{4} = \frac{\varepsilon_0 E_0^2}{2}
+$$
+
+$$
+= \frac{8.854\times10^{-12}\times10^4}{2} = 4.43\times10^{-8}\text{ J/m}^3
+$$
+
+Verify: $\langle S \rangle = \langle u \rangle c = 4.43\times10^{-8}\times3\times10^8 = 13.3$ W/m². ✓
+
+#### Step 4: Radiation pressure on a perfect reflector
+
+For a perfect reflector, the wave is completely reflected. The momentum delivered per unit time per unit area is twice the incident momentum flux (incoming + reflected):
+
+$$
+P_{\text{rad}} = \frac{2\langle S \rangle}{c} = \frac{2\times13.3}{3\times10^8} = 8.85\times10^{-8}\text{ Pa}
+$$
+
+Alternatively: $P_{\text{rad}} = 2\langle u \rangle = 2\times4.43\times10^{-8} = 8.85\times10^{-8}$ Pa. ✓
+
+For a perfect absorber, the factor would be 1 instead of 2.
+
+**Final Answer:**
+
+$$
+\langle S \rangle = \frac{E_0^2}{2\mu_0 c} = 13.3\text{ W/m}^2, \quad \langle u \rangle = \frac{\varepsilon_0 E_0^2}{2} = 4.43\times10^{-8}\text{ J/m}^3, \quad P_{\text{rad}} = \frac{2\langle S\rangle}{c} = 8.85\times10^{-8}\text{ Pa}
+$$
+
+</details>
+
+### Example 8.4 — TE₁₀ Mode Field Structure in a Rectangular Waveguide
+
+**Problem:** For a rectangular waveguide with dimensions $a = 2.286$ cm, $b = 1.016$ cm, operating at $f = 10$ GHz in the TE₁₀ mode, derive the complete field expressions and the guide wavelength.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Cutoff frequency verification
+
+$$
+f_{c,10} = \frac{c}{2a} = \frac{3\times10^8}{2\times0.02286} = 6.56\text{ GHz}
+$$
+
+Since $f = 10$ GHz $\gt  f_c = 6.56$ GHz, the mode propagates. ✓
+
+#### Step 2: Propagation constant
+
+The longitudinal wave number:
+
+$$
+k_z = \sqrt{k^2 - k_c^2} = \sqrt{\left(\frac{\omega}{c}\right)^2 - \left(\frac{\pi}{a}\right)^2}
+$$
+
+$$
+k = \frac{2\pi f}{c} = \frac{2\pi\times10^{10}}{3\times10^8} = 209.4\text{ rad/m}
+$$
+
+$$
+k_c = \frac{\pi}{a} = \frac{\pi}{0.02286} = 137.4\text{ rad/m}
+$$
+
+$$
+k_z = \sqrt{209.4^2 - 137.4^2} = \sqrt{43850 - 18880} = \sqrt{24970} = 158.0\text{ rad/m}
+$$
+
+#### Step 3: Guide wavelength
+
+$$
+\lambda_g = \frac{2\pi}{k_z} = \frac{2\pi}{158.0} = 3.98\text{ cm}
+$$
+
+Compare to free-space wavelength $\lambda_0 = c/f = 3.0$ cm. The guide wavelength is longer, as expected.
+
+Verify via the standard formula:
+
+$$
+\lambda_g = \frac{\lambda_0}{\sqrt{1-(f_c/f)^2}} = \frac{3.0}{\sqrt{1-(6.56/10)^2}} = \frac{3.0}{\sqrt{1-0.430}} = \frac{3.0}{0.755} = 3.97\text{ cm} \quad \checkmark
+$$
+
+#### Step 4: Field expressions for TE₁₀
+
+For the TE₁₀ mode, the longitudinal magnetic field is:
+
+$$
+H_z = H_0\cos\left(\frac{\pi x}{a}\right)e^{i(k_z z - \omega t)}
+$$
+
+The transverse fields are derived from $H_z$ using the waveguide equations:
+
+$$
+E_y = -\frac{i\omega\mu_0}{k_c^2}\frac{\partial H_z}{\partial x} = \frac{i\omega\mu_0 H_0}{k_c^2}\frac{\pi}{a}\sin\left(\frac{\pi x}{a}\right)e^{i(k_z z - \omega t)}
+$$
+
+$$
+H_x = -\frac{ik_z}{k_c^2}\frac{\partial H_z}{\partial x} = \frac{ik_z H_0}{k_c^2}\frac{\pi}{a}\sin\left(\frac{\pi x}{a}\right)e^{i(k_z z - \omega t)}
+$$
+
+$$
+E_x = 0, \quad H_y = 0
+$$
+
+#### Step 5: Phase and group velocities
+
+$$
+v_p = \frac{\omega}{k_z} = \frac{c}{\sqrt{1-(f_c/f)^2}} = \frac{c}{0.755} = 3.97\times10^8\text{ m/s} \gt  c
+$$
+
+$$
+v_g = \frac{d\omega}{dk_z} = c\sqrt{1-(f_c/f)^2} = 0.755c = 2.27\times10^8\text{ m/s} \lt  c
+$$
+
+$$
+v_p v_g = c^2 \quad \checkmark
+$$
+
+**Final Answer:**
+
+$$
+\lambda_g = \frac{\lambda_0}{\sqrt{1-(f_c/f)^2}} = 3.97\text{ cm}, \quad v_p = 1.32c, \quad v_g = 0.755c
+$$
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 Group Velocity vs Phase Velocity: A Rigorous Treatment
+
+The **phase velocity** $v_p = \omega/k$ is the speed at which a surface of constant phase moves. For a monochromatic wave, this is the only velocity. But real signals are wave packets — superpositions of frequencies — and the envelope of the packet moves at the **group velocity** $v_g = d\omega/dk$.
+
+**Derivation from a two-frequency superposition:**
+
+Consider two waves with slightly different frequencies and wave numbers:
+
+$$
+E(z,t) = E_0\cos(k_1 z - \omega_1 t) + E_0\cos(k_2 z - \omega_2 t)
+$$
+
+Using the identity $\cos A + \cos B = 2\cos\left(\frac{A-B}{2}\right)\cos\left(\frac{A+B}{2}\right)$:
+
+$$
+E = 2E_0\cos\left(\frac{\Delta k}{2}z - \frac{\Delta\omega}{2}t\right)\cos\left(\bar{k}z - \bar{\omega}t\right)
+$$
+
+where $\Delta k = k_1 - k_2$, $\Delta\omega = \omega_1 - \omega_2$, $\bar{k} = (k_1+k_2)/2$, $\bar{\omega} = (\omega_1+\omega_2)/2$.
+
+The rapidly oscillating factor $\cos(\bar{k}z - \bar{\omega}t)$ moves at $v_p = \bar{\omega}/\bar{k}$. The slowly varying envelope $\cos(\frac{\Delta k}{2}z - \frac{\Delta\omega}{2}t)$ moves at:
+
+$$
+v_g = \frac{\Delta\omega}{\Delta k} \xrightarrow{\Delta k\to 0} \frac{d\omega}{dk}
+$$
+
+**Relationship between $v_p$ and $v_g$:**
+
+$$
+v_g = \frac{d\omega}{dk} = \frac{d(kv_p)}{dk} = v_p + k\frac{dv_p}{dk}
+$$
+
+- **Normal dispersion** ($dv_p/dk < 0$): $v_g < v_p$ (e.g., glass in the visible spectrum)
+- **Anomalous dispersion** ($dv_p/dk > 0$): $v_g > v_p$ (near absorption resonances)
+- **No dispersion** ($dv_p/dk = 0$): $v_g = v_p$ (vacuum)
+
+**In a waveguide:** The dispersion relation $\omega^2 = c^2 k_z^2 + \omega_c^2$ gives:
+
+$$
+v_p = \frac{\omega}{k_z} = \frac{c}{\sqrt{1-\omega_c^2/\omega^2}} > c
+$$
+
+$$
+v_g = \frac{d\omega}{dk_z} = \frac{c^2 k_z}{\omega} = c\sqrt{1-\omega_c^2/\omega^2} < c
+$$
+
+$$
+v_p v_g = c^2
+$$
+
+The superluminal phase velocity does not violate relativity because no information or energy travels at $v_p$. Energy and signals travel at $v_g < c$.
+
+**References:** Griffiths §9.2.1; Jackson §7.8; Brillouin, *Wave Propagation and Group Velocity* (1960).
+
+---
+
+### 9.2 Electromagnetic Energy Density: Complete Derivation from Poynting's Theorem
+
+**Goal:** Derive the electromagnetic energy density $u = \frac{1}{2}\varepsilon_0 E^2 + \frac{1}{2\mu_0}B^2$ rigorously from Poynting's theorem.
+
+**Step 1:** Start from the work done by electromagnetic fields on charges. The force on a charge $q$ is $\mathbf{F} = q(\mathbf{E} + \mathbf{v}\times\mathbf{B})$. The rate of work:
+
+$$
+\frac{dW}{dt} = \mathbf{F}\cdot\mathbf{v} = q\mathbf{E}\cdot\mathbf{v}
+$$
+
+(The magnetic force does no work since $(\mathbf{v}\times\mathbf{B})\cdot\mathbf{v} = 0$.)
+
+**Step 2:** For a continuous charge distribution with current density $\mathbf{J} = \rho\mathbf{v}$:
+
+$$
+\frac{dW}{dt} = \int_V \mathbf{E}\cdot\mathbf{J}\,d\tau
+$$
+
+**Step 3:** Eliminate $\mathbf{J}$ using Ampère-Maxwell: $\mathbf{J} = \frac{1}{\mu_0}\nabla\times\mathbf{B} - \varepsilon_0\frac{\partial\mathbf{E}}{\partial t}$:
+
+$$
+\mathbf{E}\cdot\mathbf{J} = \frac{1}{\mu_0}\mathbf{E}\cdot(\nabla\times\mathbf{B}) - \varepsilon_0\mathbf{E}\cdot\frac{\partial\mathbf{E}}{\partial t}
+$$
+
+**Step 4:** Use the vector identity $\nabla\cdot(\mathbf{E}\times\mathbf{B}) = \mathbf{B}\cdot(\nabla\times\mathbf{E}) - \mathbf{E}\cdot(\nabla\times\mathbf{B})$:
+
+$$
+\mathbf{E}\cdot(\nabla\times\mathbf{B}) = \mathbf{B}\cdot(\nabla\times\mathbf{E}) - \nabla\cdot(\mathbf{E}\times\mathbf{B})
+$$
+
+**Step 5:** Substitute Faraday's law $\nabla\times\mathbf{E} = -\partial\mathbf{B}/\partial t$:
+
+$$
+\mathbf{E}\cdot(\nabla\times\mathbf{B}) = -\mathbf{B}\cdot\frac{\partial\mathbf{B}}{\partial t} - \nabla\cdot(\mathbf{E}\times\mathbf{B})
+$$
+
+**Step 6:** Combine:
+
+$$
+\mathbf{E}\cdot\mathbf{J} = -\frac{1}{\mu_0}\mathbf{B}\cdot\frac{\partial\mathbf{B}}{\partial t} - \frac{1}{\mu_0}\nabla\cdot(\mathbf{E}\times\mathbf{B}) - \varepsilon_0\mathbf{E}\cdot\frac{\partial\mathbf{E}}{\partial t}
+$$
+
+**Step 7:** Recognize the time derivatives as:
+
+$$
+\varepsilon_0\mathbf{E}\cdot\frac{\partial\mathbf{E}}{\partial t} = \frac{\partial}{\partial t}\left(\frac{1}{2}\varepsilon_0 E^2\right), \quad \frac{1}{\mu_0}\mathbf{B}\cdot\frac{\partial\mathbf{B}}{\partial t} = \frac{\partial}{\partial t}\left(\frac{1}{2\mu_0}B^2\right)
+$$
+
+**Step 8:** Define the energy density and Poynting vector:
+
+$$
+u = \frac{1}{2}\varepsilon_0 E^2 + \frac{1}{2\mu_0}B^2, \quad \mathbf{S} = \frac{1}{\mu_0}\mathbf{E}\times\mathbf{B}
+$$
+
+**Poynting's Theorem (differential form):**
+
+$$
+\frac{\partial u}{\partial t} + \nabla\cdot\mathbf{S} = -\mathbf{E}\cdot\mathbf{J}
+$$
+
+This is a continuity equation for electromagnetic energy: the rate of decrease of field energy in a volume equals the power flowing out through the surface plus the power delivered to charges.
+
+**References:** Griffiths §8.1.2; Jackson §6.7; Poynting, *Phil. Trans.* **175**, 343 (1884).
+
+---
+
+### 9.3 Radiation Pressure: Perfect Absorber vs Perfect Reflector
+
+**Setup:** A plane electromagnetic wave with time-averaged intensity $I = \langle S \rangle$ strikes a flat surface at normal incidence.
+
+**Case 1: Perfect absorber**
+
+The wave carries momentum density $\mathbf{g} = \mathbf{S}/c^2$. The momentum flux (force per unit area) is:
+
+$$
+P_{\text{abs}} = \frac{\langle S \rangle}{c} = \frac{I}{c}
+$$
+
+This follows from $p = E_{\text{photon}}/c$ for each photon absorbed.
+
+**Case 2: Perfect reflector**
+
+The reflected wave carries momentum in the opposite direction. The total momentum change per photon is $2p$. Therefore:
+
+$$
+P_{\text{ref}} = \frac{2\langle S \rangle}{c} = \frac{2I}{c}
+$$
+
+**Case 3: Partial reflection (reflectance $R$)**
+
+$$
+P = \frac{(1+R)I}{c}
+$$
+
+For $R = 0$ (absorber): $P = I/c$. For $R = 1$ (reflector): $P = 2I/c$. ✓
+
+**Numerical example:** Solar radiation at Earth's orbit has $I \approx 1361$ W/m². On a perfectly reflecting solar sail of area $A = 1000$ m²:
+
+$$
+F = P_{\text{ref}}\times A = \frac{2\times1361}{3\times10^8}\times1000 = 9.07\times10^{-3}\text{ N} \approx 9\text{ mN}
+$$
+
+This tiny force, acting continuously, can accelerate a spacecraft to significant velocities over months — the principle behind solar sailing (JAXA's IKAROS, The Planetary Society's LightSail 2).
+
+**References:** Griffiths §9.2.3; Jackson §6.7; Maxwell, *Treatise on Electricity and Magnetism* Vol. 2, §792 (1873).
+
+---

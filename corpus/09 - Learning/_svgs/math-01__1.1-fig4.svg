@@ -1,0 +1,163 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <defs>
+    <marker id="ed-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.35; }
+    .circle { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .triangle-inner { fill: var(--text-accent, #79c0ff); opacity: 0.2; }
+    .sector { fill: var(--interactive-accent, #58a6ff); opacity: 0.2; }
+    .triangle-outer { fill: var(--text-muted, #8b949e); opacity: 0.2; }
+    
+    .line-radius { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .line-sin { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; }
+    .line-tan { stroke: var(--text-accent, #79c0ff); stroke-width: 2.5; }
+    .line-arc { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; }
+    
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .math { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 16px; fill: var(--text-normal, #c9d1d9); }
+    .math-sin { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .math-tan { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 16px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+  </style>
+
+  <!-- Grid -->
+  <g class="grid">
+    <line x1="60" y1="40" x2="60" y2="360"/>
+    <line x1="180" y1="40" x2="180" y2="360"/>
+    <line x1="300" y1="40" x2="300" y2="360"/>
+    <line x1="420" y1="40" x2="420" y2="360"/>
+    <line x1="540" y1="40" x2="540" y2="360"/>
+    <line x1="60" y1="80" x2="540" y2="80"/>
+    <line x1="60" y1="200" x2="540" y2="200"/>
+    <line x1="60" y1="320" x2="540" y2="320"/>
+  </g>
+
+  <!-- Axes -->
+  <!-- Origin at (200, 320) -->
+  <line x1="100" y1="320" x2="560" y2="320" class="axis" marker-end="url(#ed-arrow)"/>
+  <line x1="200" y1="360" x2="200" y2="40" class="axis" marker-end="url(#ed-arrow)"/>
+  <text x="565" y="324" class="label">x</text>
+  <text x="185" y="38" class="label">y</text>
+
+  <!-- We animate the point moving along the circle.
+       Angle theta goes from ~60 degrees (1.04 rad) down to ~10 degrees (0.17 rad).
+       cos(60)=0.5, sin(60)=0.866. R=240
+       x = 200 + 240*cos(theta)
+       y = 320 - 240*sin(theta)
+  -->
+
+  <g>
+    <!-- The unit circle arc -->
+    <path class="circle" d="M 200 80 A 240 240 0 0 1 440 320" />
+    
+    <!-- Animate an angle parameter visually using SMIL. We can just rotate a group around origin! -->
+    <g>
+      <!-- We rotate the whole moving assembly around (200, 320) -->
+      <!-- from -60 deg to -10 deg -->
+      <animateTransform attributeName="transform" type="rotate" values="-60 200 320; -10 200 320; -60 200 320" dur="6s" repeatCount="indefinite" />
+      
+      <!-- Radius line to point P (which is at 440, 320 before rotation) -->
+      <line x1="200" y1="320" x2="440" y2="320" class="line-radius" />
+      
+      <!-- Point P -->
+      <circle cx="440" cy="320" r="5" fill="var(--text-normal, #c9d1d9)" />
+      
+      <!-- Arc for theta (starts at radius 40, drawn here as straight for simplicity or a small arc) -->
+      <path d="M 240 320 A 40 40 0 0 0 240 320" class="line-arc" /> <!-- Simplified -->
+    </g>
+
+    <!-- The actual sin/tan lines need to be computed or approximated since SMIL doesn't do trig for you directly.
+         Alternatively, we can just use CSS/SMIL on the specific path points if we calculate them, but for pure SVG 
+         without JS, we can use a clip path on the rotated line to simulate the tangent. -->
+         
+    <!-- Let's just create a static visual that explains the theorem with the bounds! 
+         Animated math text is much easier. We'll show a static angle and animate a spotlight or text. 
+         Wait, animating the actual geometry is cooler. 
+         I will just show the three areas filling in sequence: Inner triangle, Sector, Outer triangle.
+    -->
+    
+    <!-- Triangle OPQ (inner) -->
+    <polygon points="200,320 320,320 320,112" class="triangle-inner">
+      <animate attributeName="opacity" values="0.2; 0.8; 0.2; 0.2" dur="6s" repeatCount="indefinite" keyTimes="0; 0.25; 0.5; 1" />
+    </polygon>
+    
+    <!-- Sector OAP -->
+    <path d="M 200 320 L 440 320 A 240 240 0 0 0 320 112 Z" class="sector">
+      <animate attributeName="opacity" values="0.2; 0.2; 0.8; 0.2" dur="6s" repeatCount="indefinite" keyTimes="0; 0.25; 0.5; 1" />
+    </path>
+    
+    <!-- Triangle OAT (outer) -->
+    <polygon points="200,320 440,320 440,181" class="triangle-outer">
+      <!-- tan(60)*240 = 415. 320 - 415 = -95. Wait, 320,112 means cos=120/240=0.5 -> 60deg. sin=207. 320-207=113. 
+           Outer tan point T is at x=440. y = 320 - tan(60)*240 = 320 - 415 = -95. -->
+    </polygon>
+    <!-- Let's fix the static points for 45 degrees instead so it fits better. -->
+  </g>
+  
+  <!-- Redrawing with static 45 degrees for simplicity, animating the area highlights! -->
+  <g>
+    <!-- We hide the above messy attempt by overriding with a clean 45 degree static setup -->
+    <rect x="0" y="0" width="600" height="400" fill="var(--background-primary, #0d1117)" opacity="1" />
+    
+    <!-- Grid -->
+    <g class="grid">
+      <line x1="60" y1="40" x2="60" y2="360"/>
+      <line x1="180" y1="40" x2="180" y2="360"/>
+      <line x1="300" y1="40" x2="300" y2="360"/>
+      <line x1="420" y1="40" x2="420" y2="360"/>
+      <line x1="540" y1="40" x2="540" y2="360"/>
+      <line x1="60" y1="80" x2="540" y2="80"/>
+      <line x1="60" y1="200" x2="540" y2="200"/>
+      <line x1="60" y1="320" x2="540" y2="320"/>
+    </g>
+
+    <!-- Axes -->
+    <line x1="100" y1="320" x2="560" y2="320" class="axis" marker-end="url(#ed-arrow)"/>
+    <line x1="200" y1="360" x2="200" y2="40" class="axis" marker-end="url(#ed-arrow)"/>
+    
+    <!-- R = 200 -->
+    <!-- Angle = 45 deg. cos=0.707, sin=0.707. x=200+141=341. y=320-141=179 -->
+    <!-- Arc for unit circle -->
+    <path class="circle" d="M 200 120 A 200 200 0 0 1 400 320" />
+    
+    <!-- Three Areas -->
+    <!-- 1. Inner Triangle -->
+    <polygon points="200,320 341,320 341,179" class="triangle-inner">
+      <animate attributeName="opacity" values="0.6; 0.1; 0.1; 0.6" dur="6s" repeatCount="indefinite" />
+    </polygon>
+    
+    <!-- 2. Sector -->
+    <path d="M 200 320 L 400 320 A 200 200 0 0 0 341 179 Z" class="sector">
+      <animate attributeName="opacity" values="0.1; 0.6; 0.1; 0.1" dur="6s" repeatCount="indefinite" />
+    </path>
+    
+    <!-- 3. Outer Triangle -->
+    <polygon points="200,320 400,320 400,120" class="triangle-outer">
+      <animate attributeName="opacity" values="0.1; 0.1; 0.6; 0.1" dur="6s" repeatCount="indefinite" />
+    </polygon>
+    
+    <!-- Outlines and Lines -->
+    <line x1="200" y1="320" x2="400" y2="120" class="line-radius" />
+    <line x1="200" y1="320" x2="400" y2="320" class="line-radius" />
+    
+    <line x1="341" y1="320" x2="341" y2="179" class="line-sin" />
+    <line x1="400" y1="320" x2="400" y2="120" class="line-tan" />
+    
+    <path d="M 240 320 A 40 40 0 0 0 228 292" class="line-arc" fill="none" stroke="var(--text-normal, #c9d1d9)" />
+    <text x="250" y="310" class="math">θ</text>
+    
+    <!-- Labels -->
+    <text x="310" y="240" class="math-sin">sin θ</text>
+    <text x="410" y="220" class="math-tan">tan θ</text>
+    <text x="395" y="340" class="math">1</text>
+    <text x="375" y="180" class="math">P</text>
+    <text x="410" y="120" class="math">T</text>
+    
+    <rect x="360" y="40" width="220" height="60" rx="4" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+    <text x="470" y="62" class="math" text-anchor="middle">sin θ &lt; θ &lt; tan θ</text>
+    <text x="470" y="86" class="math" text-anchor="middle">1 &lt; θ / sin θ &lt; 1 / cos θ</text>
+  </g>
+</svg>

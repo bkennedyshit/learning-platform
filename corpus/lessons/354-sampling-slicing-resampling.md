@@ -1,0 +1,196 @@
+---
+title: "35.4 — Sampling, Slicing & Resampling"
+subject: "Music Production & Sound Design"
+catalog: advanced
+audience_tier: higher-education
+chapter: "35.4"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 35.4 — Sampling, Slicing & Resampling
+
+> *"Hip-hop was built on the ashes of what other people threw away."* — DJ Premier
+
+---
+
+## 🎯 Learning Objectives
+
+1. Describe the sample workflow: source → edit → slice → map → manipulate.
+2. Slice a drum break into individual hits and remap to a MIDI keyboard layout.
+3. Apply 5 creative sample manipulation techniques: pitch shifting, time-stretching, reversal, granular extension, resampling.
+4. Explain why loop points must be at zero crossings to avoid clicks.
+5. Identify royalty-free sample sources and explain basic copyright rules for sampling.
+6. Perform **resampling**: print a processed chain back to audio for further manipulation.
+
+---
+
+## 🖼️ Visual Anchor
+
+![music__35.4-fig1](music__35.4-fig1.svg)
+
+---
+
+## 📚 1. The Sampling Workflow
+
+### 1.1 Sourcing
+
+**Royalty-free/safe sources:**
+- **Splice:** Subscription-based; samples are royalty-free while your subscription is active
+- **Looperman.com:** Free, community-uploaded, royalty-free loops and one-shots
+- **Freesound.org:** Creative Commons; check individual file licenses (CC0 = fully free)
+- **BBC Sound Effects library:** Free for personal/educational use
+- **Self-recorded:** You own it completely. Field recordings, instrument recordings, hardware synths
+
+**Copyright-problematic sources:**
+- Vinyl records, commercial releases — require clearance/licensing
+- Even 2-second samples have been litigated successfully (Bridgeport v. Dimension Films, 2004)
+- "Fair use" is a US legal defence, not a clearance — don't rely on it for release
+
+### 1.2 Editing (Before Slicing)
+
+**The three essential edits:**
+1. **Trim:** Remove silence before the first transient (sample starts at the attack)
+2. **Normalize:** Bring peak level to -3 dBFS to maximise dynamic range before processing
+3. **Fade in/out:** Tiny 2–5ms fade at start and end to prevent clicks (zero-crossing issue)
+
+**Loop points:** For sustained/looped samples (pads, textures), loop points MUST be placed at **zero crossings** — where the waveform crosses the 0V line. Looping at any other point creates a sudden voltage jump → click → aliasing artifact.
+
+---
+
+## 📚 2. Drum Break Slicing
+
+A "drum break" is an isolated drum section (usually 1–4 bars) sampled from a vinyl record. The most famous: the **Amen Break** (The Winstons, 1969) — the backbone of drum and bass.
+
+### 2.1 Slicing Method
+
+1. **Load** break into a sampler or audio editor
+2. **Analyse transients:** Use auto-transient detection (most slicers/DAWs can detect hits automatically)
+3. **Set slice markers:** One marker per drum hit (kick, snare, hi-hat, ghost note, fill)
+4. **Export slices** or assign to sampler zones mapped to MIDI notes (C2, C#2, D2… up the keyboard)
+5. **Program new pattern:** Use MIDI piano roll to trigger slices in new rhythmic order
+
+### 2.2 Creative Reordering
+
+Once slices are on MIDI notes, you can:
+- **Swap kick and snare positions** → instantly different groove
+- **Double a snare hit** → adds ghost note fill
+- **Pitch different slices up/down** → pitched drum sounds
+- **Sequence the break at 2× speed** → doubles the tempo feel
+- **Layer with programmed kicks/snares** → hybrid groove
+
+---
+
+## 📚 3. Melodic Chop Technique
+
+**Melo chops:** Take a melodic phrase (vocal hook, string section, piano loop) and slice it into rhythmic or pitched fragments.
+
+**Process:**
+1. Import melodic sample into sampler (e.g. 4-bar piano loop)
+2. Slice on every beat or half-beat (not just transients)
+3. Map slices to chromatic notes: original pitch on C3, +1 semitone on C#3, etc.
+4. Play new melody by triggering different slices + repitching with note position
+5. Add chord stabs by hitting multiple slices simultaneously
+
+---
+
+## 📚 4. Creative Manipulation Techniques
+
+### 4.1 Pitch Shifting
+
+**Non-destructive pitch shifting** (changes pitch without affecting speed):
+- Semitone map: each MIDI note shifts pitch ±n semitones
+- Creative use: play a drum loop as a pitched instrument (Bo Diddley effect)
+- "Chipmunk" effect: shift +7 semitones → thin, high-pitched percussion texture
+
+### 4.2 Time Stretching
+
+**Time stretching** (changes speed/tempo without affecting pitch):
+- Beat-match a loop from 120 BPM to 130 BPM without pitch change
+- Types: Phase vocoder (smooth but artefacty), granular (rhythmic, stuttery), élastique (high quality)
+- Creative use: Extreme stretch (200–1000×) → ambient texture from any source
+
+### 4.3 Reversal
+
+Playing a sample backwards creates:
+- **Reverse reverb:** Capture tail of reverb → reverse → plays before the hit
+- **Reverse cymbal:** Classic build-up effect
+- **Reverse vocal:** Alien/ghostly effect
+- **In practice:** Most DAWs have a "reverse" button in the clip/sample editor
+
+### 4.4 Granular Manipulation
+
+Break the sample into tiny grains and:
+- **Freeze:** Infinite sustain from any point in the sample
+- **Scatter:** Random grain position → textured noise
+- **Stretch with grain shift:** Walk through the sample at any speed
+
+Free tools: Bespoke Synth has a granular module. Pure Data, SuperCollider for custom granular.
+
+### 4.5 Resampling (Print to Audio)
+
+**Resampling workflow:**
+1. Build a sound/effect chain (synth + effects + automation)
+2. Route the output to a new audio track input
+3. Record while playing the sequence → capture the processed signal as audio
+4. Now treat the recorded audio as a new sample → slice, chop, layer
+
+**Why resample?**
+- Complex effect chains become a simple audio file
+- Freeze CPU-heavy instruments
+- Print audio "glitches" that would be hard to reproduce
+- Layer the resampled result with the original for thickness
+
+---
+
+## 📚 5. Sample File Formats
+
+| Format | Type | Bit depth | Notes |
+|--------|------|-----------|-------|
+| WAV | Uncompressed | 16/24/32-bit | Universal, highest quality, large files |
+| AIFF | Uncompressed | 16/24-bit | Same as WAV, Mac-native |
+| FLAC | Lossless compressed | Any | 40–60% smaller than WAV, lossless |
+| MP3 | Lossy compressed | N/A | Avoid for production use (adds artefacts) |
+| OGG Vorbis | Lossy compressed | N/A | Open standard; streaming use |
+| SF2/SFZ | Soundfont | — | Sample library format for MIDI instruments |
+
+**Best practice:** Source and archive samples as 24-bit WAV. Convert to MP3/AAC only for distribution.
+
+---
+
+## ⚠️ 6. Common Misconceptions
+
+1. **"If I pitch-shift a sample, copyright doesn't apply."** False. Courts have found that pitch-shifted, reversed, or altered samples still infringe if the underlying material is identifiable. Always clear samples from commercial releases or use royalty-free sources.
+
+2. **"Time stretching is transparent at any ratio."** Time stretching algorithms introduce artefacts, especially beyond ±20% tempo change. Different algorithms suit different materials: phase vocoder works best on sustain sounds; élastique for transient-heavy drums.
+
+3. **"I can sample anything under 2 seconds for free."** This is a myth with no legal basis. There is no "de minimis" standard in US copyright law for music samples. Even 1 second can infringe (Bridgeport ruling).
+
+4. **"Reversal is just playing the file backwards."** Simple reversal is easy. The interesting effect (reverse reverb) requires: record a note, print it with reverb, extract ONLY the reverb tail, reverse THAT tail, trigger it timed to land just before the dry hit. More involved than it sounds.
+
+5. **"Loop points are automatic in good samplers."** Some samplers auto-detect zero crossings; many don't. Always listen carefully to the loop transition. A tiny click means the loop points aren't at zero crossings.
+
+6. **"Resampling degrades audio quality."** Not with proper levels. 24-bit float processing in a modern DAW maintains quality through hundreds of generations of processing. The risk is only if you're using lossy formats (MP3) or if you're clipping the signal at any stage.
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal
+- [35.5 - Mixing Fundamentals](35.5---Mixing-Fundamentals) — how to mix samples into a cohesive track
+- [35.8 - Generative Music & AI Audio](35.8---Generative-Music-&-AI-Audio) — AI-based separation of stems from existing recordings
+
+### External
+- [Looperman (free samples)](https://www.looperman.com/)
+- [Freesound.org (CC licensed)](https://freesound.org/)
+- [BBC Sound Effects (free personal use)](https://sound-effects.bbcrewind.co.uk/)
+- [Produce Like A Pro YouTube — chopping techniques](https://www.youtube.com/@ProduceLikeAPro)
+
+---
+
+*Prev: [35.3 - DAW Workflow & Signal Chain](35.3---DAW-Workflow-&-Signal-Chain) | Next: [35.5 - Mixing Fundamentals](35.5---Mixing-Fundamentals)*

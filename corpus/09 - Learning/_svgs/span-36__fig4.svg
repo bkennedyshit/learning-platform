@@ -1,0 +1,152 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 600px; height: auto;">
+  <style>
+    .title       { font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; fill: var(--text-normal, #c9d1d9); }
+    .subtitle    { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .section-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    
+    /* Mood Split Styles */
+    .mood-box    { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; rx: 6; }
+    .mood-box-ac { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.2; rx: 6; }
+    .mood-title  { font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: bold; fill: var(--text-accent, #79c0ff); }
+    .mood-text   { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .mood-ex     { font-family: 'Courier New', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+
+    /* WEIRDO Pillar Styles */
+    .weirdo-bg   { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; rx: 4; }
+    .weirdo-ltr  { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 900; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    .weirdo-lbl  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+
+    /* Pathway Styles */
+    .path-bg     { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 0.8; rx: 4; }
+    .path-lbl    { font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: bold; fill: var(--text-normal, #c9d1d9); }
+    .path-ex     { font-family: 'Courier New', monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .path-line   { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; opacity: 0.5; }
+    .p-real      { fill: var(--text-normal, #c9d1d9); }
+    .p-subj      { fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    .p-cond      { fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+  </style>
+
+  <!-- Title -->
+  <text x="30" y="35" class="title">SPANISH SUBJUNCTIVE &amp; CONDITIONAL PATHWAYS</text>
+  <text x="30" y="50" class="subtitle">Structural triggers for the subjunctive mood and tense combination rules for conditional clauses</text>
+
+  <!-- ================= TOP: MOOD SPLIT & WEIRDO TRIGGERS ================= -->
+  <text x="30" y="85" class="section-lbl">1. THE MOOD POLARITY &amp; SUBJUNCTIVE TRIGGERS</text>
+  
+  <g transform="translate(30, 95)">
+    <!-- Indicative Box -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="160" height="95" class="mood-box" />
+      <text x="15" y="20" class="mood-title" style="fill: var(--text-normal, #c9d1d9);">INDICATIVE MOOD</text>
+      <text x="15" y="38" class="mood-text">Objective Reality &amp; Certainty</text>
+      <text x="15" y="50" class="mood-text">Declares facts directly.</text>
+      <text x="15" y="72" class="mood-ex">Sé que <tspan fill="var(--text-normal, #c9d1d9)">vienes</tspan>.</text>
+      <text x="15" y="84" class="mood-text" style="font-size: 8px; fill: var(--text-muted, #8b949e);">(I know you are coming — Fact)</text>
+    </g>
+
+    <!-- Subjunctive Box -->
+    <g transform="translate(180, 0)">
+      <rect x="0" y="0" width="170" height="95" class="mood-box-ac" />
+      <text x="15" y="20" class="mood-title" style="fill: var(--interactive-accent, #58a6ff);">SUBJUNCTIVE MOOD</text>
+      <text x="15" y="38" class="mood-text">Subjective Space &amp; Unreality</text>
+      <text x="15" y="50" class="mood-text">Triggers: WEIRDO + diff subjects</text>
+      <text x="15" y="72" class="mood-ex">Quiero que <tspan fill="var(--interactive-accent, #58a6ff)">vengas</tspan>.</text>
+      <text x="15" y="84" class="mood-text" style="font-size: 8px; fill: var(--text-muted, #8b949e);">(I want you to come — Wish/Hypothetical)</text>
+    </g>
+
+    <!-- WEIRDO Pillar -->
+    <g transform="translate(370, 0)">
+      <rect x="0" y="0" width="170" height="95" class="weirdo-bg" />
+      <text x="85" y="16" class="mood-title" style="fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-size: 10px;">WEIRDO SUBJUNCTIVE TRIGGERS</text>
+      
+      <!-- Letters & Labels -->
+      <g transform="translate(15, 28)">
+        <text x="10" y="12" class="weirdo-ltr">W</text><text x="25" y="10" class="weirdo-lbl">Wishes</text>
+        <text x="10" y="32" class="weirdo-ltr">E</text><text x="25" y="30" class="weirdo-lbl">Emotion</text>
+        <text x="10" y="52" class="weirdo-ltr">I</text><text x="25" y="50" class="weirdo-lbl">Impersonal</text>
+      </g>
+      <g transform="translate(95, 28)">
+        <text x="10" y="12" class="weirdo-ltr">R</text><text x="25" y="10" class="weirdo-lbl">Request</text>
+        <text x="10" y="32" class="weirdo-ltr">D</text><text x="25" y="30" class="weirdo-lbl">Doubt</text>
+        <text x="10" y="52" class="weirdo-ltr">O</text><text x="25" y="50" class="weirdo-lbl">Ojalá</text>
+      </g>
+      
+      <!-- Pulsing boundary highlight -->
+      <rect x="-2" y="-2" width="174" height="99" rx="6" fill="none" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.2" stroke-opacity="0.3">
+        <animate attributeName="stroke-opacity" values="0.1;0.7;0.1" dur="3s" repeatCount="indefinite" />
+      </rect>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM: CONDITIONAL SI-CLAUSES PATHWAYS ================= -->
+  <text x="30" y="225" class="section-lbl">2. CONDITIONAL SI-CLAUSE PATHWAY DECODER</text>
+  
+  <g transform="translate(30, 235)">
+    <!-- Pathway 1: Real / Open (Likely Future) -->
+    <g transform="translate(0, 0)">
+      <!-- Si-Clause Block -->
+      <rect x="0" y="0" width="200" height="42" class="path-bg" />
+      <text x="15" y="18" class="path-lbl">SI-CLAUSE: <tspan class="p-real">Present Indicative</tspan></text>
+      <text x="15" y="32" class="path-ex">Si tienes tiempo...</text>
+
+      <!-- Connection line -->
+      <path id="line1" d="M 200 21 L 340 21" class="path-line" />
+
+      <!-- Main Clause Block -->
+      <rect x="340" y="0" width="200" height="42" class="path-bg" />
+      <text x="15" y="18" class="path-lbl">MAIN CLAUSE: <tspan class="p-real">Future / Present</tspan></text>
+      <text x="15" y="32" class="path-ex">...vendrás a la fiesta. (Likely)</text>
+    </g>
+
+    <!-- Pathway 2: Hypothetical (Imaginary Present/Future) -->
+    <g transform="translate(0, 52)">
+      <!-- Si-Clause Block -->
+      <rect x="0" y="0" width="200" height="42" class="path-bg" style="stroke: var(--text-accent, #79c0ff); stroke-width: 1;" />
+      <text x="15" y="18" class="path-lbl">SI-CLAUSE: <tspan class="p-subj">Imperfect Subjunctive</tspan></text>
+      <text x="15" y="32" class="path-ex">Si tuvieras tiempo...</text>
+
+      <!-- Connection line -->
+      <path id="line2" d="M 200 21 L 340 21" class="path-line" style="stroke: var(--text-accent, #79c0ff);" />
+
+      <!-- Main Clause Block -->
+      <rect x="340" y="0" width="200" height="42" class="path-bg" style="stroke: var(--interactive-accent, #58a6ff); stroke-width: 1;" />
+      <text x="15" y="18" class="path-lbl">MAIN CLAUSE: <tspan class="p-cond">Conditional</tspan></text>
+      <text x="15" y="32" class="path-ex">...vendrías a la fiesta. (Unlikely)</text>
+    </g>
+
+    <!-- Pathway 3: Counterfactual (Past Impossible) -->
+    <g transform="translate(0, 104)">
+      <!-- Si-Clause Block -->
+      <rect x="0" y="0" width="200" height="42" class="path-bg" />
+      <text x="15" y="18" class="path-lbl">SI-CLAUSE: <tspan class="p-subj">Pluperfect Subjunctive</tspan></text>
+      <text x="15" y="32" class="path-ex">Si hubieras tenido tiempo...</text>
+
+      <!-- Connection line -->
+      <path id="line3" d="M 200 21 L 340 21" class="path-line" />
+
+      <!-- Main Clause Block -->
+      <rect x="340" y="0" width="200" height="42" class="path-bg" />
+      <text x="15" y="18" class="path-lbl">MAIN CLAUSE: <tspan class="p-cond">Conditional Perfect</tspan></text>
+      <text x="15" y="32" class="path-ex">...habrías venido. (Past/Impossible)</text>
+    </g>
+
+    <!-- FLOW SIGNAL DOTS (SMIL animateMotion) -->
+    <circle cx="0" cy="0" r="3.5" fill="var(--text-normal, #c9d1d9)">
+      <animateMotion dur="2.5s" repeatCount="indefinite">
+        <mpath href="#line1" />
+      </animateMotion>
+    </circle>
+    
+    <circle cx="0" cy="0" r="3.5" fill="var(--text-accent, #79c0ff)">
+      <animateMotion dur="2.5s" repeatCount="indefinite">
+        <mpath href="#line2" />
+      </animateMotion>
+    </circle>
+
+    <circle cx="0" cy="0" r="3.5" fill="var(--interactive-accent, #58a6ff)">
+      <animateMotion dur="2.5s" repeatCount="indefinite">
+        <mpath href="#line3" />
+      </animateMotion>
+    </circle>
+  </g>
+</svg>

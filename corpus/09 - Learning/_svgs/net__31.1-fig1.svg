@@ -1,0 +1,167 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .layer-phy   { fill: #3d1a1a; stroke: #ff6b6b; stroke-width: 1.5; }
+    .layer-dl    { fill: #3d2a1a; stroke: #ffa94d; stroke-width: 1.5; }
+    .layer-net   { fill: #3d3a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .layer-trans { fill: #1a3d1a; stroke: #51cf66; stroke-width: 1.5; }
+    .layer-sess  { fill: #1a3a3d; stroke: #4dabf7; stroke-width: 1.5; }
+    .layer-pres  { fill: #1a1a3d; stroke: #748ffc; stroke-width: 1.5; }
+    .layer-app   { fill: #2d1a3d; stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .arrow { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; marker-end: url(#arr); }
+    .arrow-data { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.8; fill: none; marker-end: url(#arr-blue); }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">OSI 7-Layer Model vs TCP/IP · Ethernet Frame · ARP · MAC Addressing</text>
+
+  <!-- OSI Stack left -->
+  <text x="90" y="44" class="label" text-anchor="middle" font-weight="bold">OSI Model</text>
+  <rect x="20"  y="52" width="140" height="34" class="layer-app"/>
+  <text x="90"  y="68" class="label" text-anchor="middle">7 — Application</text>
+  <text x="90"  y="80" class="sublabel" text-anchor="middle">HTTP, DNS, SMTP, FTP</text>
+
+  <rect x="20"  y="90" width="140" height="26" class="layer-pres"/>
+  <text x="90"  y="103" class="label" text-anchor="middle">6 — Presentation</text>
+  <text x="90"  y="113" class="sublabel" text-anchor="middle">TLS/SSL, gzip, MIME</text>
+
+  <rect x="20"  y="120" width="140" height="26" class="layer-sess"/>
+  <text x="90"  y="133" class="label" text-anchor="middle">5 — Session</text>
+  <text x="90"  y="143" class="sublabel" text-anchor="middle">TLS session, RPC channel</text>
+
+  <rect x="20"  y="150" width="140" height="26" class="layer-trans"/>
+  <text x="90"  y="163" class="label" text-anchor="middle">4 — Transport</text>
+  <text x="90"  y="173" class="sublabel" text-anchor="middle">TCP · UDP · QUIC</text>
+
+  <rect x="20"  y="180" width="140" height="26" class="layer-net"/>
+  <text x="90"  y="193" class="label" text-anchor="middle">3 — Network</text>
+  <text x="90"  y="203" class="sublabel" text-anchor="middle">IPv4 · IPv6 · ICMP · BGP</text>
+
+  <rect x="20"  y="210" width="140" height="26" class="layer-dl"/>
+  <text x="90"  y="223" class="label" text-anchor="middle">2 — Data Link</text>
+  <text x="90"  y="233" class="sublabel" text-anchor="middle">Ethernet · ARP · MAC · LLC</text>
+
+  <rect x="20"  y="240" width="140" height="26" class="layer-phy"/>
+  <text x="90"  y="253" class="label" text-anchor="middle">1 — Physical</text>
+  <text x="90"  y="263" class="sublabel" text-anchor="middle">Bits · signals · NIC · cable</text>
+
+  <!-- TCP/IP Stack right of OSI -->
+  <text x="255" y="44" class="label" text-anchor="middle" font-weight="bold">TCP/IP Model</text>
+  <rect x="178" y="52" width="154" height="64" class="layer-app"/>
+  <text x="255" y="78" class="label" text-anchor="middle">Application Layer</text>
+  <text x="255" y="92" class="sublabel" text-anchor="middle">HTTP/2/3, DNS, TLS, QUIC</text>
+  <text x="255" y="108" class="sublabel" text-anchor="middle">gRPC, WebSockets, SSH</text>
+
+  <rect x="178" y="120" width="154" height="56" class="layer-trans"/>
+  <text x="255" y="148" class="label" text-anchor="middle">Transport Layer</text>
+  <text x="255" y="164" class="sublabel" text-anchor="middle">TCP — reliable stream</text>
+  <text x="255" y="176" class="sublabel" text-anchor="middle">UDP — unreliable datagram</text>
+
+  <rect x="178" y="180" width="154" height="26" class="layer-net"/>
+  <text x="255" y="195" class="label" text-anchor="middle">Internet Layer (L3)</text>
+  <text x="255" y="207" class="sublabel" text-anchor="middle">IP routing · ICMP · ARP</text>
+
+  <rect x="178" y="210" width="154" height="56" class="layer-phy"/>
+  <text x="255" y="238" class="label" text-anchor="middle">Link Layer (L1/L2)</text>
+  <text x="255" y="252" class="sublabel" text-anchor="middle">Ethernet · Wi-Fi · PPP</text>
+  <text x="255" y="265" class="sublabel" text-anchor="middle">signals on the wire</text>
+
+  <!-- Mapping braces / arrows -->
+  <line x1="162" y1="69" x2="176" y2="69" class="arrow"/>
+  <line x1="162" y1="106" x2="176" y2="85" class="arrow"/>
+  <line x1="162" y1="133" x2="176" y2="100" class="arrow"/>
+  <line x1="162" y1="163" x2="176" y2="148" class="arrow"/>
+  <line x1="162" y1="193" x2="176" y2="193" class="arrow"/>
+  <line x1="162" y1="223" x2="176" y2="233" class="arrow"/>
+  <line x1="162" y1="253" x2="176" y2="253" class="arrow"/>
+
+  <!-- Ethernet frame diagram -->
+  <text x="480" y="44" class="label" text-anchor="middle" font-weight="bold">Ethernet II Frame (DIX)</text>
+  <rect x="350" y="54" width="338" height="26" rx="3" fill="var(--background-secondary,#161b22)" stroke="var(--text-muted,#8b949e)" stroke-width="1"/>
+  <!-- preamble -->
+  <rect x="350" y="54" width="46" height="26" rx="0" fill="#3d1a1a" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="373" y="66" class="sublabel" text-anchor="middle">Preamble</text>
+  <text x="373" y="76" class="sublabel" text-anchor="middle">7 B</text>
+  <!-- SFD -->
+  <rect x="396" y="54" width="20" height="26" rx="0" fill="#3d1a1a" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="406" y="67" class="sublabel" text-anchor="middle">SFD</text>
+  <text x="406" y="77" class="sublabel" text-anchor="middle">1B</text>
+  <!-- dst mac -->
+  <rect x="416" y="54" width="52" height="26" rx="0" fill="#3d2a1a" stroke="#ffa94d" stroke-width="1"/>
+  <text x="442" y="66" class="sublabel" text-anchor="middle">Dst MAC</text>
+  <text x="442" y="76" class="sublabel" text-anchor="middle">6 B</text>
+  <!-- src mac -->
+  <rect x="468" y="54" width="52" height="26" rx="0" fill="#3d2a1a" stroke="#ffa94d" stroke-width="1"/>
+  <text x="494" y="66" class="sublabel" text-anchor="middle">Src MAC</text>
+  <text x="494" y="76" class="sublabel" text-anchor="middle">6 B</text>
+  <!-- ethertype -->
+  <rect x="520" y="54" width="30" height="26" rx="0" fill="#3d3a1a" stroke="#ffd93d" stroke-width="1"/>
+  <text x="535" y="66" class="sublabel" text-anchor="middle">Ether</text>
+  <text x="535" y="76" class="sublabel" text-anchor="middle">type 2B</text>
+  <!-- payload -->
+  <rect x="550" y="54" width="76" height="26" rx="0" fill="#1a3d1a" stroke="#51cf66" stroke-width="1.5"/>
+  <text x="588" y="66" class="sublabel" text-anchor="middle">Payload (IP packet)</text>
+  <text x="588" y="76" class="sublabel" text-anchor="middle">46–1500 B</text>
+  <!-- FCS -->
+  <rect x="626" y="54" width="30" height="26" rx="0" fill="#3d1a1a" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="641" y="66" class="sublabel" text-anchor="middle">FCS</text>
+  <text x="641" y="76" class="sublabel" text-anchor="middle">4 B</text>
+  <!-- IFG -->
+  <rect x="656" y="54" width="32" height="26" rx="0" fill="#222" stroke="var(--text-muted,#8b949e)" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <text x="672" y="66" class="sublabel" text-anchor="middle">IFG</text>
+  <text x="672" y="76" class="sublabel" text-anchor="middle">12 B</text>
+
+  <!-- ARP table diagram -->
+  <text x="480" y="108" class="label" text-anchor="middle" font-weight="bold">ARP — Address Resolution Protocol</text>
+  <rect x="350" y="116" width="338" height="130" rx="3" class="box"/>
+
+  <!-- Host A box -->
+  <rect x="360" y="126" width="90" height="36" rx="4" fill="#1a3a3d" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="405" y="142" class="label" text-anchor="middle" font-weight="bold">Host A</text>
+  <text x="405" y="154" class="mono" text-anchor="middle">192.168.1.10</text>
+
+  <!-- Host B box -->
+  <rect x="590" y="126" width="90" height="36" rx="4" fill="#1a3a3d" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="635" y="142" class="label" text-anchor="middle" font-weight="bold">Host B</text>
+  <text x="635" y="154" class="mono" text-anchor="middle">192.168.1.20</text>
+
+  <!-- ARP request (broadcast) -->
+  <line x1="450" y1="144" x2="590" y2="144" stroke="#ffd93d" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+  <text x="520" y="138" class="sublabel" text-anchor="middle" fill="#ffd93d">ARP Request (broadcast)</text>
+  <text x="520" y="148" class="mono" text-anchor="middle">"Who has 192.168.1.20? Tell .1.10"</text>
+
+  <!-- ARP reply (unicast) -->
+  <line x1="590" y1="165" x2="450" y2="165" stroke="#51cf66" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="520" y="178" class="sublabel" text-anchor="middle" fill="#51cf66">ARP Reply (unicast)</text>
+  <text x="520" y="188" class="mono" text-anchor="middle">"192.168.1.20 is at AA:BB:CC:DD:EE:FF"</text>
+
+  <!-- ARP cache note -->
+  <text x="405" y="210" class="sublabel" text-anchor="middle">ARP cache (kernel)</text>
+  <text x="405" y="222" class="mono" text-anchor="middle">192.168.1.20 → AA:BB:CC:...</text>
+  <text x="405" y="232" class="mono" text-anchor="middle">TTL ≈ 20 min</text>
+
+  <text x="635" y="210" class="sublabel" text-anchor="middle">Layer 2 boundary:</text>
+  <text x="635" y="222" class="sublabel" text-anchor="middle">ARP stays within</text>
+  <text x="635" y="234" class="sublabel" text-anchor="middle">broadcast domain</text>
+
+  <!-- MAC structure note -->
+  <rect x="350" y="262" width="338" height="56" rx="3" class="box"/>
+  <text x="480" y="278" class="label" text-anchor="middle" font-weight="bold">MAC Address Structure (48-bit / EUI-48)</text>
+  <text x="360" y="295" class="mono">AA:BB:CC : DD:EE:FF</text>
+  <text x="480" y="295" class="sublabel">  ← OUI (Org Unique ID) → ← Device-specific (NIC) →</text>
+  <text x="360" y="310" class="sublabel">Bit 0 of byte 0: 0=unicast 1=multicast  ·  Bit 1: 0=globally unique 1=locally administered</text>
+
+  <!-- Broadcast &amp; multicast note -->
+  <text x="360" y="328" class="mono">FF:FF:FF:FF:FF:FF = Ethernet broadcast  ·  01:00:5E:xx:xx:xx = IPv4 multicast</text>
+</svg>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style="background-color: #1e1e2e; font-family: sans-serif;">
+  <style>
+    .title { fill: #cdd6f4; font-size: 24px; font-weight: bold; text-anchor: middle; }
+    .label { fill: #a6adc8; font-size: 16px; text-anchor: middle; font-weight: 500; }
+    .circle-left { fill: none; stroke: #89b4fa; stroke-width: 4; }
+    .circle-right { fill: none; stroke: #f38ba8; stroke-width: 4; }
+    .fill-blue { fill: #89b4fa; opacity: 0.6; }
+    .fill-red { fill: #f38ba8; opacity: 0.6; }
+    .fill-purple { fill: #cba6f7; opacity: 0.8; }
+  </style>
+
+  <text x="400" y="40" class="title">SQL JOIN Types</text>
+
+  <!-- INNER JOIN -->
+  <g transform="translate(200, 150)">
+    <text x="0" y="-80" class="label">INNER JOIN</text>
+    <circle cx="-35" cy="0" r="60" class="circle-left" />
+    <circle cx="35" cy="0" r="60" class="circle-right" />
+    <path d="M 0,-48 A 60 60 0 0 0 0,48 A 60 60 0 0 0 0,-48 Z" class="fill-purple">
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <text x="-55" y="5" class="label" fill="#89b4fa">A</text>
+    <text x="55" y="5" class="label" fill="#f38ba8">B</text>
+  </g>
+
+  <!-- LEFT JOIN -->
+  <g transform="translate(600, 150)">
+    <text x="0" y="-80" class="label">LEFT JOIN</text>
+    <circle cx="-35" cy="0" r="60" class="fill-blue">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <path d="M 0,-48 A 60 60 0 0 0 0,48 A 60 60 0 0 0 0,-48 Z" class="fill-purple" />
+    <circle cx="-35" cy="0" r="60" class="circle-left" />
+    <circle cx="35" cy="0" r="60" class="circle-right" />
+    <text x="-55" y="5" class="label" fill="#1e1e2e">A</text>
+    <text x="55" y="5" class="label" fill="#f38ba8">B</text>
+  </g>
+
+  <!-- RIGHT JOIN -->
+  <g transform="translate(200, 420)">
+    <text x="0" y="-80" class="label">RIGHT JOIN</text>
+    <circle cx="35" cy="0" r="60" class="fill-red">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+    <path d="M 0,-48 A 60 60 0 0 0 0,48 A 60 60 0 0 0 0,-48 Z" class="fill-purple" />
+    <circle cx="-35" cy="0" r="60" class="circle-left" />
+    <circle cx="35" cy="0" r="60" class="circle-right" />
+    <text x="-55" y="5" class="label" fill="#89b4fa">A</text>
+    <text x="55" y="5" class="label" fill="#1e1e2e">B</text>
+  </g>
+
+  <!-- FULL OUTER JOIN -->
+  <g transform="translate(600, 420)">
+    <text x="0" y="-80" class="label">FULL OUTER JOIN</text>
+    <circle cx="-35" cy="0" r="60" class="fill-blue">
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="35" cy="0" r="60" class="fill-red">
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <path d="M 0,-48 A 60 60 0 0 0 0,48 A 60 60 0 0 0 0,-48 Z" class="fill-purple">
+      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="-35" cy="0" r="60" class="circle-left" />
+    <circle cx="35" cy="0" r="60" class="circle-right" />
+    <text x="-55" y="5" class="label" fill="#1e1e2e">A</text>
+    <text x="55" y="5" class="label" fill="#1e1e2e">B</text>
+  </g>
+</svg>

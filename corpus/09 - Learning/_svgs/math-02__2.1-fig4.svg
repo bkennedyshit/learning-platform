@@ -1,0 +1,33 @@
+<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:280px;height:auto;">
+  <defs>
+    <marker id="be" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="bf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .be1{stroke:var(--interactive-accent, #58a6ff);stroke-width:2.8;fill:none;marker-end:url(#be);}
+    .be2{stroke:var(--text-accent, #79c0ff);stroke-width:2.8;fill:none;marker-end:url(#bf);}
+    .bax{stroke:var(--text-muted, #8b949e);stroke-width:1;fill:none;}
+    .bl{font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--text-normal, #c9d1d9);}
+  </style>
+  <line x1="140" y1="20" x2="140" y2="220" class="bax"/>
+  <line x1="20" y1="130" x2="270" y2="130" class="bax"/>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.2s" dur="0.01s" fill="freeze" />
+    <line x1="140" y1="130" x2="230" y2="130" class="be1">
+      <animate attributeName="x2" values="140;230" begin="0.2s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" begin="0.7s" dur="0.01s" fill="freeze" />
+    <line x1="140" y1="130" x2="140" y2="50" class="be2">
+      <animate attributeName="y2" values="130;50" begin="0.7s" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+    </line>
+  </g>
+  <text x="235" y="126" class="bl" fill="var(--interactive-accent, #58a6ff)" opacity="0">e₁=(1,0)<animate attributeName="opacity" to="1" begin="0.7s" dur="0.3s" fill="freeze"/></text>
+  <text x="100" y="46" class="bl" fill="var(--text-accent, #79c0ff)" opacity="0">e₂=(0,1)<animate attributeName="opacity" to="1" begin="1.2s" dur="0.3s" fill="freeze"/></text>
+  <text x="140" y="235" class="bl" text-anchor="middle" opacity="0">Standard basis of ℝ²<animate attributeName="opacity" to="1" begin="1.7s" dur="0.5s" fill="freeze"/></text>
+</svg>

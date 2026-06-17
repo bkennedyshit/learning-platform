@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0f172a; }
+      .box { fill: #1e293b; stroke: #475569; stroke-width: 2; rx: 6; }
+      .text-code { font-family: 'Courier New', Courier, monospace; font-size: 16px; fill: #e2e8f0; }
+      .reg { fill: #f43f5e; font-weight: bold; }
+      .inst { fill: #8b5cf6; font-weight: bold; }
+      .mem { fill: #0ea5e9; }
+      .pipeline-line { stroke: #3b82f6; stroke-width: 3; stroke-dasharray: 8; }
+      .pulse { fill: #3b82f6; }
+    </style>
+  </defs>
+
+  <rect width="800" height="400" class="bg" rx="12" />
+
+  <text x="400" y="40" font-family="sans-serif" font-size="20" fill="#f8fafc" text-anchor="middle" font-weight="bold" letter-spacing="2">CODE GENERATION &amp; BACKEND</text>
+
+  <!-- IR Representation -->
+  <g transform="translate(50, 120)">
+    <rect width="200" height="180" class="box" stroke="#3b82f6" />
+    <text x="100" y="25" font-family="sans-serif" font-size="14" fill="#93c5fd" text-anchor="middle" font-weight="bold">Intermediate Representation</text>
+    <line x1="0" y1="35" x2="200" y2="35" stroke="#3b82f6" />
+    <text x="20" y="65" class="text-code"><tspan fill="#3b82f6">%1</tspan> = load i32, ptr %x</text>
+    <text x="20" y="95" class="text-code"><tspan fill="#3b82f6">%2</tspan> = load i32, ptr %y</text>
+    <text x="20" y="125" class="text-code"><tspan fill="#3b82f6">%3</tspan> = add i32 %1, %2</text>
+    <text x="20" y="155" class="text-code">store i32 <tspan fill="#3b82f6">%3</tspan>, ptr %z</text>
+  </g>
+
+  <!-- Transformation Pipeline -->
+  <g transform="translate(260, 200)">
+    <line x1="0" y1="0" x2="270" y2="0" class="pipeline-line" />
+    <circle cx="0" cy="0" r="6" class="pulse">
+      <animate attributeName="cx" values="0; 270" dur="2s" repeatCount="indefinite" />
+    </circle>
+    
+    <rect x="40" y="-30" width="190" height="60" fill="#0f172a" stroke="#64748b" stroke-width="2" rx="8" />
+    <text x="135" y="-5" font-family="sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">Register Allocation &amp;</text>
+    <text x="135" y="15" font-family="sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">Instruction Selection</text>
+  </g>
+
+  <!-- Machine Code / Assembly -->
+  <g transform="translate(550, 120)">
+    <rect width="200" height="180" class="box" stroke="#f43f5e" />
+    <text x="100" y="25" font-family="sans-serif" font-size="14" fill="#fda4af" text-anchor="middle" font-weight="bold">x86 Assembly</text>
+    <line x1="0" y1="35" x2="200" y2="35" stroke="#f43f5e" />
+    
+    <g>
+      <text x="20" y="65" class="text-code"><tspan class="inst">mov</tspan> <tspan class="reg">eax</tspan>, <tspan class="mem">[rbp-4]</tspan></text>
+      <text x="20" y="95" class="text-code"><tspan class="inst">mov</tspan> <tspan class="reg">edx</tspan>, <tspan class="mem">[rbp-8]</tspan></text>
+      <text x="20" y="125" class="text-code"><tspan class="inst">add</tspan> <tspan class="reg">eax</tspan>, <tspan class="reg">edx</tspan></text>
+      <text x="20" y="155" class="text-code"><tspan class="inst">mov</tspan> <tspan class="mem">[rbp-12]</tspan>, <tspan class="reg">eax</tspan></text>
+      
+      <!-- Typewriter effect animation -->
+      <rect x="15" y="45" width="180" height="120" fill="#1e293b">
+        <animate attributeName="x" values="15; 195; 195" keyTimes="0; 0.5; 1" dur="2s" repeatCount="indefinite" />
+        <animate attributeName="width" values="180; 0; 0" keyTimes="0; 0.5; 1" dur="2s" repeatCount="indefinite" />
+      </rect>
+    </g>
+  </g>
+
+</svg>

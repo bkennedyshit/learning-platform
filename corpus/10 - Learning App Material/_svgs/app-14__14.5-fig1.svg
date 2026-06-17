@@ -1,0 +1,36 @@
+<svg viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 400px; height: auto;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal)"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .grid { stroke: var(--text-muted); stroke-width: 0.5; opacity: 0.5; }
+    .axis { stroke: var(--text-normal); stroke-width: 2; }
+    .line1 { stroke: var(--interactive-accent); stroke-width: 3; fill: none; }
+    .line2 { stroke: var(--text-accent); stroke-width: 3; fill: none; }
+    .solution { fill: var(--h1-color); stroke: var(--background-secondary); stroke-width: 2; cursor: pointer; transition: r 0.2s; }
+    .solution:hover { r: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal); }
+    .sol-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--h1-color); font-weight: bold; }
+  </style>
+
+  <path class="grid" d="M -150 -200 V 200 M -100 -200 V 200 M -50 -200 V 200 M 50 -200 V 200 M 100 -200 V 200 M 150 -200 V 200" />
+  <path class="grid" d="M -200 -150 H 200 M -200 -100 H 200 M -200 -50 H 200 M -200 50 H 200 M -200 100 H 200 M -200 150 H 200" />
+
+  <line x1="-190" y1="0" x2="190" y2="0" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="0" y1="190" x2="0" y2="-190" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+  <!-- L1: y = x (SVG y = -x) -->
+  <line x1="-200" y1="200" x2="200" y2="-200" class="line1" />
+  <!-- L2: y = -2x + 3 (SVG y = 2x - 150) -->
+  <line x1="-25" y1="-200" x2="175" y2="200" class="line2" />
+  
+  <!-- Solution at (1, 1) -> (50, -50) -->
+  <circle cx="50" cy="-50" r="5" class="solution"/>
+  <text x="65" y="-55" class="sol-label">Solution (1, 1)</text>
+
+  <text x="-180" y="-170" class="label" fill="var(--interactive-accent)" font-weight="bold">y = x</text>
+  <text x="100" y="180" class="label" fill="var(--text-accent)" font-weight="bold">y = -2x + 3</text>
+</svg>

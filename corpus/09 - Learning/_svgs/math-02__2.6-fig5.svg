@@ -1,0 +1,51 @@
+<svg viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <style>
+    .pax { stroke:var(--text-muted, #8b949e); stroke-width:1.2; fill:none; }
+    .pv0 { stroke:var(--text-muted, #8b949e); stroke-width:2; fill:none; }
+    .pv1 { stroke:var(--text-accent, #79c0ff); stroke-width:2; fill:none; }
+    .pv2 { stroke:var(--interactive-accent, #58a6ff); stroke-width:2.5; fill:none; }
+    .pvD { stroke:var(--interactive-accent, #58a6ff); stroke-width:3; fill:none; stroke-dasharray:8 3; }
+    .plb { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9); }
+    .pla { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--interactive-accent, #58a6ff); font-weight:bold; }
+  </style>
+  <defs>
+    <marker id="pia" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="pib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-accent, #79c0ff)"/>
+    </marker>
+  </defs>
+  <!-- Axes -->
+  <line x1="50" y1="200" x2="490" y2="200" class="pax"/>
+  <line x1="70" y1="220" x2="70"  y2="20"  class="pax"/>
+  <!-- Dominant eigenvector direction: slope ≈ 1 (45°) -->
+  <line x1="50" y1="220" x2="490" y2="-20" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+  <text x="425" y="20" class="pla">dominant eigenvector</text>
+  <!-- b0: initial random vector -->
+  <line x1="70" y1="200" x2="140" y2="140" stroke="var(--text-muted, #8b949e)" stroke-width="2" marker-end="url(#pib)" opacity="0.3"/>
+  <text x="130" y="133" class="plb" opacity="0.3">b₀</text>
+  <!-- b1 = Ab0 / ||Ab0|| — closer to eigendir -->
+  <line x1="70" y1="200" x2="200" y2="110" stroke="var(--text-accent, #79c0ff)" stroke-width="2" marker-end="url(#pib)" opacity="0.3"/>
+  <text x="205" y="106" fill="var(--text-accent, #79c0ff)" class="plb" opacity="0.3">b₁</text>
+  <!-- b2 — even closer -->
+  <line x1="70" y1="200" x2="290" y2="80" stroke="var(--interactive-accent, #58a6ff)" stroke-width="2.5" marker-end="url(#pia)" opacity="0.3"/>
+  <text x="295" y="75" class="pla" opacity="0.3">b₂</text>
+  <!-- b3 — nearly on eigenline -->
+  <line x1="70" y1="200" x2="380" y2="50" stroke="var(--interactive-accent, #58a6ff)" stroke-width="3" marker-end="url(#pia)" opacity="0.3"/>
+  <text x="385" y="45" class="pla" opacity="0.3">b₃ ≈ v₁</text>
+
+  <!-- Animated Vector -->
+  <line x1="70" y1="200" x2="140" y2="140" stroke="var(--text-accent, #79c0ff)" stroke-width="3" marker-end="url(#pia)">
+    <animate attributeName="x2" values="140; 200; 290; 380; 380; 140" keyTimes="0; 0.2; 0.4; 0.6; 0.9; 1" dur="6s" repeatCount="indefinite" />
+    <animate attributeName="y2" values="140; 110; 80; 50; 50; 140" keyTimes="0; 0.2; 0.4; 0.6; 0.9; 1" dur="6s" repeatCount="indefinite" />
+  </line>
+  <text x="130" y="133" class="pla" fill="var(--text-accent, #79c0ff)">
+    <animate attributeName="x" values="130; 205; 295; 385; 385; 130" keyTimes="0; 0.2; 0.4; 0.6; 0.9; 1" dur="6s" repeatCount="indefinite" />
+    <animate attributeName="y" values="133; 106; 75; 45; 45; 133" keyTimes="0; 0.2; 0.4; 0.6; 0.9; 1" dur="6s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="1; 1; 1; 1; 0; 0" keyTimes="0; 0.2; 0.4; 0.6; 0.9; 1" dur="6s" repeatCount="indefinite" />
+    bₖ
+  </text>
+  <!-- Caption -->
+  <text x="280" y="230" class="plb" text-anchor="middle">Power method: bₖ₊₁ = Abₖ / ||Abₖ|| → dominant eigenvector</text>
+</svg>

@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .text { font-family: sans-serif; font-size: 14px; fill: #ccc; }
+      .title { font-family: sans-serif; font-size: 18px; font-weight: bold; fill: #fff; }
+      .membrane { fill: #e9ecef; stroke: #ced4da; stroke-width: 2; }
+      .receptor { fill: #4dabf7; stroke: #228be6; stroke-width: 2; }
+      .glutamate { fill: #fa5252; }
+      .mg-ion { fill: #fcc419; }
+      .ca-ion { fill: #40c057; }
+    </style>
+  </defs>
+  <rect width="620" height="400" fill="#1e1e1e" rx="10"/>
+  
+  <text x="310" y="30" text-anchor="middle" class="title">NMDA Receptor: Hebbian Coincidence Detector</text>
+  
+  <line x1="310" y1="60" x2="310" y2="380" stroke="#444" stroke-width="2" stroke-dasharray="5,5"/>
+
+  <!-- Panel 1: Rest (Glutamate but Mg Blocked) -->
+  <g transform="translate(0, 0)">
+    <text x="155" y="70" text-anchor="middle" class="title" fill="#ccc">1. Glutamate Only (Rest)</text>
+    <text x="155" y="90" text-anchor="middle" class="text">Presynaptic active, Postsynaptic resting</text>
+    
+    <!-- Presynaptic Terminal -->
+    <path d="M 55 120 C 55 180, 255 180, 255 120" class="membrane" fill="#343a40" stroke="#495057"/>
+    
+    <!-- Synaptic Vesicles -->
+    <circle cx="155" cy="140" r="12" fill="none" stroke="#ced4da" stroke-width="1.5"/>
+    <circle cx="150" cy="138" r="2" class="glutamate"/>
+    <circle cx="158" cy="142" r="2" class="glutamate"/>
+    <circle cx="155" cy="146" r="2" class="glutamate"/>
+    
+    <!-- Postsynaptic Membrane -->
+    <path d="M 55 350 L 55 280 C 120 280, 190 280, 255 280 L 255 350 Z" class="membrane" fill="#343a40" stroke="#495057"/>
+    
+    <!-- NMDA Receptor -->
+    <path d="M 130 280 L 130 260 C 130 250, 140 250, 140 260 L 140 290 L 130 290 Z" class="receptor"/>
+    <path d="M 180 280 L 180 260 C 180 250, 170 250, 170 260 L 170 290 L 180 290 Z" class="receptor"/>
+    
+    <!-- Glutamate binding -->
+    <circle cx="135" cy="255" r="4" class="glutamate"/>
+    <circle cx="175" cy="255" r="4" class="glutamate"/>
+    
+    <!-- Mg Block -->
+    <circle cx="155" cy="275" r="6" class="mg-ion"/>
+    <text x="155" y="278" font-size="8" fill="#000" text-anchor="middle" font-weight="bold">Mg</text>
+    
+    <text x="155" y="320" text-anchor="middle" class="text" fill="#ff6b6b">Channel Blocked</text>
+    <text x="155" y="340" text-anchor="middle" class="text" font-size="12">V_m = -70 mV</text>
+  </g>
+
+  <!-- Panel 2: Coincidence (Glutamate + Depolarization) -->
+  <g transform="translate(310, 0)">
+    <text x="155" y="70" text-anchor="middle" class="title" fill="#ccc">2. Coincidence (LTP Induction)</text>
+    <text x="155" y="90" text-anchor="middle" class="text">Glutamate + Postsynaptic Depolarization</text>
+    
+    <!-- Presynaptic Terminal -->
+    <path d="M 55 120 C 55 180, 255 180, 255 120" class="membrane" fill="#343a40" stroke="#495057"/>
+    
+    <!-- Postsynaptic Membrane -->
+    <path d="M 55 350 L 55 280 C 120 280, 190 280, 255 280 L 255 350 Z" class="membrane" fill="#343a40" stroke="#495057"/>
+    
+    <!-- Depolarization indicator (+) inside postsynaptic -->
+    <text x="80" y="320" class="text" fill="#ffcc00" font-weight="bold" font-size="20">+</text>
+    <text x="120" y="340" class="text" fill="#ffcc00" font-weight="bold" font-size="20">+</text>
+    <text x="200" y="330" class="text" fill="#ffcc00" font-weight="bold" font-size="20">+</text>
+    <text x="230" y="300" class="text" fill="#ffcc00" font-weight="bold" font-size="20">+</text>
+    
+    <!-- NMDA Receptor (Open) -->
+    <path d="M 125 280 L 125 260 C 125 250, 135 250, 135 260 L 135 290 L 125 290 Z" class="receptor"/>
+    <path d="M 185 280 L 185 260 C 185 250, 175 250, 175 260 L 175 290 L 185 290 Z" class="receptor"/>
+    
+    <!-- Glutamate binding -->
+    <circle cx="130" cy="255" r="4" class="glutamate"/>
+    <circle cx="180" cy="255" r="4" class="glutamate"/>
+    
+    <!-- Mg Block Expelled (animated) -->
+    <circle r="6" class="mg-ion">
+      <animate attributeName="cy" values="275;200" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="cx" values="155;190" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Ca Influx -->
+    <circle cx="155" cy="220" r="4" class="ca-ion">
+      <animate attributeName="cy" values="220;330" dur="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="155" cy="220" r="4" class="ca-ion">
+      <animate attributeName="cy" values="220;330" dur="1s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="155" cy="220" r="4" class="ca-ion">
+      <animate attributeName="cy" values="220;330" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+
+    <text x="155" y="320" text-anchor="middle" class="text" fill="#40c057" font-weight="bold">Ca²⁺ Influx → LTP</text>
+    <text x="155" y="340" text-anchor="middle" class="text" font-size="12">V_m = -20 mV</text>
+  </g>
+</svg>

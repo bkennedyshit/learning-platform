@@ -1,0 +1,1089 @@
+---
+title: "Thermodynamic Potentials Maxwell Relations"
+subject: "Thermodynamics & Statistical Mechanics"
+catalog: advanced
+audience_tier: higher-education
+chapter: "5.3"
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+# 5.3 — Thermodynamic Potentials & Maxwell Relations
+
+> *"The general equations of thermodynamics may be given a remarkably symmetrical form by the introduction of the functions which I have called the thermodynamic potentials."* — J. Willard Gibbs
+
+The thermodynamic potentials — internal energy $U$, enthalpy $H$, Helmholtz free energy $F$, and Gibbs free energy $G$ — are connected by Legendre transformations that trade natural variables. Each potential encodes the complete thermodynamic information of a system when expressed in its natural variables. The Maxwell relations, derived from the exactness of these potential differentials, provide powerful identities connecting seemingly unrelated partial derivatives.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Perform Legendre transformations to derive $H$, $F$, and $G$ from $U$.
+2. Write the fundamental relation and natural variables for each potential.
+3. Derive all four Maxwell relations from the equality of mixed partial derivatives.
+4. Apply Maxwell relations to compute unmeasurable quantities from measurable ones.
+5. Derive the Gibbs-Helmholtz equation and its applications.
+6. Use the mnemonic "Good Physicists Have Studied Under Very Fine Teachers" (or the thermodynamic square).
+7. Prove the general relation $C_P - C_V = TV\alpha^2/\kappa_T$ using Maxwell relations.
+
+---
+
+## 🖼️ Visual Anchor — The Thermodynamic Square
+
+![math-05__5.3-fig1](math-05__5.3-fig1.svg)
+
+---
+
+## 📚 1. Definitions
+
+### Definition 5.3.1 — Legendre Transformation
+
+Given a function $f(x)$ with slope $p = df/dx$, the **Legendre transform** is:
+
+$$
+g(p) = f(x(p)) - p \cdot x(p)
+$$
+
+where $x(p)$ is obtained by inverting $p = f'(x)$. The transform trades the independent variable $x$ for its conjugate $p$, preserving all thermodynamic information.
+
+### Definition 5.3.2 — The Four Thermodynamic Potentials
+
+| Potential | Definition | Natural Variables | Differential |
+|-----------|-----------|-------------------|-------------|
+| Internal Energy $U$ | fundamental | $S, V, N$ | $dU = TdS - PdV + \mu dN$ |
+| Enthalpy $H$ | $U + PV$ | $S, P, N$ | $dH = TdS + VdP + \mu dN$ |
+| Helmholtz $F$ | $U - TS$ | $T, V, N$ | $dF = -SdT - PdV + \mu dN$ |
+| Gibbs $G$ | $U - TS + PV$ | $T, P, N$ | $dG = -SdT + VdP + \mu dN$ |
+
+### Definition 5.3.3 — Natural Variables
+
+The **natural variables** of a potential are those in which the potential contains complete thermodynamic information. All other thermodynamic quantities can be obtained by differentiation with respect to natural variables.
+
+### Definition 5.3.4 — Maxwell Relations
+
+The four Maxwell relations are identities between second-order partial derivatives of the potentials, arising from the equality of mixed partials (Clairaut's theorem):
+
+$$
+\left(\frac{\partial T}{\partial V}\right)_S = -\left(\frac{\partial P}{\partial S}\right)_V \quad \text{(from } U\text{)}
+$$
+
+$$
+\left(\frac{\partial T}{\partial P}\right)_S = \left(\frac{\partial V}{\partial S}\right)_P \quad \text{(from } H\text{)}
+$$
+
+$$
+\left(\frac{\partial S}{\partial V}\right)_T = \left(\frac{\partial P}{\partial T}\right)_V \quad \text{(from } F\text{)}
+$$
+
+$$
+-\left(\frac{\partial S}{\partial P}\right)_T = \left(\frac{\partial V}{\partial T}\right)_P \quad \text{(from } G\text{)}
+$$
+
+### Definition 5.3.5 — Response Functions
+
+$$
+\alpha = \frac{1}{V}\left(\frac{\partial V}{\partial T}\right)_P \quad \text{(thermal expansion coefficient)}
+$$
+
+$$
+\kappa_T = -\frac{1}{V}\left(\frac{\partial V}{\partial P}\right)_T \quad \text{(isothermal compressibility)}
+$$
+
+$$
+\kappa_S = -\frac{1}{V}\left(\frac{\partial V}{\partial P}\right)_S \quad \text{(adiabatic compressibility)}
+$$
+
+---
+
+## 📐 2. Axioms / Postulates
+
+### Postulate 5.3.P1 — Fundamental Relation
+
+A single equation $S = S(U, V, N)$ (or equivalently $U = U(S, V, N)$) contains **all** thermodynamic information about a system. All equations of state can be derived from it by differentiation.
+
+### Postulate 5.3.P2 — Smoothness
+
+The fundamental relation is a sufficiently smooth ($C^2$) function of its arguments, ensuring the existence and equality of mixed partial derivatives (Clairaut's theorem applies).
+
+---
+
+## 🛡️ 3. Lemmas
+
+### Lemma 5.3.1 — Derivation of Enthalpy
+
+Starting from $dU = TdS - PdV$, we want a potential with natural variables $(S, P)$. Perform a Legendre transform on $V$:
+
+$$
+H = U - \frac{\partial U}{\partial V}\bigg|_S \cdot V = U - (-P) \cdot V = U + PV
+$$
+
+Verify: $dH = dU + PdV + VdP = TdS - PdV + PdV + VdP = TdS + VdP$. $\blacksquare$
+
+### Lemma 5.3.2 — Derivation of Helmholtz Free Energy
+
+Legendre transform on $S$ (trading $S$ for its conjugate $T = \partial U/\partial S|_V$):
+
+$$
+F = U - TS
+$$
+
+$$
+dF = dU - TdS - SdT = (TdS - PdV) - TdS - SdT = -SdT - PdV \quad \blacksquare
+$$
+
+### Lemma 5.3.3 — Derivation of Gibbs Free Energy
+
+Legendre transform on both $S$ and $V$:
+
+$$
+G = U - TS + PV = H - TS = F + PV
+$$
+
+$$
+dG = -SdT + VdP \quad \blacksquare
+$$
+
+### Lemma 5.3.4 — Coefficient Extraction
+
+From $dF = -SdT - PdV$, comparing with $dF = (\partial F/\partial T)_V dT + (\partial F/\partial V)_T dV$:
+
+$$
+S = -\left(\frac{\partial F}{\partial T}\right)_V, \qquad P = -\left(\frac{\partial F}{\partial V}\right)_T
+$$
+
+Similarly for all potentials. These are the **equations of state** derivable from the potential.
+
+---
+
+## 👑 4. Theorems
+
+### Theorem 5.3.1 — Maxwell Relations from Exactness
+
+Each Maxwell relation follows from applying Clairaut's theorem ($\partial^2 \Phi/\partial x\partial y = \partial^2 \Phi/\partial y\partial x$) to the corresponding potential.
+
+### Theorem 5.3.2 — Gibbs-Helmholtz Equation
+
+$$
+\left(\frac{\partial (G/T)}{\partial T}\right)_P = -\frac{H}{T^2}
+$$
+
+$$
+\left(\frac{\partial (F/T)}{\partial T}\right)_V = -\frac{U}{T^2}
+$$
+
+### Theorem 5.3.3 — General $C_P - C_V$ Relation
+
+$$
+C_P - C_V = \frac{TV\alpha^2}{\kappa_T}
+$$
+
+### Theorem 5.3.4 — Ratio of Compressibilities
+
+$$
+\frac{\kappa_T}{\kappa_S} = \frac{C_P}{C_V} = \gamma
+$$
+
+### Theorem 5.3.5 — Energy Equation (Internal Pressure)
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = T\left(\frac{\partial P}{\partial T}\right)_V - P
+$$
+
+---
+
+## ✍️ 5. Proofs / Derivations
+
+### 5.1 Systematic Derivation of All Four Maxwell Relations
+
+**From $U$:** $dU = TdS - PdV$. Identify $(\partial U/\partial S)_V = T$ and $(\partial U/\partial V)_S = -P$. Apply Clairaut:
+
+$$
+\frac{\partial^2 U}{\partial V \partial S} = \frac{\partial^2 U}{\partial S \partial V}
+$$
+
+$$
+\frac{\partial}{\partial V}\bigg|_S \left(\frac{\partial U}{\partial S}\bigg|_V\right) = \frac{\partial}{\partial S}\bigg|_V \left(\frac{\partial U}{\partial V}\bigg|_S\right)
+$$
+
+$$
+\left(\frac{\partial T}{\partial V}\right)_S = -\left(\frac{\partial P}{\partial S}\right)_V \quad \blacksquare
+$$
+
+**From $H$:** $dH = TdS + VdP$. Coefficients: $(\partial H/\partial S)_P = T$, $(\partial H/\partial P)_S = V$.
+
+$$
+\left(\frac{\partial T}{\partial P}\right)_S = \left(\frac{\partial V}{\partial S}\right)_P \quad \blacksquare
+$$
+
+**From $F$:** $dF = -SdT - PdV$. Coefficients: $(\partial F/\partial T)_V = -S$, $(\partial F/\partial V)_T = -P$.
+
+$$
+\frac{\partial}{\partial V}\bigg|_T(-S) = \frac{\partial}{\partial T}\bigg|_V(-P)
+$$
+
+$$
+-\left(\frac{\partial S}{\partial V}\right)_T = -\left(\frac{\partial P}{\partial T}\right)_V
+$$
+
+$$
+\left(\frac{\partial S}{\partial V}\right)_T = \left(\frac{\partial P}{\partial T}\right)_V \quad \blacksquare
+$$
+
+**From $G$:** $dG = -SdT + VdP$. Coefficients: $(\partial G/\partial T)_P = -S$, $(\partial G/\partial P)_T = V$.
+
+$$
+\frac{\partial}{\partial P}\bigg|_T(-S) = \frac{\partial}{\partial T}\bigg|_P(V)
+$$
+
+$$
+-\left(\frac{\partial S}{\partial P}\right)_T = \left(\frac{\partial V}{\partial T}\right)_P \quad \blacksquare
+$$
+
+### 5.2 Proof of the Gibbs-Helmholtz Equation
+
+Start with $G = H - TS$ and $S = -(\partial G/\partial T)_P$:
+
+$$
+\frac{G}{T} = \frac{H}{T} - S = \frac{H}{T} + \left(\frac{\partial G}{\partial T}\right)_P
+$$
+
+Now differentiate $G/T$ with respect to $T$ at constant $P$ using the quotient rule:
+
+$$
+\frac{\partial}{\partial T}\left(\frac{G}{T}\right)_P = \frac{1}{T}\left(\frac{\partial G}{\partial T}\right)_P - \frac{G}{T^2}
+$$
+
+Substitute $(\partial G/\partial T)_P = -S$ and $G = H - TS$:
+
+$$
+= \frac{-S}{T} - \frac{H - TS}{T^2} = \frac{-S}{T} - \frac{H}{T^2} + \frac{S}{T} = -\frac{H}{T^2} \quad \blacksquare
+$$
+
+### 5.3 Proof of the Energy Equation
+
+From $dU = TdS - PdV$:
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = T\left(\frac{\partial S}{\partial V}\right)_T - P
+$$
+
+Apply the Maxwell relation from $F$: $(\partial S/\partial V)_T = (\partial P/\partial T)_V$:
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = T\left(\frac{\partial P}{\partial T}\right)_V - P \quad \blacksquare
+$$
+
+**Application to ideal gas:** $P = nRT/V$, so $(\partial P/\partial T)_V = nR/V = P/T$. Then:
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = T \cdot \frac{P}{T} - P = 0
+$$
+
+confirming that $U$ of an ideal gas is independent of $V$ (depends only on $T$).
+
+**Application to van der Waals gas:** $P = nRT/(V-nb) - an^2/V^2$:
+
+$$
+\left(\frac{\partial P}{\partial T}\right)_V = \frac{nR}{V - nb}
+$$
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = \frac{nRT}{V-nb} - P = \frac{nRT}{V-nb} - \frac{nRT}{V-nb} + \frac{an^2}{V^2} = \frac{an^2}{V^2}
+$$
+
+The internal energy of a van der Waals gas increases with volume due to intermolecular attractions.
+
+### 5.4 Proof of $C_P - C_V = TV\alpha^2/\kappa_T$
+
+This was derived in [5.1 - The Four Laws & Temperature](5.1---The-Four-Laws-&-Temperature) §5.5. Here we present an alternative route using Maxwell relations directly.
+
+Start from the identity (proved by expanding $S = S(T,V)$ and $S = S(T,P)$):
+
+$$
+C_P - C_V = T\left(\frac{\partial S}{\partial V}\right)_T\left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+Apply the Maxwell relation $(\partial S/\partial V)_T = (\partial P/\partial T)_V$:
+
+$$
+C_P - C_V = T\left(\frac{\partial P}{\partial T}\right)_V\left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+Use the cyclic relation: $(\partial P/\partial T)_V(\partial T/\partial V)_P(\partial V/\partial P)_T = -1$, giving:
+
+$$
+\left(\frac{\partial P}{\partial T}\right)_V = -\frac{(\partial V/\partial T)_P}{(\partial V/\partial P)_T} = \frac{V\alpha}{V\kappa_T} = \frac{\alpha}{\kappa_T}
+$$
+
+Substitute:
+
+$$
+C_P - C_V = T \cdot \frac{\alpha}{\kappa_T} \cdot V\alpha = \frac{TV\alpha^2}{\kappa_T} \quad \blacksquare
+$$
+
+### 5.5 Proof of $\kappa_T/\kappa_S = C_P/C_V$
+
+$$
+\kappa_T = -\frac{1}{V}\left(\frac{\partial V}{\partial P}\right)_T, \quad \kappa_S = -\frac{1}{V}\left(\frac{\partial V}{\partial P}\right)_S
+$$
+
+We need to relate $(\partial V/\partial P)_T$ to $(\partial V/\partial P)_S$. Write $V = V(P, T)$ and $V = V(P, S)$:
+
+$$
+\left(\frac{\partial V}{\partial P}\right)_T = \left(\frac{\partial V}{\partial P}\right)_S + \left(\frac{\partial V}{\partial S}\right)_P\left(\frac{\partial S}{\partial P}\right)_T
+$$
+
+From the Maxwell relation (from $H$): $(\partial V/\partial S)_P = (\partial T/\partial P)_S$.
+
+From the Maxwell relation (from $G$): $(\partial S/\partial P)_T = -(\partial V/\partial T)_P = -V\alpha$.
+
+Also $(\partial T/\partial P)_S = (\partial V/\partial S)_P$. Using $(\partial S/\partial T)_P = C_P/T$:
+
+$$
+\left(\frac{\partial V}{\partial S}\right)_P = \left(\frac{\partial V}{\partial T}\right)_P\left(\frac{\partial T}{\partial S}\right)_P = V\alpha \cdot \frac{T}{C_P}
+$$
+
+Combining:
+
+$$
+\left(\frac{\partial V}{\partial P}\right)_T = \left(\frac{\partial V}{\partial P}\right)_S + V\alpha \cdot \frac{T}{C_P} \cdot (-V\alpha)
+$$
+
+$$
+-V\kappa_T = -V\kappa_S - \frac{TV^2\alpha^2}{C_P}
+$$
+
+$$
+\kappa_T - \kappa_S = \frac{TV\alpha^2}{C_P}
+$$
+
+But from Theorem 5.3.3: $C_P - C_V = TV\alpha^2/\kappa_T$, so $TV\alpha^2 = \kappa_T(C_P - C_V)$:
+
+$$
+\kappa_T - \kappa_S = \frac{\kappa_T(C_P - C_V)}{C_P} = \kappa_T\left(1 - \frac{C_V}{C_P}\right)
+$$
+
+$$
+\frac{\kappa_S}{\kappa_T} = \frac{C_V}{C_P} \implies \frac{\kappa_T}{\kappa_S} = \frac{C_P}{C_V} = \gamma \quad \blacksquare
+$$
+
+---
+
+## 🧮 6. Worked Examples
+
+### Example 5.3.E1 — Maxwell Relation Application: $(\partial S/\partial P)_T$ for Ideal Gas
+
+Compute $(\partial S/\partial P)_T$ for an ideal gas using a Maxwell relation.
+
+**Solution:** From the Gibbs potential Maxwell relation:
+
+$$
+\left(\frac{\partial S}{\partial P}\right)_T = -\left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+For an ideal gas, $V = nRT/P$:
+
+$$
+\left(\frac{\partial V}{\partial T}\right)_P = \frac{nR}{P}
+$$
+
+Therefore:
+
+$$
+\left(\frac{\partial S}{\partial P}\right)_T = -\frac{nR}{P}
+$$
+
+This tells us entropy decreases with increasing pressure at constant temperature — compression reduces the available phase space.
+
+### Example 5.3.E2 — Helmholtz Free Energy of Ideal Gas
+
+Derive $F(T,V)$ for an ideal gas.
+
+**Solution:** From $F = U - TS$. For an ideal gas:
+
+$$
+U = nC_V T + U_0
+$$
+
+$$
+S = nC_V\ln T + nR\ln V + S_0
+$$
+
+Therefore:
+
+$$
+F = nC_V T + U_0 - T(nC_V\ln T + nR\ln V + S_0)
+$$
+
+$$
+F = nC_V T(1 - \ln T) - nRT\ln V + (U_0 - TS_0)
+$$
+
+Verify: $-(\partial F/\partial V)_T = nRT/V = P$. ✓
+
+$-(\partial F/\partial T)_V = -nC_V + nC_V\ln T + nC_V + nR\ln V + S_0 = nC_V\ln T + nR\ln V + S_0 = S$. ✓
+
+### Example 5.3.E3 — Energy Equation for Photon Gas
+
+For a photon gas (blackbody radiation): $P = U/(3V)$ (radiation pressure). Find $U(T,V)$.
+
+**Solution:** Apply the energy equation:
+
+$$
+\left(\frac{\partial U}{\partial V}\right)_T = T\left(\frac{\partial P}{\partial T}\right)_V - P
+$$
+
+Since $P = U/(3V)$ and $U = U(T,V)$:
+
+$$
+\left(\frac{\partial P}{\partial T}\right)_V = \frac{1}{3V}\left(\frac{\partial U}{\partial T}\right)_V
+$$
+
+Let $u = U/V$ (energy density). Then $P = u/3$ and $(\partial U/\partial V)_T = u$ (if $u = u(T)$ only). Substituting:
+
+$$
+u = T \cdot \frac{1}{3V}\left(\frac{\partial U}{\partial T}\right)_V - \frac{u}{3}
+$$
+
+$$
+\frac{4u}{3} = \frac{T}{3V}\left(\frac{\partial U}{\partial T}\right)_V = \frac{T}{3}\frac{du}{dT}
+$$
+
+$$
+4u = T\frac{du}{dT} \implies \frac{du}{u} = 4\frac{dT}{T}
+$$
+
+Integrate: $\ln u = 4\ln T + \text{const}$, giving:
+
+$$
+u = aT^4 \implies U = aVT^4
+$$
+
+where $a$ is the radiation constant. This is the **Stefan-Boltzmann law** derived purely from thermodynamics. $\blacksquare$
+
+---
+
+## 🔗 7. Cross-links & Further Reading
+
+### Internal Cross-links
+- First Law and state functions: [5.1 - The Four Laws & Temperature](5.1---The-Four-Laws-&-Temperature)
+- Entropy foundations: [5.2 - Entropy & Heat Engines](5.2---Entropy-&-Heat-Engines)
+- Chemical potential (from $G$): [5.4 - Chemical Potential & Phase Transitions](5.4---Chemical-Potential-&-Phase-Transitions)
+- Free energy from partition function: [5.6 - The Partition Function & Free Energy](5.6---The-Partition-Function-&-Free-Energy)
+- Partial derivatives and chain rule: [1.4 - Multivariable Calculus & Vector Analysis](1.4---Multivariable-Calculus-&-Vector-Analysis)
+- Legendre transforms in mechanics: [4.3 - Lagrangian Mechanics](4.3---Lagrangian-Mechanics)
+
+### Authoritative Sources
+- **Callen**, *Thermodynamics*, Ch. 5–7 (definitive treatment of Legendre transforms in thermo)
+- **Reif**, *Fundamentals of Statistical and Thermal Physics*, Ch. 5
+- **Kittel & Kroemer**, *Thermal Physics*, Ch. 5 (free energy)
+- **Gibbs, J.W.** (1873), "A Method of Geometrical Representation of the Thermodynamic Properties of Substances"
+
+
+---
+
+## 🧠 8. Extended Worked Examples & Deep Dives
+
+### Example 8.1 — Derive All Four Maxwell Relations from the Fundamental Potentials
+
+**Problem.** Starting from the differential forms of $U$, $H$, $F$, and $G$, systematically derive all four Maxwell relations using the exactness condition (equality of mixed partial derivatives).
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Preliminary: Exactness Condition
+
+If $df = M\,dx + N\,dy$ is an exact differential, then:
+
+$$
+\frac{\partial M}{\partial y}\bigg|_x = \frac{\partial N}{\partial x}\bigg|_y
+$$
+
+This follows from the equality of mixed second partial derivatives: $\partial^2 f/\partial x\,\partial y = \partial^2 f/\partial y\,\partial x$.
+
+#### From Internal Energy $U(S, V)$:
+
+The fundamental relation:
+
+$$
+dU = T\,dS - P\,dV
+$$
+
+Here $M = T$, $N = -P$, $x = S$, $y = V$. Applying the exactness condition:
+
+$$
+\frac{\partial T}{\partial V}\bigg|_S = \frac{\partial(-P)}{\partial S}\bigg|_V = -\frac{\partial P}{\partial S}\bigg|_V
+$$
+
+$$
+\boxed{\left(\frac{\partial T}{\partial V}\right)_S = -\left(\frac{\partial P}{\partial S}\right)_V} \quad \text{(Maxwell I)}
+$$
+
+#### From Enthalpy $H(S, P)$:
+
+$$
+H = U + PV \implies dH = T\,dS + V\,dP
+$$
+
+Here $M = T$, $N = V$, $x = S$, $y = P$:
+
+$$
+\frac{\partial T}{\partial P}\bigg|_S = \frac{\partial V}{\partial S}\bigg|_P
+$$
+
+$$
+\boxed{\left(\frac{\partial T}{\partial P}\right)_S = \left(\frac{\partial V}{\partial S}\right)_P} \quad \text{(Maxwell II)}
+$$
+
+#### From Helmholtz Free Energy $F(T, V)$:
+
+$$
+F = U - TS \implies dF = -S\,dT - P\,dV
+$$
+
+Here $M = -S$, $N = -P$, $x = T$, $y = V$:
+
+$$
+\frac{\partial(-S)}{\partial V}\bigg|_T = \frac{\partial(-P)}{\partial T}\bigg|_V
+$$
+
+$$
+-\left(\frac{\partial S}{\partial V}\right)_T = -\left(\frac{\partial P}{\partial T}\right)_V
+$$
+
+$$
+\boxed{\left(\frac{\partial S}{\partial V}\right)_T = \left(\frac{\partial P}{\partial T}\right)_V} \quad \text{(Maxwell III)}
+$$
+
+#### From Gibbs Free Energy $G(T, P)$:
+
+$$
+G = H - TS \implies dG = -S\,dT + V\,dP
+$$
+
+Here $M = -S$, $N = V$, $x = T$, $y = P$:
+
+$$
+\frac{\partial(-S)}{\partial P}\bigg|_T = \frac{\partial V}{\partial T}\bigg|_P
+$$
+
+$$
+\boxed{-\left(\frac{\partial S}{\partial P}\right)_T = \left(\frac{\partial V}{\partial T}\right)_P} \quad \text{(Maxwell IV)}
+$$
+
+#### Summary Table
+
+| Potential | Natural Variables | Maxwell Relation |
+|-----------|------------------|-----------------|
+| $U(S,V)$ | $dU = T\,dS - P\,dV$ | $(\partial T/\partial V)_S = -(\partial P/\partial S)_V$ |
+| $H(S,P)$ | $dH = T\,dS + V\,dP$ | $(\partial T/\partial P)_S = (\partial V/\partial S)_P$ |
+| $F(T,V)$ | $dF = -S\,dT - P\,dV$ | $(\partial S/\partial V)_T = (\partial P/\partial T)_V$ |
+| $G(T,P)$ | $dG = -S\,dT + V\,dP$ | $-(\partial S/\partial P)_T = (\partial V/\partial T)_P$ |
+
+**Mnemonic (the "thermodynamic square"):** Arrange $S, V, T, P$ at the corners of a square with potentials on the sides. The Maxwell relations follow from reading around the square with appropriate signs.
+
+</details>
+
+---
+
+### Example 8.2 — Compute $C_P - C_V$ for Ideal Gas and van der Waals Gas
+
+**Problem.** (a) Derive the general relation $C_P - C_V = -T\frac{[(\partial P/\partial T)_V]^2}{(\partial P/\partial V)_T}$. (b) Evaluate for an ideal gas. (c) Evaluate for a van der Waals gas.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): General Derivation
+
+Start from the fundamental result (Theorem 5.3.3):
+
+$$
+C_P - C_V = TV\alpha^2/\kappa_T
+$$
+
+where $\alpha = \frac{1}{V}(\partial V/\partial T)_P$ and $\kappa_T = -\frac{1}{V}(\partial V/\partial P)_T$.
+
+We can rewrite this using the triple product rule. From $P = P(T, V)$:
+
+$$
+\left(\frac{\partial V}{\partial T}\right)_P = -\frac{(\partial P/\partial T)_V}{(\partial P/\partial V)_T}
+$$
+
+Therefore:
+
+$$
+\alpha = \frac{1}{V}\left(\frac{\partial V}{\partial T}\right)_P = -\frac{1}{V}\frac{(\partial P/\partial T)_V}{(\partial P/\partial V)_T}
+$$
+
+$$
+\kappa_T = -\frac{1}{V}\left(\frac{\partial V}{\partial P}\right)_T = -\frac{1}{V}\frac{1}{(\partial P/\partial V)_T}
+$$
+
+Substituting into $C_P - C_V = TV\alpha^2/\kappa_T$:
+
+$$
+C_P - C_V = TV \cdot \frac{1}{V^2}\frac{[(\partial P/\partial T)_V]^2}{[(\partial P/\partial V)_T]^2} \cdot \frac{1}{-\frac{1}{V}\frac{1}{(\partial P/\partial V)_T}}
+$$
+
+$$
+= TV \cdot \frac{[(\partial P/\partial T)_V]^2}{V^2(\partial P/\partial V)_T^2} \cdot \frac{-V(\partial P/\partial V)_T}{1}
+$$
+
+$$
+= \frac{T[(\partial P/\partial T)_V]^2}{(\partial P/\partial V)_T^2} \cdot (-(\partial P/\partial V)_T)
+$$
+
+$$
+= -T\frac{[(\partial P/\partial T)_V]^2}{(\partial P/\partial V)_T}
+$$
+
+$$
+\boxed{C_P - C_V = -T\frac{[(\partial P/\partial T)_V]^2}{(\partial P/\partial V)_T}}
+$$
+
+Note: Since $(\partial P/\partial V)_T \lt  0$ for any stable system (mechanical stability), we have $C_P - C_V \gt  0$ always.
+
+#### Part (b): Ideal Gas
+
+For $PV = nRT$: $P = nRT/V$.
+
+$$
+\left(\frac{\partial P}{\partial T}\right)_V = \frac{nR}{V}
+$$
+
+$$
+\left(\frac{\partial P}{\partial V}\right)_T = -\frac{nRT}{V^2}
+$$
+
+$$
+C_P - C_V = -T\frac{(nR/V)^2}{-nRT/V^2} = -T\frac{n^2R^2/V^2}{-nRT/V^2} = -T \cdot \frac{n^2R^2}{V^2} \cdot \frac{-V^2}{nRT} = nR
+$$
+
+$$
+\boxed{C_P - C_V = nR} \quad \text{(ideal gas)}
+$$
+
+This is the famous Mayer relation.
+
+#### Part (c): Van der Waals Gas
+
+For 1 mole: $P = \frac{RT}{V-b} - \frac{a}{V^2}$.
+
+$$
+\left(\frac{\partial P}{\partial T}\right)_V = \frac{R}{V-b}
+$$
+
+$$
+\left(\frac{\partial P}{\partial V}\right)_T = -\frac{RT}{(V-b)^2} + \frac{2a}{V^3}
+$$
+
+$$
+C_P - C_V = -T\frac{[R/(V-b)]^2}{-RT/(V-b)^2 + 2a/V^3}
+$$
+
+$$
+= -T\frac{R^2/(V-b)^2}{-RT/(V-b)^2 + 2a/V^3}
+$$
+
+$$
+= \frac{TR^2/(V-b)^2}{RT/(V-b)^2 - 2a/V^3}
+$$
+
+$$
+= \frac{R^2T}{RT - 2a(V-b)^2/V^3}
+$$
+
+$$
+\boxed{C_P - C_V = \frac{R}{1 - \frac{2a(V-b)^2}{RTV^3}}} \quad \text{(van der Waals, 1 mol)}
+$$
+
+**Analysis:** 
+- When $a = 0$ and $b = 0$: reduces to $R$ (ideal gas). ✓
+- For real gases at moderate conditions: $2a(V-b)^2/(RTV^3) \ll 1$, so $C_P - C_V \approx R(1 + 2a(V-b)^2/(RTV^3))$ — slightly larger than $R$.
+- Near the critical point: $(\partial P/\partial V)_T \to 0$, so $C_P - C_V \to \infty$. This divergence of $C_P$ at the critical point is a real physical effect observed experimentally.
+
+</details>
+
+---
+
+### Example 8.3 — Joule-Thomson Coefficient: Derivation and Application
+
+**Problem.** (a) Derive the general expression for the Joule-Thomson coefficient $\mu_{JT} = (\partial T/\partial P)_H$. (b) Show that $\mu_{JT} = 0$ for an ideal gas. (c) Compute $\mu_{JT}$ for a van der Waals gas and find the inversion temperature.
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): General Expression
+
+The Joule-Thomson coefficient describes the temperature change during a throttling process (constant enthalpy):
+
+$$
+\mu_{JT} = \left(\frac{\partial T}{\partial P}\right)_H
+$$
+
+Start from $dH = T\,dS + V\,dP$. At constant $H$ ($dH = 0$):
+
+$$
+0 = T\,dS + V\,dP \implies dS = -\frac{V}{T}\,dP \quad \text{(at constant } H\text{)}
+$$
+
+Also, from $S = S(T, P)$:
+
+$$
+dS = \left(\frac{\partial S}{\partial T}\right)_P dT + \left(\frac{\partial S}{\partial P}\right)_T dP = \frac{C_P}{T}\,dT + \left(\frac{\partial S}{\partial P}\right)_T dP
+$$
+
+At constant $H$, equate the two expressions for $dS$:
+
+$$
+\frac{C_P}{T}\,dT + \left(\frac{\partial S}{\partial P}\right)_T dP = -\frac{V}{T}\,dP
+$$
+
+$$
+\frac{C_P}{T}\left(\frac{\partial T}{\partial P}\right)_H = -\frac{V}{T} - \left(\frac{\partial S}{\partial P}\right)_T
+$$
+
+Using Maxwell IV: $(\partial S/\partial P)_T = -(\partial V/\partial T)_P$:
+
+$$
+\frac{C_P}{T}\mu_{JT} = -\frac{V}{T} + \left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+$$
+\mu_{JT} = \frac{1}{C_P}\left[T\left(\frac{\partial V}{\partial T}\right)_P - V\right]
+$$
+
+$$
+\boxed{\mu_{JT} = \frac{V}{C_P}(T\alpha - 1)}
+$$
+
+where $\alpha = \frac{1}{V}(\partial V/\partial T)_P$ is the thermal expansion coefficient.
+
+#### Part (b): Ideal Gas
+
+For an ideal gas: $V = nRT/P$, so $(\partial V/\partial T)_P = nR/P = V/T$.
+
+$$
+\mu_{JT} = \frac{1}{C_P}\left[T \cdot \frac{V}{T} - V\right] = \frac{1}{C_P}[V - V] = 0
+$$
+
+An ideal gas neither heats nor cools during throttling. This is because $H = H(T)$ only for an ideal gas — enthalpy is independent of pressure.
+
+#### Part (c): Van der Waals Gas
+
+For 1 mole of van der Waals gas: $P = RT/(V-b) - a/V^2$.
+
+We need $(\partial V/\partial T)_P$. Using the triple product rule:
+
+$$
+\left(\frac{\partial V}{\partial T}\right)_P = -\frac{(\partial P/\partial T)_V}{(\partial P/\partial V)_T} = -\frac{R/(V-b)}{-RT/(V-b)^2 + 2a/V^3}
+$$
+
+$$
+= \frac{R/(V-b)}{RT/(V-b)^2 - 2a/V^3}
+$$
+
+For the Joule-Thomson coefficient:
+
+$$
+\mu_{JT} = \frac{1}{C_P}\left[\frac{TR/(V-b)}{RT/(V-b)^2 - 2a/V^3} - V\right]
+$$
+
+This is exact but complex. For a simpler result, use the approximation $V \gg b$ (low density):
+
+$$
+\left(\frac{\partial V}{\partial T}\right)_P \approx \frac{R/V}{RT/V^2 - 2a/V^3} = \frac{RV}{RT - 2a/V}
+$$
+
+$$
+T\left(\frac{\partial V}{\partial T}\right)_P - V \approx \frac{RTV}{RT - 2a/V} - V = V\left[\frac{RT}{RT - 2a/V} - 1\right] = V\frac{2a/V}{RT - 2a/V} \approx \frac{2a}{RT}
+$$
+
+(keeping only first-order corrections). Also, to first order in $b$:
+
+$$
+T\left(\frac{\partial V}{\partial T}\right)_P - V \approx \frac{2a}{RT} - b
+$$
+
+Therefore:
+
+$$
+\boxed{\mu_{JT} \approx \frac{1}{C_P}\left(\frac{2a}{RT} - b\right)} \quad \text{(van der Waals, low density)}
+$$
+
+**Inversion temperature:** $\mu_{JT} = 0$ when:
+
+$$
+\frac{2a}{RT_i} - b = 0 \implies T_i = \frac{2a}{Rb}
+$$
+
+$$
+\boxed{T_{\text{inv}} = \frac{2a}{Rb}}
+$$
+
+- For $T \lt  T_{\text{inv}}$: $\mu_{JT} \gt  0$ (gas cools upon throttling — useful for liquefaction).
+- For $T \gt  T_{\text{inv}}$: $\mu_{JT} \lt  0$ (gas heats upon throttling).
+
+**Example:** For nitrogen, $a = 1.39\,\text{L}^2\text{·atm/mol}^2$, $b = 0.0391\,\text{L/mol}$:
+
+$$
+T_{\text{inv}} = \frac{2 \times 1.39}{0.08206 \times 0.0391} = \frac{2.78}{0.003209} = 866\,\text{K}
+$$
+
+Since room temperature (300 K) $\lt  T_{\text{inv}}$, nitrogen cools upon throttling — this is the basis of the Linde liquefaction process.
+
+</details>
+
+---
+
+### Example 8.4 — Gibbs-Helmholtz Equation and Temperature Dependence of Equilibrium
+
+**Problem.** (a) Derive the Gibbs-Helmholtz equation: $\frac{\partial(G/T)}{\partial T}\bigg|_P = -\frac{H}{T^2}$. (b) Use it to show how the equilibrium constant $K$ depends on temperature (van't Hoff equation).
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+#### Part (a): Gibbs-Helmholtz Equation
+
+Start from $G = H - TS$. We want $\partial(G/T)/\partial T$ at constant $P$.
+
+$$
+\frac{\partial}{\partial T}\left(\frac{G}{T}\right)_P = \frac{1}{T}\left(\frac{\partial G}{\partial T}\right)_P - \frac{G}{T^2}
+$$
+
+From $dG = -S\,dT + V\,dP$: $(\partial G/\partial T)_P = -S$.
+
+$$
+\frac{\partial}{\partial T}\left(\frac{G}{T}\right)_P = \frac{-S}{T} - \frac{G}{T^2} = \frac{-ST - G}{T^2} = \frac{-(G + TS)}{T^2} = \frac{-H}{T^2}
+$$
+
+$$
+\boxed{\frac{\partial(G/T)}{\partial T}\bigg|_P = -\frac{H}{T^2}}
+$$
+
+#### Part (b): Van't Hoff Equation
+
+For a chemical reaction at equilibrium: $\Delta G° = -RT\ln K$, so $\Delta G°/T = -R\ln K$.
+
+Apply the Gibbs-Helmholtz equation to $\Delta G°$:
+
+$$
+\frac{\partial(\Delta G°/T)}{\partial T}\bigg|_P = -\frac{\Delta H°}{T^2}
+$$
+
+$$
+\frac{\partial(-R\ln K)}{\partial T} = -\frac{\Delta H°}{T^2}
+$$
+
+$$
+\boxed{\frac{d\ln K}{dT} = \frac{\Delta H°}{RT^2}}
+$$
+
+This is the **van't Hoff equation**. For an exothermic reaction ($\Delta H° \lt  0$): $d\ln K/dT \lt  0$, so $K$ decreases with temperature (Le Chatelier's principle). For endothermic ($\Delta H° \gt  0$): $K$ increases with temperature.
+
+</details>
+
+---
+
+## 📘 9. Appendix: Extended Derivations & Special Cases
+
+### Appendix 9.1 — Derivation of Maxwell Relations via Mixed Partials of $G$
+
+We present a detailed derivation focusing on the Gibbs potential $G(T, P)$, which is the most experimentally relevant potential (since $T$ and $P$ are the natural control variables in the laboratory).
+
+**Starting point.** The Gibbs free energy is defined as:
+
+$$
+G \equiv U + PV - TS = H - TS
+$$
+
+Taking the total differential:
+
+$$
+dG = dU + P\,dV + V\,dP - T\,dS - S\,dT
+$$
+
+Substituting $dU = T\,dS - P\,dV$ (First Law for reversible processes):
+
+$$
+dG = (T\,dS - P\,dV) + P\,dV + V\,dP - T\,dS - S\,dT
+$$
+
+$$
+dG = -S\,dT + V\,dP
+$$
+
+This identifies the natural variables of $G$ as $(T, P)$ and gives:
+
+$$
+S = -\left(\frac{\partial G}{\partial T}\right)_P, \qquad V = \left(\frac{\partial G}{\partial P}\right)_T
+$$
+
+**The Maxwell relation from $G$.** Since $G$ is a state function (exact differential), the mixed second partial derivatives must be equal:
+
+$$
+\frac{\partial^2 G}{\partial P\,\partial T} = \frac{\partial^2 G}{\partial T\,\partial P}
+$$
+
+Computing each side:
+
+$$
+\frac{\partial}{\partial P}\left(\frac{\partial G}{\partial T}\right)_P\bigg|_T = \frac{\partial(-S)}{\partial P}\bigg|_T = -\left(\frac{\partial S}{\partial P}\right)_T
+$$
+
+$$
+\frac{\partial}{\partial T}\left(\frac{\partial G}{\partial P}\right)_T\bigg|_P = \frac{\partial V}{\partial T}\bigg|_P = \left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+Equating:
+
+$$
+-\left(\frac{\partial S}{\partial P}\right)_T = \left(\frac{\partial V}{\partial T}\right)_P
+$$
+
+$$
+\boxed{\left(\frac{\partial S}{\partial P}\right)_T = -\left(\frac{\partial V}{\partial T}\right)_P}
+$$
+
+**Physical content.** This relation connects an entropy derivative (hard to measure directly) to a volume derivative (easy to measure — it's the thermal expansion coefficient $\alpha = V^{-1}(\partial V/\partial T)_P$):
+
+$$
+\left(\frac{\partial S}{\partial P}\right)_T = -V\alpha
+$$
+
+For most materials, $\alpha > 0$ (they expand when heated), so entropy decreases with increasing pressure at constant temperature. Physically: higher pressure constrains the available configurations, reducing entropy.
+
+**Application: Entropy of rubber.** Rubber has $\alpha < 0$ (it contracts when heated at constant tension). The analogous Maxwell relation for a rubber band (replacing $P \to -f$, $V \to L$) gives $(\partial S/\partial f)_T = -(\partial L/\partial T)_f > 0$: stretching rubber increases its entropy! This is because rubber elasticity is entropic (stretching aligns polymer chains, but the relevant Maxwell relation shows the full thermodynamic consistency).
+
+**Reference:** Callen, *Thermodynamics*, Ch. 7; Kittel & Kroemer, *Thermal Physics*, Ch. 5; David Tong, *Statistical Mechanics* Notes §4.
+
+---
+
+### Appendix 9.2 — The TdS Equations: A Systematic Framework
+
+The "TdS equations" express entropy changes in terms of measurable quantities ($C_P$, $C_V$, $\alpha$, $\kappa_T$). They are the workhorses of applied thermodynamics.
+
+**First TdS equation** (independent variables $T, V$):
+
+$$
+T\,dS = C_V\,dT + T\left(\frac{\partial P}{\partial T}\right)_V dV
+$$
+
+**Derivation:** From $S = S(T, V)$:
+
+$$
+dS = \left(\frac{\partial S}{\partial T}\right)_V dT + \left(\frac{\partial S}{\partial V}\right)_T dV
+$$
+
+Multiply by $T$: $T\,dS = T(\partial S/\partial T)_V\,dT + T(\partial S/\partial V)_T\,dV$.
+
+- First term: $T(\partial S/\partial T)_V = C_V$ (definition of heat capacity at constant $V$).
+- Second term: Use Maxwell III: $(\partial S/\partial V)_T = (\partial P/\partial T)_V$.
+
+$$
+\boxed{T\,dS = C_V\,dT + T\left(\frac{\partial P}{\partial T}\right)_V dV}
+$$
+
+**Second TdS equation** (independent variables $T, P$):
+
+$$
+T\,dS = C_P\,dT - T\left(\frac{\partial V}{\partial T}\right)_P dP
+$$
+
+**Derivation:** From $S = S(T, P)$:
+
+$$
+dS = \left(\frac{\partial S}{\partial T}\right)_P dT + \left(\frac{\partial S}{\partial P}\right)_T dP = \frac{C_P}{T}\,dT - \left(\frac{\partial V}{\partial T}\right)_P dP
+$$
+
+where we used Maxwell IV: $(\partial S/\partial P)_T = -(\partial V/\partial T)_P$. Multiply by $T$:
+
+$$
+\boxed{T\,dS = C_P\,dT - T\left(\frac{\partial V}{\partial T}\right)_P dP = C_P\,dT - TV\alpha\,dP}
+$$
+
+**Third TdS equation** (independent variables $P, V$):
+
+$$
+T\,dS = C_V\frac{\kappa_T}{\alpha}\,dP + C_P\frac{1}{V\alpha}\,dV
+$$
+
+This is less commonly used but follows from eliminating $dT$ between the first two equations.
+
+**Application: Adiabatic compression.** Set $dS = 0$ in the second TdS equation:
+
+$$
+0 = C_P\,dT - TV\alpha\,dP \implies \left(\frac{\partial T}{\partial P}\right)_S = \frac{TV\alpha}{C_P}
+$$
+
+For an ideal gas: $\alpha = 1/T$, $V = nRT/P$, $C_P = nC_P^{\text{mol}}$:
+
+$$
+\left(\frac{\partial T}{\partial P}\right)_S = \frac{T \cdot nRT/(PT)}{nC_P^{\text{mol}}} = \frac{nRT}{nPC_P^{\text{mol}}} = \frac{RT}{PC_P^{\text{mol}}} = \frac{V}{nC_P^{\text{mol}}/R} = \frac{(\gamma-1)T}{\gamma P}
+$$
+
+This gives the adiabatic temperature-pressure relation: $T \propto P^{(\gamma-1)/\gamma}$, consistent with $TV^{\gamma-1} = \text{const}$.
+
+**Reference:** Reif, *Fundamentals*, Ch. 5; Zemansky & Dittman, *Heat and Thermodynamics*, Ch. 9.
+
+---
+
+### Appendix 9.3 — Legendre Transforms: The Mathematical Structure Behind Thermodynamic Potentials
+
+The four thermodynamic potentials ($U$, $H$, $F$, $G$) are related by **Legendre transforms** — a mathematical operation that changes the independent variables of a function while preserving all information.
+
+**Definition.** Given a function $f(x)$ with slope $p = df/dx$, the Legendre transform is:
+
+$$
+g(p) = f(x(p)) - px(p)
+$$
+
+where $x(p)$ is obtained by inverting $p = f'(x)$. The key property: $dg = -x\,dp$ (the roles of variable and slope are exchanged).
+
+**Application to thermodynamics:**
+
+Starting from $U(S, V)$ with $T = (\partial U/\partial S)_V$ and $P = -(\partial U/\partial V)_S$:
+
+- **Legendre transform in $S$ (replace $S$ with $T$):**
+
+$$
+F = U - TS \quad \Rightarrow \quad dF = -S\,dT - P\,dV
+$$
+
+Natural variables: $(T, V)$. This is the Helmholtz free energy.
+
+- **Legendre transform in $V$ (replace $V$ with $P$):**
+
+$$
+H = U + PV \quad \Rightarrow \quad dH = T\,dS + V\,dP
+$$
+
+Natural variables: $(S, P)$. This is the enthalpy.
+
+- **Double Legendre transform (replace both $S$ and $V$):**
+
+$$
+G = U - TS + PV \quad \Rightarrow \quad dG = -S\,dT + V\,dP
+$$
+
+Natural variables: $(T, P)$. This is the Gibbs free energy.
+
+**Why Legendre transforms?** In the lab, we control $T$ and $P$ (not $S$ and $V$). The Legendre transform to $G(T, P)$ gives us a potential whose natural variables match our experimental control parameters. The equilibrium condition at constant $T, P$ is simply $dG = 0$ (minimum $G$), which is far more practical than working with $U(S, V)$.
+
+**Information preservation.** The Legendre transform is invertible — no information is lost. From $G(T, P)$ alone, we can reconstruct $U(S, V)$ completely. All four potentials contain the same thermodynamic information, just expressed in different variables.
+
+**Connection to mechanics.** The Lagrangian $L(q, \dot{q})$ and Hamiltonian $H(q, p)$ are related by a Legendre transform in $\dot{q}$: $H = p\dot{q} - L$ where $p = \partial L/\partial\dot{q}$. The mathematical structure is identical to the thermodynamic case.
+
+**Reference:** Callen, *Thermodynamics*, Ch. 5 (definitive treatment); Arnold, *Mathematical Methods of Classical Mechanics*, §14.
+
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [07 - Math and Physics Index](07---Math-and-Physics-Index)*
+
+*Previous: [5.2 - Entropy & Heat Engines](5.2---Entropy-&-Heat-Engines) | Next: [5.4 - Chemical Potential & Phase Transitions](5.4---Chemical-Potential-&-Phase-Transitions)*

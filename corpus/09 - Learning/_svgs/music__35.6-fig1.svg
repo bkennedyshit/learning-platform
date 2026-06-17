@@ -1,0 +1,128 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+    .meter{fill:#51cf66;rx:2;}
+  </style>
+  <defs>
+    <clipPath id="vu-clip">
+      <rect x="42" y="195" width="26" height="0">
+        <animate attributeName="y" dur="1.8s" repeatCount="indefinite"
+          values="195; 175; 125; 135; 145; 125; 155; 180; 125; 130; 145; 165; 195" />
+        <animate attributeName="height" dur="1.8s" repeatCount="indefinite"
+          values="0; 20; 70; 60; 50; 70; 40; 15; 70; 65; 50; 30; 0" />
+      </rect>
+    </clipPath>
+    <clipPath id="lufs-clip">
+      <rect x="102" y="195" width="26" height="0">
+        <animate attributeName="y" dur="5s" repeatCount="indefinite"
+          values="135; 145; 125; 130; 138; 135" />
+        <animate attributeName="height" dur="5s" repeatCount="indefinite"
+          values="58; 48; 68; 63; 55; 58" />
+      </rect>
+    </clipPath>
+    <clipPath id="tp-clip">
+      <rect x="157" y="195" width="26" height="0">
+        <animate attributeName="y" dur="1.2s" repeatCount="indefinite"
+          values="193; 130; 95; 115; 140; 95; 160; 110; 95; 150; 193" />
+        <animate attributeName="height" dur="1.2s" repeatCount="indefinite"
+          values="0; 63; 98; 78; 53; 98; 33; 83; 98; 43; 0" />
+      </rect>
+    </clipPath>
+  </defs>
+  <text x="360" y="22" class="title" text-anchor="middle">35.6 — Mastering &amp; Loudness: LUFS, True Peak, Limiting &amp; Distribution Targets</text>
+  <!-- Loudness meter visual -->
+  <rect x="20" y="35" width="200" height="200" class="box" rx="4"/>
+  <text x="120" y="52" class="label" text-anchor="middle" font-weight="bold">Loudness Meters</text>
+  <!-- VU meter bar -->
+  <rect x="40" y="65" width="30" height="130" fill="#1a1a1a" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" rx="2"/>
+  <g clip-path="url(#vu-clip)">
+    <rect x="42" y="155" width="26" height="38" fill="#51cf66" rx="1"/>
+    <rect x="42" y="140" width="26" height="14" fill="#ffd93d" rx="1"/>
+    <rect x="42" y="125" width="26" height="14" fill="#ff6b6b" rx="1"/>
+  </g>
+  <text x="55" y="205" class="mono" text-anchor="middle">VU</text>
+  <text x="35" y="170" class="mono" text-anchor="end">0</text>
+  <text x="35" y="145" class="mono" text-anchor="end">+3</text>
+  <text x="35" y="130" class="mono" text-anchor="end">+6</text>
+  <!-- LUFS integrated meter bar -->
+  <rect x="100" y="65" width="30" height="130" fill="#1a1a1a" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" rx="2"/>
+  <rect x="102" y="135" width="26" height="58" fill="var(--interactive-accent,#58a6ff)" rx="1" opacity="0.8" clip-path="url(#lufs-clip)"/>
+  <text x="115" y="205" class="mono" text-anchor="middle">LUFS</text>
+  <text x="95" y="140" class="mono" text-anchor="end">-14</text>
+  <text x="95" y="165" class="mono" text-anchor="end">-18</text>
+  <text x="95" y="190" class="mono" text-anchor="end">-23</text>
+  <!-- True peak meter bar -->
+  <rect x="155" y="65" width="30" height="130" fill="#1a1a1a" stroke="var(--text-muted,#8b949e)" stroke-width="0.8" rx="2"/>
+  <rect x="157" y="67" width="26" height="3" fill="#ff6b6b" rx="1" opacity="0.7">
+    <animate attributeName="opacity" dur="1.2s" repeatCount="indefinite"
+      values="0.2; 0.2; 1.0; 0.2; 0.2; 1.0; 0.2; 0.5; 1.0; 0.2; 0.2" />
+  </rect>
+  <rect x="157" y="95" width="26" height="98" fill="var(--text-muted,#8b949e)" rx="1" opacity="0.5" clip-path="url(#tp-clip)"/>
+  <text x="170" y="205" class="mono" text-anchor="middle">TP</text>
+  <text x="150" y="72" class="mono" text-anchor="end">0</text>
+  <text x="150" y="100" class="mono" text-anchor="end">-1</text>
+  <text x="150" y="130" class="mono" text-anchor="end">-3</text>
+  <text x="120" y="222" class="sub" text-anchor="middle">VU: peak · LUFS: loudness · TP: true peak</text>
+  <!-- Distribution targets -->
+  <rect x="235" y="35" width="270" height="200" class="box" rx="4"/>
+  <text x="370" y="52" class="label" text-anchor="middle" font-weight="bold">Platform Loudness Targets (2026)</text>
+  <text x="245" y="70" class="sub" font-weight="bold">Platform · Integrated LUFS · True Peak</text>
+  <line x1="235" y1="75" x2="505" y2="75" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="245" y="91" class="mono">Spotify         −14 LUFS    −1 dBTP</text>
+  <text x="245" y="107" class="mono">Apple Music     −16 LUFS    −1 dBTP</text>
+  <text x="245" y="123" class="mono">YouTube         −14 LUFS    −1 dBTP</text>
+  <text x="245" y="139" class="mono">Amazon Music    −14 LUFS    −2 dBTP</text>
+  <text x="245" y="155" class="mono">Tidal           −14 LUFS    −1 dBTP</text>
+  <text x="245" y="171" class="mono">SoundCloud      −14 LUFS    −1 dBTP</text>
+  <text x="245" y="187" class="mono">CD (redbook)    −9 LUFS     0 dBTP</text>
+  <text x="245" y="203" class="mono">Podcast         −16 LUFS    −1 dBTP</text>
+  <text x="245" y="220" class="mono">Film/TV (ATSC)  −24 LUFS    −2 dBTP</text>
+  <!-- Mastering chain -->
+  <rect x="520" y="35" width="180" height="200" class="box" rx="4"/>
+  <text x="610" y="52" class="label" text-anchor="middle" font-weight="bold">Mastering Chain</text>
+  <circle cx="526" cy="68" r="2.5" fill="var(--interactive-accent,#58a6ff)" opacity="0.8">
+    <animate attributeName="cy" dur="8s" repeatCount="indefinite"
+      values="68; 94; 120; 146; 172; 198; 224; 224"
+      keyTimes="0; 0.14; 0.28; 0.42; 0.56; 0.70; 0.84; 1" />
+    <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+      values="0.8; 0.8; 0.8; 0.8; 0.8; 0.8; 0.8; 0"
+      keyTimes="0; 0.14; 0.28; 0.42; 0.56; 0.70; 0.84; 1" />
+  </circle>
+  <text x="530" y="68" class="sub">1. Reference comparison</text>
+  <text x="530" y="80" class="sub">   (match genre, level)</text>
+  <text x="530" y="94" class="sub">2. Linear-phase EQ</text>
+  <text x="530" y="106" class="sub">   (correct tonal balance)</text>
+  <text x="530" y="120" class="sub">3. MS processing</text>
+  <text x="530" y="132" class="sub">   (tighten mid, widen sides)</text>
+  <text x="530" y="146" class="sub">4. Bus compression (glue)</text>
+  <text x="530" y="158" class="sub">   ratio 1.5–2:1, slow A/R</text>
+  <text x="530" y="172" class="sub">5. Saturation/exciter</text>
+  <text x="530" y="184" class="sub">   (harmonic richness)</text>
+  <text x="530" y="198" class="sub">6. Stereo imager</text>
+  <text x="530" y="210" class="sub">   (LP to mono ≤80 Hz)</text>
+  <text x="530" y="224" class="sub">7. Limiter (ceiling −1 dBTP)</text>
+  <!-- Bottom: mastering workflow + codec impact -->
+  <rect x="20" y="248" width="680" height="155" class="box" rx="4"/>
+  <text x="360" y="265" class="label" text-anchor="middle" font-weight="bold">Mastering Workflow, Codec Impact &amp; Delivery Formats</text>
+  <text x="30" y="282" class="sub" font-weight="bold">Pre-master checklist:</text>
+  <text x="30" y="296" class="sub">• Export 24-bit/48kHz WAV from DAW with 3–6 dB headroom (peaks at −6 dBFS)</text>
+  <text x="30" y="310" class="sub">• Remove all processing from master bus before sending to mastering engineer</text>
+  <text x="30" y="324" class="sub">• Include reference track (commercial release in same genre)</text>
+  <text x="30" y="342" class="sub" font-weight="bold">Codec impact (what streaming does to your master):</text>
+  <text x="30" y="356" class="sub">• Spotify: AAC 256 kbps (normal quality) / OGG Vorbis 320 kbps (very high)</text>
+  <text x="30" y="370" class="sub">• Apple Music: ALAC lossless + Dolby Atmos spatial (24-bit/192kHz option)</text>
+  <text x="30" y="384" class="sub">• MP3 320 kbps: still audible artifacts on cymbals and transients</text>
+  <text x="360" y="282" class="sub" font-weight="bold">Delivery formats:</text>
+  <text x="360" y="296" class="sub">WAV 24-bit/44.1kHz: standard distribution master</text>
+  <text x="360" y="310" class="sub">WAV 24-bit/48kHz: video/sync</text>
+  <text x="360" y="324" class="sub">DDP image: CD manufacturing</text>
+  <text x="360" y="342" class="sub" font-weight="bold">Free mastering tools:</text>
+  <text x="360" y="356" class="sub">SPAN (Voxengo, free): real-time spectrum</text>
+  <text x="360" y="370" class="sub">Youlean Loudness Meter 2 (free): LUFS/LRA</text>
+  <text x="360" y="384" class="sub">Ozone Elements: basic mastering chain</text>
+  <text x="360" y="398" class="sub">LandR / eMastered: AI mastering (quick demos)</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;">
+  <defs>
+    <marker id="bp-fwd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+    <marker id="bp-bwd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .bp-node { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .bp-node:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .bp-fwd-line { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.8; fill: none; stroke-dasharray: 6 4; animation: fwdFlow 1.5s linear infinite; }
+    .bp-bwd-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6 4; animation: bwdFlow 1.5s linear infinite; }
+    @keyframes fwdFlow { to { stroke-dashoffset: -10; } }
+    @keyframes bwdFlow { to { stroke-dashoffset: 10; } }
+    .bp-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .bp-accent { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+  </style>
+  <!-- Layer nodes -->
+  <rect x="30" y="130" width="70" height="40" rx="6" class="bp-node"/>
+  <text x="65" y="155" class="bp-label">x (input)</text>
+  <rect x="150" y="130" width="70" height="40" rx="6" class="bp-node"/>
+  <text x="185" y="155" class="bp-label">z₁=W₁x+b₁</text>
+  <rect x="270" y="130" width="70" height="40" rx="6" class="bp-node"/>
+  <text x="305" y="155" class="bp-label">h₁=σ(z₁)</text>
+  <rect x="390" y="130" width="70" height="40" rx="6" class="bp-node"/>
+  <text x="425" y="155" class="bp-label">z₂=W₂h₁+b₂</text>
+  <rect x="510" y="130" width="60" height="40" rx="6" class="bp-node"/>
+  <text x="540" y="155" class="bp-label">L(z₂,y)</text>
+  <!-- Forward arrows -->
+  <line x1="100" y1="150" x2="150" y2="150" class="bp-fwd-line" marker-end="url(#bp-fwd)"/>
+  <line x1="220" y1="150" x2="270" y2="150" class="bp-fwd-line" marker-end="url(#bp-fwd)"/>
+  <line x1="340" y1="150" x2="390" y2="150" class="bp-fwd-line" marker-end="url(#bp-fwd)"/>
+  <line x1="460" y1="150" x2="510" y2="150" class="bp-fwd-line" marker-end="url(#bp-fwd)"/>
+  <text x="300" y="120" class="bp-label">→ Forward Pass →</text>
+  <!-- Backward arrows (below) -->
+  <line x1="510" y1="185" x2="460" y2="185" class="bp-bwd-line" marker-end="url(#bp-bwd)"/>
+  <line x1="390" y1="185" x2="340" y2="185" class="bp-bwd-line" marker-end="url(#bp-bwd)"/>
+  <line x1="270" y1="185" x2="220" y2="185" class="bp-bwd-line" marker-end="url(#bp-bwd)"/>
+  <line x1="150" y1="185" x2="100" y2="185" class="bp-bwd-line" marker-end="url(#bp-bwd)"/>
+  <text x="300" y="210" class="bp-accent">← Backward Pass (∂L/∂·) ←</text>
+  <!-- Gradient labels -->
+  <text x="485" y="200" class="bp-accent">∂L/∂z₂</text>
+  <text x="365" y="200" class="bp-accent">∂L/∂h₁</text>
+  <text x="245" y="200" class="bp-accent">∂L/∂z₁</text>
+  <text x="125" y="200" class="bp-accent">∂L/∂x</text>
+  <!-- Weight gradient branches -->
+  <line x1="185" y1="170" x2="185" y2="250" class="bp-bwd-line"/>
+  <text x="185" y="270" class="bp-accent">∂L/∂W₁ = (∂L/∂z₁)xᵀ</text>
+  <line x1="425" y1="170" x2="425" y2="290" class="bp-bwd-line"/>
+  <text x="425" y="310" class="bp-accent">∂L/∂W₂ = (∂L/∂z₂)h₁ᵀ</text>
+  <!-- Info box -->
+  <rect x="180" y="30" width="250" height="55" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="305" y="50" class="bp-accent">Chain Rule</text>
+  <text x="305" y="70" class="bp-label">∂L/∂W₁ = (∂L/∂z₂)(∂z₂/∂h₁)(∂h₁/∂z₁)(∂z₁/∂W₁)</text>
+</svg>

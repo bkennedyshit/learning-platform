@@ -1,0 +1,119 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 800px; height: auto;">
+  <style>
+    .title { font-family: 'Outfit', 'Inter', system-ui, sans-serif; font-size: 22px; fill: var(--text-normal, #c9d1d9); font-weight: 800; letter-spacing: -0.5px; }
+    .subtitle { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; fill: var(--text-muted, #8b949e); }
+    .vertex-title { font-family: 'Outfit', sans-serif; font-size: 16px; fill: var(--interactive-accent, #58a6ff); font-weight: 800; letter-spacing: 0.5px; }
+    .card-title { font-family: 'Outfit', sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .card-text { font-family: 'Inter', system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .card-bold { font-weight: bold; fill: var(--text-normal, #c9d1d9); }
+    .triangle-edge { stroke: var(--text-accent, #58a6ff); stroke-width: 2; fill: none; opacity: 0.4; }
+    .triangle-pulse { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; fill: none; stroke-dasharray: 10,15; }
+    .pulse-dot { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .glass-card { stroke: var(--text-muted, #8b949e); stroke-opacity: 0.3; stroke-width: 1; fill: var(--background-secondary, #161b22); rx: 8; opacity: 0.95; }
+    .glass-card:hover { stroke: var(--interactive-accent, #58a6ff); stroke-opacity: 0.8; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .center-circle { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: var(--background-primary, #0d1117); }
+    .center-text { font-family: 'Outfit', sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .glow-effect { filter: drop-shadow(0 0 8px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="ethos-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="var(--background-secondary, #161b22)" stop-opacity="0.9"/>
+    </linearGradient>
+    <radialGradient id="center-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--interactive-accent, #58a6ff)" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="var(--background-primary, #0d1117)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="var(--background-primary, #0d1117)" rx="12"/>
+
+  <!-- Title -->
+  <text x="40" y="45" class="title">Aristotle's Rhetorical Triangle</text>
+  <text x="40" y="65" class="subtitle">The dynamic equilibrium of Ethos, Pathos, and Logos in persuasive writing</text>
+
+  <!-- Radial Glow in Center -->
+  <circle cx="400" cy="260" r="160" fill="url(#center-glow)" />
+
+  <!-- The Triangle Edges (Base Lines) -->
+  <polygon points="400,110 270,335 530,335" class="triangle-edge"/>
+
+  <!-- Animated Active Triangle Path -->
+  <polygon points="400,110 270,335 530,335" class="triangle-pulse">
+    <animate attributeName="stroke-dashoffset" values="0; 50" dur="3s" repeatCount="indefinite" />
+  </polygon>
+
+  <!-- SMIL Pulse Dots travelling along the edges -->
+  <circle r="5" class="pulse-dot">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 400 110 L 270 335 L 530 335 Z" />
+  </circle>
+  <circle r="5" class="pulse-dot">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 270 335 L 530 335 L 400 110 Z" />
+  </circle>
+
+  <!-- Center Circle (The Message/Synthesis Point) -->
+  <g class="glow-effect">
+    <circle cx="400" cy="260" r="45" class="center-circle"/>
+    <!-- Pulsating ring -->
+    <circle cx="400" cy="260" r="45" stroke="var(--interactive-accent)" stroke-width="1.5" fill="none" opacity="0.8">
+      <animate attributeName="r" values="45; 58; 45" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8; 0; 0.8" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="400" y="258" class="center-text" text-anchor="middle">THE</text>
+    <text x="400" y="272" class="center-text" text-anchor="middle" fill="var(--text-accent)">MESSAGE</text>
+  </g>
+
+  <!-- Vertex Labels (Glow Overlay) -->
+  <circle cx="400" cy="110" r="8" fill="var(--interactive-accent, #58a6ff)" filter="drop-shadow(0 0 6px var(--interactive-accent))"/>
+  <circle cx="270" cy="335" r="8" fill="var(--interactive-accent, #58a6ff)" filter="drop-shadow(0 0 6px var(--interactive-accent))"/>
+  <circle cx="530" cy="335" r="8" fill="var(--interactive-accent, #58a6ff)" filter="drop-shadow(0 0 6px var(--interactive-accent))"/>
+
+  <!-- Interactive Vertex Title Text -->
+  <text x="400" y="90" class="vertex-title" text-anchor="middle">ETHOS</text>
+  <text x="250" y="350" class="vertex-title" text-anchor="end">LOGOS</text>
+  <text x="550" y="350" class="vertex-title" text-anchor="start">PATHOS</text>
+
+  <!-- Interactive/Glassmorphic Cards for Details -->
+
+  <!-- Top Card: Ethos (Speaker/Writer) -->
+  <g class="glass-card" transform="translate(285, 30)">
+    <rect width="230" height="95" class="glass-card"/>
+    <text x="15" y="22" class="card-title" fill="var(--interactive-accent)">ETHOS • Credibility</text>
+    <text x="15" y="42" class="card-text"><tspan class="card-bold">Source:</tspan> Writer/Speaker Character</text>
+    <text x="15" y="57" class="card-text"><tspan class="card-bold">Mechanism:</tspan> Expertise, Trust, Fairness</text>
+    <text x="15" y="72" class="card-text"><tspan class="card-bold">Fails when:</tspan> Obvious bias, errors, ad hominems</text>
+    <text x="15" y="85" class="card-text" fill="var(--text-accent)" font-style="italic">"Why should we listen to you?"</text>
+  </g>
+
+  <!-- Left Card: Logos (Text/Subject) -->
+  <g class="glass-card" transform="translate(30, 240)">
+    <rect width="230" height="95" class="glass-card"/>
+    <text x="15" y="22" class="card-title" fill="var(--interactive-accent)">LOGOS • Logic</text>
+    <text x="15" y="42" class="card-text"><tspan class="card-bold">Source:</tspan> Text/Logical Argument</text>
+    <text x="15" y="57" class="card-text"><tspan class="card-bold">Mechanism:</tspan> Data, Evidence, Induction/Deduction</text>
+    <text x="15" y="72" class="card-text"><tspan class="card-bold">Fails when:</tspan> Fallacies, cherry-picking, non sequiturs</text>
+    <text x="15" y="85" class="card-text" fill="var(--text-accent)" font-style="italic">"How does that make rational sense?"</text>
+  </g>
+
+  <!-- Right Card: Pathos (Audience/Reader) -->
+  <g class="glass-card" transform="translate(540, 240)">
+    <rect width="230" height="95" class="glass-card"/>
+    <text x="15" y="22" class="card-title" fill="var(--interactive-accent)">PATHOS • Emotion</text>
+    <text x="15" y="42" class="card-text"><tspan class="card-bold">Source:</tspan> Audience/Reader Connection</text>
+    <text x="15" y="57" class="card-text"><tspan class="card-bold">Mechanism:</tspan> Values, Stories, Vivid Imagery, Identity</text>
+    <text x="15" y="72" class="card-text"><tspan class="card-bold">Fails when:</tspan> Over-manipulation, irrelevant outrage</text>
+    <text x="15" y="85" class="card-text" fill="var(--text-accent)" font-style="italic">"Why should we care about this?"</text>
+  </g>
+
+  <!-- Informative footer card -->
+  <rect x="40" y="445" width="720" height="35" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-opacity="0.3"/>
+  <text x="400" y="467" font-family="'Inter', sans-serif" font-size="12" fill="var(--text-normal, #c9d1d9)" text-anchor="middle">
+    Persuasion is maximized at the <tspan font-weight="bold" fill="var(--interactive-accent)">Centroid</tspan> — balancing credibility, logic, and emotional investment.
+  </text>
+
+  <!-- Interactive Instruction -->
+  <text x="760" y="45" font-family="'Inter', sans-serif" font-size="10" fill="var(--text-muted, #8b949e)" text-anchor="end">Hover over panels to inspect each appeal • Path pulse illustrates continuous logical integration</text>
+</svg>

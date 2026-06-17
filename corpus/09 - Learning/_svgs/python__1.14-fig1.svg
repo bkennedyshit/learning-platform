@@ -1,0 +1,68 @@
+<svg viewBox="0 0 650 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 650px; height: auto;">
+  <style>
+    .model-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.2s; cursor: pointer; }
+    .model-box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; marker-end: url(#conc-arr); }
+  </style>
+  <defs><marker id="conc-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 2 L 7 5 L 0 8 z" fill="var(--interactive-accent, #58a6ff)"/></marker></defs>
+
+  <text x="325" y="20" class="title">Concurrency Models — From Threads to Actors</text>
+
+  <!-- Shared Memory -->
+  <rect x="30" y="50" width="180" height="100" class="model-box"/>
+  <text x="120" y="70" class="label">Shared Memory</text>
+  <text x="120" y="90" class="detail">threading + locks</text>
+  <text x="120" y="105" class="detail">Race conditions possible</text>
+  <text x="120" y="120" class="detail">Fine-grained control</text>
+  <text x="120" y="135" class="detail">Python: threading module</text>
+
+  <!-- Message Passing -->
+  <rect x="235" y="50" width="180" height="100" class="model-box"/>
+  <text x="325" y="70" class="label">Message Passing</text>
+  <text x="325" y="90" class="detail">Queues, channels, pipes</text>
+  <text x="325" y="105" class="detail">No shared state</text>
+  <text x="325" y="120" class="detail">CSP / Go-style</text>
+  <text x="325" y="135" class="detail">Python: multiprocessing.Queue</text>
+
+  <!-- Actor Model -->
+  <rect x="440" y="50" width="180" height="100" class="model-box"/>
+  <text x="530" y="70" class="label">Actor Model</text>
+  <text x="530" y="90" class="detail">Isolated actors + mailboxes</text>
+  <text x="530" y="105" class="detail">Location transparent</text>
+  <text x="530" y="120" class="detail">Erlang/Akka style</text>
+  <text x="530" y="135" class="detail">Python: ray, dramatiq</text>
+
+  <!-- Event-Driven -->
+  <rect x="30" y="190" width="180" height="100" class="model-box"/>
+  <text x="120" y="210" class="label">Event Loop</text>
+  <text x="120" y="230" class="detail">Single-threaded async</text>
+  <text x="120" y="245" class="detail">Cooperative scheduling</text>
+  <text x="120" y="260" class="detail">No parallelism</text>
+  <text x="120" y="275" class="detail">Python: asyncio</text>
+
+  <!-- Structured Concurrency -->
+  <rect x="235" y="190" width="180" height="100" class="model-box"/>
+  <text x="325" y="210" class="label">Structured Concurrency</text>
+  <text x="325" y="230" class="detail">TaskGroup / nursery</text>
+  <text x="325" y="245" class="detail">Scoped lifetimes</text>
+  <text x="325" y="260" class="detail">Error propagation</text>
+  <text x="325" y="275" class="detail">Python: asyncio.TaskGroup, trio</text>
+
+  <!-- Data Parallelism -->
+  <rect x="440" y="190" width="180" height="100" class="model-box"/>
+  <text x="530" y="210" class="label">Data Parallelism</text>
+  <text x="530" y="230" class="detail">Same op on partitioned data</text>
+  <text x="530" y="245" class="detail">SPMD pattern</text>
+  <text x="530" y="260" class="detail">GPU / multi-GPU</text>
+  <text x="530" y="275" class="detail">Python: torch.distributed</text>
+
+  <!-- Connections -->
+  <line x1="210" y1="100" x2="235" y2="100" class="conn"/>
+  <line x1="415" y1="100" x2="440" y2="100" class="conn"/>
+  <line x1="120" y1="150" x2="120" y2="190" class="conn"/>
+  <line x1="325" y1="150" x2="325" y2="190" class="conn"/>
+  <line x1="530" y1="150" x2="530" y2="190" class="conn"/>
+</svg>

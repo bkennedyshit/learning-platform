@@ -1,0 +1,46 @@
+<svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;height:auto;">
+  <style>
+    @keyframes fadeOut {
+      0%, 20% { opacity: 0.8; }
+      50%, 80% { opacity: 0.1; }
+      100% { opacity: 0.8; }
+    }
+    .discarded { animation: fadeOut 3s infinite; }
+    .lrab { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .lrt  { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9);
+            text-anchor:middle; }
+    .lrsv { stroke:var(--interactive-accent, #58a6ff); stroke-width:3; fill:none; }
+    .lrsk { stroke:var(--text-muted, #8b949e); stroke-width:1.5; stroke-dasharray:4 3; fill:none; }
+    .lrlb { font-family:'Latin Modern Math',serif; font-style:italic; font-size:13px;
+            fill:var(--text-normal, #c9d1d9); }
+    .lrax { stroke:var(--text-normal, #c9d1d9); stroke-width:1.2; fill:none; }
+  </style>
+  <!-- Axes -->
+  <line x1="60" y1="170" x2="400" y2="170" class="lrax"/>
+  <line x1="60" y1="170" x2="60" y2="20" class="lrax"/>
+  <text x="410" y="174" class="lrt">i</text>
+  <text x="50" y="18" class="lrt">σᵢ</text>
+  <!-- Singular value bars (decreasing) -->
+  <rect x="75" y="40" width="28" height="130" class="lrab" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <rect x="115" y="70" width="28" height="100" class="lrab" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <rect x="155" y="100" width="28" height="70" class="lrab" fill="var(--interactive-accent, #58a6ff)" opacity="0.7"/>
+  <rect x="195" y="125" width="28" height="45" class="lrab discarded" fill="var(--text-muted, #8b949e)" opacity="0.4"/>
+  <rect x="235" y="145" width="28" height="25" class="lrab discarded" fill="var(--text-muted, #8b949e)" opacity="0.4"/>
+  <rect x="275" y="155" width="28" height="15" class="lrab discarded" fill="var(--text-muted, #8b949e)" opacity="0.3"/>
+  <rect x="315" y="162" width="28" height="8" class="lrab discarded" fill="var(--text-muted, #8b949e)" opacity="0.2"/>
+  <!-- Cutoff line at k=3 -->
+  <line x1="183" y1="15" x2="183" y2="175" class="lrsk"/>
+  <text x="183" y="12" class="lrt" fill="var(--interactive-accent, #58a6ff)">keep k=3</text>
+  <!-- Labels -->
+  <text x="89" y="185" class="lrlb">σ₁</text>
+  <text x="129" y="185" class="lrlb">σ₂</text>
+  <text x="169" y="185" class="lrlb">σ₃</text>
+  <text x="209" y="185" class="lrlb">σ₄</text>
+  <text x="249" y="185" class="lrlb">σ₅</text>
+  <!-- Annotations -->
+  <rect x="420" y="30" width="150" height="90" rx="5" class="lrab"/>
+  <text x="495" y="50" class="lrt" font-weight="bold">Eckart-Young</text>
+  <text x="495" y="68" class="lrt">Best rank-k approx:</text>
+  <text x="495" y="84" class="lrt">Aₖ = Σᵢ₌₁ᵏ σᵢuᵢvᵢᵀ</text>
+  <text x="495" y="108" class="lrt">Error = σₖ₊₁</text>
+</svg>

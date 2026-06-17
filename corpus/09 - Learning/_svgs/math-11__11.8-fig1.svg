@@ -1,0 +1,104 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="ss-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .ss-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; rx: 8; cursor: pointer; transition: all 0.2s; }
+    .ss-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 3; filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .ss-line { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; color: var(--text-normal, #c9d1d9); }
+    .ss-fb { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; color: var(--interactive-accent, #58a6ff); stroke-dasharray: 6 3; }
+    .ss-sum { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .ss-lbl { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .ss-acc { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .ss-eq { font-family: serif; font-size: 14px; fill: var(--text-accent, #79c0ff); text-anchor: middle; }
+    .ss-signal { fill: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+  </style>
+
+  <!-- Input u -->
+  <text x="30" y="115" class="ss-acc">u</text>
+  <line x1="45" y1="110" x2="85" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+
+  <!-- B matrix -->
+  <rect x="85" y="85" width="60" height="50" class="ss-box"/>
+  <text x="115" y="115" class="ss-lbl">B</text>
+
+  <!-- Summing junction -->
+  <circle cx="185" cy="110" r="12" class="ss-sum"/>
+  <text x="185" y="115" class="ss-lbl">+</text>
+  <line x1="145" y1="110" x2="173" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+
+  <!-- Integrator -->
+  <rect x="220" y="85" width="80" height="50" class="ss-box"/>
+  <text x="260" y="108" class="ss-lbl">∫</text>
+  <text x="260" y="125" class="ss-eq">ẋ → x</text>
+  <line x1="197" y1="110" x2="220" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+
+  <!-- State x output from integrator -->
+  <line x1="300" y1="110" x2="370" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+  <text x="335" y="100" class="ss-acc">x(t)</text>
+
+  <!-- C matrix (to output) -->
+  <rect x="370" y="85" width="60" height="50" class="ss-box"/>
+  <text x="400" y="115" class="ss-lbl">C</text>
+  <line x1="430" y1="110" x2="500" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+
+  <!-- D matrix (direct feedthrough) -->
+  <rect x="370" y="180" width="60" height="50" class="ss-box"/>
+  <text x="400" y="210" class="ss-lbl">D</text>
+  <line x1="45" y1="205" x2="370" y2="205" class="ss-line"/>
+  <line x1="430" y1="205" x2="500" y2="205" class="ss-line"/>
+
+  <!-- Output summing -->
+  <circle cx="520" cy="110" r="12" class="ss-sum"/>
+  <text x="520" y="115" class="ss-lbl">+</text>
+  <line x1="500" y1="205" x2="520" y2="125" class="ss-line"/>
+  <line x1="532" y1="110" x2="580" y2="110" class="ss-line" marker-end="url(#ss-arr)"/>
+  <text x="600" y="115" class="ss-acc">y</text>
+
+  <!-- A matrix feedback -->
+  <rect x="220" y="220" width="60" height="50" class="ss-box"/>
+  <text x="250" y="250" class="ss-lbl">A</text>
+
+  <!-- Feedback path from x to A to summing junction -->
+  <line x1="335" y1="110" x2="335" y2="245" class="ss-fb"/>
+  <line x1="335" y1="245" x2="280" y2="245" class="ss-fb"/>
+  <line x1="220" y1="245" x2="185" y2="245" class="ss-fb"/>
+  <line x1="185" y1="245" x2="185" y2="122" class="ss-fb" marker-end="url(#ss-arr)"/>
+
+  <!-- State equations box -->
+  <rect x="480" y="200" width="200" height="80" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="580" y="225" class="ss-acc">State Equations</text>
+  <text x="580" y="248" class="ss-eq">ẋ = Ax + Bu</text>
+  <text x="580" y="270" class="ss-eq">y = Cx + Du</text>
+
+  <!-- Animated Signals -->
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M45,110 L85,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M145,110 L173,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M197,110 L220,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M300,110 L370,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M430,110 L500,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M532,110 L580,110" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M335,110 L335,245 L185,245 L185,122" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M45,205 L370,205" />
+  </circle>
+  <circle r="4" class="ss-signal">
+    <animateMotion dur="1s" repeatCount="indefinite" path="M430,205 L520,125" />
+  </circle>
+</svg>

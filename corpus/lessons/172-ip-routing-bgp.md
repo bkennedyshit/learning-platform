@@ -1,0 +1,397 @@
+---
+title: "17.2 — IP, Routing & BGP"
+subject: "Networking & Protocols"
+catalog: advanced
+audience_tier: higher-education
+chapter: "17.2"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 17.2 — IP, Routing & BGP
+
+> *"The Internet is not a network. It is a network of networks. The miracle is that it works at all."* — paraphrased from various networking textbooks
+
+The IP layer is where **location meets identity**. Every packet on the Internet carries two IP addresses — source and destination — and is forwarded hop-by-hop by routers that consult their routing tables. This chapter follows a packet from its origin to its destination: through subnets, through routing algorithms, and through the BGP system that holds the global Internet together.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Decode an **IPv4 header** field by field and explain TTL, DSCP/ECN, and fragmentation.
+2. Perform **CIDR subnetting** — divide any /24 into smaller blocks, calculate usable host ranges.
+3. Describe **IPv4 private ranges** (RFC 1918) and the role of NAT.
+4. Explain the structural differences between **IPv4 and IPv6**.
+5. Trace a packet through a **link-state routing** (OSPF/Dijkstra) and a **distance-vector** (RIP/Bellman-Ford) network.
+6. Explain **BGP** — what an AS is, the eBGP/iBGP distinction, the 8-attribute decision process, and how an AS-PATH prevents loops.
+7. Explain **Anycast** and why it's fundamental to DNS, CDNs, and DDoS mitigation.
+
+---
+
+## 🖼️ Visual Anchor
+
+![net-17__fig2](net-17__fig2.svg)
+
+---
+
+## 📚 1. IPv4 Header
+
+### 1.1 Field-by-Field Breakdown
+
+```
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  IHL  |DSCP     | ECN |         Total Length          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Identification        |Flags|      Fragment Offset    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Time to Live |    Protocol   |         Header Checksum       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Source Address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Destination Address                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Options (if IHL > 5)                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+| Field | Bits | Notes |
+|---|---|---|
+| **Version** | 4 | `4` for IPv4, `6` for IPv6 |
+| **IHL** (Internet Header Length) | 4 | Header length in 32-bit words; minimum 5 (20 bytes) |
+| **DSCP** (Differentiated Services Code Point) | 6 | QoS classification (formerly TOS); EF=46 (VoIP), CS3=24 (streaming), CS0=0 (best effort) |
+| **ECN** (Explicit Congestion Notification) | 2 | `11`=CE (congestion experienced); used with TCP/QUIC for backpressure |
+| **Total Length** | 16 | Entire packet size in bytes; max 65535 |
+| **Identification** | 16 | Used for fragment reassembly |
+| **Flags** | 3 | Bit 1: DF (Don't Fragment); Bit 2: MF (More Fragments) |
+| **Fragment Offset** | 13 | Position of this fragment in original datagram (×8 bytes) |
+| **TTL** (Time to Live) | 8 | Decremented by each router; 0 → ICMP Time Exceeded; prevents routing loops |
+| **Protocol** | 8 | `6`=TCP, `17`=UDP, `1`=ICMP, `89`=OSPF, `41`=IPv6-in-IPv4 |
+| **Header Checksum** | 16 | CRC of header only (not payload); recalculated at each router due to TTL decrement |
+| **Source Address** | 32 | Sender's IPv4 address |
+| **Destination Address** | 32 | Target IPv4 address |
+
+> **Key insight**: Unlike TCP, IP is *connectionless and unreliable*. There is no acknowledgment, no retransmission. IP simply makes a best-effort to deliver the packet to the destination; upper layers (TCP, QUIC) handle reliability.
+
+### 1.2 TTL and Routing Loops
+
+TTL (Time to Live) starts at 64 or 128 (OS default) and is decremented by 1 at each router hop. When it reaches 0, the router discards the packet and sends an ICMP Type 11 "Time Exceeded" back to the source.
+
+```bash
+# traceroute exploits TTL
+# Sends packets with TTL=1, 2, 3... collecting ICMP responses
+traceroute google.com
+# 1  192.168.1.1    1.2 ms  (default gateway)
+# 2  10.0.0.1       3.4 ms  (ISP first hop)
+# 3  72.14.200.1    8.1 ms  (Google backbone)
+# ...
+```
+
+### 1.3 IP Fragmentation
+
+If a packet is larger than the link's MTU, an IPv4 router may fragment it (unless DF=1 is set). Fragments carry the same Identification field and Fragment Offset to allow reassembly. Modern TCP uses **Path MTU Discovery (PMTUD)**: set DF=1 and use ICMP Fragmentation Needed responses to learn the minimum MTU along a path.
+
+**Fragmentation is almost never intentional today.** It causes performance problems and is blocked by many firewalls. The correct fix is PMTUD or reducing packet size at the application level.
+
+---
+
+## 📚 2. IPv4 Addressing and CIDR
+
+### 2.1 Classless Inter-Domain Routing (CIDR)
+
+Before CIDR (1993), IPv4 used classful addressing (Class A /8, Class B /16, Class C /24). CIDR allows any prefix length and eliminates the waste of classful allocation.
+
+**Notation**: `10.0.0.0/24` means: 24 bits are the network prefix, 8 bits are the host part.
+
+**Calculating a subnet**:
+```
+Network:     10.0.0.0/26
+Subnet mask: 255.255.255.192  (11111111 11111111 11111111 11000000)
+Network addr: 10.0.0.0    (host bits all 0)
+Broadcast:    10.0.0.63   (host bits all 1)
+Usable hosts: 10.0.0.1 – 10.0.0.62  (62 hosts)
+```
+
+**Splitting a /24 into /26s**:
+```
+10.0.0.0/24  →  10.0.0.0/26   (hosts .1–.62)
+                10.0.0.64/26  (hosts .65–.126)
+                10.0.0.128/26 (hosts .129–.190)
+                10.0.0.192/26 (hosts .193–.254)
+```
+
+### 2.2 VLSM (Variable-Length Subnet Masking)
+
+Different subnets don't have to be the same size. A /30 gives 2 usable hosts — perfect for a point-to-point router link. A /25 gives 126 — good for a medium office. VLSM lets you match subnet size to need.
+
+### 2.3 RFC 1918 Private Ranges and NAT
+
+| Range | CIDR | Class |
+|---|---|---|
+| 10.0.0.0 – 10.255.255.255 | 10.0.0.0/8 | A |
+| 172.16.0.0 – 172.31.255.255 | 172.16.0.0/12 | B |
+| 192.168.0.0 – 192.168.255.255 | 192.168.0.0/16 | C |
+
+These addresses are **not routed on the public Internet**. **NAT (Network Address Translation)** maps private addresses to a public IP at the edge router. This is why your `192.168.x.x` laptop can reach `8.8.8.8` — the NAT device rewrites the source address.
+
+NAT introduces **connection state** at the router — the NAT table maps `{private_ip:port ↔ public_ip:port}`. This breaks the end-to-end principle of the Internet and is why peer-to-peer protocols (WebRTC, game clients) need ICE/STUN/TURN to work behind NAT (see [17.6 - WebSockets, SSE & WebRTC](17.6---WebSockets,-SSE-&-WebRTC)).
+
+### 2.4 Longest-Prefix Match
+
+Routing tables are looked up by **longest prefix match**: the most specific (longest) matching prefix wins.
+
+```
+Routing table:
+  0.0.0.0/0     → via 10.0.0.1      (default route)
+  192.168.0.0/16 → via 172.16.0.1
+  192.168.1.0/24 → via 172.16.0.2   ← wins for 192.168.1.5
+```
+
+For destination `192.168.1.5`: `/24` is longer than `/16`, so the `/24` route wins. This is how specific routes override aggregated routes.
+
+---
+
+## 📚 3. IPv6
+
+### 3.1 Why IPv6
+
+IPv4 exhausted its ~4.3 billion addresses (2011 at IANA; regional RIRs depleted 2012–2019). IPv6 provides 128-bit addresses: 3.4 × 10³⁸ addresses — effectively inexhaustible.
+
+### 3.2 IPv6 Header
+
+IPv6's header is simpler than IPv4's (no fragmentation fields, no checksum):
+
+```
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version| Traffic Class |           Flow Label                  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Payload Length        |  Next Header  |   Hop Limit   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                         Source Address                        +
+|                        (128 bits)                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                      Destination Address                      +
+|                        (128 bits)                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+Key differences from IPv4:
+- **No fragmentation in header**: Routers don't fragment; hosts use Path MTU Discovery. Fragmentation via extension header.
+- **No header checksum**: Relies on L2/L4 checksums.
+- **Next Header**: Extension headers (routing, fragment, hop-by-hop options) chained via Next Header field.
+- **Hop Limit**: Same as TTL.
+- **NDP replaces ARP**: Neighbor Discovery Protocol (ICMPv6 types 135/136) handles what ARP did in IPv4.
+
+### 3.3 IPv6 Address Types
+
+| Type | Example | Description |
+|---|---|---|
+| Global unicast | `2001:db8::/32` (documentation) | Routable on the public Internet; assigned by RIRs |
+| Link-local | `fe80::/10` | Auto-configured; valid only on a single link; not routed |
+| Loopback | `::1/128` | Equivalent to 127.0.0.1 |
+| Multicast | `ff00::/8` | Group addressing (replaces IPv4 broadcast in many cases) |
+| Anycast | (same pool as unicast) | Same address advertised by multiple nodes; nearest answers |
+
+### 3.4 IPv6 Address Notation
+
+128 bits written as eight groups of 4 hex digits:
+`2001:0db8:85a3:0000:0000:8a2e:0370:7334`
+
+**Abbreviation rules**:
+- Leading zeros in each group can be omitted: `2001:db8:85a3:0:0:8a2e:370:7334`
+- One sequence of consecutive zero groups can be replaced with `::`: `2001:db8:85a3::8a2e:370:7334`
+
+---
+
+## 📚 4. Routing Algorithms
+
+### 4.1 Link-State Routing (OSPF — Dijkstra)
+
+In a **link-state** protocol, every router:
+1. Discovers its neighbors via Hello packets
+2. Broadcasts a **Link-State Advertisement (LSA)** to *all* routers in the area containing its directly connected links and their costs
+3. Each router builds an identical **Link-State Database (LSDB)** — a complete graph of the network
+4. Runs **Dijkstra's shortest-path algorithm** on the LSDB to compute the best path to every destination
+
+**Dijkstra's Algorithm** (simplified):
+```
+OSPF: Each router runs SPF independently on the full topology graph
+- Initialize: dist[self]=0, dist[all others]=∞
+- While unvisited nodes exist:
+  - Pick node u with minimum dist
+  - For each neighbor v of u:
+    - if dist[u] + cost(u,v) < dist[v]:
+      - dist[v] = dist[u] + cost(u,v)
+      - prev[v] = u
+```
+
+OSPF (Open Shortest Path First, RFC 2328) uses this internally. **Convergence** is fast (sub-second with fast hellos) but requires more memory/CPU than distance-vector protocols.
+
+### 4.2 Distance-Vector Routing (RIP — Bellman-Ford)
+
+In a **distance-vector** protocol, each router:
+1. Knows only the cost to its directly connected neighbors
+2. Periodically sends its routing table to neighbors
+3. Each router updates its table: if `cost_to_neighbor + neighbor_cost_to_dest < current_cost`, update
+
+**Bellman-Ford** in practice (RIP):
+```
+Each router R maintains distance_table[destination] = (cost, next_hop)
+On receiving update from neighbor N:
+  for each destination D in N's table:
+    if cost[N] + N.cost[D] < cost[D]:
+      cost[D] = cost[N] + N.cost[D]
+      next_hop[D] = N
+```
+
+**Problem**: Distance-vector routing is slow to converge on failures (**count-to-infinity**). If a link fails, the routers keep incrementing each other's hop count toward infinity. RIP's max hop count is 15 (16 = unreachable) to bound this. Modern replacement: OSPF, IS-IS.
+
+### 4.3 Summary Comparison
+
+| | Link-State (OSPF) | Distance-Vector (RIP) |
+|---|---|---|
+| What each router knows | Full topology | Only neighbors |
+| Algorithm | Dijkstra (SPF) | Bellman-Ford |
+| Convergence | Fast | Slow |
+| Scalability | Areas needed at scale | Poor (15-hop limit in RIP) |
+| Bandwidth | LSA floods | Periodic full-table sends |
+| Used where | Enterprise, ISP intra-AS | Legacy; teaching |
+
+---
+
+## 📚 5. BGP — Border Gateway Protocol
+
+### 5.1 What is an AS?
+
+An **Autonomous System (AS)** is a collection of IP prefixes under common administrative control with a consistent routing policy. Your ISP is an AS. Google is an AS. Cloudflare is an AS. Each AS has a globally unique **AS number (ASN)** assigned by regional internet registries (ARIN, RIPE, APNIC…).
+
+- Private ASNs: 64512–65535 (16-bit), 4200000000–4294967294 (32-bit) — used internally, not on public Internet
+- Public ASNs: e.g., AS15169 (Google), AS13335 (Cloudflare), AS7018 (AT&T)
+
+### 5.2 iBGP vs eBGP
+
+- **eBGP (external BGP)**: Runs *between* different ASes. TTL is 1 by default (peers must be directly connected, unless `ebgp-multihop`).
+- **iBGP (internal BGP)**: Runs *within* an AS between edge routers, distributing routes learned from eBGP peers. Full mesh required (or use route reflectors).
+
+### 5.3 BGP UPDATE Messages
+
+When a BGP speaker announces a new prefix:
+
+```
+UPDATE message:
+  NLRI (Network Layer Reachability Information):
+    - Prefixes being advertised: e.g., 192.0.2.0/24
+  Path Attributes:
+    - AS_PATH:      [64496, 1239, 3356] (path to origin)
+    - NEXT_HOP:     203.0.113.1 (next router to use)
+    - ORIGIN:       IGP | EGP | INCOMPLETE
+    - MED:          0 (multi-exit discriminator; hint to neighboring AS)
+    - LOCAL_PREF:   100 (internal preference; only in iBGP)
+    - COMMUNITIES:  e.g., 64496:100 (no-export)
+```
+
+### 5.4 BGP Decision Process
+
+When multiple paths exist to the same prefix, BGP selects the best one in this order (higher priority = earlier in list):
+
+1. **Highest Weight** (Cisco proprietary; local only)
+2. **Highest Local Preference** (iBGP; default 100)
+3. **Locally originated** (prefer routes you originated)
+4. **Shortest AS_PATH** (fewest ASes in the path)
+5. **Lowest Origin** (IGP < EGP < INCOMPLETE)
+6. **Lowest MED** (if from same neighboring AS)
+7. **eBGP over iBGP**
+8. **Lowest IGP metric to NEXT_HOP**
+9. **Oldest eBGP route** (stability preference)
+10. **Lowest Router ID** (tiebreaker)
+
+**Memory aid**: "We Love Oranges As Oranges Mean Pure Refreshment" — Weight, Local-Pref, Originated, AS-path, Origin, MED, Peer type, Router ID.
+
+### 5.5 AS_PATH Loop Prevention
+
+BGP is the only routing protocol that runs on the public Internet because it has a **natural loop prevention mechanism**: the AS_PATH attribute. When a router receives a BGP UPDATE, it checks if its own AS number is already in the AS_PATH. If it is, the route is discarded — this prevents routing loops.
+
+### 5.6 Anycast
+
+**Anycast** means the same IP prefix is announced from multiple locations simultaneously. BGP routes each querier to the nearest (by BGP path selection) announcement point.
+
+**Why it matters**:
+- **DNS root servers**: The 13 root server addresses are anycast — each "letter" (a.root-servers.net through m.root-servers.net) has hundreds of instances in datacenters worldwide. Clients always reach the nearest instance.
+- **Cloudflare 1.1.1.1**: Announced from 300+ datacenters. Your DNS query goes to the nearest PoP.
+- **DDoS mitigation**: A 1 Tbit/s attack targeting an anycast prefix is absorbed across all PoPs globally — no single location receives the full volume.
+
+```
+Network diagram:
+  You (EU)  ──BGP shortest path──►  PoP Frankfurt (1.1.1.1)
+  You (US)  ──BGP shortest path──►  PoP Ashburn   (1.1.1.1)
+  You (APAC)──BGP shortest path──►  PoP Singapore (1.1.1.1)
+  (same IP, different physical machines)
+```
+
+---
+
+## 🛠️ 6. Worked Example — Tracing a BGP Route
+
+You want to reach `8.8.8.8` (Google's DNS) from your home network.
+
+**Step 1 — Your default gateway** (your ISP's router) has a BGP table entry for `8.8.8.0/24` learned from Google's AS.
+
+**Step 2 — BGP path**: Your ISP (AS 12345) → Transit ISP (AS 3356 Level3) → Google (AS 15169).
+The AS_PATH in the BGP table is `[3356, 15169]`.
+
+**Step 3 — Your packet**:
+- Leaves your machine with `dst=8.8.8.8`
+- NAT at your home router rewrites `src=192.168.1.x` to your public IP
+- ISP router forwards based on BGP: next_hop = Level3 router
+- Level3 forwards to Google's edge router (eBGP peer)
+- Google's router accepts the packet and delivers to 8.8.8.8
+
+**Verify with**:
+```bash
+traceroute 8.8.8.8
+# or use bgp.tools to look up ASN for any IP:
+curl https://bgp.tools/api/autnum/for/8.8.8.8
+```
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+- **"BGP is complicated."** BGP's core idea is simple: share prefixes + path attributes, prefer the shortest AS-PATH to reach each destination. The complexity is in policy tuning — filtering, communities, MED manipulation.
+- **"Routing tables are static."** On the Internet, BGP continuously exchanges updates. Thousands of BGP UPDATE messages per second across the Internet are normal. Major route changes happen during fiber cuts, datacenter failures, and misconfigurations.
+- **"Longest prefix match means shortest AS-PATH."** Prefix length (e.g., /24 vs /16) and AS-PATH length are completely independent. A /24 is preferred over a /16 regardless of how many AS-hops the /24 requires.
+- **"IPv6 and IPv4 interoperate natively."** They do not. IPv6 packets cannot traverse IPv4-only infrastructure without a translation mechanism (NAT64, 6in4 tunnel, etc.). Dual-stack (both IPv4 and IPv6 simultaneously) is the current transition strategy.
+
+---
+
+## 🔗 8. Cross-Links & Further Reading
+
+### Internal
+- [17.1 - Physical & Data Link Layer](17.1---Physical-&-Data-Link-Layer) — Ethernet frames that carry IP packets
+- [17.3 - TCP & UDP Deep Dive](17.3---TCP-&-UDP-Deep-Dive) — transport layer inside IP packets
+- [17.8 - Network Security & DDoS Mitigation](17.8---Network-Security-&-DDoS-Mitigation) — BGP hijacking, RPKI
+- [27.2 - Caching, CDNs & Edge](27.2---Caching,-CDNs-&-Edge) — CDN Anycast architecture
+- [1.11 - Computer Networks Essentials](1.11---Computer-Networks-Essentials) — existing networking foundation
+
+### External
+- [Kurose & Ross Ch. 4 (Network Layer) slides](http://gaia.cs.umass.edu/kurose_ross/)
+- [bgp.tools — live BGP routing table explorer](https://bgp.tools/)
+- [Cloudflare Learning — What is BGP?](https://www.cloudflare.com/learning/security/glossary/what-is-bgp/)
+- [RIPE NCC — BGP basics](https://www.ripe.net/manage-ips-and-asns/db/support/documentation/ripe-database-documentation/rpsl-object-types/4-2-description-of-primary-objects/4-2-4-description-of-the-aut-num-object)
+- [Practical Networking — Subnetting series](https://www.practicalnetworking.net/stand-alone/subnetting-mastery/)
+- [Julia Evans — How does DNS work? (related routing context)](https://jvns.ca/)
+- [Hurricane Electric BGP Toolkit](https://bgp.he.net/)
+
+---
+
+*Next: [17.3 - TCP & UDP Deep Dive](17.3---TCP-&-UDP-Deep-Dive) — The reliable transport layer that carries almost everything.*

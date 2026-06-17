@@ -1,0 +1,142 @@
+<svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .code { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); transition: all 0.2s; cursor: pointer; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); transform: translateY(-1px); }
+    .pipeline-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; fill: none; }
+    .flow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#be-arrow); stroke-dasharray: 20; stroke-dashoffset: 20; animation: passMw 1s infinite alternate; }
+    .mw-box { stroke: var(--text-accent, #79c0ff); stroke-width: 1.5; rx: 4; fill: var(--background-secondary, #161b22); }
+    @keyframes passMw { to { stroke-dashoffset: 0; } }
+  </style>
+  <defs>
+    <marker id="be-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" class="title" text-anchor="middle">Backend Framework Architecture</text>
+
+  <!-- Middleware Pipeline -->
+  <text x="350" y="50" class="label" text-anchor="middle" font-weight="bold">Request → Middleware Pipeline → Response</text>
+
+  <rect x="20" y="60" width="660" height="70" class="pipeline-box"/>
+
+  <!-- Request -->
+  <rect x="35" y="75" width="70" height="40" class="box"/>
+  <text x="70" y="93" class="label" text-anchor="middle">Request</text>
+  <text x="70" y="106" class="sublabel" text-anchor="middle">HTTP</text>
+
+  <path d="M 105 95 L 125 95" class="flow"/>
+
+  <!-- Middleware boxes -->
+  <rect x="130" y="75" width="80" height="40" class="mw-box"/>
+  <text x="170" y="93" class="sublabel" text-anchor="middle">Logger</text>
+  <text x="170" y="106" class="sublabel" text-anchor="middle">⏱️</text>
+
+  <path d="M 210 95 L 225 95" class="flow"/>
+
+  <rect x="230" y="75" width="80" height="40" class="mw-box"/>
+  <text x="270" y="93" class="sublabel" text-anchor="middle">Auth</text>
+  <text x="270" y="106" class="sublabel" text-anchor="middle">🔐</text>
+
+  <path d="M 310 95 L 325 95" class="flow"/>
+
+  <rect x="330" y="75" width="80" height="40" class="mw-box"/>
+  <text x="370" y="93" class="sublabel" text-anchor="middle">Validate</text>
+  <text x="370" y="106" class="sublabel" text-anchor="middle">✅</text>
+
+  <path d="M 410 95 L 425 95" class="flow"/>
+
+  <rect x="430" y="75" width="90" height="40" class="mw-box"/>
+  <text x="475" y="93" class="sublabel" text-anchor="middle">Rate Limit</text>
+  <text x="475" y="106" class="sublabel" text-anchor="middle">🚦</text>
+
+  <path d="M 520 95 L 535 95" class="flow"/>
+
+  <rect x="540" y="75" width="80" height="40" class="box" style="stroke: var(--interactive-accent, #58a6ff); stroke-width: 2;"/>
+  <text x="580" y="93" class="label" text-anchor="middle" font-weight="bold">Handler</text>
+  <text x="580" y="106" class="sublabel" text-anchor="middle">🎯</text>
+
+  <path d="M 620 95 L 640 95" class="flow"/>
+
+  <rect x="640" y="75" width="30" height="40" class="box"/>
+  <text x="655" y="99" class="sublabel" text-anchor="middle">→</text>
+
+  <!-- Framework Comparison -->
+  <text x="350" y="160" class="label" text-anchor="middle" font-weight="bold">Framework Comparison</text>
+
+  <!-- Express -->
+  <rect x="20" y="170" width="155" height="120" class="box"/>
+  <text x="97" y="190" class="label" text-anchor="middle" font-weight="bold">Express</text>
+  <text x="97" y="205" class="sublabel" text-anchor="middle" fill="var(--text-muted, #8b949e)">2010 · TJ Holowaychuk</text>
+  <text x="35" y="225" class="sublabel">✅ Largest ecosystem</text>
+  <text x="35" y="240" class="sublabel">✅ Most tutorials</text>
+  <text x="35" y="255" class="sublabel">❌ No async errors</text>
+  <text x="35" y="270" class="sublabel">❌ No validation</text>
+  <text x="35" y="285" class="sublabel">❌ Node.js only</text>
+
+  <!-- Fastify -->
+  <rect x="185" y="170" width="155" height="120" class="box"/>
+  <text x="262" y="190" class="label" text-anchor="middle" font-weight="bold">Fastify</text>
+  <text x="262" y="205" class="sublabel" text-anchor="middle" fill="var(--text-muted, #8b949e)">2016 · Matteo Collina</text>
+  <text x="200" y="225" class="sublabel">✅ Schema validation</text>
+  <text x="200" y="240" class="sublabel">✅ Fast serialization</text>
+  <text x="200" y="255" class="sublabel">✅ Plugin system</text>
+  <text x="200" y="270" class="sublabel">✅ TypeScript</text>
+  <text x="200" y="285" class="sublabel">⚠️ Mainly Node.js</text>
+
+  <!-- Hono -->
+  <rect x="350" y="170" width="155" height="120" class="box" style="stroke: var(--interactive-accent, #58a6ff)"/>
+  <text x="427" y="190" class="label" text-anchor="middle" font-weight="bold" fill="var(--interactive-accent, #58a6ff)">Hono ⭐</text>
+  <text x="427" y="205" class="sublabel" text-anchor="middle" fill="var(--text-muted, #8b949e)">2022 · Yusuke Wada</text>
+  <text x="365" y="225" class="sublabel">✅ Multi-runtime</text>
+  <text x="365" y="240" class="sublabel">✅ 14KB bundle</text>
+  <text x="365" y="255" class="sublabel">✅ Edge-first</text>
+  <text x="365" y="270" class="sublabel">✅ TypeScript native</text>
+  <text x="365" y="285" class="sublabel">✅ Zod validation</text>
+
+  <!-- Bun.serve -->
+  <rect x="515" y="170" width="165" height="120" class="box"/>
+  <text x="597" y="190" class="label" text-anchor="middle" font-weight="bold">Bun.serve</text>
+  <text x="597" y="205" class="sublabel" text-anchor="middle" fill="var(--text-muted, #8b949e)">2022 · Jarred Sumner</text>
+  <text x="530" y="225" class="sublabel">✅ Fastest HTTP</text>
+  <text x="530" y="240" class="sublabel">✅ Native WebSocket</text>
+  <text x="530" y="255" class="sublabel">✅ Built-in SQLite</text>
+  <text x="530" y="270" class="sublabel">✅ Zero deps</text>
+  <text x="530" y="285" class="sublabel">⚠️ Bun runtime only</text>
+
+  <!-- Deployment Targets -->
+  <text x="350" y="315" class="label" text-anchor="middle" font-weight="bold">Deployment Targets</text>
+
+  <rect x="30" y="325" width="120" height="55" class="box"/>
+  <text x="90" y="345" class="label" text-anchor="middle">Traditional</text>
+  <text x="90" y="360" class="sublabel" text-anchor="middle">VPS / Container</text>
+  <text x="90" y="373" class="sublabel" text-anchor="middle">~50-200ms cold start</text>
+
+  <rect x="165" y="325" width="120" height="55" class="box"/>
+  <text x="225" y="345" class="label" text-anchor="middle">Serverless</text>
+  <text x="225" y="360" class="sublabel" text-anchor="middle">AWS Lambda</text>
+  <text x="225" y="373" class="sublabel" text-anchor="middle">~100-500ms cold start</text>
+
+  <rect x="300" y="325" width="120" height="55" class="box" style="stroke: var(--interactive-accent, #58a6ff);"/>
+  <text x="360" y="345" class="label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">Edge</text>
+  <text x="360" y="360" class="sublabel" text-anchor="middle">Cloudflare Workers</text>
+  <text x="360" y="373" class="sublabel" text-anchor="middle">~0-5ms cold start</text>
+
+  <rect x="435" y="325" width="120" height="55" class="box"/>
+  <text x="495" y="345" class="label" text-anchor="middle">Hybrid</text>
+  <text x="495" y="360" class="sublabel" text-anchor="middle">Vercel / Netlify</text>
+  <text x="495" y="373" class="sublabel" text-anchor="middle">Edge + Serverless</text>
+
+  <rect x="570" y="325" width="110" height="55" class="box"/>
+  <text x="625" y="345" class="label" text-anchor="middle">Self-hosted</text>
+  <text x="625" y="360" class="sublabel" text-anchor="middle">Docker + K8s</text>
+  <text x="625" y="373" class="sublabel" text-anchor="middle">Full control</text>
+
+  <!-- Footer -->
+  <text x="350" y="405" class="sublabel" text-anchor="middle">Recommendation: Hono for new projects (runs everywhere) · Express for legacy · Fastify for max Node.js perf</text>
+</svg>

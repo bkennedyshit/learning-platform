@@ -1,0 +1,272 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@600;800&amp;display=swap');
+      .svg-bg {
+        fill: var(--background-primary);
+        stroke: var(--divider-color);
+        stroke-width: 1.5;
+        rx: 12px;
+      }
+      .title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        fill: var(--text-normal);
+      }
+      .subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        fill: var(--text-muted);
+      }
+      
+      /* Orb & Ring styles */
+      .orbit-line {
+        fill: none;
+        stroke: var(--text-faint);
+        stroke-width: 1.5;
+        stroke-dasharray: 6,4;
+        opacity: 0.5;
+      }
+      
+      /* Core Verb Sun */
+      .core-verb {
+        fill: var(--background-secondary);
+        stroke: #eab308;
+        stroke-width: 3;
+      }
+      .core-glow {
+        fill: none;
+        stroke: #eab308;
+        stroke-width: 1.5;
+        opacity: 0.8;
+      }
+      .core-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        fill: #eab308;
+        text-anchor: middle;
+      }
+      .core-sub {
+        font-family: 'Inter', sans-serif;
+        font-size: 10px;
+        fill: var(--text-muted);
+        text-anchor: middle;
+      }
+      
+      /* Particle Node Bubbles */
+      .node-bubble {
+        fill: var(--background-secondary);
+        stroke-width: 2.5;
+      }
+      .node-bubble-inner {
+        stroke: #ec4899; /* Pink for core case */
+      }
+      .node-bubble-middle {
+        stroke: #3b82f6; /* Blue for circumstantial case */
+      }
+      .node-bubble-outer {
+        stroke: var(--interactive-accent); /* Purple for discourse level */
+      }
+      
+      .node-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .text-inner { fill: #ec4899; }
+      .text-middle { fill: #3b82f6; }
+      .text-outer { fill: var(--interactive-accent); }
+      
+      /* Labels & Connectors */
+      .leader-line {
+        fill: none;
+        stroke: var(--text-faint);
+        stroke-width: 1;
+      }
+      .label-bg {
+        fill: var(--background-secondary);
+        stroke: var(--divider-color);
+        stroke-width: 1;
+        rx: 4px;
+      }
+      .label-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .label-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 10px;
+        fill: var(--text-muted);
+      }
+      .layer-header {
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+
+  <!-- Container Background -->
+  <rect width="100%" height="100%" class="svg-bg" />
+
+  <!-- Header -->
+  <g transform="translate(30, 45)">
+    <text x="0" y="0" class="title">The Particle Relationship Rings</text>
+    <text x="0" y="20" class="subtitle">Visualizing grammatical case dependencies orbiting the central Verb nucleus</text>
+  </g>
+
+  <!-- CENTERED ORBITAL SYSTEM -->
+  <g id="orbital-system" transform="translate(0, 0)">
+    
+    <!-- Rotating Dashed Orbit Rings -->
+    <g>
+      <circle cx="400" cy="235" r="75" class="orbit-line" />
+      <circle cx="400" cy="235" r="145" class="orbit-line" />
+      <circle cx="400" cy="235" r="215" class="orbit-line" />
+      <animateTransform attributeName="transform" type="rotate" from="0 400 235" to="360 400 235" dur="45s" repeatCount="indefinite" />
+    </g>
+
+    <!-- Syntactic Core Wave (Expanding Ring from Center) -->
+    <circle cx="400" cy="235" r="45" class="core-glow">
+      <animate attributeName="r" from="45" to="260" dur="4s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.8;0" dur="4s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- CORE NUCLEUS: THE VERB -->
+    <circle cx="400" cy="235" r="45" class="core-verb" />
+    <text x="400" y="230" class="core-label">VERB</text>
+    <text x="400" y="248" class="core-label" font-size="12px" fill="var(--text-normal)">述語</text>
+    <text x="400" y="260" class="core-sub">(Jutsugo)</text>
+
+    <!-- ================= LAYER 1: DIRECT CASES (R = 75) ================= -->
+    <!-- Node が (Subject - Actor) [Top-Right] -->
+    <!-- Angle: -60 deg. Cos(-60) = 0.5, Sin(-60) = -0.866. X = 400 + 75*0.5 = 437.5, Y = 235 - 75*0.866 = 170 -->
+    <g transform="translate(437.5, 170)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-inner" />
+      <text x="0" y="0" class="node-text text-inner">が</text>
+    </g>
+    
+    <!-- Node を (Direct Object - Recipient) [Bottom-Left] -->
+    <!-- Angle: 120 deg. Cos(120) = -0.5, Sin(120) = 0.866. X = 400 - 75*0.5 = 362.5, Y = 235 + 75*0.866 = 300 -->
+    <g transform="translate(362.5, 300)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-inner" />
+      <text x="0" y="0" class="node-text text-inner">を</text>
+    </g>
+
+    <!-- ================= LAYER 2: CIRCUMSTANTIAL CASES (R = 145) ================= -->
+    <!-- Node に (Destination / Target) [Right] -->
+    <!-- Angle: 0 deg. Cos(0) = 1, Sin(0) = 0. X = 400 + 145 = 545, Y = 235 -->
+    <g transform="translate(545, 235)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-middle" />
+      <text x="0" y="0" class="node-text text-middle">に</text>
+    </g>
+    
+    <!-- Node で (Location / Means) [Left] -->
+    <!-- Angle: 180 deg. Cos(180) = -1, Sin(180) = 0. X = 400 - 145 = 255, Y = 235 -->
+    <g transform="translate(255, 235)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-middle" />
+      <text x="0" y="0" class="node-text text-middle">で</text>
+    </g>
+    
+    <!-- Node と (Companion / And) [Bottom] -->
+    <!-- Angle: 90 deg. X = 400, Y = 235 + 145 = 380 -->
+    <g transform="translate(400, 380)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-middle" />
+      <text x="0" y="0" class="node-text text-middle">と</text>
+    </g>
+
+    <!-- ================= LAYER 3: DISCOURSE GLOBAL CASES (R = 215) ================= -->
+    <!-- Node は (Topic Frame) [Top-Left] -->
+    <!-- Angle: -135 deg. Cos(-135) = -0.707, Sin(-135) = -0.707. X = 400 - 215*0.707 = 248, Y = 235 - 215*0.707 = 83 -->
+    <g transform="translate(248, 83)">
+      <!-- Pulsing Orbit Glow on Topic because it's massive -->
+      <circle cx="0" cy="0" r="23" fill="none" stroke="var(--interactive-accent)" stroke-width="1.5" opacity="0.6">
+        <animate attributeName="r" values="20;26;20" dur="2s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-outer" />
+      <text x="0" y="0" class="node-text text-outer">は</text>
+    </g>
+    
+    <!-- Node も (Also / Inclusion) [Bottom-Right] -->
+    <!-- Angle: 45 deg. Cos(45) = 0.707, Sin(45) = 0.707. X = 400 + 215*0.707 = 552, Y = 235 + 215*0.707 = 387 -->
+    <g transform="translate(552, 387)">
+      <circle cx="0" cy="0" r="18" class="node-bubble node-bubble-outer" />
+      <text x="0" y="0" class="node-text text-outer">も</text>
+    </g>
+    
+  </g>
+
+  <!-- STATIC LABELS AND DESCRIPTION CALLOUTS -->
+  <!-- Layer 1 Header (Inner) -->
+  <text x="400" y="105" text-anchor="middle" class="layer-header" fill="#ec4899">LAYER 1: Core Grammatical Cases</text>
+  
+  <!-- Layer 2 Header (Middle) -->
+  <text x="650" y="85" text-anchor="end" class="layer-header" fill="#3b82f6">LAYER 2: Circumstantial Context</text>
+  
+  <!-- Layer 3 Header (Outer) -->
+  <text x="150" y="380" text-anchor="start" class="layer-header" fill="var(--interactive-accent)">LAYER 3: Discourse &amp; Topic Frame</text>
+
+  <!-- CONNECTOR CALLOUTS AND DESCRIPTIONS -->
+  
+  <!-- が Subject Callout -->
+  <path d="M 437.5,152 L 437.5,115" class="leader-line" />
+  <g transform="translate(390, 85)">
+    <rect x="0" y="0" width="95" height="30" class="label-bg" />
+    <text x="47.5" y="14" text-anchor="middle" class="label-title text-inner">が (ga)</text>
+    <text x="47.5" y="24" text-anchor="middle" class="label-desc">Subject / Actor</text>
+  </g>
+
+  <!-- を Direct Object Callout -->
+  <path d="M 344.5,300 L 290,300" class="leader-line" />
+  <g transform="translate(180, 285)">
+    <rect x="0" y="0" width="100" height="30" class="label-bg" />
+    <text x="50" y="14" text-anchor="middle" class="label-title text-inner">を (o/wo)</text>
+    <text x="50" y="24" text-anchor="middle" class="label-desc">Direct Object</text>
+  </g>
+
+  <!-- で Location/Means Callout -->
+  <path d="M 237,235 L 180,235" class="leader-line" />
+  <g transform="translate(60, 220)">
+    <rect x="0" y="0" width="110" height="30" class="label-bg" />
+    <text x="55" y="14" text-anchor="middle" class="label-title text-middle">で (de)</text>
+    <text x="55" y="24" text-anchor="middle" class="label-desc">Location / Tool / Means</text>
+  </g>
+
+  <!-- に Indirect/Destination Callout -->
+  <path d="M 563,235 L 620,235" class="leader-line" />
+  <g transform="translate(630, 220)">
+    <rect x="0" y="0" width="110" height="30" class="label-bg" />
+    <text x="55" y="14" text-anchor="middle" class="label-title text-middle">に (ni)</text>
+    <text x="55" y="24" text-anchor="middle" class="label-desc">Target / Time / Place</text>
+  </g>
+
+  <!-- と Companion Callout -->
+  <path d="M 418,380 L 460,380" class="leader-line" />
+  <g transform="translate(470, 365)">
+    <rect x="0" y="0" width="70" height="30" class="label-bg" />
+    <text x="35" y="14" text-anchor="middle" class="label-title text-middle">と (to)</text>
+    <text x="35" y="24" text-anchor="middle" class="label-desc">With / And</text>
+  </g>
+
+  <!-- は Topic Frame Callout -->
+  <path d="M 230,83 L 170,83" class="leader-line" />
+  <g transform="translate(50, 68)">
+    <rect x="0" y="0" width="110" height="30" class="label-bg" />
+    <text x="55" y="14" text-anchor="middle" class="label-title text-outer">は (wa)</text>
+    <text x="55" y="24" text-anchor="middle" class="label-desc">Topic Framer</text>
+  </g>
+
+  <!-- も Also Callout -->
+  <path d="M 552,405 L 552,425" class="leader-line" />
+  <g transform="translate(502, 410)">
+    <rect x="0" y="0" width="100" height="30" class="label-bg" />
+    <text x="50" y="14" text-anchor="middle" class="label-title text-outer">も (mo)</text>
+    <text x="50" y="24" text-anchor="middle" class="label-desc">Also / Inclusion</text>
+  </g>
+
+</svg>

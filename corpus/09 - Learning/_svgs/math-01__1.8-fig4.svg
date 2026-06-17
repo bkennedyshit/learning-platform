@@ -1,0 +1,69 @@
+<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;height:auto;">
+  <defs>
+    <marker id="lv-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="lv-narr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted, #8b949e)"/>
+    </marker>
+  </defs>
+  <style>
+    .lev  { stroke: var(--text-muted, #8b949e); stroke-width: 1.2; fill: none; opacity: 0.6; stroke-dasharray: 4 2; }
+    .vec  { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; marker-end: url(#lv-arr); }
+    .axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; fill: none; }
+    .lab  { font-family: Inter,system-ui,sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .math { font-family: 'Latin Modern Math',serif; font-style: italic; font-size: 13px; fill: var(--interactive-accent, #58a6ff); }
+    .muted{ font-family: Inter,system-ui,sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .dot  { fill: var(--interactive-accent, #58a6ff); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Grid axes -->
+  <line x1="40" y1="290" x2="490" y2="290" class="axis"/>
+  <line x1="40" y1="290" x2="40"  y2="20"  class="axis"/>
+  <text x="495" y="294" class="lab">x</text>
+  <text x="28"  y="18"  class="lab">y</text>
+  <!-- Level curves of f(x,y) = x+y: diagonal lines -->
+  <line x1="40" y1="250" x2="290" y2="0"   class="lev"/>
+  <line x1="90" y1="290" x2="380" y2="0"   class="lev"/>
+  <line x1="175" y1="290" x2="470" y2="0"  class="lev"/>
+  <line x1="265" y1="290" x2="490" y2="65" class="lev"/>
+  <line x1="355" y1="290" x2="490" y2="155" class="lev"/>
+  <line x1="445" y1="290" x2="490" y2="245" class="lev"/>
+  <!-- Level labels -->
+  <text x="48" y="230" class="muted">f=1</text>
+  <text x="96" y="275" class="muted">f=2</text>
+  <text x="185" y="275" class="muted">f=3</text>
+  <text x="280" y="275" class="muted">f=4</text>
+  <!-- Vector v pointing NE (high df rate) -->
+  <line x1="200" y1="200" x2="340" y2="100" class="vec"/>
+  <text x="300" y="150" class="math">v</text>
+  <text x="300" y="168" class="muted">df(v) ≈ 2</text>
+  <text x="300" y="181" class="muted">(pierces ~2 level sets)</text>
+  <!-- Vector w pointing E (lower rate) -->
+  <line x1="200" y1="200" x2="330" y2="200" class="vec" stroke="var(--text-muted, #8b949e)" marker-end="url(#lv-narr)"/>
+  <text x="285" y="218" class="muted">w (pierces ~1 level set)</text>
+  <!-- Base point dot -->
+  <circle cx="200" cy="200" r="5" class="dot"/>
+  <text x="160" y="215" class="math">p</text>
+  <!-- Title -->
+  <text x="260" y="315" class="muted" text-anchor="middle">Level surfaces of f(x,y)=x+y; df = dx + dy</text>
+</svg>

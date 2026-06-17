@@ -1,0 +1,988 @@
+---
+title: "08.15 — GPU Computing & CUDA Foundations"
+subject: "Python"
+catalog: advanced
+audience_tier: higher-education
+chapter: "8.15"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 08.15 — GPU Computing & CUDA Foundations
+
+> *"The GPU is a throughput machine. The CPU is a latency machine. Know which problem you have."* — NVIDIA
+
+GPUs are why LLMs exist. A single GPU performs 10-100 TFLOPS of matrix multiplication — the operation at the heart of every neural network. This chapter teaches you the GPU programming model from first principles, connecting hardware architecture to the Python libraries you'll use for training.
+
+---
+
+## 🎯 Learning Objectives
+
+By the end of this chapter you will be able to:
+
+1. Explain GPU architecture: SMs, warps, memory hierarchy, and the SIMT execution model.
+2. Write CUDA kernels using Numba's `@cuda.jit` decorator.
+3. Understand memory coalescing, occupancy, and why memory bandwidth is usually the bottleneck.
+4. Use PyTorch's CUDA API for tensor operations and custom autograd functions.
+5. Profile GPU code with `nsys`, `ncu`, and PyTorch's profiler.
+6. Explain Tensor Cores and mixed-precision training (FP16/BF16).
+
+---
+
+## 🖼️ Visual Anchor — GPU Architecture & CUDA Execution Model
+
+![python__1.15-fig1](python__1.15-fig1.svg)
+
+---
+
+## 📚 1. Definitions / Concepts
+
+### Definition 08.15.1 — SIMT (Single Instruction, Multiple Threads)
+
+GPUs execute the same instruction across 32 threads simultaneously (a **warp**). All threads in a warp execute in lockstep. If threads diverge (different branches), both paths execute serially — this is **warp divergence** and kills performance.
+
+### Definition 08.15.2 — GPU Memory Hierarchy
+
+| Memory | Scope | Size | Latency | Bandwidth |
+|--------|-------|------|---------|-----------|
+| Registers | Per-thread | ~256 KB/SM | 0 cycles | ∞ |
+| Shared Memory | Per-block | 48-164 KB/SM | ~5 cycles | ~19 TB/s |
+| L1 Cache | Per-SM | 128 KB | ~30 cycles | ~12 TB/s |
+| L2 Cache | Global | 6-96 MB | ~200 cycles | ~6 TB/s |
+| Global (HBM/GDDR) | Global | 24-80 GB | ~400 cycles | 1-3 TB/s |
+| Host (PCIe) | CPU↔GPU | System RAM | ~10μs | 32-64 GB/s |
+
+### Definition 08.15.3 — Tensor Cores
+
+Specialized hardware units that perform 4×4 matrix multiply-accumulate in one clock cycle. They operate on FP16/BF16 inputs with FP32 accumulation — this is why mixed-precision training is 2-3x faster.
+
+### Definition 08.15.4 — Compute Intensity (Arithmetic Intensity)
+
+$$
+\text{Arithmetic Intensity} = \frac{\text{FLOPs}}{\text{Bytes transferred}}
+$$
+
+If your kernel's arithmetic intensity is below the machine's ops:byte ratio, you're **memory-bound** (most kernels). If above, you're **compute-bound** (large matrix multiplies).
+
+---
+
+## 📐 2. Mental Models / Principles
+
+### Principle 1.15.1 — The Roofline Model
+
+A kernel's performance is bounded by either:
+1. **Memory bandwidth** (most operations): Performance = Bandwidth × Arithmetic Intensity
+2. **Compute throughput** (large matmuls): Performance = Peak FLOPS
+
+For an RTX 4090: Peak = 82.6 TFLOPS (FP32), Bandwidth = 1 TB/s.
+Crossover point: 82.6 TFLOPS / 1 TB/s ≈ 83 FLOPs/byte.
+
+Matrix multiplication of large matrices (N>1024) exceeds this threshold → compute-bound.
+Element-wise operations (ReLU, add) are far below → memory-bound.
+
+### Principle 1.15.2 — Memory Coalescing
+
+When 32 threads in a warp access consecutive memory addresses, the hardware combines them into one transaction. Non-coalesced access (random/strided) wastes bandwidth:
+
+```python
+# GOOD: Coalesced — thread i accesses element i
+output[thread_id] = input[thread_id]  # One 128-byte transaction for 32 threads
+
+# BAD: Strided — thread i accesses element i*stride
+output[thread_id] = input[thread_id * 32]  # 32 separate transactions!
+```
+
+### Principle 1.15.3 — Why LLM Training Needs GPUs
+
+A GPT-3 forward pass on one token:
+- 175B parameters × 2 FLOPs/param (multiply + add) = 350 GFLOPS per token
+- At batch_size=2048, sequence_length=2048: ~08.4 PFLOPS per step
+- A100 GPU: 312 TFLOPS (BF16 Tensor Core) → need 4-5 A100s just for compute
+- Plus memory for parameters (350 GB in FP16) → need model parallelism
+
+---
+
+## 🔑 3. Mechanics
+
+### 3.1 — CUDA Kernels with Numba
+
+```python
+from numba import cuda
+import numpy as np
+
+@cuda.jit
+def vector_add(a, b, out):
+    """CUDA kernel: each thread computes one element."""
+    idx = cuda.grid(1)  # Global thread index
+    if idx < out.size:
+        out[idx] = a[idx] + b[idx]
+
+# Host code
+n = 1_000_000
+a = np.random.randn(n).astype(np.float32)
+b = np.random.randn(n).astype(np.float32)
+out = np.zeros(n, dtype=np.float32)
+
+# Transfer to GPU
+d_a = cuda.to_device(a)
+d_b = cuda.to_device(b)
+d_out = cuda.device_array(n, dtype=np.float32)
+
+# Launch kernel
+threads_per_block = 256
+blocks = (n + threads_per_block - 1) // threads_per_block
+vector_add[blocks, threads_per_block](d_a, d_b, d_out)
+
+# Transfer back
+result = d_out.copy_to_host()
+```
+
+### 3.2 — PyTorch CUDA Operations
+
+```python
+import torch
+
+# Check GPU availability
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"GPU: {torch.cuda.get_device_name(0)}")
+print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
+
+# Tensor operations on GPU
+x = torch.randn(4096, 4096, device=device)
+y = torch.randn(4096, 4096, device=device)
+
+# Matrix multiply — uses Tensor Cores automatically with float16
+with torch.cuda.amp.autocast():  # Mixed precision
+    z = x @ y  # cuBLAS under the hood
+
+# Memory management
+torch.cuda.empty_cache()
+print(f"Allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+print(f"Cached: {torch.cuda.memory_reserved() / 1e9:.2f} GB")
+```
+
+### 3.3 — Mixed-Precision Training
+
+```python
+import torch
+from torch.cuda.amp import autocast, GradScaler
+
+model = MyModel().cuda()
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+scaler = GradScaler()  # Handles FP16 gradient scaling
+
+for batch in dataloader:
+    optimizer.zero_grad()
+
+    with autocast():  # Forward pass in FP16
+        output = model(batch.cuda())
+        loss = criterion(output, targets.cuda())
+
+    # Backward pass: scale loss to prevent FP16 underflow
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+```
+
+### 3.4 — Custom CUDA Kernel via PyTorch Extension
+
+```python
+# For when you need operations PyTorch doesn't provide
+import torch
+from torch.utils.cpp_extension import load_inline
+
+cuda_source = """
+__global__ void fused_gelu_kernel(float* x, float* out, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        float val = x[idx];
+        // GELU approximation: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
+        float cdf = 0.5f * (1.0f + tanhf(0.7978845608f * (val + 0.044715f * val * val * val)));
+        out[idx] = val * cdf;
+    }
+}
+
+torch::Tensor fused_gelu(torch::Tensor x) {
+    auto out = torch::empty_like(x);
+    int n = x.numel();
+    int threads = 256;
+    int blocks = (n + threads - 1) / threads;
+    fused_gelu_kernel<<<blocks, threads>>>(x.data_ptr<float>(), out.data_ptr<float>(), n);
+    return out;
+}
+"""
+
+fused_gelu_module = load_inline(
+    name="fused_gelu",
+    cpp_sources="torch::Tensor fused_gelu(torch::Tensor x);",
+    cuda_sources=cuda_source,
+    functions=["fused_gelu"],
+)
+```
+
+---
+
+## ✍️ 4. Derivations & Worked Examples
+
+### Example 08.15.1 — Matrix Multiply Kernel (Tiled for Shared Memory)
+
+<details>
+<summary>🔍 View Step-by-Step Solution</summary>
+
+```python
+from numba import cuda
+import numpy as np
+
+TILE_SIZE = 16
+
+@cuda.jit
+def matmul_tiled(A, B, C):
+    """Tiled matrix multiply using shared memory."""
+    # Shared memory tiles
+    sA = cuda.shared.array((TILE_SIZE, TILE_SIZE), dtype=np.float32)
+    sB = cuda.shared.array((TILE_SIZE, TILE_SIZE), dtype=np.float32)
+
+    tx, ty = cuda.threadIdx.x, cuda.threadIdx.y
+    row = cuda.blockIdx.y * TILE_SIZE + ty
+    col = cuda.blockIdx.x * TILE_SIZE + tx
+
+    acc = 0.0
+    for tile in range((A.shape[1] + TILE_SIZE - 1) // TILE_SIZE):
+        # Load tile into shared memory
+        if row < A.shape[0] and tile * TILE_SIZE + tx < A.shape[1]:
+            sA[ty, tx] = A[row, tile * TILE_SIZE + tx]
+        else:
+            sA[ty, tx] = 0.0
+
+        if tile * TILE_SIZE + ty < B.shape[0] and col < B.shape[1]:
+            sB[ty, tx] = B[tile * TILE_SIZE + ty, col]
+        else:
+            sB[ty, tx] = 0.0
+
+        cuda.syncthreads()  # Wait for all threads to load
+
+        # Compute partial dot product
+        for k in range(TILE_SIZE):
+            acc += sA[ty, k] * sB[k, tx]
+
+        cuda.syncthreads()
+
+    if row < C.shape[0] and col < C.shape[1]:
+        C[row, col] = acc
+```
+
+**Why tiling matters:** Without shared memory, each thread reads from global memory (400 cycles latency). With tiling, data is loaded once into shared memory (5 cycles) and reused TILE_SIZE times. Speedup: ~10-50x for large matrices.
+
+</details>
+
+---
+
+## ⚠️ 6. Gotchas & Anti-Patterns
+
+### Gotcha 1.15.1 — CPU-GPU Transfer Bottleneck
+
+PCIe bandwidth (64 GB/s) is 15x slower than GPU memory bandwidth (1 TB/s). Minimize transfers. Keep data on GPU as long as possible.
+
+```python
+# BAD: Transfer every iteration
+for batch in data:
+    x = torch.tensor(batch).cuda()  # Transfer each time!
+    output = model(x)
+
+# GOOD: Pre-load to GPU or use DataLoader with pin_memory
+dataloader = DataLoader(dataset, pin_memory=True, num_workers=4)
+for batch in dataloader:
+    x = batch.cuda(non_blocking=True)  # Async transfer
+```
+
+### Gotcha 1.15.2 — Warp Divergence
+
+```python
+# BAD: Threads in same warp take different branches
+@cuda.jit
+def bad_kernel(x, out):
+    idx = cuda.grid(1)
+    if idx % 2 == 0:  # Half the warp goes one way
+        out[idx] = x[idx] * 2
+    else:             # Other half goes another
+        out[idx] = x[idx] + 1
+    # Both paths execute serially → 50% efficiency
+```
+
+---
+
+## 🧮 7. Hands-On Lab
+
+```bash
+python _practice/scripts/1.15_gpu_cuda.py --demo
+```
+
+Detects GPU hardware, benchmarks memory bandwidth, runs a simple CUDA kernel, and reports Tensor Core availability.
+
+---
+
+## 🔗 8. Cross-links & Further Reading
+
+- Previous: [08.14 - Concurrency Models & Patterns](08.14---Concurrency-Models-&-Patterns)
+- Next: [08.16 - Distributed Systems & Multi-GPU Training](08.16---Distributed-Systems-&-Multi-GPU-Training)
+- Math: [2.6 - Eigenvalues Eigenvectors & Diagonalization](2.6---Eigenvalues-Eigenvectors-&-Diagonalization) (matrix operations on GPU)
+- Architecture: [08.12 - Computer Architecture - Performance Intuition](08.12---Computer-Architecture---Performance-Intuition)
+- ML: [23.5 - Transformer Architectures & LLMs](23.5---Transformer-Architectures-&-LLMs)
+- [NVIDIA CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)
+- [PyTorch CUDA Semantics](https://pytorch.org/docs/stable/notes/cuda.html)
+- [Numba CUDA documentation](https://numba.readthedocs.io/en/stable/cuda/)
+
+
+
+---
+
+## 🧠 9. Extended Worked Examples & Deep Dives
+
+### Example 9.1 — PyTorch Tensor Operations on GPU: From CPU to CUDA
+
+**Problem:** Demonstrate the complete workflow of moving computation to GPU with PyTorch: memory management, data transfer patterns, kernel fusion, and profiling. Show the performance crossover point where GPU becomes faster than CPU.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Basic GPU Operations
+
+```python
+import torch
+import time
+
+def gpu_basics():
+    """Fundamental GPU tensor operations."""
+    # Check GPU availability
+    assert torch.cuda.is_available(), "No CUDA GPU detected"
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+    print(f"Memory: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+
+    # Create tensors on GPU directly (avoids CPU→GPU transfer)
+    a = torch.randn(10000, 10000, device="cuda")  # Allocated on GPU
+    b = torch.randn(10000, 10000, device="cuda")
+
+    # Operations on GPU tensors execute on GPU automatically
+    c = a @ b  # Matrix multiplication — runs on GPU (cuBLAS)
+
+    # Transfer result back to CPU (only when needed!)
+    c_cpu = c.cpu()  # GPU → CPU transfer (slow, avoid in hot loops)
+    c_numpy = c.cpu().numpy()  # For NumPy interop
+
+    # Memory management
+    print(f"GPU memory allocated: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+    del a, b, c  # Free GPU memory
+    torch.cuda.empty_cache()  # Return memory to CUDA allocator
+    print(f"After cleanup: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+```
+
+#### Step 2: CPU vs GPU Crossover Point
+
+```python
+def benchmark_crossover():
+    """Find the matrix size where GPU becomes faster than CPU."""
+    sizes = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
+
+    print(f"{'Size':>8} {'CPU (ms)':>10} {'GPU (ms)':>10} {'Speedup':>10}")
+    print("-" * 42)
+
+    for n in sizes:
+        a_cpu = torch.randn(n, n)
+        b_cpu = torch.randn(n, n)
+        a_gpu = a_cpu.cuda()
+        b_gpu = b_cpu.cuda()
+
+        # Warmup GPU (first CUDA call has overhead)
+        if n == sizes[0]:
+            _ = a_gpu @ b_gpu
+            torch.cuda.synchronize()
+
+        # CPU benchmark
+        start = time.perf_counter()
+        for _ in range(10):
+            _ = a_cpu @ b_cpu
+        cpu_time = (time.perf_counter() - start) / 10 * 1000
+
+        # GPU benchmark (must synchronize for accurate timing!)
+        torch.cuda.synchronize()
+        start = time.perf_counter()
+        for _ in range(10):
+            _ = a_gpu @ b_gpu
+        torch.cuda.synchronize()  # Wait for GPU to finish
+        gpu_time = (time.perf_counter() - start) / 10 * 1000
+
+        speedup = cpu_time / gpu_time
+        marker = "← GPU wins" if speedup > 1 else ""
+        print(f"{n:>8} {cpu_time:>8.2f}ms {gpu_time:>8.2f}ms {speedup:>8.1f}x {marker}")
+
+    # Typical results (RTX 4090 vs Ryzen 9):
+    # Size 10:    CPU 0.01ms, GPU 0.05ms → CPU 5x faster (overhead dominates)
+    # Size 100:   CPU 0.03ms, GPU 0.05ms → CPU 1.5x faster
+    # Size 500:   CPU 2.1ms,  GPU 0.08ms → GPU 26x faster ← crossover!
+    # Size 5000:  CPU 180ms,  GPU 1.2ms  → GPU 150x faster
+    # Size 10000: CPU 1400ms, GPU 8.5ms  → GPU 165x faster
+
+# benchmark_crossover()
+```
+
+#### Step 3: Efficient Data Transfer Patterns
+
+```python
+def efficient_transfer_patterns():
+    """Minimize CPU↔GPU data transfer (the #1 performance killer)."""
+
+    # ANTI-PATTERN: Transfer every iteration
+    # for batch in dataloader:
+    #     x = batch.cuda()      # Transfer per batch (slow!)
+    #     y = model(x)
+    #     loss = y.cpu().item() # Transfer back per batch (slow!)
+
+    # PATTERN 1: Pin memory for async transfer
+    # Pinned (page-locked) memory enables DMA transfer (CPU doesn't wait)
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=64,
+        pin_memory=True,  # Allocate batches in pinned memory
+        num_workers=4,    # Prefetch in background
+    )
+    # Then: x = batch.cuda(non_blocking=True)  # Async transfer
+
+    # PATTERN 2: Keep everything on GPU
+    model = model.cuda()
+    optimizer = torch.optim.Adam(model.parameters())
+
+    for batch in dataloader:
+        x = batch.cuda(non_blocking=True)
+        loss = model(x).sum()  # Everything stays on GPU
+        loss.backward()        # Gradients computed on GPU
+        optimizer.step()       # Weight update on GPU
+        # Only transfer scalar loss for logging:
+        print(f"Loss: {loss.item()}")  # .item() transfers single scalar
+
+    # PATTERN 3: CUDA streams for overlapping transfer and compute
+    stream1 = torch.cuda.Stream()
+    stream2 = torch.cuda.Stream()
+
+    with torch.cuda.stream(stream1):
+        # Transfer next batch while current batch is computing
+        next_batch = current_batch.cuda(non_blocking=True)
+
+    with torch.cuda.stream(stream2):
+        # Compute on current batch
+        output = model(current_gpu_batch)
+```
+
+#### Step 4: torch.compile — Kernel Fusion (PyTorch 2.0+)
+
+```python
+def demonstrate_torch_compile():
+    """torch.compile fuses operations into optimized CUDA kernels."""
+
+    class SimpleModel(torch.nn.Module):
+        def __init__(self, dim: int):
+            super().__init__()
+            self.linear1 = torch.nn.Linear(dim, dim * 4)
+            self.linear2 = torch.nn.Linear(dim * 4, dim)
+
+        def forward(self, x):
+            # Without compile: 5 separate CUDA kernels
+            # (linear1, gelu, linear2, residual add, layer norm)
+            x = self.linear1(x)
+            x = torch.nn.functional.gelu(x)
+            x = self.linear2(x)
+            return x
+
+    model = SimpleModel(1024).cuda()
+    x = torch.randn(32, 1024, device="cuda")
+
+    # Compile the model — fuses kernels, reduces memory bandwidth
+    compiled_model = torch.compile(model, mode="reduce-overhead")
+
+    # First call: compilation (slow, ~30s)
+    # Subsequent calls: optimized fused kernel (2-3x faster)
+    output = compiled_model(x)
+
+    # Benchmark
+    torch.cuda.synchronize()
+    start = time.perf_counter()
+    for _ in range(1000):
+        _ = model(x)
+    torch.cuda.synchronize()
+    eager_time = time.perf_counter() - start
+
+    torch.cuda.synchronize()
+    start = time.perf_counter()
+    for _ in range(1000):
+        _ = compiled_model(x)
+    torch.cuda.synchronize()
+    compiled_time = time.perf_counter() - start
+
+    print(f"Eager: {eager_time:.3f}s")
+    print(f"Compiled: {compiled_time:.3f}s")
+    print(f"Speedup: {eager_time / compiled_time:.2f}x")
+    # Typical: 1.5-3x speedup from kernel fusion
+
+# demonstrate_torch_compile()
+```
+
+**Final Answer:**
+
+```python
+# GPU performance rules:
+# 1. Minimize CPU↔GPU transfers (keep data on GPU as long as possible)
+# 2. Use pin_memory=True in DataLoader for async transfers
+# 3. Batch operations (GPU thrives on large parallel workloads)
+# 4. Use torch.compile for kernel fusion (PyTorch 2.0+)
+# 5. Profile with torch.profiler to find bottlenecks
+# 6. GPU only wins for matrices > ~500×500 (overhead crossover)
+# 7. Always torch.cuda.synchronize() before timing GPU operations
+```
+
+</details>
+
+### Example 9.2 — Explicit Kernel Launch with Numba CUDA
+
+**Problem:** Write a custom CUDA kernel in Python using Numba that performs element-wise operations not available in PyTorch. Demonstrate thread/block configuration, shared memory, and synchronization.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Basic Numba CUDA Kernel
+
+```python
+from numba import cuda
+import numpy as np
+import math
+
+@cuda.jit
+def vector_add_kernel(a, b, result, n):
+    """
+    CUDA kernel: each thread computes one element of the result.
+    
+    Thread hierarchy:
+    - Grid: collection of blocks (gridDim.x blocks)
+    - Block: collection of threads (blockDim.x threads per block)
+    - Thread: identified by (blockIdx.x * blockDim.x + threadIdx.x)
+    """
+    # Calculate global thread index
+    idx = cuda.grid(1)  # Shorthand for: cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
+
+    # Bounds check (grid may be larger than data)
+    if idx < n:
+        result[idx] = a[idx] + b[idx]
+
+
+def launch_vector_add():
+    """Configure and launch the kernel."""
+    n = 10_000_000
+
+    # Allocate host (CPU) arrays
+    a_host = np.random.rand(n).astype(np.float32)
+    b_host = np.random.rand(n).astype(np.float32)
+    result_host = np.zeros(n, dtype=np.float32)
+
+    # Transfer to device (GPU)
+    a_device = cuda.to_device(a_host)
+    b_device = cuda.to_device(b_host)
+    result_device = cuda.device_array(n, dtype=np.float32)
+
+    # Configure grid dimensions
+    threads_per_block = 256  # Must be multiple of 32 (warp size)
+    blocks_per_grid = math.ceil(n / threads_per_block)
+    # Total threads = blocks_per_grid * threads_per_block >= n
+
+    # Launch kernel
+    vector_add_kernel[blocks_per_grid, threads_per_block](
+        a_device, b_device, result_device, n
+    )
+
+    # Transfer result back to CPU
+    result_device.copy_to_host(result_host)
+
+    # Verify
+    expected = a_host + b_host
+    assert np.allclose(result_host, expected)
+    print(f"✅ Vector add: {n:,} elements computed on GPU")
+
+# launch_vector_add()
+```
+
+#### Step 2: Shared Memory and Reduction
+
+```python
+@cuda.jit
+def sum_reduction_kernel(data, partial_sums, n):
+    """
+    Parallel reduction using shared memory.
+    Each block reduces its portion, writes partial sum.
+    
+    Shared memory: fast on-chip memory shared by threads in a block.
+    Much faster than global memory (5 cycles vs 400 cycles).
+    """
+    # Allocate shared memory (one element per thread in block)
+    shared = cuda.shared.array(256, dtype=numba.float32)
+
+    tid = cuda.threadIdx.x
+    gid = cuda.grid(1)
+
+    # Load from global memory to shared memory
+    if gid < n:
+        shared[tid] = data[gid]
+    else:
+        shared[tid] = 0.0
+
+    # Synchronize: all threads must finish loading before reduction
+    cuda.syncthreads()
+
+    # Tree reduction within the block
+    stride = cuda.blockDim.x // 2
+    while stride > 0:
+        if tid < stride:
+            shared[tid] += shared[tid + stride]
+        cuda.syncthreads()  # Must sync between reduction steps
+        stride //= 2
+
+    # Thread 0 of each block writes the block's sum
+    if tid == 0:
+        partial_sums[cuda.blockIdx.x] = shared[0]
+
+
+def parallel_sum(data: np.ndarray) -> float:
+    """Sum an array using GPU parallel reduction."""
+    n = len(data)
+    threads_per_block = 256
+    blocks = math.ceil(n / threads_per_block)
+
+    d_data = cuda.to_device(data.astype(np.float32))
+    d_partial = cuda.device_array(blocks, dtype=np.float32)
+
+    # First pass: reduce within blocks
+    sum_reduction_kernel[blocks, threads_per_block](d_data, d_partial, n)
+
+    # Second pass: reduce partial sums (small enough for CPU)
+    partial_sums = d_partial.copy_to_host()
+    return float(partial_sums.sum())
+```
+
+#### Step 3: Thread Configuration Guidelines
+
+```python
+def configure_kernel(n: int) -> tuple[int, int]:
+    """
+    Choose optimal thread/block configuration.
+    
+    Rules:
+    1. threads_per_block should be multiple of 32 (warp size)
+    2. 128-512 threads per block is usually optimal
+    3. Need enough blocks to saturate all SMs (streaming multiprocessors)
+    4. Total threads >= n (with bounds checking in kernel)
+    """
+    # Query device properties
+    device = cuda.get_current_device()
+    max_threads = device.MAX_THREADS_PER_BLOCK  # Usually 1024
+    sm_count = device.MULTIPROCESSOR_COUNT       # e.g., 128 for RTX 4090
+    warp_size = device.WARP_SIZE                 # Always 32 on NVIDIA
+
+    # Heuristic: 256 threads per block works well for most kernels
+    threads_per_block = 256
+    blocks_per_grid = math.ceil(n / threads_per_block)
+
+    # Ensure enough blocks to keep all SMs busy
+    # Each SM can run multiple blocks concurrently (occupancy)
+    min_blocks = sm_count * 4  # At least 4 blocks per SM
+    blocks_per_grid = max(blocks_per_grid, min_blocks)
+
+    print(f"Grid config: {blocks_per_grid} blocks × {threads_per_block} threads")
+    print(f"Total threads: {blocks_per_grid * threads_per_block:,}")
+    print(f"SMs: {sm_count}, target occupancy: {blocks_per_grid / sm_count:.1f} blocks/SM")
+
+    return blocks_per_grid, threads_per_block
+```
+
+**Final Answer:**
+
+```python
+# Numba CUDA kernel writing rules:
+# 1. @cuda.jit decorator compiles Python to PTX (GPU assembly)
+# 2. Each thread computes ONE element (or a small chunk)
+# 3. Always bounds-check: if idx < n (grid may be larger than data)
+# 4. Use shared memory for data reused within a block (100x faster than global)
+# 5. cuda.syncthreads() between shared memory write and read
+# 6. threads_per_block = 256 is a safe default
+# 7. Profile with cuda.event timing or NVIDIA Nsight
+#
+# When to write custom kernels vs use PyTorch:
+# - PyTorch covers 95% of ML operations (prefer it)
+# - Custom kernels for: novel operations, fused kernels, non-ML workloads
+# - Numba for prototyping; Triton for production custom kernels
+```
+
+</details>
+
+### Example 9.3 — Profiling GPU Code with PyTorch Profiler
+
+**Problem:** Your training loop is slower than expected. Use PyTorch's built-in profiler to identify whether the bottleneck is data loading, CPU preprocessing, GPU compute, or memory transfers.
+
+<details>
+<summary>🔍 Full step-by-step solution</summary>
+
+#### Step 1: Basic Profiling Setup
+
+```python
+import torch
+from torch.profiler import profile, record_function, ProfilerActivity
+
+def profile_training_loop(model, dataloader, optimizer, num_steps=20):
+    """Profile a training loop to find bottlenecks."""
+
+    model.train()
+
+    with profile(
+        activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+        schedule=torch.profiler.schedule(
+            wait=2,      # Skip first 2 steps (warmup)
+            warmup=3,    # Profile but don't record (JIT warmup)
+            active=10,   # Record these steps
+            repeat=1,
+        ),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./profiler_logs"),
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True,
+    ) as prof:
+        for step, batch in enumerate(dataloader):
+            if step >= num_steps:
+                break
+
+            with record_function("data_transfer"):
+                x = batch["input"].cuda(non_blocking=True)
+                y = batch["target"].cuda(non_blocking=True)
+
+            with record_function("forward"):
+                output = model(x)
+                loss = torch.nn.functional.cross_entropy(output, y)
+
+            with record_function("backward"):
+                optimizer.zero_grad()
+                loss.backward()
+
+            with record_function("optimizer_step"):
+                optimizer.step()
+
+            prof.step()  # Signal end of iteration
+
+    # Print summary
+    print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=20))
+
+    # Export Chrome trace (open in chrome://tracing)
+    prof.export_chrome_trace("trace.json")
+```
+
+#### Step 2: Interpreting Results
+
+```python
+# Typical profiler output:
+# Name                    CPU total   CUDA total   # Calls
+# -------------------------------------------------------
+# forward                 12.5ms      8.2ms        10
+# backward                18.3ms      15.1ms       10
+# optimizer_step          3.2ms       2.1ms        10
+# data_transfer           5.8ms       0.3ms        10  ← CPU-bound!
+# aten::mm                2.1ms       6.5ms        40  ← Matrix multiply
+# aten::conv2d            1.8ms       4.2ms        20
+# aten::batch_norm        0.9ms       1.1ms        20
+# cudaLaunchKernel        3.5ms       0.0ms        200 ← Kernel launch overhead
+
+# Diagnosis:
+# - If data_transfer dominates: increase num_workers, use pin_memory
+# - If forward/backward CUDA time is high: model is compute-bound (good!)
+# - If CPU total >> CUDA total: CPU is the bottleneck (preprocessing)
+# - If many small kernels: use torch.compile for fusion
+```
+
+#### Step 3: Memory Profiling
+
+```python
+def profile_memory():
+    """Track GPU memory allocation to find leaks and peaks."""
+    torch.cuda.reset_peak_memory_stats()
+
+    model = LargeModel().cuda()
+    x = torch.randn(32, 3, 224, 224, device="cuda")
+
+    # Forward pass
+    print(f"After model load: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+
+    output = model(x)
+    print(f"After forward: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+    # Activations stored for backward pass increase memory
+
+    loss = output.sum()
+    loss.backward()
+    print(f"After backward: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+    # Gradients allocated, activations freed
+
+    print(f"Peak memory: {torch.cuda.max_memory_allocated() / 1e9:.2f} GB")
+
+    # Memory snapshot for detailed analysis
+    torch.cuda.memory._record_memory_history()
+    # ... run code ...
+    torch.cuda.memory._dump_snapshot("memory_snapshot.pickle")
+    # Visualize at: pytorch.org/memory_viz
+```
+
+**Final Answer:**
+
+```python
+# GPU profiling workflow:
+# 1. Profile with torch.profiler (CPU + CUDA activities)
+# 2. Export to TensorBoard or Chrome trace for visualization
+# 3. Look for:
+#    - Data loading bottleneck (CPU time in DataLoader)
+#    - Transfer bottleneck (high cuda memcpy time)
+#    - Compute bottleneck (high kernel time — this is ideal)
+#    - Kernel launch overhead (many small kernels → use torch.compile)
+# 4. Fix the bottleneck:
+#    - Data: more workers, pin_memory, prefetch
+#    - Transfer: keep data on GPU, non_blocking=True
+#    - Compute: mixed precision (fp16), torch.compile, larger batches
+#    - Memory: gradient checkpointing, smaller batch, FSDP
+```
+
+</details>
+
+---
+
+## 📘 10. Appendix: Extended Derivations & Special Cases
+
+### 10.1 NVLink Topology — Why GPU Interconnect Matters for Multi-GPU
+
+When training models across multiple GPUs, the interconnect bandwidth between GPUs determines scaling efficiency. NVLink provides 10-20x more bandwidth than PCIe.
+
+**Interconnect Hierarchy:**
+
+```python
+# PCIe Gen4 x16: 32 GB/s bidirectional (16 GB/s each direction)
+# PCIe Gen5 x16: 64 GB/s bidirectional
+# NVLink 3.0 (A100): 600 GB/s total (12 links × 50 GB/s)
+# NVLink 4.0 (H100): 900 GB/s total (18 links × 50 GB/s)
+# NVSwitch (DGX): Full bisection bandwidth between all 8 GPUs
+
+# Why it matters for training:
+# AllReduce (gradient synchronization) transfers ~2× model_size per step
+# GPT-3 (175B params, fp16): 350 GB per AllReduce
+# Over PCIe Gen4: 350 GB / 16 GB/s = 22 seconds (!!!)
+# Over NVLink 4.0: 350 GB / 450 GB/s = 0.78 seconds
+# That's 28x faster — the difference between training in days vs months
+```
+
+**Checking Topology:**
+
+```bash
+# nvidia-smi topo -m
+# Shows GPU-to-GPU connectivity:
+#         GPU0  GPU1  GPU2  GPU3
+# GPU0     X    NV12  NV12  NV12    (NV12 = NVLink with 12 links)
+# GPU1    NV12   X    NV12  NV12
+# GPU2    NV12  NV12   X    NV12
+# GPU3    NV12  NV12  NV12   X
+#
+# Or on consumer hardware:
+# GPU0     X    PHB               (PHB = PCIe Host Bridge — slow!)
+# GPU1    PHB    X
+```
+
+**Impact on Training Strategy:**
+
+```python
+# If GPUs are connected via NVLink:
+# → Use NCCL AllReduce (saturates NVLink bandwidth)
+# → Data Parallel (DDP) scales nearly linearly
+
+# If GPUs are connected via PCIe only:
+# → Gradient compression helps (reduce transfer volume)
+# → Pipeline parallelism may be better than data parallelism
+# → Consider gradient accumulation (fewer, larger AllReduce calls)
+
+# Check in PyTorch:
+import torch.distributed as dist
+# NCCL automatically detects NVLink and uses optimal algorithms
+```
+
+### 10.2 Mixed-Precision Training — The Math Behind FP16/BF16
+
+Mixed-precision training uses 16-bit floating point for most operations while maintaining 32-bit master weights. This halves memory usage and doubles compute throughput on modern GPUs (Tensor Cores).
+
+**Floating Point Formats:**
+
+$$
+\text{FP32: } \underbrace{1}_{\text{sign}} \underbrace{8}_{\text{exponent}} \underbrace{23}_{\text{mantissa}} \quad \text{Range: } \pm 3.4 \times 10^{38}, \text{ precision: } \sim 7 \text{ digits}
+$$
+
+$$
+\text{FP16: } \underbrace{1}_{\text{sign}} \underbrace{5}_{\text{exponent}} \underbrace{10}_{\text{mantissa}} \quad \text{Range: } \pm 65504, \text{ precision: } \sim 3.3 \text{ digits}
+$$
+
+$$
+\text{BF16: } \underbrace{1}_{\text{sign}} \underbrace{8}_{\text{exponent}} \underbrace{7}_{\text{mantissa}} \quad \text{Range: } \pm 3.4 \times 10^{38}, \text{ precision: } \sim 2.4 \text{ digits}
+$$
+
+**Why BF16 is Preferred for Training:**
+
+FP16 has limited range (max 65504). Gradients and loss values can exceed this, causing overflow → NaN. BF16 has the same range as FP32 (same 8-bit exponent) but less precision. For neural network training, range matters more than precision.
+
+**The Mixed-Precision Recipe:**
+
+```python
+import torch
+from torch.cuda.amp import autocast, GradScaler
+
+# The three components:
+# 1. autocast: automatically casts operations to fp16/bf16 where safe
+# 2. GradScaler: scales loss to prevent gradient underflow in fp16
+# 3. Master weights: optimizer maintains fp32 copy for accumulation
+
+model = MyModel().cuda()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+scaler = GradScaler()  # Only needed for fp16, not bf16
+
+for batch in dataloader:
+    x = batch.cuda()
+
+    # Forward pass in mixed precision
+    with autocast(dtype=torch.float16):  # or torch.bfloat16
+        output = model(x)
+        loss = criterion(output, target)
+    # autocast automatically:
+    # - Runs matmul, conv in fp16 (Tensor Core accelerated, 2x faster)
+    # - Keeps softmax, layer norm, loss in fp32 (numerically sensitive)
+
+    # Backward pass with loss scaling (fp16 only)
+    scaler.scale(loss).backward()  # Scale loss up to prevent underflow
+    scaler.step(optimizer)          # Unscale gradients, then optimizer.step()
+    scaler.update()                 # Adjust scale factor
+    optimizer.zero_grad()
+```
+
+**Performance Impact:**
+
+| Precision | Memory | Compute (Tensor Cores) | Training Stability |
+|-----------|--------|----------------------|-------------------|
+| FP32 | 1.0x | 1.0x | Perfect |
+| FP16 + scaler | 0.5x | 2-8x | Good (with scaling) |
+| BF16 | 0.5x | 2-8x | Excellent (no scaling needed) |
+
+**When Mixed Precision Fails:**
+
+- Very small learning rates (gradients underflow even with scaling)
+- Models with extreme activation magnitudes (overflow)
+- Certain loss functions (KL divergence with small probabilities)
+
+Fix: Use BF16 instead of FP16, or keep specific layers in FP32 with `autocast(enabled=False)`.
+
+---

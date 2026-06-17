@@ -1,0 +1,79 @@
+<svg viewBox="0 0 620 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;">
+  <defs>
+    <marker id="mi-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal, #c9d1d9)"/>
+    </marker>
+  </defs>
+  <style>
+    .ax   { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.6; fill: none; }
+    .grid { stroke: var(--text-muted, #8b949e); stroke-width: 0.5; opacity: 0.4; }
+    .prism-face-top  { fill: var(--interactive-accent, #58a6ff); opacity: 0.22; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.0; }
+    .prism-face-side { fill: var(--interactive-accent, #58a6ff); opacity: 0.10; stroke: var(--interactive-accent, #58a6ff); stroke-width: 0.8; }
+    .surface { fill: var(--text-accent, #79c0ff); opacity: 0.13; stroke: var(--text-accent, #79c0ff); stroke-width: 1.4; }
+    .base-rect { fill: var(--text-muted, #8b949e); opacity: 0.07; stroke: var(--text-muted, #8b949e); stroke-width: 0.8; }
+    .lab  { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .math { font-family: 'Latin Modern Math', serif; font-style: italic; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .ann  { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <!-- Axes (isometric-ish projection) -->
+  <line x1="80" y1="360" x2="560" y2="360" class="ax" marker-end="url(#mi-arrow)"/>
+  <line x1="80" y1="360" x2="80" y2="40"  class="ax" marker-end="url(#mi-arrow)"/>
+  <line x1="80" y1="360" x2="20" y2="420" class="ax" marker-end="url(#mi-arrow)"/>
+  <text x="565" y="364" class="math">x</text>
+  <text x="68"  y="36"  class="math">z</text>
+  <text x="12"  y="430" class="math">y</text>
+  <!-- Base grid on xy-plane (projected) -->
+  <line x1="160" y1="360" x2="140" y2="380" class="grid"/>
+  <line x1="240" y1="360" x2="220" y2="380" class="grid"/>
+  <line x1="320" y1="360" x2="300" y2="380" class="grid"/>
+  <line x1="400" y1="360" x2="380" y2="380" class="grid"/>
+  <line x1="80"  y1="360" x2="60"  y2="380" class="grid"/>
+  <!-- Several prisms at various heights -->
+  <!-- Prism 1: x in [160,240], y in [0,20 offset], z height 140 -->
+  <polygon points="160,360 240,360 220,380 140,380" class="base-rect"/>
+  <polygon points="160,220 240,220 220,240 140,240" class="prism-face-top"/>
+  <polygon points="160,360 160,220 140,240 140,380" class="prism-face-side"/>
+  <polygon points="240,360 240,220 220,240 220,380" class="prism-face-side"/>
+  <!-- Prism 2: x in [240,320], y in [0,20], z height 110 -->
+  <polygon points="240,360 320,360 300,380 220,380" class="base-rect"/>
+  <polygon points="240,250 320,250 300,270 220,270" class="prism-face-top"/>
+  <polygon points="240,360 240,250 220,270 220,380" class="prism-face-side"/>
+  <polygon points="320,360 320,250 300,270 300,380" class="prism-face-side"/>
+  <!-- Prism 3: x in [320,400], z height 160 -->
+  <polygon points="320,360 400,360 380,380 300,380" class="base-rect"/>
+  <polygon points="320,200 400,200 380,220 300,220" class="prism-face-top"/>
+  <polygon points="320,360 320,200 300,220 300,380" class="prism-face-side"/>
+  <polygon points="400,360 400,200 380,220 380,380" class="prism-face-side"/>
+  <!-- Prism 4: x in [400,480], z height 90 -->
+  <polygon points="400,360 480,360 460,380 380,380" class="base-rect"/>
+  <polygon points="400,270 480,270 460,290 380,290" class="prism-face-top"/>
+  <polygon points="400,360 400,270 380,290 380,380" class="prism-face-side"/>
+  <polygon points="480,360 480,270 460,290 460,380" class="prism-face-side"/>
+  <!-- Smooth surface above (hint) -->
+  <path class="surface" d="M 160 220 Q 280 160, 400 200 Q 480 230, 530 280 L 510 300 Q 450 250, 370 220 Q 260 180, 140 240 Z"/>
+  <!-- Labels -->
+  <text x="300" y="410" class="math" text-anchor="middle">Δx</text>
+  <text x="550" y="310" class="math">f(x*,y*)</text>
+  <text x="290" y="100" class="ann" text-anchor="middle">z = f(x,y) (surface)</text>
+  <text x="290" y="115" class="ann" text-anchor="middle">Prisms approximate volume underneath</text>
+</svg>

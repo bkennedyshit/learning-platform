@@ -1,0 +1,53 @@
+<svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:540px;height:auto;">
+  <defs>
+    <marker id="mtarr" viewBox="0 0 10 10" refX="6" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .mtb { fill:var(--background-secondary, #161b22); stroke:var(--text-muted, #8b949e); stroke-width:1; }
+    .mtar { stroke:var(--interactive-accent, #58a6ff); stroke-width:1.8; fill:none;
+            marker-end:url(#mtarr); }
+    .mtad { stroke:var(--text-accent, #79c0ff); stroke-width:1.8; fill:none;
+            marker-end:url(#mtarr); stroke-dasharray:5 3; }
+    .mtt  { font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-normal, #c9d1d9);
+            text-anchor:middle; }
+    .mtm  { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+            fill:var(--text-normal, #c9d1d9); text-anchor:middle; }
+    .mtma { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+            fill:var(--interactive-accent, #58a6ff); text-anchor:middle; }
+    .mtmb { font-family:'Latin Modern Math',serif; font-style:italic; font-size:15px;
+            fill:var(--text-accent, #79c0ff); text-anchor:middle; }
+  </style>
+  <!-- Vector box -->
+  <rect x="30" y="60" width="140" height="80" rx="6" class="mtb"/>
+  <text x="100" y="98" class="mtma">vⁱ</text>
+  <text x="100" y="116" class="mtt">contravariant vector</text>
+  <text x="100" y="130" class="mtt">(upper index)</text>
+  <!-- Covector box -->
+  <rect x="370" y="60" width="140" height="80" rx="6" class="mtb"/>
+  <text x="440" y="98" class="mtmb">vᵢ</text>
+  <text x="440" y="116" class="mtt">covariant vector</text>
+  <text x="440" y="130" class="mtt">(lower index)</text>
+  <!-- Lower arrow: vⁱ → vᵢ via gᵢⱼ -->
+  <line x1="170" y1="85" x2="370" y2="85" class="mtar"/>
+  <circle r="4" fill="var(--interactive-accent, #58a6ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 170 85 L 370 85"/>
+  </circle>
+  <text x="270" y="78" class="mtm">gᵢⱼ</text>
+  <text x="270" y="70" class="mtt">lower: vᵢ = gᵢⱼ vʲ</text>
+  <!-- Raise arrow: vᵢ → vⁱ via gⁱʲ -->
+  <line x1="370" y1="115" x2="170" y2="115" class="mtad"/>
+  <circle r="4" fill="var(--text-accent, #79c0ff)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 370 115 L 170 115"/>
+  </circle>
+  <text x="270" y="110" class="mtm">gⁱʲ</text>
+  <text x="270" y="150" class="mtt">raise: vⁱ = gⁱʲ vⱼ</text>
+  <!-- Metric box -->
+  <rect x="190" y="165" width="160" height="45" rx="5" class="mtb"/>
+  <text x="270" y="182" class="mtt" font-weight="bold">Metric tensor</text>
+  <text x="270" y="198" class="mtt">gᵢₖ gᵏʲ = δᵢʲ  (inverse)</text>
+  <!-- Euclidean special case -->
+  <text x="270" y="218" class="mtt" font-style="italic">In Euclidean space: gᵢⱼ = δᵢⱼ</text>
+</svg>

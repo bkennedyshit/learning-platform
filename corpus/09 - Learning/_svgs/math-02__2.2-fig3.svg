@@ -1,0 +1,47 @@
+<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:auto;">
+  <style>
+    .elim-box{fill:none;stroke:var(--text-muted, #8b949e);stroke-width:1;}
+    .elim-h{fill:var(--background-secondary, #161b22);}
+    .piv{fill:var(--interactive-accent, #58a6ff);opacity:0.25;}
+    .elim-l{font-family:'Courier New',monospace;font-size:12px;fill:var(--text-normal, #c9d1d9);}
+    .elim-a{font-family:Inter,system-ui,sans-serif;font-size:11px;fill:var(--interactive-accent, #58a6ff);}
+    .arr2{stroke:var(--text-muted, #8b949e);stroke-width:1.5;fill:none;stroke-dasharray:4 3;}
+  </style>
+  <text x="10" y="18" class="elim-a">Augmented [A|b]</text>
+  <rect x="10" y="25" width="150" height="90" class="elim-box"/>
+  <text x="20" y="50" class="elim-l">[ 2  1  -1 | 8]</text>
+  <text x="20" y="70" class="elim-l">[-3 -1   2 |-11]</text>
+  <text x="20" y="90" class="elim-l">[-2  1   2 |-3]</text>
+  <rect x="10" y="25" width="14" height="90" class="piv"/>
+  <!-- Arrow 1 -->
+  <g>
+    <animate attributeName="opacity" values="0; 1; 1; 1" keyTimes="0; 0.33; 0.9; 1" dur="6s" repeatCount="indefinite"/>
+    <line x1="165" y1="70" x2="200" y2="70" class="arr2"/>
+    <text x="168" y="62" class="elim-a" font-size="10">R2+3/2R1</text>
+    <text x="168" y="74" class="elim-a" font-size="10">R3+R1</text>
+    <!-- After first elimination -->
+    <text x="210" y="18" class="elim-a">After step 1</text>
+    <rect x="210" y="25" width="150" height="90" class="elim-box"/>
+    <text x="220" y="50" class="elim-l">[ 2  1  -1 | 8]</text>
+    <text x="220" y="70" class="elim-l">[ 0 1/2 1/2| 1]</text>
+    <text x="220" y="90" class="elim-l">[ 0  2   1 | 5]</text>
+    <rect x="210" y="25" width="14" height="90" class="piv"/>
+    <rect x="220" y="55" width="16" height="44" class="piv"/>
+  </g>
+  <!-- Arrow 2 -->
+  <g>
+    <animate attributeName="opacity" values="0; 0; 1; 1" keyTimes="0; 0.33; 0.66; 1" dur="6s" repeatCount="indefinite"/>
+    <line x1="365" y1="70" x2="400" y2="70" class="arr2"/>
+    <text x="368" y="62" class="elim-a" font-size="10">R3-4·R2</text>
+    <!-- After second elimination -->
+    <text x="410" y="18" class="elim-a">REF (upper-triangular)</text>
+    <rect x="410" y="25" width="145" height="90" class="elim-box"/>
+    <text x="420" y="50" class="elim-l">[ 2  1 -1 | 8]</text>
+    <text x="420" y="70" class="elim-l">[ 0 1/2 1/2|1]</text>
+    <text x="420" y="90" class="elim-l">[ 0  0  -1 | 1]</text>
+    <rect x="410" y="25" width="14" height="90" class="piv"/>
+    <rect x="420" y="55" width="16" height="44" class="piv"/>
+    <rect x="432" y="79" width="16" height="14" class="piv"/>
+    <text x="240" y="155" class="elim-a">Back-substitute bottom to top: x₃, then x₂, then x₁.</text>
+  </g>
+</svg>

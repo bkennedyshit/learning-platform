@@ -1,0 +1,89 @@
+<svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="mohr-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .mohr-axis { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; fill: none; }
+    .mohr-circle { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .mohr-circle-fill { fill: var(--interactive-accent, #58a6ff); opacity: 0.05; }
+    .mohr-radius { stroke: var(--text-accent, #79c0ff); stroke-width: 2; fill: none; }
+    .mohr-point { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; cursor: pointer; transition: r 0.2s; }
+    .mohr-point:hover { r: 7; }
+    .mohr-principal { fill: var(--interactive-accent, #58a6ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .mohr-dashed { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .mohr-angle { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-point { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-accent, #79c0ff); font-weight: bold; }
+    .info-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .anim-rotate { transform-origin: 350px 270px; animation: mohrRotate 8s linear infinite; }
+    @keyframes mohrRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+
+  <!-- Axes -->
+  <line x1="80" y1="270" x2="620" y2="270" class="mohr-axis" marker-end="url(#mohr-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <line x1="350" y1="450" x2="350" y2="60" class="mohr-axis" marker-end="url(#mohr-arrow)" style="color:var(--text-normal, #c9d1d9)"/>
+  <text x="630" y="275" class="label">σ</text>
+  <text x="355" y="52" class="label">τ</text>
+  <text x="355" y="285" class="label">(+CW↑)</text>
+
+  <!-- Mohr's Circle -->
+  <circle cx="350" cy="270" r="150" class="mohr-circle-fill"/>
+  <circle cx="350" cy="270" r="150" class="mohr-circle"/>
+
+  <!-- Center C -->
+  <circle cx="350" cy="270" r="4" fill="var(--text-normal, #c9d1d9)"/>
+  <text x="340" y="295" class="label">C</text>
+  <text x="310" y="310" class="label" font-size="11">(σ_avg, 0)</text>
+
+  <!-- Principal stress points -->
+  <!-- σ₁ (right) -->
+  <circle cx="500" cy="270" r="6" class="mohr-principal">
+    <animate attributeName="r" values="6; 9; 6" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <text x="505" y="260" class="label-accent">σ₁</text>
+  <!-- σ₂ (left) -->
+  <circle cx="200" cy="270" r="6" class="mohr-principal">
+    <animate attributeName="r" values="6; 9; 6" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <text x="180" y="260" class="label-accent">σ₂</text>
+
+  <!-- Maximum shear points -->
+  <circle cx="350" cy="120" r="5" class="mohr-point"/>
+  <text x="360" y="115" class="label-point">τ_max</text>
+  <circle cx="350" cy="420" r="5" class="mohr-point"/>
+  <text x="360" y="435" class="label-point">−τ_max</text>
+
+  <!-- Original stress state points X and Y -->
+  <!-- X = (σ_xx, τ_xy) -->
+  <circle cx="440" cy="170" r="5" class="mohr-point"/>
+  <text x="450" y="165" class="label-point">X (σ_xx, τ_xy)</text>
+  <!-- Y = (σ_yy, -τ_xy) -->
+  <circle cx="260" cy="370" r="5" class="mohr-point"/>
+  <text x="200" y="385" class="label-point">Y (σ_yy, −τ_xy)</text>
+
+  <!-- Diameter line X-Y -->
+  <line x1="440" y1="170" x2="260" y2="370" class="mohr-radius"/>
+
+  <!-- Radius R annotation -->
+  <line x1="350" y1="270" x2="500" y2="270" class="mohr-dashed"/>
+  <text x="420" y="255" class="label-accent">R</text>
+
+  <!-- Angle 2θ_p -->
+  <path d="M 400 270 A 50 50 0 0 0 390 230" class="mohr-angle"/>
+  <text x="405" y="245" class="label-accent">2θ_p</text>
+
+  <!-- Animated rotating radius -->
+  <line x1="350" y1="270" x2="500" y2="270" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5" opacity="0.4" class="anim-rotate"/>
+  <circle cx="500" cy="270" r="3" fill="var(--interactive-accent, #58a6ff)" opacity="0.6" class="anim-rotate"/>
+
+  <!-- Info box -->
+  <rect x="20" y="20" width="250" height="110" rx="6" class="info-box"/>
+  <text x="145" y="42" class="label" text-anchor="middle" font-weight="bold">Mohr's Circle Parameters</text>
+  <text x="145" y="62" class="label-accent" text-anchor="middle">C = (σ_xx+σ_yy)/2</text>
+  <text x="145" y="82" class="label-accent" text-anchor="middle">R = √[(σ_xx−σ_yy)²/4 + τ_xy²]</text>
+  <text x="145" y="102" class="label-accent" text-anchor="middle">σ₁,₂ = C ± R</text>
+  <text x="145" y="122" class="label-accent" text-anchor="middle">τ_max = R</text>
+</svg>

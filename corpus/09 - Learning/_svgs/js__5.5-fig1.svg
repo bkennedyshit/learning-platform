@@ -1,0 +1,99 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 16px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .sublabel { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .code { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-normal, #c9d1d9); }
+    .box { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 6; fill: var(--background-secondary, #161b22); transition: all 0.2s; cursor: pointer; }
+    .box:hover { stroke: var(--interactive-accent, #58a6ff); filter: drop-shadow(0 0 3px var(--interactive-accent, #58a6ff)); }
+    .phase-box { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; fill: none; }
+    .flow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#build-arrow); stroke-dasharray: 30; stroke-dashoffset: 30; animation: drawFlow 1.5s infinite alternate; }
+    .dead-code { stroke: #ef4444; stroke-width: 1.5; stroke-dasharray: 3,3; opacity: 0.6; animation: blink 2s infinite; }
+    @keyframes drawFlow { to { stroke-dashoffset: 0; } }
+    @keyframes blink { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.2; } }
+  </style>
+  <defs>
+    <marker id="build-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" class="title" text-anchor="middle">Module Systems & Build Pipeline</text>
+
+  <!-- Source Phase -->
+  <rect x="15" y="40" width="200" height="150" class="phase-box"/>
+  <text x="115" y="60" class="label" text-anchor="middle" font-weight="bold">📝 Source</text>
+
+  <rect x="30" y="70" width="170" height="30" class="box"/>
+  <text x="115" y="89" class="code" text-anchor="middle">import { add } from "./math"</text>
+
+  <rect x="30" y="108" width="170" height="30" class="box"/>
+  <text x="115" y="127" class="code" text-anchor="middle">import React from "react"</text>
+
+  <rect x="30" y="146" width="170" height="30" class="box" style="stroke: #ef4444; opacity: 0.5;"/>
+  <text x="115" y="165" class="code" text-anchor="middle" style="opacity: 0.5;">import { unused } from "./x"</text>
+  <line x1="30" y1="161" x2="200" y2="161" class="dead-code"/>
+
+  <!-- Build Phase -->
+  <path d="M 215 115 L 245 115" class="flow"/>
+
+  <rect x="250" y="40" width="200" height="150" class="phase-box"/>
+  <text x="350" y="60" class="label" text-anchor="middle" font-weight="bold">⚙️ Build (Vite/esbuild)</text>
+
+  <rect x="265" y="72" width="170" height="25" class="box"/>
+  <text x="350" y="89" class="sublabel" text-anchor="middle">1. Resolve imports (dep graph)</text>
+
+  <rect x="265" y="102" width="170" height="25" class="box"/>
+  <text x="350" y="119" class="sublabel" text-anchor="middle">2. Tree shake (remove dead code)</text>
+
+  <rect x="265" y="132" width="170" height="25" class="box"/>
+  <text x="350" y="149" class="sublabel" text-anchor="middle">3. Code split (dynamic import)</text>
+
+  <rect x="265" y="162" width="170" height="25" class="box"/>
+  <text x="350" y="179" class="sublabel" text-anchor="middle">4. Minify + compress</text>
+
+  <!-- Output Phase -->
+  <path d="M 450 115 L 480 115" class="flow"/>
+
+  <rect x="485" y="40" width="200" height="150" class="phase-box"/>
+  <text x="585" y="60" class="label" text-anchor="middle" font-weight="bold">📦 Output</text>
+
+  <rect x="500" y="72" width="170" height="30" class="box"/>
+  <text x="585" y="85" class="code" text-anchor="middle">main.a3f2c.js</text>
+  <text x="585" y="97" class="sublabel" text-anchor="middle">(app code, hashed)</text>
+
+  <rect x="500" y="108" width="170" height="30" class="box"/>
+  <text x="585" y="121" class="code" text-anchor="middle">vendor.b7e1d.js</text>
+  <text x="585" y="133" class="sublabel" text-anchor="middle">(react, libraries)</text>
+
+  <rect x="500" y="144" width="170" height="30" class="box"/>
+  <text x="585" y="157" class="code" text-anchor="middle">lazy-route.c9f4a.js</text>
+  <text x="585" y="169" class="sublabel" text-anchor="middle">(code-split chunk)</text>
+
+  <!-- Module Systems Comparison -->
+  <text x="350" y="220" class="label" text-anchor="middle" font-weight="bold">Module Systems Comparison</text>
+
+  <!-- ESM -->
+  <rect x="30" y="235" width="300" height="120" rx="8" stroke="#10b981" stroke-width="2" fill="var(--background-secondary, #161b22)"/>
+  <text x="180" y="255" class="label" text-anchor="middle" font-weight="bold" fill="#10b981">ESM (ECMAScript Modules) ✅</text>
+  <text x="50" y="275" class="code">import { add } from "./math.js";</text>
+  <text x="50" y="290" class="code">export function add(a, b) { ... }</text>
+  <text x="50" y="310" class="sublabel">✅ Static analysis → tree shaking</text>
+  <text x="50" y="323" class="sublabel">✅ Live bindings (references)</text>
+  <text x="50" y="336" class="sublabel">✅ Top-level await</text>
+  <text x="50" y="349" class="sublabel">✅ Browser-native support</text>
+
+  <!-- CJS -->
+  <rect x="370" y="235" width="300" height="120" rx="8" stroke="#f59e0b" stroke-width="2" fill="var(--background-secondary, #161b22)"/>
+  <text x="520" y="255" class="label" text-anchor="middle" font-weight="bold" fill="#f59e0b">CJS (CommonJS) ⚠️ Legacy</text>
+  <text x="390" y="275" class="code">const { add } = require("./math");</text>
+  <text x="390" y="290" class="code">module.exports = { add };</text>
+  <text x="390" y="310" class="sublabel">❌ Dynamic → no tree shaking</text>
+  <text x="390" y="323" class="sublabel">❌ Value copies (not references)</text>
+  <text x="390" y="336" class="sublabel">❌ No top-level await</text>
+  <text x="390" y="349" class="sublabel">❌ Needs bundler for browser</text>
+
+  <!-- Bottom note -->
+  <text x="350" y="375" class="sublabel" text-anchor="middle">Always use ESM for new projects: "type": "module" in package.json</text>
+</svg>

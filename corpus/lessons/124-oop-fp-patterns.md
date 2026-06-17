@@ -1,0 +1,1569 @@
+---
+title: "12.4 — OOP & FP Patterns"
+subject: "JavaScript"
+catalog: advanced
+audience_tier: higher-education
+chapter: "12.4"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [09 - Learning Index](09---Learning-Index)*
+
+# 12.4 — OOP & FP Patterns
+
+> *"Favor object composition over class inheritance."* — **Gang of Four**, *Design Patterns* (1994)
+>
+> *"OOP and FP are not opposites. They're orthogonal. The best JavaScript uses both."* — **Douglas Crockford**, *JavaScript: The Good Parts*
+
+JavaScript is a **multi-paradigm** language. You can write classical OOP with classes, prototypal OOP with object delegation, or pure functional code with closures and higher-order functions. The best JavaScript developers don't pick a side — they use the right tool for each problem.
+
+This chapter builds both toolboxes and teaches you when to reach for each.
+
+---
+
+## 🎯 Learning Objectives
+
+1. **Implement classes** with private fields, static methods, and inheritance.
+2. **Explain prototypal delegation** (OLOO pattern) as an alternative to classical inheritance.
+3. **Apply composition over inheritance** using mixins and object composition.
+4. **Write curried and partially applied functions** for reusable logic.
+5. **Build function pipelines** using `pipe()` and `compose()`.
+6. **Use immutable data patterns** with `Object.freeze`, spread operators, and Immer-style approaches.
+7. **Recognize and apply** common design patterns (Observer, Strategy, Factory, Builder) in JavaScript.
+
+---
+
+## 🖼️ Visual Anchor — OOP vs FP Decision Model
+
+![js__5.4-fig1](js__5.4-fig1.svg)
+
+---
+
+## 📚 1. Classes (ES2015+)
+
+### Definition 12.4.1 — Class Syntax
+
+JavaScript classes are **syntactic sugar over prototypes**. Under the hood, `class` still uses the prototype chain:
+
+```javascript
+class Animal {
+  // Private field (ES2022)
+  #sound;
+
+  // Static property
+  static kingdom = "Animalia";
+
+  constructor(name, sound) {
+    this.name = name;    // Public instance property
+    this.#sound = sound; // Private instance property
+  }
+
+  // Public method (on prototype)
+  speak() {
+    return `${this.name} says ${this.#sound}`;
+  }
+
+  // Getter
+  get info() {
+    return `${this.name} (${Animal.kingdom})`;
+  }
+
+  // Static method
+  static create(name, sound) {
+    return new Animal(name, sound);
+  }
+
+  // Private method (ES2022)
+  #validate() {
+    if (!this.name) throw new Error("Name required");
+  }
+}
+
+const cat = new Animal("Whiskers", "meow");
+cat.speak();  // "Whiskers says meow"
+cat.info;     // "Whiskers (Animalia)"
+// cat.#sound; // SyntaxError: Private field
+```
+
+### Definition 12.4.2 — Inheritance with `extends`
+
+```javascript
+class Dog extends Animal {
+  #tricks = [];
+
+  constructor(name) {
+    super(name, "woof"); // MUST call super() before using `this`
+  }
+
+  learn(trick) {
+    this.#tricks.push(trick);
+    return this; // Enable chaining
+  }
+
+  perform() {
+    return this.#tricks.length > 0
+      ? `${this.name} performs: ${this.#tricks.join(", ")}`
+      : `${this.name} doesn't know any tricks yet`;
+  }
+
+  // Override parent method
+  speak() {
+    return `${super.speak()}! ${super.speak()}!`; // Call parent version
+  }
+}
+
+const rex = new Dog("Rex");
+rex.learn("sit").learn("roll over");
+rex.perform(); // "Rex performs: sit, roll over"
+rex.speak();   // "Rex says woof! Rex says woof!"
+```
+
+### When Classes Are Appropriate
+
+✅ **Use classes when:**
+- You need multiple instances with shared behavior
+- You're modeling entities with clear identity (User, Connection, EventEmitter)
+- The framework expects them (React class components, TypeORM entities)
+- You need private state encapsulation (`#private` fields)
+
+❌ **Avoid classes when:**
+- You only need one instance (use a plain object or module)
+- Deep inheritance hierarchies emerge (> 2 levels deep = smell)
+- You're just grouping utility functions (use a module with named exports)
+
+---
+
+## 📚 2. Prototypal Patterns (OLOO)
+
+### Definition 12.4.3 — Objects Linking to Other Objects (OLOO)
+
+Kyle Simpson's OLOO pattern uses `Object.create()` for direct object delegation without `new` or `class`:
+
+```javascript
+const Validator = {
+  init(rules) {
+    this.rules = rules;
+    this.errors = [];
+    return this;
+  },
+  validate(data) {
+    this.errors = [];
+    for (const [field, rule] of Object.entries(this.rules)) {
+      if (!rule(data[field])) {
+        this.errors.push(`${field} is invalid`);
+      }
+    }
+    return this.errors.length === 0;
+  },
+  getErrors() {
+    return [...this.errors];
+  },
+};
+
+const EmailValidator = Object.create(Validator);
+EmailValidator.initEmail = function (additionalRules = {}) {
+  return this.init({
+    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    ...additionalRules,
+  });
+};
+
+const validator = Object.create(EmailValidator).initEmail({
+  name: (v) => v?.length >= 2,
+});
+
+validator.validate({ email: "bill@example.com", name: "Bill" }); // true
+validator.validate({ email: "invalid", name: "" }); // false
+validator.getErrors(); // ["email is invalid", "name is invalid"]
+```
+
+**OLOO vs Classes:** OLOO is simpler (no `new`, no constructor ceremony) but less familiar to most developers. Use it for internal library code; use classes for public APIs.
+
+---
+
+## 📚 3. Composition Over Inheritance
+
+### Definition 12.4.4 — The Problem with Deep Inheritance
+
+```javascript
+// ❌ THE GORILLA-BANANA PROBLEM
+// "You wanted a banana but got a gorilla holding the banana and the entire jungle"
+class Entity { /* ... */ }
+class MovableEntity extends Entity { /* ... */ }
+class AnimatedMovableEntity extends MovableEntity { /* ... */ }
+class PhysicsAnimatedMovableEntity extends AnimatedMovableEntity { /* ... */ }
+class PlayerPhysicsAnimatedMovableEntity extends PhysicsAnimatedMovableEntity { /* ... */ }
+// 5 levels deep. What if you need a non-animated physics entity?
+```
+
+### Definition 12.4.5 — Composition with Mixins
+
+```javascript
+// ✅ COMPOSITION — behaviors as independent units
+const withMovement = (state) => ({
+  move(dx, dy) {
+    state.x += dx;
+    state.y += dy;
+  },
+  getPosition() {
+    return { x: state.x, y: state.y };
+  },
+});
+
+const withHealth = (state) => ({
+  takeDamage(amount) {
+    state.hp = Math.max(0, state.hp - amount);
+  },
+  heal(amount) {
+    state.hp = Math.min(state.maxHp, state.hp + amount);
+  },
+  isAlive() {
+    return state.hp > 0;
+  },
+});
+
+const withInventory = (state) => ({
+  addItem(item) {
+    state.inventory.push(item);
+  },
+  removeItem(name) {
+    const idx = state.inventory.findIndex((i) => i.name === name);
+    return idx >= 0 ? state.inventory.splice(idx, 1)[0] : null;
+  },
+});
+
+// Compose behaviors into an entity
+function createPlayer(name) {
+  const state = { name, x: 0, y: 0, hp: 100, maxHp: 100, inventory: [] };
+
+  return {
+    name: state.name,
+    ...withMovement(state),
+    ...withHealth(state),
+    ...withInventory(state),
+  };
+}
+
+// Create an NPC that moves but has no inventory
+function createNPC(name) {
+  const state = { name, x: 0, y: 0, hp: 50, maxHp: 50 };
+  return {
+    name: state.name,
+    ...withMovement(state),
+    ...withHealth(state),
+  };
+}
+
+const player = createPlayer("Bill");
+player.move(10, 5);
+player.takeDamage(20);
+player.addItem({ name: "sword", damage: 15 });
+```
+
+### Definition 12.4.6 — Class Mixins (When You Must Use Classes)
+
+```javascript
+// Mixin as a function that takes a base class and returns an extended class
+const Serializable = (Base) =>
+  class extends Base {
+    serialize() {
+      return JSON.stringify(this);
+    }
+    static deserialize(json) {
+      return Object.assign(new this(), JSON.parse(json));
+    }
+  };
+
+const Timestamped = (Base) =>
+  class extends Base {
+    constructor(...args) {
+      super(...args);
+      this.createdAt = new Date();
+      this.updatedAt = new Date();
+    }
+    touch() {
+      this.updatedAt = new Date();
+    }
+  };
+
+// Apply mixins
+class BaseModel {
+  constructor(data) {
+    Object.assign(this, data);
+  }
+}
+
+class User extends Timestamped(Serializable(BaseModel)) {
+  get displayName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+
+const user = new User({ firstName: "Bill", lastName: "K" });
+user.createdAt; // Date object
+user.serialize(); // JSON string
+```
+
+---
+
+## 📚 4. Functional Programming Patterns
+
+### Definition 12.4.7 — Pure Functions
+
+A **pure function** has two properties:
+1. Same inputs → same output (deterministic)
+2. No side effects (doesn't modify external state)
+
+```javascript
+// ✅ Pure
+const add = (a, b) => a + b;
+const toUpper = (str) => str.toUpperCase();
+const filter = (arr, pred) => arr.filter(pred);
+
+// ❌ Impure (side effects)
+let count = 0;
+const increment = () => ++count; // Modifies external state
+const log = (msg) => console.log(msg); // I/O side effect
+const now = () => Date.now(); // Non-deterministic
+```
+
+### Definition 12.4.8 — Higher-Order Functions
+
+Functions that take functions as arguments or return functions:
+
+```javascript
+// Takes a function
+const map = (fn) => (arr) => arr.map(fn);
+const filter = (pred) => (arr) => arr.filter(pred);
+
+// Returns a function
+const greaterThan = (n) => (x) => x > n;
+const multiply = (factor) => (x) => x * factor;
+
+// Composition
+const double = multiply(2);
+const isAdult = greaterThan(17);
+const getAdults = filter(isAdult);
+
+getAdults([10, 18, 25, 15, 30]); // [18, 25, 30]
+```
+
+### Definition 12.4.9 — Currying
+
+**Currying** transforms a function that takes multiple arguments into a sequence of functions that each take one argument:
+
+```javascript
+// Manual currying
+const add = (a) => (b) => a + b;
+add(3)(5); // 8
+
+// Generic curry utility
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return (...moreArgs) => curried(...args, ...moreArgs);
+  };
+}
+
+const curriedAdd = curry((a, b, c) => a + b + c);
+curriedAdd(1)(2)(3);    // 6
+curriedAdd(1, 2)(3);    // 6
+curriedAdd(1)(2, 3);    // 6
+curriedAdd(1, 2, 3);    // 6
+
+// Practical use: creating specialized functions
+const formatCurrency = curry((symbol, decimals, value) =>
+  `${symbol}${value.toFixed(decimals)}`
+);
+
+const formatUSD = formatCurrency("$", 2);
+const formatEUR = formatCurrency("€", 2);
+const formatBTC = formatCurrency("₿", 8);
+
+formatUSD(42.5);    // "$42.50"
+formatBTC(0.00123); // "₿0.00123000"
+```
+
+### Definition 12.4.10 — Pipe & Compose
+
+```javascript
+// pipe: left-to-right composition (most intuitive)
+const pipe = (...fns) => (x) => fns.reduce((acc, fn) => fn(acc), x);
+
+// compose: right-to-left composition (mathematical convention)
+const compose = (...fns) => (x) => fns.reduceRight((acc, fn) => fn(acc), x);
+
+// Example pipeline
+const processUser = pipe(
+  (user) => ({ ...user, name: user.name.trim() }),
+  (user) => ({ ...user, email: user.email.toLowerCase() }),
+  (user) => ({ ...user, slug: user.name.replace(/\s+/g, "-").toLowerCase() }),
+  (user) => ({ ...user, createdAt: new Date().toISOString() }),
+);
+
+const user = processUser({ name: "  Bill Kennedy  ", email: "BILL@Example.COM" });
+// { name: "Bill Kennedy", email: "bill@example.com", slug: "bill-kennedy", createdAt: "..." }
+```
+
+### Async Pipe
+
+```javascript
+// Pipe that handles async functions
+const pipeAsync = (...fns) => (x) =>
+  fns.reduce((acc, fn) => acc.then(fn), Promise.resolve(x));
+
+const processOrder = pipeAsync(
+  validateOrder,      // sync or async
+  calculateTax,      // async (calls tax API)
+  applyDiscount,     // sync
+  chargePayment,     // async (calls payment API)
+  sendConfirmation,  // async (sends email)
+);
+
+const result = await processOrder(orderData);
+```
+
+---
+
+## 📚 5. Immutability Patterns
+
+### Definition 12.4.11 — Why Immutability?
+
+Mutable state is the #1 source of bugs in complex applications. Immutable patterns make state changes **explicit** and **traceable**:
+
+```javascript
+// ❌ MUTATION — hard to track what changed
+const user = { name: "Bill", scores: [85, 92] };
+user.scores.push(97); // Mutates in place — who did this? When?
+
+// ✅ IMMUTABLE — creates new reference, old state preserved
+const updatedUser = {
+  ...user,
+  scores: [...user.scores, 97],
+};
+// user.scores is still [85, 92]
+// updatedUser.scores is [85, 92, 97]
+```
+
+### Immutable Update Patterns
+
+```javascript
+// Object: update nested property
+const state = { user: { profile: { name: "Bill", age: 35 } } };
+const newState = {
+  ...state,
+  user: {
+    ...state.user,
+    profile: { ...state.user.profile, age: 36 },
+  },
+};
+
+// Array: common operations
+const arr = [1, 2, 3, 4, 5];
+const added = [...arr, 6];                          // Append
+const prepended = [0, ...arr];                      // Prepend
+const removed = arr.filter((_, i) => i !== 2);      // Remove index 2
+const updated = arr.map((v, i) => (i === 2 ? 99 : v)); // Update index 2
+const inserted = [...arr.slice(0, 2), 99, ...arr.slice(2)]; // Insert at index 2
+
+// New array methods (ES2023) — return new arrays, don't mutate!
+const sorted = arr.toSorted((a, b) => b - a);   // [5, 4, 3, 2, 1]
+const reversed = arr.toReversed();                // [5, 4, 3, 2, 1]
+const spliced = arr.toSpliced(1, 1, 99);         // [1, 99, 3, 4, 5]
+const withReplaced = arr.with(2, 99);            // [1, 2, 99, 4, 5]
+// Original `arr` is unchanged in all cases!
+```
+
+### Object.freeze (Shallow)
+
+```javascript
+const config = Object.freeze({
+  apiUrl: "https://api.example.com",
+  timeout: 5000,
+  nested: { mutable: true }, // ⚠️ NOT frozen (shallow freeze)
+});
+
+config.apiUrl = "hacked"; // Silently fails (or TypeError in strict mode)
+config.nested.mutable = false; // ✅ This WORKS — freeze is shallow
+
+// Deep freeze utility
+function deepFreeze(obj) {
+  Object.getOwnPropertyNames(obj).forEach((name) => {
+    const value = obj[name];
+    if (typeof value === "object" && value !== null) {
+      deepFreeze(value);
+    }
+  });
+  return Object.freeze(obj);
+}
+```
+
+---
+
+## 📚 6. Design Patterns in JavaScript
+
+### Pattern: Observer (Event Emitter)
+
+```javascript
+class EventEmitter {
+  #listeners = new Map();
+
+  on(event, callback) {
+    if (!this.#listeners.has(event)) {
+      this.#listeners.set(event, new Set());
+    }
+    this.#listeners.get(event).add(callback);
+    return () => this.off(event, callback); // Return unsubscribe function
+  }
+
+  off(event, callback) {
+    this.#listeners.get(event)?.delete(callback);
+  }
+
+  emit(event, ...args) {
+    this.#listeners.get(event)?.forEach((cb) => cb(...args));
+  }
+
+  once(event, callback) {
+    const unsub = this.on(event, (...args) => {
+      unsub();
+      callback(...args);
+    });
+    return unsub;
+  }
+}
+
+const bus = new EventEmitter();
+const unsub = bus.on("user:login", (user) => console.log(`Welcome, ${user.name}`));
+bus.emit("user:login", { name: "Bill" }); // "Welcome, Bill"
+unsub(); // Unsubscribe
+```
+
+### Pattern: Strategy
+
+```javascript
+// Strategies as plain objects
+const sortStrategies = {
+  byName: (a, b) => a.name.localeCompare(b.name),
+  byDate: (a, b) => new Date(b.date) - new Date(a.date),
+  byPrice: (a, b) => a.price - b.price,
+  byRating: (a, b) => b.rating - a.rating,
+};
+
+function sortProducts(products, strategy = "byName") {
+  const compareFn = sortStrategies[strategy];
+  if (!compareFn) throw new Error(`Unknown strategy: ${strategy}`);
+  return [...products].sort(compareFn);
+}
+
+const sorted = sortProducts(products, "byPrice");
+```
+
+### Pattern: Builder (Fluent API)
+
+```javascript
+class QueryBuilder {
+  #table = "";
+  #conditions = [];
+  #orderBy = [];
+  #limit = null;
+
+  from(table) { this.#table = table; return this; }
+  where(condition) { this.#conditions.push(condition); return this; }
+  orderBy(field, dir = "ASC") { this.#orderBy.push(`${field} ${dir}`); return this; }
+  limit(n) { this.#limit = n; return this; }
+
+  build() {
+    let sql = `SELECT * FROM ${this.#table}`;
+    if (this.#conditions.length) sql += ` WHERE ${this.#conditions.join(" AND ")}`;
+    if (this.#orderBy.length) sql += ` ORDER BY ${this.#orderBy.join(", ")}`;
+    if (this.#limit) sql += ` LIMIT ${this.#limit}`;
+    return sql;
+  }
+}
+
+const query = new QueryBuilder()
+  .from("users")
+  .where("age > 18")
+  .where("active = true")
+  .orderBy("name")
+  .limit(10)
+  .build();
+// "SELECT * FROM users WHERE age > 18 AND active = true ORDER BY name ASC LIMIT 10"
+```
+
+---
+
+## 📚 7. When to Use What — Decision Framework
+
+| Scenario | Pattern | Why |
+|----------|---------|-----|
+| Shared behavior across many instances | **Class** | Clear instantiation, private state |
+| Data transformation pipeline | **pipe/compose** | Readable, testable, no mutation |
+| Configurable behavior | **Strategy** | Swap algorithms without conditionals |
+| Event-driven communication | **Observer** | Decoupled publishers/subscribers |
+| Complex object construction | **Builder** | Step-by-step, readable construction |
+| Reusable logic across unrelated classes | **Composition/Mixins** | Avoids inheritance diamond |
+| State management | **Immutable updates** | Predictable, debuggable state |
+| Utility functions | **Module exports** | No class needed for stateless logic |
+
+---
+
+## 🏋️ 8. Exercises
+
+### Exercise 5.4.1 — Implement `pipe` with Type Safety
+
+```javascript
+// Implement pipe that:
+// 1. Works with any number of functions
+// 2. Handles async functions in the chain
+// 3. Short-circuits on error (like Promise chain)
+```
+
+### Exercise 5.4.2 — Refactor Inheritance to Composition
+
+Take this inheritance hierarchy and refactor to composition:
+
+```javascript
+class Vehicle { /* start(), stop(), fuel() */ }
+class Car extends Vehicle { /* drive(), park() */ }
+class ElectricCar extends Car { /* charge(), regenerativeBrake() */ }
+class HybridCar extends Car { /* charge(), switchMode() */ }
+// Problem: ElectricCar and HybridCar both need charge() but have different bases
+```
+
+### Exercise 5.4.3 — Build a Middleware System
+
+Implement Express-style middleware using function composition:
+
+```javascript
+const app = createApp();
+app.use(logger);      // Logs request
+app.use(auth);        // Checks auth header
+app.use(rateLimit);   // Rate limiting
+app.handle(request);  // Process through all middleware
+```
+
+---
+
+## 🔗 Cross-References
+
+- **Previous:** [12.3 - Async - Promises, Async_Await, Event Loop](12.3---Async---Promises,-Async_Await,-Event-Loop) — Async patterns compose beautifully with FP.
+- **Next:** [12.5 - Modules & Build Systems](12.5---Modules-&-Build-Systems) — How to organize OOP/FP code into modules.
+- **Python OOP:** [08.3 - OOP, Data Models & Pythonic Idioms](08.3---OOP,-Data-Models-&-Pythonic-Idioms) — Python's protocols ≈ JS's duck typing; Python's `@dataclass` ≈ JS's class with private fields.
+- **TypeScript:** [13 - TypeScript](13---TypeScript) — TS interfaces formalize the duck typing that JS composition relies on.
+- **React patterns:** [Track 08 App Architectures](Track-08-App-Architectures) — React hooks are FP composition applied to UI state.
+
+---
+
+## 📖 Further Reading
+
+- Douglas Crockford, *JavaScript: The Good Parts* — The original case for FP in JS
+- Kyle Simpson, *Functional-Light JavaScript* — [Free on GitHub](https://github.com/getify/Functional-Light-JS)
+- Eric Elliott, "Composing Software" series — [Medium articles on FP composition](https://medium.com/javascript-scene/composing-software-the-book-f31c77fc3ddc)
+- [MDN: Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
+
+
+
+---
+
+## 🏗️ 8. Extended Worked Examples & Deep Dives
+
+### 8.1 — Ramda vs Lodash/fp: Functional Library Comparison
+
+#### Philosophy Differences
+
+```js
+// Lodash/fp: Lodash with auto-curried, iteratee-first, data-last methods
+import { map, filter, flow, get, sortBy } from "lodash/fp";
+
+// Ramda: Purpose-built for FP, all functions curried, data-last
+import * as R from "ramda";
+
+// Example: Transform an array of users
+const users = [
+  { name: "Alice", age: 30, department: "Engineering" },
+  { name: "Bob", age: 25, department: "Marketing" },
+  { name: "Charlie", age: 35, department: "Engineering" },
+  { name: "Diana", age: 28, department: "Design" },
+];
+
+// Lodash/fp approach (flow = left-to-right composition)
+const getEngineers_lodash = flow(
+  filter({ department: "Engineering" }),
+  sortBy("age"),
+  map(get("name"))
+);
+getEngineers_lodash(users); // ["Alice", "Charlie"]
+
+// Ramda approach (pipe = left-to-right, compose = right-to-left)
+const getEngineers_ramda = R.pipe(
+  R.filter(R.propEq("Engineering", "department")),
+  R.sortBy(R.prop("age")),
+  R.map(R.prop("name"))
+);
+getEngineers_ramda(users); // ["Alice", "Charlie"]
+
+// Vanilla JS (no library needed for simple cases)
+const getEngineers_vanilla = (users) =>
+  users
+    .filter(u => u.department === "Engineering")
+    .sort((a, b) => a.age - b.age)
+    .map(u => u.name);
+```
+
+#### Key Differences
+
+| Feature | Lodash/fp | Ramda | Vanilla |
+|---------|-----------|-------|---------|
+| **Bundle size** | ~70KB (full), tree-shakeable | ~50KB (full) | 0KB |
+| **Currying** | Auto-curried (fixed arity) | Auto-curried (variadic-aware) | Manual |
+| **Composition** | `flow` (L→R), `flowRight` (R→L) | `pipe` (L→R), `compose` (R→L) | Manual |
+| **Immutability** | Returns new values | Returns new values | Must be careful |
+| **Lenses** | ❌ | ✅ `R.lens`, `R.view`, `R.set` | ❌ |
+| **Transducers** | ❌ | ✅ `R.transduce` | ❌ |
+| **TypeScript** | ✅ Good types | ⚠️ Complex types, some gaps | ✅ Native |
+| **Learning curve** | Low (familiar Lodash API) | Medium (FP concepts required) | None |
+
+#### Ramda Lenses (Functional Getters/Setters)
+
+```js
+import * as R from "ramda";
+
+const user = {
+  name: "Bill",
+  address: {
+    street: "123 Main St",
+    city: "Pittsburgh",
+    state: "PA",
+  },
+  hobbies: ["BMX", "coding", "VR"],
+};
+
+// Create a lens for nested property
+const cityLens = R.lensPath(["address", "city"]);
+
+// View (get)
+R.view(cityLens, user); // "Pittsburgh"
+
+// Set (immutable — returns new object)
+const moved = R.set(cityLens, "Austin", user);
+// moved.address.city === "Austin"
+// user.address.city === "Pittsburgh" (unchanged!)
+
+// Over (transform)
+const uppercased = R.over(cityLens, R.toUpper, user);
+// uppercased.address.city === "PITTSBURGH"
+
+// Lens for array element
+const firstHobbyLens = R.lensPath(["hobbies", 0]);
+R.view(firstHobbyLens, user); // "BMX"
+R.set(firstHobbyLens, "skateboarding", user); // { ..., hobbies: ["skateboarding", "coding", "VR"] }
+```
+
+---
+
+### 8.2 — Immer for Immutable Updates
+
+Immer lets you write "mutative" code that produces immutable updates. It uses Proxy under the hood to track changes.
+
+```js
+import { produce, enableMapSet, current, original } from "immer";
+
+// Basic usage: "mutate" a draft, get a new immutable object
+const baseState = {
+  users: [
+    { id: 1, name: "Alice", tasks: ["code", "review"] },
+    { id: 2, name: "Bob", tasks: ["design"] },
+  ],
+  settings: { theme: "dark", notifications: true },
+};
+
+const nextState = produce(baseState, (draft) => {
+  // Write code as if mutating — Immer tracks changes
+  draft.users[0].tasks.push("deploy");
+  draft.users.push({ id: 3, name: "Charlie", tasks: [] });
+  draft.settings.theme = "light";
+});
+
+// Structural sharing: unchanged parts are the SAME reference
+console.log(baseState.users[1] === nextState.users[1]); // true! (Bob unchanged)
+console.log(baseState.users[0] === nextState.users[0]); // false (Alice changed)
+console.log(baseState === nextState); // false
+
+// Curried producer (great for Redux reducers)
+const addTodo = produce((draft, todo) => {
+  draft.todos.push(todo);
+});
+
+const state1 = { todos: [] };
+const state2 = addTodo(state1, { text: "Learn Immer", done: false });
+
+// With React useState
+function TodoApp() {
+  const [state, setState] = useState({ todos: [], filter: "all" });
+
+  const addTodo = (text) => {
+    setState(produce(draft => {
+      draft.todos.push({ id: Date.now(), text, done: false });
+    }));
+  };
+
+  const toggleTodo = (id) => {
+    setState(produce(draft => {
+      const todo = draft.todos.find(t => t.id === id);
+      if (todo) todo.done = !todo.done;
+    }));
+  };
+}
+
+// Enable Map and Set support
+enableMapSet();
+
+const mapState = produce(new Map(["key", "value"]("key",-"value")), (draft) => {
+  draft.set("newKey", "newValue");
+  draft.delete("key");
+});
+```
+
+#### How Immer Works (Proxy-Based Copy-on-Write)
+
+```js
+// Simplified Immer implementation concept
+function produce(base, recipe) {
+  const copies = new Map(); // Track which objects were modified
+
+  function createProxy(target, path = []) {
+    return new Proxy(target, {
+      get(obj, prop) {
+        const value = obj[prop];
+        if (typeof value === "object" && value !== null) {
+          // Return a proxy for nested objects (lazy)
+          return createProxy(value, [...path, prop]);
+        }
+        return value;
+      },
+      set(obj, prop, value) {
+        // Copy-on-write: only copy when actually modified
+        if (!copies.has(obj)) {
+          copies.set(obj, Array.isArray(obj) ? [...obj] : { ...obj });
+        }
+        copies.get(obj)[prop] = value;
+        return true;
+      },
+    });
+  }
+
+  const draft = createProxy(base);
+  recipe(draft);
+
+  // Reconstruct: use copies where modified, originals where not
+  // (Real Immer is more sophisticated — handles nested copies, deletions, etc.)
+  return copies.has(base) ? copies.get(base) : base;
+}
+```
+
+---
+
+### 8.3 — Combinators: curry, compose, flip, pipe
+
+#### Curry — Transform Multi-Argument into Single-Argument Chain
+
+```js
+// Manual curry
+function curry(fn) {
+  const arity = fn.length;
+  return function curried(...args) {
+    if (args.length >= arity) {
+      return fn(...args);
+    }
+    return (...moreArgs) => curried(...args, ...moreArgs);
+  };
+}
+
+// Usage
+const add = curry((a, b, c) => a + b + c);
+add(1)(2)(3);     // 6
+add(1, 2)(3);     // 6
+add(1)(2, 3);     // 6
+add(1, 2, 3);     // 6
+
+// Practical: create specialized functions from general ones
+const multiply = curry((a, b) => a * b);
+const double = multiply(2);
+const triple = multiply(3);
+
+[1, 2, 3].map(double); // [2, 4, 6]
+[1, 2, 3].map(triple); // [3, 6, 9]
+
+// Curry with placeholder (Ramda-style)
+const __ = Symbol("placeholder");
+
+function curryWithPlaceholder(fn) {
+  const arity = fn.length;
+  return function curried(...args) {
+    const realArgs = args.filter(a => a !== __);
+    if (realArgs.length >= arity) {
+      return fn(...realArgs);
+    }
+    return (...moreArgs) => {
+      const merged = args.map(a => a === __ ? moreArgs.shift() : a);
+      return curried(...merged, ...moreArgs);
+    };
+  };
+}
+
+const divide = curryWithPlaceholder((a, b) => a / b);
+const halve = divide(__, 2);  // _ / 2
+halve(10); // 5
+```
+
+#### Compose & Pipe — Function Composition
+
+```js
+// compose: right-to-left (mathematical convention: f∘g means f(g(x)))
+function compose(...fns) {
+  return (x) => fns.reduceRight((acc, fn) => fn(acc), x);
+}
+
+// pipe: left-to-right (reading order — more intuitive)
+function pipe(...fns) {
+  return (x) => fns.reduce((acc, fn) => fn(acc), x);
+}
+
+// Example: data transformation pipeline
+const processUser = pipe(
+  (user) => ({ ...user, name: user.name.trim() }),
+  (user) => ({ ...user, email: user.email.toLowerCase() }),
+  (user) => ({ ...user, age: Number(user.age) }),
+  (user) => ({ ...user, isAdult: user.age >= 18 }),
+);
+
+processUser({ name: "  Bill  ", email: "BILL@Example.COM", age: "30" });
+// { name: "Bill", email: "bill@example.com", age: 30, isAdult: true }
+
+// Async pipe (handles promises in the chain)
+function pipeAsync(...fns) {
+  return (x) => fns.reduce(
+    (acc, fn) => acc.then(fn),
+    Promise.resolve(x)
+  );
+}
+
+const fetchAndProcess = pipeAsync(
+  (id) => fetch(`/api/users/${id}`),
+  (res) => res.json(),
+  (user) => ({ ...user, fetchedAt: Date.now() }),
+  (user) => saveToCache(user),
+);
+
+await fetchAndProcess("123");
+```
+
+#### Flip — Reverse Argument Order
+
+```js
+function flip(fn) {
+  return (...args) => fn(...args.reverse());
+}
+
+// Useful for adapting APIs
+const includes = (arr, item) => arr.includes(item);
+const isIncludedIn = flip(includes);
+
+// Now data-first:
+isIncludedIn("hello", ["hello", "world"]); // true
+
+// Or with curry:
+const isIn = curry(flip(includes));
+const isVowel = isIn(["a", "e", "i", "o", "u"]);
+isVowel("e"); // true
+```
+
+---
+
+### 8.4 — Transducers: Composable, Efficient Data Transformations
+
+Transducers solve the problem of creating intermediate arrays when chaining `.map().filter().reduce()`:
+
+```js
+// Problem: each step creates a new array
+const result = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  .filter(n => n % 2 === 0)  // Creates [2, 4, 6, 8, 10]
+  .map(n => n * 3)           // Creates [6, 12, 18, 24, 30]
+  .filter(n => n > 10)       // Creates [12, 18, 24, 30]
+  .map(n => `item-${n}`);    // Creates ["item-12", "item-18", "item-24", "item-30"]
+// 4 intermediate arrays! O(4n) memory for large datasets
+
+// Transducers: compose transformations, single pass, no intermediates
+
+// A transducer is a function that transforms a reducer
+// reducer: (accumulator, value) => accumulator
+// transducer: (reducer) => reducer
+
+// Step 1: Define transducer-compatible map and filter
+function mapT(fn) {
+  return (nextReducer) => (acc, value) => nextReducer(acc, fn(value));
+}
+
+function filterT(predicate) {
+  return (nextReducer) => (acc, value) =>
+    predicate(value) ? nextReducer(acc, value) : acc;
+}
+
+// Step 2: Compose transducers (left-to-right with compose!)
+function composeTransducers(...xforms) {
+  return (reducer) => xforms.reduceRight((r, xf) => xf(r), reducer);
+}
+
+// Step 3: Apply to data
+const xform = composeTransducers(
+  filterT(n => n % 2 === 0),
+  mapT(n => n * 3),
+  filterT(n => n > 10),
+  mapT(n => `item-${n}`)
+);
+
+// Single pass through the data!
+const finalReducer = xform((acc, val) => { acc.push(val); return acc; });
+const result2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].reduce(finalReducer, []);
+// ["item-12", "item-18", "item-24", "item-30"]
+
+// Generic transduce function
+function transduce(xform, reducer, init, collection) {
+  const xReducer = xform(reducer);
+  return collection.reduce(xReducer, init);
+}
+
+// Usage
+const output = transduce(
+  composeTransducers(
+    filterT(n => n % 2 === 0),
+    mapT(n => n ** 2)
+  ),
+  (acc, val) => { acc.push(val); return acc; },
+  [],
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+);
+// [4, 16, 36, 64, 100]
+
+// Transducers work with ANY data source (arrays, streams, generators, etc.)
+function* transduceGenerator(xform, iterable) {
+  const results = [];
+  const reducer = xform((acc, val) => { acc.push(val); return acc; });
+
+  for (const item of iterable) {
+    const before = results.length;
+    reducer(results, item);
+    // Yield any new items
+    while (results.length > before) {
+      yield results.shift();
+    }
+  }
+}
+```
+
+---
+
+### 8.5 — Algebraic Data Types in JavaScript
+
+```js
+// Option/Maybe type — explicit absence handling
+class Option {
+  #value;
+  #hasValue;
+
+  constructor(value, hasValue) {
+    this.#value = value;
+    this.#hasValue = hasValue;
+  }
+
+  static Some(value) { return new Option(value, true); }
+  static None() { return new Option(undefined, false); }
+  static from(value) {
+    return value != null ? Option.Some(value) : Option.None();
+  }
+
+  map(fn) {
+    return this.#hasValue ? Option.Some(fn(this.#value)) : this;
+  }
+
+  flatMap(fn) {
+    return this.#hasValue ? fn(this.#value) : this;
+  }
+
+  getOrElse(defaultValue) {
+    return this.#hasValue ? this.#value : defaultValue;
+  }
+
+  match({ some, none }) {
+    return this.#hasValue ? some(this.#value) : none();
+  }
+}
+
+// Result/Either type — typed error handling
+class Result {
+  #value;
+  #isOk;
+
+  constructor(value, isOk) {
+    this.#value = value;
+    this.#isOk = isOk;
+  }
+
+  static Ok(value) { return new Result(value, true); }
+  static Err(error) { return new Result(error, false); }
+
+  map(fn) {
+    return this.#isOk ? Result.Ok(fn(this.#value)) : this;
+  }
+
+  mapErr(fn) {
+    return this.#isOk ? this : Result.Err(fn(this.#value));
+  }
+
+  flatMap(fn) {
+    return this.#isOk ? fn(this.#value) : this;
+  }
+
+  match({ ok, err }) {
+    return this.#isOk ? ok(this.#value) : err(this.#value);
+  }
+
+  unwrap() {
+    if (!this.#isOk) throw new Error(`Unwrap on Err: ${this.#value}`);
+    return this.#value;
+  }
+}
+
+// Usage: composable error handling without try/catch
+function parseJSON(str) {
+  try {
+    return Result.Ok(JSON.parse(str));
+  } catch (e) {
+    return Result.Err(`Invalid JSON: ${e.message}`);
+  }
+}
+
+function validateUser(data) {
+  if (!data.name) return Result.Err("Missing name");
+  if (!data.email) return Result.Err("Missing email");
+  return Result.Ok(data);
+}
+
+const result = parseJSON('{"name": "Bill", "email": "bill@example.com"}')
+  .flatMap(validateUser)
+  .map(user => ({ ...user, createdAt: Date.now() }));
+
+result.match({
+  ok: (user) => console.log("Created:", user),
+  err: (error) => console.error("Failed:", error),
+});
+```
+
+
+
+
+---
+
+## 📎 9. Appendix: Extended Derivations & Special Cases
+
+### 9.1 — The Y-Combinator in JavaScript
+
+The Y-combinator enables recursion in languages without named functions. It's the theoretical foundation for all recursive computation.
+
+```js
+// The problem: How do you write a recursive function without naming it?
+// You can't reference yourself if you have no name.
+
+// The Y-combinator solves this by passing the function to itself:
+
+// Strict (applicative-order) Y-combinator for JavaScript
+// (JavaScript is strict/eager, so we need the Z-combinator variant)
+const Y = (f) => {
+  const g = (x) => f((v) => x(x)(v));
+  return g(g);
+};
+
+// Usage: factorial without self-reference
+const factorial = Y((self) => (n) => {
+  if (n <= 1) return 1;
+  return n * self(n - 1); // 'self' is the recursive reference
+});
+
+console.log(factorial(5)); // 120
+console.log(factorial(10)); // 3628800
+
+// Fibonacci
+const fibonacci = Y((self) => (n) => {
+  if (n <= 1) return n;
+  return self(n - 1) + self(n - 2);
+});
+
+console.log(fibonacci(10)); // 55
+
+// How it works (step by step):
+// Y(f) = g(g) where g = (x) => f((v) => x(x)(v))
+// g(g) = f((v) => g(g)(v))
+//       = f(Y(f))  ← f receives itself as first argument!
+//
+// The (v) => x(x)(v) wrapper is crucial in strict languages:
+// Without it: g = (x) => f(x(x)) → infinite expansion before f is called
+// With it: lazy — x(x) only evaluated when (v) => ... is actually called
+
+// Memoized Y-combinator (practical for dynamic programming)
+const Ymemo = (f) => {
+  const cache = new Map();
+  const memoized = Y((self) => (n) => {
+    if (cache.has(n)) return cache.get(n);
+    const result = f(self)(n);
+    cache.set(n, result);
+    return result;
+  });
+  return memoized;
+};
+
+const fibMemo = Ymemo((self) => (n) => {
+  if (n <= 1) return n;
+  return self(n - 1) + self(n - 2);
+});
+
+console.log(fibMemo(50)); // 12586269025 (instant, not exponential)
+```
+
+#### Derivation from Lambda Calculus
+
+```
+In lambda calculus (untyped):
+  Y = λf. (λx. f (x x)) (λx. f (x x))
+
+Applying Y to some function F:
+  Y F = (λx. F (x x)) (λx. F (x x))
+      = F ((λx. F (x x)) (λx. F (x x)))
+      = F (Y F)
+
+So Y F = F (Y F) = F (F (Y F)) = F (F (F (...)))
+Y gives F access to itself — enabling recursion without names!
+
+In JavaScript (strict evaluation requires eta-expansion):
+  Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)))
+  
+  The `v => x(x)(v)` is the eta-expansion that prevents
+  infinite evaluation in a strict (non-lazy) language.
+```
+
+---
+
+### 9.2 — Church Encoding Tutorial
+
+Church encoding represents data using only functions — no numbers, booleans, or data structures needed. Everything is a function.
+
+```js
+// Church Booleans — booleans as selector functions
+const TRUE = (a) => (_b) => a;   // Select first argument
+const FALSE = (_a) => (b) => b;  // Select second argument
+
+// IF is just function application!
+const IF = (condition) => (then) => (else_) => condition(then)(else_);
+
+// Boolean operations
+const AND = (a) => (b) => a(b)(FALSE);
+const OR = (a) => (b) => a(TRUE)(b);
+const NOT = (a) => a(FALSE)(TRUE);
+
+// Convert to JS booleans for display
+const toBool = (churchBool) => churchBool(true)(false);
+
+console.log(toBool(AND(TRUE)(TRUE)));   // true
+console.log(toBool(AND(TRUE)(FALSE)));  // false
+console.log(toBool(OR(FALSE)(TRUE)));   // true
+console.log(toBool(NOT(TRUE)));         // false
+
+// Church Numerals — numbers as repeated function application
+const ZERO = (_f) => (x) => x;           // Apply f zero times
+const ONE = (f) => (x) => f(x);          // Apply f once
+const TWO = (f) => (x) => f(f(x));       // Apply f twice
+const THREE = (f) => (x) => f(f(f(x)));  // Apply f three times
+
+// Successor: add one more application of f
+const SUCC = (n) => (f) => (x) => f(n(f)(x));
+
+// Addition: apply f (m+n) times
+const ADD = (m) => (n) => (f) => (x) => m(f)(n(f)(x));
+
+// Multiplication: apply f (m*n) times
+const MUL = (m) => (n) => (f) => m(n(f));
+
+// Exponentiation: m^n
+const POW = (m) => (n) => n(m);
+
+// Convert to JS number
+const toNum = (churchNum) => churchNum((x) => x + 1)(0);
+
+const FOUR = ADD(TWO)(TWO);
+const SIX = MUL(TWO)(THREE);
+const EIGHT = POW(TWO)(THREE);
+
+console.log(toNum(FOUR));  // 4
+console.log(toNum(SIX));   // 6
+console.log(toNum(EIGHT)); // 8
+
+// Church Pairs (tuples)
+const PAIR = (a) => (b) => (selector) => selector(a)(b);
+const FIRST = (pair) => pair(TRUE);
+const SECOND = (pair) => pair(FALSE);
+
+const myPair = PAIR(THREE)(FOUR);
+console.log(toNum(FIRST(myPair)));  // 3
+console.log(toNum(SECOND(myPair))); // 4
+
+// Church Lists (using pairs as cons cells)
+const NIL = PAIR(TRUE)(TRUE);  // Empty list marker
+const CONS = (head) => (tail) => PAIR(FALSE)(PAIR(head)(tail));
+const HEAD = (list) => FIRST(SECOND(list));
+const TAIL = (list) => SECOND(SECOND(list));
+const IS_NIL = (list) => FIRST(list);
+
+// Predecessor (subtraction) — the hardest Church encoding
+// Uses the "shift-and-increment" trick with pairs
+const PRED = (n) => FIRST(
+  n((pair) => PAIR(SECOND(pair))(SUCC(SECOND(pair))))
+   (PAIR(ZERO)(ZERO))
+);
+
+console.log(toNum(PRED(THREE))); // 2
+```
+
+---
+
+### 9.3 — Tail-Call Elimination Status
+
+**Proper Tail Calls (PTC)** allow recursive functions to run in constant stack space. ES2015 specifies PTC, but only Safari implements it.
+
+```js
+// A tail call: the recursive call is the LAST thing the function does
+// (no computation after the recursive call returns)
+
+// ❌ NOT a tail call (multiplication happens AFTER recursion returns)
+function factorial(n) {
+  if (n <= 1) return 1;
+  return n * factorial(n - 1); // Must multiply after recursive call returns
+}
+// factorial(100000) → Stack overflow!
+
+// ✅ Tail call (recursive call IS the return value — nothing after it)
+function factorialTC(n, acc = 1) {
+  if (n <= 1) return acc;
+  return factorialTC(n - 1, n * acc); // Tail position — can reuse stack frame
+}
+// In Safari: factorialTC(100000) → works! (constant stack space)
+// In Chrome/Firefox/Node: still stack overflows (PTC not implemented)
+
+// Why other engines don't implement PTC:
+// 1. Debugging: stack traces disappear (can't see recursive calls)
+// 2. Performance: checking for tail position has overhead
+// 3. Implicit behavior: developers don't know when PTC applies
+// 4. V8 proposed "Syntactic Tail Calls" (explicit opt-in) but it stalled
+```
+
+#### Workarounds for Non-Safari Engines
+
+```js
+// Trampoline: manual tail-call elimination
+function trampoline(fn) {
+  return (...args) => {
+    let result = fn(...args);
+    while (typeof result === "function") {
+      result = result(); // Keep calling until we get a non-function
+    }
+    return result;
+  };
+}
+
+// Rewrite recursive function to return thunks (lazy calls)
+function factorialTrampoline(n, acc = 1) {
+  if (n <= 1) return acc;
+  return () => factorialTrampoline(n - 1, n * acc); // Return thunk, don't call
+}
+
+const factorial = trampoline(factorialTrampoline);
+console.log(factorial(100000)); // Works in ALL engines! No stack overflow.
+
+// Generator-based recursion (another approach)
+function* factorialGen(n, acc = 1) {
+  if (n <= 1) return acc;
+  return yield [n - 1, n * acc]; // Yield args for next call
+}
+
+function runGenerator(genFn) {
+  return (...initialArgs) => {
+    let args = initialArgs;
+    while (true) {
+      const gen = genFn(...args);
+      const { value, done } = gen.next();
+      if (done) return value;
+      args = value; // Use yielded args for next iteration
+    }
+  };
+}
+
+const factGen = runGenerator(factorialGen);
+console.log(factGen(100000, 1)); // Works!
+
+// Iterative conversion (most practical for production)
+function factorialIterative(n) {
+  let acc = 1n; // BigInt for large numbers
+  for (let i = 2n; i <= BigInt(n); i++) {
+    acc *= i;
+  }
+  return acc;
+}
+```
+
+#### Browser/Runtime Support Table
+
+| Engine | PTC Support | Status |
+|--------|-------------|--------|
+| Safari (JSC) | ✅ Full | Shipped since Safari 10 (2016) |
+| Chrome (V8) | ❌ | Rejected — prefers explicit syntax |
+| Firefox (SpiderMonkey) | ❌ | No plans to implement |
+| Node.js (V8) | ❌ | Was behind `--harmony_tailcalls`, removed |
+| Bun (JSC) | ✅ Full | Inherits from JavaScriptCore |
+| Deno (V8) | ❌ | Same as Chrome |
+
+---
+
+### 9.4 — Monads in JavaScript (Practical, Not Academic)
+
+```js
+// A Monad is any type that implements:
+// 1. of(value) — wrap a value (also called "return" or "unit")
+// 2. flatMap(fn) — chain operations (also called "bind" or ">>=")
+//
+// Laws:
+// Left identity:  M.of(a).flatMap(f) === f(a)
+// Right identity: m.flatMap(M.of) === m
+// Associativity:  m.flatMap(f).flatMap(g) === m.flatMap(x => f(x).flatMap(g))
+
+// Array is a monad!
+// of: [value]
+// flatMap: Array.prototype.flatMap
+
+[1, 2, 3].flatMap(x => [x, x * 2]);
+// [1, 2, 2, 4, 3, 6]
+
+// Promise is (almost) a monad!
+// of: Promise.resolve(value)
+// flatMap: .then() (auto-flattens nested Promises)
+
+Promise.resolve(1).then(x => Promise.resolve(x + 1));
+// Promise<2> (not Promise<Promise<2>> — auto-flattened)
+
+// IO Monad — defer side effects
+class IO {
+  #effect;
+  constructor(effect) { this.#effect = effect; }
+
+  static of(value) { return new IO(() => value); }
+
+  map(fn) {
+    return new IO(() => fn(this.#effect()));
+  }
+
+  flatMap(fn) {
+    return new IO(() => fn(this.#effect()).run());
+  }
+
+  run() { return this.#effect(); }
+}
+
+// Build a program without executing side effects
+const program = IO.of("hello")
+  .map(s => s.toUpperCase())
+  .flatMap(s => new IO(() => {
+    console.log(s); // Side effect deferred!
+    return s.length;
+  }))
+  .map(n => n * 2);
+
+// Nothing has happened yet! No console.log, no side effects.
+// Only when we explicitly run:
+const result = program.run(); // NOW prints "HELLO", returns 10
+```
+
+---
+
+### 9.5 — Pattern Matching (TC39 Stage 1 Proposal)
+
+```js
+// Current proposal syntax (Stage 1 — may change significantly)
+// This is what pattern matching MIGHT look like in future JavaScript:
+
+// match (value) {
+//   when ({ type: "circle", radius: r }) -> Math.PI * r ** 2;
+//   when ({ type: "rect", width: w, height: h }) -> w * h;
+//   when ({ type: "triangle", base: b, height: h }) -> 0.5 * b * h;
+//   default -> throw new Error("Unknown shape");
+// }
+
+// TODAY: Implement pattern matching with plain JavaScript
+
+// Approach 1: Object dispatch (simple patterns)
+const shapeArea = {
+  circle: ({ radius }) => Math.PI * radius ** 2,
+  rect: ({ width, height }) => width * height,
+  triangle: ({ base, height }) => 0.5 * base * height,
+};
+
+function area(shape) {
+  const handler = shapeArea[shape.type];
+  if (!handler) throw new Error(`Unknown shape: ${shape.type}`);
+  return handler(shape);
+}
+
+// Approach 2: Match utility (more expressive)
+function match(value) {
+  const cases = [];
+  const api = {
+    when(predicate, handler) {
+      cases.push({ predicate, handler });
+      return api;
+    },
+    otherwise(handler) {
+      cases.push({ predicate: () => true, handler });
+      return api;
+    },
+    run() {
+      for (const { predicate, handler } of cases) {
+        if (predicate(value)) return handler(value);
+      }
+      throw new Error("No match found");
+    },
+  };
+  return api;
+}
+
+const result = match({ type: "circle", radius: 5 })
+  .when(s => s.type === "circle", s => Math.PI * s.radius ** 2)
+  .when(s => s.type === "rect", s => s.width * s.height)
+  .otherwise(() => 0)
+  .run();
+// 78.54...
+
+// Approach 3: ts-pattern library (TypeScript, exhaustive checking)
+// import { match, P } from "ts-pattern";
+// const area = match(shape)
+//   .with({ type: "circle", radius: P.number }, ({ radius }) => Math.PI * radius ** 2)
+//   .with({ type: "rect" }, ({ width, height }) => width * height)
+//   .exhaustive();
+```
+
+---
+
+*Last updated: 2026-05-24*

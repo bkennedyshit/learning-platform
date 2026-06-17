@@ -1,0 +1,34 @@
+<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="rl-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .rl-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 10; }
+    .rl-box:hover { filter: drop-shadow(0 0 5px var(--interactive-accent, #58a6ff)); }
+    .rl-line { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 6 4; animation: rlFlow 1s linear infinite; }
+    @keyframes rlFlow { to { stroke-dashoffset: -10; } }
+    .rl-lbl { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .rl-acc { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+  </style>
+  <!-- Agent box -->
+  <rect x="50" y="30" width="150" height="70" class="rl-box"/>
+  <text x="125" y="60" class="rl-acc">Agent</text>
+  <text x="125" y="80" class="rl-lbl">π(a|s) — policy</text>
+  <!-- Environment box -->
+  <rect x="300" y="30" width="150" height="70" class="rl-box"/>
+  <text x="375" y="60" class="rl-acc">Environment</text>
+  <text x="375" y="80" class="rl-lbl">P(s'|s,a), R(s,a)</text>
+  <!-- Action arrow (top) -->
+  <path d="M 200 50 C 240 20 310 20 300 50" class="rl-line" marker-end="url(#rl-arr)"/>
+  <text x="250" y="20" class="rl-acc">action aₜ</text>
+  <!-- State + Reward arrow (bottom) -->
+  <path d="M 300 85 C 260 120 200 120 200 85" class="rl-line" marker-end="url(#rl-arr)"/>
+  <text x="250" y="135" class="rl-acc">state sₜ₊₁, reward rₜ</text>
+  <!-- Goal box -->
+  <rect x="130" y="180" width="240" height="60" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="250" y="200" class="rl-acc">Objective</text>
+  <text x="250" y="220" class="rl-lbl">Maximize E[Σ γᵗ rₜ] — discounted return</text>
+  <text x="250" y="235" class="rl-lbl" fill="var(--text-muted, #8b949e)">γ ∈ [0,1) = discount factor</text>
+</svg>

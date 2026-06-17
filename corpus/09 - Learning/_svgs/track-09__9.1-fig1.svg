@@ -1,0 +1,129 @@
+<svg viewBox="0 0 750 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:750px;height:auto;">
+  <defs>
+    <marker id="pipe-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+    <marker id="axis-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 2 L8 5 L0 8z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .pipe-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; transition: all 0.3s; }
+    .pipe-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .pipe-label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; font-weight: bold; }
+    .pipe-sub { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .pipe-conn { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 5, 5; animation: dashFlow 1.5s linear infinite; }
+    .matrix-label { font-family: 'Courier New', monospace; font-size: 9px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    .coord-axis { stroke-width: 1.8; fill: none; }
+    .ax-x { stroke: #e74c3c; }
+    .ax-y { stroke: #2ecc71; }
+    .ax-z { stroke: #3498db; }
+    .obj-mesh { stroke: var(--text-normal, #c9d1d9); stroke-width: 1; fill: none; opacity: 0.7; animation: pulseMesh 3s ease-in-out infinite; }
+    .title-text { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; font-weight: bold; }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -20; }
+    }
+    @keyframes pulseMesh {
+      0%, 100% { stroke: var(--text-normal, #c9d1d9); }
+      50% { stroke: var(--interactive-accent, #58a6ff); opacity: 1; }
+    }
+  </style>
+
+  <text x="375" y="25" class="title-text">The Coordinate Space Pipeline</text>
+
+  <!-- Object Space Box -->
+  <rect x="20" y="50" width="110" height="70" class="pipe-box"/>
+  <text x="75" y="78" class="pipe-label">Object Space</text>
+  <text x="75" y="95" class="pipe-sub">(Local / Model)</text>
+  <text x="75" y="110" class="pipe-sub">origin at mesh center</text>
+
+  <!-- Arrow: Object → World -->
+  <line x1="130" y1="85" x2="175" y2="85" class="pipe-conn" marker-end="url(#pipe-arrow)"/>
+  <text x="152" y="75" class="matrix-label">M_model</text>
+
+  <!-- World Space Box -->
+  <rect x="175" y="50" width="110" height="70" class="pipe-box"/>
+  <text x="230" y="78" class="pipe-label">World Space</text>
+  <text x="230" y="95" class="pipe-sub">(Scene / Global)</text>
+  <text x="230" y="110" class="pipe-sub">shared coordinate frame</text>
+
+  <!-- Arrow: World → View -->
+  <line x1="285" y1="85" x2="330" y2="85" class="pipe-conn" marker-end="url(#pipe-arrow)"/>
+  <text x="307" y="75" class="matrix-label">M_view</text>
+
+  <!-- View Space Box -->
+  <rect x="330" y="50" width="110" height="70" class="pipe-box"/>
+  <text x="385" y="78" class="pipe-label">View Space</text>
+  <text x="385" y="95" class="pipe-sub">(Camera / Eye)</text>
+  <text x="385" y="110" class="pipe-sub">camera at origin</text>
+
+  <!-- Arrow: View → Clip -->
+  <line x1="440" y1="85" x2="485" y2="85" class="pipe-conn" marker-end="url(#pipe-arrow)"/>
+  <text x="462" y="75" class="matrix-label">M_proj</text>
+
+  <!-- Clip Space Box -->
+  <rect x="485" y="50" width="110" height="70" class="pipe-box"/>
+  <text x="540" y="78" class="pipe-label">Clip Space</text>
+  <text x="540" y="95" class="pipe-sub">(Homogeneous)</text>
+  <text x="540" y="110" class="pipe-sub">w ≠ 1, frustum clip</text>
+
+  <!-- Arrow: Clip → NDC -->
+  <line x1="595" y1="85" x2="640" y2="85" class="pipe-conn" marker-end="url(#pipe-arrow)"/>
+  <text x="617" y="75" class="matrix-label">÷ w</text>
+
+  <!-- NDC Box -->
+  <rect x="640" y="50" width="90" height="70" class="pipe-box"/>
+  <text x="685" y="78" class="pipe-label">NDC</text>
+  <text x="685" y="95" class="pipe-sub">[-1,1]³ or [0,1]³</text>
+  <text x="685" y="110" class="pipe-sub">perspective divide</text>
+
+  <!-- Second row: combined pipeline formula -->
+  <rect x="100" y="160" width="550" height="50" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1.5"/>
+  <text x="375" y="185" class="pipe-label" font-size="12px">v_clip = M_projection × M_view × M_model × v_local</text>
+  <text x="375" y="200" class="pipe-sub" font-size="10px">Then: v_ndc = v_clip.xyz / v_clip.w → viewport transform → screen pixels</text>
+
+  <!-- 3D Axes Demo (Object Space) -->
+  <g transform="translate(75, 310)">
+    <text x="0" y="-55" class="pipe-sub" font-size="10px">Object Space Axes</text>
+    <!-- X axis (red) -->
+    <line x1="0" y1="0" x2="40" y2="10" class="coord-axis ax-x" marker-end="url(#axis-arrow)"/>
+    <text x="45" y="14" font-size="9px" fill="#e74c3c">X</text>
+    <!-- Y axis (green) -->
+    <line x1="0" y1="0" x2="0" y2="-40" class="coord-axis ax-y" marker-end="url(#axis-arrow)"/>
+    <text x="5" y="-42" font-size="9px" fill="#2ecc71">Y</text>
+    <!-- Z axis (blue) -->
+    <line x1="0" y1="0" x2="-25" y2="20" class="coord-axis ax-z" marker-end="url(#axis-arrow)"/>
+    <text x="-35" y="25" font-size="9px" fill="#3498db">Z</text>
+    <!-- Simple cube wireframe -->
+    <path d="M-10,-25 L20,-15 L20,10 L-10,0 Z" class="obj-mesh"/>
+    <path d="M-10,-25 L-25,-15 L-25,10 L-10,0" class="obj-mesh"/>
+    <path d="M-25,-15 L5,-5 L20,-15" class="obj-mesh" stroke-dasharray="3 2"/>
+  </g>
+
+  <!-- View Frustum Demo -->
+  <g transform="translate(385, 310)">
+    <text x="0" y="-55" class="pipe-sub" font-size="10px">View Frustum</text>
+    <!-- Camera point -->
+    <circle cx="0" cy="0" r="3" fill="var(--interactive-accent, #58a6ff)"/>
+    <text x="-15" y="15" font-size="8px" fill="var(--text-muted, #8b949e)">eye</text>
+    <!-- Frustum lines -->
+    <line x1="0" y1="0" x2="60" y2="-35" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+    <line x1="0" y1="0" x2="60" y2="35" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+    <!-- Near plane -->
+    <line x1="15" y1="-9" x2="15" y2="9" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+    <text x="15" y="18" font-size="7px" fill="var(--text-muted, #8b949e)">near</text>
+    <!-- Far plane -->
+    <line x1="55" y1="-32" x2="55" y2="32" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5"/>
+    <text x="55" y="42" font-size="7px" fill="var(--text-muted, #8b949e)">far</text>
+  </g>
+
+  <!-- Screen Space Demo -->
+  <g transform="translate(620, 290)">
+    <text x="50" y="-35" class="pipe-sub" font-size="10px">Screen Space</text>
+    <rect x="10" y="-20" width="80" height="55" fill="none" stroke="var(--text-normal, #c9d1d9)" stroke-width="1.5" rx="3"/>
+    <text x="15" y="-10" font-size="7px" fill="var(--text-muted, #8b949e)">(0,0)</text>
+    <text x="65" y="42" font-size="7px" fill="var(--text-muted, #8b949e)">(W,H)</text>
+    <!-- Projected triangle -->
+    <polygon points="30,5 60,25 40,30" fill="var(--interactive-accent, #58a6ff)" opacity="0.3" stroke="var(--interactive-accent, #58a6ff)" stroke-width="1"/>
+  </g>
+</svg>

@@ -1,0 +1,95 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .thread-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 6; transition: all 0.3s; cursor: pointer; }
+    .thread-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .mutex-box { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 4; }
+    .coro-box { fill: none; stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; stroke-dasharray: 5,3; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    .timeline { stroke: var(--text-normal, #c9d1d9); stroke-width: 2; fill: none; }
+    .active { stroke: var(--interactive-accent, #58a6ff); stroke-width: 4; fill: none; stroke-linecap: round; }
+    .blocked { stroke: var(--text-muted, #8b949e); stroke-width: 4; fill: none; stroke-dasharray: 3,3; stroke-linecap: round; }
+    .anim-pulse { animation: concPulse 2s ease-in-out infinite; }
+    @keyframes concPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+  </style>
+
+  <text x="350" y="22" class="title">C++ Concurrency — Threads, Atomics &amp; Coroutines</text>
+
+  <!-- Thread timeline -->
+  <text x="100" y="50" class="section-label">Thread Execution (true parallelism)</text>
+
+  <text x="50" y="75" class="label">T1</text>
+  <line x1="80" y1="72" x2="350" y2="72" class="timeline"/>
+  <line x1="80" y1="72" x2="180" y2="72" class="active"/>
+  <line x1="180" y1="72" x2="220" y2="72" class="blocked"/>
+  <line x1="220" y1="72" x2="350" y2="72" class="active"/>
+
+  <text x="50" y="97" class="label">T2</text>
+  <line x1="80" y1="94" x2="350" y2="94" class="timeline"/>
+  <line x1="80" y1="94" x2="140" y2="94" class="blocked"/>
+  <line x1="140" y1="94" x2="280" y2="94" class="active"/>
+  <line x1="280" y1="94" x2="350" y2="94" class="blocked"/>
+
+  <text x="50" y="119" class="label">T3</text>
+  <line x1="80" y1="116" x2="350" y2="116" class="timeline"/>
+  <line x1="80" y1="116" x2="350" y2="116" class="active anim-pulse"/>
+
+  <!-- Mutex indicator -->
+  <rect x="175" y="60" width="50" height="48" class="mutex-box"/>
+  <text x="200" y="88" class="label">🔒</text>
+  <text x="200" y="55" class="detail">mutex</text>
+
+  <!-- Legend -->
+  <line x1="380" y1="72" x2="420" y2="72" class="active"/>
+  <text x="460" y="76" class="detail">Running</text>
+  <line x1="380" y1="92" x2="420" y2="92" class="blocked"/>
+  <text x="460" y="96" class="detail">Blocked/Waiting</text>
+
+  <!-- Synchronization primitives -->
+  <text x="350" y="150" class="section-label">Synchronization Primitives</text>
+
+  <rect x="30" y="165" width="130" height="50" class="thread-box"/>
+  <text x="95" y="185" class="label">mutex</text>
+  <text x="95" y="202" class="detail">Exclusive access</text>
+
+  <rect x="175" y="165" width="130" height="50" class="thread-box"/>
+  <text x="240" y="185" class="label">atomic&lt;T&gt;</text>
+  <text x="240" y="202" class="detail">Lock-free ops</text>
+
+  <rect x="320" y="165" width="130" height="50" class="thread-box"/>
+  <text x="385" y="185" class="label">condition_var</text>
+  <text x="385" y="202" class="detail">Wait/notify</text>
+
+  <rect x="465" y="165" width="130" height="50" class="thread-box"/>
+  <text x="530" y="185" class="label">future/promise</text>
+  <text x="530" y="202" class="detail">Async results</text>
+
+  <!-- Coroutines section -->
+  <text x="350" y="240" class="section-label">Coroutines (cooperative, single-thread)</text>
+
+  <rect x="30" y="255" width="640" height="55" class="coro-box"/>
+  <text x="80" y="275" class="label">Coro A</text>
+  <line x1="110" y1="275" x2="200" y2="275" class="active"/>
+  <text x="215" y="275" class="detail">await</text>
+  <line x1="240" y1="275" x2="330" y2="275" class="blocked"/>
+  <line x1="330" y1="275" x2="420" y2="275" class="active"/>
+
+  <text x="80" y="298" class="label">Coro B</text>
+  <line x1="110" y1="298" x2="200" y2="298" class="blocked"/>
+  <line x1="200" y1="298" x2="330" y2="298" class="active"/>
+  <text x="345" y="298" class="detail">await</text>
+  <line x1="360" y1="298" x2="420" y2="298" class="blocked"/>
+  <line x1="420" y1="298" x2="500" y2="298" class="active"/>
+
+  <text x="550" y="285" class="detail">Single thread</text>
+  <text x="550" y="298" class="detail">No OS scheduling</text>
+
+  <!-- Python comparison -->
+  <text x="350" y="335" class="section-label">Python vs C++ Concurrency</text>
+  <text x="180" y="355" class="detail">Python: GIL blocks true parallelism</text>
+  <text x="500" y="355" class="detail">C++: Real parallel threads (no GIL)</text>
+  <text x="180" y="370" class="detail">asyncio = cooperative (like coroutines)</text>
+  <text x="500" y="370" class="detail">std::thread = preemptive (OS-scheduled)</text>
+</svg>

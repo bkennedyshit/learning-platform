@@ -1,0 +1,79 @@
+<svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="ipt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+    <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd43b" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffd43b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .ipt-earth-orbit { stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; fill: none; stroke-dasharray: 6 3; }
+    .ipt-mars-orbit { stroke: #ff6b6b; stroke-width: 1.5; fill: none; stroke-dasharray: 6 3; }
+    .ipt-transfer { stroke: var(--text-accent, #79c0ff); stroke-width: 3; fill: none; }
+    .ipt-hyp { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; }
+    .ipt-label { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .ipt-accent { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .ipt-soi { stroke: var(--text-muted, #8b949e); stroke-width: 1; fill: none; stroke-dasharray: 3 2; }
+    .ipt-planet { cursor: pointer; transition: all 0.3s; }
+    .ipt-planet:hover { r: 12; filter: drop-shadow(0 0 6px var(--interactive-accent, #58a6ff)); }
+    .ipt-transfer { stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawIPT 6s linear infinite; }
+    @keyframes drawIPT { 0% { stroke-dashoffset: 800; } 100% { stroke-dashoffset: 0; } }
+  </style>
+
+  <!-- Sun -->
+  <circle cx="350" cy="250" r="25" fill="url(#sun-glow)"/>
+  <circle cx="350" cy="250" r="12" fill="#ffd43b"/>
+  <text x="350" y="280" class="ipt-label" text-anchor="middle">Sun</text>
+
+  <!-- Earth orbit -->
+  <circle cx="350" cy="250" r="120" class="ipt-earth-orbit"/>
+  <text x="350" y="115" class="ipt-label" text-anchor="middle" fill="var(--interactive-accent, #58a6ff)">Earth orbit (1 AU)</text>
+
+  <!-- Mars orbit -->
+  <circle cx="350" cy="250" r="185" class="ipt-mars-orbit"/>
+  <text x="350" y="50" class="ipt-label" text-anchor="middle" fill="#ff6b6b">Mars orbit (1.524 AU)</text>
+
+  <!-- Earth at departure -->
+  <circle cx="230" cy="250" r="8" class="ipt-planet" fill="var(--interactive-accent, #58a6ff)"/>
+  <text x="210" y="270" class="ipt-accent">Earth (dep)</text>
+  <!-- SOI around Earth -->
+  <circle cx="230" cy="250" r="20" class="ipt-soi"/>
+
+  <!-- Mars at arrival -->
+  <circle cx="535" cy="250" r="7" class="ipt-planet" fill="#ff6b6b"/>
+  <text x="540" y="270" class="ipt-label" fill="#ff6b6b">Mars (arr)</text>
+  <!-- SOI around Mars -->
+  <circle cx="535" cy="250" r="18" class="ipt-soi"/>
+
+  <!-- Hohmann transfer ellipse (half) -->
+  <path d="M 230 250 A 152.5 140 0 0 1 535 250" class="ipt-transfer"/>
+  
+  <!-- Animated Spacecraft -->
+  <g>
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 230 250 A 152.5 140 0 0 1 535 250" />
+    <circle cx="0" cy="0" r="5" fill="var(--text-accent, #79c0ff)" stroke="var(--background-secondary, #161b22)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Departure hyperbola (small, near Earth) -->
+  <path d="M 230 250 Q 215 235 220 220" class="ipt-hyp" marker-end="url(#ipt-arrow)"/>
+  <text x="195" y="215" class="ipt-label" fill="var(--interactive-accent, #58a6ff)">v∞,dep</text>
+
+  <!-- Arrival hyperbola (small, near Mars) -->
+  <path d="M 535 250 Q 545 240 550 225" class="ipt-hyp" stroke="#ff6b6b" marker-end="url(#ipt-arrow)"/>
+  <text x="555" y="220" class="ipt-label" fill="#ff6b6b">v∞,arr</text>
+
+  <!-- Phase angle -->
+  <path d="M 400 250 A 50 50 0 0 0 350 200" stroke="var(--text-accent, #79c0ff)" stroke-width="1.5" fill="none"/>
+  <text x="390" y="210" class="ipt-label" fill="var(--text-accent, #79c0ff)">Phase angle φ</text>
+
+  <!-- Info box -->
+  <rect x="10" y="350" width="280" height="140" rx="6" fill="var(--background-secondary, #161b22)" stroke="var(--text-muted, #8b949e)" stroke-width="1"/>
+  <text x="150" y="372" class="ipt-accent" text-anchor="middle">Patched-Conic Method</text>
+  <text x="20" y="395" class="ipt-label">1. Heliocentric transfer (Sun gravity)</text>
+  <text x="20" y="415" class="ipt-label">2. Departure hyperbola (planet gravity)</text>
+  <text x="20" y="435" class="ipt-label">3. Arrival hyperbola (planet gravity)</text>
+  <text x="20" y="458" class="ipt-label">v∞ = |v_sc − v_planet| at SOI</text>
+  <text x="20" y="478" class="ipt-label">ΔV = v_dep − v_parking orbit</text>
+</svg>

@@ -1,0 +1,207 @@
+---
+title: "20.7 — Deployment Strategies"
+subject: "DevOps & SRE"
+catalog: advanced
+audience_tier: higher-education
+chapter: "20.7"
+type: chapter
+objectives:
+  - "Understand the concepts"
+  - "Apply the theory"
+open_source: true
+---
+
+*Back to [Subject_Plan](Subject_Plan) | Part of [00 - 09 - Learning Index](00---09---Learning-Index)*
+
+# 20.7 — Deployment Strategies
+
+> *"Deploy is mechanical. Release is a business decision. Separate them."*
+
+This chapter is the **release valve**. With CI/CD ([20.1 - CI-CD Foundations](20.1---CI-CD-Foundations)) producing signed artifacts, GitOps ([20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration)) reconciling, observability ([20.4 - Observability - Logs, Metrics, Traces](20.4---Observability---Logs,-Metrics,-Traces)) emitting, SLOs ([20.5 - SLOs, SLAs, Error Budgets & Incident Response](20.5---SLOs,-SLAs,-Error-Budgets-&-Incident-Response)) gating, and chaos ([20.6 - Chaos Engineering & Resilience](20.6---Chaos-Engineering-&-Resilience)) verifying, you now choose **how** to expose new code to users — usually progressively.
+
+---
+
+## 🎯 Learning Objectives
+
+1. Compare **rolling**, **blue-green**, **canary**, and **shadow** deployments.
+2. Run a canary on Kubernetes with **Argo Rollouts** or **Flagger** — both progressive-delivery controllers built on top of GitOps.
+3. Decouple **deploy** from **release** using **feature flags** (LaunchDarkly, Flagsmith, Unleash, OpenFeature).
+4. Author a **canary analysis** that reads SLO burn rate from Prometheus and auto-promotes or auto-rolls-back.
+5. Decide between Argo Rollouts (replaces Deployment with a Rollout CRD) and Flagger (sidecar to Deployment + service-mesh integration).
+
+---
+
+## 🖼️ Visual Anchor
+
+![dev-20__fig4](dev-20__fig4.svg)
+
+> *Picture / video reference (external):*
+> - 📺 [Argo Rollouts docs](https://argo-rollouts.readthedocs.io/)
+> - 📺 [Flagger docs](https://docs.flagger.app/)
+> - 📺 [Red Hat — Blue-Green and Canary with Argo Rollouts](https://www.redhat.com/architect/blue-green-canary-argo-rollouts)
+> - 📺 [LaunchDarkly Galaxy talks](https://launchdarkly.com/galaxy/)
+> - 📺 [OpenFeature docs](https://openfeature.dev/)
+
+---
+
+## 📚 1. The Five Strategies
+
+| Strategy | Idea | Pros | Cons |
+|---|---|---|---|
+| **Recreate** | Stop old, start new | Simple | Downtime |
+| **Rolling** | Replace pods one batch at a time | No downtime, default in K8s | Mixed-version window; slow rollback |
+| **Blue-Green** | Run two full copies; flip traffic in one shot | Instant rollback by flipping back | 2× resources during cutover |
+| **Canary** | Gradually shift traffic 1% → 5% → 25% → 100%, watching SLI | Low blast radius; SLI-gated | More complex routing |
+| **Shadow** | Send a copy of prod traffic to new version; don't return responses | Real load, zero customer risk | Hard for stateful / write APIs |
+
+Most modern Kubernetes shops default to **rolling for low-risk** and **canary for risk-bearing** changes.
+
+---
+
+## 🌀 2. Argo Rollouts vs Flagger
+
+Both are open-source progressive-delivery controllers for Kubernetes. (paraphrased from [oneuptime — ArgoCD + Argo Rollouts vs Flagger](https://oneuptime.com/blog/post/2026-02-26-argocd-rollouts-vs-flagger/view) and [sumguy — Argo Rollouts vs Flagger](https://sumguy.com/argo-rollouts-vs-flagger/), rephrased for compliance)
+
+| Dimension | Argo Rollouts | Flagger |
+|---|---|---|
+| **Model** | Replace Deployment with a `Rollout` CRD | Sidecar to existing Deployment via a `Canary` CRD |
+| **Traffic shifting** | NGINX, Istio, AWS ALB, Traefik, SMI | Istio, Linkerd, App Mesh, NGINX, Gloo, Skipper, Contour |
+| **Analysis** | `AnalysisTemplate` querying Prometheus, Datadog, New Relic, etc. | MetricTemplate against Prometheus, Datadog, New Relic, etc. |
+| **Common pairing** | Argo CD (one ecosystem) | Flux CD (Weaveworks origin) |
+| **Strengths** | Tight Argo CD integration, dashboard visibility | Native to Flux; lighter, no resource replacement |
+| **Trade-offs** | Migrate Deployment → Rollout | Best with a service mesh in place |
+
+### Argo Rollouts — Canary skeleton
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata: { name: orders-api }
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      steps:
+      - setWeight: 5
+      - pause: { duration: 5m }
+      - analysis:
+          templates: [{ templateName: orders-availability }]
+      - setWeight: 25
+      - pause: { duration: 10m }
+      - analysis:
+          templates: [{ templateName: orders-availability }]
+      - setWeight: 50
+      - pause: { duration: 10m }
+      - setWeight: 100
+  selector: { matchLabels: { app: orders-api } }
+  template: { ... } # same as Deployment
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata: { name: orders-availability }
+spec:
+  metrics:
+  - name: success-rate
+    interval: 1m
+    successCondition: result[0] >= 0.999
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring:9090
+        query: |
+          sum(rate(http_server_requests_total{service="orders-api", status!~"5.."}[5m]))
+          /
+          sum(rate(http_server_requests_total{service="orders-api"}[5m]))
+```
+
+If the success rate dips below 99.9% on three consecutive checks, the rollout aborts and traffic returns to the stable version.
+
+---
+
+## 🎚️ 3. Feature Flags — Decouple Deploy from Release
+
+Deploy = ship the code. Release = expose it to users. Feature flags split them. The same artifact can be deployed but kept off; turned on for 1% of users for an hour; expanded to 50%; then removed when stable.
+
+| Flag tool | Highlights |
+|---|---|
+| **LaunchDarkly** | Mature SaaS, biggest enterprise footprint |
+| **Flagsmith** | OSS + SaaS, self-hostable |
+| **Unleash** | OSS-first, GitLab-integrated |
+| **Statsig** / **GrowthBook** | Strong on experimentation/A-B testing |
+| **OpenFeature** | CNCF-incubating vendor-neutral SDK; switch providers without code changes |
+
+The 2026 best practice is to write your application against **OpenFeature**, then choose any provider behind it.
+
+```typescript
+import { OpenFeature } from '@openfeature/server-sdk';
+
+const client = OpenFeature.getClient();
+const newFlowEnabled = await client.getBooleanValue('orders.new-checkout', false, {
+  userId: req.user.id,
+  plan: req.user.plan,
+});
+```
+
+Combining feature flags with progressive delivery — a common 2026 pattern — gives you **flag-gated canary**: ship the code to all pods, but enable the new behaviour only for a slowly-growing slice of users. (paraphrased from [towardsaws — Feature-flagged Progressive Delivery: Argo Rollouts + OpenFeature](https://towardsaws.com/feature-flagged-progressive-delivery-argo-rollouts-openfeature-bd93c8ddd75f), rephrased for compliance)
+
+---
+
+## 🔵🟢 4. Blue-Green vs Canary — When to Pick Which
+
+| Choose **Blue-Green** when | Choose **Canary** when |
+|---|---|
+| Schema migrations require atomic cutover | You want to detect bad releases via metrics, not a binary flip |
+| Rollback must be instant (flip the LB back) | You can tolerate slow promotion (5–60 minutes) |
+| You can afford 2× resources for the cutover window | You can't afford 2× resources |
+| Stateless API with strong feature parity between versions | Service is on a service mesh or supports weighted routing |
+
+Blue-green is *binary* (0% or 100%); canary is a *function of traffic share over time*.
+
+---
+
+## 🛠️ 5. Worked Example — Promote a Risky Change Safely
+
+Goal: ship a new pricing engine for `orders-api` without risking a 99.9% SLO.
+
+1. CI signs the new image. Argo CD picks it up (via [20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration)).
+2. Argo Rollouts runs the canary script above.
+3. At 5% weight, the AnalysisTemplate queries Prometheus every minute.
+4. At the same time, the new code path is **gated by a feature flag** (`pricing.v2`) — only 5% of canary users actually hit the new code; the rest fall back to v1 even though they're on the new pods.
+5. SLO holds → promote to 25%, 50%, 100%.
+6. After 24 hours of clean operation, flip the flag to 100% (decoupled from deploy).
+7. After two weeks, remove the flag and the dead-code path.
+
+You shipped something risky in a way where a bad outcome is bounded — by traffic share, by user share, and by automatic rollback.
+
+---
+
+## 🔗 6. Cross-links & Further Reading
+
+### Internal
+- [20.1 - CI-CD Foundations](20.1---CI-CD-Foundations) — pipeline that produced the artifact
+- [20.3 - Containers & Orchestration](20.3---Containers-&-Orchestration) — GitOps that reconciles the Rollout CRD
+- [20.4 - Observability - Logs, Metrics, Traces](20.4---Observability---Logs,-Metrics,-Traces) — the metrics canary analysis reads
+- [20.5 - SLOs, SLAs, Error Budgets & Incident Response](20.5---SLOs,-SLAs,-Error-Budgets-&-Incident-Response) — what gates promotion
+- [20.6 - Chaos Engineering & Resilience](20.6---Chaos-Engineering-&-Resilience) — what proves the rollback path actually works
+
+### External
+- [Argo Rollouts docs](https://argo-rollouts.readthedocs.io/) · [Flagger docs](https://docs.flagger.app/)
+- [argoproj — Rollouts blue-green features](https://argoproj.github.io/argo-rollouts/features/bluegreen/)
+- [Red Hat — Blue/Green and Canary with Argo Rollouts](https://www.redhat.com/architect/blue-green-canary-argo-rollouts)
+- [LaunchDarkly](https://launchdarkly.com/) · [Flagsmith](https://www.flagsmith.com/) · [Unleash](https://www.getunleash.io/)
+- [OpenFeature](https://openfeature.dev/) · [GrowthBook](https://www.growthbook.io/) · [Statsig](https://statsig.com/)
+- [reintech — Argo Rollouts in 2026](https://reintech.io/blog/argocd-vs-flux-which-gitops-tool-should-you-choose-in-2026)
+
+---
+
+## ⚠️ 7. Common Misconceptions
+
+- **"Canary = 5% of pods."** It's 5% of *traffic*, which usually requires a weighted router (service mesh, ingress with traffic-splitting, ALB weighted target groups).
+- **"Feature flags = config files."** A real flag platform supports targeting (by user, plan, geo), kill switches, percentage rollouts, and audit logs.
+- **"Blue-green is safer than canary."** Faster rollback, yes; but the cutover is binary and there's no early signal — you only learn after 100% switchover. Canary fails earlier, smaller.
+- **"Once deployed, it's released."** Decouple them. Deploy daily (artifact propagation); release on the business's schedule (flag flip).
+- **"Argo Rollouts and Flagger compete."** They overlap but optimize for different ecosystems (Argo / Flux). Both are valid choices in 2026. (paraphrased from [oneuptime — ArgoCD + Argo Rollouts vs Flagger](https://oneuptime.com/blog/post/2026-02-26-argocd-rollouts-vs-flagger/view), rephrased for compliance)
+
+---
+
+*Next: [20.8 - Cost & Capacity Engineering - FinOps](20.8---Cost-&-Capacity-Engineering---FinOps) — Where reliability meets the cloud bill.*

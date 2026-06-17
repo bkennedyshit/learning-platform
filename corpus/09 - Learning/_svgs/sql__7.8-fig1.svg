@@ -1,0 +1,90 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 700px; height: auto;">
+  <style>
+    .layer-box { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; transition: all 0.3s; cursor: pointer; }
+    .layer-box:hover { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .db-box { fill: var(--background-secondary, #161b22); stroke: var(--text-accent, #79c0ff); stroke-width: 2; rx: 10; }
+    .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; text-anchor: middle; }
+    .section-label { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; text-anchor: middle; }
+    .connector { stroke: var(--text-muted, #8b949e); stroke-width: 1.5; fill: none; }
+    .accent-connector { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; stroke-dasharray: 5,3; }
+  </style>
+
+  <text x="350" y="25" class="title">Python SQL Ecosystem — Architecture Layers</text>
+
+  <!-- Application Layer -->
+  <text x="350" y="55" class="section-label">application layer</text>
+  <rect x="50" y="65" width="140" height="40" class="layer-box"/>
+  <text x="120" y="89" class="label">FastAPI + SQLModel</text>
+
+  <rect x="210" y="65" width="140" height="40" class="layer-box"/>
+  <text x="280" y="89" class="label">Flask / Django</text>
+
+  <rect x="370" y="65" width="140" height="40" class="layer-box"/>
+  <text x="440" y="89" class="label">Data Pipeline</text>
+
+  <rect x="530" y="65" width="140" height="40" class="layer-box"/>
+  <text x="600" y="89" class="label">ML Training</text>
+
+  <!-- ORM Layer -->
+  <text x="350" y="130" class="section-label">orm / query builder</text>
+  <rect x="120" y="140" width="200" height="40" class="layer-box" style="stroke: var(--interactive-accent, #58a6ff);"/>
+  <text x="220" y="164" class="label">SQLAlchemy 2.x (Core + ORM)</text>
+
+  <rect x="340" y="140" width="120" height="40" class="layer-box"/>
+  <text x="400" y="164" class="label">SQLModel</text>
+
+  <rect x="480" y="140" width="120" height="40" class="layer-box"/>
+  <text x="540" y="164" class="label">DuckDB Python</text>
+
+  <!-- Driver Layer -->
+  <text x="350" y="205" class="section-label">database drivers</text>
+  <rect x="60" y="215" width="110" height="35" class="layer-box"/>
+  <text x="115" y="237" class="label">psycopg3</text>
+
+  <rect x="185" y="215" width="110" height="35" class="layer-box"/>
+  <text x="240" y="237" class="label">asyncpg</text>
+
+  <rect x="310" y="215" width="110" height="35" class="layer-box"/>
+  <text x="365" y="237" class="label">mysqlclient</text>
+
+  <rect x="435" y="215" width="110" height="35" class="layer-box"/>
+  <text x="490" y="237" class="label">sqlite3 (stdlib)</text>
+
+  <rect x="560" y="215" width="110" height="35" class="layer-box"/>
+  <text x="615" y="237" class="label">duckdb</text>
+
+  <!-- Database Layer -->
+  <text x="350" y="280" class="section-label">databases</text>
+  <rect x="60" y="290" width="130" height="50" class="db-box"/>
+  <text x="125" y="312" class="label">PostgreSQL</text>
+  <text x="125" y="328" class="section-label">OLTP + OLAP</text>
+
+  <rect x="210" y="290" width="130" height="50" class="db-box"/>
+  <text x="275" y="312" class="label">MySQL</text>
+  <text x="275" y="328" class="section-label">Web Apps</text>
+
+  <rect x="360" y="290" width="130" height="50" class="db-box"/>
+  <text x="425" y="312" class="label">SQLite</text>
+  <text x="425" y="328" class="section-label">Embedded/Test</text>
+
+  <rect x="510" y="290" width="130" height="50" class="db-box"/>
+  <text x="575" y="312" class="label">DuckDB</text>
+  <text x="575" y="328" class="section-label">Analytics</text>
+
+  <!-- Connectors -->
+  <line x1="120" y1="105" x2="220" y2="140" class="connector"/>
+  <line x1="280" y1="105" x2="220" y2="140" class="connector"/>
+  <line x1="440" y1="105" x2="540" y2="140" class="connector"/>
+  <line x1="600" y1="105" x2="540" y2="140" class="connector"/>
+  <line x1="220" y1="180" x2="115" y2="215" class="connector"/>
+  <line x1="220" y1="180" x2="240" y2="215" class="connector"/>
+  <line x1="220" y1="180" x2="365" y2="215" class="connector"/>
+  <line x1="400" y1="180" x2="220" y2="180" class="accent-connector"/>
+  <line x1="540" y1="180" x2="615" y2="215" class="connector"/>
+  <line x1="490" y1="250" x2="425" y2="290" class="connector"/>
+  <line x1="115" y1="250" x2="125" y2="290" class="connector"/>
+  <line x1="240" y1="250" x2="125" y2="290" class="connector"/>
+  <line x1="365" y1="250" x2="275" y2="290" class="connector"/>
+  <line x1="615" y1="250" x2="575" y2="290" class="connector"/>
+</svg>

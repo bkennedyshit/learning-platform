@@ -1,0 +1,73 @@
+<svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 800px; height: auto;">
+  <style>
+    .axis  { stroke: var(--text-normal, #c9d1d9); stroke-width: 1.2; fill: none; }
+    .grid  { stroke: var(--text-muted, #8b949e); stroke-width: 0.4; opacity: 0.3; }
+    .curve { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2.5; fill: none; }
+    .hole  { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .dot   { fill: var(--interactive-accent, #58a6ff); }
+    .lab   { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .sub   { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); }
+    .asym  { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; }
+  </style>
+
+  <!-- Panel 1: Removable -->
+  <g transform="translate(0,0)">
+    <line x1="20" y1="190" x2="180" y2="190" class="axis"/>
+    <line x1="100" y1="220" x2="100" y2="30" class="axis"/>
+    <path class="curve" d="M 30 60 Q 100 180 170 60"/>
+    <circle cx="100" cy="130" r="6" class="hole"/>
+    <circle cx="100" cy="80"  r="5" class="dot">
+      <animate attributeName="r" values="5;8;5" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <text x="100" y="225" class="lab" text-anchor="middle">Removable</text>
+    <text x="100" y="240" class="sub" text-anchor="middle">f(a) ≠ lim f</text>
+  </g>
+
+  <!-- Panel 2: Jump -->
+  <g transform="translate(200,0)">
+    <line x1="20" y1="190" x2="180" y2="190" class="axis"/>
+    <line x1="100" y1="220" x2="100" y2="30" class="axis"/>
+    <path class="curve" d="M 30 70 L 100 110"/>
+    <path class="curve" d="M 100 60 L 170 100"/>
+    <circle cx="100" cy="110" r="6" class="hole"/>
+    <circle cx="100" cy="60"  r="5" class="dot">
+      <animate attributeName="cy" values="60;110;60" dur="2s" repeatCount="indefinite" keyTimes="0;0.5;1" calcMode="discrete"/>
+    </circle>
+    <text x="100" y="225" class="lab" text-anchor="middle">Jump</text>
+    <text x="100" y="240" class="sub" text-anchor="middle">left ≠ right limit</text>
+  </g>
+
+  <!-- Panel 3: Infinite -->
+  <g transform="translate(400,0)">
+    <line x1="20" y1="190" x2="180" y2="190" class="axis"/>
+    <line x1="100" y1="220" x2="100" y2="30" class="axis"/>
+    <line x1="100" y1="220" x2="100" y2="30" class="asym"/>
+    <path class="curve" d="M 30 180 Q 80 180 95 35"/>
+    <path class="curve" d="M 105 35 Q 120 180 170 180"/>
+    <circle cx="0" cy="0" r="4" class="dot">
+      <animateMotion path="M 30 180 Q 80 180 95 35" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="1;0" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <text x="100" y="225" class="lab" text-anchor="middle">Infinite</text>
+    <text x="100" y="240" class="sub" text-anchor="middle">f → ±∞</text>
+  </g>
+
+  <!-- Panel 4: Essential -->
+  <g transform="translate(600,0)">
+    <line x1="20" y1="190" x2="180" y2="190" class="axis"/>
+    <line x1="100" y1="220" x2="100" y2="30" class="axis"/>
+    <path class="curve" d="M 30 110
+                            Q 50 60, 60 110 T 70 110 T 75 110 T 80 110 T 85 110 T 90 110 T 95 110
+                            L 100 110
+                            T 105 110 T 110 110 T 120 110 T 130 110 T 140 110 Q 160 60 170 110">
+      <animate attributeName="d" values="
+        M 30 110 Q 50 60, 60 110 T 70 110 T 75 110 T 80 110 T 85 110 T 90 110 T 95 110 L 100 110 T 105 110 T 110 110 T 120 110 T 130 110 T 140 110 Q 160 60 170 110;
+        M 30 110 Q 50 160, 60 110 T 70 110 T 75 110 T 80 110 T 85 110 T 90 110 T 95 110 L 100 110 T 105 110 T 110 110 T 120 110 T 130 110 T 140 110 Q 160 160 170 110;
+        M 30 110 Q 50 60, 60 110 T 70 110 T 75 110 T 80 110 T 85 110 T 90 110 T 95 110 L 100 110 T 105 110 T 110 110 T 120 110 T 130 110 T 140 110 Q 160 60 170 110
+      " dur="0.5s" repeatCount="indefinite" />
+    </path>
+    <text x="100" y="225" class="lab" text-anchor="middle">Essential</text>
+    <text x="100" y="240" class="sub" text-anchor="middle">oscillating, no limit</text>
+  </g>
+</svg>

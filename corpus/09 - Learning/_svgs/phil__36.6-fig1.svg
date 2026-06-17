@@ -1,0 +1,60 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;">
+  <style>
+    .title{font-family:Inter,system-ui,sans-serif;font-size:15px;fill:var(--text-normal,#c9d1d9);font-weight:bold;}
+    .label{font-family:Inter,system-ui,sans-serif;font-size:12px;fill:var(--text-normal,#c9d1d9);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-size:10px;fill:var(--text-muted,#8b949e);}
+    .mono{font-family:ui-monospace,monospace;font-size:9px;fill:var(--text-muted,#8b949e);}
+    .box{fill:var(--background-secondary,#161b22);stroke:var(--text-muted,#8b949e);stroke-width:1;}
+  </style>
+  <text x="360" y="22" class="title" text-anchor="middle">36.6 — Personal Identity &amp; Continuity: Ship of Theseus, Teleportation &amp; Brain Upload</text>
+  <!-- Identity theories -->
+  <rect x="20" y="35" width="340" height="185" class="box" rx="4"/>
+  <text x="190" y="52" class="label" text-anchor="middle" font-weight="bold">Theories of Personal Identity</text>
+  <rect x="30" y="62" width="145" height="60" fill="none" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1" rx="3"/>
+  <text x="102" y="79" class="sub" text-anchor="middle" font-weight="bold">Psychological Continuity</text>
+  <text x="102" y="93" class="sub" text-anchor="middle">(Locke, Parfit)</text>
+  <text x="102" y="107" class="sub" text-anchor="middle">Memory + connected</text>
+  <text x="102" y="119" class="sub" text-anchor="middle">psychological states</text>
+  <rect x="190" y="62" width="145" height="60" fill="none" stroke="#51cf66" stroke-width="1" rx="3"/>
+  <text x="262" y="79" class="sub" text-anchor="middle" font-weight="bold">Bodily Continuity</text>
+  <text x="262" y="93" class="sub" text-anchor="middle">(Wiggins, van Inwagen)</text>
+  <text x="262" y="107" class="sub" text-anchor="middle">Same physical body /</text>
+  <text x="262" y="119" class="sub" text-anchor="middle">biological organism</text>
+  <rect x="30" y="135" width="145" height="60" fill="none" stroke="#ffd93d" stroke-width="1" rx="3"/>
+  <text x="102" y="152" class="sub" text-anchor="middle" font-weight="bold">Soul Theory</text>
+  <text x="102" y="166" class="sub" text-anchor="middle">(Swinburne)</text>
+  <text x="102" y="180" class="sub" text-anchor="middle">Same immaterial soul</text>
+  <text x="102" y="192" class="sub" text-anchor="middle">persists through change</text>
+  <rect x="190" y="135" width="145" height="60" fill="none" stroke="#ff6b6b" stroke-width="1" rx="3"/>
+  <text x="262" y="152" class="sub" text-anchor="middle" font-weight="bold">No-Self (Parfit/Buddhism)</text>
+  <text x="262" y="166" class="sub" text-anchor="middle">Personal identity is a</text>
+  <text x="262" y="180" class="sub" text-anchor="middle">convenient fiction. Just</text>
+  <text x="262" y="192" class="sub" text-anchor="middle">overlapping bundles.</text>
+  <!-- Thought experiments -->
+  <rect x="375" y="35" width="325" height="185" class="box" rx="4"/>
+  <text x="537" y="52" class="label" text-anchor="middle" font-weight="bold">Thought Experiments</text>
+  <text x="385" y="68" class="sub" font-weight="bold">Ship of Theseus:</text>
+  <text x="385" y="82" class="sub">If every plank replaced, is it the same ship?</text>
+  <text x="385" y="94" class="sub">Cells replaced over 7 years → are you same person?</text>
+  <text x="385" y="110" class="sub" font-weight="bold">Teleportation (Parfit "Reasons and Persons"):</text>
+  <text x="385" y="124" class="sub">Scan body, destroy, recreate elsewhere. Same person?</text>
+  <text x="385" y="138" class="sub">What if original isn't destroyed — two "you"s exist?</text>
+  <text x="385" y="154" class="sub">Which has greater claim to being "you"?</text>
+  <text x="385" y="170" class="sub" font-weight="bold">Brain in a vat / gradual replacement:</text>
+  <text x="385" y="184" class="sub">Replace neurons one by one with silicon equivalents</text>
+  <text x="385" y="198" class="sub">— at what point (if any) do you stop being you?</text>
+  <text x="385" y="212" class="sub">Functionalism: you persist. Bodily: you die at neuron 1.</text>
+  <!-- Bottom: upload implications -->
+  <rect x="20" y="235" width="680" height="168" class="box" rx="4"/>
+  <text x="360" y="252" class="label" text-anchor="middle" font-weight="bold">Brain Upload, AI Continuity &amp; the Survival Question</text>
+  <text x="30" y="270" class="sub" font-weight="bold">Brain uploading (mind uploading):</text>
+  <text x="30" y="284" class="sub">Scan connectome at sufficient resolution → simulate in silicon → does the upload survive as "you"?</text>
+  <text x="30" y="300" class="sub">Psychological continuity answer: YES, if the correct psychological connections are preserved in the simulation.</text>
+  <text x="30" y="316" class="sub">Bodily continuity answer: NO — you died. The upload is a copy, not you.</text>
+  <text x="30" y="334" class="sub" font-weight="bold">Parfit's liberating conclusion:</text>
+  <text x="30" y="348" class="sub">Personal identity may not be what matters in survival. What matters is psychological continuity — and that can come in degrees.</text>
+  <text x="30" y="362" class="sub">Implication: worrying about "identity" in uploads/AI may be the wrong question. Ask about what matters, not strict identity.</text>
+  <text x="30" y="380" class="sub" font-weight="bold">AI alignment connection:</text>
+  <text x="30" y="394" class="sub">AI systems that learn and update — are they "the same" agent across training runs? Value continuity matters more than architectural identity. (Mesa-optimization problem.)</text>
+  <text x="360" y="395" class="sub" text-anchor="middle">Free texts: Parfit "Divided Minds and the Nature of Persons" · SEP plato.stanford.edu/entries/identity-personal/ · iep.utm.edu/person-id/</text>
+</svg>

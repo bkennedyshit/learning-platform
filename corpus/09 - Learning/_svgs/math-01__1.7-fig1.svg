@@ -1,0 +1,61 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <style>
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; rx: 8; }
+    .arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#arr); }
+    .lab   { font-family: Inter,system-ui,sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); text-anchor: middle; }
+    .math  { font-family: 'Latin Modern Math',serif; font-style: italic; font-size: 14px; fill: var(--interactive-accent, #58a6ff); text-anchor: middle; }
+    .sub   { font-family: Inter,system-ui,sans-serif; font-size: 11px; fill: var(--text-muted, #8b949e); text-anchor: middle; }
+    /* Animations */
+    @keyframes drawPath { from { stroke-dashoffset: 1500; } to { stroke-dashoffset: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeInDraw { 0% { opacity: 0; stroke-dashoffset: 1500; } 1% { opacity: 1; stroke-dashoffset: 1500; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    
+    .curve, .true, .surf, .surface { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawPath 1.5s ease-in-out forwards; }
+    .tangent, .tan-1, .tan-2, .tan-3, .arrow, .vf-vec { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: fadeInDraw 1.5s ease-out 1s forwards; }
+    .secant, .secant-1, .secant-2, .secant-3, .level, .drop, .proj, .vf-circle { animation: fadeIn 1s ease-out 1s both; }
+    .secant-3 { animation-delay: 1s; } .secant-2 { animation-delay: 2s; } .secant-1 { animation-delay: 3s; } .tangent { animation-delay: 2s; }
+    .errfill, .fill, .area, .prism-face-top, .prism-face-side, .base-rect, .box { animation: fadeIn 1s ease-out 0.5s both; }
+    .rect-L, .rect-R { transform-origin: bottom; animation: growUp 1s ease-out both; }
+    .rect-L:nth-child(even) { animation-delay: 0.2s; } .rect-L:nth-child(odd) { animation-delay: 0.4s; }
+    .rect-R:nth-child(even) { animation-delay: 1.2s; } .rect-R:nth-child(odd) { animation-delay: 1.4s; }
+    .pt, .pt-mov, .root, .vf-origin { animation: fadeInScale 0.5s ease-out 1s both; }
+    .t1 { animation: fadeIn 1s 1s both; } .t2 { animation: fadeIn 1s 2.5s both; } .t3 { animation: fadeIn 1s 4s both; } .t5 { animation: fadeIn 1s 5.5s both; }
+    .box { animation: fadeInScale 0.8s ease-out both; }
+    .box:nth-of-type(1) { animation-delay: 0.2s; } .box:nth-of-type(2) { animation-delay: 0.6s; }
+    .box:nth-of-type(3) { animation-delay: 1.0s; } .box:nth-of-type(4) { animation-delay: 1.4s; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <!-- Central theorem -->
+  <rect x="240" y="10" width="220" height="60" rx="8" class="box"/>
+  <text x="350" y="34" class="math">∫_∂M ω = ∫_M dω</text>
+  <text x="350" y="56" class="lab">Generalized Stokes' Theorem</text>
+  <!-- Green box -->
+  <rect x="20" y="160" width="180" height="70" rx="8" class="box"/>
+  <text x="110" y="183" class="math">∮_∂D P dx + Q dy</text>
+  <text x="110" y="201" class="math">= ∬_D (∂Q/∂x − ∂P/∂y) dA</text>
+  <text x="110" y="220" class="sub">Green's Theorem (2D)</text>
+  <!-- Stokes box -->
+  <rect x="260" y="160" width="180" height="70" rx="8" class="box"/>
+  <text x="350" y="183" class="math">∮_∂S F · dr</text>
+  <text x="350" y="201" class="math">= ∬_S (∇×F) · dS</text>
+  <text x="350" y="220" class="sub">Stokes' Theorem (3D surface)</text>
+  <!-- Divergence box -->
+  <rect x="500" y="160" width="180" height="70" rx="8" class="box"/>
+  <text x="590" y="183" class="math">∯_∂V F · dS</text>
+  <text x="590" y="201" class="math">= ∭_V (∇·F) dV</text>
+  <text x="590" y="220" class="sub">Divergence Theorem (3D volume)</text>
+  <!-- Arrows from central -->
+  <line x1="280" y1="70" x2="140" y2="158" class="arrow"/>
+  <line x1="350" y1="70" x2="350" y2="158" class="arrow"/>
+  <line x1="420" y1="70" x2="560" y2="158" class="arrow"/>
+  <!-- dim labels -->
+  <text x="185" y="125" class="sub">M = 2D region, ω = P dx+Q dy</text>
+  <text x="350" y="145" class="sub">M = surface, ω = F·dr</text>
+  <text x="515" y="125" class="sub">M = 3D volume, ω = F·dS</text>
+</svg>

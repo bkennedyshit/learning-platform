@@ -1,0 +1,32 @@
+<svg viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 400px; height: auto;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-normal)"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .grid { stroke: var(--text-muted); stroke-width: 0.5; opacity: 0.5; }
+    .axis { stroke: var(--text-normal); stroke-width: 2; }
+    .line { stroke: var(--interactive-accent); stroke-width: 3; fill: none; }
+    .intercept { fill: var(--h1-color); stroke: var(--background-secondary); stroke-width: 2; cursor: pointer; transition: r 0.2s; }
+    .intercept:hover { fill: var(--text-accent); r: 8; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal); }
+    .int-label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--h1-color); font-weight: bold; }
+  </style>
+
+  <path class="grid" d="M -150 -200 V 200 M -100 -200 V 200 M -50 -200 V 200 M 50 -200 V 200 M 100 -200 V 200 M 150 -200 V 200" />
+  <path class="grid" d="M -200 -150 H 200 M -200 -100 H 200 M -200 -50 H 200 M -200 50 H 200 M -200 100 H 200 M -200 150 H 200" />
+
+  <line x1="-190" y1="0" x2="190" y2="0" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="0" y1="190" x2="0" y2="-190" class="axis" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+  <!-- y = -x + 2 (SVG: y = x - 100) -->
+  <line x1="-100" y1="-200" x2="200" y2="100" class="line" />
+  
+  <circle cx="100" cy="0" r="5" class="intercept"/>
+  <circle cx="0" cy="-100" r="5" class="intercept"/>
+
+  <text x="110" y="20" class="int-label">x-intercept (2, 0)</text>
+  <text x="10" y="-110" class="int-label">y-intercept (0, 2)</text>
+</svg>

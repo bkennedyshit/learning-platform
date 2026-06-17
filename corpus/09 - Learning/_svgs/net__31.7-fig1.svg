@@ -1,0 +1,101 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 11px; fill: var(--text-normal, #c9d1d9); }
+    .sub   { font-family: Inter, system-ui, sans-serif; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; fill: var(--text-muted, #8b949e); }
+    .box   { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .grpc  { fill: #1a3a3d; stroke: #4dabf7; stroke-width: 1.5; }
+    .proto { fill: #2d1a3d; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1.5; }
+    .mesh  { fill: #1a3d1a; stroke: #51cf66; stroke-width: 1.5; }
+    .svc   { fill: #3d2a1a; stroke: #ffa94d; stroke-width: 1.2; }
+    .sidecar { fill: #2a2a3d; stroke: var(--interactive-accent, #58a6ff); stroke-width: 1; stroke-dasharray: 3 2; }
+  </style>
+
+  <text x="360" y="20" class="title" text-anchor="middle">gRPC Streaming · Protocol Buffers Encoding · Service Mesh (Istio / Linkerd)</text>
+
+  <!-- gRPC streaming modes -->
+  <text x="145" y="44" class="label" text-anchor="middle" font-weight="bold">gRPC Streaming Modes (HTTP/2)</text>
+  <rect x="20" y="52" width="250" height="200" rx="3" class="grpc"/>
+
+  <text x="30" y="70" class="sub" font-weight="bold">Unary:</text>
+  <line x1="30" y1="80" x2="260" y2="80" stroke="#4dabf7" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <text x="30" y="93" class="mono">client → Req  |  server → Res</text>
+
+  <text x="30" y="112" class="sub" font-weight="bold">Server Streaming:</text>
+  <line x1="30" y1="120" x2="260" y2="120" stroke="#4dabf7" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <text x="30" y="133" class="mono">client → Req  |  server → Res*</text>
+  <text x="30" y="145" class="sub">e.g. log tail, sensor feed, LLM token stream</text>
+
+  <text x="30" y="164" class="sub" font-weight="bold">Client Streaming:</text>
+  <line x1="30" y1="172" x2="260" y2="172" stroke="#4dabf7" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <text x="30" y="185" class="mono">client → Req*  |  server → Res</text>
+  <text x="30" y="197" class="sub">e.g. file upload, telemetry batch</text>
+
+  <text x="30" y="216" class="sub" font-weight="bold">Bidirectional Streaming:</text>
+  <text x="30" y="228" class="mono">client → Req*  |  server → Res*</text>
+  <text x="30" y="240" class="sub">e.g. game state sync, chat, AI inference stream</text>
+
+  <!-- Protobuf encoding -->
+  <text x="435" y="44" class="label" text-anchor="middle" font-weight="bold">Protocol Buffer Encoding</text>
+  <rect x="280" y="52" width="310" height="200" rx="3" class="proto"/>
+  <text x="290" y="70" class="sub" font-weight="bold">.proto definition:</text>
+  <text x="290" y="84" class="mono">message Player {</text>
+  <text x="290" y="96" class="mono">  uint32 id        = 1;</text>
+  <text x="290" y="108" class="mono">  string name      = 2;</text>
+  <text x="290" y="120" class="mono">  float  x         = 3;</text>
+  <text x="290" y="132" class="mono">  float  y         = 4;</text>
+  <text x="290" y="144" class="mono">  repeated Item items = 5;</text>
+  <text x="290" y="156" class="mono">}</text>
+  <line x1="290" y1="164" x2="585" y2="164" stroke="var(--text-muted,#8b949e)" stroke-width="0.5"/>
+  <text x="290" y="178" class="sub" font-weight="bold">Wire format (field tag + type + value):</text>
+  <text x="290" y="192" class="mono">08 01           field 1 (varint) = 1</text>
+  <text x="290" y="204" class="mono">12 05 41 6c 69  field 2 (len-del) = "Ali"</text>
+  <text x="290" y="216" class="mono">1d cd cc 48 42  field 3 (32-bit)  = 50.2f</text>
+  <text x="290" y="230" class="sub">~70% smaller than JSON · no schema = no parse · forward-compatible (unknown fields preserved)</text>
+  <text x="290" y="244" class="sub">Type encoding: 0=varint 1=64-bit 2=len-delimited 5=32-bit</text>
+
+  <!-- Service Mesh diagram -->
+  <text x="360" y="274" class="label" text-anchor="middle" font-weight="bold">Service Mesh — mTLS + Observability via Sidecar Proxies (Istio/Linkerd)</text>
+  <rect x="20" y="282" width="680" height="126" rx="3" class="box"/>
+
+  <!-- Service A pod -->
+  <rect x="40" y="296" width="140" height="96" rx="6" fill="#1a2a1a" stroke="#51cf66" stroke-width="1"/>
+  <text x="110" y="313" class="sub" text-anchor="middle" font-weight="bold">Pod A</text>
+  <rect x="54" y="320" width="112" height="30" rx="3" class="svc"/>
+  <text x="110" y="339" class="sub" text-anchor="middle">Service A</text>
+  <rect x="54" y="354" width="112" height="26" rx="3" class="sidecar"/>
+  <text x="110" y="369" class="sub" text-anchor="middle">Envoy / Linkerd Proxy</text>
+
+  <!-- mTLS tunnel -->
+  <rect x="200" y="330" width="100" height="30" rx="4" fill="#1a1a2d" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="250" y="345" class="sub" text-anchor="middle" fill="var(--interactive-accent,#58a6ff)">mTLS tunnel</text>
+  <text x="250" y="357" class="sub" text-anchor="middle">cert per workload</text>
+
+  <!-- Service B pod -->
+  <rect x="320" y="296" width="140" height="96" rx="6" fill="#1a2a1a" stroke="#51cf66" stroke-width="1"/>
+  <text x="390" y="313" class="sub" text-anchor="middle" font-weight="bold">Pod B</text>
+  <rect x="334" y="320" width="112" height="30" rx="3" class="svc"/>
+  <text x="390" y="339" class="sub" text-anchor="middle">Service B</text>
+  <rect x="334" y="354" width="112" height="26" rx="3" class="sidecar"/>
+  <text x="390" y="369" class="sub" text-anchor="middle">Envoy / Linkerd Proxy</text>
+
+  <!-- Control plane -->
+  <rect x="490" y="296" width="190" height="96" rx="6" fill="#1a1a2d" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.5"/>
+  <text x="585" y="313" class="label" text-anchor="middle" font-weight="bold">Control Plane</text>
+  <text x="500" y="330" class="sub">Istiod / Linkerd control plane</text>
+  <text x="500" y="344" class="sub">• Issues SPIFFE/X.509 certs (SVID)</text>
+  <text x="500" y="358" class="sub">• Pushes xDS config to all proxies</text>
+  <text x="500" y="372" class="sub">• Collects metrics/traces (Prometheus)</text>
+  <text x="500" y="384" class="sub">• Traffic policy: retry, timeout, circuit-break</text>
+
+  <!-- arrows -->
+  <line x1="180" y1="344" x2="200" y2="344" stroke="#51cf66" stroke-width="1.2" marker-end="url(#ga2)"/>
+  <line x1="300" y1="344" x2="320" y2="344" stroke="#51cf66" stroke-width="1.2" marker-end="url(#ga2)"/>
+  <line x1="464" y1="344" x2="488" y2="344" stroke="var(--interactive-accent,#58a6ff)" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#ba2)"/>
+
+  <defs>
+    <marker id="ga2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#51cf66"/></marker>
+    <marker id="ba2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--interactive-accent,#58a6ff)"/></marker>
+  </defs>
+</svg>

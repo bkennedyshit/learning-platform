@@ -1,0 +1,96 @@
+<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 720px; height: auto;">
+  <style>
+    .title  { font-family: Inter, system-ui, sans-serif; font-size: 15px; fill: var(--text-normal, #c9d1d9); font-weight: bold; }
+    .label  { font-family: Inter, system-ui, sans-serif; font-size: 12px; fill: var(--text-normal, #c9d1d9); }
+    .small  { font-family: Inter, system-ui, sans-serif; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .mono   { font-family: ui-monospace, monospace; font-size: 10px; fill: var(--text-muted, #8b949e); }
+    .box    { fill: var(--background-secondary,#161b22); stroke: var(--text-muted,#8b949e); stroke-width:1.2; }
+    .txn1   { fill: #1a2a3a; stroke: var(--interactive-accent,#58a6ff); stroke-width: 1.5; }
+    .txn2   { fill: #1a3a1a; stroke: #51cf66; stroke-width: 1.5; }
+    .lock   { fill: #3a2a1a; stroke: #ffd93d; stroke-width: 1.5; }
+    .mvcc   { fill: #2a1a3a; stroke: #a855f7; stroke-width: 1.5; }
+    .arr    { stroke: var(--text-muted,#8b949e); stroke-width: 1.2; fill: none; }
+    .t-line { stroke: #58a6ff; stroke-width: 1.5; }
+    .t2-line{ stroke: #51cf66; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="dbs6-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--text-muted,#8b949e)"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="20" class="title" text-anchor="middle">Concurrency Control — 2PL vs MVCC (PostgreSQL internals)</text>
+
+  <!-- LEFT: 2PL -->
+  <rect x="18" y="30" width="318" height="180" class="box" rx="6"/>
+  <text x="177" y="50" class="label" text-anchor="middle" font-weight="bold">Two-Phase Locking (2PL)</text>
+
+  <text x="28"  y="68" class="small" font-weight="bold">Phase 1 — Growing:</text>
+  <text x="28"  y="82" class="small">Acquire locks (shared S or exclusive X).</text>
+  <text x="28"  y="96" class="small">Cannot release any lock yet.</text>
+
+  <text x="28"  y="114" class="small" font-weight="bold">Phase 2 — Shrinking:</text>
+  <text x="28"  y="128" class="small">Release locks. Cannot acquire new ones.</text>
+
+  <text x="28"  y="146" class="small" fill="#ffd93d">Strict 2PL: hold X-locks until commit.</text>
+  <text x="28"  y="160" class="small">Guarantees serializability. But...</text>
+  <text x="28"  y="174" class="small" fill="#ff6b6b">Deadlock possible: T1 holds A, wants B.</text>
+  <text x="28"  y="188" class="small" fill="#ff6b6b">T2 holds B, wants A. → cycle detected.</text>
+  <text x="28"  y="202" class="small">Resolve: abort younger txn (wound-wait).</text>
+
+  <!-- RIGHT: MVCC -->
+  <rect x="348" y="30" width="354" height="180" class="box" rx="6"/>
+  <text x="525" y="50" class="label" text-anchor="middle" font-weight="bold">MVCC — Multi-Version Concurrency Control</text>
+
+  <text x="358" y="68" class="small">Each row has xmin (created by) + xmax (deleted by).</text>
+  <text x="358" y="82" class="small">Reader sees version valid at txn start snapshot.</text>
+  <text x="358" y="96" class="small">Writers don't block readers. Readers don't block writers.</text>
+
+  <text x="358" y="114" class="small" font-weight="bold">PostgreSQL row version (tuple header):</text>
+  <rect x="362" y="120" width="330" height="28" class="mvcc" rx="3"/>
+  <text x="527" y="134" class="mono" text-anchor="middle">xmin | xmax | ctid | infomask | user columns…</text>
+  <text x="527" y="144" class="small" text-anchor="middle">ctid = (page, offset) physical location</text>
+
+  <text x="358" y="162" class="small">UPDATE = INSERT new version + mark old xmax.</text>
+  <text x="358" y="176" class="small">DELETE = mark xmax only (row stays until VACUUM).</text>
+  <text x="358" y="190" class="small" fill="#ffd93d">Table bloat: dead tuples accumulate → VACUUM needed.</text>
+  <text x="358" y="204" class="small">autovacuum cleans dead tuples + updates visibility map.</text>
+
+  <!-- Timeline diagram -->
+  <rect x="18" y="222" width="684" height="184" class="box" rx="6"/>
+  <text x="360" y="240" class="label" text-anchor="middle" font-weight="bold">MVCC Read Snapshot — T2 reads row updated by T1 (PostgreSQL)</text>
+
+  <!-- time axis -->
+  <text x="30"  y="260" class="small">Time →</text>
+  <line x1="80" y1="258" x2="696" y2="258" class="arr" marker-end="url(#dbs6-a)"/>
+  <text x="100" y="255" class="small">T=100</text>
+  <text x="220" y="255" class="small">T=200</text>
+  <text x="340" y="255" class="small">T=300</text>
+  <text x="460" y="255" class="small">T=400</text>
+  <text x="580" y="255" class="small">T=500</text>
+
+  <!-- T1 row -->
+  <text x="22"  y="282" class="small" fill="#58a6ff">T1:</text>
+  <line x1="80" y1="280" x2="696" y2="280" class="t-line" stroke-dasharray="none"/>
+  <circle cx="100" cy="280" r="4" fill="#58a6ff"/>
+  <text x="100" y="297" class="small" text-anchor="middle" fill="#58a6ff">BEGIN</text>
+  <circle cx="260" cy="280" r="4" fill="#58a6ff"/>
+  <text x="260" y="297" class="small" text-anchor="middle" fill="#58a6ff">UPDATE row7</text>
+  <text x="260" y="308" class="small" text-anchor="middle" fill="#58a6ff">xmin=T1-txid</text>
+  <circle cx="420" cy="280" r="5" fill="#51cf66"/>
+  <text x="420" y="297" class="small" text-anchor="middle" fill="#51cf66">COMMIT</text>
+
+  <!-- T2 row -->
+  <text x="22"  y="330" class="small" fill="#51cf66">T2:</text>
+  <line x1="80" y1="328" x2="696" y2="328" class="t2-line" stroke-dasharray="5 3"/>
+  <circle cx="160" cy="328" r="4" fill="#51cf66"/>
+  <text x="160" y="345" class="small" text-anchor="middle" fill="#51cf66">BEGIN</text>
+  <text x="160" y="356" class="small" text-anchor="middle" fill="#51cf66">snapshot=T=160</text>
+  <circle cx="500" cy="328" r="4" fill="#51cf66"/>
+  <text x="500" y="345" class="small" text-anchor="middle" fill="#51cf66">READ row7</text>
+  <text x="500" y="356" class="small" text-anchor="middle" fill="#ffd93d">sees OLD version!</text>
+  <text x="500" y="367" class="small" text-anchor="middle">(T1 committed at T=420</text>
+  <text x="500" y="378" class="small" text-anchor="middle">but T2 started before)</text>
+
+  <text x="360" y="398" class="small" text-anchor="middle">Snapshot Isolation: each txn sees a consistent snapshot at its start time. Write skew anomaly still possible — use SELECT FOR UPDATE or Serializable (SSI) to prevent.</text>
+</svg>

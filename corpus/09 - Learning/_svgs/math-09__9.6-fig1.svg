@@ -1,0 +1,78 @@
+<svg viewBox="0 0 650 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;height:auto;">
+  <defs>
+    <marker id="dirac-arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <style>
+    .d-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1.5; rx: 8; }
+    .d-box-accent { fill: var(--background-secondary, #161b22); stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; rx: 8; }
+    .d-label { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: var(--text-normal, #c9d1d9); }
+    .d-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .d-formula { font-family: 'Latin Modern Math', serif; font-size: 15px; fill: var(--interactive-accent, #58a6ff); }
+    .d-arrow { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; fill: none; marker-end: url(#dirac-arr); }
+    .d-neg { fill: var(--background-secondary, #161b22); stroke: var(--text-accent, #79c0ff); stroke-width: 2; rx: 8; }
+    .d-energy-pos { stroke: var(--interactive-accent, #58a6ff); stroke-width: 2; }
+    .d-energy-neg { stroke: var(--text-accent, #79c0ff); stroke-width: 2; stroke-dasharray: 5 3; animation: undulate 2s ease-in-out infinite alternate; }
+    @keyframes undulate { to { stroke-width: 4; opacity: 0.6; } }
+    .d-gap { fill: var(--text-muted, #8b949e); opacity: 0.1; }
+    .d-particle {
+      fill: var(--interactive-accent, #58a6ff);
+      animation: bobParticle 2s ease-in-out infinite alternate;
+    }
+    @keyframes bobParticle {
+      0% { cy: 100; }
+      100% { cy: 90; }
+    }
+  </style>
+
+  <!-- Left: Energy spectrum -->
+  <text x="100" y="25" class="d-accent" text-anchor="middle">Energy Spectrum</text>
+  
+  <!-- Positive energy continuum -->
+  <line x1="40" y1="80" x2="160" y2="80" class="d-energy-pos"/>
+  <line x1="40" y1="100" x2="160" y2="100" class="d-energy-pos"/>
+  <line x1="40" y1="120" x2="160" y2="120" class="d-energy-pos"/>
+  <text x="170" y="100" class="d-label" fill="var(--interactive-accent, #58a6ff)">E > mc²</text>
+  
+  <!-- Mass gap -->
+  <rect x="40" y="150" width="120" height="80" class="d-gap"/>
+  <text x="100" y="195" class="d-label" text-anchor="middle">2mc² gap</text>
+  
+  <!-- Negative energy continuum (Dirac sea) -->
+  <line x1="40" y1="260" x2="160" y2="260" class="d-energy-neg"/>
+  <line x1="40" y1="280" x2="160" y2="280" class="d-energy-neg"/>
+  <line x1="40" y1="300" x2="160" y2="300" class="d-energy-neg"/>
+  <text x="170" y="280" class="d-label" fill="var(--text-accent, #79c0ff)">E < -mc²</text>
+
+  <!-- Particle -->
+  <circle cx="100" cy="100" r="6" class="d-particle"/>
+  <text x="100" y="70" class="d-accent" text-anchor="middle">e⁻</text>
+
+  <!-- Center: 4-component spinor -->
+  <rect x="220" y="50" width="180" height="280" class="d-box-accent"/>
+  <text x="310" y="80" class="d-accent" text-anchor="middle">Dirac Spinor ψ</text>
+  
+  <rect x="240" y="100" width="140" height="50" class="d-box"/>
+  <text x="310" y="130" class="d-formula" text-anchor="middle">φ (2-spinor)</text>
+  <text x="310" y="145" class="d-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">particle, spin ↑↓</text>
+  
+  <rect x="240" y="170" width="140" height="50" class="d-box"/>
+  <text x="310" y="200" class="d-formula" text-anchor="middle">χ (2-spinor)</text>
+  <text x="310" y="215" class="d-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">antiparticle, spin ↑↓</text>
+
+  <text x="310" y="260" class="d-label" text-anchor="middle">ψ = (φ, χ)ᵀ ∈ ℂ⁴</text>
+  <text x="310" y="290" class="d-formula" text-anchor="middle">(iγᵘ∂_μ - m)ψ = 0</text>
+  <text x="310" y="315" class="d-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">{γᵘ,γᵛ} = 2gᵘᵛ</text>
+
+  <!-- Right: Predictions -->
+  <rect x="440" y="50" width="190" height="280" class="d-box"/>
+  <text x="535" y="80" class="d-accent" text-anchor="middle">Predictions</text>
+  <text x="535" y="115" class="d-label" text-anchor="middle">✓ Spin-1/2 (automatic)</text>
+  <text x="535" y="145" class="d-label" text-anchor="middle">✓ g-factor = 2</text>
+  <text x="535" y="175" class="d-label" text-anchor="middle">✓ Antimatter (e⁺)</text>
+  <text x="535" y="205" class="d-label" text-anchor="middle">✓ Spin-orbit coupling</text>
+  <text x="535" y="235" class="d-label" text-anchor="middle">✓ Fine structure</text>
+  <text x="535" y="265" class="d-label" text-anchor="middle">✓ Lorentz covariance</text>
+  <text x="535" y="305" class="d-label" text-anchor="middle" fill="var(--text-muted, #8b949e)">All from one equation!</text>
+</svg>

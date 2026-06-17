@@ -1,0 +1,99 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;">
+  <defs>
+    <marker id="fbd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="currentColor"/>
+    </marker>
+    <marker id="fbd-moment" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1.5 L8 5 L0 8.5z" fill="var(--interactive-accent, #58a6ff)"/>
+    </marker>
+  </defs>
+  <style>
+    .beam-body { fill: var(--background-secondary, #161b22); stroke: var(--text-normal, #c9d1d9); stroke-width: 2; }
+    .force-arrow { stroke-width: 2.5; fill: none; cursor: pointer; transition: all 0.2s ease; }
+    .force-arrow:hover { stroke-width: 3.5; filter: drop-shadow(0 0 4px var(--interactive-accent, #58a6ff)); }
+    .reaction { color: var(--interactive-accent, #58a6ff); stroke: currentColor; }
+    .applied { color: #e74c3c; stroke: currentColor; }
+    .dimension { stroke: var(--text-muted, #8b949e); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .support-pin { fill: var(--text-accent, #79c0ff); stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .support-roller { fill: none; stroke: var(--text-normal, #c9d1d9); stroke-width: 1.5; }
+    .ground-hatch { stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+    .label { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--text-normal, #c9d1d9); }
+    .label-accent { font-family: Inter, system-ui, sans-serif; font-size: 14px; fill: var(--interactive-accent, #58a6ff); font-weight: bold; }
+    .label-force { font-family: Inter, system-ui, sans-serif; font-size: 13px; fill: #e74c3c; font-weight: bold; }
+    .title-box { fill: var(--background-secondary, #161b22); stroke: var(--text-muted, #8b949e); stroke-width: 1; }
+  </style>
+
+  <!-- Beam body -->
+  <rect x="100" y="160" width="500" height="20" rx="3" class="beam-body"/>
+
+  <!-- Pin support at A (left) -->
+  <polygon points="100,180 85,220 115,220" class="support-pin"/>
+  <circle cx="100" cy="180" r="5" class="support-pin"/>
+  <!-- Ground hatching under pin -->
+  <line x1="75" y1="220" x2="125" y2="220" class="ground-hatch" stroke-width="2"/>
+  <line x1="80" y1="225" x2="75" y2="220" class="ground-hatch"/>
+  <line x1="90" y1="225" x2="85" y2="220" class="ground-hatch"/>
+  <line x1="100" y1="225" x2="95" y2="220" class="ground-hatch"/>
+  <line x1="110" y1="225" x2="105" y2="220" class="ground-hatch"/>
+  <line x1="120" y1="225" x2="115" y2="220" class="ground-hatch"/>
+
+  <!-- Roller support at B (right) -->
+  <polygon points="600,180 585,210 615,210" class="support-roller"/>
+  <circle cx="593" cy="215" r="5" class="support-roller"/>
+  <circle cx="607" cy="215" r="5" class="support-roller"/>
+  <line x1="575" y1="220" x2="625" y2="220" class="ground-hatch" stroke-width="2"/>
+  <line x1="580" y1="225" x2="575" y2="220" class="ground-hatch"/>
+  <line x1="590" y1="225" x2="585" y2="220" class="ground-hatch"/>
+  <line x1="600" y1="225" x2="595" y2="220" class="ground-hatch"/>
+  <line x1="610" y1="225" x2="605" y2="220" class="ground-hatch"/>
+  <line x1="620" y1="225" x2="615" y2="220" class="ground-hatch"/>
+
+  <!-- Applied load P (downward at midspan) -->
+  <line x1="350" y1="70" x2="350" y2="155" class="force-arrow applied" marker-end="url(#fbd-arrow)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,10; 0,0" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="360" y="65" class="label-force">P = 10 kN</text>
+
+  <!-- Distributed load w (over right half) -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,5; 0,0" dur="2s" repeatCount="indefinite" />
+    <rect x="450" y="110" width="150" height="45" fill="#e74c3c" opacity="0.08" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3 2"/>
+    <line x1="450" y1="110" x2="450" y2="155" stroke="#e74c3c" stroke-width="1.5"/>
+    <line x1="500" y1="110" x2="500" y2="155" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#fbd-arrow)" style="color:#e74c3c"/>
+    <line x1="550" y1="110" x2="550" y2="155" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#fbd-arrow)" style="color:#e74c3c"/>
+    <line x1="600" y1="110" x2="600" y2="155" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#fbd-arrow)" style="color:#e74c3c"/>
+    <line x1="450" y1="110" x2="600" y2="110" stroke="#e74c3c" stroke-width="1.5"/>
+  </g>
+  <text x="525" y="100" class="label-force" text-anchor="middle">w = 4 kN/m</text>
+
+  <!-- Reaction at A: vertical Ay (up) -->
+  <line x1="100" y1="250" x2="100" y2="185" class="force-arrow reaction" marker-end="url(#fbd-arrow)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="65" y="265" class="label-accent">A_y</text>
+
+  <!-- Reaction at A: horizontal Ax (right) -->
+  <line x1="60" y1="180" x2="95" y2="180" class="force-arrow reaction" marker-end="url(#fbd-arrow)"/>
+  <text x="45" y="175" class="label-accent">A_x</text>
+
+  <!-- Reaction at B: vertical By (up) -->
+  <line x1="600" y1="250" x2="600" y2="185" class="force-arrow reaction" marker-end="url(#fbd-arrow)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="2s" repeatCount="indefinite" />
+  </line>
+  <text x="615" y="265" class="label-accent">B_y</text>
+
+  <!-- Dimension lines -->
+  <line x1="100" y1="290" x2="350" y2="290" class="dimension"/>
+  <line x1="100" y1="285" x2="100" y2="295" class="dimension"/>
+  <line x1="350" y1="285" x2="350" y2="295" class="dimension"/>
+  <text x="225" y="308" class="label" text-anchor="middle">L/2 = 2.5 m</text>
+
+  <line x1="350" y1="290" x2="600" y2="290" class="dimension"/>
+  <line x1="600" y1="285" x2="600" y2="295" class="dimension"/>
+  <text x="475" y="308" class="label" text-anchor="middle">L/2 = 2.5 m</text>
+
+  <!-- Info box -->
+  <rect x="10" y="320" width="680" height="50" rx="6" class="title-box"/>
+  <text x="350" y="342" class="label" text-anchor="middle" font-weight="bold">Equilibrium: ΣF_x = 0, ΣF_y = 0, ΣM_A = 0</text>
+  <text x="350" y="362" class="label-accent" text-anchor="middle">3 equations → 3 unknowns (A_x, A_y, B_y) → Statically Determinate</text>
+</svg>
