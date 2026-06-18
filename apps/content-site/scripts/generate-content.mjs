@@ -68,11 +68,22 @@ async function indexAssets(dir) {
 }
 
 const copiedAssets = new Set();
+const skippedAssets = new Set();
 async function resolveAsset(ref) {
   // ref may be a path or bare filename, possibly URL-encoded.
   const base = decodeURIComponent(ref.split("/").pop().split("\\").pop()).trim();
   const hit = assetIndex.get(base.toLowerCase());
   if (!hit) return null;
+  if (skippedAssets.has(base)) return null;
+  // Drop SVG placeholders that rely on Obsidian theme CSS variables — those
+  // vars are undefined on the web, so every fill resolves to black (a black box).
+  if (base.toLowerCase().endsWith(".svg")) {
+    const txt = await readFile(hit, "utf8");
+    if (txt.includes("var(--")) {
+      skippedAssets.add(base);
+      return null;
+    }
+  }
   if (!copiedAssets.has(base)) {
     await mkdir(assetsOutDir, { recursive: true });
     await copyFile(hit, path.join(assetsOutDir, base));
