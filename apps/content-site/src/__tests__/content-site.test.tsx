@@ -6,7 +6,7 @@ import { lessons, subjects, getAllLessonSlugs } from '../lib/manifest';
 
 vi.mock('next/link', () => {
   return {
-    default: ({ children, href }: any) => {
+    default: ({ children, href }: { children: React.ReactNode; href: string }) => {
       return <a href={href}>{children}</a>;
     },
   };
