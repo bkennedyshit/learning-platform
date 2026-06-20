@@ -25,6 +25,7 @@ export default async function LearnHome({ searchParams }: Props) {
           <Link href="/learn" className="btn-secondary" style={{ padding: "0.5rem 1rem" }}>All</Link>
           <Link href="/learn?catalog=k12" className="btn-secondary" style={{ padding: "0.5rem 1rem" }}>K-12</Link>
           <Link href="/learn?catalog=advanced" className="btn-secondary" style={{ padding: "0.5rem 1rem" }}>Advanced</Link>
+          <Link href="/tools" className="btn-secondary" style={{ padding: "0.5rem 1rem" }}>🧮 Tools</Link>
         </div>
       </header>
 

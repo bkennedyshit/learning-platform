@@ -27,6 +27,7 @@ export default function Home() {
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <Link href="/learn?catalog=k12" style={{ fontWeight: 500, fontSize: '0.95rem' }}>K-12</Link>
           <Link href="/learn?catalog=advanced" style={{ fontWeight: 500, fontSize: '0.95rem' }}>College</Link>
+          <Link href="/tools" style={{ fontWeight: 500, fontSize: '0.95rem' }}>Tools</Link>
           <Link href="/learn" style={{ fontWeight: 500, fontSize: '0.95rem' }}>Catalog</Link>
         </div>
         <div>

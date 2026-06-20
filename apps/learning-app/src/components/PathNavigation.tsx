@@ -76,6 +76,9 @@ export default function PathNavigation({ nav }: { nav?: PathNavData }) {
             {c.name}
           </Link>
         ))}
+        <Link href="/tools" className={styles.pathItem} style={{ textDecoration: "none", color: "inherit" }}>
+          🧮 Tools &amp; Calculators
+        </Link>
       </div>
     </nav>
   );
