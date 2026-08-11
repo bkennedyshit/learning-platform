@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
@@ -21,6 +23,8 @@ export default function RootLayout({
           <span className="support-fab__mark" aria-hidden>$</span>
           <span>Tip jar</span>
         </Link>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
