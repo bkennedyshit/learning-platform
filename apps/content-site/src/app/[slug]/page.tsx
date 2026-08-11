@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLesson, getAllLessonSlugs } from "../../lib/manifest";
+import { SITE_URL } from "../../lib/site";
 import LessonContent from "../../components/LessonContent";
 
 interface Props {
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Lesson Not Found" };
   }
 
-  const canonicalUrl = `https://platform.example.com/${lesson.slug}`;
+  const canonicalUrl = `${SITE_URL}/${lesson.slug}`;
 
   return {
     title: `${lesson.title} - Learning Platform`,
@@ -40,7 +41,7 @@ export default async function LessonPage({ params }: Props) {
     "@type": "Article",
     headline: lesson.title,
     author: { "@type": "Organization", name: "Learning Platform" },
-    url: `https://platform.example.com/${lesson.slug}`,
+    url: `${SITE_URL}/${lesson.slug}`,
     publisher: { "@type": "Organization", name: "Learning Platform" },
     isAccessibleForFree: lesson.openSource,
   };

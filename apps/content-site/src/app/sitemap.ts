@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { getSubjects, getAllLessonSlugs } from '../lib/manifest';
+import { SITE_URL } from '../lib/site';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://platform.example.com';
+  const baseUrl = SITE_URL;
 
   const subjectUrls = getSubjects().map((subject) => ({
     url: `${baseUrl}/subject/${subject.slug}`,

@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSubjectBySlug, getAllSubjectSlugs } from "../../../lib/manifest";
+import { SITE_URL } from "../../../lib/site";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${subject.name} - Learning Platform`,
     description: `Browse ${subject.lessonCount} lessons in ${subject.name}.`,
-    alternates: { canonical: `https://platform.example.com/subject/${subject.slug}` },
+    alternates: { canonical: `${SITE_URL}/subject/${subject.slug}` },
   };
 }
 
