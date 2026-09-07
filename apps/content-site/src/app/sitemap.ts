@@ -7,14 +7,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const subjectUrls = getSubjects().map((subject) => ({
     url: `${baseUrl}/subject/${subject.slug}`,
-    lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
 
   const lessonUrls = getAllLessonSlugs().map((slug) => ({
     url: `${baseUrl}/${slug}`,
-    lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
@@ -22,9 +20,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
+    },
+    {
+      url: `${baseUrl}/resources`,
+      lastModified: '2026-09-07',
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/resources/mobile-connectivity-for-students-and-remote-learning`,
+      lastModified: '2026-09-07',
+      changeFrequency: 'monthly',
+      priority: 0.6,
     },
     ...subjectUrls,
     ...lessonUrls,

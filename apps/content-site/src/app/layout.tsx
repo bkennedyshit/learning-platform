@@ -4,9 +4,14 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "katex/dist/katex.min.css";
 import "./globals.css";
+import { SITE_URL } from "../lib/site";
 
 export const metadata: Metadata = {
-  title: "Learning Platform Content Site",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "NEPA Learning",
+    template: "%s | NEPA Learning",
+  },
   description: "Browse published learning lessons and resources.",
 };
 
