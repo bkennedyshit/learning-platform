@@ -119,9 +119,11 @@ function cleanMarkdown(md) {
 
 function slugify(s) {
   return String(s)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/&/g, " and ")
-    .replace(/[^\w\s-]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
@@ -187,7 +189,7 @@ for (const file of files) {
   const subjectName = cleanSubject(fm.subject);
   if (!subjectName) { skipped++; continue; }
 
-  const slug = file.replace(/\.md$/, "");
+  const slug = slugify(file.replace(/\.md$/, ""));
   const cleaned = cleanMarkdown(body);
   const withImages = await rewriteImages(cleaned);
   const html = marked.parse(withImages);
