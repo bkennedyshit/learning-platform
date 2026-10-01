@@ -7,6 +7,7 @@ export function AffiliateOffer() {
       <a href={ATT_URL} target="_blank" rel="sponsored nofollow noopener noreferrer" style={{ display: "block", width: "fit-content", maxWidth: "100%", margin: "0 auto", overflow: "hidden", borderRadius: 8 }}>
         <img src="https://cdn.avantlink.com/banners/85cbb310-8273-4bb9-9350-8b256144dd8d.png" width="398" height="264" alt="AT&amp;T wireless advertisement" style={{ display: "block", maxWidth: "100%", height: "auto" }} />
       </a>
+      <p style={{ margin: ".55rem auto 0", maxWidth: 520, color: "#64748b", fontSize: ".75rem", textAlign: "center" }}>Affiliate disclosure: NEPA Learning may earn a commission from qualifying purchases at no extra cost to you.</p>
     </aside>
   );
 }

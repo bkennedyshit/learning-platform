@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AffiliateOffer } from "../../components/AffiliateOffer";
 
 export const metadata: Metadata = {
   title: "Learning Resources",
@@ -16,6 +17,7 @@ export default function ResourcesPage() {
         <h1>Build a learning setup that keeps working</h1>
         <p>Focused guides for the technology around the lesson: connectivity, devices, study workflows, and access.</p>
       </header>
+      <AffiliateOffer />
       <article style={{ padding: "1.5rem", border: "1px solid #d9deea", borderRadius: 16 }}>
         <h2><Link href="/resources/mobile-connectivity-for-students-and-remote-learning">Mobile Connectivity for Students and Remote Learning</Link></h2>
         <p>How to measure the workload, compare hotspot terms, plan offline study, and avoid paying for capacity the student does not need.</p>
