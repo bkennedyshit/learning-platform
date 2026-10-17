@@ -165,15 +165,190 @@ function parseFrontmatter(raw) {
   return { fm, body };
 }
 
+// ---- Index-promotion gate ----------------------------------------------------
+// A lesson is only offered to search engines (robots index + sitemap) when it
+// is finished content. Everything below is derived from the corpus itself:
+//
+//  * placeholder - the authoring stub markers ("Ready for expansion" chapter
+//                  goal and "TODO: Expand/Add" sections) are still present.
+//  * scaffold    - the body is the generic grade-band template that was
+//                  generated for every chapter before real content was written
+//                  ("Primary Element: The foundational building block of this
+//                  unit" + "System Overlay"). These pages are near-identical
+//                  across subjects, which is exactly what Google reports as
+//                  "Crawled - currently not indexed".
+//  * thin        - fewer than MIN_INDEXABLE_WORDS words of rendered prose.
+//
+// Non-indexable lessons are still published and linked (noindex,follow) so
+// readers can use them; they rejoin the sitemap automatically once rewritten.
+const MIN_INDEXABLE_WORDS = 400;
+
+function htmlToText(html) {
+  return html
+    .replace(/<(script|style|math)\b[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function countWords(text) {
+  return text.split(/\s+/).filter((w) => /[A-Za-z0-9\u00C0-\uFFFF]/.test(w)).length;
+}
+
+function assessLesson(html) {
+  const text = htmlToText(html);
+  const wordCount = countWords(text);
+  const placeholder = /Ready for expansion/i.test(text) || /TODO:\s*(Expand|Add)\b/i.test(text);
+  const scaffold =
+    /The foundational building block of this unit/i.test(text) && /System Overlay/i.test(text);
+  let noindexReason = null;
+  if (placeholder) noindexReason = "placeholder";
+  else if (scaffold) noindexReason = "scaffold";
+  else if (wordCount < MIN_INDEXABLE_WORDS) noindexReason = "thin";
+  return { wordCount, indexable: noindexReason === null, noindexReason };
+}
+
+// Meta description from the lesson's own first substantial paragraph, so each
+// page has a distinct snippet instead of one templated sentence site-wide.
+function extractDescription(html) {
+  for (const m of html.matchAll(/<p>([\s\S]*?)<\/p>/g)) {
+    const text = htmlToText(m[1]);
+    if (text.length < 60) continue;
+    if (/^(Chapter goal|By the end of this chapter)/i.test(text)) continue;
+    if (text.length <= 160) return text;
+    const cut = text.slice(0, 157);
+    return `${cut.slice(0, cut.lastIndexOf(" ") > 100 ? cut.lastIndexOf(" ") : 157)}…`;
+  }
+  return null;
+}
+
+// ---- Local link resolution ---------------------------------------------------
+// Corpus lessons cross-reference each other with Obsidian-style relative links
+// ("2.6---Eigenvalues-Eigenvectors-&-Diagonalization", "Subject_Plan",
+// "README"). Rendered verbatim they resolve to /<target> on the site and 404.
+// Each is rewritten to the canonical lesson route, to the subject hub for
+// subject-plan style documents, or reduced to plain text when nothing public
+// corresponds to it.
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function decodeEntities(s) {
+  return s.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
+function looseKey(value, ampersand = "") {
+  return String(value)
+    .replace(/\.md$/i, "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, ampersand)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function stripChapterPrefix(value) {
+  return String(value).replace(/^\s*(?:app-)?\d+(?:\.\d+)*\s*[—–:\-\s]+/i, "");
+}
+
+const SUBJECT_DOC_KEYS = new Set(["subjectplan", "learningpath", "readme"]);
+
+function addUnique(map, key, value) {
+  if (!key) return;
+  if (!map.has(key)) map.set(key, value);
+  else if (map.get(key) !== value) map.set(key, null); // ambiguous -> never used
+}
+
+function buildLinkIndex(sources) {
+  const exact = new Map();
+  const body = new Map();
+  for (const s of sources) {
+    const heading = (/^#\s+(.+)$/m.exec(s.body)?.[1] ?? "").replace(/[*_`]/g, "");
+    const names = [s.file, s.slug, s.fm.title || "", heading].filter(Boolean);
+    for (const name of names) {
+      addUnique(exact, looseKey(name), s.slug);
+      addUnique(exact, looseKey(name, "and"), s.slug);
+      const bodyKey = looseKey(stripChapterPrefix(name));
+      if (bodyKey.length >= 10) addUnique(body, bodyKey, s.slug);
+    }
+  }
+  return { exact, body };
+}
+
+function resolveLocalTarget(target, index, subjectSlug) {
+  const basename = target.replace(/\\/g, "/").replace(/\/+$/, "").split("/").pop();
+  if (!basename) return null;
+  const key = looseKey(basename);
+  if (SUBJECT_DOC_KEYS.has(key)) return `/subject/${subjectSlug}`;
+  const exact = index.exact.get(key) ?? index.exact.get(looseKey(basename, "and"));
+  if (exact) return `/${exact}`;
+  const bodyKey = looseKey(stripChapterPrefix(basename));
+  const byBody = bodyKey.length >= 10 ? index.body.get(bodyKey) : null;
+  return byBody ? `/${byBody}` : null;
+}
+
+const linkStats = { rewritten: 0, toHub: 0, unlinked: 0 };
+
+function rewriteLocalLinks(html, index, subjectSlug) {
+  return html.replace(/<a href="([^"]*)"([^>]*)>([\s\S]*?)<\/a>/g, (full, rawHref, attrs, inner) => {
+    const href = decodeEntities(rawHref);
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#|\/)/i.test(href)) return full;
+    const suffixAt = href.search(/[?#]/);
+    const target = safeDecode(suffixAt === -1 ? href : href.slice(0, suffixAt));
+    const fragment = suffixAt === -1 ? "" : href.slice(suffixAt);
+    const resolved = resolveLocalTarget(target, index, subjectSlug);
+    if (!resolved) {
+      linkStats.unlinked++;
+      return inner;
+    }
+    if (resolved.startsWith("/subject/")) linkStats.toHub++;
+    else linkStats.rewritten++;
+    return `<a href="${resolved}${fragment.startsWith("#") ? fragment : ""}"${attrs}>${inner}</a>`;
+  });
+}
+
+function assertInternalLinks(subjects, lessons) {
+  const known = new Set(["/", "/resources", "/tools"]);
+  for (const s of subjects) known.add(`/subject/${s.slug}`);
+  for (const slug of Object.keys(lessons)) known.add(`/${slug}`);
+  const bad = [];
+  for (const l of Object.values(lessons)) {
+    for (const m of l.html.matchAll(/<a\b[^>]*\bhref="([^"]*)"/g)) {
+      const href = decodeEntities(m[1]);
+      if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(href)) continue;
+      const p = href.split(/[?#]/)[0];
+      if (!known.has(p)) bad.push(`${l.slug} -> ${href}`);
+    }
+  }
+  if (bad.length) {
+    throw new Error(`Unresolved internal lesson links (${bad.length}):\n${bad.slice(0, 20).join("\n")}`);
+  }
+}
+
+// C# and C++ both slugify to "c"; give them distinct, readable hub URLs.
+const SUBJECT_SLUG_OVERRIDES = new Map([
+  ["C#", "c-sharp"],
+  ["C++", "cpp"],
+]);
+const subjectSlugFor = (name) => SUBJECT_SLUG_OVERRIDES.get(name) ?? slugify(name);
+
+const RELATED_LESSON_COUNT = 4;
+
 // ---- Main ------------------------------------------------------------------
 await indexAssets(corpusRoot);
 console.log(`Indexed ${assetIndex.size} asset files.`);
 
 const files = (await readdir(lessonsDir)).filter((f) => f.endsWith(".md"));
-const lessonsBySubject = new Map();
-let kept = 0;
+const sources = [];
 let skipped = 0;
 
+// Pass 1: select teachable lessons so every final route is known before any
+// cross-reference is rewritten.
 for (const file of files) {
   const raw = await readFile(path.join(lessonsDir, file), "utf8");
   const parsed = parseFrontmatter(raw);
@@ -189,10 +364,25 @@ for (const file of files) {
   const subjectName = cleanSubject(fm.subject);
   if (!subjectName) { skipped++; continue; }
 
-  const slug = slugify(file.replace(/\.md$/, ""));
+  sources.push({ file, fm, body, subjectName, slug: slugify(file.replace(/\.md$/, "")) });
+}
+
+const slugOwners = new Map();
+for (const s of sources) {
+  if (slugOwners.has(s.slug)) {
+    throw new Error(`Duplicate lesson slug "${s.slug}" from ${slugOwners.get(s.slug)} and ${s.file}`);
+  }
+  slugOwners.set(s.slug, s.file);
+}
+const linkIndex = buildLinkIndex(sources);
+
+// Pass 2: render, fix cross-references, and assess index eligibility.
+const lessonsBySubject = new Map();
+for (const { file, fm, body, subjectName, slug } of sources) {
   const cleaned = cleanMarkdown(body);
   const withImages = await rewriteImages(cleaned);
-  const html = marked.parse(withImages);
+  const html = rewriteLocalLinks(marked.parse(withImages), linkIndex, subjectSlugFor(subjectName));
+  const assessment = assessLesson(html);
 
   const lesson = {
     slug,
@@ -202,20 +392,39 @@ for (const file of files) {
     audienceTier: fm.audience_tier || (fm.catalog === "advanced" ? "higher-education" : "9-12"),
     openSource: true,
     order: orderKey(file, fm.chapter),
+    description: extractDescription(html),
+    ...assessment,
     html,
   };
 
   if (!lessonsBySubject.has(subjectName)) lessonsBySubject.set(subjectName, []);
   lessonsBySubject.get(subjectName).push(lesson);
-  kept++;
+}
+
+// Nearest indexable siblings in course order, excluding the lesson itself and
+// its prev/next (already linked separately).
+function relatedFor(list, i) {
+  const exclude = new Set([list[i].slug, list[i - 1]?.slug, list[i + 1]?.slug]);
+  return list
+    .map((l, j) => ({ l, d: Math.abs(j - i), j }))
+    .filter(({ l }) => l.indexable && !exclude.has(l.slug))
+    .sort((a, b) => a.d - b.d || a.j - b.j)
+    .slice(0, RELATED_LESSON_COUNT)
+    .sort((a, b) => a.j - b.j)
+    .map(({ l }) => l.slug);
 }
 
 const subjects = [];
 const lessons = {};
+const subjectSlugOwners = new Map();
 
 for (const [name, list] of [...lessonsBySubject.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
   list.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
-  const subjectSlug = slugify(name);
+  const subjectSlug = subjectSlugFor(name);
+  if (subjectSlugOwners.has(subjectSlug)) {
+    throw new Error(`Duplicate subject slug "${subjectSlug}" for "${subjectSlugOwners.get(subjectSlug)}" and "${name}"`);
+  }
+  subjectSlugOwners.set(subjectSlug, name);
   const catalog = list.some((l) => l.catalog === "advanced") ? "advanced" : "k12";
 
   list.forEach((l, i) => {
@@ -228,25 +437,45 @@ for (const [name, list] of [...lessonsBySubject.entries()].sort((a, b) => a[0].l
       catalog: l.catalog,
       audienceTier: l.audienceTier,
       openSource: l.openSource,
+      description: l.description,
+      wordCount: l.wordCount,
+      indexable: l.indexable,
+      noindexReason: l.noindexReason,
       html: l.html,
       prevSlug: i > 0 ? list[i - 1].slug : null,
       nextSlug: i < list.length - 1 ? list[i + 1].slug : null,
+      relatedSlugs: relatedFor(list, i),
     };
   });
 
+  const indexableLessonCount = list.filter((l) => l.indexable).length;
   subjects.push({
     slug: subjectSlug,
     name,
     catalog,
     lessonCount: list.length,
-    lessons: list.map((l) => ({ slug: l.slug, title: l.title, chapter: l.chapter })),
+    indexableLessonCount,
+    indexable: indexableLessonCount > 0,
+    lessons: list.map((l) => ({ slug: l.slug, title: l.title, chapter: l.chapter, indexable: l.indexable })),
   });
 }
+
+assertInternalLinks(subjects, lessons);
 
 await mkdir(path.dirname(outFile), { recursive: true });
 await writeFile(outFile, JSON.stringify({ subjects, lessons }, null, 0), "utf8");
 
-console.log(`Subjects: ${subjects.length}`);
-console.log(`Lessons kept: ${Object.keys(lessons).length}  (skipped non-lessons: ${skipped})`);
+const all = Object.values(lessons);
+const byReason = (r) => all.filter((l) => l.noindexReason === r).length;
+console.log(`Subjects: ${subjects.length} (indexable hubs: ${subjects.filter((s) => s.indexable).length})`);
+console.log(`Lessons kept: ${all.length}  (skipped non-lessons: ${skipped})`);
+console.log(
+  `Index gate: ${all.filter((l) => l.indexable).length} indexable, ` +
+    `${all.length - all.filter((l) => l.indexable).length} noindex ` +
+    `(placeholder ${byReason("placeholder")}, scaffold ${byReason("scaffold")}, thin <${MIN_INDEXABLE_WORDS}w ${byReason("thin")})`
+);
+console.log(
+  `Local links: ${linkStats.rewritten} -> lessons, ${linkStats.toHub} -> subject hubs, ${linkStats.unlinked} unlinked (no public target)`
+);
 console.log(`Assets copied to public/lesson-assets: ${copiedAssets.size}`);
 console.log(`Output: ${path.relative(appDir, outFile)}`);

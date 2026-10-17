@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getSubjectBySlug, getAllSubjectSlugs } from "../../../lib/manifest";
+import { getSubjectBySlug, getAllSubjectSlugs, type SubjectLessonRef } from "../../../lib/manifest";
 import { SITE_URL } from "../../../lib/site";
 
 interface Props {
@@ -18,7 +18,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${subject.name} - Learning Platform`,
     description: `Browse ${subject.lessonCount} lessons in ${subject.name}.`,
     alternates: { canonical: `${SITE_URL}/subject/${subject.slug}` },
+    // A hub whose lessons are all still in development has nothing to index yet.
+    ...(subject.indexable ? {} : { robots: { index: false, follow: true } }),
   };
+}
+
+function LessonList({ items, offset = 0 }: { items: SubjectLessonRef[]; offset?: number }) {
+  return (
+    <ol style={{ listStyle: 'none', display: 'grid', gap: '0.75rem', padding: 0 }}>
+      {items.map((lesson, i) => (
+        <li key={lesson.slug}>
+          <Link href={`/${lesson.slug}`} style={{ color: 'inherit' }}>
+            <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem' }}>
+              <span className="badge">{lesson.chapter || offset + i + 1}</span>
+              <span style={{ fontSize: '1.1rem' }}>{lesson.title}</span>
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ol>
+  );
 }
 
 export default async function SubjectPage({ params }: Props) {
@@ -27,6 +46,9 @@ export default async function SubjectPage({ params }: Props) {
   if (!subject) {
     notFound();
   }
+
+  const ready = subject.lessons.filter((l) => l.indexable);
+  const inDevelopment = subject.lessons.filter((l) => !l.indexable);
 
   return (
     <main className="container" style={{ padding: '4rem 2rem' }}>
@@ -42,18 +64,20 @@ export default async function SubjectPage({ params }: Props) {
         <h1 style={{ marginTop: '1rem' }}>{subject.name}</h1>
       </header>
 
-      <ol style={{ listStyle: 'none', display: 'grid', gap: '0.75rem', padding: 0 }}>
-        {subject.lessons.map((lesson, i) => (
-          <li key={lesson.slug}>
-            <Link href={`/${lesson.slug}`} style={{ color: 'inherit' }}>
-              <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem' }}>
-                <span className="badge">{lesson.chapter || i + 1}</span>
-                <span style={{ fontSize: '1.1rem' }}>{lesson.title}</span>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ol>
+      {ready.length > 0 && (
+        <section aria-labelledby="lessons-heading">
+          <h2 id="lessons-heading">Lessons</h2>
+          <LessonList items={ready} />
+        </section>
+      )}
+
+      {inDevelopment.length > 0 && (
+        <section aria-labelledby="in-development-heading" style={{ marginTop: ready.length ? '2.5rem' : 0 }}>
+          <h2 id="in-development-heading">In development</h2>
+          <p>These lesson outlines are still being written.</p>
+          <LessonList items={inDevelopment} />
+        </section>
+      )}
     </main>
   );
 }

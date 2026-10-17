@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import { proxy } from '../proxy';
+import { getLesson } from '../lib/manifest';
 
 const LEGACY_REDIRECTS = [
   [
@@ -23,5 +24,9 @@ describe('legacy lesson redirects', () => {
 
     expect(response.status).toBe(308);
     expect(response.headers.get('location')).toBe(`https://learning.nepa-ai.com${canonicalPath}`);
+  });
+
+  it.each(LEGACY_REDIRECTS)('%s redirects to a published lesson', (_legacyPath, canonicalPath) => {
+    expect(getLesson(canonicalPath.slice(1))).toBeDefined();
   });
 });

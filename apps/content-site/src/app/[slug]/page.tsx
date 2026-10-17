@@ -21,10 +21,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${lesson.title} - Learning Platform`,
-    description: `Study ${lesson.title} from the ${lesson.subject} subject.`,
+    description: lesson.description ?? `Study ${lesson.title} from the ${lesson.subject} subject.`,
     alternates: {
       canonical: canonicalUrl,
     },
+    // Index-promotion gate: unfinished lessons stay reachable and pass link
+    // equity, but are kept out of the index until they are rewritten.
+    ...(lesson.indexable ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
@@ -48,6 +51,9 @@ export default async function LessonPage({ params }: Props) {
 
   const prevLesson = lesson.prevSlug ? getLesson(lesson.prevSlug) : null;
   const nextLesson = lesson.nextSlug ? getLesson(lesson.nextSlug) : null;
+  const relatedLessons = lesson.relatedSlugs
+    .map((s) => getLesson(s))
+    .filter((l): l is NonNullable<typeof l> => Boolean(l));
 
   return (
     <main className="container" style={{ padding: '4rem 2rem' }}>
@@ -95,6 +101,22 @@ export default async function LessonPage({ params }: Props) {
         ) : (
           <div></div>
         )}
+      </nav>
+
+      <nav aria-labelledby="related-lessons-heading" className="glass-panel" style={{ marginTop: '2rem' }}>
+        <h2 id="related-lessons-heading" style={{ marginTop: 0 }}>More in {lesson.subject}</h2>
+        {relatedLessons.length > 0 && (
+          <ul>
+            {relatedLessons.map((related) => (
+              <li key={related.slug}>
+                <Link href={`/${related.slug}`}>{related.title}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={{ marginBottom: 0 }}>
+          <Link href={`/subject/${lesson.subjectSlug}`}>All {lesson.subject} lessons</Link>
+        </p>
       </nav>
     </main>
   );
