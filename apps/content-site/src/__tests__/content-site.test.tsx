@@ -332,3 +332,62 @@ describe('Content Site - rewrite batch: Geometry', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Pre-Algebra', () => {
+  const hubSlug = 'pre-algebra';
+  const batch: Array<[string, string]> = [
+    ['131-ratios-rates-proportions', '13.1 - Ratios, Rates & Proportions'],
+    ['132-the-number-system', '13.2 - The Number System'],
+    ['133-fractions-decimals-percent', '13.3 - Fractions, Decimals & Percent'],
+    ['134-expressions-variables', '13.4 - Expressions & Variables'],
+    ['135-equations-inequalities', '13.5 - Equations & Inequalities'],
+    ['136-geometry-foundations', '13.6 - Geometry Foundations'],
+    ['137-statistics-data', '13.7 - Statistics & Data'],
+    ['138-probability-intro', '13.8 - Probability Intro'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Pre-Algebra');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`13.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error/i);
+    }
+  });
+
+  it('every lesson has worked examples, 2+ misconceptions, 3+ practice tasks, an answer key, and a hub link', () => {
+    for (const slug of slugs) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+    }
+  });
+
+  it('the Pre-Algebra hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
