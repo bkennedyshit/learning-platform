@@ -159,3 +159,59 @@ describe('Content Site - internal linking', () => {
     }
   });
 });
+
+
+// Rewrite batches (see .kiro/learning-content-rewrite): each rewritten lesson
+// must stay promoted through the existing gate and keep its teaching structure.
+describe('Content Site - rewrite batch: Algebra I', () => {
+  const batch = [
+    '141-the-language-of-algebra',
+    '142-linear-equations',
+    '143-linear-inequalities',
+    '144-functions-relations',
+    '145-linear-functions-graphing',
+    '146-systems-of-equations',
+    '147-exponents-polynomials',
+    '148-factoring-quadratics',
+  ];
+
+  it('keeps the chapter order, subject, tier, and prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === 'algebra-i')!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(batch);
+    batch.forEach((slug, i) => {
+      const l = getLesson(slug)!;
+      expect(l.subject).toBe('Algebra I');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`14.${i + 1}`);
+      expect(l.prevSlug).toBe(batch[i - 1] ?? null);
+      expect(l.nextSlug).toBe(batch[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of batch) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO/i);
+    }
+  });
+
+  it('every lesson has worked examples, misconceptions, practice, an answer key, and a hub link', () => {
+    for (const slug of batch) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      expect(html, slug).toMatch(/<h2[^>]*>Common misconceptions/);
+      expect(html, slug).toMatch(/<h2[^>]*>Practice<\/h2>/);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toContain('href="/subject/algebra-i"');
+    }
+  });
+
+  it('the Algebra I hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === 'algebra-i')!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/algebra-i`);
+    for (const slug of batch) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
