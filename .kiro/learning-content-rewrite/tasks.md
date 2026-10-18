@@ -23,8 +23,8 @@
 
 - [x] 2.1 Rewrite Algebra II & Pre-Calculus (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/algebra-ii-01.md)
 - [x] 2.2 Rewrite Geometry (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 511 URLs incl. Geometry hub/lessons, lessons indexable. Record: batches/geometry-01.md)
-- [x] 2.3 Rewrite Pre-Algebra (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/pre-algebra-01.md)
-- [ ] 2.4 Rewrite Statistics & Probability (8 lessons).
+- [x] 2.3 Rewrite Pre-Algebra (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 520 URLs incl. `/subject/pre-algebra`, lessons indexable. Record: batches/pre-algebra-01.md)
+- [x] 2.4 Rewrite Statistics & Probability (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/statistics-probability-01.md)
 - [ ] 2.5 Rewrite Early Numeracy K-5 (8 lessons).
 - [ ] 2.6 Validate cross-subject prerequisites and hub navigation.
 - [ ] 2.7 Build, test, report, commit, and deploy each batch separately.

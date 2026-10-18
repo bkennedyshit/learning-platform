@@ -141,7 +141,7 @@ Self-check method: every answer must be between $0$ and $1$. For a full sample s
 
 ## Where this fits
 
-This is the final lesson in the [Pre-Algebra course](/subject/pre-algebra), following [13.7 - Statistics & Data](/137-statistics-data). The next step is [14.1 - The Language of Algebra](/141-the-language-of-algebra), the first lesson of the [Algebra I course](/subject/algebra-i). Probability is developed further in [17.4 - Probability](/174-probability) in the [Statistics & Probability course](/subject/statistics-and-probability), which is still being written.
+This is the final lesson in the [Pre-Algebra course](/subject/pre-algebra), following [13.7 - Statistics & Data](/137-statistics-data). The next step is [14.1 - The Language of Algebra](/141-the-language-of-algebra), the first lesson of the [Algebra I course](/subject/algebra-i). Probability is developed further in [17.4 - Probability](/174-probability) in the [Statistics & Probability course](/subject/statistics-and-probability), which adds conditional probability, independence, and Bayes' theorem.
 
 ## Sources
 

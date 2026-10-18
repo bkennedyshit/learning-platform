@@ -391,3 +391,63 @@ describe('Content Site - rewrite batch: Pre-Algebra', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+
+describe('Content Site - rewrite batch: Statistics & Probability', () => {
+  const hubSlug = 'statistics-and-probability';
+  const batch: Array<[string, string]> = [
+    ['171-exploring-data-1-variable', '17.1 - Exploring Data (1-Variable)'],
+    ['172-exploring-data-2-variable', '17.2 - Exploring Data (2-Variable)'],
+    ['173-sampling-experimental-design', '17.3 - Sampling & Experimental Design'],
+    ['174-probability', '17.4 - Probability'],
+    ['175-discrete-random-variables', '17.5 - Discrete Random Variables'],
+    ['176-normal-distribution-sampling-distributions', '17.6 - Normal Distribution & Sampling Distributions'],
+    ['177-confidence-intervals', '17.7 - Confidence Intervals'],
+    ['178-significance-tests', '17.8 - Significance Tests'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Statistics & Probability');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`17.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error/i);
+    }
+  });
+
+  it('every lesson has worked examples, 2+ misconceptions, 3+ practice tasks, an answer key, and a hub link', () => {
+    for (const slug of slugs) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+    }
+  });
+
+  it('the Statistics & Probability hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});

@@ -140,7 +140,7 @@ Self-check method: the mean must lie between the minimum and maximum, and the su
 
 ## Where this fits
 
-This lesson follows [13.6 - Geometry Foundations](/136-geometry-foundations) in the [Pre-Algebra course](/subject/pre-algebra). Next, [13.8 - Probability Intro](/138-probability-intro) uses relative frequencies from data as estimates of probability. These ideas are developed further in [17.1 - Exploring Data (1-Variable)](/171-exploring-data-1-variable) in the [Statistics & Probability course](/subject/statistics-and-probability), which is still being written.
+This lesson follows [13.6 - Geometry Foundations](/136-geometry-foundations) in the [Pre-Algebra course](/subject/pre-algebra). Next, [13.8 - Probability Intro](/138-probability-intro) uses relative frequencies from data as estimates of probability. These ideas are developed further in [17.1 - Exploring Data (1-Variable)](/171-exploring-data-1-variable) in the [Statistics & Probability course](/subject/statistics-and-probability), which adds the standard deviation and the effect of changing units.
 
 ## Sources
 
