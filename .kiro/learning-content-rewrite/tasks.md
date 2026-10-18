@@ -21,7 +21,7 @@
 
 ## Phase 2 — foundational math
 
-- [ ] 2.1 Rewrite Algebra II & Pre-Calculus (8 lessons).
+- [x] 2.1 Rewrite Algebra II & Pre-Calculus (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/algebra-ii-01.md)
 - [ ] 2.2 Rewrite Geometry (8 lessons).
 - [ ] 2.3 Rewrite Pre-Algebra (8 lessons).
 - [ ] 2.4 Rewrite Statistics & Probability (8 lessons).

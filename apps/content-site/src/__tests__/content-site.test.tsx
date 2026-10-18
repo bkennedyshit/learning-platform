@@ -215,3 +215,61 @@ describe('Content Site - rewrite batch: Algebra I', () => {
     for (const slug of batch) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Algebra II & Pre-Calculus', () => {
+  const hubSlug = 'algebra-ii-and-pre-calculus';
+  const batch: Array<[string, string]> = [
+    ['161-polynomial-functions', '16.1 - Polynomial Functions'],
+    ['162-rational-functions', '16.2 - Rational Functions'],
+    ['163-exponential-logarithmic-functions', '16.3 - Exponential & Logarithmic Functions'],
+    ['164-trigonometry-the-unit-circle', '16.4 - Trigonometry — The Unit Circle'],
+    ['165-trig-identities-equations', '16.5 - Trig Identities & Equations'],
+    ['166-conic-sections', '16.6 - Conic Sections'],
+    ['167-sequences-series-the-binomial-theorem', '16.7 - Sequences, Series & the Binomial Theorem'],
+    ['168-limits-introduction-to-calculus', '16.8 - Limits & Introduction to Calculus'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Algebra II & Pre-Calculus');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`16.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error/i);
+    }
+  });
+
+  it('every lesson has worked examples, misconceptions, 3+ practice tasks, an answer key, and a hub link', () => {
+    for (const slug of slugs) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      expect(html, slug).toMatch(/<h2[^>]*>Common misconceptions/);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+    }
+  });
+
+  it('the Algebra II & Pre-Calculus hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
