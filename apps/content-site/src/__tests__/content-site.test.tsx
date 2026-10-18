@@ -273,3 +273,62 @@ describe('Content Site - rewrite batch: Algebra II & Pre-Calculus', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Geometry', () => {
+  const hubSlug = 'geometry';
+  const batch: Array<[string, string]> = [
+    ['151-foundations-of-geometry', '15.1 - Foundations of Geometry'],
+    ['152-reasoning-proof', '15.2 - Reasoning & Proof'],
+    ['153-parallel-perpendicular-lines', '15.3 - Parallel & Perpendicular Lines'],
+    ['154-triangles', '15.4 - Triangles'],
+    ['155-similarity-proportions', '15.5 - Similarity & Proportions'],
+    ['156-right-triangles-trigonometry', '15.6 - Right Triangles & Trigonometry'],
+    ['157-circles', '15.7 - Circles'],
+    ['158-area-volume-coordinate-geometry', '15.8 - Area, Volume & Coordinate Geometry'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Geometry');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`15.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error/i);
+    }
+  });
+
+  it('every lesson has worked examples, 2+ misconceptions, 3+ practice tasks, an answer key, and a hub link', () => {
+    for (const slug of slugs) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+    }
+  });
+
+  it('the Geometry hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
