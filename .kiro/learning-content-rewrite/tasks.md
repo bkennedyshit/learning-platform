@@ -31,8 +31,8 @@
 
 ## Phase 3 — science and literacy foundations
 
-- [x] 3.1 Rewrite Physical Science K-8 (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/physical-science-01.md)
-- [ ] 3.2 Rewrite Earth Science (8 lessons).
+- [x] 3.1 Rewrite Physical Science K-8 (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 547 URLs incl. `/subject/physical-science-k-8`, lessons indexable. Record: batches/physical-science-01.md)
+- [x] 3.2 Rewrite Earth Science (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/earth-science-01.md)
 - [ ] 3.3 Rewrite Life Science K-8 (8 lessons).
 - [ ] 3.4 Rewrite Early Literacy & Writing (8 lessons).
 - [ ] 3.5 Rewrite Research Writing & Academic Literacy (8 lessons).
