@@ -511,3 +511,67 @@ describe('Content Site - rewrite batch: Early Numeracy K-5', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+
+describe('Content Site - rewrite batch: Physical Science K-8', () => {
+  const hubSlug = 'physical-science-k-8';
+  const batch: Array<[string, string]> = [
+    ['app-041-forces-motion-foundations', 'APP-04.1 — Forces & Motion — Foundations'],
+    ['app-042-energy-forms-transfers', 'APP-04.2 — Energy — Forms & Transfers'],
+    ['app-043-waves-light-sound', 'APP-04.3 — Waves — Light & Sound'],
+    ['app-044-matter-properties-states', 'APP-04.4 — Matter — Properties & States'],
+    ['app-045-forces-motion-newtons-laws', 'APP-04.5 — Forces & Motion — Newtons Laws'],
+    ['app-046-atoms-elements-the-periodic-table', 'APP-04.6 — Atoms, Elements & the Periodic Table'],
+    ['app-047-chemical-reactions', 'APP-04.7 — Chemical Reactions'],
+    ['app-048-electricity-magnetism', 'APP-04.8 — Electricity & Magnetism'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Physical Science K-8');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`4.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error|Visual Anchor/i);
+    }
+  });
+
+  it('every lesson has worked examples, 2+ misconceptions, 3+ practice tasks, an answer key, a safety note, sources, and nav links', () => {
+    for (const [i, slug] of slugs.entries()) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toMatch(/Safety note/);
+      expect(html, slug).toMatch(/<h2[^>]*>Sources<\/h2>/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+      if (i > 0) expect(html, slug).toContain(`href="/${slugs[i - 1]}"`);
+      if (i < slugs.length - 1) expect(html, slug).toContain(`href="/${slugs[i + 1]}"`);
+    }
+  });
+
+  it('the Physical Science K-8 hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});

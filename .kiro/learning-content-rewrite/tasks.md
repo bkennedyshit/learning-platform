@@ -25,13 +25,13 @@
 - [x] 2.2 Rewrite Geometry (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 511 URLs incl. Geometry hub/lessons, lessons indexable. Record: batches/geometry-01.md)
 - [x] 2.3 Rewrite Pre-Algebra (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 520 URLs incl. `/subject/pre-algebra`, lessons indexable. Record: batches/pre-algebra-01.md)
 - [x] 2.4 Rewrite Statistics & Probability (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 529 URLs incl. `/subject/statistics-and-probability`, lessons indexable. Record: batches/statistics-probability-01.md)
-- [x] 2.5 Rewrite Early Numeracy K-5 (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/early-numeracy-01.md)
+- [x] 2.5 Rewrite Early Numeracy K-5 (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 538 URLs incl. `/subject/early-numeracy-k-5`, lessons indexable. Record: batches/early-numeracy-01.md)
 - [ ] 2.6 Validate cross-subject prerequisites and hub navigation.
 - [ ] 2.7 Build, test, report, commit, and deploy each batch separately.
 
 ## Phase 3 — science and literacy foundations
 
-- [ ] 3.1 Rewrite Physical Science K-8 (8 lessons).
+- [x] 3.1 Rewrite Physical Science K-8 (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/physical-science-01.md)
 - [ ] 3.2 Rewrite Earth Science (8 lessons).
 - [ ] 3.3 Rewrite Life Science K-8 (8 lessons).
 - [ ] 3.4 Rewrite Early Literacy & Writing (8 lessons).
