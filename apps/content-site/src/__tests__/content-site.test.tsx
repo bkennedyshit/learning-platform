@@ -451,3 +451,63 @@ describe('Content Site - rewrite batch: Statistics & Probability', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Early Numeracy K-5', () => {
+  const hubSlug = 'early-numeracy-k-5';
+  const batch: Array<[string, string]> = [
+    ['app-021-number-sense-counting', 'APP-02.1 — Number Sense & Counting'],
+    ['app-022-addition-subtraction', 'APP-02.2 — Addition & Subtraction'],
+    ['app-023-multiplication-division', 'APP-02.3 — Multiplication & Division'],
+    ['app-024-fractions-concepts-operations', 'APP-02.4 — Fractions — Concepts & Operations'],
+    ['app-025-fractions-advanced-operations', 'APP-02.5 — Fractions — Advanced Operations'],
+    ['app-026-decimals-place-value', 'APP-02.6 — Decimals & Place Value'],
+    ['app-027-measurement-data', 'APP-02.7 — Measurement & Data'],
+    ['app-028-geometry-coordinate-plane', 'APP-02.8 — Geometry & Coordinate Plane'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Early Numeracy K-5');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`2.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error|Visual Anchor/i);
+    }
+  });
+
+  it('every lesson has worked examples, 2+ misconceptions, 3+ practice tasks, an answer key, an adult note, and a hub link', () => {
+    for (const slug of slugs) {
+      const html = getLesson(slug)!.html;
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toMatch(/Adult note/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+    }
+  });
+
+  it('the Early Numeracy K-5 hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
