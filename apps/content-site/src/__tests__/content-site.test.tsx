@@ -704,3 +704,76 @@ describe('Content Site - rewrite batch: Life Science K-8', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+
+describe('Content Site - rewrite batch: Early Literacy & Writing', () => {
+  const hubSlug = 'early-literacy-and-writing';
+  const batch: Array<[string, string]> = [
+    ['app-011-phonemic-awareness-the-alphabet', 'APP-01.1 — Phonemic Awareness & the Alphabet'],
+    ['app-012-phonics-blending-decoding', 'APP-01.2 — Phonics — Blending & Decoding'],
+    ['app-013-fluency-word-recognition', 'APP-01.3 — Fluency & Word Recognition'],
+    ['app-014-vocabulary-word-study', 'APP-01.4 — Vocabulary & Word Study'],
+    ['app-015-reading-comprehension-narrative-text', 'APP-01.5 — Reading Comprehension — Narrative Text'],
+    ['app-016-reading-comprehension-informational-text', 'APP-01.6 — Reading Comprehension — Informational Text'],
+    ['app-017-writing-sentences-to-paragraphs', 'APP-01.7 — Writing — Sentences to Paragraphs'],
+    ['app-018-writing-essays-research', 'APP-01.8 — Writing — Essays & Research'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Early Literacy & Writing');
+      expect(l.catalog).toBe('k12');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`1.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error|Visual Anchor|Primary Element|Subject_Plan|LEARNING_PATH/i);
+    }
+  });
+
+  it('every lesson has prerequisites, objectives, 2+ examples, 2+ misconceptions, 3+ practice tasks, an answer key, an adult or safety note, sources, and nav links', () => {
+    for (const [i, slug] of slugs.entries()) {
+      const html = getLesson(slug)!.html;
+      expect(html, slug).toMatch(/<h2[^>]*>Prerequisites<\/h2>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Learning objectives<\/h2>/);
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      expect(html, slug).toMatch(/<summary>Answer key/);
+      expect(html, slug).toMatch(/Adult note|Safety note/);
+      expect(html, slug).toMatch(/<h2[^>]*>Sources<\/h2>/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+      if (i > 0) expect(html, slug).toContain(`href="/${slugs[i - 1]}"`);
+      if (i < slugs.length - 1) expect(html, slug).toContain(`href="/${slugs[i + 1]}"`);
+    }
+  });
+
+  it('the writing lessons include a scoring rubric', () => {
+    for (const slug of ['app-017-writing-sentences-to-paragraphs', 'app-018-writing-essays-research']) {
+      expect(getLesson(slug)!.html, slug).toMatch(/<strong>(Paragraph|Essay) rubric<\/strong>/);
+    }
+  });
+
+  it('the Early Literacy & Writing hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});

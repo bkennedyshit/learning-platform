@@ -33,8 +33,8 @@
 
 - [x] 3.1 Rewrite Physical Science K-8 (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 547 URLs incl. `/subject/physical-science-k-8`, lessons indexable. Record: batches/physical-science-01.md)
 - [x] 3.2 Rewrite Earth Science (8 lessons). (Committed and pushed; production propagation observed 2026-10-18: live sitemap 556 URLs incl. `/subject/earth-science`, lessons indexable. Record: batches/earth-science-01.md)
-- [x] 3.3 Rewrite Life Science K-8 (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/life-science-01.md)
-- [ ] 3.4 Rewrite Early Literacy & Writing (8 lessons).
+- [x] 3.3 Rewrite Life Science K-8 (8 lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 565 URLs incl. `/subject/life-science-k-8`, lessons indexable. Record: batches/life-science-01.md)
+- [x] 3.4 Rewrite Early Literacy & Writing (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/early-literacy-writing-01.md)
 - [ ] 3.5 Rewrite Research Writing & Academic Literacy (8 lessons).
 - [ ] 3.6 Rewrite Writing Craft & Rhetoric (8 stub lessons).
 - [ ] 3.7 Validate sources, safety language, examples, rubrics, and answer keys.
