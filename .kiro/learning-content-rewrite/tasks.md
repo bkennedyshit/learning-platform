@@ -42,8 +42,8 @@
 
 ## Phase 4 — humanities and social sciences
 
-- [x] 4.1 Rewrite Civics & Government (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/civics-government-01.md)
-- [ ] 4.2 Rewrite US History (8 lessons).
+- [x] 4.1 Rewrite Civics & Government (8 lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 601 URLs incl. `/subject/civics-and-government`, lessons indexable. Record: batches/civics-government-01.md)
+- [x] 4.2 Rewrite US History (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/us-history-01.md)
 - [ ] 4.3 Rewrite World History (8 lessons).
 - [ ] 4.4 Rewrite Geography (8 lessons).
 - [ ] 4.5 Rewrite Art History (8 lessons).
