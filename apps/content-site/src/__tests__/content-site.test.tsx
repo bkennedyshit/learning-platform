@@ -1092,3 +1092,82 @@ describe('Content Site - rewrite batch: US History', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: World History', () => {
+  const hubSlug = 'world-history';
+  const batch: Array<[string, string]> = [
+    ['181-foundations-of-civilization', '18.1 - Foundations of Civilization'],
+    ['182-networks-of-exchange', '18.2 - Networks of Exchange'],
+    ['183-land-based-empires', '18.3 - Land-Based Empires'],
+    ['184-transoceanic-connections', '18.4 - Transoceanic Connections'],
+    ['185-revolutions', '18.5 - Revolutions'],
+    ['186-industrialization-imperialism', '18.6 - Industrialization & Imperialism'],
+    ['187-global-conflict-displacement', '18.7 - Global Conflict & Displacement'],
+    ['188-globalization', '18.8 - Globalization'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('World History');
+      expect(l.catalog).toBe('k12');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`18.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex|Visual Anchor|Primary Element|Subject_Plan|LEARNING_PATH|Active Recall/i);
+    }
+  });
+
+  it('every lesson has prerequisites, objectives, 2+ examples, 2+ misconceptions, 3+ practice tasks, an answer key with a rubric, a sources-and-viewpoints note, sources, and nav links', () => {
+    for (const [i, slug] of slugs.entries()) {
+      const html = getLesson(slug)!.html;
+      expect(html, slug).toMatch(/<h2[^>]*>Prerequisites<\/h2>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Learning objectives<\/h2>/);
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      const answerKey = html.split(/<summary>Answer key/)[1]?.split('</details>')[0] ?? '';
+      expect(answerKey, slug).toMatch(/<strong>[^<]*rubric[^<]*<\/strong>/i);
+      expect(html, slug).toMatch(/<strong>Note on sources and viewpoints:<\/strong>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Sources<\/h2>/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+      if (i > 0) expect(html, slug).toContain(`href="/${slugs[i - 1]}"`);
+      if (i < slugs.length - 1) expect(html, slug).toContain(`href="/${slugs[i + 1]}"`);
+    }
+  });
+
+  it('internal lesson links in the batch resolve to indexable lessons', () => {
+    for (const slug of slugs) {
+      for (const [, href] of getLesson(slug)!.html.matchAll(/href="\/([^"#?]+)"/g)) {
+        if (href.startsWith('subject/')) {
+          expect(subjects.some((s) => `subject/${s.slug}` === href), `${slug} -> ${href}`).toBe(true);
+        } else {
+          expect(getLesson(href)?.indexable, `${slug} -> ${href}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('the World History hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
