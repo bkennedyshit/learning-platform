@@ -777,3 +777,82 @@ describe('Content Site - rewrite batch: Early Literacy & Writing', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Research Writing & Academic Literacy', () => {
+  const hubSlug = 'research-writing-and-academic-literacy';
+  const batch: Array<[string, string]> = [
+    ['app-121-the-writing-process', 'APP-12.1 — The Writing Process'],
+    ['app-122-thesis-argument-construction', 'APP-12.2 — Thesis & Argument Construction'],
+    ['app-123-evidence-analysis-integration', 'APP-12.3 — Evidence, Analysis & Integration'],
+    ['app-124-research-skills-source-evaluation', 'APP-12.4 — Research Skills & Source Evaluation'],
+    ['app-125-citation-documentation', 'APP-12.5 — Citation & Documentation'],
+    ['app-126-essay-structures-genres', 'APP-12.6 — Essay Structures & Genres'],
+    ['app-127-disciplinary-writing', 'APP-12.7 — Disciplinary Writing'],
+    ['app-128-advanced-rhetoric-style', 'APP-12.8 — Advanced Rhetoric & Style'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Research Writing & Academic Literacy');
+      expect(l.catalog).toBe('k12');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`12.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex-error|Visual Anchor|Primary Element|Subject_Plan|LEARNING_PATH/i);
+    }
+  });
+
+  it('every lesson has prerequisites, objectives, 2+ examples, 2+ misconceptions, 3+ practice tasks, an answer key with a rubric, an integrity note, sources, and nav links', () => {
+    for (const [i, slug] of slugs.entries()) {
+      const html = getLesson(slug)!.html;
+      expect(html, slug).toMatch(/<h2[^>]*>Prerequisites<\/h2>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Learning objectives<\/h2>/);
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      const answerKey = html.split(/<summary>Answer key/)[1]?.split('</details>')[0] ?? '';
+      expect(answerKey, slug).toMatch(/<strong>[^<]*rubric[^<]*<\/strong>/i);
+      expect(html, slug).toMatch(/(Academic integrity|Safety and integrity) note/);
+      expect(html, slug).toMatch(/<h2[^>]*>Sources<\/h2>/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+      if (i > 0) expect(html, slug).toContain(`href="/${slugs[i - 1]}"`);
+      if (i < slugs.length - 1) expect(html, slug).toContain(`href="/${slugs[i + 1]}"`);
+    }
+  });
+
+  it('internal lesson links in the batch resolve to indexable lessons', () => {
+    for (const slug of slugs) {
+      for (const [, href] of getLesson(slug)!.html.matchAll(/href="\/([^"#?]+)"/g)) {
+        if (href.startsWith('subject/')) {
+          expect(subjects.some((s) => `subject/${s.slug}` === href), `${slug} -> ${href}`).toBe(true);
+        } else {
+          expect(getLesson(href)?.indexable, `${slug} -> ${href}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('the Research Writing & Academic Literacy hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
