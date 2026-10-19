@@ -36,13 +36,13 @@
 - [x] 3.3 Rewrite Life Science K-8 (8 lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 565 URLs incl. `/subject/life-science-k-8`, lessons indexable. Record: batches/life-science-01.md)
 - [x] 3.4 Rewrite Early Literacy & Writing (8 lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 574 URLs incl. `/subject/early-literacy-and-writing`, lessons indexable. Record: batches/early-literacy-writing-01.md)
 - [x] 3.5 Rewrite Research Writing & Academic Literacy (8 lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 583 URLs incl. `/subject/research-writing-and-academic-literacy`, lessons indexable. Record: batches/research-writing-academic-literacy-01.md)
-- [x] 3.6 Rewrite Writing Craft & Rhetoric (8 stub lessons). (Committed and pushed; production deployment not yet verified. Record: batches/writing-craft-rhetoric-01.md)
+- [x] 3.6 Rewrite Writing Craft & Rhetoric (8 stub lessons). (Committed and pushed; production propagation observed 2026-10-19: live sitemap 592 URLs incl. `/subject/writing-craft-and-rhetoric`, lessons indexable. Record: batches/writing-craft-rhetoric-01.md)
 - [ ] 3.7 Validate sources, safety language, examples, rubrics, and answer keys.
 - [ ] 3.8 Build, test, report, commit, and deploy each batch separately.
 
 ## Phase 4 — humanities and social sciences
 
-- [ ] 4.1 Rewrite Civics & Government (8 lessons).
+- [x] 4.1 Rewrite Civics & Government (8 lessons). (Committed and pushed; production deployment not yet verified. Record: batches/civics-government-01.md)
 - [ ] 4.2 Rewrite US History (8 lessons).
 - [ ] 4.3 Rewrite World History (8 lessons).
 - [ ] 4.4 Rewrite Geography (8 lessons).

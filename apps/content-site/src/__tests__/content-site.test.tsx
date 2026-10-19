@@ -934,3 +934,82 @@ describe('Content Site - rewrite batch: Writing Craft & Rhetoric', () => {
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
   });
 });
+
+
+describe('Content Site - rewrite batch: Civics & Government', () => {
+  const hubSlug = 'civics-and-government';
+  const batch: Array<[string, string]> = [
+    ['app-051-foundations-of-american-democracy', 'APP-05.1 — Foundations of American Democracy'],
+    ['app-052-the-constitution-structure-principles', 'APP-05.2 — The Constitution — Structure & Principles'],
+    ['app-053-congress-structure-function', 'APP-05.3 — Congress — Structure & Function'],
+    ['app-054-the-presidency', 'APP-05.4 — The Presidency'],
+    ['app-055-the-federal-judiciary', 'APP-05.5 — The Federal Judiciary'],
+    ['app-056-civil-liberties-civil-rights', 'APP-05.6 — Civil Liberties & Civil Rights'],
+    ['app-057-political-participation-public-opinion', 'APP-05.7 — Political Participation & Public Opinion'],
+    ['app-058-public-policy-policymaking', 'APP-05.8 — Public Policy & Policymaking'],
+  ];
+  const slugs = batch.map(([slug]) => slug);
+
+  it('keeps slugs, titles, chapter order, subject, tier, and the prev/next chain', () => {
+    const hub = subjects.find((s) => s.slug === hubSlug)!;
+    expect(hub.lessons.map((l) => l.slug)).toEqual(slugs);
+    batch.forEach(([slug, title], i) => {
+      const l = getLesson(slug)!;
+      expect(l.title).toBe(title);
+      expect(l.subject).toBe('Civics & Government');
+      expect(l.catalog).toBe('k12');
+      expect(l.audienceTier).toBe('9-12');
+      expect(l.chapter).toBe(`5.${i + 1}`);
+      expect(l.prevSlug).toBe(slugs[i - 1] ?? null);
+      expect(l.nextSlug).toBe(slugs[i + 1] ?? null);
+    });
+  });
+
+  it('every lesson is indexable, substantial, and free of scaffold residue', () => {
+    for (const slug of slugs) {
+      const l = getLesson(slug)!;
+      expect(l.indexable, slug).toBe(true);
+      expect(l.wordCount, slug).toBeGreaterThanOrEqual(500);
+      expect(l.html, slug).not.toMatch(/System Overlay|foundational building block|Ready for expansion|TODO|katex|Visual Anchor|Primary Element|Subject_Plan|LEARNING_PATH|Active Recall/i);
+    }
+  });
+
+  it('every lesson has prerequisites, objectives, 2+ examples, 2+ misconceptions, 3+ practice tasks, an answer key with a rubric, a sources-and-viewpoints note, sources, and nav links', () => {
+    for (const [i, slug] of slugs.entries()) {
+      const html = getLesson(slug)!.html;
+      expect(html, slug).toMatch(/<h2[^>]*>Prerequisites<\/h2>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Learning objectives<\/h2>/);
+      expect(html.match(/<h3[^>]*>Example \d/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const misconceptions = html.split(/<h2[^>]*>Common misconceptions/)[1]?.split('<h2')[0] ?? '';
+      expect(misconceptions.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(2);
+      const practice = html.split(/<h2[^>]*>Practice<\/h2>/)[1]?.split('<details>')[0] ?? '';
+      expect(practice.match(/<li>/g)?.length ?? 0, slug).toBeGreaterThanOrEqual(3);
+      const answerKey = html.split(/<summary>Answer key/)[1]?.split('</details>')[0] ?? '';
+      expect(answerKey, slug).toMatch(/<strong>[^<]*rubric[^<]*<\/strong>/i);
+      expect(html, slug).toMatch(/<strong>Note on sources and viewpoints:<\/strong>/);
+      expect(html, slug).toMatch(/<h2[^>]*>Sources<\/h2>/);
+      expect(html, slug).toContain(`href="/subject/${hubSlug}"`);
+      if (i > 0) expect(html, slug).toContain(`href="/${slugs[i - 1]}"`);
+      if (i < slugs.length - 1) expect(html, slug).toContain(`href="/${slugs[i + 1]}"`);
+    }
+  });
+
+  it('internal lesson links in the batch resolve to indexable lessons', () => {
+    for (const slug of slugs) {
+      for (const [, href] of getLesson(slug)!.html.matchAll(/href="\/([^"#?]+)"/g)) {
+        if (href.startsWith('subject/')) {
+          expect(subjects.some((s) => `subject/${s.slug}` === href), `${slug} -> ${href}`).toBe(true);
+        } else {
+          expect(getLesson(href)?.indexable, `${slug} -> ${href}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('the Civics & Government hub is indexable and listed in the sitemap', async () => {
+    const urls = (await sitemap()).map((s) => s.url);
+    expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
+    expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
+    for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
