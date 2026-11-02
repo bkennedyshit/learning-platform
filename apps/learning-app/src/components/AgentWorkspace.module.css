@@ -1,0 +1,257 @@
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--surface, #14161c);
+  color: var(--text-primary, #e8eaf0);
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-bottom: 1px solid var(--border, #2a2e39);
+  padding-bottom: 0.5rem;
+}
+.title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.context {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #9aa0ad);
+}
+
+.goalRow {
+  display: flex;
+  gap: 0.4rem;
+}
+.goalInput,
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border, #2a2e39);
+  background: var(--surface-2, #1c1f27);
+  color: inherit;
+  font-size: 0.85rem;
+}
+.goalBadge {
+  font-size: 0.75rem;
+  color: var(--accent, #7aa2f7);
+}
+
+.plan {
+  border: 1px solid var(--border, #2a2e39);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+}
+.planHeading,
+.subHeading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #9aa0ad);
+  margin-bottom: 0.3rem;
+}
+.planSteps {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.planStep {
+  font-size: 0.8rem;
+}
+.planStepCurrent {
+  color: var(--accent, #7aa2f7);
+  font-weight: 600;
+}
+.planStep[data-status="failed"] {
+  color: var(--danger, #f7768e);
+}
+
+.conversation {
+  flex: 1;
+  min-height: 4rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+.placeholder {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #9aa0ad);
+}
+.bubble {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+.learner {
+  align-self: flex-end;
+  background: var(--accent-muted, #2d3a5e);
+}
+.agent {
+  align-self: flex-start;
+  background: var(--surface-2, #1c1f27);
+  border: 1px solid var(--border, #2a2e39);
+}
+
+.toolActivity ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+}
+.toolOk {
+  color: var(--text-secondary, #9aa0ad);
+}
+.toolFail {
+  color: var(--danger, #f7768e);
+}
+
+.whyNext {
+  font-size: 0.8rem;
+  background: var(--surface-2, #1c1f27);
+  border-left: 3px solid var(--accent, #7aa2f7);
+  padding: 0.4rem 0.55rem;
+  border-radius: 0 6px 6px 0;
+}
+.citations {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #9aa0ad);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--danger, #f7768e);
+  background: rgba(247, 118, 142, 0.08);
+  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+}
+
+.inputArea {
+  display: flex;
+  gap: 0.4rem;
+  border-top: 1px solid var(--border, #2a2e39);
+  padding-top: 0.5rem;
+}
+.primaryButton,
+.secondaryButton {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.primaryButton {
+  background: var(--accent, #7aa2f7);
+  color: #0b0d12;
+  font-weight: 600;
+}
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.secondaryButton {
+  background: var(--surface-2, #1c1f27);
+  color: inherit;
+  border: 1px solid var(--border, #2a2e39);
+}
+
+.artifactCard {
+  margin-top: 0.5rem;
+  border: 1px solid var(--border, #2a2e39);
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: var(--surface, #14161c);
+}
+.artifactTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.artifactVisual {
+  max-width: 100%;
+  max-height: 220px;
+}
+.artifactLarge {
+  max-width: 100%;
+  max-height: 70vh;
+}
+.artifactText {
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  margin: 0;
+}
+.flashcards {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+}
+.artifactActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.linkButton {
+  font-size: 0.75rem;
+  color: var(--accent, #7aa2f7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+.modalCard {
+  background: var(--surface, #14161c);
+  border: 1px solid var(--border, #2a2e39);
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: min(900px, 95vw);
+  max-height: 90vh;
+  overflow: auto;
+}
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    height: auto;
+    max-height: 60vh;
+  }
+  .conversation {
+    max-height: 40vh;
+  }
+}

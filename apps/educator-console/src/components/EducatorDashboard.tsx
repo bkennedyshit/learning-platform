@@ -10,7 +10,7 @@ export default function EducatorDashboard() {
     const load = async () => {
       const classes = await orgService.getClassrooms();
       setClassrooms(classes);
-      
+
       const pd: Record<string, StudentProgress[]> = {};
       for (const c of classes) {
         pd[c.id] = await progressService.getStudentProgress(c.studentIds);
@@ -28,7 +28,7 @@ export default function EducatorDashboard() {
       {classrooms.map(c => (
         <div key={c.id} style={{ marginBottom: '32px' }}>
           <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px', marginBottom: '16px' }}>{c.name}</h3>
-          
+
           <div style={{ overflowX: 'auto' }}>
             <table>
               <thead>

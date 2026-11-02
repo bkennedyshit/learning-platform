@@ -1,4 +1,4 @@
-import { createDatabase } from "../../api/src/db.js";
+import { Pool } from "pg";
 import { loadProviderConfig, createLLMProviderAdapter } from "@learning-platform/llm-adapter";
 import { createLocalObjectStorageClient } from "@learning-platform/object-storage";
 import { ingestCorpus } from "./pipeline.js";
@@ -10,11 +10,13 @@ const corpusDir = path.resolve(__dirname, "../../../corpus");
 
 async function main() {
   process.env.LLM_PROVIDER = "stub"; // Default to stub for fast local ingestion
-  
-  const db = createDatabase(process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/learning_platform");
+
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/learning_platform"
+  });
   const config = loadProviderConfig();
   const adapter = createLLMProviderAdapter(config);
-  
+
   const storage = createLocalObjectStorageClient({
     rootDir: path.resolve(__dirname, "../../../storage"),
     publicBaseUrl: "http://localhost:3000"
@@ -22,14 +24,14 @@ async function main() {
 
   console.log("Starting ingestion from", corpusDir);
   const manifest = await ingestCorpus({
-    db: db.pool as any, // Pool proxy type
+    db: pool,
     adapter,
     storage,
     corpusDir
   });
 
   console.log(`Successfully ingested ${manifest.length} lessons into the database.`);
-  await db.close();
+  await pool.end();
 }
 
 main().catch((err) => {

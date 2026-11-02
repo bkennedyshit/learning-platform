@@ -25,7 +25,7 @@ export function createDatabase(primaryUrl: string, replicaUrl?: string): Databas
                values = text.values;
              }
           }
-          
+
           let isWrite = false;
           if (queryText) {
              isWrite = /^\s*(insert|update|delete|with\s)/i.test(queryText);
@@ -63,13 +63,13 @@ export function createDatabase(primaryUrl: string, replicaUrl?: string): Databas
           return result;
         };
       }
-      
+
       if (prop === "connect") {
         return async function() {
            return await primary.connect();
         }
       }
-      
+
       const val = Reflect.get(target, prop, receiver);
       if (typeof val === "function") {
         return val.bind(target);

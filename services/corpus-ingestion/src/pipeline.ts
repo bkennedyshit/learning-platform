@@ -103,7 +103,7 @@ export async function ingestCorpus(options: IngestionOptions): Promise<ContentMa
 
     const content = await readFile(filePath, "utf8");
     const parsed = parseLessonMarkdown(content);
-    
+
     // For validation, we mock the catalog mapping to match what's in frontmatter
     validateLessonCatalogMapping(parsed, {
       getCatalogForSubject: () => parsed.frontmatter.catalog as any

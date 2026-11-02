@@ -29,7 +29,7 @@ export interface LLMProviderAdapter {
   embed(request: EmbeddingRequest): Promise<number[][]>;
 }
 
-export type ProviderKind = "local" | "hosted" | "stub";
+export type ProviderKind = "local" | "hosted" | "gemini" | "codex" | "stub";
 
 export interface ProviderConfig {
   kind: ProviderKind;
@@ -37,4 +37,10 @@ export interface ProviderConfig {
   apiKey?: string;
   completionModel?: string;
   embeddingModel?: string;
+  /** Optional executable used by the ChatGPT-authenticated Codex CLI provider. */
+  command?: string;
+  /** Optional isolated working directory for Codex CLI calls. */
+  workingDirectory?: string;
+  /** Maximum duration of one Codex CLI completion. */
+  timeoutMs?: number;
 }

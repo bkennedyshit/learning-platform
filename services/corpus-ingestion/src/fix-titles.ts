@@ -11,7 +11,7 @@ async function fixTitles() {
     if (!file.endsWith(".md")) continue;
     const filePath = path.join(lessonsDir, file);
     let content = await readFile(filePath, "utf8");
-    
+
     let title = file.replace(/\.md$/, "");
     title = title.replace(/^\d+-\d+-/, "").replace(/^\d+-/, "");
     title = title.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -19,7 +19,10 @@ async function fixTitles() {
     // Check if there is frontmatter
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (frontmatterMatch) {
-      let fm = frontmatterMatch[1];
+      const originalFrontmatter = frontmatterMatch[1];
+      if (originalFrontmatter === undefined) continue;
+
+      let fm = originalFrontmatter;
       let needsUpdate = false;
 
       if (!fm.includes("title:")) { fm = `title: "${title}"\n${fm}`; needsUpdate = true; }
@@ -31,7 +34,7 @@ async function fixTitles() {
       if (!fm.includes("open_source:") && !fm.includes("openSource:")) { fm += `\nopen_source: true`; needsUpdate = true; }
 
       if (needsUpdate) {
-        content = content.replace(frontmatterMatch[1], fm);
+        content = content.replace(originalFrontmatter, fm);
         await writeFile(filePath, content, "utf8");
         console.log(`Updated frontmatter for ${file}`);
       }

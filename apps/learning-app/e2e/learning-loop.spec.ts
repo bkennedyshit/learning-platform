@@ -16,11 +16,11 @@ test.describe('Core Learning Experience', () => {
     // 4. Modality Loop: Read Stage
     await expect(page.locator('text=Introduction to Algebraic Expressions')).toBeVisible();
     await expect(page.locator('text=Algebraic expressions are mathematical phrases')).toBeVisible();
-    
+
     // Glossary check
     await page.locator('text=Algebraic expressions').hover();
     await expect(page.locator('text=A combination of variables, numbers, and operations.')).toBeVisible();
-    
+
     await page.getByRole('button', { name: /continue to next step/i }).click();
 
     // 5. Modality Loop: Listen Stage

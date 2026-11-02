@@ -35,6 +35,7 @@ export default async function LessonPage({ params }: Props) {
       isProgramming={PROGRAMMING.test(lesson.subject)}
       nextHref={nextHref}
       nextStepName={nextStepName}
+      lessonId={lesson.slug}
       nav={{
         currentSubject: { name: subject.name, slug: subject.slug, progress },
         upNext,

@@ -22,7 +22,7 @@ export class ComplianceRepository {
     // Path enrollments might also be considered personal data if they track progress.
     // We can delete them too, or rely on them being wiped if the account is deleted.
     // The requirement says: "delete the Student's personal data within the period defined by the platform's data-retention policy."
-    
+
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -30,13 +30,13 @@ export class ComplianceRepository {
       await client.query(`DELETE FROM grasp_scores WHERE account_id = $1`, [studentAccountId]);
       await client.query(`DELETE FROM review_schedules WHERE account_id = $1`, [studentAccountId]);
       await client.query(`DELETE FROM path_enrollments WHERE account_id = $1`, [studentAccountId]);
-      
+
       // Let's also anonymize or delete the account if requested? The task says "delete the Student's personal data"
       // If the account needs to be deleted, we delete it from `accounts` table.
-      // But typically "delete student data" refers to the generated records. Let's delete the account too if that's what's meant, 
-      // but maybe just the progress data is enough. 
+      // But typically "delete student data" refers to the generated records. Let's delete the account too if that's what's meant,
+      // but maybe just the progress data is enough.
       // "delete the Student's personal data" -> progress, grasp_scores are explicit.
-      
+
       await client.query("COMMIT");
     } catch (err) {
       await client.query("ROLLBACK");

@@ -87,7 +87,7 @@ describe("TtsService", () => {
 
     // second call should hit cache
     const result2 = await service.getOrGenerateAudio(lessonId, voiceId, text);
-    
+
     assert.strictEqual(synthesized, false);
     assert.strictEqual(storage.putCalls, 0);
 

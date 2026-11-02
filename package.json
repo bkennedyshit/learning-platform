@@ -8,7 +8,10 @@
     "check": "turbo run check",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "release": "node scripts/release.mjs",
+    "release:fixtures": "node scripts/validate-release-fixtures.mjs",
+    "release:selftest": "node --test scripts/release-report.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",

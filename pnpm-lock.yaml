@@ -115,6 +115,9 @@ importers:
 
   apps/learning-app:
     dependencies:
+      '@learning-platform/agent-contract':
+        specifier: workspace:*
+        version: link:../../packages/agent-contract
       katex:
         specifier: ^0.17.0
         version: 0.17.0
@@ -137,6 +140,12 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
     devDependencies:
+      '@testing-library/dom':
+        specifier: 10.4.1
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: 16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@types/node':
         specifier: ^20
         version: 20.19.41
@@ -146,15 +155,24 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.16)
+      '@vitejs/plugin-react':
+        specifier: 5.2.0
+        version: 5.2.0(vite@6.4.3(@types/node@20.19.41))
       eslint:
         specifier: ^9
         version: 9.39.4
       eslint-config-next:
         specifier: 16.2.7
         version: 16.2.7(eslint@9.39.4)(typescript@5.9.3)
+      jsdom:
+        specifier: 29.1.1
+        version: 29.1.1
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: 4.1.8
+        version: 4.1.8(@types/node@20.19.41)(jsdom@29.1.1)(vite@6.4.3(@types/node@20.19.41))
 
   apps/spatial-calculator:
     dependencies:
@@ -183,6 +201,15 @@ importers:
       '@types/three':
         specifier: ^0.177.0
         version: 0.177.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/agent-contract:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.19.19
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -217,6 +244,9 @@ importers:
 
   services/api:
     dependencies:
+      '@learning-platform/agent-contract':
+        specifier: workspace:*
+        version: link:../../packages/agent-contract
       '@learning-platform/llm-adapter':
         specifier: workspace:*
         version: link:../../packages/llm-adapter
@@ -229,6 +259,9 @@ importers:
       pg:
         specifier: ^8.16.0
         version: 8.21.0
+      saxes:
+        specifier: 6.0.0
+        version: 6.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.30
@@ -5513,7 +5546,7 @@ snapshots:
       eslint: 9.39.4
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4))(eslint@9.39.4)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4)
       eslint-plugin-react: 7.37.5(eslint@9.39.4)
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4)
@@ -5566,7 +5599,7 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4))(eslint@9.39.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -5606,7 +5639,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4))(eslint@9.39.4):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { compile, numDeriv } from "../../../lib/mathx";
 
@@ -10,8 +10,29 @@ export default function CalculusVisualizer() {
   const [x0, setX0] = useState(1);
   const [showDeriv, setShowDeriv] = useState(true);
   const [showTangent, setShowTangent] = useState(true);
-  const [error, setError] = useState("");
-  const [readout, setReadout] = useState<{ fx: number; dfx: number } | null>(null);
+
+  // Derive compilation + readout purely (no setState inside the draw effect,
+  // which would trigger cascading renders). The effect below only draws.
+  const compiled = useMemo<{ fn: ((x: number) => number) | null; error: string }>(() => {
+    try {
+      const c = compile(expr);
+      return { fn: (x: number) => c.eval(x), error: "" };
+    } catch (e) {
+      return { fn: null, error: (e as Error).message };
+    }
+  }, [expr]);
+  const error = compiled.error;
+
+  const readout = useMemo<{ fx: number; dfx: number } | null>(() => {
+    if (!compiled.fn) return null;
+    try {
+      const fx = compiled.fn(x0);
+      const dfx = numDeriv(compiled.fn, x0);
+      return isFinite(fx) ? { fx, dfx } : null;
+    } catch {
+      return null;
+    }
+  }, [compiled, x0]);
 
   useEffect(() => {
     const cv = ref.current;
@@ -40,15 +61,8 @@ export default function CalculusVisualizer() {
     ctx.beginPath(); ctx.moveTo(sx(0), 0); ctx.lineTo(sx(0), H); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, sy(0)); ctx.lineTo(W, sy(0)); ctx.stroke();
 
-    let f: (x: number) => number;
-    try {
-      const c = compile(expr);
-      f = (x) => c.eval(x);
-      setError("");
-    } catch (e) {
-      setError((e as Error).message);
-      return;
-    }
+    const f = compiled.fn;
+    if (!f) return;
 
     const plot = (g: (x: number) => number, color: string) => {
       ctx.strokeStyle = color;
@@ -69,27 +83,23 @@ export default function CalculusVisualizer() {
     plot(f, "#6366f1"); // f(x)
     if (showDeriv) plot((x) => numDeriv(f, x), "#ec4899"); // f'(x)
 
-    // tangent at x0
-    try {
-      const fx = f(x0);
-      const dfx = numDeriv(f, x0);
-      setReadout({ fx, dfx });
-      if (showTangent && isFinite(fx) && isFinite(dfx)) {
-        const tan = (x: number) => fx + dfx * (x - x0);
-        ctx.strokeStyle = "#22d3ee";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 4]);
-        ctx.beginPath();
-        ctx.moveTo(sx(xmin), sy(tan(xmin)));
-        ctx.lineTo(sx(xmax), sy(tan(xmax)));
-        ctx.stroke();
-        ctx.setLineDash([]);
-        // point
-        ctx.fillStyle = "#22d3ee";
-        ctx.beginPath(); ctx.arc(sx(x0), sy(fx), 5, 0, Math.PI * 2); ctx.fill();
-      }
-    } catch { /* ignore */ }
-  }, [expr, x0, showDeriv, showTangent]);
+    // tangent at x0 (uses the purely-derived readout)
+    if (showTangent && readout && isFinite(readout.fx) && isFinite(readout.dfx)) {
+      const { fx, dfx } = readout;
+      const tan = (x: number) => fx + dfx * (x - x0);
+      ctx.strokeStyle = "#22d3ee";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx(xmin), sy(tan(xmin)));
+      ctx.lineTo(sx(xmax), sy(tan(xmax)));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // point
+      ctx.fillStyle = "#22d3ee";
+      ctx.beginPath(); ctx.arc(sx(x0), sy(fx), 5, 0, Math.PI * 2); ctx.fill();
+    }
+  }, [compiled, x0, showDeriv, showTangent, readout]);
 
   return (
     <main style={{ maxWidth: 1000, margin: "0 auto", padding: "2.5rem 1.5rem" }}>

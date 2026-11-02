@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from "react";
 import styles from "./Shell.module.css";
-import TutorPanel, { type TutorContext } from "./TutorPanel";
+import AgentWorkspace, { type AgentContext } from "./AgentWorkspace";
 import PathNavigation, { type PathNavData } from "./PathNavigation";
 
 interface ShellProps {
@@ -10,7 +10,7 @@ interface ShellProps {
   currentStepName: string;
   nextStepName: string;
   nav?: PathNavData;
-  tutorContext?: TutorContext;
+  tutorContext?: AgentContext;
 }
 
 export default function Shell({ children, currentStepName, nextStepName, nav, tutorContext }: ShellProps) {
@@ -26,18 +26,14 @@ export default function Shell({ children, currentStepName, nextStepName, nav, tu
             <span className={styles.currentStep}>Currently: {currentStepName}</span>
             <span className={styles.nextStep}>Up next: {nextStepName}</span>
           </div>
-          <div>
-            {/* User profile / Glossary trigger can go here */}
-          </div>
+          <div>{/* User profile / Glossary trigger can go here */}</div>
         </header>
-        
-        <div className={styles.actionArea}>
-          {children}
-        </div>
+
+        <div className={styles.actionArea}>{children}</div>
       </main>
 
       <aside className={styles.tutorPanelContainer}>
-        <TutorPanel context={tutorContext} />
+        <AgentWorkspace context={tutorContext} />
       </aside>
     </div>
   );

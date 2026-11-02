@@ -79,7 +79,7 @@ export class LearningRepository {
 
   async getSubjectSummary(accountId: string, subjectId: string): Promise<{ completedCount: number; inProgressCount: number }> {
     // A lesson is complete if all applicable stages are done.
-    // Wait, it might be simpler to compute this on the fly in the service layer if we pull progress per lesson, 
+    // Wait, it might be simpler to compute this on the fly in the service layer if we pull progress per lesson,
     // but SQL can also do it. Let's just pull all stages for lessons in this subject for this account.
     const result = await this.pool.query<{ lesson_id: string; stages: ModalityStage[] }>(
       `
@@ -91,7 +91,7 @@ export class LearningRepository {
       `,
       [accountId, subjectId]
     );
-    
+
     // We will evaluate completed/inProgress in the service layer because it needs to know if the subject is programming.
     return { completedCount: 0, inProgressCount: 0 }; // Service will compute
   }
@@ -225,8 +225,8 @@ export class LearningRepository {
   async getLessonAtPosition(pathId: string, position: number): Promise<string | undefined> {
     const result = await this.pool.query<{ lesson_id: string }>(
       `
-      SELECT lesson_id 
-      FROM path_items 
+      SELECT lesson_id
+      FROM path_items
       WHERE path_id = $1 AND position = $2 AND kind = 'lesson'
       `,
       [pathId, position]

@@ -15,7 +15,7 @@ export class TtsService {
 
   public async getOrGenerateAudio(lessonId: string, voiceId: string, text: string): Promise<TtsGenerationResult> {
     const contentHash = createHash("sha256").update(text).digest("hex");
-    
+
     const audioKey = buildTtsAudioKey(lessonId, voiceId, contentHash);
     const timingsKey = audioKey.replace(/\.mp3$/, ".json");
 

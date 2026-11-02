@@ -14,6 +14,7 @@ interface Props {
   nextHref: string;
   nextStepName: string;
   nav: PathNavData;
+  lessonId?: string;
 }
 
 export default function LessonClient({
@@ -24,6 +25,7 @@ export default function LessonClient({
   nextHref,
   nextStepName,
   nav,
+  lessonId,
 }: Props) {
   const router = useRouter();
 
@@ -32,7 +34,7 @@ export default function LessonClient({
       currentStepName={title}
       nextStepName={nextStepName}
       nav={nav}
-      tutorContext={{ title, text: textContent }}
+      tutorContext={{ title, text: textContent, ...(lessonId ? { lessonId } : {}) }}
     >
       <ModalityLoop
         title={title}

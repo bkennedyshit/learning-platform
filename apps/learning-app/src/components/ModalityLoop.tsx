@@ -41,7 +41,13 @@ export default function ModalityLoop({
     (async () => {
       try {
         const mermaid = (await import("mermaid")).default;
-        mermaid.initialize({ startOnLoad: false, theme: "dark", securityLevel: "loose" });
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "dark",
+          securityLevel: "strict",
+          htmlLabels: false,
+          flowchart: { htmlLabels: false },
+        });
         if (cancelled) return;
         await mermaid.run({ nodes: blocks });
       } catch {

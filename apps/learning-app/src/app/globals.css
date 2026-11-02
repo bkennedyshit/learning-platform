@@ -6,25 +6,25 @@
   --hue-accent: 250;
   --hue-secondary: 320;
   --hue-success: 150;
-  
+
   --bg-primary: hsl(var(--hue-base), 40%, 6%);
   --bg-secondary: hsl(var(--hue-base), 30%, 10%);
   --bg-tertiary: hsl(var(--hue-base), 25%, 15%);
-  
+
   --bg-glass: hsla(var(--hue-base), 30%, 12%, 0.6);
   --bg-glass-hover: hsla(var(--hue-base), 35%, 18%, 0.8);
-  
+
   --text-primary: hsl(var(--hue-base), 20%, 98%);
   --text-secondary: hsl(var(--hue-base), 15%, 70%);
   --text-muted: hsl(var(--hue-base), 10%, 50%);
-  
+
   --accent-primary: hsl(var(--hue-accent), 85%, 65%);
   --accent-hover: hsl(var(--hue-accent), 90%, 75%);
   --accent-glow: hsla(var(--hue-accent), 85%, 65%, 0.3);
-  
+
   --secondary-color: hsl(var(--hue-secondary), 80%, 65%);
   --secondary-glow: hsla(var(--hue-secondary), 80%, 65%, 0.3);
-  
+
   --success: hsl(var(--hue-success), 70%, 50%);
   --border-color: hsla(var(--hue-base), 20%, 30%, 0.3);
   --border-light: hsla(var(--hue-base), 20%, 80%, 0.1);
@@ -75,9 +75,9 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+
   /* Rich animated background */
-  background-image: 
+  background-image:
     radial-gradient(circle at 10% 20%, hsla(var(--hue-accent), 70%, 40%, 0.08) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, hsla(var(--hue-secondary), 70%, 40%, 0.08) 0%, transparent 40%),
     radial-gradient(circle at 50% 50%, hsla(var(--hue-base), 50%, 20%, 0.05) 0%, transparent 60%);
@@ -203,15 +203,15 @@ button {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary); 
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary); 
+  background: var(--bg-tertiary);
   border-radius: var(--radius-full);
   border: 2px solid var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted); 
+  background: var(--text-muted);
 }
 
 /* Animations */

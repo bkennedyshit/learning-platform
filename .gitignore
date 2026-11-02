@@ -48,3 +48,8 @@ coverage/
 # Generated content artifacts (rebuilt from /corpus at build time)
 apps/*/src/generated/
 apps/*/public/lesson-assets/
+
+# Local image staging before upload to Cloudflare/R2/etc.
+_image-staging/
+image-staging/
+apps/*/public/_image-staging/

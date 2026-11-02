@@ -111,7 +111,7 @@ export class LearningService {
     // 8.3 Spaced Repetition Scheduler
     const lastSchedule = await this.repo.getLatestReviewSchedule(accountId, lessonId);
     const lastReviewedAt = lastSchedule ? lastSchedule.updated_at : undefined;
-    
+
     const reviewResult = computeNextReview({
       score: assessment.score,
       lastReviewedAt

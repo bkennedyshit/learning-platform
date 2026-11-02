@@ -11,11 +11,11 @@ const corpusDir = path.resolve(__dirname, "../corpus");
 
 async function main() {
   process.env.LLM_PROVIDER = "stub"; // Default to stub for fast local ingestion
-  
+
   const db = createDatabase(process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/learning_platform");
   const config = loadProviderConfig();
   const adapter = createLLMProviderAdapter(config);
-  
+
   const storage = createLocalObjectStorageClient({
     rootDir: path.resolve(__dirname, "../storage"),
     publicBaseUrl: "http://localhost:3000"

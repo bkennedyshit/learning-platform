@@ -74,7 +74,7 @@ export class AffiliateRepository {
   async getStats(accountId: string): Promise<AffiliateStats> {
     const result = await this.pool.query<{ referrals: string; conversions: string }>(
       `
-        SELECT 
+        SELECT
           COUNT(DISTINCT r.id) as referrals,
           COUNT(DISTINCT c.id) as conversions
         FROM affiliates a

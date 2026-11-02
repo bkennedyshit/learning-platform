@@ -30,14 +30,14 @@ export interface StudentProgress {
 }
 
 // Mocks
-let org: Organization = {
+const org: Organization = {
   id: 'org1',
   name: 'Springfield High',
   purchasedSeats: 50,
   usedSeats: 48,
 };
 
-let classrooms: Classroom[] = [
+const classrooms: Classroom[] = [
   {
     id: 'class1',
     name: 'Algebra 101',
@@ -47,7 +47,7 @@ let classrooms: Classroom[] = [
   }
 ];
 
-let progress: Record<string, StudentProgress> = {
+const progress: Record<string, StudentProgress> = {
   stu1: { studentId: 'stu1', completedLessons: 12, lastActivity: new Date().toISOString(), needsReview: true, graspScore: 65 },
   stu2: { studentId: 'stu2', completedLessons: 15, lastActivity: new Date().toISOString(), needsReview: false, graspScore: 85 },
 };

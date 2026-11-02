@@ -120,7 +120,7 @@ test("password reset flow generates token, consumes it, and updates password", a
   let updatedPasswordHash: string | undefined;
 
   const mockRepo = {
-    findAccountByEmail: async (email: string) => 
+    findAccountByEmail: async (email: string) =>
       email === "test@example.com" ? { id: "account-1", role: "b2c_learner" } : undefined,
     createPasswordResetToken: async (accountId: string, token: string, expiresAt: Date) => {
       createdToken = token;

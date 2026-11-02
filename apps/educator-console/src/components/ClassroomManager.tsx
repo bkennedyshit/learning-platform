@@ -2,6 +2,13 @@
 import { useState, useEffect } from 'react';
 import { orgService, Classroom, Organization } from '../lib/services';
 
+// Module-scope id generator (impure Date.now() must not run during render).
+let studentSeq = 0;
+function nextStudentId(): string {
+  studentSeq += 1;
+  return `stu${Date.now()}_${studentSeq}`;
+}
+
 export default function ClassroomManager() {
   const [org, setOrg] = useState<Organization | null>(null);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
@@ -23,13 +30,13 @@ export default function ClassroomManager() {
   const handleAddStudent = async (classId: string) => {
     try {
       setError('');
-      await orgService.addStudentToClassroom(classId, `stu${Date.now()}`);
+      await orgService.addStudentToClassroom(classId, nextStudentId());
       const updated = await orgService.getClassrooms();
       setClassrooms([...updated]);
       const updatedOrg = await orgService.getOrganization();
       setOrg({ ...updatedOrg });
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -49,13 +56,13 @@ export default function ClassroomManager() {
           Seats: {org.usedSeats} / {org.purchasedSeats}
         </span>
       </h2>
-      
+
       {error && <div style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>{error}</div>}
 
       <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-        <input 
-          placeholder="New Classroom Name" 
-          value={newClassName} 
+        <input
+          placeholder="New Classroom Name"
+          value={newClassName}
           onChange={e => setNewClassName(e.target.value)}
           style={{ marginBottom: 0 }}
         />
