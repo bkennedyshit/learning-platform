@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getSubjects } from "../lib/manifest";
+
+// Page-level canonical for the home page only. The root layout deliberately has none, so lesson, hub and
+// resource pages keep their own canonicals instead of inheriting "/".
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const CATALOG_LABELS: Record<string, string> = {
   advanced: "Advanced / Higher-Ed",

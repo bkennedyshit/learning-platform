@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import LessonPage, { generateMetadata } from '../app/[slug]/page';
+import { metadata as homeMetadata } from '../app/page';
+import { metadata as layoutMetadata } from '../app/layout';
 import SubjectPage, { generateMetadata as generateSubjectMetadata } from '../app/subject/[slug]/page';
 import sitemap from '../app/sitemap';
 import { lessons, subjects, getLesson } from '../lib/manifest';
@@ -1248,5 +1250,15 @@ describe('Content Site - rewrite batch: Geography', () => {
     expect(subjects.find((s) => s.slug === hubSlug)!.indexable).toBe(true);
     expect(urls).toContain(`${SITE_URL}/subject/${hubSlug}`);
     for (const slug of slugs) expect(urls).toContain(`${SITE_URL}/${slug}`);
+  });
+});
+
+describe('Home page canonical', () => {
+  it('declares a page-level canonical for the home page', () => {
+    expect(homeMetadata.alternates?.canonical).toBe('/');
+  });
+
+  it('keeps the root layout canonical-free so lessons and hubs are not overridden', () => {
+    expect(layoutMetadata.alternates?.canonical).toBeUndefined();
   });
 });
