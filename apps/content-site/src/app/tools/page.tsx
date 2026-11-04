@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 const TOOLS = [
   { slug: "matrix", emoji: "🔢", name: "Matrix Commander", desc: "Add, multiply, transpose, determinant, and inverse of matrices.", tag: "Linear Algebra" },
@@ -7,7 +8,11 @@ const TOOLS = [
   { slug: "gradient-descent", emoji: "🏔️", name: "Gradient Descent", desc: "Watch optimization roll down a loss landscape.", tag: "Machine Learning" },
 ];
 
-export const metadata = { title: "Tools & Calculators | Aura" };
+export const metadata: Metadata = {
+  title: "Interactive Math Tools & Calculators",
+  description: "Explore matrices, calculus, probability distributions and gradient descent with interactive calculators from NEPA Learning.",
+  alternates: { canonical: "/tools" },
+};
 
 export default function ToolsHub() {
   return (

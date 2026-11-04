@@ -44,6 +44,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    ...['/tools', '/tools/matrix', '/tools/calculus', '/tools/probability', '/tools/gradient-descent'].map((path) => ({
+      url: `${baseUrl}${path}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
     ...subjectUrls,
     ...lessonUrls,
   ];

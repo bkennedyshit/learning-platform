@@ -7,6 +7,11 @@ import SubjectPage, { generateMetadata as generateSubjectMetadata } from '../app
 import sitemap from '../app/sitemap';
 import { lessons, subjects, getLesson } from '../lib/manifest';
 import { SITE_URL } from '../lib/site';
+import ToolsHub, { metadata as toolsMetadata } from '../app/tools/page';
+import { metadata as matrixMetadata } from '../app/tools/matrix/layout';
+import { metadata as calculusMetadata } from '../app/tools/calculus/layout';
+import { metadata as probabilityMetadata } from '../app/tools/probability/layout';
+import { metadata as gradientMetadata } from '../app/tools/gradient-descent/layout';
 
 afterEach(() => cleanup());
 
@@ -37,11 +42,11 @@ describe('Content Site - generated corpus content', () => {
     expect(sampleLesson.html.length).toBeGreaterThan(0);
   });
 
-  it('sitemap lists home, resources, indexable hubs and indexable lessons only', async () => {
+  it('sitemap lists home, resources, tools, indexable hubs and indexable lessons only', async () => {
     const sm = await sitemap();
     const indexableLessons = lessons.filter((l) => l.indexable);
     const indexableSubjects = subjects.filter((s) => s.indexable);
-    expect(sm.length).toBe(1 + 2 + indexableSubjects.length + indexableLessons.length);
+    expect(sm.length).toBe(1 + 2 + 5 + indexableSubjects.length + indexableLessons.length);
 
     const urls = sm.map((s) => s.url);
     expect(new Set(urls).size).toBe(urls.length);
@@ -73,6 +78,28 @@ describe('Content Site - generated corpus content', () => {
     expect(meta.title).toBe(`${sampleLesson.title} - Learning Platform`);
     expect(meta.description).toBeTruthy();
     expect(meta.alternates?.canonical).toBe(`${SITE_URL}/${sampleLesson.slug}`);
+  });
+});
+
+describe('Content Site - calculator discovery and canonical isolation', () => {
+  it('includes every linked calculator in the sitemap with a unique self-canonical and title', async () => {
+    render(<ToolsHub />);
+    const urls = new Set((await sitemap()).map((entry) => entry.url));
+    const entries = [toolsMetadata, matrixMetadata, calculusMetadata, probabilityMetadata, gradientMetadata];
+    expect(new Set(entries.map((meta) => meta.title)).size).toBe(entries.length);
+    for (const meta of entries) {
+      const canonical = String(meta.alternates?.canonical);
+      expect(canonical).toMatch(/^\/tools(?:\/[^/]+)?$/);
+      expect(urls.has(`${SITE_URL}${canonical}`)).toBe(true);
+      expect(meta.description).toBeTruthy();
+    }
+    for (const link of screen.getAllByRole('link')) {
+      const href = link.getAttribute('href')!;
+      if (href.startsWith('/tools/')) {
+        expect(entries.some((meta) => meta.alternates?.canonical === href), href).toBe(true);
+      }
+    }
+    expect(layoutMetadata.alternates?.canonical).toBeUndefined();
   });
 });
 
