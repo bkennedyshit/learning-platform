@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     template: "%s | NEPA Learning",
   },
   description: "Browse published learning lessons and resources.",
+  other: {
+    "impact-site-verification": "f3d6dfcc-1223-4504-8c62-3eecdd10238b",
+  },
 };
 
 export default function RootLayout({
