@@ -93,7 +93,7 @@ export default async function Home() {
         <nav className="site-nav__links" aria-label="Primary">
           <a href="#advanced">Advanced</a>
           <a href="#k12">K-12</a>
-          <a href="/tools">Tools</a>
+          <Link href="/tools">Tools</Link>
           <a href="#support" className="site-nav__donate">Donate</a>
         </nav>
       </header>
