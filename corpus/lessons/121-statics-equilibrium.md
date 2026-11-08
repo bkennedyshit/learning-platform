@@ -1197,11 +1197,23 @@ $$
 
 **Moment equations:**
 
-$\hat{\mathbf{i}}$: $-1.2T_1 - 1.341T_2 + 7.5 = 0 \tag{I}$
+$\hat{\mathbf{i}}$:
 
-$\hat{\mathbf{j}}$: $-1.2T_1 - 0.671T_2 + 0 = 0 \tag{II}$
+$$
+-1.2T_1 - 1.341T_2 + 7.5 = 0 \tag{I}
+$$
 
-$\hat{\mathbf{k}}$: $1.6T_1 + 0 - 10 = 0 \tag{III}$
+$\hat{\mathbf{j}}$:
+
+$$
+-1.2T_1 - 0.671T_2 + 0 = 0 \tag{II}
+$$
+
+$\hat{\mathbf{k}}$:
+
+$$
+1.6T_1 + 0 - 10 = 0 \tag{III}
+$$
 
 From (III): $T_1 = 6.25$ kN
 

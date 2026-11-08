@@ -231,19 +231,19 @@ $$
 
 More cleanly: $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle = \langle \lambda\mathbf{v}, \mathbf{v}\rangle = \bar\lambda\|\mathbf{v}\|^2$.
 
-But $\langle \mathbf{v}, A\mathbf{v}\rangle \in \mathbb{C}$ and $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle$. Since $A$ is symmetric (real), $A = A^T$, so $\langle A\mathbf{v}, \mathbf{v}\rangle = (A\mathbf{v})^T\bar\mathbf{v} = \mathbf{v}^T A^T \bar\mathbf{v} = \mathbf{v}^T A\bar\mathbf{v}$... 
+But $\langle \mathbf{v}, A\mathbf{v}\rangle \in \mathbb{C}$ and $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle$. Since $A$ is symmetric (real), $A = A^T$, so $\langle A\mathbf{v}, \mathbf{v}\rangle = (A\mathbf{v})^T\bar{\mathbf{v}} = \mathbf{v}^T A^T \bar{\mathbf{v}} = \mathbf{v}^T A\bar{\mathbf{v}}$... 
 
-Let us use the cleaner route: $\langle \mathbf{v}, A\mathbf{v}\rangle = \bar\mathbf{v}^T A\mathbf{v}$. Then:
-
-$$
-\overline{\bar\mathbf{v}^T A\mathbf{v}} = \mathbf{v}^T \bar{A} \bar\mathbf{v} = \mathbf{v}^T A \bar\mathbf{v} \quad (A \text{ real})
-$$
+Let us use the cleaner route: $\langle \mathbf{v}, A\mathbf{v}\rangle = \bar{\mathbf{v}}^T A\mathbf{v}$. Then:
 
 $$
-= (A^T \mathbf{v})^T \bar\mathbf{v} = (A\mathbf{v})^T\bar\mathbf{v} = (\lambda\mathbf{v})^T\bar\mathbf{v} = \lambda \mathbf{v}^T\bar\mathbf{v} = \bar\lambda \bar\mathbf{v}^T\mathbf{v}.
+\overline{\bar{\mathbf{v}}^T A\mathbf{v}} = \mathbf{v}^T \bar{A} \bar{\mathbf{v}} = \mathbf{v}^T A \bar{\mathbf{v}} \quad (A \text{ real})
 $$
 
-Wait — $\mathbf{v}^T\bar\mathbf{v} = \overline{\bar\mathbf{v}^T\mathbf{v}}$. We have $\bar\mathbf{v}^T A \mathbf{v} = \lambda\|\mathbf{v}\|^2$ and taking conjugates: $\mathbf{v}^T A\bar\mathbf{v} = \bar\lambda\|\mathbf{v}\|^2$. But $\mathbf{v}^T A\bar\mathbf{v} = (\bar\mathbf{v}^T A^T \mathbf{v})^T \to$ by symmetry $= \bar\mathbf{v}^T A\mathbf{v} = \lambda\|\mathbf{v}\|^2$.
+$$
+= (A^T \mathbf{v})^T \bar{\mathbf{v}} = (A\mathbf{v})^T\bar{\mathbf{v}} = (\lambda\mathbf{v})^T\bar{\mathbf{v}} = \lambda \mathbf{v}^T\bar{\mathbf{v}} = \bar\lambda \bar{\mathbf{v}}^T\mathbf{v}.
+$$
+
+Wait — $\mathbf{v}^T\bar{\mathbf{v}} = \overline{\bar{\mathbf{v}}^T\mathbf{v}}$. We have $\bar{\mathbf{v}}^T A \mathbf{v} = \lambda\|\mathbf{v}\|^2$ and taking conjugates: $\mathbf{v}^T A\bar{\mathbf{v}} = \bar\lambda\|\mathbf{v}\|^2$. But $\mathbf{v}^T A\bar{\mathbf{v}} = (\bar{\mathbf{v}}^T A^T \mathbf{v})^T \to$ by symmetry $= \bar{\mathbf{v}}^T A\mathbf{v} = \lambda\|\mathbf{v}\|^2$.
 
 So $\bar\lambda\|\mathbf{v}\|^2 = \lambda\|\mathbf{v}\|^2$. Since $\|\mathbf{v}\|^2 > 0$, $\bar\lambda = \lambda$, hence $\lambda \in \mathbb{R}$. $\blacksquare$
 
