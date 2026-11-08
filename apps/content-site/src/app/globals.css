@@ -338,6 +338,13 @@ a:hover {
   font-size: 1.05em;
 }
 
+/* The global `* { padding: 0 }` reset also zeroes the UA padding on native
+   MathML table cells, which packs matrix rows and columns together. Restore
+   cell spacing for MathML tables only; fractions and operators are untouched. */
+.lesson-content math mtd {
+  padding: 0.3em 0.5em;
+}
+
 
 /* ---- Home: hero ---- */
 .site-nav {
