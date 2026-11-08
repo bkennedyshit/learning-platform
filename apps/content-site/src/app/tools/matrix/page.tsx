@@ -116,19 +116,6 @@ export default function MatrixCalculator() {
     } catch (e) { setError((e as Error).message); }
   };
 
-  const Dim = ({ which, m }: { which: "a" | "b"; m: M }) => (
-    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-      <span style={{ color: "var(--text-muted)", fontSize: ".85rem" }}>size</span>
-      <select value={m.length} onChange={(e) => resize(which, +e.target.value, m[0].length)} style={sel}>
-        {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
-      </select>
-      <span>×</span>
-      <select value={m[0].length} onChange={(e) => resize(which, m.length, +e.target.value)} style={sel}>
-        {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
-      </select>
-    </div>
-  );
-
   return (
     <main style={{ maxWidth: 1000, margin: "0 auto", padding: "2.5rem 1.5rem" }}>
       <Link href="/tools" style={{ color: "var(--text-muted)", fontSize: ".9rem" }}>← All tools</Link>
@@ -138,12 +125,12 @@ export default function MatrixCalculator() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "1.5rem" }}>
         <div className="glass-panel" style={{ padding: "1.25rem" }}>
           <h3 style={{ marginTop: 0 }}>Matrix A</h3>
-          <Dim which="a" m={a} />
+          <Dim which="a" m={a} resize={resize} />
           <Grid m={a} editable onChange={edit("a")} />
         </div>
         <div className="glass-panel" style={{ padding: "1.25rem" }}>
           <h3 style={{ marginTop: 0 }}>Matrix B</h3>
-          <Dim which="b" m={b} />
+          <Dim which="b" m={b} resize={resize} />
           <Grid m={b} editable onChange={edit("b")} />
         </div>
       </div>
@@ -170,3 +157,19 @@ export default function MatrixCalculator() {
 
 const btn: React.CSSProperties = { padding: "0.6rem 1.1rem", borderRadius: 8, border: "1px solid var(--border-color)", background: "var(--bg-tertiary)", color: "inherit", cursor: "pointer", fontWeight: 600 };
 const sel: React.CSSProperties = { padding: "0.3rem", background: "var(--bg-tertiary)", border: "1px solid var(--border-color)", borderRadius: 6, color: "inherit" };
+
+// Module-scope component (not created during render) that picks a matrix size.
+function Dim({ which, m, resize }: { which: "a" | "b"; m: M; resize: (which: "a" | "b", r: number, c: number) => void }) {
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+      <span style={{ color: "var(--text-muted)", fontSize: ".85rem" }}>size</span>
+      <select value={m.length} onChange={(e) => resize(which, +e.target.value, m[0].length)} style={sel}>
+        {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+      <span>×</span>
+      <select value={m[0].length} onChange={(e) => resize(which, m.length, +e.target.value)} style={sel}>
+        {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </div>
+  );
+}

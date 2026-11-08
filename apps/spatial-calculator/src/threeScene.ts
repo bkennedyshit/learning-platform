@@ -70,7 +70,7 @@ export function createSpatialScene(): SpatialScene {
     }
 
     const geometry = buildSurfaceGeometry(evaluate, domain, steps);
-    
+
     surface = new THREE.Mesh(
       geometry,
       new THREE.MeshPhysicalMaterial({
@@ -86,7 +86,7 @@ export function createSpatialScene(): SpatialScene {
         side: THREE.DoubleSide,
       }),
     );
-    
+
     const wireframe = new THREE.LineSegments(
       new THREE.WireframeGeometry(geometry),
       new THREE.LineBasicMaterial({
@@ -96,7 +96,7 @@ export function createSpatialScene(): SpatialScene {
       })
     );
     surface.add(wireframe);
-    
+
     scene.add(surface);
     render();
   }
