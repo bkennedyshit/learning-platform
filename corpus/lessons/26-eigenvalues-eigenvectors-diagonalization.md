@@ -231,7 +231,7 @@ $$
 
 More cleanly: $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle = \langle \lambda\mathbf{v}, \mathbf{v}\rangle = \bar\lambda\|\mathbf{v}\|^2$.
 
-But $\langle \mathbf{v}, A\mathbf{v}\rangle \in \mathbb{C}$ and $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle$. Since $A$ is symmetric (real), $A = A^T$, so $\langle A\mathbf{v}, \mathbf{v}\rangle = (A\mathbf{v})^T\bar{\mathbf{v}} = \mathbf{v}^T A^T \bar{\mathbf{v}} = \mathbf{v}^T A\bar{\mathbf{v}}$... 
+But $\langle \mathbf{v}, A\mathbf{v}\rangle \in \mathbb{C}$ and $\overline{\langle \mathbf{v}, A\mathbf{v}\rangle} = \langle A\mathbf{v}, \mathbf{v}\rangle$. Since $A$ is symmetric (real), $A = A^T$, so $\langle A\mathbf{v}, \mathbf{v}\rangle = (A\mathbf{v})^T\bar{\mathbf{v}} = \mathbf{v}^T A^T \bar{\mathbf{v}} = \mathbf{v}^T A\bar{\mathbf{v}}$...
 
 Let us use the cleaner route: $\langle \mathbf{v}, A\mathbf{v}\rangle = \bar{\mathbf{v}}^T A\mathbf{v}$. Then:
 
