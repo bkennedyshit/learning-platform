@@ -22,7 +22,7 @@ const assetsOutDir = path.resolve(appDir, "public/lesson-assets");
 
 const LESSON_TYPES = new Set(["chapter", "chapter-note", "experiment-chapter"]);
 
-marked.use(markedKatex({ throwOnError: false, strict: "ignore", nonStandard: true, output: "html" }));
+marked.use(markedKatex({ throwOnError: false, strict: "ignore", nonStandard: true, output: "mathml" }));
 marked.setOptions({ gfm: true, breaks: false });
 
 // Emit ```mermaid fenced blocks as <pre class="mermaid"> so the client can

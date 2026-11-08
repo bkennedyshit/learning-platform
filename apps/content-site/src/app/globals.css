@@ -319,11 +319,23 @@ a:hover {
   margin: 2rem 0;
 }
 
-/* Display math can overflow on small screens; let it scroll. */
-.lesson-content .katex-display {
+/* Math is emitted as MathML (see scripts/generate-content.mjs). Display math can
+   overflow on small screens, so let it scroll instead of widening the page. */
+.lesson-content math[display="block"] {
+  display: block;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.5rem 0;
+}
+
+.lesson-content .katex:has(> math[display="block"]) {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.lesson-content math {
+  font-size: 1.05em;
 }
 
 
