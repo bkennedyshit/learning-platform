@@ -17,7 +17,13 @@ export default function LessonContent({ html }: { html: string }) {
     (async () => {
       try {
         const mermaid = (await import("mermaid")).default;
-        mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "loose" });
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "neutral",
+          securityLevel: "strict",
+          htmlLabels: false,
+          flowchart: { htmlLabels: false },
+        });
         if (cancelled) return;
         await mermaid.run({ nodes: blocks });
       } catch {
