@@ -94,6 +94,7 @@ export default async function Home() {
           <a href="#advanced">Advanced</a>
           <a href="#k12">K-12</a>
           <Link href="/tools">Tools</Link>
+          <Link href="/resources">Resources</Link>
           <a href="#support" className="site-nav__donate">Donate</a>
         </nav>
       </header>
