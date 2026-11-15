@@ -34,5 +34,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|lesson-assets).*)",
+  matcher: [
+    // ASCII prefixes handle encoded Unicode consistently. Parentheses in a
+    // matcher are regex syntax; the exact map above decides what redirects.
+    "/415-past-tenses-:legacy",
+    "/308-from-electronics-to-robotics-:legacy",
+    "/225-serial-verbs-:legacy",
+    "/37.3---Kanji-:legacy",
+  ],
 };

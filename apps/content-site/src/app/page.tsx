@@ -68,7 +68,7 @@ export default async function Home() {
   const k12 = subjects.filter((s) => s.catalog === "k12");
 
   const Card = ({ s }: { s: (typeof subjects)[number] }) => (
-    <Link href={`/subject/${s.slug}`} className="subject-card">
+    <Link href={`/subject/${s.slug}`} prefetch={false} className="subject-card">
       <span
         className="subject-card__image"
         style={{ backgroundImage: `url(${getSubjectImage(s.name, s.slug)})` }}

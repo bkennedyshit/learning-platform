@@ -5,6 +5,8 @@ import { getLesson, getAllLessonSlugs } from "../../lib/manifest";
 import { SITE_URL } from "../../lib/site";
 import LessonContent from "../../components/LessonContent";
 
+export const dynamicParams = false;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -87,7 +89,7 @@ export default async function LessonPage({ params }: Props) {
 
       <nav className="nav-links">
         {prevLesson ? (
-          <Link href={`/${prevLesson.slug}`} className="btn btn-outline" style={{ marginRight: 'auto' }}>
+          <Link href={`/${prevLesson.slug}`} prefetch={false} className="btn btn-outline" style={{ marginRight: 'auto' }}>
             &larr; Previous: {prevLesson.title}
           </Link>
         ) : (
@@ -95,7 +97,7 @@ export default async function LessonPage({ params }: Props) {
         )}
 
         {nextLesson ? (
-          <Link href={`/${nextLesson.slug}`} className="btn">
+          <Link href={`/${nextLesson.slug}`} prefetch={false} className="btn">
             Next: {nextLesson.title} &rarr;
           </Link>
         ) : (
@@ -109,7 +111,7 @@ export default async function LessonPage({ params }: Props) {
           <ul>
             {relatedLessons.map((related) => (
               <li key={related.slug}>
-                <Link href={`/${related.slug}`}>{related.title}</Link>
+                <Link href={`/${related.slug}`} prefetch={false}>{related.title}</Link>
               </li>
             ))}
           </ul>

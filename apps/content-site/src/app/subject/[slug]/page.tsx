@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getSubjectBySlug, getAllSubjectSlugs, type SubjectLessonRef } from "../../../lib/manifest";
 import { SITE_URL } from "../../../lib/site";
 
+export const dynamicParams = false;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -47,7 +49,7 @@ function LessonList({ items, offset = 0 }: { items: SubjectLessonRef[]; offset?:
     <ol style={{ listStyle: 'none', display: 'grid', gap: '0.75rem', padding: 0 }}>
       {items.map((lesson, i) => (
         <li key={lesson.slug}>
-          <Link href={`/${lesson.slug}`} style={{ color: 'inherit' }}>
+          <Link href={`/${lesson.slug}`} prefetch={false} style={{ color: 'inherit' }}>
             <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem' }}>
               <span className="badge">{lesson.chapter || offset + i + 1}</span>
               <span style={{ fontSize: '1.1rem' }}>{lesson.title}</span>
