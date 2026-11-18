@@ -12,6 +12,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { marked } from "marked";
 import markedKatex from "marked-katex-extension";
+import { compactMathHtml, countMath } from "./compact-math.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appDir = path.resolve(__dirname, "..");
@@ -293,6 +294,7 @@ function resolveLocalTarget(target, index, subjectSlug) {
 }
 
 const linkStats = { rewritten: 0, toHub: 0, unlinked: 0 };
+const mathStats = { equations: 0, bytesSaved: 0 };
 
 function rewriteLocalLinks(html, index, subjectSlug) {
   return html.replace(/<a href="([^"]*)"([^>]*)>([\s\S]*?)<\/a>/g, (full, rawHref, attrs, inner) => {
@@ -381,7 +383,15 @@ const lessonsBySubject = new Map();
 for (const { file, fm, body, subjectName, slug } of sources) {
   const cleaned = cleanMarkdown(body);
   const withImages = await rewriteImages(cleaned);
-  const html = rewriteLocalLinks(marked.parse(withImages), linkIndex, subjectSlugFor(subjectName));
+  const rendered = rewriteLocalLinks(marked.parse(withImages), linkIndex, subjectSlugFor(subjectName));
+  // Drop redundant per-equation markup (see compact-math.mjs). The equation
+  // count must not change: this is a size optimization, never a content edit.
+  const html = compactMathHtml(rendered);
+  if (countMath(html) !== countMath(rendered)) {
+    throw new Error(`Math compaction changed the equation count in ${file}`);
+  }
+  mathStats.equations += countMath(html);
+  mathStats.bytesSaved += Buffer.byteLength(rendered) - Buffer.byteLength(html);
   const assessment = assessLesson(html);
 
   const lesson = {
@@ -476,6 +486,9 @@ console.log(
 );
 console.log(
   `Local links: ${linkStats.rewritten} -> lessons, ${linkStats.toHub} -> subject hubs, ${linkStats.unlinked} unlinked (no public target)`
+);
+console.log(
+  `Math: ${mathStats.equations} equations, ${(mathStats.bytesSaved / 1048576).toFixed(2)} MB of redundant markup removed`
 );
 console.log(`Assets copied to public/lesson-assets: ${copiedAssets.size}`);
 console.log(`Output: ${path.relative(appDir, outFile)}`);
