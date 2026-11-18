@@ -75,7 +75,7 @@ export default async function SubjectPage({ params }: Props) {
   return (
     <main className="container" style={{ padding: '4rem 2rem' }}>
       <nav style={{ marginBottom: '1.5rem' }}>
-        <Link href="/" className="btn btn-outline">&larr; All Subjects</Link>
+        <Link href="/" prefetch={false} className="btn btn-outline">&larr; All Subjects</Link>
       </nav>
 
       <header style={{ marginBottom: '2rem' }}>

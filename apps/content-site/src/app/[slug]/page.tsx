@@ -62,7 +62,7 @@ export default async function LessonPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <nav style={{ marginBottom: '1.5rem' }}>
-        <Link href={`/subject/${lesson.subjectSlug}`} className="btn btn-outline">
+        <Link href={`/subject/${lesson.subjectSlug}`} prefetch={false} className="btn btn-outline">
           &larr; {lesson.subject}
         </Link>
       </nav>
@@ -117,7 +117,7 @@ export default async function LessonPage({ params }: Props) {
           </ul>
         )}
         <p style={{ marginBottom: 0 }}>
-          <Link href={`/subject/${lesson.subjectSlug}`}>All {lesson.subject} lessons</Link>
+          <Link href={`/subject/${lesson.subjectSlug}`} prefetch={false}>All {lesson.subject} lessons</Link>
         </p>
       </nav>
     </main>

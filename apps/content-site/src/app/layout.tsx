@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <Link className="support-fab" href="/#support" aria-label="Support the open learning library">
+        <Link className="support-fab" href="/#support" prefetch={false} aria-label="Support the open learning library">
           <span className="support-fab__mark" aria-hidden>$</span>
           <span>Tip jar</span>
         </Link>
